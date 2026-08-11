@@ -8,10 +8,11 @@ rust-version = "1.91"
 publish = false
 
 [dependencies]
-lumis = { version = "0.12.0", default-features = false, features = ["lang-c", "lang-css", "lang-go", "lang-html", "lang-java", "lang-javascript", "lang-json", "lang-python", "lang-ruby", "lang-rust"] }
+lumis = { path = "../../crates/lumis", default-features = false, features = ["lang-bash", "lang-c", "lang-comment", "lang-elixir", "lang-heex", "lang-markdown", "lang-markdown-inline", "lang-css", "lang-go", "lang-html", "lang-java", "lang-javascript", "lang-json", "lang-python", "lang-ruby", "lang-rust", "lang-tsx"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 syntect = "5.3"
+two-face = "0.5.1"
 
 [dev-dependencies]
 criterion = { version = "0.7", features = ["html_reports"] }
@@ -19,6 +20,18 @@ criterion = { version = "0.7", features = ["html_reports"] }
 [[bench]]
 name = "scenarios"
 harness = false
+
+[[bin]]
+name = "lumis-size"
+path = "src/bin/lumis-size.rs"
+
+[[bin]]
+name = "syntect-size"
+path = "src/bin/syntect-size.rs"
+
+[[bin]]
+name = "showcase"
+path = "src/bin/showcase.rs"
 
 [profile.release]
 lto = true

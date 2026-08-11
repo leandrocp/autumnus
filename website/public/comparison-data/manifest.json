@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "theme": {
+    "name": "Dracula",
+    "source": "https://github.com/dracula/sublime/blob/d490b57c08f3d110ff61a07ec6edcc1ed9e24a63/Dracula.tmTheme"
+  },
+  "lumisRuntimes": [
+    "Lumis Rust",
+    "Lumis JavaScript (Node, Wasmtime)",
+    "Lumis JavaScript (web-tree-sitter)",
+    "Lumis Elixir",
+    "Lumis CLI"
+  ],
+  "implementations": [
+    {
+      "id": "lumis",
+      "label": "Lumis",
+      "version": "Lumis 0.6.1",
+      "theme": "Neovim Dracula colorscheme, extracted by this repository"
+    },
+    {
+      "id": "syntect",
+      "label": "syntect",
+      "version": "syntect 5.3 with two-face 0.5.1",
+      "theme": "dracula/sublime Dracula.tmTheme, pinned by SHA-256"
+    },
+    {
+      "id": "shiki",
+      "label": "Shiki",
+      "version": "shiki 4.4.2",
+      "theme": "Shiki's bundled dracula theme"
+    },
+    {
+      "id": "highlight-js",
+      "label": "highlight.js",
+      "version": "highlight.js 11.11.1",
+      "theme": "highlight.js styles/base16/dracula.css"
+    }
+  ],
+  "documents": [
+    {
+      "id": "webgpu",
+      "label": "three.js WebGPU compute reduce",
+      "language": "html",
+      "languageLabel": "HTML",
+      "source": "https://github.com/mrdoob/three.js/blob/6365c1a0af6a32ed45f99712197555fee2f4b24a/examples/webgpu_compute_reduce.html",
+      "lines": 1397,
+      "bytes": 43028,
+      "injections": [
+        "CSS",
+        "JSON",
+        "JavaScript"
+      ]
+    },
+    {
+      "id": "ripgrep",
+      "label": "ripgrep searcher",
+      "language": "rust",
+      "languageLabel": "Rust",
+      "source": "https://github.com/BurntSushi/ripgrep/blob/4649aa9700619f94cf9c66876e9549d83420e16c/crates/searcher/src/searcher/mod.rs",
+      "lines": 1054,
+      "bytes": 39771,
+      "injections": [
+        "Comment"
+      ]
+    },
+    {
+      "id": "phoenix",
+      "label": "Phoenix core components",
+      "language": "elixir",
+      "languageLabel": "Elixir",
+      "source": "https://github.com/phoenixframework/phoenix/blob/1562adca2e9b02b4564c519d5cc2a096ae6fc009/installer/templates/phx_web/components/core_components.ex",
+      "lines": 691,
+      "bytes": 22389,
+      "injections": [
+        "HEEx",
+        "Markdown",
+        "Comment"
+      ]
+    },
+    {
+      "id": "go",
+      "label": "Go encoding/json",
+      "language": "go",
+      "languageLabel": "Go",
+      "source": "https://github.com/golang/go/blob/3901409b5d0fb7c85a3e6730a59943cc93b2835c/src/encoding/json/encode.go",
+      "lines": 1342,
+      "bytes": 39143,
+      "injections": [
+        "Comment"
+      ]
+    },
+    {
+      "id": "readme",
+      "label": "Lumis README",
+      "language": "markdown",
+      "languageLabel": "Markdown",
+      "source": "https://github.com/leandrocp/lumis/blob/main/README.md",
+      "lines": 182,
+      "bytes": 7314,
+      "injections": [
+        "Bash",
+        "Elixir",
+        "Java",
+        "JavaScript",
+        "Rust"
+      ]
+    },
+    {
+      "id": "shadcn",
+      "label": "shadcn/ui sidebar",
+      "language": "tsx",
+      "languageLabel": "TSX",
+      "source": "https://github.com/shadcn-ui/ui/blob/607e8a9717fe6ff0d374ba74c651012f9c052534/apps/v4/registry/new-york-v4/ui/sidebar.tsx",
+      "lines": 727,
+      "bytes": 21743,
+      "injections": [
+        "Comment"
+      ]
+    }
+  ]
+}

@@ -21,9 +21,7 @@ function nativeTarget() {
 const target = nativeTarget();
 
 if (!target) {
-  throw new Error(
-    `The Lumis native runtime does not support ${process.platform}-${process.arch}`,
-  );
+  throw new Error(`The Lumis native runtime does not support ${process.platform}-${process.arch}`);
 }
 
 module.exports = require(`@lumis-sh/lumis-native-${target}`);

@@ -1,11 +1,19 @@
-import type { Element, Root } from "hast";
+import type { Element, Properties, Root } from "hast";
 import { describe, expect, it } from "vitest";
+import { visit } from "unist-util-visit";
 import dracula from "../../themes/dist/json/dracula.json";
 import githubLight from "../../themes/dist/json/github_light.json";
 import javascript from "../../lumis/langs/javascript.ts";
 import json from "../../lumis/langs/json.ts";
+import { configureLocalWasmResolver } from "../../lumis/test/wasm.ts";
+import { configureLanguagePackageResolver, configureWasmResolver } from "@lumis-sh/lumis";
 import { htmlInline, htmlLinked, htmlMultiThemes, terminal } from "@lumis-sh/lumis/formatters";
 import rehypeLumis from "../src/index.js";
+
+configureLocalWasmResolver(["javascript", "json"], {
+  configureLanguagePackageResolver,
+  configureWasmResolver,
+});
 
 function codeBlockTree({
   code = "const answer = 42",
@@ -14,7 +22,7 @@ function codeBlockTree({
 }: {
   code?: string;
   codeClassName?: string[];
-  preProperties?: Record<string, unknown>;
+  preProperties?: Properties;
 } = {}): Root {
   return {
     type: "root",
@@ -38,29 +46,31 @@ function codeBlockTree({
 
 function findElements(root: Root, tagName: string): Element[] {
   const results: Element[] = [];
-  function walk(node: unknown) {
-    if (node && typeof node === "object" && "type" in node) {
-      const n = node as { type: string; tagName?: string; children?: unknown[] };
-      if (n.type === "element" && n.tagName === tagName) {
-        results.push(n as unknown as Element);
-      }
-      if (n.children) {
-        for (const child of n.children) {
-          walk(child);
-        }
-      }
-    }
-  }
-  walk(root);
+  visit(root, "element", (node) => {
+    if (node.tagName === tagName) results.push(node);
+  });
   return results;
+}
+
+function classNames(element: Element): string[] {
+  const value = element.properties.className;
+  expect(Array.isArray(value)).toBe(true);
+  return Array.isArray(value)
+    ? value.filter((entry): entry is string => typeof entry === "string")
+    : [];
+}
+
+function style(element: Element): string {
+  const value = element.properties.style;
+  expect(typeof value).toBe("string");
+  return typeof value === "string" ? value : "";
 }
 
 function assertLumisPreElement(tree: Root) {
   const pres = findElements(tree, "pre");
   expect(pres.length).toBeGreaterThan(0);
   const pre = pres[0]!;
-  const classes = (pre.properties as Record<string, unknown>).className as string[];
-  expect(classes).toContain("lumis");
+  expect(classNames(pre)).toContain("lumis");
   return pre;
 }
 
@@ -71,6 +81,37 @@ function assertSpansExist(tree: Root) {
 }
 
 describe("rehype-lumis", () => {
+  describe("fence languages the caller did not declare", () => {
+    it("loads what the document names, like every other runtime", async () => {
+      const transform = rehypeLumis({
+        formatter: (language) => htmlInline({ language, theme: dracula }),
+        languages: [javascript],
+      });
+      // The document asks for json; the caller only declared javascript.
+      const tree = codeBlockTree({ code: '{"a": 1}', codeClassName: ["language-json"] });
+
+      await transform(tree);
+
+      const pre = assertLumisPreElement(tree);
+      expect(pre).toBeDefined();
+      // Highlighted as json, not dropped to plain text.
+      expect(JSON.stringify(pre)).toContain("language-json");
+    });
+
+    it("costs one block, not the document, when the language cannot be loaded", async () => {
+      const transform = rehypeLumis({
+        formatter: (language) => htmlInline({ language, theme: dracula }),
+        languages: [javascript],
+      });
+      const tree = codeBlockTree({ codeClassName: ["language-no-such-language"] });
+
+      await transform(tree);
+
+      const pre = assertLumisPreElement(tree);
+      expect(pre).toBeDefined();
+    });
+  });
+
   describe("htmlInline formatter", () => {
     it("produces pre.lumis with inline styles and colored spans", async () => {
       const transform = rehypeLumis({
@@ -82,19 +123,15 @@ describe("rehype-lumis", () => {
       await transform(tree);
 
       const pre = assertLumisPreElement(tree);
-      const style = (pre.properties as Record<string, unknown>).style as string;
-      expect(style).toMatch(/color: #[0-9a-f]+/);
-      expect(style).toMatch(/background-color: #[0-9a-f]+/);
+      expect(style(pre)).toMatch(/color: #[0-9a-f]+/);
+      expect(style(pre)).toMatch(/background-color: #[0-9a-f]+/);
 
       const spans = assertSpansExist(tree);
-      const spanWithStyle = spans.find(
-        (s) => typeof (s.properties as Record<string, unknown>).style === "string",
-      );
+      const spanWithStyle = spans.find((span) => typeof span.properties.style === "string");
       expect(spanWithStyle).toBeDefined();
 
       const codes = findElements(tree, "code");
-      const codeClasses = (codes[0]!.properties as Record<string, unknown>).className as string[];
-      expect(codeClasses).toContain("language-javascript");
+      expect(classNames(codes[0]!)).toContain("language-javascript");
     });
 
     it("applies preClass", async () => {
@@ -107,8 +144,7 @@ describe("rehype-lumis", () => {
       await transform(tree);
 
       const pre = assertLumisPreElement(tree);
-      const classes = (pre.properties as Record<string, unknown>).className as string[];
-      expect(classes).toContain("my-pre");
+      expect(classNames(pre)).toContain("my-pre");
     });
   });
 
@@ -130,9 +166,8 @@ describe("rehype-lumis", () => {
 
       // All spans should have class, none should have style
       for (const span of spans) {
-        const props = span.properties as Record<string, unknown>;
-        expect(props.className).toBeDefined();
-        expect(props.style).toBeUndefined();
+        expect(span.properties.className).toBeDefined();
+        expect(span.properties.style).toBeUndefined();
       }
     });
   });
@@ -153,15 +188,14 @@ describe("rehype-lumis", () => {
       await transform(tree);
 
       const pre = assertLumisPreElement(tree);
-      const classes = (pre.properties as Record<string, unknown>).className as string[];
-      expect(classes).toContain("lumis-themes");
+      expect(classNames(pre)).toContain("lumis-themes");
 
       // Spans should contain CSS custom properties for the non-default theme
       const spans = assertSpansExist(tree);
       const spanStyles = spans
-        .map((s) => (s.properties as Record<string, unknown>).style as string)
-        .filter(Boolean);
-      expect(spanStyles.some((s) => s.includes("--lumis-dark"))).toBe(true);
+        .map((span) => span.properties.style)
+        .filter((value): value is string => typeof value === "string");
+      expect(spanStyles.some((value) => value.includes("--lumis-dark"))).toBe(true);
     });
   });
 
@@ -195,8 +229,7 @@ describe("rehype-lumis", () => {
       await transform(tree);
 
       const codes = findElements(tree, "code");
-      const codeClasses = (codes[0]!.properties as Record<string, unknown>).className as string[];
-      expect(codeClasses).toContain("language-javascript");
+      expect(classNames(codes[0]!)).toContain("language-javascript");
     });
 
     it("reads language from pre element class", async () => {
@@ -255,8 +288,7 @@ describe("rehype-lumis", () => {
       await transform(tree);
 
       const codes = findElements(tree, "code");
-      const codeClasses = (codes[0]!.properties as Record<string, unknown>).className as string[];
-      expect(codeClasses).toContain("language-json");
+      expect(classNames(codes[0]!)).toContain("language-json");
     });
 
     it("ignores empty string language attributes", async () => {
@@ -391,8 +423,7 @@ describe("rehype-lumis", () => {
       const pres = findElements(tree, "pre");
       expect(pres.length).toBe(2);
       for (const pre of pres) {
-        const classes = (pre.properties as Record<string, unknown>).className as string[];
-        expect(classes).toContain("lumis");
+        expect(classNames(pre)).toContain("lumis");
       }
     });
 
@@ -481,8 +512,7 @@ describe("rehype-lumis", () => {
 
       const pres = findElements(tree, "pre");
       // First: highlighted
-      const firstClasses = (pres[0]!.properties as Record<string, unknown>).className as string[];
-      expect(firstClasses).toContain("lumis");
+      expect(classNames(pres[0]!)).toContain("lumis");
       // Second: preserved
       const secondCode = pres[1]!.children[0] as Element;
       expect(secondCode.tagName).toBe("code");

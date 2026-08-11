@@ -38,7 +38,12 @@ import { sanitizeThemeName } from "../src/themes.js";
 import { hexToRgb, paint, rgbToAnsi, styleToAnsi, wrapWithAnsi } from "../src/formatter/ansi.js";
 import type { Language } from "../src/types.js";
 
-const jsonLang: Language = { id: "json", aliases: [], highlights: "", wasm: "json.wasm" };
+const jsonLang: Language = {
+  id: "json",
+  aliases: [],
+  highlights: "",
+  wasm: "json.wasm",
+};
 
 const theme = {
   name: "test",
@@ -79,9 +84,7 @@ describe("formatter shared helpers", () => {
   });
 
   it("escapes HTML entities without touching braces", () => {
-    expect(escape(`<tag attr='x'>&{"y"}`)).toBe(
-      "&lt;tag attr=&#39;x&#39;&gt;&amp;{&quot;y&quot;}",
-    );
+    expect(escape(`<tag attr='x'>&{"y"}`)).toBe("&lt;tag attr=&#39;x&#39;&gt;&amp;{&quot;y&quot;}");
   });
 
   it("escapes HTML attributes without touching braces", () => {
@@ -114,6 +117,8 @@ describe("formatter shared helpers", () => {
     expect(closeCodeTag()).toBe("</code>");
     expect(closingTags()).toBe("</code></pre>");
     expect(openSpanTag({ class: "token" })).toBe('<span class="token">');
+    expect(openSpanTag()).toBe("<span>");
+    expect(openSpanTag({ class: undefined })).toBe("<span>");
     expect(openPreTag()).toBe('<pre class="lumis">');
     expect(openPreTag({ preClass: "custom" })).toBe('<pre class="lumis custom">');
     expect(openPreTag({ theme })).toBe(
@@ -122,7 +127,7 @@ describe("formatter shared helpers", () => {
     expect(openPreTag({ preClass: "custom", theme })).toBe(
       '<pre class="lumis custom" style="color: #ffffff; background-color: #000000;">',
     );
-    expect(openCodeTag({ id: "json", aliases: [], highlights: "" })).toBe(
+    expect(openCodeTag({ id: "json", aliases: [] })).toBe(
       '<code class="language-json" translate="no" tabindex="0">',
     );
   });
@@ -201,6 +206,22 @@ describe("formatter shared helpers", () => {
     ]);
   });
 
+  it("keeps a deliberately omitted custom span balanced", () => {
+    const { lines } = formatHighlightIterLines(
+      "a\nb",
+      [
+        { type: "start", scope: "string", language: "json" },
+        { type: "source", startByte: 0, endByte: 3 },
+        { type: "end" },
+      ],
+      jsonLang,
+      undefined,
+      { openSpan: () => "" },
+    );
+
+    expect(lines).toEqual(["a", "b"]);
+  });
+
   it("escapes braces only through the framework helper", () => {
     expect(escapeBraces("fn() {}")).toBe("fn() &lbrace;&rbrace;");
     expect(escapeBraces("<div>{x}</div>")).toBe("<div>&lbrace;x&rbrace;</div>");
@@ -221,6 +242,51 @@ describe("formatter shared helpers", () => {
     expect(lines).toEqual(['<span class="string">a</span>', '<span class="string">b</span>']);
   });
 
+  it("opens a bare span for a scope whose attrs come out empty", () => {
+    const lines = renderLinesFromEvents(
+      "ab",
+      [
+        { type: "start", scope: "string", language: "json" },
+        { type: "source", startByte: 0, endByte: 1 },
+        { type: "start", scope: "unstyled", language: "json" },
+        { type: "source", startByte: 1, endByte: 2 },
+        { type: "end" },
+        { type: "end" },
+      ],
+      (scope) => (scope === "unstyled" ? "" : `class="${scope}"`),
+    );
+
+    expect(lines).toEqual(['<span class="string">a<span>b</span></span>']);
+  });
+
+  it("reopens a bare span across a newline", () => {
+    const lines = renderLinesFromEvents(
+      "a\nb",
+      [
+        { type: "start", scope: "unstyled", language: "json" },
+        { type: "source", startByte: 0, endByte: 3 },
+        { type: "end" },
+      ],
+      () => "",
+    );
+
+    expect(lines).toEqual(["<span>a</span>", "<span>b</span>"]);
+  });
+
+  it("opens a bare span in renderEvents when the callback writes nothing", () => {
+    const [html] = renderEvents(
+      "ab",
+      [
+        { type: "start", scope: "unstyled", language: "json" },
+        { type: "source", startByte: 0, endByte: 2 },
+        { type: "end" },
+      ],
+      () => {},
+    );
+
+    expect(new TextDecoder().decode(html)).toBe("<span>ab</span>");
+  });
+
   it("renders event HTML and slices it back into lines", () => {
     const [html, offsets] = renderEvents(
       "a\n<b>",
@@ -237,7 +303,7 @@ describe("formatter shared helpers", () => {
     expect(new TextDecoder().decode(html)).toBe('<span class="string">a\n&lt;b&gt;</span>');
     expect(linesFromOffsets(html, offsets)).toEqual([
       '<span class="string">a\n',
-      '&lt;b&gt;</span>',
+      "&lt;b&gt;</span>",
     ]);
   });
 
@@ -249,7 +315,12 @@ describe("formatter shared helpers", () => {
   });
 
   it("generates span inline attrs with theme styling", () => {
-    const attrs = spanInlineAttrs({ scope: "string", language: "json", theme, includeHighlights: true });
+    const attrs = spanInlineAttrs({
+      scope: "string",
+      language: "json",
+      theme,
+      includeHighlights: true,
+    });
     expect(attrs["data-highlight"]).toBe("string");
     expect(attrs.style).toContain("color: #22ff22");
   });
@@ -267,9 +338,9 @@ describe("formatter shared helpers", () => {
     expect(html).toContain("#22ff22");
   });
 
-  it("returns plain escaped text when no style matches", () => {
+  it("opens a bare span around escaped text when no style matches", () => {
     const html = spanInline("<b>", { language: "json", scope: "string" });
-    expect(html).toBe("&lt;b&gt;");
+    expect(html).toBe("<span>&lt;b&gt;</span>");
   });
 
   it("generates linked span attrs", () => {
@@ -284,20 +355,30 @@ describe("formatter shared helpers", () => {
 
   it("generates multi-themes span attrs with default theme", () => {
     const themes = { dracula: theme };
-    const attrs = spanMultiThemesAttrs({ scope: "string", language: "json", themes, defaultTheme: "dracula" });
+    const attrs = spanMultiThemesAttrs({
+      scope: "string",
+      language: "json",
+      themes,
+      defaultTheme: "dracula",
+    });
     expect(attrs.style).toContain("#22ff22");
   });
 
   it("wraps text in multi-themes span", () => {
     const themes = { dracula: theme };
-    const html = spanMultiThemes("x", { scope: "string", language: "json", themes, defaultTheme: "dracula" });
+    const html = spanMultiThemes("x", {
+      scope: "string",
+      language: "json",
+      themes,
+      defaultTheme: "dracula",
+    });
     expect(html).toContain("<span");
     expect(html).toContain("x");
   });
 
-  it("returns plain text for multi-themes with empty themes", () => {
+  it("opens a bare multi-themes span with empty themes", () => {
     const html = spanMultiThemes("<b>", { scope: "string", language: "json", themes: {} });
-    expect(html).toBe("&lt;b&gt;");
+    expect(html).toBe("<span>&lt;b&gt;</span>");
   });
 });
 

@@ -2,6 +2,16 @@
   "name": "json-basic",
   "language": "json",
   "theme": "dracula",
+  "htmlMultiThemes": {
+    "themes": {
+      "dark": "dark",
+      "light": "light"
+    },
+    "defaultTheme": "light-dark()",
+    "highlightLines": [
+      1
+    ]
+  },
   "events": [
     {
       "type": "start",

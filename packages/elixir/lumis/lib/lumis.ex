@@ -9,7 +9,6 @@ defmodule Lumis do
   require Logger
   alias Lumis.Theme
 
-  @default_theme "onedark"
   @built_in_formatters [
     :html_inline,
     :html_linked,
@@ -163,6 +162,9 @@ defmodule Lumis do
 
       :html_inline
 
+  There is no default theme, so this emits `<span>` tags without any `style` attribute.
+  Pass `:theme` to get colors, or use `:html_linked` to style the output with a CSS file.
+
   ### Inline HTML formatter with custom options
 
       {:html_inline, theme: "onedark", pre_class: "example-01", include_highlights: true}
@@ -170,19 +172,19 @@ defmodule Lumis do
   ### HTML Inline: highlight specific lines
 
       # apply theme's `highlighted` style
-      {:html_inline, highlight_lines: %{lines: [2..4, 6], style: :theme}}
+      {:html_inline, theme: "onedark", highlight_lines: %{lines: [2..4, 6], style: :theme}}
 
       # style: :theme is the default
-      {:html_inline, highlight_lines: %{lines: [1, 2, 3]}}
+      {:html_inline, theme: "onedark", highlight_lines: %{lines: [1, 2, 3]}}
 
       # explicitly use theme style
-      {:html_inline, highlight_lines: %{lines: [1, 2, 3], style: :theme}}
+      {:html_inline, theme: "onedark", highlight_lines: %{lines: [1, 2, 3], style: :theme}}
 
       # overrides default style
-      {:html_inline, highlight_lines: %{lines: [1, 3..5, 8], style: "background-color: #fff3cd; border-left: 3px solid #ffc107;"}}
+      {:html_inline, theme: "onedark", highlight_lines: %{lines: [1, 3..5, 8], style: "background-color: #fff3cd; border-left: 3px solid #ffc107;"}}
 
       # with only class and no style
-      {:html_inline, highlight_lines: %{lines: [1, 2, 3], style: nil, class: "transition-colors duration-500 w-full inline-block bg-yellow-500"}}
+      {:html_inline, theme: "onedark", highlight_lines: %{lines: [1, 2, 3], style: nil, class: "transition-colors duration-500 w-full inline-block bg-yellow-500"}}
 
   ### HTML Linked: highlight specific lines
 
@@ -198,7 +200,7 @@ defmodule Lumis do
         open_tag: "<div class=\"code-header\"><span>file: app.ex</span>",
         close_tag: "</div>"
       }
-      {:html_inline, header: header}
+      {:html_inline, theme: "onedark", header: header}
 
   ### HTML Multi-Themes: Light/Dark mode support
 
@@ -293,7 +295,7 @@ defmodule Lumis do
     type: {:custom, Lumis, :formatter_type, []},
     type_spec: quote(do: Lumis.formatter()),
     type_doc: "`t:Lumis.formatter/0`",
-    default: {:html_inline, theme: "onedark"},
+    default: {:html_inline, []},
     doc: "Formatter to apply on the highlighted source code. See the type doc for more info."
   ]
 
@@ -347,7 +349,7 @@ defmodule Lumis do
   def formatter_type({:html_inline, options}) when is_list(options) do
     schema = [
       language: [type: {:or, [:string, nil]}, default: nil],
-      theme: [type: {:or, [{:struct, Lumis.Theme}, :string, nil]}, default: @default_theme],
+      theme: [type: {:or, [{:struct, Lumis.Theme}, :string, nil]}, default: nil],
       pre_class: [type: {:or, [:string, nil]}, default: nil],
       italic: [type: :boolean, default: false],
       include_highlights: [type: :boolean, default: false],
@@ -506,7 +508,7 @@ defmodule Lumis do
   def formatter_type({:terminal, options}) when is_list(options) do
     schema = [
       language: [type: {:or, [:string, nil]}, default: nil],
-      theme: [type: {:or, [{:struct, Lumis.Theme}, :string, nil]}, default: @default_theme],
+      theme: [type: {:or, [{:struct, Lumis.Theme}, :string, nil]}, default: nil],
       background: [type: {:or, [:string, {:in, [:theme]}, nil]}, default: nil],
       width: [type: {:or, [:pos_integer, nil]}, default: nil]
     ]
@@ -564,33 +566,43 @@ defmodule Lumis do
   defp validate_annotations(annotations) do
     annotations
     |> Enum.with_index()
-    |> Enum.reduce_while(:ok, fn
-      {%Lumis.Annotation{
-         range: %Lumis.Range.Offset{start: start, end: end_offset}
-       }, _index},
-      :ok
-      when is_integer(start) and start >= 0 and is_integer(end_offset) and end_offset > start ->
+    |> Enum.reduce_while(:ok, fn {annotation, index}, :ok ->
+      if valid_annotation?(annotation) do
         {:cont, :ok}
-
-      {%Lumis.Annotation{
-         range: %Lumis.Range.Position{
-           start: %Lumis.Position{line: start_line, column: start_column},
-           end: %Lumis.Position{line: end_line, column: end_column}
-         }
-       }, _index},
-      :ok
-      when is_integer(start_line) and start_line >= 0 and is_integer(start_column) and
-             start_column >= 0 and is_integer(end_line) and end_line >= 0 and
-             is_integer(end_column) and end_column >= 0 and
-             (start_line < end_line or
-                (start_line == end_line and start_column < end_column)) ->
-        {:cont, :ok}
-
-      {_annotation, index}, :ok ->
+      else
         {:halt,
          {:error,
           "annotation #{index} must be a Lumis.Annotation with a non-empty offset or position range"}}
+      end
     end)
+  end
+
+  defp valid_annotation?(%Lumis.Annotation{
+         range: %Lumis.Range.Offset{start: start, end: end_offset}
+       }) do
+    is_integer(start) and start >= 0 and is_integer(end_offset) and end_offset > start
+  end
+
+  defp valid_annotation?(%Lumis.Annotation{
+         range: %Lumis.Range.Position{
+           start: %Lumis.Position{} = start,
+           end: %Lumis.Position{} = stop
+         }
+       }) do
+    valid_position?(start) and valid_position?(stop) and precedes?(start, stop)
+  end
+
+  defp valid_annotation?(_annotation), do: false
+
+  defp valid_position?(%Lumis.Position{line: line, column: column}) do
+    is_integer(line) and line >= 0 and is_integer(column) and column >= 0
+  end
+
+  defp precedes?(%Lumis.Position{line: line, column: column}, %Lumis.Position{
+         line: stop_line,
+         column: stop_column
+       }) do
+    line < stop_line or (line == stop_line and column < stop_column)
   end
 
   @doc false
@@ -787,6 +799,23 @@ defmodule Lumis do
   def available_languages, do: Lumis.Native.available_languages()
 
   @doc """
+  Returns the ids of the languages loaded into this VM, sorted.
+
+  The complement of `available_languages/0`: what can be highlighted right now
+  without a download. Loading is global to the VM, so this is the same list in
+  every process.
+
+  ## Example
+
+      iex> Lumis.Languages.load("elixir")
+      iex> Lumis.loaded_languages()
+      ["elixir"]
+
+  """
+  @spec loaded_languages() :: [id :: String.t()]
+  def loaded_languages, do: Lumis.Native.loaded_languages()
+
+  @doc """
   Returns the list of all available themes.
 
   Use `Lumis.Theme.get/1` to get the actual theme struct.
@@ -922,8 +951,18 @@ defmodule Lumis do
       options = rust_options!(options)
 
       case Lumis.Native.highlight(source, options) do
-        {:error, error} -> raise Lumis.HighlightError, error: error
-        output -> output
+        {:error, {:language_not_loaded, language}} ->
+          raise Lumis.HighlightError,
+            error:
+              "language #{inspect(language)} could not be loaded. Cache it ahead of " <>
+                "time with `mix lumis.languages.cache #{language}` if this host has " <>
+                "no network access"
+
+        {:error, error} ->
+          raise Lumis.HighlightError, error: error
+
+        output ->
+          output
       end
     else
       render_with_custom_formatter(
@@ -951,7 +990,7 @@ defmodule Lumis do
   ## Examples
 
       iex> Lumis.validate_options!(formatter: {:html_inline, language: "elixir"})
-      [formatter: {:html_inline, [header: nil, highlight_lines: nil, include_highlights: false, italic: false, pre_class: nil, theme: "onedark", language: "elixir"]}]
+      [formatter: {:html_inline, [header: nil, highlight_lines: nil, include_highlights: false, italic: false, pre_class: nil, theme: nil, language: "elixir"]}]
 
       iex> Lumis.validate_options!(formatter: {:html_inline, theme: "dracula"})
       [formatter: {:html_inline, [theme: "dracula", ...]}]

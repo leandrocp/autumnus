@@ -1,8 +1,8 @@
-use lumis::formatters::{
+use lumis_core::formatter::{
     html_inline, html_linked, BBCodeScopedBuilder, Formatter, HtmlElement, HtmlInlineBuilder,
     HtmlLinkedBuilder, HtmlMultiThemesBuilder, TerminalBackground, TerminalBuilder,
 };
-use lumis::{languages::Language, themes};
+use lumis_core::{languages::Language, themes};
 use rustler::{NifMap, NifStruct, NifTaggedEnum, NifUnitEnum};
 use std::collections::HashMap;
 

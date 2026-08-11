@@ -9,10 +9,14 @@ on:
     branches: [ main ]
     paths:
       - "packages/elixir/lumis/**"
+      - "packages/javascript/lumis/bundles/**"
+      - "crates/lumis-wasm-runtime/**"
       - ".github/workflows/elixir.yml"
   pull_request:
     paths:
       - "packages/elixir/lumis/**"
+      - "packages/javascript/lumis/bundles/**"
+      - "crates/lumis-wasm-runtime/**"
       - ".github/workflows/elixir.yml"
   workflow_dispatch:
 
@@ -31,6 +35,11 @@ jobs:
       working-directory: packages/elixir/lumis
       env_vars: '{"LUMIS_BUILD": "1"}'
       rust-toolchain: 'stable'
+      # Newest pair on a pull request; every supported pair on main, where an
+      # OTP or Elixir incompatibility has to surface before a release. Spelled
+      # out on both sides because an empty string is not the same as omitting
+      # the input: it would produce an empty matrix and run nothing.
+      pairs: "${{ github.event_name == 'pull_request' && '[{\"name\": \"OTP 29.x, Elixir 1.20.x\", \"elixir\": \"1.20.x\", \"otp\": \"29.x\"}]' || '[{\"name\": \"OTP 25.1, Elixir 1.15.0\", \"elixir\": \"1.15.0\", \"otp\": \"25.1\"}, {\"name\": \"OTP 29.x, Elixir 1.20.x\", \"elixir\": \"1.20.x\", \"otp\": \"29.x\"}, {\"name\": \"OTP 29, Elixir main\", \"elixir\": \"main-otp-29\", \"otp\": \"maint-29\"}]' }}"
   lint:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||
@@ -41,3 +50,4 @@ jobs:
       working-directory: packages/elixir/lumis
       env_vars: '{"LUMIS_BUILD": "1"}'
       rust-toolchain: 'stable'
+      pairs: "${{ github.event_name == 'pull_request' && '[{\"name\": \"OTP 29.x, Elixir 1.20.x\", \"elixir\": \"1.20.x\", \"otp\": \"29.x\"}]' || '[{\"name\": \"OTP 29.x, Elixir 1.20.x\", \"elixir\": \"1.20.x\", \"otp\": \"29.x\"}, {\"name\": \"OTP 29, Elixir main\", \"elixir\": \"main-otp-29\", \"otp\": \"maint-29\"}]' }}"

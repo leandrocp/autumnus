@@ -4,13 +4,24 @@ import dracula from "../../themes/dist/json/dracula.json";
 import githubLight from "../../themes/dist/json/github_light.json";
 import javascript from "../../lumis/langs/javascript.ts";
 import json from "../../lumis/langs/json.ts";
+import { configureLocalWasmResolver } from "../../lumis/test/wasm.ts";
 import markdownItLumis, { fromHighlighter } from "../src/index.js";
-import { createHighlighter } from "@lumis-sh/lumis";
+import {
+  configureLanguagePackageResolver,
+  configureWasmResolver,
+  createHighlighter,
+} from "@lumis-sh/lumis";
+import type { LanguageRef } from "@lumis-sh/lumis";
 import { htmlInline, htmlLinked, htmlMultiThemes, terminal } from "@lumis-sh/lumis/formatters";
 import { bundledLanguages } from "@lumis-sh/lumis/bundles/web";
 
 const JS_SOURCE = "```javascript\nconst x = 1\n```";
 const JSON_SOURCE = '```json\n{"a": 1}\n```';
+
+configureLocalWasmResolver(["javascript", "json"], {
+  configureLanguagePackageResolver,
+  configureWasmResolver,
+});
 
 describe("markdown-it-lumis", () => {
   describe("htmlInline formatter", () => {
@@ -24,7 +35,9 @@ describe("markdown-it-lumis", () => {
 
       const html = md.render(JS_SOURCE);
 
-      expect(html).toMatch(/<pre class="lumis" style="color: #[0-9a-f]+; background-color: #[0-9a-f]+;">/);
+      expect(html).toMatch(
+        /<pre class="lumis" style="color: #[0-9a-f]+; background-color: #[0-9a-f]+;">/,
+      );
       expect(html).toMatch(/<code class="language-javascript"/);
       expect(html).toMatch(/<span style="color: #[0-9a-f]+;">const<\/span>/);
       expect(html).toMatch(/<span style="color: #[0-9a-f]+;">1<\/span>/);
@@ -45,6 +58,20 @@ describe("markdown-it-lumis", () => {
       const html = md.render(JS_SOURCE);
 
       expect(html).toMatch(/<pre class="lumis my-pre"/);
+    });
+
+    it("loads an identifier-only reference from a registered bundle", async () => {
+      const plugin = await markdownItLumis({
+        formatter: (language) => htmlInline({ language, theme: dracula }),
+        languages: [bundledLanguages, { id: "javascript", aliases: ["js"] }],
+      });
+      const md = new MarkdownIt();
+      md.use(plugin);
+
+      const html = md.render(JS_SOURCE);
+
+      expect(html).toContain('class="language-javascript"');
+      expect(html).toMatch(/<span style="color: #[0-9a-f]+;">const<\/span>/);
     });
   });
 
@@ -101,6 +128,7 @@ describe("markdown-it-lumis", () => {
       const html = md.render(JS_SOURCE);
 
       // terminal output has ANSI codes, no HTML tags
+      // oxlint-disable-next-line no-control-regex -- matching ANSI escapes is the point
       expect(html).toMatch(/\u001b\[38;2;\d+;\d+;\d+m/);
       expect(html).toContain("\u001b[0m");
       expect(html).not.toContain("<pre");
@@ -109,6 +137,23 @@ describe("markdown-it-lumis", () => {
   });
 
   describe("language handling", () => {
+    it.each([
+      ["empty definition ID", { id: "", aliases: [] }],
+      ["non-string definition alias", { id: "javascript", aliases: [1] }],
+      ["empty lazy ID", Object.assign(async () => javascript, { id: "", aliases: [] })],
+      [
+        "non-string lazy alias",
+        Object.assign(async () => javascript, { id: "javascript", aliases: [1] }),
+      ],
+    ])("rejects %s at the adapter boundary", async (_name, language) => {
+      await expect(
+        markdownItLumis({
+          formatter: (name) => htmlInline({ language: name, theme: dracula }),
+          languages: [language as unknown as LanguageRef],
+        }),
+      ).rejects.toThrow("Invalid markdown-it-lumis language metadata");
+    });
+
     it("auto-detects unannotated fences", async () => {
       const plugin = await markdownItLumis({
         formatter: (language) => htmlInline({ language, theme: dracula }),

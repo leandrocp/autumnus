@@ -18,11 +18,14 @@ keywords:
 Use [`highlight/2`](https://hexdocs.pm/lumis/Lumis.html#highlight/2) when invalid user input, formatter options, or language detection should stay in the normal control flow.
 
 ```elixir
-case Lumis.highlight(source, formatter: {:html_inline, language: "elixir"}) do
+case Lumis.highlight(source, formatter: {:html_inline, language: "elixir", theme: "github_light"}) do
   {:ok, html} -> html
   {:error, reason} -> handle_error(reason)
 end
 ```
+
+There is no default theme. Without `:theme`, `:html_inline` and `:terminal` emit
+uncolored output.
 
 `highlight/2` returns `{:ok, output}` or `{:error, reason}`.
 
@@ -31,7 +34,7 @@ end
 Use [`highlight!/2`](https://hexdocs.pm/lumis/Lumis.html#highlight!/2) when failures should raise immediately, such as in scripts, trusted internal code, or examples.
 
 ```elixir
-html = Lumis.highlight!(source, formatter: {:html_inline, language: "elixir"})
+html = Lumis.highlight!(source, formatter: {:html_inline, language: "elixir", theme: "github_light"})
 ```
 
 `highlight!/2` returns the highlighted output or raises.
@@ -49,6 +52,105 @@ Lumis.highlight!(code)
 
 Omitting `language` from the formatter enables auto-detection.
 
+## Parser loading
+
+`Lumis.highlight/2` downloads, verifies and loads whatever a document turns out
+to name, including languages injected inside it, and caches them for every later
+request. Nothing has to be declared up front:
+
+````elixir
+# Loads markdown, then elixir for the fenced block, in one pass.
+Lumis.highlight!("""
+# Title
+
+```elixir
+defmodule Demo do
+end
+```
+""", formatter: {:html_inline, language: "markdown", theme: "github_light"})
+````
+
+A language that cannot be fetched leaves its own block plain rather than failing
+the document. Only the document's own language failing raises.
+
+Loading is global to the VM. One runtime lives in the NIF, so the first process
+to need a language pays for it and every process after it does not.
+
+### Loading ahead of time
+
+A cold parser costs a download and then a Wasmtime compile, and the compile is
+the larger half: seven parsers already on disk take about 8 s to compile and
+1.3 s once the compiled forms are cached. Load at startup so a request never
+pays either:
+
+```elixir title="lib/my_app/application.ex"
+:ok = Lumis.Languages.load(["markdown", "elixir", "json"])
+:ok = Lumis.Languages.load(:bundle_web)
+```
+
+A `:bundle_*` atom names the same languages as the `@lumis-sh/wasm-bundle-*` package
+of that name — `:bundle_web`, `:bundle_web_extra`, `:bundle_system`, `:bundle_backend`
+and `:bundle_full` — so a bundle means the same thing in every runtime.
+`Lumis.Languages.bundles/0` returns the membership.
+
+### Paying for parsers at build time, not on a request
+
+```bash
+mix lumis.languages.cache elixir html javascript css
+mix lumis.languages.cache --all
+```
+
+Each parser is downloaded *and* loaded once, so Wasmtime writes its compiled
+form beside it. An image built this way starts serving without paying either
+cost, and a restart or a new pod does not pay it again.
+
+Parsers land under `LUMIS_DATA_DIR`, which defaults to the user data directory.
+The result is self-sufficient — parser bytes, their metadata, and the compiled
+modules — so pointing a container at it needs nothing else. `--force` resolves
+the compatible package range again and replaces files that already verify. To
+write somewhere other than the default, set `LUMIS_DATA_DIR` or
+`config :lumis, data_dir:`; there is no second way to name that directory.
+
+### Where parsers come from
+
+One directory holds them all, and it is checked before the CDN. Parsers you
+build or vendor yourself go in the same place as downloaded ones, so a release
+that stages them at build time never reaches the network.
+
+It defaults to `LUMIS_DATA_DIR`, and configuration takes precedence, which is
+what a release usually wants:
+
+```elixir title="config/runtime.exs"
+config :lumis, data_dir: "/app/lumis"
+```
+
+See [WASM and CDN](/advanced/wasm-and-cdn#the-store-directory) for the layout and
+for how a compatible range becomes an exact cached package.
+
+Bytes are checked against the size and SHA-256 their package declares before
+use, and anything that fails is discarded rather than trusted, so a corrupted
+cache repairs itself.
+
+### Upgrading from 0.6
+
+Highlighting used to raise for a language that had not been loaded, and left
+injected languages unhighlighted. It now loads them, so `Lumis.Languages.load/1`
+becomes an optimization rather than a requirement.
+
+Four things were removed along with the Elixir-side download code, which now
+lives in the shared Rust store:
+
+| Removed | Use instead |
+| --- | --- |
+| `config :lumis, :bundled_languages` | name the languages: `mix lumis.languages.cache elixir html`, or `--all` |
+| `config :lumis, :wasm_resolver` | `config :lumis, data_dir: "/app/lumis"` |
+| `config :lumis, :language_package_resolver` | `config :lumis, data_dir: "/app/lumis"` |
+| release-local `priv/wasm` | `config :lumis, data_dir: "/app/lumis"`, or `LUMIS_DATA_DIR` |
+| `config :lumis, :wasm_path` | one directory now: `config :lumis, data_dir:` |
+
+`mix lumis.languages.cache` takes language names or `--all` rather than reading
+configuration, matching `lumis parsers cache`.
+
 ## Discover supported languages and themes
 
 ```elixir
@@ -64,7 +166,7 @@ See [`Lumis`](https://hexdocs.pm/lumis/Lumis.html) and [`Lumis.Theme`](https://h
 Highlighted HTML must be rendered as raw HTML in templates.
 
 ```elixir
-code = Lumis.highlight!(source, formatter: {:html_inline, language: "elixir"})
+code = Lumis.highlight!(source, formatter: {:html_inline, language: "elixir", theme: "github_light"})
 ```
 
 ```heex

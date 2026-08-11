@@ -4,7 +4,11 @@ use lumis::{
     HtmlMultiThemesBuilder, TerminalBuilder,
 };
 use serde::Deserialize;
-use std::{collections::HashMap, fs, path::PathBuf};
+use std::{
+    collections::{BTreeMap, HashMap},
+    fs,
+    path::PathBuf,
+};
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -15,7 +19,18 @@ struct FixtureMetadata {
     theme: String,
     #[serde(default)]
     rainbow_brackets: bool,
+    #[serde(default)]
+    html_multi_themes: Option<HtmlMultiThemesFixture>,
     events: Vec<SerializableHighlightEvent>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct HtmlMultiThemesFixture {
+    themes: BTreeMap<String, String>,
+    default_theme: String,
+    #[serde(default)]
+    highlight_lines: Vec<usize>,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Eq)]
@@ -38,6 +53,16 @@ struct Fixture {
 
 fn conformance_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../fixtures/conformance")
+}
+
+fn fixture_theme(name: &str) -> lumis::themes::Theme {
+    let path = conformance_dir()
+        .join("../conformance-themes")
+        .join(format!("{name}.json"));
+    if path.is_file() {
+        return themes::from_file(path).unwrap();
+    }
+    themes::get(name).unwrap()
 }
 
 fn load_fixture(name: &str) -> Fixture {
@@ -94,7 +119,7 @@ fn check_events(fixture: &Fixture) {
 
 fn check_html_inline(fixture: &Fixture) {
     let lang: Language = fixture.metadata.language.parse().unwrap();
-    let theme = themes::get(&fixture.metadata.theme).unwrap();
+    let theme = fixture_theme(&fixture.metadata.theme);
     let fmt = HtmlInlineBuilder::new()
         .language(lang)
         .theme(Some(theme))
@@ -129,15 +154,32 @@ fn check_html_linked(fixture: &Fixture) {
 
 fn check_html_multi_themes(fixture: &Fixture) {
     let lang: Language = fixture.metadata.language.parse().unwrap();
-    let theme = themes::get(&fixture.metadata.theme).unwrap();
     let mut map = HashMap::new();
-    map.insert("main".to_string(), theme);
-    let fmt = HtmlMultiThemesBuilder::new()
-        .language(lang)
-        .themes(map)
-        .default_theme("main")
-        .build()
-        .unwrap();
+    let mut builder = HtmlMultiThemesBuilder::new();
+
+    if let Some(config) = &fixture.metadata.html_multi_themes {
+        for (name, theme) in &config.themes {
+            map.insert(name.clone(), fixture_theme(theme));
+        }
+        builder.default_theme(config.default_theme.clone());
+
+        if !config.highlight_lines.is_empty() {
+            builder.highlight_lines(Some(lumis::formatters::html_inline::HighlightLines {
+                lines: config
+                    .highlight_lines
+                    .iter()
+                    .map(|line| *line..=*line)
+                    .collect(),
+                style: Some(lumis::formatters::html_inline::HighlightLinesStyle::Theme),
+                class: None,
+            }));
+        }
+    } else {
+        map.insert("main".to_string(), fixture_theme(&fixture.metadata.theme));
+        builder.default_theme("main");
+    }
+
+    let fmt = builder.language(lang).themes(map).build().unwrap();
     let mut out = Vec::new();
     lumis::write_highlight_with_options(
         &mut out,
@@ -154,7 +196,7 @@ fn check_html_multi_themes(fixture: &Fixture) {
 
 fn check_terminal(fixture: &Fixture) {
     let lang: Language = fixture.metadata.language.parse().unwrap();
-    let theme = themes::get(&fixture.metadata.theme).unwrap();
+    let theme = fixture_theme(&fixture.metadata.theme);
     let fmt = TerminalBuilder::new()
         .language(lang)
         .theme(Some(theme))

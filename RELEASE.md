@@ -30,9 +30,66 @@ git push origin cargo-lumis-cli/v0.2.0
 - Pass the bare version to `mise run release-prepare`, for example `0.2.0`, not `v0.2.0`.
 - Include `v` only in the git tag, for example `cargo-lumis-cli/v0.2.0`.
 - Review each changed manifest and `CHANGELOG.md` after `mise run release-prepare`.
-- If one released package depends on another released package, update the dependent manifest in the same commit.
+- If one released package depends on another released package, update the dependent manifest in the same commit. See [Crate version requirements](#crate-version-requirements).
 - Push package tags in dependency order.
 - Watch the tag-triggered publish workflows after pushing tags.
+
+## Crate version requirements
+
+A `version` requirement on a lumis crate must equal that crate's version in this
+repository, spelled in full:
+
+```toml
+lumis-core = { path = "../lumis-core", version = "2.3.0", default-features = false }
+```
+
+Almost nothing built from this repository can tell you when that requirement
+goes stale. Every crate that reaches a lumis crate through a `path` entry
+resolves it there, and the root `[patch.crates-io]` table redirects the rest, so
+local builds, CI, and the Elixir and Node addons compile against the working
+tree no matter what the requirement says. `crates/autumnus` is the one exception:
+it declares its own `[workspace]` and depends on `lumis` through the registry, so
+its requirement is the only one a build here actually resolves.
+
+For everything else the requirement takes effect only after the crate is on
+crates.io, and even then only for consumers whose `Cargo.lock` already holds an
+older version — a fresh resolve picks the newest match and looks fine.
+
+That is how [#1118](https://github.com/leandrocp/lumis/issues/1118) shipped.
+`lumis` 0.12.1 called `lumis_core::formatter::html::open_multi_themes_pre_tag`,
+added in `lumis-core` 2.2.0, while requiring `lumis-core = "2"`. Anyone upgrading
+from 0.11 kept the `lumis-core` 2.0.0 or 2.1.0 already in their lockfile and got
+a compile error.
+
+`mise run release-prepare` keeps this current, so a normal release needs no
+manual edit. Writing the requirement in full is what makes that work: the
+`cargo set-version` it already ran rewrites dependents only when the new version
+falls outside their requirement, and `"2"` absorbed every 2.x bump silently.
+
+```text
+Upgrading lumis-core from 2.3.0 to 2.4.0
+ Updating lumis's dependency from 2.3.0 to 2.4.0
+ Updating lumis-cli's dependency from 2.3.0 to 2.4.0
+ Updating lumis-js-native's dependency from 2.3.0 to 2.4.0
+ Updating lumis-wasm-runtime's dependency from 2.3.0 to 2.4.0
+```
+
+`cargo set-version` only reaches dependents it can see through `path`.
+`packages/elixir/lumis/native/lumis_nif/Cargo.toml` depends on `lumis-core`
+through the registry, so `release-prepare` follows up with
+`mise run check-crate-deps --fix`, which updates whatever is left:
+
+```text
+packages/elixir/lumis/native/lumis_nif/Cargo.toml: lumis-core 2.3.0 -> 2.4.0
+```
+
+Both passes edit manifests other than the one being released. Review everything
+`git status` reports and commit it with the release, not just the target
+package's `Cargo.toml` and `CHANGELOG.md`.
+
+`mise run check-crate-deps` reports the same drift instead of fixing it. It runs
+in `mise run lint`, as its own job in Rust CI, and again in `rust-release.yml`
+before `cargo publish`.
 
 ## Publish order
 
@@ -70,17 +127,41 @@ If multiple JS packages are part of the same release, use this order:
 
 `@lumis-sh/lumis` builds against `@lumis-sh/themes`. `@lumis-sh/markdown-it-lumis`, `@lumis-sh/rehype-lumis`, and `@lumis-sh/react` depend on `@lumis-sh/lumis`. The `@lumis-sh/wasm-bundle-*` packages declare `@lumis-sh/lumis` as a peer dependency.
 
-The `npm-lumis` workflow also publishes the platform-specific `@lumis-sh/lumis-native-*` packages and then the `@lumis-sh/lumis-native` selector before publishing `@lumis-sh/lumis`. All of them share the `npm-lumis` version and tag.
-
 After `npm-lumis` is published, the plugin packages, CLI package, and WASM bundle packages are independent. Keep the order above as the canonical release order.
+
+The `npm-lumis` workflow also publishes the five platform-specific `@lumis-sh/lumis-native-*` packages and then the `@lumis-sh/lumis-native` selector, before publishing `@lumis-sh/lumis` itself. All of them share the `npm-lumis` version and tag, and `mise run release-prepare npm-lumis <version>` bumps them together.
+
+That lockstep is not cosmetic. `@lumis-sh/lumis` depends on the platform packages with `workspace:*`, which pnpm replaces with the workspace version when it packs, so a main package bumped on its own would ship optional dependencies pointing at the previous release — and npm refuses to republish a version that already exists, so the workflow would fail before reaching the main package. `mise run lint` runs `mise run check-native-versions`, which fails if any of them drift.
 
 `npm-cli` must use the same version as `cargo-lumis-cli`, and the matching `cargo-lumis-cli/v<version>` GitHub release must already contain prebuilt CLI archives before publishing `@lumis-sh/cli`.
 
 If a JS release also needs new parser WASM packages, publish those first through the WASM workflow. Run `mise run wasm-publish-needed` to see which parser packages still need publishing.
 
+Each `@lumis-sh/wasm-*` package contains its parser and matching processed
+queries. During staging, `crates/dev` generates `lumis.json` from
+`languages.toml`, the processed queries, and the built parser. It is a published
+package artifact, not checked-in source. A parser revision or query change
+publishes only the affected language package; it does not require runtime
+package releases. `mise run wasm-publish-needed` compares the complete package
+definition with the package's small `package.json#lumis` release marker.
+
+Dynamic runtimes resolve every language package through the single compatible
+range derived from the Tree-sitter series in `mise.toml` (for example `0.26`).
+Do not release the runtimes after an ordinary `0.26.x` WASM release: new and
+explicitly refreshed caches adopt it through npm/CDN range resolution. A move
+to a new Tree-sitter minor series changes that range and does require releasing
+the dynamic runtimes.
+
+After changing language IDs, aliases, or parser package assignments in
+`languages.toml`, run `mise run langs-gen-catalog` and
+`pnpm --filter @lumis-sh/lumis run build:langs`, then commit the generated Rust
+catalog data and JavaScript handles.
+
 ### Elixir package
 
-Publish `hex-lumis` after any required `cargo-lumis` release because `packages/elixir/lumis/native/lumis_nif/Cargo.toml` depends on `lumis`.
+Publish `hex-lumis` after the required `cargo-lumis-wasm-runtime` release.
+Refresh and commit `packages/elixir/lumis/native/lumis_nif/Cargo.lock` against
+that published runtime before creating the Hex tag.
 
 ## Failed releases
 
@@ -135,3 +216,5 @@ mise run release-prepare cargo-lumis-cli 0.2.0
 `release-prepare` updates only the target package version file and prepends the next changelog entry with `git-cliff`.
 
 If a release requires dependent manifests to move in lockstep, update those files separately and commit them with the release prep.
+
+`npm-lumis` is the one exception: it additionally bumps `native/Cargo.toml`, the `@lumis-sh/lumis-native` selector, and all five platform packages, because the release workflow publishes them under the same version before the main package. See [JavaScript packages](#javascript-packages).

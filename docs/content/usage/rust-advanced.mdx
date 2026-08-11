@@ -18,10 +18,11 @@ keywords:
 Use [`highlight()`](https://docs.rs/lumis/latest/lumis/fn.highlight.html) when you want the rendered output in memory as a `String`.
 
 ```rust
-use lumis::{highlight, HtmlInlineBuilder, languages::Language};
+use lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
 
 let formatter = HtmlInlineBuilder::new()
     .language(Language::Rust)
+    .theme(Some(themes::get("onedark").unwrap()))
     .build()
     .unwrap();
 
@@ -33,11 +34,12 @@ let html = highlight("fn main() {}", formatter);
 Use [`write_highlight()`](https://docs.rs/lumis/latest/lumis/fn.write_highlight.html) when you want to stream into a file, socket, or other writer without building a large intermediate string.
 
 ```rust
-use lumis::{write_highlight, HtmlInlineBuilder, languages::Language};
+use lumis::{write_highlight, HtmlInlineBuilder, languages::Language, themes};
 use std::fs::File;
 
 let formatter = HtmlInlineBuilder::new()
     .language(Language::Rust)
+    .theme(Some(themes::get("onedark").unwrap()))
     .build()
     .unwrap();
 

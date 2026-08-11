@@ -1,7 +1,7 @@
 {
   "name": "@lumis-sh/lumis-native",
   "version": "0.6.1",
-  "description": "Opt-in native Node.js runtime for Lumis",
+  "description": "Native Node.js runtime for Lumis",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -10,6 +10,7 @@
   },
   "main": "index.js",
   "files": [
+    "LICENSE",
     "index.js"
   ],
   "optionalDependencies": {

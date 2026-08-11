@@ -14,6 +14,7 @@ on:
       - "packages/javascript/react/**"
       - "packages/javascript/themes/**"
       - "packages/javascript/package.json"
+      - "packages/javascript/scripts/check-native-versions.mjs"
       - "packages/javascript/wasm-bundle-*/**"
       - "crates/lumis-core/**"
       - "crates/lumis/**"
@@ -34,6 +35,7 @@ on:
       - "packages/javascript/react/**"
       - "packages/javascript/themes/**"
       - "packages/javascript/package.json"
+      - "packages/javascript/scripts/check-native-versions.mjs"
       - "packages/javascript/wasm-bundle-*/**"
       - "crates/lumis-core/**"
       - "crates/lumis/**"
@@ -56,26 +58,30 @@ jobs:
           (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
         with:
-          version: 10
-      - uses: actions/setup-node@v7
+          version: 11.15.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: 'lts/*'
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @lumis-sh/lumis fmt:check
-      - run: pnpm --filter @lumis-sh/lumis lint
-      - run: pnpm --filter @lumis-sh/markdown-it-lumis fmt:check
-      - run: pnpm --filter @lumis-sh/markdown-it-lumis lint
-      - run: pnpm --filter @lumis-sh/rehype-lumis fmt:check
-      - run: pnpm --filter @lumis-sh/rehype-lumis lint
-      - run: pnpm --filter @lumis-sh/react fmt:check
-      - run: pnpm --filter @lumis-sh/react lint
-      - run: pnpm --filter @lumis-sh/themes fmt:check
-      - run: pnpm --filter @lumis-sh/themes lint
+      - run: mise run fmt-js -- --check
+      - run: pnpm --filter @lumis-sh/lumis run lint
+      - run: pnpm --filter @lumis-sh/markdown-it-lumis run lint
+      - run: pnpm --filter @lumis-sh/rehype-lumis run lint
+      - run: pnpm --filter @lumis-sh/react run lint
+      - run: pnpm --filter @lumis-sh/themes run lint
+      # `mise run docs` is the only caller of this script, and a pnpm upgrade
+      # once made it unrunnable without any check going red.
+      - run: pnpm --filter @lumis-sh/lumis run build:generate
+      - run: pnpm --filter @lumis-sh/lumis run docs
+      # The release workflow publishes six native npm packages before the main
+      # package, and npm will not republish an existing version.
+      - run: node packages/javascript/scripts/check-native-versions.mjs
       - run: pnpm --dir packages/javascript run build:wasm-bundles && git diff --exit-code -- packages/javascript/wasm-bundle-*
 
   test:
@@ -85,48 +91,59 @@ jobs:
           (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
         with:
-          version: 10
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 'lts/*'
-          cache: 'pnpm'
-          cache-dependency-path: pnpm-lock.yaml
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @lumis-sh/themes build
-      - run: pnpm --filter @lumis-sh/lumis build
-      - run: pnpm --filter @lumis-sh/markdown-it-lumis build
-      - run: pnpm --filter @lumis-sh/rehype-lumis build
-      - run: pnpm --filter @lumis-sh/react build
-      - run: pnpm --filter @lumis-sh/markdown-it-lumis test
-      - run: pnpm --filter @lumis-sh/rehype-lumis test
-      - run: pnpm --filter @lumis-sh/lumis test
-      - run: pnpm --filter @lumis-sh/react test
-      - run: pnpm --dir packages/javascript run build:wasm-bundles && git diff --exit-code -- packages/javascript/wasm-bundle-*
-
-  test-native:
-    if: >-
-      ${{ github.event_name == 'workflow_dispatch' ||
-          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
-          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: pnpm/action-setup@v6
-        with:
-          version: 10
-      - uses: actions/setup-node@v7
+          version: 11.15.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: 'lts/*'
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @lumis-sh/themes build
-      - run: pnpm --filter @lumis-sh/lumis build:generate
-      - run: pnpm --filter @lumis-sh/lumis build:native
-      - run: pnpm --filter @lumis-sh/lumis test
+      - run: pnpm --filter @lumis-sh/themes run build
+      # Node highlights through the addon, so the tests build it and the parser
+      # tree it resolves against.
+      - run: cargo run -q --manifest-path crates/dev/Cargo.toml -- stage-test-parsers target/test-parsers
+      - run: pnpm --filter @lumis-sh/lumis run build:native
+      - run: pnpm --filter @lumis-sh/lumis run build
+      - run: pnpm --filter @lumis-sh/markdown-it-lumis run build
+      - run: pnpm --filter @lumis-sh/rehype-lumis run build
+      - run: pnpm --filter @lumis-sh/react run build
+      # The addon resolves parsers in Rust, so the downstream packages read the
+      # store directly rather than the JavaScript resolvers the Wasm runtime uses.
+      - run: pnpm --filter @lumis-sh/markdown-it-lumis run test
         env:
-          LUMIS_TEST_RUNTIME: native
+          LUMIS_DATA_DIR: ${{ github.workspace }}/target/test-parsers
+      - run: pnpm --filter @lumis-sh/rehype-lumis run test
+        env:
+          LUMIS_DATA_DIR: ${{ github.workspace }}/target/test-parsers
+      # Both runtimes, explicitly. vite.config.mjs defaults to Wasm, so leaving
+      # this unset would run the same one twice and leave every native-only
+      # resolver and lifetime behaviour uncovered.
+      - run: |
+          native_runtime_data_dir="$(mktemp -d)"
+          native_suite_data_dir="$(mktemp -d)"
+          trap 'rm -rf "$native_runtime_data_dir" "$native_suite_data_dir"' EXIT
+          cp -R "$GITHUB_WORKSPACE/target/test-parsers/parsers" "$native_runtime_data_dir/"
+          LUMIS_TEST_RUNTIME=native \
+            LUMIS_DATA_DIR="$native_runtime_data_dir" \
+            pnpm --filter @lumis-sh/lumis exec vitest run test/native-runtime.test.ts
+          LUMIS_TEST_RUNTIME=native \
+            LUMIS_DATA_DIR="$native_suite_data_dir" \
+            pnpm --filter @lumis-sh/lumis exec vitest run \
+              --exclude test/conformance.test.ts \
+              --exclude test/query-compile.test.ts \
+              --exclude 'test/browser/**' \
+              --exclude test/native-runtime.test.ts
+      - run: |
+          wasm_suite_data_dir="$(mktemp -d)"
+          trap 'rm -rf "$wasm_suite_data_dir"' EXIT
+          cp -R "$GITHUB_WORKSPACE/target/test-parsers/parsers" "$wasm_suite_data_dir/"
+          LUMIS_TEST_RUNTIME=wasm \
+            LUMIS_DATA_DIR="$wasm_suite_data_dir" \
+            pnpm --filter @lumis-sh/lumis run test
+      - run: pnpm --filter @lumis-sh/react run test
+        env:
+          LUMIS_DATA_DIR: ${{ github.workspace }}/target/test-parsers

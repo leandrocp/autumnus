@@ -4,33 +4,25 @@ Syntax Highlighter powered by Tree-sitter and Neovim themes.
 
 JavaScript/TypeScript package for [Lumis](https://lumis.sh). Works in Node.js, Bun, Deno, and browsers.
 
-By default, Lumis uses `web-tree-sitter` and loads parser `.wasm` files per language on demand. Node.js users can opt into the native Rust runtime; the public API is identical in both modes.
+## Features
+
+- **110+ Tree-sitter languages** - Fast, accurate, and updated syntax parsing
+- **250+ built-in Neovim themes** - Updated and curated themes from the Neovim community
+- **Built-in formatters** - HTML (inline/linked), Terminal (ANSI), Multi-theme (light/dark), BBCode
+- **Custom formatters** - Build your own output
+- **Language auto-detection** - File extension, shebang, and emacs-mode support
+- **Line highlighting** - Mark and style individual lines, with custom HTML wrappers
+- **Streaming-friendly** - Handles incomplete code
+- **Load parsers on demand** - Verified and cached, including injected languages on Node; browsers load those up front
 
 ## Install
 
 ```sh
 npm install @lumis-sh/lumis
-```
-
-Themes are published separately:
-
-```sh
 npm install @lumis-sh/themes
 ```
 
-### Optional native Node.js runtime
-
-```sh
-npm install @lumis-sh/lumis-native
-```
-
-No code changes are required. On supported Node.js platforms, Lumis detects the package and uses its matching prebuilt addon automatically.
-
-The native addon includes all supported language parsers, so it is much larger than the default per-language WASM runtime. Without it, Lumis fetches versioned parser WASM packages from jsDelivr on demand and caches them locally in Node.
-
-## Quick Start
-
-The fastest way to highlight code. The stateless `highlight()` function initializes the parser, loads the language, and returns HTML in a single async call.
+## Usage
 
 ```typescript
 import { highlight } from '@lumis-sh/lumis'
@@ -38,284 +30,47 @@ import { htmlInline } from '@lumis-sh/lumis/formatters'
 import javascript from '@lumis-sh/lumis/langs/javascript'
 import dracula from '@lumis-sh/themes/dracula'
 
-const html = await highlight(
-  'const x = 1',
-  htmlInline({ language: javascript, theme: dracula })
-)
+const html = await highlight('const x = 1', htmlInline({ language: javascript, theme: dracula }))
 ```
 
-`highlight()` uses a shared default runtime. It is convenient for one-off calls, but loaded languages and WASM resolver configuration are shared process-wide.
-
-## Reuse A Highlighter
-
-Use `createHighlighter()` when you want to preload languages and highlight synchronously after setup.
+`highlight()` shares one process-wide runtime, which is what you want for a
+one-off. For repeated calls, `createHighlighter()` loads languages during setup
+and highlights synchronously afterwards:
 
 ```typescript
 import { createHighlighter } from '@lumis-sh/lumis'
-import { htmlInline } from '@lumis-sh/lumis/formatters'
-import javascript from '@lumis-sh/lumis/langs/javascript'
-import dracula from '@lumis-sh/themes/dracula'
 
 const hl = await createHighlighter({ languages: [javascript] })
-
-// hl.highlight() is synchronous, languages are already loaded
-const html = hl.highlight(
-  'const x = 1',
-  htmlInline({ language: javascript, theme: dracula })
-)
+const html = hl.highlight('const x = 1', htmlInline({ language: javascript, theme: dracula }))
 ```
 
-Use `createHighlighter()` when you want explicit control over loaded languages, isolation between highlighters, or better throughput for repeated calls.
+Bundles register a whole set at once — `bundles/web`, `web-extra`, `system`,
+`backend`, `full` — and each language in one still loads lazily on first use.
 
-## Bundles
+## Parsers
 
-Bundles group languages into sets. Each language loads lazily on first use, so registering a bundle with 110+ languages costs almost nothing upfront.
+Each language import is a handle to an independently released parser package.
+Lumis resolves it to an exact version, verifies the bytes against a SHA-256
+digest before use, and caches them.
 
-Five preset bundles ship with lumis:
+On Node, a document also loads the languages **injected inside** it during the
+same pass, so a Markdown file with a fenced Rust block highlights that block
+without Rust being named in your code. Browsers load asynchronously, so name
+injected languages up front or use a bundle.
 
-| Bundle | Use case |
-|--------|----------|
-| `bundles/web` | Core web languages: HTML, CSS, JavaScript, TypeScript, TSX, and JSON |
-| `bundles/web-extra` | Web frameworks, templating, and adjacent formats like Angular, Astro, Dart, Elm, HEEx, Prisma, Surface, Vue, Svelte, PHP, GraphQL, and XML |
-| `bundles/system` | C, C++, Rust, Go, Zig, ASM, LLVM, CMake, Make |
-| `bundles/backend` | Backend languages like C#, Elixir, Erlang, Go, Java, JS, Kotlin, PHP, Python, Ruby, Rust, Scala, SQL, TypeScript, Protobuf, and Javadoc |
-| `bundles/full` | Every supported language |
+For a host with no network access, prepare a cache before starting:
 
-### Using a bundle
-
-Pass the bundle to `createHighlighter()`. Languages register lazily and load on first `loadLanguage()` call.
-
-```typescript
-import { createHighlighter } from '@lumis-sh/lumis'
-import { htmlInline } from '@lumis-sh/lumis/formatters'
-import { bundledLanguages } from '@lumis-sh/lumis/bundles/web'
-import dracula from '@lumis-sh/themes/dracula'
-
-const hl = await createHighlighter({ languages: [bundledLanguages] })
-
-// Load a language before highlighting
-await hl.loadLanguage('javascript')
-const html = hl.highlight(
-  'const x = 1',
-  htmlInline({ language: 'javascript', theme: dracula })
-)
+```sh
+npx lumis-wasm-cache javascript html css --output ./wasm-cache
+LUMIS_DATA_DIR=./wasm-cache node app.mjs
 ```
 
-### Using bundle handles
+## Documentation
 
-Each entry in a bundle is a `LazyLanguage` handle. You can pass it to formatters and `loadLanguage()` instead of using strings.
-
-```typescript
-import { bundledLanguages } from '@lumis-sh/lumis/bundles/web'
-
-const hl = await createHighlighter({ languages: [bundledLanguages] })
-await hl.loadLanguage(bundledLanguages.javascript)
-
-const html = hl.highlight(
-  'const x = 1',
-  htmlInline({ language: bundledLanguages.javascript, theme: dracula })
-)
-```
-
-### Mixing bundles and individual languages
-
-`createHighlighter()` accepts any combination of `Language` objects, bundles, and dynamic imports.
-
-```typescript
-import { createHighlighter } from '@lumis-sh/lumis'
-import { bundledLanguages } from '@lumis-sh/lumis/bundles/system'
-import elixir from '@lumis-sh/lumis/langs/elixir'
-
-const hl = await createHighlighter({
-  languages: [
-    elixir,                                    // loaded immediately
-    bundledLanguages,                          // registered lazily
-    import('@lumis-sh/lumis/langs/python'),     // loaded immediately via dynamic import
-  ],
-})
-```
-
-## Local WASM bundle packages
-
-Install a `@lumis-sh/wasm-bundle-*` package when you want the matching bundle's parser WASM files available locally.
-
-- In Node.js, installing the package is enough. Lumis will detect the installed `@lumis-sh/wasm-*` parser packages automatically.
-- In browser bundlers, pair it with `withWasmBundle()` so the bundler can include the static WASM imports.
-
-```typescript
-import { createHighlighter, withWasmBundle } from '@lumis-sh/lumis'
-import { bundledLanguages } from '@lumis-sh/lumis/bundles/web'
-import { bundledWasms } from '@lumis-sh/wasm-bundle-web'
-
-const languages = withWasmBundle(bundledLanguages, bundledWasms)
-const hl = await createHighlighter({ languages: [languages] })
-```
-
-### Checking registered vs loaded languages
-
-```typescript
-const hl = await createHighlighter({ languages: [bundledLanguages] })
-
-hl.registeredLanguages  // all languages in the bundle (including lazy)
-hl.languages            // only languages that have been loaded
-```
-
-## Language References
-
-Formatters and `hl.highlight()` accept several forms for specifying a language.
-
-```typescript
-import json from '@lumis-sh/lumis/langs/json'
-import { bundledLanguages } from '@lumis-sh/lumis/bundles/web'
-
-// Language object
-hl.highlight(code, htmlInline({ language: json, theme }))
-
-// LazyLanguage handle from a bundle
-hl.highlight(code, htmlInline({ language: bundledLanguages.json, theme }))
-
-// String ID (must be loaded or registered in a bundle)
-hl.highlight(code, htmlInline({ language: 'json', theme }))
-```
-
-All three are equivalent at highlight time. The runtime resolves the language by its ID.
-
-## Runtime behavior
-
-- `@lumis-sh/lumis` uses the portable `web-tree-sitter` runtime by default and does not install a native addon.
-- Install `@lumis-sh/lumis-native` to opt into the native Rust runtime on supported Node.js platforms. The selector installs the matching prebuilt platform addon; no code changes are required.
-- The native addon contains all supported language parsers and is intentionally much larger than the default per-language WASM setup.
-- Browser bundles always use `web-tree-sitter`. Node.js also uses it when the native package is absent, unsupported, or unloadable.
-- Language parsers are separate versioned `.wasm` assets loaded at runtime.
-- By default, Lumis resolves parser WASM from `https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-<parser-name-without-tree-sitter-prefix>@<tree-sitter-version>/<parser>.wasm`.
-- The `<tree-sitter-version>` segment is a partial version such as `0.26`, which CDNs resolve to the latest compatible patch release.
-- In Node, fetched parser WASM files are cached under `node_modules/.cache/lumis` when possible.
-- In restricted or offline environments, set a custom resolver before calling `highlight()` or `createHighlighter()`.
-
-## Output Formats
-
-- `htmlInline()` for self-contained HTML with inline styles
-- `htmlLinked()` for class-based HTML that uses external CSS
-- `htmlMultiThemes()` for light/dark or multi-theme HTML with CSS variables
-- `terminal()` for ANSI-colored terminal output
-- `bbcodeScoped()` for nested BBCode tags using highlight scope names
-- custom formatter objects via `@lumis-sh/lumis/formatters`
-
-```typescript
-import { bbcodeScoped } from '@lumis-sh/lumis/formatters'
-import javascript from '@lumis-sh/lumis/langs/javascript'
-
-const output = hl.highlight('const x = "[url=x]"', bbcodeScoped({ language: javascript }))
-// [keyword-javascript]const[/keyword-javascript] x = [string-javascript]"&#91;url=x&#93;"[/string-javascript]
-```
-
-`bbcodeScoped()` emits highlight scope names as tags, not standard forum-style BBCode like `[b]`, `[color]`, or `[code]`.
-
-## Custom Formatters
-
-A formatter is an object with `language` and `format(source, context)`. Inside `format()`, call the sync free functions `highlightIter` (for flat token callbacks) or `highlightEvents` (for nested open/close events) imported from `@lumis-sh/lumis`. Built-in formatters are regular objects. Custom ones work the same way.
-
-Minimal example that wraps each token in a colored `<span>`:
-
-```typescript
-import { createHighlighter, highlightIter } from '@lumis-sh/lumis'
-import type { Formatter } from '@lumis-sh/lumis/formatters'
-import { openPreTag, openCodeTag, closingTags, spanInline } from '@lumis-sh/lumis/formatters/html'
-import rust from '@lumis-sh/lumis/langs/rust'
-import dracula from '@lumis-sh/themes/dracula'
-
-const hl = await createHighlighter({ languages: [rust] })
-
-const formatter: Formatter = {
-  language: rust,
-  format(source) {
-    const parts: string[] = []
-
-    parts.push(openPreTag({ theme: dracula }))
-    parts.push(openCodeTag(this.language))
-
-    highlightIter(source, this.language, dracula, (text, language, _range, scope, _style) => {
-      if (scope) {
-        parts.push(spanInline(text, { language, scope, theme: dracula }))
-      } else {
-        parts.push(text)
-      }
-    })
-
-    parts.push(closingTags())
-    return parts.join('')
-  },
-}
-
-const html = hl.highlight('fn main() {}', formatter)
-```
-
-HTML helpers (`@lumis-sh/lumis/formatters/html`):
-
-```typescript
-import {
-  escape, escapeBraces,
-  openPreTag, openCodeTag, closePreTag, closeCodeTag, closingTags,
-  wrapLine, scopeToClass, textDecoration,
-  spanInline, spanInlineAttrs, spanLinked, spanLinkedAttrs,
-  spanMultiThemes, spanMultiThemesAttrs,
-} from '@lumis-sh/lumis/formatters/html'
-```
-
-ANSI helpers (`@lumis-sh/lumis/formatters/ansi`):
-
-```typescript
-import { hexToRgb, paint, rgbToAnsi, styleToAnsi } from '@lumis-sh/lumis/formatters/ansi'
-```
-
-## Annotations
-
-Pass typed semantic ranges through the per-call `HighlightOptions`. Lumis
-composes them with syntax events; it does not determine the ranges.
-
-```typescript
-const annotations = [{
-  range: { type: 'offset', start: 12, end: 23 },
-  properties: { change: 'added' },
-}, {
-  range: {
-    type: 'position',
-    start: { line: 1, column: 0 },
-    end: { line: 1, column: 11 },
-  },
-  properties: { change: 'added' },
-}]
-
-const html = hl.highlight(source, formatter, { annotations })
-```
-
-Both forms are zero-based, half-open, and use UTF-8 byte units. Annotation
-events always contain a resolved `{ start, end }` offset range.
-
-See [`examples/diff_viewer.ts`](examples/diff_viewer.ts) for an executable
-side-by-side diff viewer with added, removed, and changed lines, changed spans,
-gutter markers, and an annotation.
-
-## Custom WASM Resolution
-
-Override the resolver when you want to serve parser WASM files yourself, switch CDNs, or avoid network fetches in locked-down environments:
-
-```typescript
-import { configureWasmResolver } from '@lumis-sh/lumis'
-
-configureWasmResolver((_language, wasm) =>
-  `https://unpkg.com/${wasm.packageName}@${wasm.version}/${wasm.name}.wasm`
-)
-```
-
-This can be called at any time. It applies to `highlight()`, `createHighlighter()`, and any existing highlighter instances.
-
-For advanced use cases that need isolated resolution (e.g., tests, multiple CDNs), pass `wasmResolver` directly to `createHighlighter()`.
-
-## `htmlLinked()` CSS
-
-`htmlLinked()` emits semantic classes instead of inline styles. Include a theme stylesheet on the page, for example:
-
-```typescript
-import '@lumis-sh/themes/css/dracula.css'
-```
+- [JavaScript runtime](https://lumis.sh/docs/usage/javascript-runtime) — runtimes, bundles, language handles
+- [WASM and CDN](https://lumis.sh/docs/usage/wasm-and-cdn) — resolution, caching, custom resolvers
+- [Formatters](https://lumis.sh/docs/usage/formatters) — every formatter and its options
+- [Custom formatters](https://lumis.sh/docs/usage/custom-formatters)
+- [Themes](https://lumis.sh/docs/usage/themes) and [CSS theme files](https://lumis.sh/docs/usage/css-theme-files)
+- [Integrations](https://lumis.sh/docs/integrations/react) — React, Next.js, Astro, Nuxt, VitePress, rehype, markdown-it
+- [Recipes](https://lumis.sh/docs/recipes)

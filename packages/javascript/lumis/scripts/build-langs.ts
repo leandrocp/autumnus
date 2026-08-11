@@ -1,222 +1,49 @@
 /**
- * Builds the language modules used by the browser/WebAssembly runtime. It reads
- * preprocessed query .scm files, converts Lua patterns to JavaScript regexes,
- * and emits one TypeScript module per language. The Node native runtime does
- * not consume these queries or parser Wasm references.
+ * Generates JavaScript language metadata from languages.toml.
  *
- * Preprocessing (inheritance, text replacements, overwrite merging) is done by
- * `mise run langs-preprocess-queries`, which is run before the JS generate commands.
- *
- * Language list and metadata (aliases, wasm_name, query_name) are read from
- * languages.toml at the repo root.
+ * Parser bytes, queries, integrity metadata, and exact versions belong to the
+ * independently released @lumis-sh/wasm-* packages, not the runtimes.
  */
 
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { parse as parseToml } from "smol-toml";
+import { parseLanguagesToml, type LanguagesToml } from "./languages-toml.js";
 
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../../..");
-const QUERIES_PROCESSED_DIR = path.join(WORKSPACE_ROOT, "queries", "processed");
 const OUT_DIR = path.resolve(import.meta.dirname, "../langs");
+const GENERATED_DIR = path.resolve(import.meta.dirname, "../src/generated");
+const BUNDLES_DIR = path.resolve(import.meta.dirname, "../bundles");
+
 const LANGUAGES_TOML = path.join(WORKSPACE_ROOT, "languages.toml");
-const PACKAGE_JSON = path.resolve(import.meta.dirname, "../package.json");
-
-interface ParserEntry {
-  git: string;
-  rev: string;
-  crate?: string;
-  version: string;
-  aliases?: string[];
-  emacs?: string[];
-  shebang?: string[];
-  location?: string;
-  generate?: boolean;
-  wasm_name?: string;
-  query_name?: string;
-  display_name?: string;
-  variant?: string;
-  globs?: string[];
-}
-
-interface BundleEntry {
-  parsers: string[] | "all";
-}
-
-interface LanguagesToml {
-  queries: Record<string, { git: string; rev: string; path: string }>;
-  parsers: Record<string, ParserEntry>;
-  bundles?: Record<string, BundleEntry>;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
-function isLanguagesToml(value: unknown): value is LanguagesToml {
-  if (!isRecord(value)) return false;
-  if (!isRecord(value.queries) || !isRecord(value.parsers)) return false;
-  return true;
-}
+const CATALOG_RS = path.join(WORKSPACE_ROOT, "crates/lumis-wasm-runtime/src/catalog.rs");
 
 function readLanguagesToml(): LanguagesToml {
   const text = fs.readFileSync(LANGUAGES_TOML, "utf-8");
-  const parsed = parseToml(text);
-  if (!isLanguagesToml(parsed)) {
-    throw new Error("Invalid languages.toml structure");
+  return parseLanguagesToml(parseToml(text));
+}
+
+// `mise run langs-gen-catalog` derives this from the Tree-sitter series pinned in
+// mise.toml and writes it into the generated Rust catalog. Reading it back keeps
+// one implementation rather than a second pin parser that could disagree about
+// which series a runtime supports.
+function languagePackageVersionRange(): string {
+  const source = fs.readFileSync(CATALOG_RS, "utf-8");
+  const range = /package_version_range:\s*"([^"]+)"/.exec(source)?.[1];
+  if (!range) {
+    throw new Error(
+      `no package version range found in ${CATALOG_RS}; run mise run langs-gen-catalog`,
+    );
   }
-  return parsed;
-}
-
-function treeSitterWasmCli(): string {
-  const packageJson: { dependencies?: Record<string, string> } = JSON.parse(
-    fs.readFileSync(PACKAGE_JSON, "utf-8"),
-  );
-  const spec = packageJson.dependencies?.["web-tree-sitter"];
-  const match = spec?.match(/(\d+\.\d+)/);
-
-  if (!match) {
-    throw new Error("Could not determine web-tree-sitter compatibility from package.json");
-  }
-
-  return match[1];
-}
-
-function wasmPackageName(wasmName: string): string {
-  return `@lumis-sh/wasm-${wasmName.startsWith("tree-sitter-") ? wasmName.slice("tree-sitter-".length) : wasmName}`;
-}
-
-function convertLuaPatternToRegex(lua: string): string {
-  let result = "";
-  const chars = [...lua];
-  let i = 0;
-
-  while (i < chars.length) {
-    if (chars[i] === "%") {
-      i++;
-      if (i >= chars.length) break;
-      const next = chars[i];
-      const map: Record<string, string> = {
-        d: "\\d",
-        s: "\\s",
-        l: "[a-z]",
-        u: "[A-Z]",
-        A: "[^a-zA-Z]",
-        S: "\\S",
-        ".": "\\.",
-        "%": "%",
-        "{": "\\{",
-        "}": "\\}",
-        $: "\\$",
-        "^": "\\^",
-      };
-      result += map[next] ?? next;
-    } else {
-      result += chars[i];
-    }
-    i++;
-  }
-
-  return result;
-}
-
-function expandCaseInsensitiveAscii(regex: string): string {
-  let result = "";
-  let inCharClass = false;
-
-  for (let i = 0; i < regex.length; i++) {
-    const char = regex[i];
-
-    if (char === "\\") {
-      result += char;
-      if (i + 1 < regex.length) {
-        result += regex[i + 1];
-        i++;
-      }
-      continue;
-    }
-
-    if (char === "[") {
-      inCharClass = true;
-      result += char;
-      continue;
-    }
-
-    if (char === "]") {
-      inCharClass = false;
-      result += char;
-      continue;
-    }
-
-    if (!inCharClass && /[A-Za-z]/.test(char)) {
-      const lower = char.toLowerCase();
-      const upper = char.toUpperCase();
-      result += lower === upper ? char : `[${lower}${upper}]`;
-      continue;
-    }
-
-    result += char;
-  }
-
-  return result;
-}
-
-function normalizeRegexForJs(regex: string): string {
-  if (!regex.startsWith("(?i)")) return regex;
-  return expandCaseInsensitiveAscii(regex.slice(4));
-}
-
-function convertLuaMatchesForBrowser(content: string): string {
-  const converted = content
-    .split("\n")
-    .map((line) => {
-      let updated = line
-        .replace(/#lua-match\?/g, "#match?")
-        .replace(/#not-lua-match\?/g, "#not-match?");
-
-      if (updated.includes("#match?") || updated.includes("#not-match?")) {
-        const firstQuote = updated.indexOf('"');
-        if (firstQuote !== -1) {
-          const secondQuote = updated.indexOf('"', firstQuote + 1);
-          if (secondQuote !== -1) {
-            const luaPattern = updated.slice(firstQuote + 1, secondQuote);
-            const regex = normalizeRegexForJs(convertLuaPatternToRegex(luaPattern));
-            updated = updated.slice(0, firstQuote + 1) + regex + updated.slice(secondQuote);
-          }
-        }
-      }
-
-      return updated;
-    })
-    .join("\n");
-
-  return converted.replace(/"\(\?i\)([^"]*)"/g, (_match, regex: string) => {
-    return `"${expandCaseInsensitiveAscii(regex)}"`;
-  });
-}
-
-function resolveQuerySource(language: string, queryType: string): string {
-  const filePath = path.join(QUERIES_PROCESSED_DIR, language, `${queryType}.scm`);
-  if (!fs.existsSync(filePath)) {
-    if (queryType === "brackets") {
-      const defaultPath = path.join(QUERIES_PROCESSED_DIR, "default", "brackets.scm");
-      if (fs.existsSync(defaultPath)) {
-        return fs.readFileSync(defaultPath, "utf-8");
-      }
-    }
-    return "";
-  }
-  return fs.readFileSync(filePath, "utf-8");
-}
-
-function escapeTemplateString(s: string): string {
-  return s.replace(/\\/g, "\\\\").replace(/`/g, "\\`").replace(/\$/g, "\\$");
+  return range;
 }
 
 function main() {
   fs.mkdirSync(OUT_DIR, { recursive: true });
 
   const config = readLanguagesToml();
-  const tsCli = treeSitterWasmCli();
+  const versionRange = languagePackageVersionRange();
   const expectedLanguageIds = new Set([...Object.keys(config.parsers), "plaintext"]);
 
   for (const entry of fs.readdirSync(OUT_DIR)) {
@@ -228,31 +55,17 @@ function main() {
   }
 
   for (const [id, entry] of Object.entries(config.parsers)) {
-    const queryName = entry.query_name || id;
     const wasmName = entry.wasm_name || `tree-sitter-${id}`;
+    const packageName = `@lumis-sh/wasm-${wasmName.replace(/^tree-sitter-/, "")}`;
     const aliases = entry.aliases || [];
 
-    const highlightSource = resolveQuerySource(queryName, "highlights");
-    const injectionSource = resolveQuerySource(queryName, "injections");
-    const localsSource = resolveQuerySource(queryName, "locals");
-    const bracketsSource = resolveQuerySource(queryName, "brackets");
-    const highlights = convertLuaMatchesForBrowser(highlightSource);
-    const injections = convertLuaMatchesForBrowser(injectionSource);
-    const locals = convertLuaMatchesForBrowser(localsSource);
-    const brackets = convertLuaMatchesForBrowser(bracketsSource);
-
-    const injectionsStr = injections.trim();
-    const localsStr = locals.trim();
-    const bracketsStr = brackets.trim();
-
     const module = `// Auto-generated by scripts/build-langs.ts — do not edit manually.
-import type { Language } from '../src/types.js'
+import type { LanguagePackageHandle } from '../src/types.js'
 
-const language: Language = {
+const language: LanguagePackageHandle = {
   id: ${JSON.stringify(id)},
   aliases: ${JSON.stringify(aliases)},
-  highlights: \`${escapeTemplateString(highlights)}\`,${injectionsStr ? `\n  injections: \`${escapeTemplateString(injections)}\`,` : ""}${localsStr ? `\n  locals: \`${escapeTemplateString(localsStr)}\`,` : ""}${bracketsStr ? `\n  brackets: \`${escapeTemplateString(bracketsStr)}\`,` : ""}
-  wasm: { packageName: ${JSON.stringify(wasmPackageName(wasmName))}, name: ${JSON.stringify(wasmName)}, version: ${JSON.stringify(tsCli)} },
+  packageName: ${JSON.stringify(packageName)},
 }
 
 export default language
@@ -262,26 +75,18 @@ export default language
     console.log(`  ${id}: langs/${id}.ts`);
   }
 
-  // Plaintext — uses diff parser with empty queries (same as Rust crate)
-  const diffEntry = config.parsers["diff"];
-  if (!diffEntry) throw new Error("diff parser entry not found in languages.toml");
-  const diffWasmName = diffEntry.wasm_name || "tree-sitter-diff";
-  const diffWasmVersion = tsCli;
   const plaintextModule = `// Auto-generated by scripts/build-langs.ts — do not edit manually.
-import type { Language } from '../src/types.js'
+import type { PlaintextLanguage } from '../src/types.js'
 
-const language: Language = {
+const language: PlaintextLanguage = {
   id: "plaintext",
   aliases: ["text", "txt", "plain"],
-  highlights: "",
-  wasm: { packageName: ${JSON.stringify(wasmPackageName(diffWasmName))}, name: ${JSON.stringify(diffWasmName)}, version: ${JSON.stringify(diffWasmVersion)} },
 }
 
 export default language
 `;
   fs.writeFileSync(path.join(OUT_DIR, "plaintext.ts"), plaintextModule);
   console.log(`  plaintext: langs/plaintext.ts`);
-
   // Generate language metadata
   const languageEntries: {
     id: string;
@@ -316,8 +121,15 @@ export default language
     shebangs: [],
   });
 
-  const GENERATED_DIR = path.resolve(import.meta.dirname, "../src/generated");
   fs.mkdirSync(GENERATED_DIR, { recursive: true });
+
+  fs.rmSync(path.join(GENERATED_DIR, "package-versions.ts"), { force: true });
+  const packageVersionRangeModule = `// Auto-generated by scripts/build-langs.ts — do not edit manually.
+// Mirrors \`catalog::LANGUAGE_PACKAGE_VERSION_RANGE\` in crates/lumis-wasm-runtime.
+export const LANGUAGE_PACKAGE_VERSION_RANGE = ${JSON.stringify(versionRange)}
+`;
+  fs.writeFileSync(path.join(GENERATED_DIR, "package-version-range.ts"), packageVersionRangeModule);
+  console.log(`  package version range: src/generated/package-version-range.ts`);
 
   const languageMetaModule = `// Auto-generated by scripts/build-langs.ts — do not edit manually.
 import type { LanguageInfo } from '../types.js'
@@ -402,7 +214,6 @@ export const THEMES: ThemeInfo[] = ${JSON.stringify(themeEntries, null, 2)}
   console.log(`  themes metadata: src/generated/themes-meta.ts`);
 
   // Generate bundle files
-  const BUNDLES_DIR = path.resolve(import.meta.dirname, "../bundles");
   fs.mkdirSync(BUNDLES_DIR, { recursive: true });
 
   const allParserIds = Object.keys(config.parsers);
@@ -461,3 +272,5 @@ function titlecase(s: string): string {
 }
 
 main();
+// Only bundles/ is committed; langs/ and src/generated are gitignored build output.
+execFileSync("oxfmt", [BUNDLES_DIR], { stdio: "inherit" });

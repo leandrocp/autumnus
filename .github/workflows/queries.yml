@@ -1,0 +1,267 @@
+name: Queries CI
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "queries/**"
+      - "languages.toml"
+      - "crates/lumis-build/**"
+      - "crates/dev/**"
+      - "packages/javascript/package.json"
+      - "packages/javascript/lumis/package.json"
+      - "packages/javascript/wasm-bundle-full/package.json"
+      - "packages/javascript/lumis/test/query-compile.test.ts"
+      - "packages/javascript/lumis/test/query-patterns.test.ts"
+      - "packages/javascript/lumis/test/unverified-parsers.json"
+      - "fixtures/parsers/**"
+      - "packages/javascript/lumis/scripts/list-parsers.mjs"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "mise.toml"
+      - ".github/workflows/queries.yml"
+  pull_request:
+    paths:
+      - "queries/**"
+      - "languages.toml"
+      - "crates/lumis-build/**"
+      - "crates/dev/**"
+      - "packages/javascript/package.json"
+      - "packages/javascript/lumis/package.json"
+      - "packages/javascript/wasm-bundle-full/package.json"
+      - "packages/javascript/lumis/test/query-compile.test.ts"
+      - "packages/javascript/lumis/test/query-patterns.test.ts"
+      - "packages/javascript/lumis/test/unverified-parsers.json"
+      - "fixtures/parsers/**"
+      - "packages/javascript/lumis/scripts/list-parsers.mjs"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "mise.toml"
+      - ".github/workflows/queries.yml"
+  workflow_dispatch:
+
+env:
+  QUERY_SHARDS: 12
+  # Selected languages per process. The global cannotCompile check also loads
+  # PHP, so a full batch retains at most five grammars before the process exits.
+  QUERY_BATCH: 4
+
+jobs:
+  portability:
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
+          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
+    name: Portability
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
+        with:
+          version: 11.15.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 'lts/*'
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+
+      - name: Processed queries are up to date
+        run: |
+          cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- preprocess-queries
+          git diff --exit-code -- queries/processed
+
+      - name: Every predicate compiles under the regex crate
+        run: cargo test -p lumis-build
+
+      - name: Every predicate compiles under RegExp
+        run: pnpm --filter @lumis-sh/lumis exec vitest run test/query-patterns.test.ts
+
+  # Every parser is built from languages.toml rather than taken from npm, so a
+  # revision bump is validated before it is published rather than after. Sharded
+  # because that is 113 builds.
+  compile:
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
+          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
+    name: Compile queries (shard ${{ matrix.shard }})
+    runs-on: ubuntu-latest
+    # llvm takes about eight minutes to compile through the WASI SDK; vim and
+    # zsh are worse and are committed instead of built.
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
+      - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
+        with:
+          version: 11.15.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 'lts/*'
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+
+      # Scoped per shard because each one builds a different slice of the
+      # corpus, so a shared key would let whichever job finished first decide
+      # what every other shard found in the cache.
+      - name: Cache built parsers
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: tmp/wasm/build
+          key: wasm-parsers-${{ runner.os }}-queries-${{ matrix.shard }}-${{ hashFiles('languages.toml', 'mise.toml') }}
+          restore-keys: |
+            wasm-parsers-${{ runner.os }}-queries-${{ matrix.shard }}-
+            wasm-parsers-${{ runner.os }}-
+
+      - name: Cache the Tree-sitter WASI SDK
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ~/.cache/tree-sitter
+          key: ${{ runner.os }}-tree-sitter-cli-${{ hashFiles('mise.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-tree-sitter-cli-
+
+      - name: Select this shard
+        run: |
+          set -euo pipefail
+          cd packages/javascript/lumis
+          # Several languages share one parser, so the two lists differ in length.
+          # Shard the parsers, then take the languages those parsers serve; sharding
+          # both separately splits a language from its parser.
+          node scripts/list-parsers.mjs --pairs > /tmp/pairs.txt
+          cut -f2 /tmp/pairs.txt | sort -u > /tmp/parsers.txt
+          awk -v s="$SHARD" -v n="$SHARDS" 'NR % n == s % n' /tmp/parsers.txt > /tmp/shard-parsers.txt
+          awk 'NR == FNR { keep[$0]; next } ($2 in keep) { print $1 }' \
+            /tmp/shard-parsers.txt /tmp/pairs.txt > /tmp/shard-languages.txt
+          [ -s /tmp/shard-parsers.txt ] || { echo "shard selected no parsers" >&2; exit 1; }
+          [ -s /tmp/shard-languages.txt ] || { echo "shard selected no languages" >&2; exit 1; }
+          echo "parser count: $(wc -l < /tmp/shard-parsers.txt)"
+          echo "language count: $(wc -l < /tmp/shard-languages.txt)"
+        env:
+          SHARD: ${{ matrix.shard }}
+          SHARDS: ${{ env.QUERY_SHARDS }}
+
+      - name: Build the parsers this shard needs
+        run: |
+          set -euo pipefail
+          failed=()
+          while read -r parser; do
+            [ -n "$parser" ] || continue
+            # Committed because a runner cannot carry the build; see
+            # fixtures/parsers/README.md for the measurements.
+            if [ -f "fixtures/parsers/$parser.wasm" ]; then
+              echo "using the committed $parser"
+              continue
+            fi
+            mise run wasm-build "$parser" || failed+=("$parser")
+          done < /tmp/shard-parsers.txt
+          # A parser that cannot be built here is covered by its committed copy
+          # or its published package; query-compile decides, and the waiver is
+          # what fails the build if neither exists.
+          if [ ${#failed[@]} -gt 0 ]; then
+            printf 'could not build: %s\n' "${failed[*]}"
+          fi
+
+      # Every grammar a run loads stays compiled for the life of the process, so
+      # what has to be bounded is grammars per process, not per shard. Sharding
+      # balances parser *count*, and shard 5 has repeatedly exhausted V8's zone
+      # allocator because its ten grammars are unusually large. Run the shard in
+      # batches of four selected languages. The global waiver check can load PHP
+      # too, so each process retains at most five grammars, whatever they weigh.
+      - name: Compile queries for this shard
+        run: |
+          set -euo pipefail
+          batch=()
+          run_batch() {
+            [ ${#batch[@]} -gt 0 ] || return 0
+            printf 'compiling: %s\n' "${batch[*]}"
+            LUMIS_QUERY_LANGUAGES="$(IFS=,; echo "${batch[*]}")" \
+              pnpm --filter @lumis-sh/lumis run test:queries
+            batch=()
+          }
+          while read -r language; do
+            [ -n "$language" ] || continue
+            batch+=("$language")
+            [ ${#batch[@]} -lt "$QUERY_BATCH" ] || run_batch
+          done < /tmp/shard-languages.txt
+          run_batch
+        env:
+          LUMIS_QUERY_COVERAGE: complete
+          LUMIS_QUERY_BATCH_LIMIT: ${{ env.QUERY_BATCH }}
+          QUERY_BATCH: ${{ env.QUERY_BATCH }}
+
+  # Sharded for the same reason the build is: every grammar a run loads stays
+  # compiled in V8 for the life of the process, and a few dozen of them exhaust
+  # its memory on a runner.
+  compile-published:
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
+          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
+    name: Compile queries (published parsers, shard ${{ matrix.shard }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
+        with:
+          version: 11.15.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 'lts/*'
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+
+      - name: Select this shard
+        run: |
+          set -euo pipefail
+          cd packages/javascript/lumis
+          node scripts/list-parsers.mjs --pairs > /tmp/pairs.txt
+          cut -f2 /tmp/pairs.txt | sort -u > /tmp/parsers.txt
+          awk -v s="$SHARD" -v n=4 'NR % n == s % n' /tmp/parsers.txt > /tmp/shard-parsers.txt
+          awk 'NR == FNR { keep[$0]; next } ($2 in keep) { print $1 }' \
+            /tmp/shard-parsers.txt /tmp/pairs.txt > /tmp/shard-languages.txt
+          [ -s /tmp/shard-parsers.txt ] || { echo "shard selected no parsers" >&2; exit 1; }
+          [ -s /tmp/shard-languages.txt ] || { echo "shard selected no languages" >&2; exit 1; }
+        env:
+          SHARD: ${{ matrix.shard }}
+
+      - name: Compile queries and check the waiver
+        run: |
+          set -euo pipefail
+          batch=()
+          run_batch() {
+            [ ${#batch[@]} -gt 0 ] || return 0
+            printf 'compiling published: %s\n' "${batch[*]}"
+            LUMIS_QUERY_LANGUAGES="$(IFS=,; echo "${batch[*]}")" \
+              pnpm --filter @lumis-sh/lumis run test:queries
+            batch=()
+          }
+          while read -r language; do
+            [ -n "$language" ] || continue
+            batch+=("$language")
+            [ ${#batch[@]} -lt "$QUERY_BATCH" ] || run_batch
+          done < /tmp/shard-languages.txt
+          run_batch
+        env:
+          LUMIS_QUERY_PARSERS: published
+          LUMIS_QUERY_BATCH_LIMIT: ${{ env.QUERY_BATCH }}
+          QUERY_BATCH: ${{ env.QUERY_BATCH }}

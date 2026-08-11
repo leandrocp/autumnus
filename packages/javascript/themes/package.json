@@ -27,7 +27,9 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./json/*.json": "./dist/json/*.json",
     "./json/*": "./dist/json/*.json",
+    "./css/*.css": "./dist/css/*.css",
     "./css/*": "./dist/css/*.css",
     "./*": {
       "types": "./dist/themes/*.d.ts",
@@ -39,14 +41,12 @@
     "dist",
     "CHANGELOG.md"
   ],
-  "packageManager": "pnpm@10.31.0",
+  "packageManager": "pnpm@11.15.1",
   "scripts": {
     "build:themes": "tsx scripts/build-themes.ts --step=ts",
     "build:assets": "tsx scripts/build-themes.ts --step=json && mkdir -p dist/css && cp ../../../css/*.css dist/css/",
     "build": "pnpm run build:themes && tsup && pnpm run build:assets",
-    "fmt": "oxfmt src/ scripts/ *.ts",
-    "fmt:check": "oxfmt --check src/ scripts/ *.ts",
-    "lint": "oxlint --type-aware src/ scripts/",
+    "lint": "oxlint --type-aware --deny-warnings src/ scripts/",
     "prepack": "pnpm run build"
   },
   "devDependencies": {

@@ -7,12 +7,9 @@
 
 import { pathToFileURL } from "node:url";
 
-import bundledWasms from "@lumis-sh/wasm-bundle-full";
-
-import typescript from "../langs/typescript.ts";
+import javascript from "../langs/javascript.ts";
 import {
   createHighlighter,
-  withWasm,
   type OffsetAnnotationRange,
   type Annotation,
   type HighlightEvent,
@@ -139,25 +136,14 @@ function offsetRange(source: string, text: string, index: number): OffsetAnnotat
 }
 
 export async function renderExample(): Promise<string> {
-  const wasm = bundledWasms.typescript;
-  const plaintextWasm = bundledWasms.diff;
-  if (!wasm || !(plaintextWasm instanceof Uint8Array)) {
-    throw new Error("the TypeScript and plaintext WASM parsers are available");
-  }
+  const highlighter = await createHighlighter({ languages: [javascript] });
+  const formatter = new DiffHtmlFormatter(javascript);
 
-  const language = withWasm(typescript, wasm);
-  const highlighter = await createHighlighter({
-    languages: [language],
-    wasmResolver: () =>
-      `data:application/wasm;base64,${Buffer.from(plaintextWasm).toString("base64")}`,
-  });
-  const formatter = new DiffHtmlFormatter(language);
-
-  const oldSource = `function calculate(price: number, tax: number): number {
+  const oldSource = `function calculate(price, tax) {
   return price + tax
 }
 `;
-  const newSource = `function calculate(price: bigint, tax: bigint, fee: bigint): bigint {
+  const newSource = `function calculate(price, tax, fee) {
   const subtotal = price + tax
   return subtotal + fee
 }
@@ -166,7 +152,7 @@ export async function renderExample(): Promise<string> {
   // A diff library would determine these ranges. Lumis only consumes them.
   const oldAnnotations = [
     {
-      range: rangeOf(oldSource, "function calculate(price: number, tax: number): number {"),
+      range: rangeOf(oldSource, "function calculate(price, tax) {"),
       properties: { type: "line", number: 1, kind: "changed" },
     },
     {
@@ -178,7 +164,7 @@ export async function renderExample(): Promise<string> {
       properties: { type: "line", number: 3, kind: "context" },
     },
     {
-      range: rangeOf(oldSource, "number"),
+      range: rangeOf(oldSource, "price, tax"),
       properties: { type: "span", kind: "removed" },
     },
     {
@@ -189,10 +175,7 @@ export async function renderExample(): Promise<string> {
 
   const newAnnotations = [
     {
-      range: rangeOf(
-        newSource,
-        "function calculate(price: bigint, tax: bigint, fee: bigint): bigint {",
-      ),
+      range: rangeOf(newSource, "function calculate(price, tax, fee) {"),
       properties: { type: "line", number: 1, kind: "changed" },
     },
     {
@@ -208,7 +191,7 @@ export async function renderExample(): Promise<string> {
       properties: { type: "line", number: 4, kind: "context" },
     },
     {
-      range: rangeOf(newSource, "bigint"),
+      range: rangeOf(newSource, "price, tax, fee"),
       properties: { type: "span", kind: "added" },
     },
     {
@@ -240,7 +223,7 @@ const pageStart = `<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lumis TypeScript annotation diff viewer</title>
+<title>Lumis JavaScript annotation diff viewer</title>
 <style>
 :root { color-scheme: dark; font-family: ui-sans-serif, system-ui, sans-serif; }
 body { margin: 0; background: #0d1117; color: #e6edf3; }
@@ -279,17 +262,17 @@ h1 { margin: 0 0 .35rem; font-size: 1.35rem; }
 </head>
 <body>
 <main>
-<h1>Annotation API: TypeScript diff viewer</h1>
+<h1>Annotation API: JavaScript diff viewer</h1>
 <p class="subtitle">Caller-supplied ranges composed with Lumis syntax events</p>
 <div class="diff-viewer">
 <section class="diff-pane">
-<h2>calculator.ts · before</h2>
+<h2>calculator.js · before</h2>
 `;
 
 const pageMiddle = `
 </section>
 <section class="diff-pane">
-<h2>calculator.ts · after</h2>
+<h2>calculator.js · after</h2>
 `;
 
 const pageEnd = `

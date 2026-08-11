@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lumis visual output comparison</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #101116;
+        color: #f8f8f2;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        height: 100vh;
+        display: grid;
+        grid-template-rows: auto auto auto minmax(0, 1fr);
+        overflow: hidden;
+      }
+      header {
+        padding: 28px clamp(18px, 4vw, 56px) 22px;
+        border-bottom: 1px solid #343644;
+        background: #171821;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: clamp(24px, 4vw, 38px);
+        letter-spacing: -0.03em;
+      }
+      p {
+        margin: 0;
+        color: #b8b9c7;
+      }
+      a {
+        color: #bd93f9;
+      }
+      code {
+        color: #8be9fd;
+      }
+      nav {
+        display: flex;
+        gap: 8px;
+        padding: 14px clamp(18px, 4vw, 56px);
+        overflow-x: auto;
+        border-bottom: 1px solid #343644;
+      }
+      button {
+        flex: 0 0 auto;
+        padding: 9px 13px;
+        border: 1px solid #44475a;
+        border-radius: 999px;
+        background: #21222c;
+        color: #f8f8f2;
+        font: inherit;
+        cursor: pointer;
+      }
+      button:hover,
+      button[aria-selected="true"] {
+        border-color: #bd93f9;
+        background: #443657;
+      }
+      main {
+        min-height: 0;
+      }
+      iframe {
+        display: block;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        background: #171821;
+      }
+      .notice {
+        margin-top: 12px;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Visual output comparison</h1>
+      <p id="fixture"></p>
+      <p class="notice">
+        Generate once with <code>mise run -C benchmarks showcase</code>, then open this file
+        directly.
+      </p>
+    </header>
+    <nav id="documents" aria-label="Document"></nav>
+    <nav id="implementations" aria-label="Implementation"></nav>
+    <main>
+      <iframe title="Highlighted output" loading="eager"></iframe>
+    </main>
+    <script src="showcase/generated/manifest.js"></script>
+    <script>
+      const { documents, implementations, theme } = globalThis.LUMIS_BENCHMARK_SHOWCASE;
+      const summary = document.querySelector("#fixture");
+      const documentNav = document.querySelector("#documents");
+      const implementationNav = document.querySelector("#implementations");
+      const frame = document.querySelector("iframe");
+
+      // Switching either tab reloads the frame, so the frame reports where it is
+      // and the next page is asked to resume there. Reading the position back off
+      // the frame is not an option: opened over file://, each page is its own
+      // opaque origin. Positions are kept per document, because the same offset
+      // in a different file is not the same place, while the same offset in a
+      // different implementation of one file is.
+      const positions = new Map();
+      let current = { document: documents[0], implementation: implementations[0] };
+      addEventListener("message", (event) => {
+        const scroll = event.data?.lumisShowcaseScroll;
+        if (scroll) positions.set(current.document.id, scroll);
+      });
+
+      function describe(chosen) {
+        const injections = chosen.injections.length ? ` + ${chosen.injections.join(" + ")}` : "";
+        summary.replaceChildren(
+          `${theme.name} · ${chosen.languageLabel}${injections} · ` +
+            `${chosen.lines.toLocaleString()} lines · `,
+        );
+        const link = document.createElement("a");
+        link.href = chosen.source;
+        link.target = "_blank";
+        link.rel = "noreferrer";
+        link.textContent = "Original source";
+        summary.append(link, ".");
+      }
+
+      function show() {
+        const at = positions.get(current.document.id) ?? { x: 0, y: 0 };
+        frame.src =
+          `showcase/generated/${current.document.id}/${current.implementation.id}.html` +
+          `#at=${at.x},${at.y}`;
+        frame.title = `${current.implementation.label} highlighting ${current.document.label}`;
+        describe(current.document);
+      }
+
+      function select(nav, entries, key) {
+        for (const entry of entries) {
+          const button = document.createElement("button");
+          button.textContent = entry.label;
+          button.setAttribute("aria-selected", String(entry === current[key]));
+          button.addEventListener("click", () => {
+            for (const candidate of nav.children) {
+              candidate.setAttribute("aria-selected", String(candidate === button));
+            }
+            current[key] = entry;
+            show();
+          });
+          nav.append(button);
+        }
+      }
+
+      select(documentNav, documents, "document");
+      select(implementationNav, implementations, "implementation");
+      show();
+    </script>
+  </body>
+</html>

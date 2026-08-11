@@ -74,18 +74,18 @@
 
 ; Used in destructure pattern
 ((sym_lit) @variable.parameter
-  (#lua-match? @variable.parameter "^[&]"))
+  (#match? @variable.parameter "^[\\&]"))
 
 ; Inline function variables
 ((sym_lit) @variable.builtin
-  (#lua-match? @variable.builtin "^%%%d*$"))
+  (#match? @variable.builtin "^%[0-9]*$"))
 
 ((sym_lit) @variable.builtin
   (#eq? @variable.builtin "%&"))
 
 ; Constructor
 ((sym_lit) @constructor
-  (#lua-match? @constructor "^-%>[^>].*"))
+  (#match? @constructor "^->[^>][\\s\\S]*"))
 
 ; Builtin dynamic variables
 ((sym_lit) @variable.builtin
@@ -105,36 +105,36 @@
 ; Types
 (sym_lit
   name: (sym_name) @_name
-  (#lua-match? @_name "^[%u][^/%s]*$")) @type
+  (#match? @_name "^[A-Z][^/\\t-\\r ]*$")) @type
 
 ; Symbols with `.` but not `/`
 (sym_lit
   !namespace
   name: (sym_name) @_name
-  (#lua-match? @_name "^[^.]+[.]")) @type
+  (#match? @_name "^[^.]+[.]")) @type
 
 ; Interop
 ; (.instanceMember instance args*)
 ; (.instanceMember Classname args*)
 ((sym_lit
   name: (sym_name) @_name) @function.method
-  (#lua-match? @_name "^%.[^-]"))
+  (#match? @_name "^\\.[^-]"))
 
 ; (.-instanceField instance)
 ((sym_name) @variable.member
-  (#lua-match? @variable.member "^%.%-%S*"))
+  (#match? @variable.member "^\\.-[^\\t-\\r ]*"))
 
 ;  Classname/staticField
 (sym_lit
   namespace: (sym_ns) @_namespace
-  (#lua-match? @_namespace "^[%u]%S*$")) @variable.member
+  (#match? @_namespace "^[A-Z][^\\t-\\r ]*$")) @variable.member
 
 ; (Classname/staticMethod args*)
 (list_lit
   .
   (sym_lit
     namespace: (sym_ns) @_namespace
-    (#lua-match? @_namespace "^%u")) @function.method)
+    (#match? @_namespace "^[A-Z]")) @function.method)
 
 ; TODO: Special casing for the `.` macro
 ; Operators

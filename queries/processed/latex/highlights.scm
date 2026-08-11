@@ -288,7 +288,7 @@
 
 (generic_command
   (command_name) @keyword.conditional
-  (#lua-match? @keyword.conditional "^if[a-zA-Z@]+$"))
+  (#match? @keyword.conditional "^if[a-zA-Z@]+$"))
 
 (generic_command
   (command_name) @keyword.conditional
@@ -392,7 +392,7 @@
 ] @comment 
 
 ((line_comment) @keyword.directive 
-  (#lua-match? @keyword.directive "^%% !TeX"))
+  (#match? @keyword.directive "^% !TeX"))
 
 ((line_comment) @keyword.directive 
-  (#lua-match? @keyword.directive "^%%&"))
+  (#match? @keyword.directive "^%&"))

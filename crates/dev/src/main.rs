@@ -3,6 +3,7 @@ use clap::{Parser, Subcommand};
 use lumis::events::HighlightEvent;
 use lumis::highlight::{highlight_events_with_options, HighlightOptions};
 use lumis::languages::Language;
+use lumis_wasm_runtime::{parser_filename, LanguagePackage, PackagedLanguage, ParserMetadata};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::collections::{BTreeMap, HashSet};
@@ -10,6 +11,9 @@ use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::thread;
+use std::time::{Duration, Instant};
 use xz2::write::XzEncoder;
 
 #[derive(Parser)]
@@ -22,6 +26,10 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     GenCss,
+    FilterThemeUpdates {
+        #[arg(default_value = "")]
+        name: String,
+    },
     SyncThemes,
     SyncCss,
     ListThemes,
@@ -52,18 +60,38 @@ enum Commands {
         name: String,
     },
     CargoUpdateFeatures,
+    CheckCrateDeps {
+        #[arg(long)]
+        fix: bool,
+    },
     PreprocessQueries {
         #[arg(default_value = "")]
         name: String,
     },
     GenHighlights,
     GenLanguagesMd,
+    GenLanguageCatalog {
+        #[arg(long)]
+        check: bool,
+    },
     BuildWasm {
         #[arg(default_value = "")]
         name: String,
     },
     StageWasm {
         name: String,
+    },
+    /// Write the committed test parsers as a Lumis store directory.
+    StageTestParsers {
+        #[arg(default_value = "target/test-parsers")]
+        out: String,
+    },
+    /// List parsers whose published package no longer matches languages.toml.
+    WasmNeeded {
+        #[arg(default_value = "")]
+        filter: String,
+        #[arg(default_value = "false")]
+        force: String,
     },
     WasmMeta {
         name: String,
@@ -103,6 +131,7 @@ fn main() -> Result<()> {
 
     match cli.command {
         Commands::GenCss => gen_css(),
+        Commands::FilterThemeUpdates { name } => filter_theme_updates(&name),
         Commands::SyncThemes => sync_themes(),
         Commands::SyncCss => sync_css(),
         Commands::ListThemes => list_themes(),
@@ -115,11 +144,15 @@ fn main() -> Result<()> {
         Commands::FetchQueries { name } => fetch_queries(&name),
         Commands::CargoUpdateDep { name } => cargo_update_dep(&name),
         Commands::CargoUpdateFeatures => cargo_update_features(),
+        Commands::CheckCrateDeps { fix } => check_crate_deps(fix),
         Commands::PreprocessQueries { name } => preprocess_queries(&name),
         Commands::GenHighlights => gen_highlights(),
         Commands::GenLanguagesMd => gen_languages_md(),
+        Commands::GenLanguageCatalog { check } => gen_language_catalog(check),
         Commands::BuildWasm { name } => build_wasm(&name),
         Commands::StageWasm { name } => stage_wasm(&name),
+        Commands::StageTestParsers { out } => stage_test_parsers(Path::new(&out)),
+        Commands::WasmNeeded { filter, force } => wasm_needed(&filter, &force),
         Commands::WasmMeta { name } => wasm_meta(&name),
         Commands::RenderConformance {
             source,
@@ -165,6 +198,7 @@ fn render_conformance(
             themes,
             default_theme,
             rainbow_brackets,
+            vec![],
         )?
     );
     Ok(())
@@ -185,6 +219,16 @@ struct FixtureMetadata {
     language: String,
     theme: String,
     rainbow_brackets: bool,
+    html_multi_themes: Option<HtmlMultiThemesFixture>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+struct HtmlMultiThemesFixture {
+    themes: BTreeMap<String, String>,
+    default_theme: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    highlight_lines: Vec<usize>,
 }
 
 fn is_false(value: &bool) -> bool {
@@ -200,6 +244,8 @@ struct FixtureFile {
     // Omitted from the JSON when false so non-rainbow fixtures stay unchanged.
     #[serde(default, skip_serializing_if = "is_false")]
     rainbow_brackets: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    html_multi_themes: Option<HtmlMultiThemesFixture>,
     #[serde(default)]
     events: Vec<SerializableHighlightEvent>,
 }
@@ -246,6 +292,14 @@ fn fixture_root() -> PathBuf {
     PathBuf::from("fixtures/conformance")
 }
 
+fn fixture_theme(name: &str) -> Result<lumis::themes::Theme> {
+    let path = PathBuf::from("fixtures/conformance-themes").join(format!("{name}.json"));
+    if path.is_file() {
+        return Ok(lumis::themes::from_file(path)?);
+    }
+    Ok(lumis::themes::get(name)?)
+}
+
 fn selected_fixture_dirs(name: &str) -> Result<Vec<PathBuf>> {
     let root = fixture_root();
     if name.is_empty() {
@@ -278,13 +332,14 @@ fn render_formatter_output(
     themes: Vec<String>,
     default_theme: Option<String>,
     rainbow_brackets: bool,
+    highlight_lines: Vec<usize>,
 ) -> Result<String> {
     let mut output = Vec::new();
 
     match formatter {
         "html-inline" => {
             let theme_name = theme.unwrap_or_else(|| "dracula".to_string());
-            let theme = lumis::themes::get(&theme_name)?;
+            let theme = fixture_theme(&theme_name)?;
             let formatter = lumis::HtmlInlineBuilder::new()
                 .language(language)
                 .theme(Some(theme))
@@ -319,7 +374,7 @@ fn render_formatter_output(
                 let (name, theme_id) = spec
                     .split_once(':')
                     .ok_or_else(|| anyhow::anyhow!("invalid theme spec '{}'", spec))?;
-                theme_map.insert(name.to_string(), lumis::themes::get(theme_id)?);
+                theme_map.insert(name.to_string(), fixture_theme(theme_id)?);
             }
 
             let mut builder = lumis::HtmlMultiThemesBuilder::new();
@@ -327,6 +382,17 @@ fn render_formatter_output(
 
             if let Some(default_theme) = default_theme {
                 builder.default_theme(default_theme);
+            }
+
+            if !highlight_lines.is_empty() {
+                builder.highlight_lines(Some(lumis::formatters::html_inline::HighlightLines {
+                    lines: highlight_lines
+                        .into_iter()
+                        .map(|line| line..=line)
+                        .collect(),
+                    style: Some(lumis::formatters::html_inline::HighlightLinesStyle::Theme),
+                    class: None,
+                }));
             }
 
             let formatter = builder.build().map_err(|e| anyhow::anyhow!("{e}"))?;
@@ -339,7 +405,7 @@ fn render_formatter_output(
         }
         "terminal" => {
             let theme_name = theme.unwrap_or_else(|| "dracula".to_string());
-            let theme = lumis::themes::get(&theme_name)?;
+            let theme = fixture_theme(&theme_name)?;
             let formatter = lumis::TerminalBuilder::new()
                 .language(language)
                 .theme(Some(theme))
@@ -376,17 +442,33 @@ fn fixture_outputs(
     theme: &str,
     name: &str,
     rainbow_brackets: bool,
+    html_multi_themes: Option<HtmlMultiThemesFixture>,
 ) -> Result<FixtureOutputs> {
     let events = highlight_events_with_options(
         source,
         language,
         HighlightOptions::new().rainbow_brackets(rainbow_brackets),
     )?;
+    let (multi_themes, multi_default_theme, multi_highlight_lines) = html_multi_themes
+        .as_ref()
+        .map(|config| {
+            (
+                config
+                    .themes
+                    .iter()
+                    .map(|(name, theme)| format!("{name}:{theme}"))
+                    .collect(),
+                config.default_theme.clone(),
+                config.highlight_lines.clone(),
+            )
+        })
+        .unwrap_or_else(|| (vec![format!("main:{theme}")], "main".to_string(), vec![]));
     let metadata = FixtureMetadata {
         name: name.to_string(),
         language: language.id_name().to_string(),
         theme: theme.to_string(),
         rainbow_brackets,
+        html_multi_themes,
     };
 
     Ok(FixtureOutputs {
@@ -400,6 +482,7 @@ fn fixture_outputs(
             vec![],
             None,
             rainbow_brackets,
+            vec![],
         )?,
         html_linked: render_formatter_output(
             source,
@@ -409,15 +492,17 @@ fn fixture_outputs(
             vec![],
             None,
             rainbow_brackets,
+            vec![],
         )?,
         html_multi_themes: render_formatter_output(
             source,
             language,
             "html-multi-themes",
             None,
-            vec![format!("main:{theme}")],
-            Some("main".to_string()),
+            multi_themes,
+            Some(multi_default_theme),
             rainbow_brackets,
+            multi_highlight_lines,
         )?,
         terminal: render_formatter_output(
             source,
@@ -427,6 +512,7 @@ fn fixture_outputs(
             vec![],
             None,
             rainbow_brackets,
+            vec![],
         )?,
         bbcode: render_formatter_output(
             source,
@@ -436,6 +522,7 @@ fn fixture_outputs(
             vec![],
             None,
             rainbow_brackets,
+            vec![],
         )?,
     })
 }
@@ -470,6 +557,7 @@ fn verify_conformance(name: &str) -> Result<()> {
             &stored.theme,
             &stored.name,
             stored.rainbow_brackets,
+            stored.html_multi_themes.clone(),
         )?;
 
         ensure_fixture_file_match(
@@ -480,6 +568,7 @@ fn verify_conformance(name: &str) -> Result<()> {
                 language: generated.metadata.language.clone(),
                 theme: generated.metadata.theme.clone(),
                 rainbow_brackets: generated.metadata.rainbow_brackets,
+                html_multi_themes: generated.metadata.html_multi_themes.clone(),
                 events: generated.events.clone(),
             },
         )?;
@@ -530,6 +619,7 @@ fn regen_conformance(name: &str) -> Result<()> {
             &stored.theme,
             &stored.name,
             stored.rainbow_brackets,
+            stored.html_multi_themes.clone(),
         )?;
 
         fs::write(
@@ -539,6 +629,7 @@ fn regen_conformance(name: &str) -> Result<()> {
                 language: generated.metadata.language,
                 theme: generated.metadata.theme,
                 rainbow_brackets: generated.metadata.rainbow_brackets,
+                html_multi_themes: generated.metadata.html_multi_themes,
                 events: generated.events,
             })? + "\n",
         )?;
@@ -593,6 +684,63 @@ fn gen_css() -> Result<()> {
         let css_path = css_dir.join(format!("{}.css", theme.name));
         fs::write(&css_path, css)?;
         println!("{}", css_path.display());
+    }
+
+    Ok(())
+}
+
+fn without_revision(mut theme: Value) -> Value {
+    if let Value::Object(fields) = &mut theme {
+        fields.remove("revision");
+    }
+    theme
+}
+
+fn is_revision_only_theme_update(previous: &Value, current: &Value) -> bool {
+    previous != current && without_revision(previous.clone()) == without_revision(current.clone())
+}
+
+fn filter_theme_updates(name: &str) -> Result<()> {
+    let mut theme_paths = if name.is_empty() {
+        glob::glob("themes/*.json")?.collect::<Result<Vec<_>, _>>()?
+    } else {
+        vec![PathBuf::from(format!("themes/{name}.json"))]
+    };
+    theme_paths.sort();
+
+    for path in theme_paths {
+        if !path.exists() {
+            continue;
+        }
+
+        let previous = Command::new("git")
+            .args(["show", &format!("HEAD:{}", path.display())])
+            .output()
+            .with_context(|| {
+                format!("failed to read the previous version of {}", path.display())
+            })?;
+
+        // A new theme has no version at HEAD and should always be kept.
+        if !previous.status.success() {
+            continue;
+        }
+
+        let previous_source = String::from_utf8(previous.stdout)
+            .with_context(|| format!("previous theme is not UTF-8: {}", path.display()))?;
+        let current_source = fs::read_to_string(&path)
+            .with_context(|| format!("failed to read generated theme {}", path.display()))?;
+        let previous_theme: Value = serde_json::from_str(&previous_source)
+            .with_context(|| format!("invalid previous theme JSON: {}", path.display()))?;
+        let current_theme: Value = serde_json::from_str(&current_source)
+            .with_context(|| format!("invalid generated theme JSON: {}", path.display()))?;
+
+        if is_revision_only_theme_update(&previous_theme, &current_theme) {
+            fs::write(&path, previous_source)?;
+            println!(
+                "Ignored revision-only theme update: {}",
+                path.file_stem().unwrap().to_string_lossy()
+            );
+        }
     }
 
     Ok(())
@@ -807,7 +955,7 @@ struct QueryInfo {
     path: Option<String>,
 }
 
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, Default, serde::Deserialize)]
 struct ParserInfo {
     git: Option<String>,
     rev: Option<String>,
@@ -990,20 +1138,12 @@ fn git_resolve_rev(url: &str, rev: &str) -> Result<String> {
         .with_context(|| format!("could not resolve git revision {rev} from {url}"))
 }
 
-fn git_resolve_version_tag(url: &str, version: &str) -> Option<String> {
-    for tag in [format!("v{version}"), version.to_string()] {
-        if let Ok(rev) = git_resolve_rev(url, &tag) {
-            return Some(rev);
-        }
-    }
-    None
+fn release_version_from_tag(tag: &str) -> Option<semver::Version> {
+    let version = lenient_semver::parse(tag).ok()?;
+    version.pre.is_empty().then_some(version)
 }
 
-fn semver_from_tag(tag: &str) -> Option<semver::Version> {
-    semver::Version::parse(tag.strip_prefix('v').unwrap_or(tag)).ok()
-}
-
-fn git_latest_release_rev(url: &str) -> Result<Option<(String, String)>> {
+fn git_release_tags(url: &str) -> Result<BTreeMap<semver::Version, String>> {
     let output = Command::new("git")
         .args(["ls-remote", "--tags", url])
         .output()
@@ -1024,20 +1164,95 @@ fn git_latest_release_rev(url: &str) -> Result<Option<(String, String)>> {
         if tag.ends_with("^{}") {
             continue;
         }
-        let Some(version) = semver_from_tag(tag) else {
+        let Some(version) = release_version_from_tag(tag) else {
             continue;
         };
-        if !version.pre.is_empty() {
-            continue;
-        }
         tags.insert(version, tag.to_string());
     }
 
+    Ok(tags)
+}
+
+fn git_resolve_version_tag(url: &str, version: &str) -> Option<String> {
+    let version = semver::Version::parse(version).ok()?;
+    let tag = git_release_tags(url).ok()?.remove(&version)?;
+    git_resolve_rev(url, &tag).ok()
+}
+
+fn git_latest_release_rev(url: &str) -> Result<Option<(String, String)>> {
+    let tags = git_release_tags(url)?;
     let Some((version, tag)) = tags.into_iter().next_back() else {
         return Ok(None);
     };
     let rev = git_resolve_rev(url, &tag)?;
     Ok(Some((version.to_string(), rev)))
+}
+
+fn git_is_ancestor(url: &str, ancestor: &str, descendant: &str) -> Result<bool> {
+    if ancestor == descendant {
+        return Ok(true);
+    }
+
+    let repo = tmpdir()?;
+    let result = (|| {
+        let init = Command::new("git")
+            .args(["init", "--bare", &repo])
+            .output()
+            .with_context(|| format!("failed to initialize temporary git repository at {repo}"))?;
+        if !init.status.success() {
+            bail!("failed to initialize temporary git repository at {repo}");
+        }
+
+        let ancestor_ref = "refs/lumis/ancestor";
+        let descendant_ref = "refs/lumis/descendant";
+        let fetch = Command::new("git")
+            .args([
+                "-C",
+                &repo,
+                "fetch",
+                "--quiet",
+                "--filter=blob:none",
+                "--no-tags",
+                url,
+                &format!("{ancestor}:{ancestor_ref}"),
+                &format!("{descendant}:{descendant_ref}"),
+            ])
+            .output()
+            .with_context(|| {
+                format!("failed to fetch parser revisions {ancestor} and {descendant} from {url}")
+            })?;
+        if !fetch.status.success() {
+            bail!(
+                "failed to fetch parser revisions {ancestor} and {descendant} from {url}: {}",
+                String::from_utf8_lossy(&fetch.stderr).trim()
+            );
+        }
+
+        let status = Command::new("git")
+            .args([
+                "-C",
+                &repo,
+                "merge-base",
+                "--is-ancestor",
+                ancestor_ref,
+                descendant_ref,
+            ])
+            .status()
+            .with_context(|| {
+                format!("failed to compare parser revisions {ancestor} and {descendant} from {url}")
+            })?;
+
+        match status.code() {
+            Some(0) => Ok(true),
+            Some(1) => Ok(false),
+            _ => bail!(
+                "git merge-base failed while comparing parser revisions {ancestor} and {descendant} from {url}"
+            ),
+        }
+    })();
+
+    let _ = fs::remove_dir_all(&repo);
+    result
 }
 
 fn latest_crate_version(crate_name: &str) -> Result<Option<String>> {
@@ -1133,6 +1348,10 @@ fn has_local_override_query(lang: &str) -> bool {
         })
 }
 
+fn query_source_name<'a>(parser_name: &'a str, info: &'a ParserInfo) -> &'a str {
+    info.query_name.as_deref().unwrap_or(parser_name)
+}
+
 fn langs_list() -> Result<()> {
     let toml = read_languages_toml()?;
     for name in toml.parsers.keys() {
@@ -1172,6 +1391,16 @@ fn upgrade_parsers(name: &str) -> Result<()> {
 
         if new_rev.is_empty() {
             println!("Warning: could not resolve revision for {parser_name}, skipping");
+            continue;
+        }
+
+        // Forks inherit upstream tags. Never replace a recorded fork revision
+        // with an older tagged commit that it already contains.
+        if !current_rev.is_empty()
+            && current_rev != new_rev
+            && git_is_ancestor(git, &new_rev, current_rev)?
+        {
+            println!("  {parser_name}: keeping {current_rev}; candidate {new_rev} is an ancestor");
             continue;
         }
 
@@ -1222,38 +1451,46 @@ fn fetch_parsers(name: &str) -> Result<()> {
         let dest = format!("crates/lumis/vendored_parsers/{parser_dir}");
 
         if info.generate.unwrap_or(false) {
-            let _ = run_cmd_ok(&format!("rm -rf {dest}"));
-            fs::create_dir_all(&dest)?;
             run_cmd_ok(&format!("cd {clone_dir} && tree-sitter generate"))?;
             let src = format!("{clone_dir}/src");
-            if Path::new(&src).is_dir() {
-                let _ = run_cmd_ok(&format!("cp -r {src} {dest}/"));
-                println!("  Updated {parser_name} (generated)");
-            } else {
-                println!("  Warning: no generated src directory found for {parser_name}");
+            if !Path::new(&src).is_dir() {
+                bail!("no generated src directory found for {parser_name} at {src}");
             }
+
+            let _ = run_cmd_ok(&format!("rm -rf {dest}"));
+            fs::create_dir_all(&dest)?;
+            run_cmd_ok(&format!("cp -r {src} {dest}/"))?;
+            println!("  Updated {parser_name} (generated)");
         } else if let Some(ref location) = info.location {
-            fs::create_dir_all(&dest)?;
             let src = format!("{clone_dir}/{location}/src");
-            if Path::new(&src).is_dir() {
-                let _ = run_cmd_ok(&format!("rm -rf {dest}/src"));
-                let _ = run_cmd_ok(&format!("cp -r {src} {dest}/"));
-                println!("  Updated {parser_name} (location: {location})");
-            } else {
-                println!(
-                    "  Warning: no src directory found for {parser_name} in location {location}"
-                );
+            if !Path::new(&src).is_dir() {
+                bail!("no src directory found for {parser_name} in location {location}");
             }
+
+            let _ = run_cmd_ok(&format!("rm -rf {dest}"));
+            let location_dest = format!("{dest}/{location}");
+            fs::create_dir_all(&location_dest)?;
+            run_cmd_ok(&format!("cp -r {src} {location_dest}/"))?;
+
+            // Multi-grammar repositories can share support files from a root-level
+            // common directory (for example XML). Preserve the complete directory:
+            // scanners may include or otherwise depend on non-header files too.
+            let common = format!("{clone_dir}/common");
+            if Path::new(&common).is_dir() {
+                run_cmd_ok(&format!("cp -r {common} {dest}/"))?;
+            }
+
+            println!("  Updated {parser_name} (location: {location})");
         } else {
-            fs::create_dir_all(&dest)?;
             let src = format!("{clone_dir}/src");
-            if Path::new(&src).is_dir() {
-                let _ = run_cmd_ok(&format!("rm -rf {dest}/src"));
-                let _ = run_cmd_ok(&format!("cp -r {src} {dest}/"));
-                println!("  Updated {parser_name}");
-            } else {
-                println!("  Warning: no src directory found for {parser_name}");
+            if !Path::new(&src).is_dir() {
+                bail!("no src directory found for {parser_name} at {src}");
             }
+
+            fs::create_dir_all(&dest)?;
+            let _ = run_cmd_ok(&format!("rm -rf {dest}/src"));
+            run_cmd_ok(&format!("cp -r {src} {dest}/"))?;
+            println!("  Updated {parser_name}");
         }
 
         let _ = run_cmd_ok(&format!("rm -rf {clone_dir}"));
@@ -1362,32 +1599,45 @@ fn compress_parsers(name: &str) -> Result<()> {
     Ok(())
 }
 
+/// Query sources a run named `name` may rewrite.
+///
+/// An empty name upgrades every source. A named one upgrades only its own
+/// entry: `queries.default` backs most of the corpus, so including it here
+/// would make a per-language run rewrite a revision every other language
+/// shares.
+fn queries_to_upgrade<'a>(
+    queries: &'a BTreeMap<String, QueryInfo>,
+    name: &str,
+) -> Vec<(&'a String, &'a QueryInfo)> {
+    queries
+        .iter()
+        .filter(|(query_name, _)| name.is_empty() || query_name.as_str() == name)
+        .collect()
+}
+
 fn upgrade_queries(name: &str) -> Result<()> {
     let mut doc = read_languages_toml_edit()?;
     let toml = read_languages_toml()?;
 
     let mut url_revs: BTreeMap<String, String> = BTreeMap::new();
-    for info in toml.queries.values() {
-        if !url_revs.contains_key(&info.git) {
-            let rev = git_ls_remote(&info.git)?;
-            println!("  {} -> {}", info.git, &rev[..12.min(rev.len())]);
-            url_revs.insert(info.git.clone(), rev);
-        }
-    }
+    for (query_name, info) in queries_to_upgrade(&toml.queries, name) {
+        let new_rev = match url_revs.get(&info.git) {
+            Some(rev) => rev.clone(),
+            None => {
+                let rev = git_ls_remote(&info.git)?;
+                println!("  {} -> {}", info.git, &rev[..12.min(rev.len())]);
+                url_revs.insert(info.git.clone(), rev.clone());
+                rev
+            }
+        };
 
-    for (query_name, info) in &toml.queries {
-        if !name.is_empty() && query_name != name && query_name != "default" {
-            continue;
-        }
-
-        let new_rev = &url_revs[&info.git];
-        if info.rev != *new_rev {
+        if info.rev != new_rev {
             println!(
                 "  {query_name}: {} -> {}",
                 &info.rev[..12.min(info.rev.len())],
                 &new_rev[..12.min(new_rev.len())]
             );
-            doc["queries"][query_name.as_str()]["rev"] = toml_edit::value(new_rev);
+            doc["queries"][query_name.as_str()]["rev"] = toml_edit::value(new_rev.as_str());
         }
     }
 
@@ -1458,6 +1708,382 @@ fn cargo_update_features() -> Result<()> {
 
     write_lumis_cargo_toml_edit(&cargo)?;
     write_lumis_core_cargo_toml_edit(&cargo_core)
+}
+
+/// Crates published from this repository that something else here depends on.
+/// Named rather than counted, so a crate that disappears from the workspace
+/// fails here instead of silently shrinking what gets checked.
+const RELEASED_CRATES: &[&str] = &[
+    "lumis",
+    "lumis-build",
+    "lumis-cli",
+    "lumis-core",
+    "lumis-wasm-runtime",
+];
+
+/// Requirements deliberately left behind the workspace, and why. A waiver that
+/// stops being needed has to fail too, so this list can only shrink.
+const CRATE_DEP_WAIVERS: &[(&str, &str, &str)] = &[(
+    "crates/autumnus/Cargo.toml",
+    "lumis",
+    "deprecated rename shim, frozen at the lumis it was published against",
+)];
+
+const DEPENDENCY_TABLES: &[&str] = &["dependencies", "dev-dependencies", "build-dependencies"];
+
+const MIN_CHECKED_CRATE_DEPS: usize = 10;
+
+struct CrateDependency {
+    manifest: String,
+    name: String,
+    requirement: Option<String>,
+    publishable: bool,
+}
+
+fn repository_root() -> Result<PathBuf> {
+    let output = Command::new("git")
+        .args(["rev-parse", "--show-toplevel"])
+        .output()
+        .context("failed to locate the repository root")?;
+    if !output.status.success() {
+        bail!("git rev-parse --show-toplevel failed; not inside a git repository");
+    }
+
+    Ok(PathBuf::from(
+        String::from_utf8_lossy(&output.stdout).trim(),
+    ))
+}
+
+/// Paths come back relative to the repository root rather than the working
+/// directory, so `CRATE_DEP_WAIVERS` matches wherever this is run from.
+fn tracked_cargo_manifests(root: &Path) -> Result<Vec<String>> {
+    let output = Command::new("git")
+        .current_dir(root)
+        .args(["ls-files", "--full-name", "-z", "*Cargo.toml"])
+        .output()
+        .context("failed to list tracked Cargo manifests")?;
+    if !output.status.success() {
+        bail!("git ls-files failed while listing Cargo manifests");
+    }
+
+    Ok(String::from_utf8_lossy(&output.stdout)
+        .split('\0')
+        .filter(|path| !path.is_empty())
+        .map(str::to_string)
+        .collect())
+}
+
+/// Visits every dependency entry in a manifest, including the ones nested under
+/// `[target.'cfg(...)'.dependencies]`, with the name of the crate it resolves to.
+fn for_each_dependency(
+    table: &mut toml_edit::Table,
+    visit: &mut impl FnMut(&str, &mut toml_edit::Item),
+) {
+    for (key, item) in table.iter_mut() {
+        if DEPENDENCY_TABLES.contains(&key.get()) {
+            let Some(dependencies) = item.as_table_like_mut() else {
+                continue;
+            };
+            for (dep_key, spec) in dependencies.iter_mut() {
+                // `package = "..."` renames the dependency, so the key is not
+                // necessarily the crate being depended on.
+                let name = spec
+                    .get("package")
+                    .and_then(|package| package.as_str())
+                    .unwrap_or(dep_key.get())
+                    .to_string();
+                visit(&name, spec);
+            }
+        } else if let Some(nested) = item.as_table_mut() {
+            for_each_dependency(nested, visit);
+        }
+    }
+}
+
+fn requirement_of(spec: &toml_edit::Item) -> Option<String> {
+    match spec {
+        toml_edit::Item::Value(toml_edit::Value::String(requirement)) => {
+            Some(requirement.value().clone())
+        }
+        _ => spec
+            .get("version")
+            .and_then(|version| version.as_str())
+            .map(str::to_string),
+    }
+}
+
+/// `{ workspace = true }` carries no requirement of its own, and cargo rejects a
+/// `version` beside it. The `[workspace.dependencies]` entry it inherits from is
+/// itself visited, so the requirement is still checked once.
+fn inherits_from_workspace(spec: &toml_edit::Item) -> bool {
+    spec.get("workspace")
+        .and_then(|workspace| workspace.as_bool())
+        .unwrap_or(false)
+}
+
+struct Manifest {
+    path: String,
+    file: PathBuf,
+    document: toml_edit::DocumentMut,
+    publishable: bool,
+}
+
+fn is_publishable(document: &toml_edit::DocumentMut) -> bool {
+    // A virtual manifest has no package to publish, so a requirement in one can
+    // never reach a registry.
+    let Some(package) = document.get("package") else {
+        return false;
+    };
+    let Some(publish) = package.get("publish") else {
+        return true;
+    };
+    if let Some(allowed) = publish.as_bool() {
+        return allowed;
+    }
+    // cargo: "`package.publish` must be set to `true` or a non-empty list in
+    // Cargo.toml to publish", so `publish = []` is another spelling of `false`.
+    publish
+        .as_array()
+        .is_none_or(|registries| !registries.is_empty())
+}
+
+fn read_manifests() -> Result<Vec<Manifest>> {
+    let root = repository_root()?;
+    tracked_cargo_manifests(&root)?
+        .into_iter()
+        .map(|path| {
+            let file = root.join(&path);
+            let text =
+                fs::read_to_string(&file).with_context(|| format!("failed to read {path}"))?;
+            let document: toml_edit::DocumentMut = text
+                .parse()
+                .with_context(|| format!("failed to parse {path}"))?;
+            let publishable = is_publishable(&document);
+            Ok(Manifest {
+                path,
+                file,
+                document,
+                publishable,
+            })
+        })
+        .collect()
+}
+
+/// Every build in this repository resolves the lumis crates through `path`
+/// entries and the root `[patch.crates-io]`, so the `version` requirement
+/// beside them is dead weight locally and only takes effect once the crate is
+/// published. Nothing here can notice it going stale, which is how lumis 0.12.1
+/// shipped requiring `lumis-core = "2"` while calling an API added in 2.2.0
+/// (#1118): consumers resolving from an existing Cargo.lock got 2.0.0 and
+/// failed to compile.
+fn check_crate_deps(fix: bool) -> Result<()> {
+    let mut manifests = read_manifests()?;
+
+    let versions: BTreeMap<String, String> = manifests
+        .iter()
+        .filter_map(|manifest| {
+            let package = manifest.document.get("package")?;
+            Some((
+                package.get("name")?.as_str()?.to_string(),
+                package.get("version")?.as_str()?.to_string(),
+            ))
+        })
+        .collect();
+
+    if fix {
+        return fix_crate_deps(&mut manifests, &versions);
+    }
+
+    let mut dependencies = Vec::new();
+    for manifest in &mut manifests {
+        let path = manifest.path.clone();
+        let publishable = manifest.publishable;
+        for_each_dependency(manifest.document.as_table_mut(), &mut |name, spec| {
+            if inherits_from_workspace(spec) {
+                return;
+            }
+            dependencies.push(CrateDependency {
+                manifest: path.clone(),
+                name: name.to_string(),
+                requirement: requirement_of(spec),
+                publishable,
+            });
+        });
+    }
+
+    let (problems, checked) = crate_dep_problems(&versions, &dependencies, manifests.len());
+
+    if !problems.is_empty() {
+        for problem in &problems {
+            eprintln!("  {problem}");
+        }
+        bail!(
+            "version requirements on lumis crates must equal the version in this repository.\n\
+             Run `mise run check-crate-deps --fix` to update them."
+        );
+    }
+
+    println!("{checked} lumis dependencies match the workspace versions");
+    Ok(())
+}
+
+fn is_waived(manifest: &str, name: &str) -> bool {
+    CRATE_DEP_WAIVERS
+        .iter()
+        .any(|(waived_manifest, waived_name, _)| {
+            *waived_manifest == manifest && *waived_name == name
+        })
+}
+
+/// `cargo set-version` rewrites dependents it can reach through `path`. The
+/// Elixir NIF depends on `lumis-core` through the registry, so it is invisible
+/// to that pass and drifts on every release unless something else moves it.
+fn fix_manifest(
+    path: &str,
+    publishable: bool,
+    document: &mut toml_edit::DocumentMut,
+    versions: &BTreeMap<String, String>,
+) -> Vec<String> {
+    let mut changes = Vec::new();
+
+    for_each_dependency(document.as_table_mut(), &mut |name, spec| {
+        let Some(version) = versions.get(name) else {
+            return;
+        };
+        if is_waived(path, name) || inherits_from_workspace(spec) {
+            return;
+        }
+        let previous = requirement_of(spec);
+        // A path dependency in a crate that is never published has nothing to
+        // resolve a requirement against, so do not invent one.
+        if previous.is_none() && !publishable {
+            return;
+        }
+        if previous.as_deref() == Some(version.as_str()) {
+            return;
+        }
+
+        changes.push(format!(
+            "{path}: {name} {} -> {version}",
+            previous.as_deref().unwrap_or("no version")
+        ));
+
+        // Only the requirement moves. Replacing the whole entry would drop the
+        // `path`, `features` and `default-features` beside it.
+        match spec {
+            toml_edit::Item::Value(toml_edit::Value::InlineTable(entry)) => {
+                entry.insert("version", toml_edit::Value::from(version.clone()));
+                entry.fmt();
+            }
+            toml_edit::Item::Table(entry) => {
+                entry["version"] = toml_edit::value(version.clone());
+            }
+            _ => *spec = toml_edit::value(version.clone()),
+        }
+    });
+
+    changes
+}
+
+fn fix_crate_deps(manifests: &mut [Manifest], versions: &BTreeMap<String, String>) -> Result<()> {
+    let mut changes = Vec::new();
+
+    for manifest in manifests {
+        let manifest_changes = fix_manifest(
+            &manifest.path,
+            manifest.publishable,
+            &mut manifest.document,
+            versions,
+        );
+        if !manifest_changes.is_empty() {
+            fs::write(&manifest.file, manifest.document.to_string())
+                .with_context(|| format!("failed to write {}", manifest.path))?;
+            changes.extend(manifest_changes);
+        }
+    }
+
+    if changes.is_empty() {
+        println!("no crate dependency requirements needed updating");
+    }
+    for change in &changes {
+        println!("  {change}");
+    }
+
+    check_crate_deps(false)
+}
+
+fn crate_dep_problems(
+    versions: &BTreeMap<String, String>,
+    dependencies: &[CrateDependency],
+    manifest_count: usize,
+) -> (Vec<String>, usize) {
+    let mut problems = Vec::new();
+
+    for name in RELEASED_CRATES {
+        if !versions.contains_key(*name) {
+            problems.push(format!("{name}: no manifest in this repository defines it"));
+        }
+    }
+
+    let mut waivers_used = HashSet::new();
+    let mut checked = 0;
+
+    for dependency in dependencies {
+        let Some(version) = versions.get(&dependency.name) else {
+            continue;
+        };
+        checked += 1;
+
+        let waiver = CRATE_DEP_WAIVERS.iter().find(|(manifest, name, _)| {
+            *manifest == dependency.manifest && *name == dependency.name
+        });
+
+        if let Some((manifest, name, reason)) = waiver {
+            waivers_used.insert((*manifest, *name));
+            if dependency.requirement.as_deref() == Some(version.as_str()) {
+                problems.push(format!(
+                    "{manifest}: {name} = \"{version}\" now matches the workspace, \
+                     so the waiver ({reason}) is obsolete and must be removed"
+                ));
+            }
+            continue;
+        }
+
+        match &dependency.requirement {
+            Some(requirement) if requirement == version => {}
+            Some(requirement) => problems.push(format!(
+                "{}: {} = \"{requirement}\", expected \"{version}\"",
+                dependency.manifest, dependency.name
+            )),
+            // A path dependency with no version is fine until the crate holding
+            // it is published, at which point cargo strips the path and has
+            // nothing left to resolve.
+            None if dependency.publishable => problems.push(format!(
+                "{}: {} declares no version, so publishing it would drop the dependency",
+                dependency.manifest, dependency.name
+            )),
+            None => {}
+        }
+    }
+
+    for (manifest, name, _) in CRATE_DEP_WAIVERS {
+        if !waivers_used.contains(&(*manifest, *name)) {
+            problems.push(format!(
+                "{manifest}: waived dependency {name} is gone, remove its waiver"
+            ));
+        }
+    }
+
+    // A glob or a `git ls-files` that stops matching would otherwise report the
+    // same success as a repository with no drift.
+    if checked < MIN_CHECKED_CRATE_DEPS {
+        problems.push(format!(
+            "only {checked} lumis dependencies found across {manifest_count} manifests, \
+             expected at least {MIN_CHECKED_CRATE_DEPS}"
+        ));
+    }
+
+    (problems, checked)
 }
 
 fn fetch_queries(name: &str) -> Result<()> {
@@ -1743,6 +2369,13 @@ fn preprocess_queries(name: &str) -> Result<()> {
             let content =
                 resolve_and_preprocess(src, override_dir, append_dir, &lang, query_type, &mut seen);
             if !content.is_empty() {
+                // Reject rather than approximate: a Lua pattern that cannot be
+                // translated faithfully would ship a regex that means something
+                // else in every runtime.
+                let content =
+                    lumis_build::try_convert_lua_matches(&content).with_context(|| {
+                        format!("failed to convert Lua patterns in {lang}/{query_type}.scm")
+                    })?;
                 let full = format!("; This file is auto-generated. Do not edit.\n{content}");
                 fs::write(format!("{dest}/{lang}/{query_type}.scm"), &full)?;
                 wrote = true;
@@ -1857,10 +2490,11 @@ fn gen_languages_md() -> Result<()> {
             "[@lumis-sh/wasm-{wasm_suffix}](https://www.npmjs.com/package/@lumis-sh/wasm-{wasm_suffix})"
         );
 
-        let query_col = if has_local_override_query(lang) {
+        let query_source = query_source_name(lang, info);
+        let query_col = if has_local_override_query(query_source) {
             "local override".to_string()
         } else {
-            let qi = resolve_query_source(&toml.queries, lang);
+            let qi = resolve_query_source(&toml.queries, query_source);
             let query_repo_path = qi
                 .git
                 .trim_start_matches("https://github.com/")
@@ -1929,15 +2563,114 @@ fn gen_languages_md() -> Result<()> {
     Ok(())
 }
 
+fn gen_language_catalog(check: bool) -> Result<()> {
+    let toml = read_languages_toml()?;
+    let document = read_languages_toml_edit()?;
+    let parser_order = document["parsers"]
+        .as_table()
+        .context("languages.toml must contain a parsers table")?
+        .iter()
+        .map(|(id, _)| id.to_string())
+        .collect::<Vec<_>>();
+    let path = "crates/lumis-wasm-runtime/src/catalog.rs";
+    let package_version_range = supported_tree_sitter_series()?;
+    let output = render_language_catalog(
+        &toml.parsers,
+        &parser_order,
+        &toml.bundles,
+        &package_version_range,
+    )?;
+
+    if check {
+        let current = fs::read_to_string(path)
+            .with_context(|| format!("failed to read generated catalog at {path}"))?;
+        if current != output {
+            bail!("language catalog is stale; run `mise run langs-gen-catalog`");
+        }
+        println!("Verified {path}");
+    } else {
+        fs::write(path, output)?;
+        println!("Generated {path}");
+    }
+    Ok(())
+}
+
+fn render_language_catalog(
+    parsers: &BTreeMap<String, ParserInfo>,
+    parser_order: &[String],
+    bundles: &BTreeMap<String, BundleInfo>,
+    package_version_range: &str,
+) -> Result<String> {
+    let mut lines = vec![
+        "// Auto-generated from languages.toml by `mise run langs-gen-catalog`.".to_string(),
+        "// Do not edit manually.".to_string(),
+        String::new(),
+        "define_catalog! {".to_string(),
+        format!("    package_version_range: {package_version_range:?},"),
+        "    languages: {".to_string(),
+    ];
+
+    for id in parser_order {
+        let info = parsers
+            .get(id)
+            .with_context(|| format!("missing parser metadata for '{id}'"))?;
+        let default_wasm_name = format!("tree-sitter-{id}");
+        let wasm_name = info.wasm_name.as_deref().unwrap_or(&default_wasm_name);
+        let package_name = format!("@lumis-sh/wasm-{}", wasm_package_suffix(wasm_name));
+        let aliases = info
+            .aliases
+            .iter()
+            .map(|alias| format!("{alias:?}"))
+            .collect::<Vec<_>>()
+            .join(", ");
+
+        lines.extend([
+            format!("        {id:?} => {{"),
+            format!("            aliases: [{aliases}],"),
+            format!("            package_name: {package_name:?}"),
+            "        },".to_string(),
+        ]);
+    }
+
+    lines.push("    },".to_string());
+    lines.push("    bundles: {".to_string());
+
+    for (bundle_name, bundle) in bundles {
+        let members = match &bundle.parsers {
+            BundleParsers::List(names) => names.clone(),
+            BundleParsers::All(value) => {
+                if value != "all" {
+                    bail!("unsupported bundle parsers value for '{bundle_name}': {value}");
+                }
+                parser_order.to_vec()
+            }
+        };
+        let rendered = members
+            .iter()
+            .map(|name| format!("{name:?}"))
+            .collect::<Vec<_>>()
+            .join(", ");
+        lines.push(format!("        {bundle_name:?} => [{rendered}],"));
+    }
+
+    lines.push("    },".to_string());
+    lines.push("}".to_string());
+    lines.push(String::new());
+    Ok(lines.join("\n"))
+}
+
 fn build_wasm(name: &str) -> Result<()> {
     let toml = read_languages_toml()?;
     let tmp = tmpdir()?;
     let cwd = std::env::current_dir()?;
-    let out_dir = cwd.join("tmp/wasms");
-    let log_dir = cwd.join("tmp/wasm-build-logs");
+    let out_dir = cwd.join("tmp/wasm/build");
+    let log_dir = cwd.join("tmp/wasm/logs");
     fs::create_dir_all(&out_dir)?;
     fs::create_dir_all(&log_dir)?;
     let mut built_wasm_names = HashSet::new();
+    let mut failed = Vec::new();
+    let toolchain = wasm_toolchain_id();
+    let rebuild = std::env::var("LUMIS_WASM_REBUILD").ok().as_deref() == Some("1");
 
     for (parser_name, info) in &toml.parsers {
         let Some(ref git) = info.git else { continue };
@@ -1954,6 +2687,27 @@ fn build_wasm(name: &str) -> Result<()> {
         }
 
         let wasm_file = out_dir.join(format!("{wasm_name}.wasm"));
+        let build_id_file = out_dir.join(format!("{wasm_name}.build-id"));
+        let build_id = wasm_build_id(
+            git,
+            rev,
+            info.location.as_deref(),
+            info.generate.unwrap_or(false),
+            &toolchain,
+        );
+
+        if !rebuild && cached_parser_is_current(&wasm_file, &build_id_file, &build_id) {
+            println!("-> Reusing {wasm_name} built from {rev}");
+            continue;
+        }
+
+        // A restored `.wasm` that this revision no longer describes has to go
+        // before the rebuild, not after it. `stage-wasm` and `test:queries`
+        // both take whatever file is present, so leaving the old one behind
+        // would let a parser that failed to build be staged, or have its
+        // queries checked against the grammar it replaced.
+        let _ = fs::remove_file(&build_id_file);
+        let _ = fs::remove_file(&wasm_file);
 
         let clone_dir = format!("{tmp}/tree-sitter-{parser_name}");
         println!("-> Building WASM for {parser_name} ...");
@@ -1987,18 +2741,25 @@ fn build_wasm(name: &str) -> Result<()> {
 
         if has_grammar_source || info.generate.unwrap_or(false) {
             if has_package_json {
-                let npm_cmd = if has_package_lock {
-                    "npm ci --ignore-scripts"
-                } else {
-                    "npm install --ignore-scripts"
-                };
                 let install_dir = if Path::new(&repo_dir).join("package.json").exists() {
                     &repo_dir
                 } else {
                     &metadata_dir
                 };
                 println!("* installing npm dependencies in {install_dir}");
-                let _ = run_cmd_ok(&format!("cd {install_dir} && {npm_cmd}"));
+                // `npm ci` refuses to run when a grammar repository ships a
+                // `package-lock.json` that has drifted from its `package.json`, which
+                // several upstream grammars do. Fall back to `npm install` so the parser
+                // stays buildable instead of silently generating without dependencies.
+                let ci_failed = has_package_lock
+                    && run_cmd_ok(&format!("cd {install_dir} && npm ci --ignore-scripts")).is_err();
+                if ci_failed {
+                    println!("  npm ci failed, retrying with npm install");
+                }
+                if ci_failed || !has_package_lock {
+                    let _ =
+                        run_cmd_ok(&format!("cd {install_dir} && npm install --ignore-scripts"));
+                }
             }
             println!("* generating parser sources in {repo_dir}");
             let _ = run_cmd_ok(&format!("cd {repo_dir} && tree-sitter generate"));
@@ -2009,70 +2770,105 @@ fn build_wasm(name: &str) -> Result<()> {
         println!("* building wasm in {repo_dir}");
         println!("* build log: {}", build_log.display());
         match build_repo_wasm(&repo_dir, &wasm_file, &build_log) {
-            Ok(()) => println!("{wasm_path}"),
-            Err(_) => println!("  ERROR: failed to build {parser_name}"),
+            Ok(()) => {
+                fs::write(&build_id_file, &build_id)?;
+                println!("{wasm_path}");
+            }
+            Err(_) => {
+                println!("  ERROR: failed to build {parser_name}");
+                failed.push(parser_name.clone());
+            }
         }
 
         let _ = run_cmd_ok(&format!("rm -rf {clone_dir}"));
     }
 
     let _ = run_cmd_ok(&format!("rm -rf {tmp}"));
+
+    // Reported once at the end rather than by returning early, so building the
+    // whole corpus still attempts every parser and names all the failures
+    // instead of stopping at the first.
+    if !failed.is_empty() {
+        bail!("failed to build: {}", failed.join(", "));
+    }
+
     Ok(())
 }
 
+/// Identifies the toolchain a `.wasm` was produced by, which is the Tree-sitter
+/// CLI and nothing else. It compiles through a WASI SDK it downloads itself and
+/// pins per release, so its own version covers the compiler too. This used to
+/// name Emscripten as well, as a hedge against an input that might matter;
+/// nothing invokes `emcc` any more, so the hedge only recorded an empty string.
+fn wasm_toolchain_id() -> String {
+    run_cmd("tree-sitter --version").unwrap_or_default()
+}
+
+fn wasm_build_id(
+    git: &str,
+    rev: &str,
+    location: Option<&str>,
+    generate: bool,
+    toolchain: &str,
+) -> String {
+    format!(
+        "{git}\n{rev}\n{}\n{generate}\n{toolchain}\n",
+        location.unwrap_or("")
+    )
+}
+
+/// A recorded build id says the inputs still match; the magic number says the
+/// bytes survived being cached. Neither alone is enough to skip a build.
+fn cached_parser_is_current(wasm_file: &Path, build_id_file: &Path, build_id: &str) -> bool {
+    fs::read(wasm_file).is_ok_and(|bytes| bytes.starts_with(b"\0asm"))
+        && fs::read_to_string(build_id_file).is_ok_and(|cached| cached == build_id)
+}
+
 fn build_repo_wasm(repo_dir: &str, wasm_file: &Path, build_log: &Path) -> Result<()> {
-    let verbose = std::env::var("LUMIS_WASM_VERBOSE").ok().as_deref() == Some("1");
-    let build_cmd = format!("tree-sitter build --wasm -o \"{}\"", wasm_file.display());
-    let shell_cmd = if verbose {
+    build_repo_wasm_with("tree-sitter", repo_dir, wasm_file, build_log)
+}
+
+/// Takes the compiler as an argument so a test can supply one whose exit status
+/// it chooses. Asserting on a missing `tree-sitter` instead would pass for the
+/// wrong reason on any machine without the CLI installed.
+fn build_repo_wasm_with(
+    tree_sitter: &str,
+    repo_dir: &str,
+    wasm_file: &Path,
+    build_log: &Path,
+) -> Result<()> {
+    // Printed before the build rather than logged after it: a grammar large
+    // enough to exhaust the runner takes the process down with it, and this
+    // line is then the only evidence the build ever started.
+    println!("[cmd] tree-sitter build --wasm -o {}", wasm_file.display());
+
+    let started = Instant::now();
+    let output = Command::new(tree_sitter)
+        .current_dir(repo_dir)
+        .args(["build", "--wasm", "-o"])
+        .arg(wasm_file)
+        .output()
+        .with_context(|| format!("failed to run tree-sitter build in {repo_dir}"))?;
+
+    let mut tail = String::from_utf8_lossy(&output.stdout).into_owned();
+    tail.push_str(&String::from_utf8_lossy(&output.stderr));
+    tail.push_str(&format!("[end] {:.1}s\n", started.elapsed().as_secs_f64()));
+
+    fs::write(
+        build_log,
         format!(
-            "{{ printf '[start] %s\n' \"$(date)\"; printf '[cmd] %s\n' '{}' ; EMCC_DEBUG=1 {}; printf '[end] %s\n' \"$(date)\"; }} 2>&1 | tee \"{}\"",
-            build_cmd,
-            build_cmd,
-            build_log.display()
-        )
-    } else {
-        format!(
-            "{{ printf '[start] %s\n' \"$(date)\"; printf '[cmd] %s\n' '{}' ; {}; printf '[end] %s\n' \"$(date)\"; }} 2>&1 | tee \"{}\"",
-            build_cmd,
-            build_cmd,
-            build_log.display()
-        )
-    };
+            "[cmd] tree-sitter build --wasm -o {}\n{tail}",
+            wasm_file.display()
+        ),
+    )
+    .with_context(|| format!("failed to write {}", build_log.display()))?;
+    print!("{tail}");
 
-    let mut cmd = Command::new("sh");
-    cmd.current_dir(repo_dir).arg("-c").arg(shell_cmd);
-
-    if let Some(python3) = resolve_python3_10_plus() {
-        cmd.env("EMSDK_PYTHON", &python3).env("PYTHON", python3);
-    }
-
-    let status = cmd
-        .status()
-        .with_context(|| format!("failed to build wasm in {repo_dir}"))?;
-    if !status.success() {
+    if !output.status.success() {
         bail!("tree-sitter build failed in {repo_dir}");
     }
 
     Ok(())
-}
-
-fn resolve_python3_10_plus() -> Option<String> {
-    let python3 = run_cmd("command -v python3").ok()?;
-    if python3.is_empty() {
-        return None;
-    }
-
-    let status = Command::new(&python3)
-        .arg("-c")
-        .arg("import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)")
-        .status()
-        .ok()?;
-
-    if status.success() {
-        Some(python3)
-    } else {
-        None
-    }
 }
 
 fn write_tree_sitter_json(
@@ -2392,49 +3188,6 @@ fn parse_npm_versions_json(input: &str) -> Result<Vec<String>> {
     }
 }
 
-fn parser_revision_published(pkg_name: &str, ts_cli: &str, rev: &str) -> Result<bool> {
-    let output = Command::new("npm")
-        .args(["view", pkg_name, "versions", "--json"])
-        .output()
-        .with_context(|| format!("failed to inspect published versions for {pkg_name}"))?;
-
-    if !output.status.success() {
-        return Ok(false);
-    }
-
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    let versions = parse_npm_versions_json(&stdout)?;
-    let prefix = format!("{ts_cli}.");
-
-    for version in versions
-        .iter()
-        .filter(|version| version.starts_with(&prefix))
-    {
-        let field_output = Command::new("npm")
-            .args(["view", &format!("{pkg_name}@{version}"), "lumis", "--json"])
-            .output()
-            .with_context(|| format!("failed to inspect metadata for {pkg_name}@{version}"))?;
-
-        if !field_output.status.success() {
-            continue;
-        }
-
-        let fields: Value = serde_json::from_slice(&field_output.stdout)
-            .with_context(|| format!("invalid metadata for {pkg_name}@{version}"))?;
-        let published_rev = fields.get("rev").and_then(Value::as_str).unwrap_or("");
-        let published_ts = fields
-            .get("treeSitter")
-            .and_then(Value::as_str)
-            .unwrap_or("");
-
-        if published_rev == rev && published_ts == ts_cli {
-            return Ok(true);
-        }
-    }
-
-    Ok(false)
-}
-
 fn stage_wasm(name: &str) -> Result<()> {
     let toml = read_languages_toml()?;
     let (parser_name, info) = toml
@@ -2451,12 +3204,12 @@ fn stage_wasm(name: &str) -> Result<()> {
     let wasm_name = info.wasm_name.as_deref().unwrap_or(&default_wasm_name);
     let pkg_name = format!("@lumis-sh/wasm-{}", wasm_package_suffix(wasm_name));
 
-    let wasm_file = format!("tmp/wasms/{wasm_name}.wasm");
+    let wasm_file = format!("tmp/wasm/build/{wasm_name}.wasm");
     if !Path::new(&wasm_file).exists() {
         bail!("ERROR: {wasm_file} not found. Run 'mise run wasm-build {wasm_name}' first.");
     }
 
-    let out = format!("tmp/wasm-publish/{wasm_name}");
+    let out = format!("tmp/wasm/publish/{wasm_name}");
     let _ = fs::remove_dir_all(&out);
     fs::create_dir_all(&out)?;
 
@@ -2473,20 +3226,36 @@ fn stage_wasm(name: &str) -> Result<()> {
     let version = info.version.as_deref().unwrap_or("0.1.0");
     fs::copy(&wasm_file, format!("{out}/{wasm_name}.wasm"))?;
 
-    // Generate browser entry (base64-inlined wasm)
     let wasm_bytes = fs::read(&wasm_file)?;
-    let base64_wasm = {
-        use base64::prelude::*;
-        BASE64_STANDARD.encode(&wasm_bytes)
+    let wasm_sha256 = sha256_hex(&wasm_bytes);
+    let grammar_name = wasm_grammar_name(&wasm_bytes)?;
+    let languages = packaged_languages(&toml, wasm_name)?;
+    let definition_hash = language_definition_hash(&toml, wasm_name, &languages)?;
+    let language_ids = languages.keys().cloned().collect::<Vec<_>>();
+    let languages_text = language_ids.join(", ");
+    let language_package = LanguagePackage {
+        package_name: pkg_name.clone(),
+        version: npm_version.clone(),
+        definition_hash: definition_hash.clone(),
+        parser: ParserMetadata {
+            name: wasm_name.to_string(),
+            grammar_name,
+            upstream_version: info.version.clone(),
+            revision: info.rev.clone(),
+            sha256: wasm_sha256.clone(),
+            size: u64::try_from(wasm_bytes.len()).expect("parser size fits in u64"),
+        },
+        languages,
     };
-    let browser_template = fs::read_to_string("templates/wasm/index.js.template")?;
-    let browser_entry = browser_template.replace("{base64_wasm}", &base64_wasm);
-    fs::write(format!("{out}/index.js"), browser_entry)?;
+    language_package.validate()?;
+    fs::write(
+        format!("{out}/lumis.json"),
+        format!("{}\n", serde_json::to_string_pretty(&language_package)?),
+    )?;
 
-    // Generate Node.js entry (reads from disk)
-    let node_template = fs::read_to_string("templates/wasm/index.node.js.template")?;
-    let node_entry = node_template.replace("{wasm_name}", wasm_name);
-    fs::write(format!("{out}/index.node.js"), node_entry)?;
+    let browser_template = fs::read_to_string("templates/wasm/index.js.template")?;
+    let browser_entry = browser_template.replace("{wasm_name}", wasm_name);
+    fs::write(format!("{out}/index.js"), browser_entry)?;
 
     fs::copy(
         "templates/wasm/index.d.ts.template",
@@ -2495,7 +3264,8 @@ fn stage_wasm(name: &str) -> Result<()> {
 
     let readme = readme_template
         .replace("{wasm_name}", wasm_name)
-        .replace("{lang}", parser_name)
+        .replace("{pkg_name}", &pkg_name)
+        .replace("{languages_text}", &languages_text)
         .replace("{git_url}", git_url)
         .replace("{rev}", rev)
         .replace("{upstream_version}", version)
@@ -2509,15 +3279,200 @@ fn stage_wasm(name: &str) -> Result<()> {
     let pkg = pkg_template
         .replace("{pkg_name}", &pkg_name)
         .replace("{npm_version}", &npm_version)
-        .replace("{lang}", parser_name)
-        .replace("{upstream_version}", version)
-        .replace("{rev}", rev)
+        .replace("{languages_text}", &languages_text)
         .replace("{tree_sitter_cli}", &ts_cli_minor)
-        .replace("{wasm_name}", wasm_name);
+        .replace("{wasm_name}", wasm_name)
+        .replace("{definition_hash}", &definition_hash);
     fs::write(format!("{out}/package.json"), pkg)?;
 
+    let store = "tmp/wasm/local";
+    let local = format!("{store}/parsers");
+    fs::create_dir_all(&local)?;
+    let suffix = wasm_package_suffix(wasm_name);
+    fs::write(
+        format!("{local}/{suffix}.lumis.json"),
+        serde_json::to_vec(&language_package)?,
+    )?;
+    fs::copy(
+        &wasm_file,
+        format!("{local}/{wasm_name}-{npm_version}-{wasm_sha256}.wasm"),
+    )?;
+
     println!("Staged in {out}");
+    println!("Runtime-ready copy in {local} as {npm_version}");
+    println!("Use it with: export LUMIS_DATA_DIR=$PWD/{store}");
     Ok(())
+}
+
+/// Lay the committed parser fixtures out the way a published package would be,
+/// so every runtime's tests exercise the real resolve, verify and load path
+/// without a network.
+fn stage_test_parsers(out: &Path) -> Result<()> {
+    const FIXTURES: &str = "packages/javascript/lumis/test/fixtures/wasm";
+
+    let toml = read_languages_toml()?;
+    let fixture_version = lumis_wasm_runtime::lowest_compatible_package_version();
+    let parsers = out.join("parsers");
+    fs::create_dir_all(&parsers)?;
+
+    let mut staged = 0usize;
+    for entry in fs::read_dir(FIXTURES)? {
+        let path = entry?.path();
+        if path.extension().and_then(|ext| ext.to_str()) != Some("wasm") {
+            continue;
+        }
+        let wasm_name = path
+            .file_stem()
+            .and_then(|stem| stem.to_str())
+            .with_context(|| format!("unreadable fixture name: {}", path.display()))?
+            .to_string();
+
+        let wasm = fs::read(&path)?;
+        let languages = packaged_languages(&toml, &wasm_name)?;
+        let package = LanguagePackage {
+            package_name: format!("@lumis-sh/wasm-{}", wasm_package_suffix(&wasm_name)),
+            version: fixture_version.clone(),
+            definition_hash: language_definition_hash(&toml, &wasm_name, &languages)?,
+            parser: ParserMetadata {
+                name: wasm_name.clone(),
+                grammar_name: wasm_grammar_name(&wasm)?,
+                upstream_version: None,
+                revision: None,
+                sha256: sha256_hex(&wasm),
+                size: u64::try_from(wasm.len()).expect("parser size fits in u64"),
+            },
+            languages,
+        };
+        package.validate()?;
+
+        fs::write(
+            parsers.join(format!("{}.lumis.json", wasm_package_suffix(&wasm_name))),
+            serde_json::to_vec(&package)?,
+        )?;
+        fs::write(parsers.join(parser_filename(&package)), &wasm)?;
+        staged += 1;
+    }
+
+    if staged == 0 {
+        bail!("no parser fixtures found in {FIXTURES}");
+    }
+    println!("{}", out.display());
+    Ok(())
+}
+
+fn packaged_languages(
+    toml: &LanguagesToml,
+    wasm_name: &str,
+) -> Result<BTreeMap<String, PackagedLanguage>> {
+    let default_brackets =
+        fs::read_to_string("queries/processed/default/brackets.scm").unwrap_or_default();
+    let mut languages = BTreeMap::new();
+
+    for (id, info) in &toml.parsers {
+        let default_name = format!("tree-sitter-{id}");
+        if info.wasm_name.as_deref().unwrap_or(&default_name) != wasm_name {
+            continue;
+        }
+
+        let query_name = info.query_name.as_deref().unwrap_or(id);
+        let query = |kind: &str| {
+            fs::read_to_string(format!("queries/processed/{query_name}/{kind}.scm"))
+                .unwrap_or_default()
+        };
+        let brackets = {
+            let language_brackets = query("brackets");
+            if language_brackets.is_empty() {
+                default_brackets.clone()
+            } else {
+                language_brackets
+            }
+        };
+
+        languages.insert(
+            id.clone(),
+            PackagedLanguage {
+                aliases: info.aliases.clone(),
+                highlights: query("highlights"),
+                injections: query("injections"),
+                locals: query("locals"),
+                brackets,
+            },
+        );
+    }
+
+    if languages.is_empty() {
+        bail!("no languages use WASM parser '{wasm_name}'");
+    }
+    Ok(languages)
+}
+
+fn language_definition_hash(
+    toml: &LanguagesToml,
+    wasm_name: &str,
+    languages: &BTreeMap<String, PackagedLanguage>,
+) -> Result<String> {
+    use sha2::{Digest, Sha256};
+
+    let revisions = toml
+        .parsers
+        .iter()
+        .filter_map(|(id, info)| {
+            let default_name = format!("tree-sitter-{id}");
+            (info.wasm_name.as_deref().unwrap_or(&default_name) == wasm_name)
+                .then_some(info.rev.as_deref().unwrap_or(""))
+        })
+        .collect::<HashSet<_>>();
+    if revisions.len() != 1 {
+        bail!("WASM parser '{wasm_name}' must have one shared parser revision");
+    }
+
+    let mut digest = Sha256::new();
+    hash_definition_field(&mut digest, b"lumis-language-package-v3");
+    hash_definition_field(&mut digest, wasm_name.as_bytes());
+    hash_definition_field(
+        &mut digest,
+        revisions.into_iter().next().unwrap_or_default().as_bytes(),
+    );
+    for (id, language) in languages {
+        hash_definition_field(&mut digest, id.as_bytes());
+        let mut aliases = language.aliases.clone();
+        aliases.sort();
+        for alias in aliases {
+            hash_definition_field(&mut digest, alias.as_bytes());
+        }
+        hash_definition_field(&mut digest, language.highlights.as_bytes());
+        hash_definition_field(&mut digest, language.injections.as_bytes());
+        hash_definition_field(&mut digest, language.locals.as_bytes());
+        hash_definition_field(&mut digest, language.brackets.as_bytes());
+    }
+    Ok(lower_hex(&digest.finalize()))
+}
+
+fn hash_definition_field(digest: &mut sha2::Sha256, value: &[u8]) {
+    use sha2::Digest;
+
+    digest.update((value.len() as u64).to_be_bytes());
+    digest.update(value);
+}
+
+fn wasm_grammar_name(wasm: &[u8]) -> Result<String> {
+    lumis_wasm_runtime::grammar_name(wasm)
+        .context("WASM parser must export exactly one tree_sitter_* language symbol")
+}
+
+fn sha256_hex(bytes: &[u8]) -> String {
+    lumis_wasm_runtime::sha256_hex(bytes)
+}
+
+fn lower_hex(bytes: &[u8]) -> String {
+    const HEX: &[u8; 16] = b"0123456789abcdef";
+
+    let mut output = String::with_capacity(bytes.len() * 2);
+    for byte in bytes {
+        output.push(HEX[(byte >> 4) as usize] as char);
+        output.push(HEX[(byte & 0x0f) as usize] as char);
+    }
+    output
 }
 
 fn wasm_meta(name: &str) -> Result<()> {
@@ -2534,20 +3489,204 @@ fn wasm_meta(name: &str) -> Result<()> {
 
     let default_wasm_name = format!("tree-sitter-{parser_name}");
     let wasm_name = info.wasm_name.as_deref().unwrap_or(&default_wasm_name);
-    let rev = info.rev.as_deref().unwrap_or("");
-    let pkg_name = format!("@lumis-sh/wasm-{}", wasm_package_suffix(wasm_name));
-    let ts_cli_version = run_cmd("tree-sitter --version")
-        .unwrap_or_default()
-        .replace("tree-sitter ", "");
-    let ts_cli_minor = tree_sitter_cli_minor(&ts_cli_version)?;
-    let npm_version = next_wasm_npm_version(&pkg_name, &ts_cli_minor)?;
-    let published = parser_revision_published(&pkg_name, &ts_cli_minor, rev)?;
 
     println!("wasm_name={wasm_name}");
-    println!("pkg_name={pkg_name}");
-    println!("npm_version={npm_version}");
-    println!("tree_sitter_cli={ts_cli_minor}");
-    println!("published={published}");
+    Ok(())
+}
+
+const PACKAGE_FORMAT_VERSION: u32 = 3;
+
+const REGISTRY_CONCURRENCY: usize = 16;
+
+const REGISTRY_ATTEMPTS: u32 = 3;
+
+const REGISTRY_TIMEOUT: Duration = Duration::from_secs(30);
+
+/// The `major.minor` series published packages are versioned within.
+///
+/// Read from the `mise.toml` pin rather than the installed CLI, so this answers
+/// the same question on a machine that has no tree-sitter installed. A pin that
+/// is not a version — `latest`, which `mise use tree-sitter@latest` writes —
+/// is rejected, because it silently produced package versions like `latest.1`.
+fn supported_tree_sitter_series() -> Result<String> {
+    let mise: toml::Value =
+        toml::from_str(&fs::read_to_string("mise.toml").context("could not read mise.toml")?)?;
+    let pin = mise
+        .get("tools")
+        .and_then(|tools| tools.get("tree-sitter"))
+        .context("mise.toml does not pin tree-sitter")?;
+    let pin = pin
+        .as_str()
+        .context("mise.toml's tree-sitter pin must be a version string such as \"0.26\"")?;
+    tree_sitter_series(pin)
+}
+
+fn tree_sitter_series(pin: &str) -> Result<String> {
+    let version = lenient_semver::parse(pin).map_err(|error| {
+        anyhow::anyhow!(
+            "mise.toml pins tree-sitter = {pin:?}; it must be a version such as \"0.26\" so the \
+             published package series can be derived from it: {error}"
+        )
+    })?;
+    Ok(format!("{}.{}", version.major, version.minor))
+}
+
+/// The full packument carries every version's `package.json`, so one request
+/// answers what `npm view` needs one call per version to answer.
+///
+/// Unlike `npm view`, this reads npmjs.org rather than whatever registry npm is
+/// configured for. Both release workflows pin that host explicitly and every
+/// `@lumis-sh/wasm-*` package is public, so a mirror or private registry is out
+/// of scope here.
+fn fetch_packument(agent: &ureq::Agent, pkg: &str) -> Result<Option<Value>> {
+    let url = format!("https://registry.npmjs.org/{pkg}");
+    let mut last_error = None;
+
+    for attempt in 0..REGISTRY_ATTEMPTS {
+        if attempt > 0 {
+            thread::sleep(Duration::from_millis(250 * u64::from(attempt)));
+        }
+        // `call` returns once the headers arrive, so a reset or truncated body
+        // surfaces from the read and is just as transient as a failed connect.
+        let read = agent
+            .get(&url)
+            .call()
+            .and_then(|mut response| response.body_mut().read_to_string());
+        match read {
+            Ok(body) => {
+                let packument = serde_json::from_str(&body)
+                    .with_context(|| format!("invalid packument for {pkg}"))?;
+                return Ok(Some(packument));
+            }
+            Err(ureq::Error::StatusCode(404)) => return Ok(None),
+            Err(err) => last_error = Some(err),
+        }
+    }
+
+    Err(last_error.expect("a failed attempt records its error"))
+        .with_context(|| format!("failed to query {pkg} on the npm registry"))
+}
+
+/// Each request is almost entirely round trip, so the whole catalog is worth
+/// fetching at once. Results come back in the order the packages were given.
+fn fetch_packuments(packages: &[String]) -> Vec<Result<Option<Value>>> {
+    let agent: ureq::Agent = ureq::Agent::config_builder()
+        .timeout_global(Some(REGISTRY_TIMEOUT))
+        .build()
+        .into();
+    let next = AtomicUsize::new(0);
+    let mut fetched: Vec<(usize, Result<Option<Value>>)> = thread::scope(|scope| {
+        let workers: Vec<_> = (0..REGISTRY_CONCURRENCY.min(packages.len()))
+            .map(|_| {
+                scope.spawn(|| {
+                    let mut done = Vec::new();
+                    loop {
+                        let index = next.fetch_add(1, Ordering::Relaxed);
+                        let Some(pkg) = packages.get(index) else {
+                            return done;
+                        };
+                        done.push((index, fetch_packument(&agent, pkg)));
+                    }
+                })
+            })
+            .collect();
+        workers
+            .into_iter()
+            .flat_map(|worker| worker.join().expect("npm registry worker panicked"))
+            .collect()
+    });
+    fetched.sort_by_key(|(index, _)| *index);
+    fetched.into_iter().map(|(_, result)| result).collect()
+}
+
+/// Whether some published version in the current series already carries this
+/// exact language definition.
+fn published_for_definition(packument: &Value, expected: &str, series: &str) -> bool {
+    let Some(versions) = packument.get("versions").and_then(Value::as_object) else {
+        return false;
+    };
+    let prefix = format!("{series}.");
+    versions.iter().any(|(version, manifest)| {
+        version.starts_with(&prefix)
+            && manifest
+                .get("lumis")
+                .is_some_and(|meta| definition_matches(meta, expected, series))
+    })
+}
+
+/// Packages published before the v3 format carry no `definitionHash`, so they
+/// never match and are always rebuilt.
+fn definition_matches(meta: &Value, expected: &str, series: &str) -> bool {
+    meta.get("definitionHash").and_then(Value::as_str) == Some(expected)
+        && meta.get("treeSitter").and_then(Value::as_str) == Some(series)
+        && meta.get("formatVersion").and_then(Value::as_u64) == Some(PACKAGE_FORMAT_VERSION.into())
+}
+
+/// Parsers whose published package no longer matches `languages.toml`.
+fn wasm_needed(filter: &str, force: &str) -> Result<()> {
+    let series = supported_tree_sitter_series()?;
+    let toml = read_languages_toml()?;
+    let force = matches!(
+        force.to_ascii_lowercase().as_str(),
+        "1" | "true" | "yes" | "on"
+    );
+    let wanted: HashSet<&str> = filter
+        .split(',')
+        .map(str::trim)
+        .filter(|part| !part.is_empty())
+        .collect();
+
+    let mut revisions: BTreeMap<String, &str> = BTreeMap::new();
+    for (id, info) in &toml.parsers {
+        let default_name = format!("tree-sitter-{id}");
+        let wasm_name = info.wasm_name.as_deref().unwrap_or(&default_name);
+        let revision = info.rev.as_deref().unwrap_or("");
+        if let Some(previous) = revisions.insert(wasm_name.to_string(), revision) {
+            if previous != revision {
+                bail!("{wasm_name} is shared by different revisions: {previous} and {revision}");
+            }
+        }
+    }
+
+    let mut candidates = Vec::new();
+    let mut seen = HashSet::new();
+    for (id, info) in &toml.parsers {
+        let default_name = format!("tree-sitter-{id}");
+        let wasm_name = info.wasm_name.as_deref().unwrap_or(&default_name);
+        if !wanted.is_empty() && !wanted.contains(id.as_str()) && !wanted.contains(wasm_name) {
+            continue;
+        }
+        if seen.insert(wasm_name.to_string()) {
+            candidates.push(wasm_name.to_string());
+        }
+    }
+
+    if force {
+        println!("{}", candidates.join(" "));
+        return Ok(());
+    }
+
+    let mut checks = Vec::with_capacity(candidates.len());
+    for wasm_name in candidates {
+        let languages = packaged_languages(&toml, &wasm_name)?;
+        let expected = language_definition_hash(&toml, &wasm_name, &languages)?;
+        let pkg = format!("@lumis-sh/wasm-{}", wasm_package_suffix(&wasm_name));
+        checks.push((wasm_name, pkg, expected));
+    }
+
+    let packages: Vec<String> = checks.iter().map(|(_, pkg, _)| pkg.clone()).collect();
+
+    let mut needed = Vec::new();
+    for ((wasm_name, pkg, expected), packument) in checks.iter().zip(fetch_packuments(&packages)) {
+        let published = packument?
+            .is_some_and(|packument| published_for_definition(&packument, expected, &series));
+        if !published {
+            eprintln!("Need to publish {pkg} for {expected}");
+            needed.push(wasm_name.clone());
+        }
+    }
+
+    println!("{}", needed.join(" "));
     Ok(())
 }
 
@@ -2556,10 +3695,598 @@ fn wasm_package_suffix(wasm_name: &str) -> &str {
 }
 
 #[cfg(test)]
+mod crate_dep_tests {
+    use super::*;
+
+    fn versions() -> BTreeMap<String, String> {
+        RELEASED_CRATES
+            .iter()
+            .map(|name| (name.to_string(), "2.3.0".to_string()))
+            .collect()
+    }
+
+    fn dependency(manifest: &str, requirement: Option<&str>) -> CrateDependency {
+        CrateDependency {
+            manifest: manifest.to_string(),
+            name: "lumis-core".to_string(),
+            requirement: requirement.map(str::to_string),
+            publishable: true,
+        }
+    }
+
+    /// The waived entry keeps every case above the corpus floor, so a real
+    /// problem is what fails rather than the sanity check underneath it.
+    fn padding() -> Vec<CrateDependency> {
+        let (manifest, name, _) = CRATE_DEP_WAIVERS[0];
+        let mut dependencies = vec![CrateDependency {
+            manifest: manifest.to_string(),
+            name: name.to_string(),
+            requirement: Some("0.0.1".to_string()),
+            publishable: true,
+        }];
+        dependencies.extend(
+            (0..MIN_CHECKED_CRATE_DEPS)
+                .map(|index| dependency(&format!("c{index}"), Some("2.3.0"))),
+        );
+        dependencies
+    }
+
+    fn problems(extra: Vec<CrateDependency>) -> Vec<String> {
+        let mut dependencies = padding();
+        dependencies.extend(extra);
+        let count = dependencies.len();
+        crate_dep_problems(&versions(), &dependencies, count).0
+    }
+
+    #[test]
+    fn matching_requirements_are_accepted() {
+        assert!(problems(Vec::new()).is_empty());
+    }
+
+    #[test]
+    fn a_requirement_below_the_workspace_version_is_reported() {
+        let reported = problems(vec![dependency("crates/lumis/Cargo.toml", Some("2"))]);
+        assert_eq!(reported.len(), 1);
+        assert!(
+            reported[0].contains("lumis-core = \"2\", expected \"2.3.0\""),
+            "{reported:?}"
+        );
+    }
+
+    #[test]
+    fn a_newer_requirement_than_the_workspace_is_reported() {
+        assert_eq!(
+            problems(vec![dependency("crates/lumis/Cargo.toml", Some("2.4.0"))]).len(),
+            1
+        );
+    }
+
+    #[test]
+    fn a_publishable_crate_must_declare_a_version() {
+        let reported = problems(vec![dependency("crates/lumis/Cargo.toml", None)]);
+        assert_eq!(reported.len(), 1);
+        assert!(reported[0].contains("declares no version"), "{reported:?}");
+    }
+
+    #[test]
+    fn an_unpublished_crate_may_omit_the_version() {
+        let mut unpublished = dependency("benchmarks/rust/Cargo.toml", None);
+        unpublished.publishable = false;
+        assert!(problems(vec![unpublished]).is_empty());
+    }
+
+    #[test]
+    fn a_waiver_that_stopped_drifting_is_reported() {
+        let (manifest, name, _) = CRATE_DEP_WAIVERS[0];
+        let mut dependencies: Vec<CrateDependency> = padding()
+            .into_iter()
+            .filter(|dependency| dependency.manifest != manifest)
+            .collect();
+        dependencies.push(CrateDependency {
+            manifest: manifest.to_string(),
+            name: name.to_string(),
+            requirement: Some("2.3.0".to_string()),
+            publishable: true,
+        });
+        let count = dependencies.len();
+        let reported = crate_dep_problems(&versions(), &dependencies, count).0;
+        assert_eq!(reported.len(), 1);
+        assert!(reported[0].contains("obsolete"), "{reported:?}");
+    }
+
+    #[test]
+    fn a_waiver_whose_dependency_is_gone_is_reported() {
+        let (manifest, _, _) = CRATE_DEP_WAIVERS[0];
+        let dependencies: Vec<CrateDependency> = padding()
+            .into_iter()
+            .filter(|dependency| dependency.manifest != manifest)
+            .collect();
+        let count = dependencies.len();
+        let reported = crate_dep_problems(&versions(), &dependencies, count).0;
+        assert_eq!(reported.len(), 1);
+        assert!(reported[0].contains("remove its waiver"), "{reported:?}");
+    }
+
+    fn fixed(manifest: &str) -> String {
+        let mut document: toml_edit::DocumentMut = manifest.parse().expect("valid manifest");
+        fix_manifest(
+            "crates/example/Cargo.toml",
+            true,
+            &mut document,
+            &versions(),
+        );
+        document.to_string()
+    }
+
+    fn collected(manifest: &str) -> Vec<(String, Option<String>)> {
+        let mut document: toml_edit::DocumentMut = manifest.parse().expect("valid manifest");
+        let mut found = Vec::new();
+        for_each_dependency(document.as_table_mut(), &mut |name, spec| {
+            found.push((name.to_string(), requirement_of(spec)));
+        });
+        found
+    }
+
+    #[test]
+    fn target_specific_and_renamed_dependencies_are_visited() {
+        let mut found = collected(
+            r#"
+[dependencies]
+lumis-core = { version = "2.0.0", features = ["all-languages"] }
+
+[target.'cfg(windows)'.dependencies]
+core-alias = { package = "lumis-core", version = "2.1.0" }
+
+[build-dependencies]
+lumis-build = "1.0.0"
+"#,
+        );
+        found.sort();
+
+        assert_eq!(
+            found,
+            vec![
+                ("lumis-build".to_string(), Some("1.0.0".to_string())),
+                ("lumis-core".to_string(), Some("2.0.0".to_string())),
+                // Reached only through `[target.'cfg(windows)'.dependencies]`,
+                // and named by `package = "lumis-core"` rather than its key.
+                ("lumis-core".to_string(), Some("2.1.0".to_string())),
+            ]
+        );
+    }
+
+    #[test]
+    fn a_dependency_table_keeps_its_other_fields() {
+        let fixed = fixed(
+            r#"
+[dependencies.lumis-core]
+path = "../lumis-core"
+version = "2"
+default-features = false
+features = ["lang-rust"]
+"#,
+        );
+
+        assert!(fixed.contains("version = \"2.3.0\""), "{fixed}");
+        assert!(fixed.contains("path = \"../lumis-core\""), "{fixed}");
+        assert!(fixed.contains("default-features = false"), "{fixed}");
+        assert!(fixed.contains("features = [\"lang-rust\"]"), "{fixed}");
+    }
+
+    #[test]
+    fn an_inline_table_keeps_its_other_fields() {
+        let fixed = fixed(
+            "[dependencies]\nlumis-core = { path = \"../lumis-core\", version = \"2\", features = [\"lang-rust\"] }\n",
+        );
+
+        assert!(fixed.contains("version = \"2.3.0\""), "{fixed}");
+        assert!(fixed.contains("path = \"../lumis-core\""), "{fixed}");
+        assert!(fixed.contains("features = [\"lang-rust\"]"), "{fixed}");
+    }
+
+    #[test]
+    fn a_string_requirement_stays_a_string() {
+        assert_eq!(
+            fixed("[dependencies]\nlumis-core = \"2\"\n"),
+            "[dependencies]\nlumis-core = \"2.3.0\"\n"
+        );
+    }
+
+    #[test]
+    fn a_workspace_inherited_dependency_is_left_alone() {
+        let manifest = "[dependencies]\nlumis-core = { workspace = true }\n";
+        assert_eq!(fixed(manifest), manifest);
+
+        let mut document: toml_edit::DocumentMut = manifest.parse().expect("valid manifest");
+        let mut inherited = Vec::new();
+        for_each_dependency(document.as_table_mut(), &mut |_, spec| {
+            inherited.push(inherits_from_workspace(spec));
+        });
+        assert_eq!(inherited, vec![true]);
+    }
+
+    fn publishable(manifest: &str) -> bool {
+        is_publishable(&manifest.parse().expect("valid manifest"))
+    }
+
+    #[test]
+    fn a_manifest_without_a_package_is_not_publishable() {
+        assert!(!publishable("[workspace]\nmembers = []\n"));
+    }
+
+    #[test]
+    fn publish_decides_whether_a_requirement_can_reach_a_registry() {
+        assert!(publishable("[package]\nname = \"example\"\n"));
+        assert!(publishable(
+            "[package]\nname = \"example\"\npublish = true\n"
+        ));
+        assert!(!publishable(
+            "[package]\nname = \"example\"\npublish = false\n"
+        ));
+        // cargo rejects `cargo publish` for both of these.
+        assert!(!publishable(
+            "[package]\nname = \"example\"\npublish = []\n"
+        ));
+        assert!(publishable(
+            "[package]\nname = \"example\"\npublish = [\"crates-io\"]\n"
+        ));
+    }
+
+    #[test]
+    fn discovery_that_finds_nothing_fails() {
+        let (reported, checked) = crate_dep_problems(&BTreeMap::new(), &[], 0);
+        assert_eq!(checked, 0);
+        assert!(
+            reported
+                .iter()
+                .any(|problem| problem.contains("expected at least")),
+            "{reported:?}"
+        );
+        for name in RELEASED_CRATES {
+            assert!(
+                reported.iter().any(|problem| problem.starts_with(name)),
+                "{name} not reported missing: {reported:?}"
+            );
+        }
+    }
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
+
+    const HASH: &str = "a4ee9c153c66f995d081895c3e57a0a4eed81ebb91f2320a0810bbf51c3598dc";
+
+    fn packument(versions: Value) -> Value {
+        json!({ "versions": versions })
+    }
+
+    fn marker(hash: &str, series: &str, format: u32) -> Value {
+        json!({
+            "lumis": {
+                "definitionHash": hash,
+                "treeSitter": series,
+                "formatVersion": format,
+            }
+        })
+    }
+
+    #[test]
+    fn a_published_version_carrying_the_definition_needs_no_republish() {
+        let packument = packument(json!({
+            "0.25.0": marker(HASH, "0.25", PACKAGE_FORMAT_VERSION),
+            "0.26.0": json!({ "lumis": { "rev": "18b0515", "treeSitter": "0.26" } }),
+            "0.26.1": marker(HASH, "0.26", PACKAGE_FORMAT_VERSION),
+        }));
+
+        assert!(published_for_definition(&packument, HASH, "0.26"));
+    }
+
+    #[test]
+    fn a_definition_published_only_outside_the_series_still_needs_publishing() {
+        let packument = packument(json!({
+            "0.25.0": marker(HASH, "0.25", PACKAGE_FORMAT_VERSION),
+        }));
+
+        assert!(!published_for_definition(&packument, HASH, "0.26"));
+    }
+
+    #[test]
+    fn a_neighbouring_series_is_not_a_prefix_match() {
+        let packument = packument(json!({
+            "0.260.0": marker(HASH, "0.26", PACKAGE_FORMAT_VERSION),
+        }));
+
+        assert!(!published_for_definition(&packument, HASH, "0.26"));
+    }
+
+    #[test]
+    fn every_stale_marker_needs_publishing() {
+        for (label, manifest) in [
+            ("no lumis key", json!({ "name": "@lumis-sh/wasm-rust" })),
+            (
+                "pre-v3 marker",
+                json!({ "lumis": { "rev": "18b0515", "treeSitter": "0.26" } }),
+            ),
+            (
+                "older format",
+                marker(HASH, "0.26", PACKAGE_FORMAT_VERSION - 1),
+            ),
+            (
+                "different definition",
+                marker("0000000000000000", "0.26", PACKAGE_FORMAT_VERSION),
+            ),
+            (
+                "series disagrees with the version",
+                marker(HASH, "0.25", PACKAGE_FORMAT_VERSION),
+            ),
+        ] {
+            let packument = packument(json!({ "0.26.0": manifest }));
+            assert!(
+                !published_for_definition(&packument, HASH, "0.26"),
+                "{label} must not count as published"
+            );
+        }
+    }
+
+    #[test]
+    fn a_packument_without_versions_needs_publishing() {
+        assert!(!published_for_definition(
+            &json!({ "dist-tags": { "latest": "0.26.1" } }),
+            HASH,
+            "0.26"
+        ));
+    }
+
+    #[test]
+    fn every_build_input_changes_the_build_id() {
+        let baseline = wasm_build_id("git://g", "rev1", Some("sub"), false, "ts\nem");
+
+        for (label, other) in [
+            (
+                "git",
+                wasm_build_id("git://other", "rev1", Some("sub"), false, "ts\nem"),
+            ),
+            (
+                "rev",
+                wasm_build_id("git://g", "rev2", Some("sub"), false, "ts\nem"),
+            ),
+            (
+                "location",
+                wasm_build_id("git://g", "rev1", None, false, "ts\nem"),
+            ),
+            (
+                "generate",
+                wasm_build_id("git://g", "rev1", Some("sub"), true, "ts\nem"),
+            ),
+            (
+                "toolchain",
+                wasm_build_id("git://g", "rev1", Some("sub"), false, "ts\nem2"),
+            ),
+        ] {
+            assert_ne!(baseline, other, "{label} must invalidate a cached parser");
+        }
+
+        assert_eq!(
+            baseline,
+            wasm_build_id("git://g", "rev1", Some("sub"), false, "ts\nem"),
+            "the same inputs must reuse a cached parser"
+        );
+    }
+
+    #[test]
+    fn a_parser_is_reused_only_when_it_is_intact_and_current() {
+        let dir = PathBuf::from(tmpdir().unwrap());
+        let wasm = dir.join("tree-sitter-x.wasm");
+        let id_file = dir.join("tree-sitter-x.build-id");
+        let seed = |bytes: &[u8], id: &str| {
+            fs::write(&wasm, bytes).unwrap();
+            fs::write(&id_file, id).unwrap();
+        };
+
+        seed(b"\0asm\x01\0\0\0", "id-1");
+        assert!(
+            cached_parser_is_current(&wasm, &id_file, "id-1"),
+            "an intact parser recorded against these inputs is reusable"
+        );
+        assert!(
+            !cached_parser_is_current(&wasm, &id_file, "id-2"),
+            "a different build id must not be reused"
+        );
+
+        seed(b"corrupt", "id-1");
+        assert!(
+            !cached_parser_is_current(&wasm, &id_file, "id-1"),
+            "bytes that are not a wasm module must not be reused"
+        );
+
+        seed(b"\0asm\x01\0\0\0", "id-1");
+        fs::remove_file(&id_file).unwrap();
+        assert!(
+            !cached_parser_is_current(&wasm, &id_file, "id-1"),
+            "a parser with no recorded build id must not be reused"
+        );
+
+        fs::write(&id_file, "id-1").unwrap();
+        fs::remove_file(&wasm).unwrap();
+        assert!(
+            !cached_parser_is_current(&wasm, &id_file, "id-1"),
+            "a recorded build id without a parser must not be reused"
+        );
+
+        fs::remove_dir_all(&dir).unwrap();
+    }
+
+    fn query_sources() -> BTreeMap<String, QueryInfo> {
+        ["default", "python", "sql"]
+            .into_iter()
+            .map(|name| {
+                (
+                    name.to_string(),
+                    QueryInfo {
+                        git: format!("https://example.invalid/{name}.git"),
+                        rev: "0000000".to_string(),
+                        path: None,
+                    },
+                )
+            })
+            .collect()
+    }
+
+    fn selected(name: &str) -> Vec<String> {
+        queries_to_upgrade(&query_sources(), name)
+            .into_iter()
+            .map(|(query_name, _)| query_name.clone())
+            .collect()
+    }
+
+    #[test]
+    fn an_unscoped_upgrade_covers_every_query_source() {
+        assert_eq!(selected(""), ["default", "python", "sql"]);
+    }
+
+    #[test]
+    fn a_language_with_its_own_query_source_upgrades_only_that_source() {
+        assert_eq!(selected("python"), ["python"]);
+    }
+
+    /// Most languages read `queries.default`, and the weekly language update
+    /// runs one job per language. Letting a scoped run reach `default` opened
+    /// 115 pull requests carrying the same shared revision bump.
+    #[test]
+    fn a_language_backed_by_the_default_source_upgrades_nothing() {
+        assert!(selected("c").is_empty());
+        assert!(selected("rust").is_empty());
+    }
+
+    #[test]
+    fn the_default_source_is_still_upgradable_by_name() {
+        assert_eq!(selected("default"), ["default"]);
+    }
+
+    fn published(hash: &str) -> Value {
+        serde_json::json!({
+            "definitionHash": hash,
+            "treeSitter": "0.26",
+            "formatVersion": 3,
+        })
+    }
+
+    #[test]
+    fn a_matching_package_needs_no_republish() {
+        assert!(definition_matches(&published("abc"), "abc", "0.26"));
+    }
+
+    /// A stub compiler that exits with `code`, so the test decides the status
+    /// `build_repo_wasm_with` has to react to.
+    #[cfg(unix)]
+    fn stub_tree_sitter(dir: &Path, code: i32) -> PathBuf {
+        use std::os::unix::fs::PermissionsExt as _;
+
+        let path = dir.join("tree-sitter-stub");
+        fs::write(
+            &path,
+            format!("#!/bin/sh\necho 'stub compiler' >&2\nexit {code}\n"),
+        )
+        .unwrap();
+        fs::set_permissions(&path, fs::Permissions::from_mode(0o755)).unwrap();
+        path
+    }
+
+    // This used to pass through `sh -c ... | tee`, whose exit status is `tee`'s.
+    // A failed build reported success and the caller printed the path of a wasm
+    // that was never written.
+    #[cfg(unix)]
+    #[test]
+    fn a_build_reports_the_compiler_exit_status() {
+        let dir = std::env::temp_dir().join(format!("lumis-build-status-{}", std::process::id()));
+        fs::create_dir_all(&dir).unwrap();
+        let log = dir.join("build.log");
+
+        let failed = build_repo_wasm_with(
+            stub_tree_sitter(&dir, 1).to_str().unwrap(),
+            dir.to_str().unwrap(),
+            &dir.join("out.wasm"),
+            &log,
+        );
+        assert!(failed.is_err(), "a nonzero exit status must be an error");
+        assert!(
+            fs::read_to_string(&log).unwrap().contains("stub compiler"),
+            "a failed build still has to leave its output in the log"
+        );
+
+        let succeeded = build_repo_wasm_with(
+            stub_tree_sitter(&dir, 0).to_str().unwrap(),
+            dir.to_str().unwrap(),
+            &dir.join("out.wasm"),
+            &log,
+        );
+
+        let _ = fs::remove_dir_all(&dir);
+        assert!(succeeded.is_ok(), "a zero exit status must succeed");
+    }
+
+    #[test]
+    fn every_field_must_agree() {
+        assert!(!definition_matches(&published("abc"), "def", "0.26"));
+        assert!(!definition_matches(&published("abc"), "abc", "0.27"));
+        let mut old_format = published("abc");
+        old_format["formatVersion"] = serde_json::json!(2);
+        assert!(!definition_matches(&old_format, "abc", "0.26"));
+    }
+
+    #[test]
+    fn a_package_predating_the_format_never_matches() {
+        // What npm actually returns for the published catalog today.
+        let legacy = serde_json::json!({
+            "language": "json",
+            "parser": "tree-sitter-json",
+            "treeSitter": "0.26",
+        });
+        assert!(!definition_matches(&legacy, "abc", "0.26"));
+    }
+    use std::path::Path;
     use std::sync::atomic::{AtomicU64, Ordering};
+    use std::sync::Mutex;
     use std::time::{SystemTime, UNIX_EPOCH};
+
+    fn run_test_git(repo: &Path, args: &[&str]) -> String {
+        let output = Command::new("git")
+            .arg("-C")
+            .arg(repo)
+            .args(args)
+            .output()
+            .expect("test git command should run");
+
+        assert!(
+            output.status.success(),
+            "git {} failed: {}",
+            args.join(" "),
+            String::from_utf8_lossy(&output.stderr)
+        );
+
+        String::from_utf8_lossy(&output.stdout).trim().to_string()
+    }
+
+    fn commit_test_revision(repo: &Path, contents: &str) -> String {
+        fs::write(repo.join("parser.c"), contents).expect("test revision should be written");
+        run_test_git(repo, &["add", "parser.c"]);
+        run_test_git(repo, &["commit", "--quiet", "-m", contents.trim()]);
+        run_test_git(repo, &["rev-parse", "HEAD"])
+    }
+
+    #[test]
+    fn release_version_from_tag_accepts_short_stable_tags() {
+        let expected = semver::Version::new(0, 20, 0);
+
+        assert_eq!(release_version_from_tag("0.20"), Some(expected.clone()));
+        assert_eq!(release_version_from_tag("v0.20"), Some(expected));
+        assert_eq!(
+            release_version_from_tag("v0.20.1"),
+            Some(semver::Version::new(0, 20, 1))
+        );
+        assert_eq!(release_version_from_tag("0.20-beta"), None);
+    }
 
     fn unique_test_root() -> std::path::PathBuf {
         static COUNTER: AtomicU64 = AtomicU64::new(0);
@@ -2570,6 +4297,28 @@ mod tests {
             .as_nanos();
         let counter = COUNTER.fetch_add(1, Ordering::Relaxed);
         std::env::temp_dir().join(format!("lumis-dev-query-test-{unique}-{counter}"))
+    }
+
+    #[test]
+    fn git_ancestry_detects_backward_parser_updates() {
+        let root = unique_test_root();
+        let source = root.join("source");
+        fs::create_dir_all(&source).expect("test repository should be created");
+
+        run_test_git(&source, &["init", "--quiet"]);
+        run_test_git(&source, &["config", "commit.gpgsign", "false"]);
+        run_test_git(&source, &["config", "user.name", "Lumis"]);
+        run_test_git(&source, &["config", "user.email", "dev@lumis.sh"]);
+        let first = commit_test_revision(&source, "first\n");
+        let second = commit_test_revision(&source, "second\n");
+        let source_url = source.to_string_lossy();
+
+        assert!(git_is_ancestor(&source_url, &first, &second)
+            .expect("forward ancestry check should succeed"));
+        assert!(!git_is_ancestor(&source_url, &second, &first)
+            .expect("backward ancestry check should succeed"));
+
+        let _ = fs::remove_dir_all(root);
     }
 
     #[test]
@@ -2689,6 +4438,23 @@ mod tests {
         let _ = fs::remove_dir_all(root);
     }
 
+    /// The working directory is process-wide, so tests that read relative query
+    /// paths have to take turns. Without this they race each other and one of
+    /// them intermittently sees the other's empty temporary tree.
+    static CWD: Mutex<()> = Mutex::new(());
+
+    fn in_directory<T>(root: &Path, body: impl FnOnce() -> T + std::panic::UnwindSafe) -> T {
+        let guard = CWD.lock().unwrap_or_else(|error| error.into_inner());
+        let cwd = std::env::current_dir().expect("cwd should be available");
+        std::env::set_current_dir(root).expect("should switch to temp dir");
+
+        let result = std::panic::catch_unwind(body);
+
+        std::env::set_current_dir(cwd).expect("should restore cwd");
+        drop(guard);
+        result.unwrap()
+    }
+
     #[test]
     fn local_override_query_detection_checks_any_query_file() {
         let root = unique_test_root();
@@ -2701,17 +4467,50 @@ mod tests {
         )
         .expect("override query should be written");
 
-        let cwd = std::env::current_dir().expect("cwd should be available");
-        std::env::set_current_dir(&root).expect("should switch to temp dir");
-
-        let result = (|| {
+        in_directory(&root, || {
             assert!(has_local_override_query("demo"));
             assert!(!has_local_override_query("missing"));
-        })();
+        });
 
-        std::env::set_current_dir(cwd).expect("should restore cwd");
-        result;
         let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn query_source_name_prefers_configured_query_name() {
+        let with_query_name: ParserInfo =
+            toml::from_str("query_name = \"nu\"").expect("parser info should parse");
+        let without_query_name: ParserInfo = toml::from_str("").expect("parser info should parse");
+
+        assert_eq!(query_source_name("nushell", &with_query_name), "nu");
+        assert_eq!(query_source_name("nushell", &without_query_name), "nushell");
+
+        let queries = BTreeMap::from([
+            (
+                "default".to_string(),
+                QueryInfo {
+                    git: "https://github.com/nvim-treesitter/nvim-treesitter.git".to_string(),
+                    rev: "default-rev".to_string(),
+                    path: None,
+                },
+            ),
+            (
+                "nu".to_string(),
+                QueryInfo {
+                    git: "https://github.com/nushell/tree-sitter-nu.git".to_string(),
+                    rev: "nu-rev".to_string(),
+                    path: None,
+                },
+            ),
+        ]);
+
+        assert_eq!(
+            resolve_query_source(&queries, query_source_name("nushell", &with_query_name)).rev,
+            "nu-rev"
+        );
+        assert_eq!(
+            resolve_query_source(&queries, query_source_name("nushell", &without_query_name)).rev,
+            "default-rev"
+        );
     }
 
     #[test]
@@ -2726,18 +4525,13 @@ mod tests {
         )
         .expect("override query should be written");
 
-        let cwd = std::env::current_dir().expect("cwd should be available");
-        std::env::set_current_dir(&root).expect("should switch to temp dir");
-
-        let result = (|| {
+        in_directory(&root, || {
             assert_eq!(
                 query_names().expect("query names should load"),
                 vec!["demo"]
             );
-        })();
+        });
 
-        std::env::set_current_dir(cwd).expect("should restore cwd");
-        result;
         let _ = fs::remove_dir_all(root);
     }
 
@@ -2770,5 +4564,155 @@ mod tests {
             "\"nil\" @constant.builtin"
         );
         assert_eq!(apply_text_replacements(query, "nim"), query);
+    }
+
+    #[test]
+    fn language_catalog_preserves_source_order_and_package_overrides() {
+        let parsers = BTreeMap::from([
+            (
+                "alpha".to_string(),
+                ParserInfo {
+                    aliases: vec!["a".to_string()],
+                    ..ParserInfo::default()
+                },
+            ),
+            (
+                "zeta".to_string(),
+                ParserInfo {
+                    wasm_name: Some("tree-sitter-shared".to_string()),
+                    ..ParserInfo::default()
+                },
+            ),
+        ]);
+        let order = vec!["zeta".to_string(), "alpha".to_string()];
+        let bundles = BTreeMap::from([
+            (
+                "web".to_string(),
+                BundleInfo {
+                    parsers: BundleParsers::List(vec!["alpha".to_string()]),
+                },
+            ),
+            (
+                "full".to_string(),
+                BundleInfo {
+                    parsers: BundleParsers::All("all".to_string()),
+                },
+            ),
+        ]);
+
+        let catalog = render_language_catalog(&parsers, &order, &bundles, "0.26")
+            .expect("catalog should be generated");
+
+        assert!(catalog.find("\"zeta\"").unwrap() < catalog.find("\"alpha\"").unwrap());
+        assert!(catalog.contains("package_name: \"@lumis-sh/wasm-shared\""));
+        assert!(catalog.contains("aliases: [\"a\"]"));
+        // `parsers = "all"` expands to the catalog, in the same order.
+        assert!(catalog.contains("\"full\" => [\"zeta\", \"alpha\"]"));
+        assert!(catalog.contains("\"web\" => [\"alpha\"]"));
+        assert!(catalog.contains("package_version_range: \"0.26\""));
+        assert!(!catalog.contains("version:"));
+    }
+
+    #[test]
+    fn tree_sitter_series_uses_semver_parsing() {
+        assert_eq!(tree_sitter_series("0.26").unwrap(), "0.26");
+        assert_eq!(tree_sitter_series("v0.26.11").unwrap(), "0.26");
+        assert!(tree_sitter_series("latest").is_err());
+        assert!(tree_sitter_series("not-a-version-0.26").is_err());
+    }
+
+    // Bundle membership is a cross-runtime promise: `@lumis-sh/wasm-bundle-web` and
+    // `Lumis.Languages.load(:bundle_web)` must name the same languages. Every runtime
+    // reads it from this one table, so the shipped catalog going stale is what would
+    // break that, and `gen-catalog --check` only runs where a Rust toolchain does.
+    #[test]
+    fn shipped_bundles_match_languages_toml() {
+        let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../languages.toml");
+        let text = fs::read_to_string(&path).expect("languages.toml should be readable");
+        let toml: LanguagesToml = toml::from_str(&text).expect("languages.toml should parse");
+        let document: toml_edit::DocumentMut = text.parse().expect("languages.toml should parse");
+        let order = document["parsers"]
+            .as_table()
+            .expect("languages.toml must contain a parsers table")
+            .iter()
+            .map(|(id, _)| id.to_string())
+            .collect::<Vec<_>>();
+
+        let expected = toml
+            .bundles
+            .iter()
+            .map(|(name, bundle)| {
+                let members = match &bundle.parsers {
+                    BundleParsers::All(_) => order.clone(),
+                    BundleParsers::List(list) => list.clone(),
+                };
+                (name.as_str(), members)
+            })
+            .collect::<BTreeMap<_, _>>();
+
+        let shipped = lumis_wasm_runtime::catalog::BUNDLES
+            .iter()
+            .map(|(name, members)| {
+                (
+                    *name,
+                    members.iter().map(|id| id.to_string()).collect::<Vec<_>>(),
+                )
+            })
+            .collect::<BTreeMap<_, _>>();
+
+        assert_eq!(shipped, expected, "run `mise run langs-gen-catalog`");
+        assert!(
+            shipped.contains_key("full"),
+            "bundles should include `full`"
+        );
+        assert!(
+            shipped["full"].len() > 100,
+            "`full` should be every language"
+        );
+    }
+
+    #[test]
+    fn revision_only_theme_updates_are_ignored() {
+        let previous = json!({
+            "name": "demo",
+            "appearance": "dark",
+            "revision": "old",
+            "highlights": {
+                "normal": { "fg": "#ffffff", "bg": "#000000" }
+            }
+        });
+        let current = json!({
+            "name": "demo",
+            "appearance": "dark",
+            "revision": "new",
+            "highlights": {
+                "normal": { "fg": "#ffffff", "bg": "#000000" }
+            }
+        });
+
+        assert!(is_revision_only_theme_update(&previous, &current));
+    }
+
+    #[test]
+    fn actual_theme_updates_are_kept() {
+        let previous = json!({
+            "name": "demo",
+            "appearance": "dark",
+            "revision": "old",
+            "highlights": {
+                "normal": { "fg": "#ffffff", "bg": "#000000" }
+            }
+        });
+        let current = json!({
+            "name": "demo",
+            "appearance": "dark",
+            "revision": "new",
+            "highlights": {
+                "normal": { "fg": "#eeeeee", "bg": "#000000" }
+            }
+        });
+
+        assert!(!is_revision_only_theme_update(&previous, &current));
+        assert!(!is_revision_only_theme_update(&previous, &previous));
     }
 }

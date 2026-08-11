@@ -85,6 +85,31 @@ languages = Lumis.available_languages()
 Map.has_key?(Lumis.available_languages(), "elixir")
 ```
 
+### Parser Loading
+
+Highlighting loads what a document needs, including languages injected inside
+it, so nothing has to be declared up front. Loading is global to the VM, so the
+cost is paid once.
+
+Load ahead of time to keep the first download off a user's request:
+
+```elixir
+:ok = Lumis.Languages.load(["markdown", "elixir", "json"])
+```
+
+Better still, do it at image-build time so no request ever pays. A cold parser
+costs a download *and* a Wasmtime compile — the compile is the larger half, about
+8 s for seven parsers against 1.3 s once cached:
+
+```sh
+mix lumis.languages.cache markdown elixir json
+```
+
+The store checks `:data_dir` and then the CDN. It defaults to `LUMIS_DATA_DIR`,
+and is also where Wasmtime persists compiled modules. A cold cache resolves the
+runtime's compatible package range; the exact package stored in that directory
+is then served without revalidating it.
+
 ## Formatters
 
 Lumis supports five formatters. The formatter option controls the output format.
@@ -768,5 +793,6 @@ Lumis is a fast, reliable syntax highlighter for Elixir. Key points to remember:
 9. **250+ built-in Neovim themes** available
 10. **Line numbers** are 1-indexed in the `data-line` attribute
 11. **Validate options** with `validate_options!/1` when needed
+12. **Cache parser WASMs** at build time so the first request does not download
 
 For more information, see the [HexDocs](https://hexdocs.pm/lumis) or the [GitHub repository](https://github.com/leandrocp/lumis).

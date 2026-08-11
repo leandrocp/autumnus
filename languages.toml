@@ -6,7 +6,7 @@
 
 [queries.default]
 git = "https://github.com/nvim-treesitter/nvim-treesitter.git"
-rev = "24977147550d53589e53b874ec75e14e4fbc304e"
+rev = "c9f9ed6c1892f629ea399f4ee7905f2686fa13f2"
 path = "runtime/queries"
 
 [queries.iex]
@@ -31,7 +31,7 @@ path = "queries"
 
 [queries.nu]
 git = "https://github.com/nushell/tree-sitter-nu.git"
-rev = "d694570aa26b53d0d642460a0430e8aa07dcbea0"
+rev = "9467420d184bd2c510378f4cda624eca35dd4590"
 path = "queries"
 
 [queries.python]
@@ -46,7 +46,7 @@ path = "queries"
 
 [queries.wat]
 git = "https://github.com/helix-editor/helix.git"
-rev = "14d6bc0febed9c692048271a8ae2362ac969c6e0"
+rev = "079a789e8cb08ead67f19e1971a1b7438b37354b"
 path = "runtime/queries/wat"
 
 # -- Parsers
@@ -73,9 +73,8 @@ version = "0.0.1"
 globs = ["*.astro"]
 
 [parsers.bash]
-git = "https://github.com/tree-sitter/tree-sitter-bash.git"
-rev = "a06c2e4415e9bc0346c6b86d401879ffb44058f7"
-crate = "tree-sitter-bash"
+git = "https://github.com/ericmj/tree-sitter-bash.git"
+rev = "382ed871c6c7d62eada5da06994d9515ae12edd7"
 version = "0.25.1"
 aliases = ["sh"]
 globs = [
@@ -248,9 +247,9 @@ globs = ["*.erb"]
 
 [parsers.erlang]
 git = "https://github.com/WhatsApp/tree-sitter-erlang.git"
-rev = "5dba13dcd531c19bf99829e2e0bb31f2e08e16fe"
+rev = "67e7f7f05baf492ca2a7c0d9538761b242d33d95"
 crate = "tree-sitter-erlang"
-version = "0.19.0"
+version = "0.20.0"
 globs = ["*.erl", "*.app", "*.app.src", "*.es", "*.escript", "*.hrl", "*.xrl", "*.yrl", "Emakefile", "rebar.config"]
 
 [parsers.fish]
@@ -262,9 +261,9 @@ globs = ["*.fish"]
 
 [parsers.fsharp]
 git = "https://github.com/ionide/tree-sitter-fsharp.git"
-rev = "97205752445ac9c6566a768d97b21bc1078ae321"
+rev = "789d8ea1481345d6f3bc1a06985dbf6a6b202744"
 crate = "tree-sitter-fsharp"
-version = "0.3.1"
+version = "0.3.11"
 location = "fsharp"
 aliases = ["f#"]
 variant = "FSharp"
@@ -274,7 +273,10 @@ emacs = ["fsharp"]
 
 [parsers.gleam]
 git = "https://github.com/gleam-lang/tree-sitter-gleam.git"
-rev = "2012f294baacf30e7a62414754021284377366c6"
+# Tag v1.1.0. Upstream still declares 1.0.0 in its Cargo.toml there, which is what
+# crates.io serves as tree-sitter-gleam 1.0.0, so `version` stays put: this only
+# moves the git pin up to the grammar the published crate was actually built from.
+rev = "dae1551a9911b24f41d876c23f2ab05ece0a9d4c"
 crate = "tree-sitter-gleam"
 version = "1.0.0"
 globs = ["*.gleam"]
@@ -312,7 +314,7 @@ shebang = ["runghc", "runhaskell", "runhugs"]
 
 [parsers.hcl]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-hcl.git"
-rev = "636dbe70301ecbab8f353c8c78b3406fe4f185f5"
+rev = "64ad62785d442eb4d45df3a1764962dafd5bc98b"
 crate = "tree-sitter-hcl"
 version = "1.1.0"
 variant = "HCL"
@@ -328,9 +330,8 @@ variant = "HEEx"
 globs = ["*.heex", "*.neex"]
 
 [parsers.html]
-git = "https://github.com/tree-sitter/tree-sitter-html.git"
-rev = "5a5ca8551a179998360b4a4ca2c0f366a35acc03"
-crate = "tree-sitter-html"
+git = "https://github.com/leandrocp/tree-sitter-html.git"
+rev = "7dfafded732a8ee82e8d8776619a56ddadb0bdd0"
 version = "0.23.2"
 variant = "HTML"
 globs = ["*.html", "*.htm", "*.xhtml"]
@@ -490,7 +491,7 @@ emacs = ["nix"]
 
 [parsers.nushell]
 git = "https://github.com/nushell/tree-sitter-nu.git"
-rev = "d694570aa26b53d0d642460a0430e8aa07dcbea0"
+rev = "9467420d184bd2c510378f4cda624eca35dd4590"
 version = "0.0.1"
 aliases = ["nu"]
 query_name = "nu"
@@ -568,9 +569,8 @@ display_name = "Protocol Buffer"
 globs = ["*.proto", "*.protobuf", "*.proto2", "*.proto3"]
 
 [parsers.python]
-git = "https://github.com/tree-sitter/tree-sitter-python.git"
-rev = "293fdc02038ee2bf0e2e206711b69c90ac0d413f"
-crate = "tree-sitter-python"
+git = "https://github.com/ericmj/tree-sitter-python.git"
+rev = "0e87bd70e972aff4e060d375166e750e3f498a8b"
 version = "0.25.0"
 globs = ["*.py", "*.py3", "*.pyi", "*.bzl", "TARGETS", "BUCK", "DEPS"]
 emacs = ["python"]
@@ -592,9 +592,8 @@ version = "0.25.0"
 globs = ["*.regex"]
 
 [parsers.ruby]
-git = "https://github.com/tree-sitter/tree-sitter-ruby.git"
-rev = "71bd32fb7607035768799732addba884a37a6210"
-crate = "tree-sitter-ruby"
+git = "https://github.com/ericmj/tree-sitter-ruby.git"
+rev = "8785f80df97f6b53a6005a5d842b8a1358fe3fdd"
 version = "0.23.1"
 globs = ["*.rb", "*.builder", "*.spec", "*.rake", "Gemfile", "Rakefile"]
 emacs = ["ruby"]
@@ -610,9 +609,9 @@ emacs = ["rust"]
 
 [parsers.scala]
 git = "https://github.com/tree-sitter/tree-sitter-scala.git"
-rev = "38950b525c9dfc44c8b60d44bdd6e54217286ca8"
+rev = "b931fcc338390925eb893d70ad070033f5856ccf"
 crate = "tree-sitter-scala"
-version = "0.26.0"
+version = "0.26.2"
 globs = ["*.scala", "*.sbt", "*.sc"]
 emacs = ["scala"]
 
@@ -641,9 +640,8 @@ globs = ["*.surface", "*.sface"]
 emacs = ["surface"]
 
 [parsers.svelte]
-git = "https://github.com/tree-sitter-grammars/tree-sitter-svelte.git"
-rev = "774a65aea563accc35f5d45fafa4d96ec5761f57"
-crate = "tree-sitter-svelte-ng"
+git = "https://github.com/leandrocp/tree-sitter-svelte.git"
+rev = "bf4eff70e5297506e9f255389ce77fa393ed744b"
 version = "1.0.2"
 globs = ["*.svelte"]
 
@@ -689,7 +687,7 @@ shebang = ["deno", "ts-node"]
 
 [parsers.typst]
 git = "https://github.com/uben0/tree-sitter-typst.git"
-rev = "13863ddcbaa7b68ee6221cea2e3143415e64aea4"
+rev = "46cf4ded12ee974a70bf8457263b67ad7ee0379d"
 crate = "codebook-tree-sitter-typst"
 version = "0.12.1"
 globs = ["*.typ", "*.typst"]
@@ -717,9 +715,8 @@ display_name = "WAT"
 globs = ["*.wat"]
 
 [parsers.xml]
-git = "https://github.com/tree-sitter-grammars/tree-sitter-xml.git"
-rev = "4b64dd3a03ec002258d6268d712fd93716d6ab57"
-crate = "tree-sitter-xml"
+git = "https://github.com/ericmj/tree-sitter-xml.git"
+rev = "87cc03f6576036feb5ff083be6e03ad7885e06cd"
 version = "0.7.0"
 location = "xml"
 variant = "XML"
@@ -733,9 +730,8 @@ globs = [
 emacs = ["nxml"]
 
 [parsers.yaml]
-git = "https://github.com/tree-sitter-grammars/tree-sitter-yaml.git"
-rev = "7708026449bed86239b1cd5bce6e3c34dbca6415"
-crate = "tree-sitter-yaml"
+git = "https://github.com/ericmj/tree-sitter-yaml.git"
+rev = "f1790f0a8246a650466bfd342b1c2c373c14b76c"
 version = "0.7.2"
 variant = "YAML"
 globs = ["*.yaml", "*.yml"]
@@ -821,7 +817,7 @@ globs = ["*.kdl"]
 
 [parsers.luadoc]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-luadoc.git"
-rev = "818acda56809f994274de64a42f97f509b3c0ad2"
+rev = "873612aadd3f684dd4e631bdf42ea8990c57634e"
 version = "1.1.0"
 display_name = "LuaDoc"
 
@@ -858,9 +854,8 @@ display_name = "Terraform"
 globs = ["*.tf", "*.tfvars", "*.tfvars.json"]
 
 [parsers.toon]
-git = "https://github.com/3swordman/tree-sitter-toon.git"
-rev = "c9eb802938e4511acba017369144540b43ad62ac"
-crate = "tree-sitter-toon"
+git = "https://github.com/ericmj/tree-sitter-toon.git"
+rev = "dda6988067d2ccd4c3cfa04068f792bc3300d1e8"
 version = "0.1.3"
 display_name = "TOON"
 globs = ["*.toon"]
@@ -954,7 +949,7 @@ version = "0.13.0"
 
 [parsers.json5]
 git = "https://github.com/Joakker/tree-sitter-json5.git"
-rev = "8cb4114a4d7e5bab75d74466422e032de31d83df"
+rev = "aa630ef48903ab99e406a8acd2e2933077cc34e1"
 version = "0.1.0"
 variant = "JSON5"
 display_name = "JSON5"
@@ -1032,7 +1027,7 @@ shebang = ["guile", "scheme"]
 
 [parsers.solidity]
 git = "https://github.com/JoranHonig/tree-sitter-solidity.git"
-rev = "4e938a46c7030dd001bc99e1ac0f0c750ac98254"
+rev = "048fe686cb1fde267243739b8bdbec8fc3a55272"
 crate = "tree-sitter-solidity"
 version = "1.2.13"
 globs = ["*.sol"]

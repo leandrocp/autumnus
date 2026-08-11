@@ -4,9 +4,18 @@ import { afterEach, describe, expect, it } from "vitest";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
-import { createHighlighter } from "@lumis-sh/lumis";
+import {
+  configureLanguagePackageResolver,
+  configureWasmResolver,
+  createHighlighter,
+} from "@lumis-sh/lumis";
+import {
+  configureLanguagePackageResolver as configureClientLanguagePackageResolver,
+  configureWasmResolver as configureClientWasmResolver,
+} from "@lumis-sh/lumis/client";
 import { bundledLanguages } from "@lumis-sh/lumis/bundles/web";
 import { htmlInline } from "@lumis-sh/lumis/formatters";
+import { configureLocalWasmResolver, ensureLocalParserWasmDataUrl } from "../../lumis/test/wasm.ts";
 import dracula from "../../themes/themes/dracula.ts";
 import githubLight from "../../themes/themes/github_light.ts";
 import { CodeBlock, useLumis } from "../src/index.js";
@@ -15,6 +24,19 @@ import { renderCodeBlock } from "../src/server.js";
 const SOURCE = "const x = 1";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+
+configureLocalWasmResolver(["javascript"], {
+  configureLanguagePackageResolver,
+  configureWasmResolver,
+});
+configureLocalWasmResolver(
+  ["javascript"],
+  {
+    configureLanguagePackageResolver: configureClientLanguagePackageResolver,
+    configureWasmResolver: configureClientWasmResolver,
+  },
+  (language, wasm) => ensureLocalParserWasmDataUrl(language, wasm.name),
+);
 
 function createDeferred<T>() {
   let resolve!: (value: T | PromiseLike<T>) => void;
@@ -61,7 +83,7 @@ function HookHarness({
     | Awaited<ReturnType<typeof createHighlighter>>
     | Promise<Awaited<ReturnType<typeof createHighlighter>>>;
 }) {
-  const { content, isLoading } = useLumis({
+  const { content, error, isLoading } = useLumis({
     children,
     formatter,
     highlighter,
@@ -69,6 +91,9 @@ function HookHarness({
 
   if (isLoading) {
     return <div data-state="loading" />;
+  }
+  if (error) {
+    return <div data-error={error.message} />;
   }
 
   return <>{content}</>;
@@ -267,6 +292,32 @@ describe("@lumis-sh/react", () => {
     await waitForHtml(container, 'class="lumis"');
     expect(container.innerHTML).toContain('class="lumis"');
     expect(container.innerHTML).toContain('class="language-javascript"');
+
+    await act(async () => {
+      root.unmount();
+    });
+  });
+
+  it("normalizes non-Error failures returned by useLumis", async () => {
+    const highlighter = Promise.reject<Awaited<ReturnType<typeof createHighlighter>>>("boom");
+    const container = document.createElement("div");
+    document.body.append(container);
+    const root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        <HookHarness
+          highlighter={highlighter}
+          formatter={htmlInline({ language: "javascript", theme: dracula })}
+        >
+          {SOURCE}
+        </HookHarness>,
+      );
+    });
+
+    expect(container.querySelector("[data-error]")?.getAttribute("data-error")).toBe(
+      "Failed to render code block",
+    );
 
     await act(async () => {
       root.unmount();

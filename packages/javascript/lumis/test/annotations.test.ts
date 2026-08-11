@@ -148,11 +148,11 @@ describe("annotations", () => {
     );
   }, 30_000);
 
-  it("renders the complete TypeScript diff viewer example", async () => {
+  it("renders the complete JavaScript diff viewer example", async () => {
     const output = await renderExample();
 
-    expect(output).toContain("calculator.ts · before");
-    expect(output).toContain("calculator.ts · after");
+    expect(output).toContain("calculator.js · before");
+    expect(output).toContain("calculator.js · after");
     expect(output).toContain('data-marker="-"');
     expect(output).toContain('data-marker="+"');
     expect(output).toContain('data-marker="~"');

@@ -76,7 +76,7 @@ export function Example() {
 }
 ```
 
-If you do not pass `highlighter`, `CodeBlock` uses a shared internal highlighter. Passing your own `highlighter` is the better choice when you want to preload bundles or reuse one instance across many blocks.
+If you do not pass `highlighter`, `CodeBlock` uses a shared internal highlighter. Passing your own `highlighter` is the better choice when you want to register bundles or reuse one instance across many blocks.
 
 ## Hook
 
@@ -92,16 +92,19 @@ import githubLight from '@lumis-sh/themes/github_light'
 const highlighter = createHighlighter({languages: [bundledLanguages]})
 
 export function Example() {
-  const {content, isLoading} = useLumis({
+  const {content, error, isLoading} = useLumis({
     children: 'export const answer = 42',
     formatter: htmlInline({language: 'typescript', theme: githubLight}),
     highlighter,
   })
 
   if (isLoading) return <p>Loading syntax highlighter...</p>
+  if (error) return <p>{error.message}</p>
   return <>{content}</>
 }
 ```
+
+`error` is an `Error` when highlighting or language loading fails, and `undefined` otherwise.
 
 ## Server rendering
 
@@ -156,7 +159,7 @@ export function Example() {
 }
 ```
 
-This is the best option when you want to preload a bundle and render many code blocks on one page.
+This is the best option when you want to register a bundle and render many code blocks on one page.
 
 ## Behavior
 

@@ -5,16 +5,24 @@ use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
 
+mod common;
+
 fn cmd() -> assert_cmd::Command {
     let mut command = cargo_bin_cmd!("lumis");
-    command.env("LUMIS_CONFIG", fixtures_dir().join("missing-config.toml"));
+    command.env(
+        "LUMIS_CONFIG",
+        source_fixtures_dir().join("missing-config.toml"),
+    );
+    command.env("LUMIS_DATA_DIR", common::data_dir());
     command
 }
 
 fn fixtures_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("tests")
-        .join("fixtures")
+    common::language_fixtures_dir()
+}
+
+fn source_fixtures_dir() -> PathBuf {
+    common::source_fixtures_dir()
 }
 
 fn write_file(path: &Path, content: &str) {
@@ -436,11 +444,11 @@ fn dump_tree_interleaves_highlights_and_children_in_source_order() {
     assert!(output.status.success());
     let stdout = String::from_utf8(output.stdout).unwrap();
     let ordered = [
-        "@punctuation.bracket language: html, range: 0:0-0:1, text: \"<\"",
+        "@tag.delimiter language: html, range: 0:0-0:1, text: \"<\"",
         "[tag_name]",
-        "@punctuation.bracket language: html, range: 0:4-0:5, text: \">\"",
+        "@tag.delimiter language: html, range: 0:4-0:5, text: \">\"",
         "[text]",
-        "@punctuation.bracket language: html, range: 0:9-0:11, text: \"</\"",
+        "@tag.delimiter language: html, range: 0:9-0:11, text: \"</\"",
     ]
     .map(|text| stdout.find(text).unwrap());
     assert!(ordered.windows(2).all(|pair| pair[0] < pair[1]));
@@ -490,8 +498,8 @@ fn dump_tree_reports_exact_highlights_across_languages() {
             "html",
             "<div class=\"x\">hello</div>\n",
             vec![
-                "@punctuation.bracket language: html, range: 0:0-0:1, text: \"<\"",
-                "@punctuation.bracket language: html, range: 0:14-0:15, text: \">\"",
+                "@tag.delimiter language: html, range: 0:0-0:1, text: \"<\"",
+                "@tag.delimiter language: html, range: 0:14-0:15, text: \">\"",
                 "@string language: html, range: 0:11-0:14, text: \"\\\"x\\\"\"",
             ],
         ),
@@ -995,12 +1003,23 @@ fn themes_generate_supports_output_setup_and_appearance_options() {
     assert!(themes_lua.contains("vim.g.test_setup = true"));
 }
 
-// -- fetch-parsers / update-parsers --
+// -- parsers cache --
 
 #[test]
-fn fetch_parsers_no_args_fails() {
+fn parsers_help_uses_cache_terminology() {
     cmd()
-        .args(["parsers", "fetch"])
+        .args(["parsers", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("cache"))
+        .stdout(predicate::str::contains("fetch").not())
+        .stdout(predicate::str::contains("update").not());
+}
+
+#[test]
+fn cache_parsers_no_args_fails() {
+    cmd()
+        .args(["parsers", "cache"])
         .assert()
         .failure()
         .stderr(predicate::str::contains(
@@ -1009,112 +1028,179 @@ fn fetch_parsers_no_args_fails() {
 }
 
 #[test]
-fn update_parsers_no_args_fails() {
+fn cache_parsers_rejects_languages_with_all() {
     cmd()
-        .args(["parsers", "update"])
+        .args(["parsers", "cache", "rust", "--all"])
         .assert()
         .failure()
         .stderr(predicate::str::contains(
-            "specify language names or use --all",
+            "pass language names or --all, not both",
         ));
 }
 
 #[test]
-fn fetch_parsers_already_cached() {
-    // The fixtures dir already has diff.wasm cached — silent without -v
+fn cache_parsers_already_cached() {
+    // The fixtures dir already has the diff package cached — silent without -v.
     cmd()
         .arg("--data-dir")
         .arg(fixtures_dir())
-        .args(["parsers", "fetch", "diff"])
+        .args(["parsers", "cache", "diff"])
         .assert()
         .success();
 }
 
 #[test]
-fn fetch_parsers_already_cached_verbose() {
+fn cache_parsers_already_cached_verbose() {
     // With -V it shows the cached path
     cmd()
         .arg("--data-dir")
         .arg(fixtures_dir())
         .arg("-V")
-        .args(["parsers", "fetch", "diff"])
+        .args(["parsers", "cache", "diff"])
         .assert()
         .success()
-        .stderr(predicate::str::contains("tree-sitter-diff.wasm"));
+        .stderr(predicate::str::contains("tree-sitter-diff-"));
 }
 
+/// Downloading is the smaller half of a cold parser; the Wasmtime compile is the
+/// larger, and a prepared directory is meant to carry both. `mix
+/// lumis.languages.cache` does the same, so the two cannot prepare different
+/// things.
+/// Downloading is the smaller half of a cold parser; the Wasmtime compile is the
+/// larger, and a prepared directory is meant to carry both. `mix
+/// lumis.languages.cache` does the same, so the two cannot prepare different
+/// things.
 #[test]
-fn update_parsers_all_empty_data_dir() {
-    let tmp = tempfile::tempdir().unwrap();
+fn cache_parsers_compiles_what_it_downloads() {
+    // Building a runtime at all compiles Tree-sitter's own module, so a
+    // non-empty cache proves nothing. Each additional parser adds an entry
+    // beside it, and only compiling produces that.
+    fn cached_modules(store: &std::path::Path) -> usize {
+        let namespaces = match fs::read_dir(store.join("compiled").join("modules")) {
+            Ok(entries) => entries,
+            Err(_) => return 0,
+        };
+        namespaces
+            .filter_map(Result::ok)
+            .filter_map(|namespace| fs::read_dir(namespace.path()).ok())
+            .flat_map(|entries| entries.filter_map(Result::ok))
+            .filter(|entry| entry.path().extension().is_none())
+            .count()
+    }
+
+    let one = seeded_store();
     cmd()
         .arg("--data-dir")
-        .arg(tmp.path())
-        .args(["parsers", "update", "--all"])
+        .arg(one.path())
+        .args(["parsers", "cache", "json"])
         .assert()
         .success();
+
+    let two = seeded_store();
+    cmd()
+        .arg("--data-dir")
+        .arg(two.path())
+        .args(["parsers", "cache", "json", "css"])
+        .assert()
+        .success();
+
+    assert!(
+        cached_modules(two.path()) > cached_modules(one.path()),
+        "caching must compile each parser, not just download it: {} vs {}",
+        cached_modules(two.path()),
+        cached_modules(one.path())
+    );
+}
+
+/// A store directory holding the committed fixtures, so `parsers cache` can be
+/// exercised without a download. Caching into an empty directory needs the
+/// network by construction; there is no second directory to copy from.
+fn seeded_store() -> tempfile::TempDir {
+    let dir = tempfile::tempdir().unwrap();
+    let parsers = dir.path().join("parsers");
+    fs::create_dir_all(&parsers).unwrap();
+    for entry in fs::read_dir(common::data_dir().join("parsers")).unwrap() {
+        let entry = entry.unwrap();
+        if entry.file_type().unwrap().is_file() {
+            fs::copy(entry.path(), parsers.join(entry.file_name())).unwrap();
+        }
+    }
+    dir
 }
 
 #[test]
-fn fetch_parsers_to_temp_dir() {
-    let tmp = tempfile::tempdir().unwrap();
+fn cache_parsers_to_temp_dir() {
+    let tmp = seeded_store();
     cmd()
         .arg("--data-dir")
         .arg(tmp.path())
-        .args(["parsers", "fetch", "json"])
+        .args(["parsers", "cache", "json"])
         .assert()
         .success();
 
     // Verify the WASM file was cached
-    assert!(tmp.path().join("parsers/tree-sitter-json.wasm").exists());
+    assert!(fs::read_dir(tmp.path().join("parsers"))
+        .unwrap()
+        .any(|entry| entry
+            .unwrap()
+            .file_name()
+            .to_string_lossy()
+            .starts_with("tree-sitter-json-")));
 }
 
 #[test]
-fn fetch_parsers_to_temp_dir_verbose() {
-    let tmp = tempfile::tempdir().unwrap();
+fn cache_parsers_to_temp_dir_verbose() {
+    let tmp = seeded_store();
     cmd()
+        .arg("-V")
         .arg("--data-dir")
         .arg(tmp.path())
-        .arg("-V")
-        .args(["parsers", "fetch", "json"])
+        .args(["parsers", "cache", "json"])
         .assert()
         .success()
-        .stderr(predicate::str::contains("tree-sitter-json.wasm"));
+        .stderr(predicate::str::contains("tree-sitter-json-"));
 
-    assert!(tmp.path().join("parsers/tree-sitter-json.wasm").exists());
+    assert!(fs::read_dir(tmp.path().join("parsers"))
+        .unwrap()
+        .any(|entry| entry
+            .unwrap()
+            .file_name()
+            .to_string_lossy()
+            .starts_with("tree-sitter-json-")));
 }
 
 #[test]
-fn fetch_parsers_then_update() {
-    let tmp = tempfile::tempdir().unwrap();
+fn cache_parsers_reuses_an_existing_file() {
+    let tmp = seeded_store();
 
-    // First fetch
+    // Cache once.
     cmd()
         .arg("--data-dir")
         .arg(tmp.path())
-        .args(["parsers", "fetch", "json"])
+        .args(["parsers", "cache", "json"])
         .assert()
         .success();
 
-    // Then update (verbose to verify path output)
+    // Then reuse it without a network request.
     cmd()
+        .arg("-V")
         .arg("--data-dir")
         .arg(tmp.path())
-        .arg("-V")
-        .args(["parsers", "update", "json"])
+        .args(["parsers", "cache", "json"])
         .assert()
         .success()
-        .stderr(predicate::str::contains("tree-sitter-json.wasm"));
+        .stderr(predicate::str::contains("tree-sitter-json-"));
 }
 
 #[test]
-fn fetch_parsers_then_highlight() {
-    let tmp = tempfile::tempdir().unwrap();
+fn cache_parsers_then_highlight() {
+    let tmp = seeded_store();
 
-    // Fetch the parser first
+    // Cache the parser first.
     cmd()
         .arg("--data-dir")
         .arg(tmp.path())
-        .args(["parsers", "fetch", "json"])
+        .args(["parsers", "cache", "json"])
         .assert()
         .success();
 
@@ -1127,4 +1213,39 @@ fn fetch_parsers_then_highlight() {
         .assert()
         .success()
         .stdout(predicate::str::is_empty().not());
+}
+
+/// Highlighting an HTML document loads JavaScript for its `<script>` block
+/// during the same pass, from a data directory that has never held either
+/// parser. Before this, the block stayed plain until `parsers cache javascript`
+/// had been run.
+/// One pass: nothing names javascript, so the walk had to discover the `<script>`
+/// injection and load it mid-walk. Whether the parser was already on disk is a
+/// separate question — every catalog package is published, so "present" and
+/// "obtainable" cannot be told apart without a fetcher that refuses.
+#[test]
+fn highlighting_loads_an_injected_language_the_caller_never_named() {
+    cmd()
+        .args(["dump", "events", "-l", "html"])
+        .write_stdin("<script>const answer = 42</script>")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\"language\": \"javascript\""));
+}
+
+/// A document is worth more than the one block Lumis cannot highlight, so a
+/// block naming a language it cannot load leaves that block plain and the rest
+/// standing.
+///
+/// Named so no catalog lookup can succeed, which also keeps the test off the
+/// network; `lumis-wasm-runtime` covers the known-but-unfetchable case against
+/// a fetcher that refuses everything.
+#[test]
+fn an_unloadable_injected_language_does_not_fail_the_document() {
+    cmd()
+        .args(["dump", "events", "-l", "markdown"])
+        .write_stdin("# Title\n\n```notalanguage\nx = 1\n```\n")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\"language\": \"markdown\""));
 }

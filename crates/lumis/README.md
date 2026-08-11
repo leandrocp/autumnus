@@ -16,33 +16,33 @@
 
 ## Features
 
-- 110+ languages with Tree-sitter parsing
-- 250+ built-in Neovim themes
-- HTML output with inline styles or CSS classes
-- Multi-theme support for light/dark mode
-- Terminal output with ANSI colors
-- Language auto-detection via file extensions and shebangs
-- Line highlighting with custom styling
-- Custom HTML wrappers for code blocks
-- Streaming-friendly — handles incomplete code without crashing
-- Custom formatters via the `Formatter` trait
+- **110+ Tree-sitter languages** - Fast, accurate, and updated syntax parsing
+- **250+ built-in Neovim themes** - Updated and curated themes from the Neovim community
+- **Built-in formatters** - HTML (inline/linked), Terminal (ANSI), Multi-theme (light/dark), BBCode
+- **Custom formatters** - Build your own output
+- **Language auto-detection** - File extension, shebang, and emacs-mode support
+- **Line highlighting** - Mark and style individual lines, with custom HTML wrappers
+- **Streaming-friendly** - Handles incomplete code
+- **Feature-gated languages** - Compile in every language, a bundle, or just the ones you name
 
 ## Installation
-
-Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
 lumis = "0.1"
 ```
 
-Or install the CLI package:
+All languages are on by default. To cut compile time and binary size, take only
+what you need:
 
-```sh
-cargo install lumis-cli
+```toml
+lumis = { version = "0.1", default-features = false, features = ["lang-rust", "lang-bundle-web"] }
 ```
 
-## Quick Start
+Feature names are `lang-<name>` and `lang-bundle-<web|web-extra|system|backend|full>`;
+the full list is in [Cargo.toml](https://github.com/leandrocp/lumis/blob/main/crates/lumis/Cargo.toml).
+
+## Usage
 
 ```rust
 use lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
@@ -59,404 +59,30 @@ let formatter = HtmlInlineBuilder::new()
 let html = highlight(code, formatter);
 ```
 
-Rust builders use `.language(...)`. The older `.lang(...)` setter still works but is deprecated.
+The language is optional — Lumis detects it from the source, a file extension,
+or a shebang. `write_highlight()` streams to any `Write` instead of allocating a
+`String`.
 
-For streaming to files or other writers, use `write_highlight()`:
+Formatters decide the output: `HtmlInline`, `HtmlLinked`, `HtmlMultiThemes`,
+`Terminal`, or your own via the `Formatter` trait.
 
-```rust
-use lumis::{write_highlight, HtmlInlineBuilder, languages::Language};
-use std::fs::File;
+## Documentation
 
-let code = "fn main() { }";
-let formatter = HtmlInlineBuilder::new()
-    .language(Language::Rust)
-    .build()
-    .unwrap();
+- [Highlighting](https://lumis.sh/docs/usage/highlight) and [Rust advanced usage](https://lumis.sh/docs/usage/rust-advanced)
+- [Formatters](https://lumis.sh/docs/usage/formatters) — every formatter and its options
+- [Custom formatters](https://lumis.sh/docs/usage/custom-formatters)
+- [Themes](https://lumis.sh/docs/usage/themes) and [CSS theme files](https://lumis.sh/docs/usage/css-theme-files)
+- [Languages](https://lumis.sh/docs/reference/languages) — the full list and how detection works
+- [Line highlighting](https://lumis.sh/docs/usage/line-highlighting)
+- [Recipes](https://lumis.sh/docs/recipes)
 
-let mut file = File::create("output.html").unwrap();
-write_highlight(&mut file, code, formatter).unwrap();
-```
+API reference: [docs.rs/lumis](https://docs.rs/lumis).
 
-## Formatters
-
-Lumis provides four built-in formatters:
-
-| Formatter | Output | Use When |
-|-----------|--------|----------|
-| `HtmlInlineBuilder` | HTML with inline styles | Standalone HTML, emails, no external CSS |
-| `HtmlMultiThemesBuilder` | HTML with CSS variables | Light/dark mode, theme switching |
-| `HtmlLinkedBuilder` | HTML with CSS classes | Multiple code blocks, custom styling |
-| `TerminalBuilder` | ANSI escape codes | CLI tools, terminal output |
-
-### HTML Inline
-
-Inline styles on each token:
-
-```rust
-use lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
-
-let code = "puts 'Hello from Ruby!'";
-let theme = themes::get("catppuccin_mocha").unwrap();
-
-let formatter = HtmlInlineBuilder::new()
-    .language(Language::Ruby)
-    .theme(Some(theme))
-    .pre_class(Some("code-block".to_string()))  // Custom CSS class for <pre>
-    .italic(true)                                // Enable italic styles
-    .include_highlights(true)                    // Add data-highlight attributes
-    .build()
-    .unwrap();
-
-let html = highlight(code, formatter);
-```
-
-### HTML Linked
-
-CSS classes instead of inline styles (requires external CSS):
-
-```rust
-use lumis::{highlight, HtmlLinkedBuilder, languages::Language};
-
-let code = "<div>Hello World</div>";
-
-let formatter = HtmlLinkedBuilder::new()
-    .language(Language::HTML)
-    .pre_class(Some("my-code".to_string()))
-    .build()
-    .unwrap();
-
-let html = highlight(code, formatter);
-```
-
-CSS theme files are available in the crate's `css/` directory. Use `themes::CssBuilder` for custom selectors or embedded CSS ([docs](https://lumis.sh/docs/themes/css-builder)).
-
-### HTML Multi-Themes
-
-CSS custom properties for multiple themes (light/dark mode):
-
-```rust
-use lumis::{highlight, HtmlMultiThemesBuilder, languages::Language, themes};
-use std::collections::HashMap;
-
-let code = "const x = 42;";
-
-let mut themes_map = HashMap::new();
-themes_map.insert("light".to_string(), themes::get("github_light").unwrap());
-themes_map.insert("dark".to_string(), themes::get("github_dark").unwrap());
-
-let formatter = HtmlMultiThemesBuilder::new()
-    .language(Language::JavaScript)
-    .themes(themes_map)
-    .default_theme("light")  // or "light-dark()" for CSS function
-    .build()
-    .unwrap();
-
-let html = highlight(code, formatter);
-```
-
-Use CSS media queries for automatic theme switching:
-
-```css
-@media (prefers-color-scheme: dark) {
-  .lumis,
-  .lumis span {
-    color: var(--lumis-dark) !important;
-    background-color: var(--lumis-dark-bg) !important;
-  }
-}
-```
-
-### Terminal
-
-ANSI escape codes:
-
-```rust
-use lumis::{highlight, TerminalBuilder, languages::Language, themes};
-
-let code = "puts 'Hello from Ruby!'";
-let theme = themes::get("dracula").unwrap();
-
-let formatter = TerminalBuilder::new()
-    .language(Language::Ruby)
-    .theme(Some(theme))
-    .build()
-    .unwrap();
-
-let ansi = highlight(code, formatter);
-println!("{}", ansi);
-```
-
-## Line Highlighting
-
-Highlight specific lines:
-
-```rust
-use lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
-use lumis::formatters::html_inline::{HighlightLines, HighlightLinesStyle};
-
-let code = "line 1\nline 2\nline 3\nline 4";
-let theme = themes::get("catppuccin_mocha").unwrap();
-
-let highlight_lines = HighlightLines {
-    lines: vec![1..=1, 3..=4],  // Highlight lines 1, 3, and 4
-    style: Some(HighlightLinesStyle::Theme),
-    class: None,
-};
-
-let formatter = HtmlInlineBuilder::new()
-    .language(Language::PlainText)
-    .theme(Some(theme))
-    .highlight_lines(Some(highlight_lines))
-    .build()
-    .unwrap();
-
-let html = highlight(code, formatter);
-```
-
-## Custom HTML Wrappers
-
-Wrap output with custom HTML elements:
-
-```rust
-use lumis::{highlight, HtmlInlineBuilder, languages::Language, formatters::html::HtmlElement};
-
-let code = "fn main() { }";
-
-let formatter = HtmlInlineBuilder::new()
-    .language(Language::Rust)
-    .header(Some(HtmlElement {
-        open_tag: "<div class=\"code-wrapper\">".to_string(),
-        close_tag: "</div>".to_string(),
-    }))
-    .build()
-    .unwrap();
-
-let html = highlight(code, formatter);
-// Output: <div class="code-wrapper"><pre class="lumis">...</pre></div>
-```
-
-## Themes
-
-250+ themes from popular Neovim colorschemes:
-
-```rust
-use lumis::themes;
-
-// Get a theme by name
-let theme = themes::get("dracula").unwrap();
-
-// Parse from string
-let theme: themes::Theme = "catppuccin_mocha".parse().unwrap();
-
-// List all available themes
-for theme in themes::available_themes() {
-    println!("{} ({})", theme.name, theme.appearance);
-}
-
-// Filter by appearance
-use lumis::themes::Appearance;
-
-let dark_themes: Vec<_> = themes::available_themes()
-    .filter(|t| t.appearance == Appearance::Dark)
-    .collect();
-```
-
-#### Custom Themes
-
-Load themes from JSON files or strings:
-
-```rust
-use lumis::themes;
-
-// From file
-let theme = themes::from_file("my_theme.json").unwrap();
-
-// From JSON string
-let json = r#"{
-    "name": "my_theme",
-    "appearance": "dark",
-    "revision": "v1.0.0",
-    "highlights": {
-        "keyword": { "fg": "#ff79c6", "bold": true },
-        "string": { "fg": "#f1fa8c" },
-        "comment": { "fg": "#6272a4", "italic": true }
-    }
-}"#;
-let theme = themes::from_json(json).unwrap();
-```
-
-## Custom Formatters
-
-Implement the `Formatter` trait to consume Lumis's unified syntax and decoration
-event stream:
-
-```rust
-use lumis::{
-    events::HighlightEvent,
-    formatters::Formatter,
-    languages::Language,
-};
-use std::io::{self, Write};
-
-struct SourceFormatter;
-
-impl Formatter for SourceFormatter {
-    fn language(&self) -> Language {
-        Language::Rust
-    }
-
-    fn render(
-        &self,
-        source: &str,
-        events: &[HighlightEvent<'_>],
-        output: &mut dyn Write,
-    ) -> io::Result<()> {
-        for event in events {
-            if let HighlightEvent::Source { start, end } = event {
-                output.write_all(&source.as_bytes()[*start..*end])?;
-            }
-        }
-        Ok(())
-    }
-}
-```
-
-### Annotations
-
-Callers can add typed semantic ranges to the formatter event stream with
-`Annotation` and `HighlightOptions`. Lumis composes those ranges with syntax
-highlighting; it does not determine which ranges changed. Ranges can use
-absolute offsets measured in UTF-8 bytes or zero-based lines and UTF-8 byte
-columns:
-
-```rust
-use lumis::annotations::Position;
-use lumis::{HighlightOptions, Annotation};
-
-let offset_annotation = Annotation::new(4..9, "changed")?;
-let position_annotation = Annotation::new(
-    Position::new(1, 0)..Position::new(1, 11),
-    "changed",
-)?;
-let annotations = [offset_annotation, position_annotation];
-let options = HighlightOptions::new().annotations(&annotations);
-
-# Ok::<(), lumis::AnnotationError>(())
-```
-
-Pass `options` to `highlight_with_options()` or
-`write_highlight_with_options()`.
-Formatter events always contain the resolved offset range.
-
-See [`examples/diff_viewer.rs`](examples/diff_viewer.rs) for an executable
-side-by-side diff viewer with added, removed, and changed lines, changed spans,
-gutter markers, and an annotation.
-
-## CLI Usage
-
-```sh
-# Highlight a file
-lumis highlight src/main.rs --theme dracula
-
-# Highlight with a specific language
-lumis highlight code.txt --language rust --theme github_dark
-
-# Output to terminal (default)
-lumis highlight src/main.rs --theme catppuccin_mocha
-
-# List available themes
-lumis themes
-
-# List available languages
-lumis languages
-```
-
-## Language Feature Flags
-
-All languages are included by default. To reduce compile time and binary size, pick only what you need:
-
-```toml
-[dependencies]
-lumis = { version = "0.1", default-features = false, features = ["lang-rust", "lang-javascript", "lang-bundle-web"] }
-```
-
-Available features:
-- `all-languages` - Enable all languages (default)
-- `lang-bundle-web`, `lang-bundle-web-extra`, `lang-bundle-system`, `lang-bundle-backend`, `lang-bundle-full`
-- `lang-rust`, `lang-javascript`, `lang-typescript`, `lang-python`, etc.
-
-See the full list of language features in [Cargo.toml](https://github.com/leandrocp/lumis/blob/main/crates/lumis/Cargo.toml).
-
-## Supported Languages
-
-| Language | File Extensions |
-|----------|-----------------|
-| Angular | *.angular, component.html |
-| Assembly | *.s, *.asm |
-| Astro | *.astro |
-| Bash | *.bash, *.sh, *.zsh, and more |
-| C | *.c |
-| C++ | *.cpp, *.cc, *.h, *.hpp |
-| C# | *.cs |
-| CSS | *.css |
-| Clojure | *.clj, *.cljs, *.cljc |
-| Dart | *.dart |
-| Dockerfile | Dockerfile, *.dockerfile |
-| Elixir | *.ex, *.exs |
-| Erlang | *.erl, *.hrl |
-| F# | *.fs, *.fsx |
-| Gleam | *.gleam |
-| Go | *.go |
-| GraphQL | *.graphql |
-| HTML | *.html, *.htm |
-| Haskell | *.hs |
-| HCL | *.hcl, *.tf |
-| Java | *.java |
-| JavaScript | *.js, *.mjs, *.cjs |
-| JSON | *.json |
-| Kotlin | *.kt |
-| LaTeX | *.tex |
-| Lua | *.lua |
-| Markdown | *.md |
-| Nix | *.nix |
-| OCaml | *.ml, *.mli |
-| PHP | *.php |
-| Python | *.py |
-| Ruby | *.rb |
-| Rust | *.rs |
-| SQL | *.sql |
-| Scala | *.scala |
-| Swift | *.swift |
-| TOML | *.toml |
-| TypeScript | *.ts |
-| TSX | *.tsx |
-| Vue | *.vue |
-| YAML | *.yaml, *.yml |
-| Zig | *.zig |
-| ...and more | See docs for full list |
-
-## Available Themes
-
-Themes from Neovim colorschemes:
-
-- **Catppuccin**: catppuccin_frappe, catppuccin_latte, catppuccin_macchiato, catppuccin_mocha
-- **Dracula**: dracula, dracula_soft
-- **GitHub**: github_dark, github_light, github_dark_dimmed, and more
-- **Gruvbox**: gruvbox_dark, gruvbox_light, and variants
-- **Tokyo Night**: tokyonight_day, tokyonight_moon, tokyonight_night, tokyonight_storm
-- **One Dark**: onedark, onedark_cool, onedark_darker, onelight
-- **Rose Pine**: rosepine_dark, rosepine_dawn, rosepine_moon
-- **Nord**: nord, nordic, nordfox
-- **Material**: material_darker, material_oceanic, material_palenight
-- **Kanagawa**: kanagawa_wave, kanagawa_dragon, kanagawa_lotus
-- ...and 100+ more
-
-Use `themes::available_themes()` or the CLI `lumis themes` for the complete list.
+The CLI is a separate crate: `cargo install lumis-cli`.
 
 ## Acknowledgements
 
-- [Inkjet](https://crates.io/crates/inkjet) for the Rust implementation in early versions
-- The Neovim community for the beautiful colorschemes
+* [Inkjet](https://crates.io/crates/inkjet) for the implementation up to v0.2 and for the inspiration
 
 ## License
 
