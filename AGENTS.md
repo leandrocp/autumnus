@@ -47,6 +47,34 @@ Do not hand-roll infrastructure that a standard library or maintained crate/pack
 - Custom code is justified only when available libraries cannot express the required behavior. Document that gap and test the compatibility boundary.
 - Delegate package discovery and version-range resolution to the package registry and CDN. Lumis validates the resolved result and caches it; it does not implement another package manager.
 
+### Keep environment variables few, and resolve each one once
+
+An environment variable is global mutable state that no signature declares and no type checks. Prefer a function argument, a `mise` task `env`, a config file, or a CLI flag with clap's `env()` attribute, which puts the variable in `--help` for free. `LUMIS_DATA_DIR` and `LUMIS_CONFIG` are declared that way in `crates/lumis-cli/src/main.rs` and are the pattern to copy.
+
+Before adding one, the bar is:
+
+- **It cannot be a parameter.** A value the caller already has does not become an environment variable to avoid threading it through.
+- **One place decides what it means.** Reading it in a few places to honor an override is fine; computing a default from it in a few places is not. Resolve it once, then pass the result inward. Five sites have five chances to disagree, and the fifth will.
+- **A row in `CONTRIBUTING.md`.** Ten of thirteen `LUMIS_*` variables were written down nowhere, so the only way to learn one existed was to grep for it.
+- **A name that is not already taken.** `LUMIS_BUILD` and `LUMIS_USE_LEGACY_ARTIFACTS` keep `rustler_precompiled`'s spelling rather than inventing a local one.
+
+Test-only knobs belong in the test harness or the `mise` task, not in library code. `benchmarks/mise.toml` is the model: `[env]` for what the whole suite shares, per-task `env` for the rest, and nothing outside `benchmarks/` reads a `BENCH_*` variable.
+
+### Data and config directories resolve identically on every runtime
+
+The CLI, the Node addon, the Elixir NIF and the browser must agree on where Lumis reads and writes, or the same machine grows two stores and downloads every parser twice.
+
+- **One function owns the data directory.** `lumis_wasm_runtime::store::default_data_dir` calls `etcetera` once; `resolve_data_dir` layers an explicit argument and then `LUMIS_DATA_DIR` over it. Every Rust caller goes through those, and `store.rs` holds the only `env::var_os("LUMIS_DATA_DIR")` in the tree. JavaScript reads the variable in three places, but only ever to honor an override that is already set; none of them computes a default.
+- **An empty value counts as unset.** `""` is falsy in JavaScript but a valid `PathBuf` in Rust that resolves to the current directory, so an unfiltered `var_os` would scatter `parsers/` and `compiled/` wherever the process started while JavaScript quietly used the platform default. `named_directory` filters it on the Rust side. Any new path variable needs the same treatment.
+- **Config resolves through the same strategy.** Today only the CLI has a config file, and `crates/lumis-cli/src/config.rs` uses `etcetera`'s `config_dir()`. A second runtime that grows one resolves it the same way instead of re-deriving `XDG_CONFIG_HOME` and `%APPDATA%` by hand.
+- **`choose_base_strategy` is the convention:** XDG everywhere except Windows, where it is `%APPDATA%`. It is `Xdg` on macOS as well. `etcetera` reserves `Apple` for `choose_native_strategy`, which Lumis does not use, and that distinction is the whole of the bug below.
+- **A runtime that cannot call Rust asks one that can.** Node resolves the default through the addon's `defaultDataDir()` rather than computing its own, via `loadAddon`, which answers even when the process has selected the Wasm runtime.
+- **Any remaining port needs a parity test**, per the rule above about reimplementation. `packages/javascript/lumis/test/data-dir-parity.test.ts` pins the no-addon fallback against the addon across four `XDG_DATA_HOME` states.
+
+No JavaScript library matches `etcetera`, so reaching for one does not solve this. `env-paths` uses the Apple convention on macOS, `%LOCALAPPDATA%` on Windows, and appends a `-nodejs` suffix; adopting it would relabel the divergence rather than remove it. The library does the work once, in Rust, and everything else asks.
+
+This is written down because it shipped ([#1264](https://github.com/leandrocp/lumis/pull/1264)). `default_data_dir` existed five times, the TypeScript copy picked Apple on macOS and `%LOCALAPPDATA%` on Windows, and the native and Wasm runtimes of the same npm package therefore used different stores. One developer machine held both, 2 parsers in one and 45 in the other. Nothing failed. Each runtime worked correctly against its own directory, and the only symptom was a download that had already happened once. A divergence whose whole cost is duplicated work raises no error, so a test has to be what catches it.
+
 ### Highlighting loads what a document needs, in one pass
 
 A parser is a WebAssembly module fetched from a registry and executed in the

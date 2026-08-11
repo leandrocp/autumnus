@@ -77,6 +77,10 @@ mix lumis.languages.cache elixir html javascript css
 
 Parsers live under `LUMIS_DATA_DIR`, or `config :lumis, data_dir:`.
 
+The NIF is precompiled. Set `LUMIS_BUILD=1` to build it from source instead, or
+`LUMIS_USE_LEGACY_ARTIFACTS=1` to take the legacy-CPU variant on a machine
+without the newer instruction sets.
+
 ## Documentation
 
 - [Elixir integration](https://lumis.sh/docs/usage/elixir-integration) — configuration, releases, Phoenix

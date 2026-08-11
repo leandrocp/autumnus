@@ -22,8 +22,12 @@ import {
 } from "./wasm.js";
 
 // Read when the addon builds its store, which is the first call into it below.
-process.env.LUMIS_DATA_DIR ??= resolve(import.meta.dirname, "../../../../target/test-parsers");
-process.env.LUMIS_DATA_DIR ??= mkdtempSync(join(tmpdir(), "lumis-native-test-"));
+// Without `mise run stage-test-parsers` there is nothing staged, so fall back to
+// an empty directory rather than pointing the store at a path that is not there.
+const stagedParsers = resolve(import.meta.dirname, "../../../../target/test-parsers");
+process.env.LUMIS_DATA_DIR ??= existsSync(stagedParsers)
+  ? stagedParsers
+  : mkdtempSync(join(tmpdir(), "lumis-native-test-"));
 
 const { loadAddon } = await import("../src/native-binding.js");
 

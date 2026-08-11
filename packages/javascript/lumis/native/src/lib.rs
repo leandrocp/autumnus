@@ -260,35 +260,27 @@ pub fn configure_store(data_dir: Option<String>) -> bool {
     }
     paths.data_dir = data_dir.map(PathBuf::from);
 
-    let compile_cache = paths
-        .data_dir
-        .clone()
-        .or_else(|| std::env::var_os("LUMIS_DATA_DIR").map(PathBuf::from))
-        .unwrap_or_else(default_data_dir);
+    let compile_cache = store::resolve_data_dir(paths.data_dir.clone());
     lumis_wasm_runtime::set_compile_cache_dir(compile_cache);
     true
+}
+
+/// The directory the store uses when nothing names one, so Node can defer to the
+/// same `etcetera` resolution the addon itself runs instead of porting it.
+#[napi(js_name = "defaultDataDir")]
+pub fn default_data_dir_js() -> String {
+    store::default_data_dir().to_string_lossy().into_owned()
 }
 
 /// The same resolve, verify and cache path the CLI and the Elixir NIF use.
 fn language_store(cache_dir: Option<PathBuf>) -> store::LanguageStore {
     let mut configured = STORE_PATHS.lock().expect("store path lock poisoned");
     configured.consumed = true;
-    let cache_dir = cache_dir
-        .or_else(|| configured.data_dir.clone())
-        .or_else(|| std::env::var_os("LUMIS_DATA_DIR").map(PathBuf::from))
-        .unwrap_or_else(default_data_dir);
+    let cache_dir = store::resolve_data_dir(cache_dir.or_else(|| configured.data_dir.clone()));
     store::LanguageStore::new(
         store::StoreConfig { cache_dir },
         Box::new(store::HttpFetcher),
     )
-}
-
-fn default_data_dir() -> PathBuf {
-    use etcetera::BaseStrategy;
-
-    etcetera::choose_base_strategy()
-        .map(|strategy| strategy.data_dir().join("lumis"))
-        .unwrap_or_else(|_| PathBuf::from(".lumis"))
 }
 
 fn resolver_scheme(source: &str) -> Option<(&str, &str)> {

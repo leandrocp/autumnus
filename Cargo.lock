@@ -1561,7 +1561,6 @@ name = "lumis-js-native"
 version = "0.6.1"
 dependencies = [
  "base64",
- "etcetera",
  "lumis-core",
  "lumis-wasm-runtime",
  "napi",
@@ -1576,6 +1575,7 @@ dependencies = [
 name = "lumis-wasm-runtime"
 version = "0.1.0"
 dependencies = [
+ "etcetera",
  "lumis-core",
  "semver",
  "serde",
@@ -1596,7 +1596,6 @@ dependencies = [
 name = "lumis_nif"
 version = "0.1.0"
 dependencies = [
- "etcetera",
  "lumis-core",
  "lumis-wasm-runtime",
  "once_cell",

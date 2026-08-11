@@ -16,6 +16,7 @@ wasm = ["dep:lumis-core", "dep:wasmtime", "dep:ureq", "dep:typed-arena", "tree-s
 [dependencies]
 typed-arena = { version = "2", optional = true }
 ureq = { version = "3", optional = true }
+etcetera = "0.11"
 lumis-core = { path = "../lumis-core", version = "2.3.0", default-features = false, optional = true }
 streaming-iterator = "0.1"
 thiserror = "2"
