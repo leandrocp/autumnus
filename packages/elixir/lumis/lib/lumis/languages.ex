@@ -100,38 +100,80 @@ defmodule Lumis.Languages do
     end
   end
 
+  @bundle_prefixes ["bundle_", "bundle-"]
+
   @doc false
+  # Compares normalized strings rather than `String.to_atom/1` on the caller's
+  # name: atoms are never garbage collected, so a name reaching this from a
+  # request would grow the atom table without bound.
   def bundle_members(name) do
-    string = to_string(name)
-
-    if String.starts_with?(string, ["bundle_", "bundle-"]) do
-      key =
-        String.to_atom(
-          "bundle_" <> String.replace(binary_part(string, 7, byte_size(string) - 7), "-", "_")
-        )
-
-      case Map.fetch(bundles(), key) do
-        {:ok, members} -> {:ok, members}
-        :error -> :error
-      end
-    else
-      :not_a_bundle
+    case name |> to_string() |> strip_bundle_prefix() do
+      nil -> :not_a_bundle
+      suffix -> find_bundle(normalize_bundle(suffix))
     end
   end
 
+  defp find_bundle(wanted) do
+    Enum.find_value(bundles(), :error, fn {bundle, members} ->
+      if bundle_key(bundle) == wanted, do: {:ok, members}
+    end)
+  end
+
+  defp bundle_key(bundle) do
+    bundle |> Atom.to_string() |> strip_bundle_prefix() |> normalize_bundle()
+  end
+
+  defp strip_bundle_prefix(string) do
+    Enum.find_value(@bundle_prefixes, fn prefix ->
+      case String.split(string, prefix, parts: 2) do
+        ["", suffix] -> suffix
+        _ -> nil
+      end
+    end)
+  end
+
+  defp normalize_bundle(nil), do: nil
+  defp normalize_bundle(suffix), do: suffix |> String.downcase() |> String.replace("-", "_")
+
   @doc false
   def expand_bundles(names) do
-    Enum.reduce_while(names, {:ok, []}, fn name, {:ok, acc} ->
+    names
+    |> Enum.reduce_while({:ok, []}, fn name, {:ok, acc} ->
       case bundle_members(name) do
-        {:ok, members} -> {:cont, {:ok, acc ++ members}}
+        {:ok, members} -> {:cont, {:ok, Enum.reverse(members, acc)}}
         :error -> {:halt, {:error, {:unknown_bundle, to_string(name)}}}
-        :not_a_bundle -> {:cont, {:ok, acc ++ [to_string(name)]}}
+        :not_a_bundle -> {:cont, {:ok, [to_string(name) | acc]}}
       end
     end)
     |> case do
-      {:ok, expanded} -> {:ok, Enum.uniq(expanded)}
+      {:ok, reversed} -> {:ok, reversed |> Enum.reverse() |> Enum.uniq()}
       error -> error
     end
+  end
+
+  @doc """
+  Resolves a name, path or source to a language id, the way highlighting does.
+
+  `name` can be a language id, an alias, a file name or a path. When it does not
+  resolve, `source` is checked for an Emacs mode header, a shebang, an HTML
+  doctype or an XML declaration. Falls back to `"plaintext"`.
+
+  The counterpart of `Language::guess` in Rust and `guessLanguage()` in
+  JavaScript. `Lumis.highlight/2` already calls this when no language is given;
+  reach for it directly to label a snippet before deciding what to do with it.
+
+      "elixir" = Lumis.Languages.guess("lib/app.ex")
+      "bash" = Lumis.Languages.guess(nil, "#!/usr/bin/env bash")
+      "plaintext" = Lumis.Languages.guess(nil, "")
+
+  """
+  @spec guess(String.t() | atom() | nil, String.t()) :: String.t()
+  def guess(name, source \\ "")
+
+  def guess(nil, source) when is_binary(source), do: Native.guess_language(nil, source)
+
+  def guess(name, source) when is_binary(source) do
+    Native.guess_language(to_string(name), source)
   end
 
   @doc """

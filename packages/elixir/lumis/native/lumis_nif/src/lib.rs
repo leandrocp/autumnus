@@ -395,6 +395,11 @@ fn cache_named_language(runtime: &Runtime, name: &str, force: bool) -> Result<St
 }
 
 #[rustler::nif]
+fn guess_language(name: Option<&str>, source: &str) -> &'static str {
+    languages::Language::guess(name, source).id_name()
+}
+
+#[rustler::nif]
 fn has_language(name: &str) -> bool {
     executor()
         .map(|executor| executor.runtime.has_language(name))

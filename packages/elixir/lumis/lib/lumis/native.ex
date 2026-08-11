@@ -73,6 +73,7 @@ defmodule Lumis.Native do
 
   def cache_language_by_name(_name, _force), do: :erlang.nif_error(:nif_not_loaded)
 
+  def guess_language(_name, _source), do: :erlang.nif_error(:nif_not_loaded)
   def has_language(_name), do: :erlang.nif_error(:nif_not_loaded)
   def loaded_languages(), do: :erlang.nif_error(:nif_not_loaded)
   def highlight(_source, _options), do: :erlang.nif_error(:nif_not_loaded)

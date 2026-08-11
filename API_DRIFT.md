@@ -45,6 +45,7 @@ that.
 | D6 | `highlight` has no `--pre-class`, `--italic`, `--include-highlights`, `--header`, and `--highlight-lines` takes no class or style | CLI | fixed |
 | D7 | `:bundle_*` names work in `Languages.load/1` but not `Languages.cache/2`, the mix task, `cacheLanguages`, `lumis-wasm-cache`, or `lumis parsers cache` | Elixir, JavaScript, CLI | fixed |
 | D8 | `guessLanguage` is implemented but not exported; `sanitizeThemeName` is not in `formatters/html`; `runtimeKind` is missing from the browser entry | JavaScript | fixed |
+| D18 | Language detection is public as `Language::guess` in Rust and `guessLanguage()` in JavaScript, and unreachable in Elixir | Elixir | fixed |
 
 **D4.** Rust models this as `Option<HighlightLinesStyle>` where `None` means no
 style, and Elixir documents `style: nil` for exactly this. JavaScript types it
@@ -55,6 +56,14 @@ opts out.
 **D5.** `HtmlMultiThemesBuilder::build` rejects all three. Elixir rejects empty
 themes itself and inherits the other two through the builder. JavaScript builds
 no formatter object, so it needs the checks at call time.
+
+**D18.** `Lumis.Languages.guess/2` calls the same `Language::guess` that
+`highlight/2` already uses when no language is given, so the two cannot answer
+differently — a test pins them against one input. Bundle name matching that
+landed alongside it compares normalized strings rather than
+`String.to_atom/1`: atoms are never collected, so a name arriving from a request
+would grow the atom table without bound. A test asserts `:erlang.system_info(:atom_count)`
+is unchanged across fifty unknown names.
 
 ## Shape and naming
 
@@ -112,6 +121,7 @@ Not drift. Recorded so they are not re-litigated.
 | --- | --- |
 | Browsers load languages before highlighting; every other runtime loads during the walk | `web-tree-sitter` loads asynchronously and cannot fetch inside a synchronous walk. `ARCHITECTURE.md` has the full reasoning. Do not make the other runtimes match the browser. |
 | Rust and the CLI take a theme object or name; JavaScript takes only an object | `@lumis-sh/themes` publishes one module per theme so bundlers can drop the other 245. A name lookup would have to reference all of them. |
+| `sanitize_theme_name` exists in Rust and JavaScript, not Elixir | It builds CSS custom property names, which only a formatter does. Elixir's formatters run inside the NIF, so nothing on the Elixir side would call it. |
 | Elixir has no custom formatter API | Formatters run inside the NIF. A formatter written in Elixir would mean crossing the BEAM boundary per token. |
 | Elixir loads languages globally to the VM; JavaScript loads per highlighter | One `Runtime` lives in the NIF, so the first process to need a language pays and every process after it does not. |
 | Rust compiles languages in behind feature flags; the dynamic runtimes fetch them | Different distribution model, same catalog and the same bundle names. |

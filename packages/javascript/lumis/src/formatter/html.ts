@@ -702,6 +702,10 @@ function pushThemeCssVars(
  *
  * Rust holds themes in a `HashMap` and sorts before emitting, so this has to
  * sort rather than follow insertion order for the two to agree byte for byte.
+ *
+ * Exported for the multi-themes formatter next door, not for callers; Rust
+ * keeps its counterpart private.
+ * @internal
  */
 export function sortedThemeNames(themes: Record<string, unknown>): string[] {
   return Object.keys(themes).sort();

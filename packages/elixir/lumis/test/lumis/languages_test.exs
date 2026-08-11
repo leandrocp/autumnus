@@ -51,6 +51,32 @@ defmodule Lumis.LanguagesTest do
     assert length(names) > 100
   end
 
+  describe "guess/2" do
+    test "resolves an id, alias, file name and path" do
+      assert Lumis.Languages.guess("elixir") == "elixir"
+      assert Lumis.Languages.guess("sh") == "bash"
+      assert Lumis.Languages.guess("app.ex") == "elixir"
+      assert Lumis.Languages.guess("lib/app.ex") == "elixir"
+    end
+
+    test "falls back to content when the name does not resolve" do
+      assert Lumis.Languages.guess(nil, "#!/usr/bin/env bash\nID=1") == "bash"
+      assert Lumis.Languages.guess(nil, "<!DOCTYPE html>\n<html></html>") == "html"
+    end
+
+    test "falls back to plaintext" do
+      assert Lumis.Languages.guess(nil, "") == "plaintext"
+      assert Lumis.Languages.guess("not-a-language", "") == "plaintext"
+    end
+
+    test "agrees with what highlight/2 picks for the same input" do
+      source = "#!/usr/bin/env bash\nID=1"
+
+      assert {:ok, html} = Lumis.highlight(source, formatter: :html_linked)
+      assert html =~ "language-#{Lumis.Languages.guess(nil, source)}"
+    end
+  end
+
   describe "bundles" do
     @bundles_dir Path.expand("../../../../javascript/lumis/bundles", __DIR__)
 
@@ -90,6 +116,41 @@ defmodule Lumis.LanguagesTest do
       assert length(Lumis.Languages.bundles()[:bundle_full]) > 100
 
       assert {:error, :unknown_bundle} = Lumis.Languages.load(:bundle_nope)
+    end
+
+    test "cache/2 takes the same bundle names load/1 does" do
+      assert {:error, {:unknown_bundle, "bundle_nope"}} = Lumis.Languages.cache([:bundle_nope])
+    end
+
+    test "expand_bundles/1 expands a bundle into its members" do
+      assert {:ok, members} = Lumis.Languages.expand_bundles([:bundle_web])
+      assert Enum.sort(members) == Enum.sort(Lumis.Languages.bundles()[:bundle_web])
+    end
+
+    test "expand_bundles/1 accepts hyphens, matching the CLI spelling" do
+      assert Lumis.Languages.expand_bundles(["bundle-web-extra"]) ==
+               Lumis.Languages.expand_bundles([:bundle_web_extra])
+    end
+
+    test "expand_bundles/1 leaves plain language names alone and deduplicates" do
+      assert {:ok, ["rust", "elixir"]} = Lumis.Languages.expand_bundles(["rust", "elixir"])
+
+      assert {:ok, expanded} = Lumis.Languages.expand_bundles([:bundle_web, "css"])
+      assert Enum.count(expanded, &(&1 == "css")) == 1
+    end
+
+    # Atoms are never garbage collected, so a bundle name arriving from a
+    # request must not become one. `bundles/0` interns the five fixed names on
+    # first call, hence the warm-up before the baseline.
+    test "an unknown bundle name creates no atom" do
+      assert :error = Lumis.Languages.bundle_members("bundle_warmup")
+      before = :erlang.system_info(:atom_count)
+
+      for index <- 1..50 do
+        assert :error = Lumis.Languages.bundle_members("bundle_absent_#{index}")
+      end
+
+      assert :erlang.system_info(:atom_count) == before
     end
 
     defp bundle_atom(name), do: String.to_atom("bundle_" <> String.replace(name, "-", "_"))
