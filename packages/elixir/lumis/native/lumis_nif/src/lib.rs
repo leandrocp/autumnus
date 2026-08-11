@@ -77,22 +77,11 @@ static STORE_PATHS: Lazy<RwLock<StorePaths>> = Lazy::new(|| RwLock::new(StorePat
 /// directories Lumis persists under.
 fn language_store(cache_dir: Option<std::path::PathBuf>) -> store::LanguageStore {
     let paths = STORE_PATHS.read();
-    let cache_dir = cache_dir
-        .or_else(|| paths.data_dir.clone())
-        .or_else(|| std::env::var_os("LUMIS_DATA_DIR").map(std::path::PathBuf::from))
-        .unwrap_or_else(default_data_dir);
+    let cache_dir = store::resolve_data_dir(cache_dir.or_else(|| paths.data_dir.clone()));
     store::LanguageStore::new(
         store::StoreConfig { cache_dir },
         Box::new(store::HttpFetcher),
     )
-}
-
-fn default_data_dir() -> std::path::PathBuf {
-    use etcetera::BaseStrategy;
-
-    etcetera::choose_base_strategy()
-        .map(|strategy| strategy.data_dir().join("lumis"))
-        .unwrap_or_else(|_| std::path::PathBuf::from(".lumis"))
 }
 
 struct WasmExecutor {
@@ -301,11 +290,7 @@ fn configure_store(data_dir: Option<String>) -> bool {
     let mut paths = STORE_PATHS.write();
     paths.data_dir = data_dir.map(std::path::PathBuf::from);
 
-    let compile_cache = paths
-        .data_dir
-        .clone()
-        .or_else(|| std::env::var_os("LUMIS_DATA_DIR").map(std::path::PathBuf::from))
-        .unwrap_or_else(default_data_dir);
+    let compile_cache = store::resolve_data_dir(paths.data_dir.clone());
     lumis_wasm_runtime::set_compile_cache_dir(compile_cache);
     true
 }

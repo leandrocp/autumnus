@@ -737,8 +737,9 @@ static COMPILE_CACHE_DIR: RwLock<Option<std::path::PathBuf>> = RwLock::new(None)
 /// The engine is process-global and built once, so the last value set before the
 /// first [`Runtime`] is the one that takes effect and later calls do nothing.
 /// Callers that resolve a data directory of their own should pass it here,
-/// otherwise the cache follows `LUMIS_DATA_DIR` and a caller-supplied directory
-/// would hold the parsers while their compiled forms went somewhere unrelated.
+/// otherwise the cache falls back to [`store::resolve_data_dir`] and a
+/// caller-supplied directory would hold the parsers while their compiled forms
+/// went somewhere unrelated.
 pub fn set_compile_cache_dir(dir: std::path::PathBuf) {
     *COMPILE_CACHE_DIR
         .write()
@@ -747,19 +748,16 @@ pub fn set_compile_cache_dir(dir: std::path::PathBuf) {
 
 fn cached_engine() -> Result<Engine, wasmtime::Error> {
     let mut config = Config::new();
-    let cache = COMPILE_CACHE_DIR
-        .read()
-        .expect("compile cache lock poisoned")
-        .clone()
-        .or_else(|| std::env::var_os("LUMIS_DATA_DIR").map(std::path::PathBuf::from))
-        .map(|root| {
-            let mut cache_config = CacheConfig::new();
-            cache_config.with_directory(root.join("compiled"));
-            Cache::new(cache_config)
-        })
-        .unwrap_or_else(|| Cache::from_file(None::<&std::path::Path>));
+    let root = crate::store::resolve_data_dir(
+        COMPILE_CACHE_DIR
+            .read()
+            .expect("compile cache lock poisoned")
+            .clone(),
+    );
+    let mut cache_config = CacheConfig::new();
+    cache_config.with_directory(root.join("compiled"));
 
-    if let Ok(cache) = cache {
+    if let Ok(cache) = Cache::new(cache_config) {
         config.cache(Some(cache));
     }
 

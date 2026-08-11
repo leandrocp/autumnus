@@ -125,6 +125,31 @@ impl Fetcher for NoNetwork {
     }
 }
 
+/// The directory Lumis persists under when nothing names one.
+///
+/// `etcetera`'s base strategy is the CLI convention: XDG everywhere except
+/// Windows, where it is `%APPDATA%`. Every runtime resolves through here so the
+/// CLI, both native addons, and Node cannot disagree about where the store is.
+#[must_use]
+pub fn default_data_dir() -> PathBuf {
+    use etcetera::BaseStrategy;
+
+    etcetera::choose_base_strategy()
+        .map(|strategy| strategy.data_dir().join("lumis"))
+        .unwrap_or_else(|_| PathBuf::from(".lumis"))
+}
+
+/// The data directory, preferring `explicit` and then `LUMIS_DATA_DIR`.
+///
+/// Callers that accept a directory of their own pass it as `explicit`; the rest
+/// pass `None` and get the environment or the platform default.
+#[must_use]
+pub fn resolve_data_dir(explicit: Option<PathBuf>) -> PathBuf {
+    explicit
+        .or_else(|| std::env::var_os("LUMIS_DATA_DIR").map(PathBuf::from))
+        .unwrap_or_else(default_data_dir)
+}
+
 /// Where a store keeps and looks for assets.
 pub struct StoreConfig {
     /// Directory holding `lumis.json` and parser files, both the ones this

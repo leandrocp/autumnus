@@ -4,7 +4,6 @@ mod registry;
 
 use anyhow::Result;
 use clap::{ArgAction, Parser, Subcommand, ValueEnum};
-use etcetera::BaseStrategy;
 use lumis_core::events::HighlightEvent;
 use lumis_core::formatter::Formatter as CoreFormatter;
 use lumis_core::formatter::TerminalBackground;
@@ -280,16 +279,9 @@ enum Formatter {
     BbcodeScoped,
 }
 
-fn default_data_dir() -> PathBuf {
-    etcetera::choose_base_strategy()
-        .expect("failed to determine home directory")
-        .data_dir()
-        .join("lumis")
-}
-
 fn main() -> Result<()> {
     let cli = Cli::parse();
-    let data_dir = cli.data_dir.unwrap_or_else(default_data_dir);
+    let data_dir = lumis_wasm_runtime::store::resolve_data_dir(cli.data_dir);
     lumis_wasm_runtime::set_compile_cache_dir(data_dir.clone());
     let config_path = cli.config.unwrap_or_else(config::default_path);
     let verbose = cli.verbose;

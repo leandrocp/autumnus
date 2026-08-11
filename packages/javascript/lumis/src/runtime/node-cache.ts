@@ -22,17 +22,40 @@ export function wasmCacheFilename(key: string): string {
 }
 
 /** @internal */
-/** Everything Lumis persists lives under one directory, `LUMIS_DATA_DIR`. */
+/**
+ * Everything Lumis persists lives under one directory, `LUMIS_DATA_DIR`.
+ *
+ * The addon resolves the default through `etcetera`, so asking it rather than
+ * deciding here keeps the Wasm runtime on the store the native runtime, the CLI
+ * and the Elixir NIF already share. {@link platformDataDir} answers only where
+ * no addon is built, and a test pins it against the Rust result.
+ */
 export async function dataDir(): Promise<string> {
-  const { join } = await import(nodePath);
   if (process.env.LUMIS_DATA_DIR) return process.env.LUMIS_DATA_DIR;
-  if (process.env.XDG_DATA_HOME) return join(process.env.XDG_DATA_HOME, "lumis");
-  if (process.platform === "win32" && process.env.LOCALAPPDATA) {
-    return join(process.env.LOCALAPPDATA, "lumis");
-  }
+  const { loadAddon } = await import("../native-binding.js");
+  return loadAddon()?.defaultDataDir() ?? (await platformDataDir());
+}
+
+/** @internal */
+/**
+ * `etcetera::choose_base_strategy`, ported: XDG everywhere except Windows, where
+ * it is `%APPDATA%`. A relative `XDG_DATA_HOME` is ignored, as the XDG spec
+ * requires and as `etcetera` implements.
+ *
+ * Exported so `test/data-dir-parity.test.ts` can pin it against the addon.
+ */
+export async function platformDataDir(): Promise<string> {
+  const { isAbsolute, join } = await import(nodePath);
   const { homedir } = await import(nodeOs);
-  return process.platform === "darwin"
-    ? join(homedir(), "Library", "Application Support", "lumis")
+
+  if (process.platform === "win32") {
+    const appData = process.env.APPDATA || join(homedir(), "AppData", "Roaming");
+    return join(appData, "lumis");
+  }
+
+  const xdgDataHome = process.env.XDG_DATA_HOME;
+  return xdgDataHome && isAbsolute(xdgDataHome)
+    ? join(xdgDataHome, "lumis")
     : join(homedir(), ".local", "share", "lumis");
 }
 
