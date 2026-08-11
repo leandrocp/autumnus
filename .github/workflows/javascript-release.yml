@@ -39,10 +39,22 @@ jobs:
             target: aarch64-unknown-linux-gnu
             os: ubuntu-24.04-arm
             library: liblumis_js_native.so
+          - package: linux-arm64-musl
+            target: aarch64-unknown-linux-musl
+            os: ubuntu-24.04-arm
+            library: liblumis_js_native.so
           - package: linux-x64-gnu
             target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
             library: liblumis_js_native.so
+          - package: linux-x64-musl
+            target: x86_64-unknown-linux-musl
+            os: ubuntu-latest
+            library: liblumis_js_native.so
+          - package: win32-arm64-msvc
+            target: aarch64-pc-windows-msvc
+            os: windows-latest
+            library: lumis_js_native.dll
           - package: win32-x64-msvc
             target: x86_64-pc-windows-msvc
             os: windows-latest
@@ -57,7 +69,24 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
+      # The Tree-sitter C sources need a musl compiler; `cc` would otherwise
+      # reach for the runner's glibc gcc and emit objects the musl link rejects.
+      # Each musl target builds on a runner of its own architecture, so the
+      # `musl-gcc` this installs is the native compiler in both cases.
+      - name: Install musl toolchain
+        if: endsWith(matrix.target, '-musl')
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y musl-tools
+
+      # Rust links musl targets against a static CRT by default, which cannot
+      # produce a loadable cdylib. Node on Alpine dlopens this, so the addon has
+      # to resolve musl's libc at load time like every other shared object.
       - name: Build native runtime
+        env:
+          RUSTFLAGS: ${{ endsWith(matrix.target, '-musl') && '-C target-feature=-crt-static' || '' }}
+          CC_x86_64_unknown_linux_musl: musl-gcc
+          CC_aarch64_unknown_linux_musl: musl-gcc
         run: >-
           cargo build --locked --release
           --target ${{ matrix.target }}
@@ -201,8 +230,8 @@ jobs:
             npm publish "$package_dir" --access public --provenance
             published=$((published + 1))
           done
-          if [ "$published" -ne 5 ]; then
-            echo "expected 5 platform packages, published $published" >&2
+          if [ "$published" -ne 8 ]; then
+            echo "expected 8 platform packages, published $published" >&2
             exit 1
           fi
         env:

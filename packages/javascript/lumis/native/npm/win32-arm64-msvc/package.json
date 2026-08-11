@@ -1,0 +1,21 @@
+{
+  "name": "@lumis-sh/lumis-native-win32-arm64-msvc",
+  "version": "0.6.1",
+  "description": "Native Lumis runtime for Windows arm64",
+  "license": "MIT",
+  "repository": "github:leandrocp/lumis",
+  "main": "lumis-native.win32-arm64-msvc.node",
+  "files": [
+    "LICENSE",
+    "lumis-native.win32-arm64-msvc.node"
+  ],
+  "os": [
+    "win32"
+  ],
+  "cpu": [
+    "arm64"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}

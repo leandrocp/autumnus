@@ -91,17 +91,37 @@ function linuxLibc(): "gnu" | "musl" {
   return report?.header?.glibcVersionRuntime ? "gnu" : "musl";
 }
 
-function nativeTarget(): string | undefined {
-  if (process.platform === "darwin" && ["arm64", "x64"].includes(process.arch)) {
-    return `darwin-${process.arch}`;
+/**
+ * The platform package name for a host, or `undefined` where none is published.
+ *
+ * `native/npm/meta/index.js` repeats this for installs that resolve the addon
+ * through `@lumis-sh/lumis-native`, because that package ships alone and cannot
+ * import from here. `test/native-targets.test.ts` pins the two together and to
+ * the published set, so a new target has to be added in both places.
+ */
+export function nativeTargetFor(
+  platform: string,
+  arch: string,
+  libc: "gnu" | "musl",
+): string | undefined {
+  if (platform === "darwin" && ["arm64", "x64"].includes(arch)) {
+    return `darwin-${arch}`;
   }
-  if (process.platform === "linux" && ["arm64", "x64"].includes(process.arch)) {
-    return linuxLibc() === "gnu" ? `linux-${process.arch}-gnu` : undefined;
+  if (platform === "linux" && ["arm64", "x64"].includes(arch)) {
+    return `linux-${arch}-${libc}`;
   }
-  if (process.platform === "win32" && process.arch === "x64") {
-    return "win32-x64-msvc";
+  if (platform === "win32" && ["arm64", "x64"].includes(arch)) {
+    return `win32-${arch}-msvc`;
   }
   return undefined;
+}
+
+function nativeTarget(): string | undefined {
+  return nativeTargetFor(
+    process.platform,
+    process.arch,
+    process.platform === "linux" ? linuxLibc() : "gnu",
+  );
 }
 
 /**
