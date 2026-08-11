@@ -17,30 +17,12 @@ pub struct HighlightConfig {
     pub theme: Option<String>,
 }
 
+/// `etcetera` resolves `XDG_CONFIG_HOME` on Unix and `%APPDATA%` on Windows, the
+/// same base strategy [`lumis_wasm_runtime::store::default_data_dir`] uses.
 pub fn default_path() -> PathBuf {
-    let config_home = std::env::var_os("XDG_CONFIG_HOME")
-        .filter(|path| !path.is_empty())
-        .map(PathBuf::from);
-
-    if let Some(config_home) = config_home {
-        return config_path(Some(config_home), PathBuf::new());
-    }
-
-    #[cfg(windows)]
-    if let Some(app_data) = std::env::var_os("APPDATA").filter(|path| !path.is_empty()) {
-        return config_path(Some(PathBuf::from(app_data)), PathBuf::new());
-    }
-
-    let home = etcetera::choose_base_strategy()
+    etcetera::choose_base_strategy()
         .expect("failed to determine home directory")
-        .home_dir()
-        .to_path_buf();
-    config_path(config_home, home)
-}
-
-fn config_path(config_home: Option<PathBuf>, home: PathBuf) -> PathBuf {
-    config_home
-        .unwrap_or_else(|| home.join(".config"))
+        .config_dir()
         .join("lumis")
         .join("config.toml")
 }
@@ -65,19 +47,20 @@ impl Config {
 mod tests {
     use super::*;
 
+    /// `etcetera` owns the base directory; what is ours is choosing the config
+    /// one over the data one and naming the file under it.
     #[test]
-    fn config_path_prefers_xdg_config_home() {
-        assert_eq!(
-            config_path(Some(PathBuf::from("/xdg")), PathBuf::from("/home/user")),
-            PathBuf::from("/xdg/lumis/config.toml")
-        );
-    }
+    fn default_path_is_lumis_config_toml_under_the_config_dir() {
+        let strategy =
+            etcetera::choose_base_strategy().expect("failed to determine home directory");
 
-    #[test]
-    fn config_path_falls_back_to_dot_config() {
         assert_eq!(
-            config_path(None, PathBuf::from("/home/user")),
-            PathBuf::from("/home/user/.config/lumis/config.toml")
+            default_path(),
+            strategy.config_dir().join("lumis").join("config.toml")
+        );
+        assert_ne!(
+            default_path(),
+            strategy.data_dir().join("lumis").join("config.toml")
         );
     }
 }
