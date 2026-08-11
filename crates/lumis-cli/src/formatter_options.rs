@@ -100,9 +100,10 @@ fn manifest_options_for(formatter: Formatter) -> &'static [&'static str] {
 }
 
 /// Every flag a formatter accepts, for `lumis formatters show`. The universal
-/// flags come first, then each group in `--help` order.
+/// flags come first, then each group in `--help` order. `--formatter` is not
+/// among them: it selects the formatter rather than configuring one.
 pub fn accepted_flags(formatter: Formatter) -> Vec<&'static str> {
-    let mut flags = vec!["--language", "--formatter", "--rainbow-brackets"];
+    let mut flags = vec!["--language", "--rainbow-brackets"];
     for group in OPTION_GROUPS.iter().filter(|g| g.accepts(formatter)) {
         flags.extend_from_slice(group.flags);
     }
@@ -177,6 +178,17 @@ mod tests {
     }
 
     #[test]
+    fn the_manifest_covers_every_formatter() {
+        assert_eq!(
+            FORMATTER_OPTIONS.len(),
+            Formatter::ALL.len(),
+            "the manifest describes {} formatters but the CLI offers {}",
+            FORMATTER_OPTIONS.len(),
+            Formatter::ALL.len()
+        );
+    }
+
+    #[test]
     fn every_manifest_option_is_reachable() {
         let grouped: Vec<&str> = OPTION_GROUPS
             .iter()
@@ -191,6 +203,36 @@ mod tests {
                      add it to OPTION_GROUPS or to the universal list"
                 );
             }
+        }
+    }
+
+    /// The reachability check above only reads manifest to group. A group naming
+    /// an option no formatter has would fail no assertion there: `accepts` would
+    /// simply return false everywhere, and the group would silently apply to
+    /// nothing.
+    #[test]
+    fn every_group_option_exists_and_reaches_a_formatter() {
+        let known: Vec<&str> = FORMATTER_OPTIONS
+            .iter()
+            .flat_map(|(_, options)| options.iter().copied())
+            .collect();
+
+        for group in OPTION_GROUPS {
+            assert!(!group.flags.is_empty(), "{} declares no flags", group.label);
+
+            for option in group.manifest_options {
+                assert!(
+                    known.contains(option),
+                    "{} names manifest option `{option}`, which no formatter declares",
+                    group.label
+                );
+            }
+
+            assert!(
+                !group.accepted_by().is_empty(),
+                "{} is accepted by no formatter, so its flags can never be used",
+                group.label
+            );
         }
     }
 }

@@ -1418,10 +1418,8 @@ fn highlight_rejects_an_option_the_chosen_formatter_ignores() {
         .stderr(predicate::str::contains("lumis formatters show terminal"));
 }
 
-/// Every offending flag in a group is named at once, so fixing the command
-/// takes one round trip rather than one per flag.
 #[test]
-fn highlight_names_every_rejected_flag_in_one_error() {
+fn highlight_names_every_rejected_flag_in_one_group_in_one_error() {
     cmd()
         .args([
             "highlight",
@@ -1442,8 +1440,33 @@ fn highlight_names_every_rejected_flag_in_one_error() {
         ));
 }
 
-/// The most misleading of the silently ignored combinations: it rendered
-/// uncolored class names and exited 0.
+#[test]
+fn highlight_names_rejected_flags_from_every_group_in_one_error() {
+    cmd()
+        .args([
+            "highlight",
+            "-l",
+            "diff",
+            "-f",
+            "html-linked",
+            "-t",
+            "dracula",
+            "--italic",
+        ])
+        .write_stdin(DIFF_SNIPPET)
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "`--theme`, `--italic` are not accepted by the `html-linked` formatter",
+        ))
+        .stderr(predicate::str::contains(
+            "`--theme` applies to: html-inline, terminal",
+        ))
+        .stderr(predicate::str::contains(
+            "inline-style options apply to: html-inline, html-multi-themes",
+        ));
+}
+
 #[test]
 fn highlight_rejects_theme_for_a_formatter_that_cannot_color() {
     cmd()
@@ -1552,6 +1575,7 @@ fn formatters_show_lists_only_what_the_formatter_accepts() {
         .stdout(predicate::str::contains("--background"))
         .stdout(predicate::str::contains("--width"))
         .stdout(predicate::str::contains("--theme"))
+        .stdout(predicate::str::contains("--formatter").not())
         .stdout(predicate::str::contains("--pre-class").not())
         .stdout(predicate::str::contains("--italic").not());
 }

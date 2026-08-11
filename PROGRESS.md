@@ -1,7 +1,17 @@
-# CLI option organization: research
+# CLI option organization: research and decision
 
-Branch `research/cli-dx`. Nothing is implemented yet; this is the analysis that
-has to land before code does.
+**Status: implemented in [#1267](https://github.com/leandrocp/lumis/pull/1267).**
+Candidate D was chosen; A, B and C were rejected for the reasons recorded below.
+Everything the CLI does today is in `crates/lumis-cli/`, and this file is kept as
+the reasoning behind it rather than as a plan.
+
+Research was done against
+[`6172edea`](https://github.com/leandrocp/lumis/commit/6172edeac33c824cb56dee3793a4fd619ab66ff8),
+the merge commit of #1266. Where the text below describes current behaviour in
+the present tense, read it as the state *before* #1267: `-h` was
+`--highlight-lines` and is now `--help`, `--highlight-lines` moved to `-H`, and
+the 42 silently ignored combinations are now errors. The "Secondary findings"
+table records which of those shipped.
 
 ## The question
 
@@ -559,18 +569,17 @@ one-flag group, so keying the verb off the flag count produces
 
 ## Secondary findings
 
-Found while reading the CLI; not caused by #1266, all worth fixing in the same
-pass.
+Found while reading the CLI; not caused by #1266. All but S5 shipped in #1267.
 
-| # | Finding |
-| --- | --- |
-| S1 | **`-h` is `--highlight-lines`, not `--help`.** `disable_help_flag = true` and `--help` is long-only. Verified in the prototype: `lumis highlight -h` prints `error: a value is required for '--highlight-lines <HIGHLIGHT_LINES>' but none was supplied` and exits 2. clig.dev lists `-h, --help` in its standard-names table. Move highlight-lines to `-H` or drop its short |
-| S2 | **`-v` and `-V` are inverted.** `-v` is version and `-V` is verbose, the opposite of clap's own default (`-V` = version) and of the GNU convention (`-v` = verbose) |
-| S3 | **`--css-variable-prefix` has `default_value = "--lumis"`,** so it is always "present". Make it `Option<String>` with the default applied at the call site, or group validation will fire on an argument nobody passed |
-| S4 | **`--theme` on `html-linked` is the most misleading no-op of the 42.** Someone running `-f html-linked -t dracula` wants colors and gets bare class names with no indication why |
-| S5 | **No shell completions.** `clap_complete` is not a dependency |
-| S6 | The `after_help` examples on `highlight` are good and clig.dev-aligned; they predate six of the flags. mise puts a long `Examples:` block at the end of every command's help. Refresh, and consider extending the habit to the other commands |
-| S7 | **`--css-variable-prefix` cannot take its own default value in space-separated form.** Found while running examples through the prototype: `--css-variable-prefix --shiki` fails with `error: unexpected argument '--shiki' found`, because clap reads a leading `--` as the next flag. Only `--css-variable-prefix=--shiki` works, and the documented default is literally `--lumis`. Needs `allow_hyphen_values = true`, and the docs example should use `=` either way |
+| # | Finding | Status |
+| --- | --- | --- |
+| S1 | **`-h` is `--highlight-lines`, not `--help`.** `disable_help_flag = true` and `--help` is long-only. Verified in the prototype: `lumis highlight -h` prints `error: a value is required for '--highlight-lines <HIGHLIGHT_LINES>' but none was supplied` and exits 2. clig.dev lists `-h, --help` in its standard-names table. Move highlight-lines to `-H` or drop its short | fixed |
+| S2 | **`-v` and `-V` are inverted.** `-v` is version and `-V` is verbose, the opposite of clap's own default (`-V` = version) and of the GNU convention (`-v` = verbose) | fixed |
+| S3 | **`--css-variable-prefix` has `default_value = "--lumis"`,** so it is always "present". Make it `Option<String>` with the default applied at the call site, or group validation will fire on an argument nobody passed | fixed |
+| S4 | **`--theme` on `html-linked` is the most misleading no-op of the 42.** Someone running `-f html-linked -t dracula` wants colors and gets bare class names with no indication why | fixed |
+| S5 | **No shell completions.** `clap_complete` is not a dependency | open |
+| S6 | The `after_help` examples on `highlight` are good and clig.dev-aligned; they predate six of the flags. mise puts a long `Examples:` block at the end of every command's help. Refresh, and consider extending the habit to the other commands | fixed |
+| S7 | **`--css-variable-prefix` cannot take its own default value in space-separated form.** Found while running examples through the prototype: `--css-variable-prefix --shiki` fails with `error: unexpected argument '--shiki' found`, because clap reads a leading `--` as the next flag. Only `--css-variable-prefix=--shiki` works, and the documented default is literally `--lumis`. Needs `allow_hyphen_values = true`, and the docs example should use `=` either way | fixed |
 
 ## Open questions
 

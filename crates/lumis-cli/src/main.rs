@@ -207,13 +207,15 @@ impl HighlightArgs {
         self.formatter.unwrap_or_default()
     }
 
-    /// The flags the user passed that the chosen formatter would ignore.
-    fn rejected(&self) -> Option<(&'static formatter_options::OptionGroup, Vec<&'static str>)> {
+    /// Every group holding a flag the user passed that the chosen formatter
+    /// would ignore, so one run reports the whole command rather than the first
+    /// thing wrong with it.
+    fn rejected(&self) -> Vec<(&'static formatter_options::OptionGroup, Vec<&'static str>)> {
         let chosen = self.formatter();
         formatter_options::OPTION_GROUPS
             .iter()
             .filter(|group| !group.accepts(chosen))
-            .find_map(|group| {
+            .filter_map(|group| {
                 let used: Vec<&'static str> = group
                     .flags
                     .iter()
@@ -222,6 +224,7 @@ impl HighlightArgs {
                     .collect();
                 (!used.is_empty()).then_some((group, used))
             })
+            .collect()
     }
 
     fn is_set(&self, flag: &str) -> bool {
@@ -516,36 +519,47 @@ fn main() -> Result<()> {
 /// clap cannot express this: `conflicts_with` keys on another argument being
 /// present, and the formatter is a *value* of `--formatter`.
 fn reject_unaccepted_options(args: &HighlightArgs) {
-    let Some((group, used)) = args.rejected() else {
+    let rejected = args.rejected();
+    if rejected.is_empty() {
         return;
-    };
+    }
 
     let chosen = args.formatter().slug();
-    let flags: Vec<String> = used.iter().map(|flag| format!("`{flag}`")).collect();
-    let accepts: Vec<&str> = group.accepted_by().iter().map(|f| f.slug()).collect();
+    let all_flags: Vec<String> = rejected
+        .iter()
+        .flat_map(|(_, used)| used.iter().map(|flag| format!("`{flag}`")))
+        .collect();
+
+    // Groups differ in which formatters accept them, so the applicability line
+    // cannot be shared.
+    let mut message = format!(
+        "{} {} not accepted by the `{chosen}` formatter\n",
+        all_flags.join(", "),
+        if all_flags.len() == 1 { "is" } else { "are" },
+    );
+    for (group, _) in &rejected {
+        let accepts: Vec<&str> = group.accepted_by().iter().map(|f| f.slug()).collect();
+        message.push_str(&format!(
+            "\n  {} {} to: {}",
+            group.label,
+            if group.flags.len() == 1 {
+                "applies"
+            } else {
+                "apply"
+            },
+            accepts.join(", "),
+        ));
+    }
+    message.push_str(&format!(
+        "\n  run `lumis formatters show {chosen}` to see what it accepts"
+    ));
 
     Cli::command()
         .find_subcommand_mut("highlight")
         .expect("the highlight subcommand exists")
         .clone()
         .bin_name("lumis highlight")
-        .error(
-            clap::error::ErrorKind::ArgumentConflict,
-            format!(
-                "{} {} not accepted by the `{chosen}` formatter\n\n  \
-                 {} {} to: {}\n  \
-                 run `lumis formatters show {chosen}` to see what it accepts",
-                flags.join(", "),
-                if used.len() == 1 { "is" } else { "are" },
-                group.label,
-                if group.flags.len() == 1 {
-                    "applies"
-                } else {
-                    "apply"
-                },
-                accepts.join(", "),
-            ),
-        )
+        .error(clap::error::ErrorKind::ArgumentConflict, message)
         .exit()
 }
 
