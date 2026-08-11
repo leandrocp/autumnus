@@ -277,31 +277,15 @@ macro_rules! define_languages {
                 static RE: LazyLock<Regex> =
                     LazyLock::new(|| Regex::new(r"#! *(?:/usr/bin/env )?([^ ]+)").unwrap());
 
-                if let Some(first_line) = split_on_newlines(src).next() {
-                    if let Some(cap) = RE.captures(first_line) {
-                        let interpreter_path = Path::new(&cap[1]);
-                        if let Some(name) = interpreter_path.file_name() {
-                            let name = normalize_shebang_command(&name.to_string_lossy());
-                            $(
-                                if (&[$($a_shebang),*] as &[&str]).iter().any(|candidate| {
-                                    normalize_shebang_command(candidate) == name
-                                }) {
-                                    return Some(Language::$a_variant);
-                                }
-                            )*
-                            $(
-                                #[cfg(feature = $g_feat)]
-                                if (&[$($g_shebang),*] as &[&str]).iter().any(|candidate| {
-                                    normalize_shebang_command(candidate) == name
-                                }) {
-                                    return Some(Language::$g_variant);
-                                }
-                            )*
-                        }
-                    }
-                }
+                let first_line = split_on_newlines(src).next()?;
+                let cap = RE.captures(first_line)?;
+                let interpreter_path = Path::new(&cap[1]);
+                let name = normalize_shebang_command(&interpreter_path.file_name()?.to_string_lossy());
 
-                None
+                NORMALIZED_SHEBANGS
+                    .iter()
+                    .find(|(_, candidates)| candidates.iter().any(|candidate| *candidate == name))
+                    .map(|(language, _)| *language)
             }
         }
 
@@ -475,57 +459,24 @@ impl Language {
             return Language::XML;
         }
 
-        #[cfg(feature = "lang-objc")]
-        if Self::looks_like_objc(Path::new(""), src) {
-            return Language::ObjC;
-        }
-
         Language::PlainText
     }
 
     fn from_glob(path: &Utf8WindowsPath) -> Option<Self> {
-        let name = path.file_name()?;
-
-        for language in Language::iter() {
-            for glob in language.globs() {
-                let pattern = glob::Pattern::new(&glob.to_ascii_lowercase())
-                    .expect("failed to guess language by path");
-                if pattern.matches(name) {
-                    return Some(language);
-                }
-            }
-        }
-
-        None
+        Self::first_matching_glob(path.file_name()?)
     }
 
     fn from_extension(token: &str) -> Option<Self> {
         let token = token.strip_prefix('.').unwrap_or(token);
-        let token_pattern = format!("*.{token}");
-
-        for language in Language::iter() {
-            for glob in Language::language_globs(language) {
-                if glob.matches(&token_pattern) {
-                    return Some(language);
-                }
-            }
-        }
-        None
+        Self::first_matching_glob(&format!("*.{}", token.to_ascii_lowercase()))
     }
 
-    #[allow(dead_code)]
-    fn looks_like_objc(path: &Path, src: &str) -> bool {
-        if let Some(extension) = path.extension() {
-            if extension == "h" {
-                return split_on_newlines(src).take(100).any(|line| {
-                    ["#import", "@interface", "@protocol"]
-                        .iter()
-                        .any(|keyword| line.starts_with(keyword))
-                });
-            }
-        }
-
-        false
+    /// The first language in catalog order whose globs match `candidate`.
+    fn first_matching_glob(candidate: &str) -> Option<Self> {
+        CATALOG_GLOBS
+            .iter()
+            .find(|(_, patterns)| patterns.iter().any(|pattern| pattern.matches(candidate)))
+            .map(|(language, _)| *language)
     }
 
     #[allow(dead_code)]
@@ -564,9 +515,85 @@ fn normalize_shebang_command(command: &str) -> String {
     VERSION_RE.replace(&command, "").into_owned()
 }
 
+/// Every catalog glob, lowercased and compiled, in catalog order.
+///
+/// `glob::Pattern::new` dominates detection: compiling the catalog costs about
+/// 93 µs against 13 µs to match it already compiled, and `guess` walks it twice
+/// — once by file name and once by extension. Compiling once takes a miss from
+/// roughly 290 µs to tens.
+///
+/// Patterns are lowercased because the name they are matched against is, so a
+/// `CMakeLists.txt` hint and a `cmakelists.txt` hint reach the same language.
+static CATALOG_GLOBS: LazyLock<Vec<(Language, Vec<glob::Pattern>)>> = LazyLock::new(|| {
+    Language::iter()
+        .map(|language| {
+            let patterns = language
+                .globs()
+                .iter()
+                .map(|glob| {
+                    glob::Pattern::new(&glob.to_ascii_lowercase())
+                        .expect("catalog glob is a valid pattern")
+                })
+                .collect();
+            (language, patterns)
+        })
+        .collect()
+});
+
+/// Every catalog shebang, normalized, in catalog order.
+///
+/// The candidates are static, so normalizing them per detection ran the version
+/// regex over the whole catalog on every call.
+static NORMALIZED_SHEBANGS: LazyLock<Vec<(Language, Vec<String>)>> = LazyLock::new(|| {
+    Language::iter()
+        .map(|language| {
+            let commands = language
+                .shebangs()
+                .iter()
+                .map(|shebang| normalize_shebang_command(shebang))
+                .collect();
+            (language, commands)
+        })
+        .collect()
+});
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Stripping a trailing version turns `python3` into `python`, which is the
+    /// point. It would also turn `perl6` into `perl`, and Perl 6 is Raku — a
+    /// different language. Nothing else warns if the catalog grows a shebang
+    /// like that, so the collision is what this asserts.
+    #[test]
+    fn no_two_languages_share_a_normalized_shebang() {
+        let mut owners: HashMap<&str, Vec<&'static str>> = HashMap::new();
+
+        for (language, commands) in NORMALIZED_SHEBANGS.iter() {
+            for command in commands {
+                owners
+                    .entry(command.as_str())
+                    .or_default()
+                    .push(language.id_name());
+            }
+        }
+
+        let collisions: Vec<_> = owners
+            .iter()
+            .filter(|(_, languages)| {
+                languages
+                    .iter()
+                    .collect::<std::collections::BTreeSet<_>>()
+                    .len()
+                    > 1
+            })
+            .collect();
+
+        assert!(
+            collisions.is_empty(),
+            "shebangs normalize onto one another: {collisions:?}"
+        );
+    }
 
     #[test]
     fn plaintext_metadata_and_detection_are_consistent() {
