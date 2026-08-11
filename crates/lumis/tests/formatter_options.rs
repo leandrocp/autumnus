@@ -60,7 +60,7 @@ fn theme() -> themes::Theme {
 
 fn highlight_lines() -> HighlightLines {
     HighlightLines {
-        lines: vec![1..=1],
+        lines: vec![1..=1, 3..=4],
         style: Some(HighlightLinesStyle::Theme),
         class: Some("active".to_string()),
     }
@@ -111,7 +111,7 @@ fn exercised_options() -> BTreeMap<&'static str, BTreeSet<&'static str>> {
         .pre_class(Some("code".to_string()))
         .rainbow_brackets(true)
         .highlight_lines(Some(lumis::formatters::html_linked::HighlightLines {
-            lines: vec![1..=1],
+            lines: vec![1..=1, 3..=4],
             class: "active".to_string(),
         }))
         .header(Some(header()))
