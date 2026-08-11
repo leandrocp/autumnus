@@ -179,9 +179,18 @@ importers:
       '@lumis-sh/lumis-native-linux-arm64-gnu':
         specifier: workspace:*
         version: link:native/npm/linux-arm64-gnu
+      '@lumis-sh/lumis-native-linux-arm64-musl':
+        specifier: workspace:*
+        version: link:native/npm/linux-arm64-musl
       '@lumis-sh/lumis-native-linux-x64-gnu':
         specifier: workspace:*
         version: link:native/npm/linux-x64-gnu
+      '@lumis-sh/lumis-native-linux-x64-musl':
+        specifier: workspace:*
+        version: link:native/npm/linux-x64-musl
+      '@lumis-sh/lumis-native-win32-arm64-msvc':
+        specifier: workspace:*
+        version: link:native/npm/win32-arm64-msvc
       '@lumis-sh/lumis-native-win32-x64-msvc':
         specifier: workspace:*
         version: link:native/npm/win32-x64-msvc
@@ -192,7 +201,11 @@ importers:
 
   packages/javascript/lumis/native/npm/linux-arm64-gnu: {}
 
+  packages/javascript/lumis/native/npm/linux-arm64-musl: {}
+
   packages/javascript/lumis/native/npm/linux-x64-gnu: {}
+
+  packages/javascript/lumis/native/npm/linux-x64-musl: {}
 
   packages/javascript/lumis/native/npm/meta:
     optionalDependencies:
@@ -205,12 +218,23 @@ importers:
       '@lumis-sh/lumis-native-linux-arm64-gnu':
         specifier: workspace:*
         version: link:../linux-arm64-gnu
+      '@lumis-sh/lumis-native-linux-arm64-musl':
+        specifier: workspace:*
+        version: link:../linux-arm64-musl
       '@lumis-sh/lumis-native-linux-x64-gnu':
         specifier: workspace:*
         version: link:../linux-x64-gnu
+      '@lumis-sh/lumis-native-linux-x64-musl':
+        specifier: workspace:*
+        version: link:../linux-x64-musl
+      '@lumis-sh/lumis-native-win32-arm64-msvc':
+        specifier: workspace:*
+        version: link:../win32-arm64-msvc
       '@lumis-sh/lumis-native-win32-x64-msvc':
         specifier: workspace:*
         version: link:../win32-x64-msvc
+
+  packages/javascript/lumis/native/npm/win32-arm64-msvc: {}
 
   packages/javascript/lumis/native/npm/win32-x64-msvc: {}
 

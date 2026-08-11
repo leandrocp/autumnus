@@ -5,20 +5,26 @@ function linuxLibc() {
   return report?.header?.glibcVersionRuntime ? "gnu" : "musl";
 }
 
-function nativeTarget() {
-  if (process.platform === "darwin" && ["arm64", "x64"].includes(process.arch)) {
-    return `darwin-${process.arch}`;
+// Kept identical to `nativeTargetFor` in src/native-binding.ts; this package
+// ships alone and cannot import it. test/native-targets.test.ts pins them.
+function nativeTargetFor(platform, arch, libc) {
+  if (platform === "darwin" && ["arm64", "x64"].includes(arch)) {
+    return `darwin-${arch}`;
   }
-  if (process.platform === "linux" && ["arm64", "x64"].includes(process.arch)) {
-    return linuxLibc() === "gnu" ? `linux-${process.arch}-gnu` : undefined;
+  if (platform === "linux" && ["arm64", "x64"].includes(arch)) {
+    return `linux-${arch}-${libc}`;
   }
-  if (process.platform === "win32" && process.arch === "x64") {
-    return "win32-x64-msvc";
+  if (platform === "win32" && ["arm64", "x64"].includes(arch)) {
+    return `win32-${arch}-msvc`;
   }
   return undefined;
 }
 
-const target = nativeTarget();
+const target = nativeTargetFor(
+  process.platform,
+  process.arch,
+  process.platform === "linux" ? linuxLibc() : "gnu",
+);
 
 if (!target) {
   throw new Error(`The Lumis native runtime does not support ${process.platform}-${process.arch}`);

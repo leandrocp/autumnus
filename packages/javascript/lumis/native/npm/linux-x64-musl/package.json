@@ -1,0 +1,24 @@
+{
+  "name": "@lumis-sh/lumis-native-linux-x64-musl",
+  "version": "0.6.1",
+  "description": "Native Lumis runtime for Linux x64 musl",
+  "license": "MIT",
+  "repository": "github:leandrocp/lumis",
+  "main": "lumis-native.linux-x64-musl.node",
+  "files": [
+    "LICENSE",
+    "lumis-native.linux-x64-musl.node"
+  ],
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "libc": [
+    "musl"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}

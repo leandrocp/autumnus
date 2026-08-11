@@ -17,7 +17,10 @@
     "@lumis-sh/lumis-native-darwin-arm64": "workspace:*",
     "@lumis-sh/lumis-native-darwin-x64": "workspace:*",
     "@lumis-sh/lumis-native-linux-arm64-gnu": "workspace:*",
+    "@lumis-sh/lumis-native-linux-arm64-musl": "workspace:*",
     "@lumis-sh/lumis-native-linux-x64-gnu": "workspace:*",
+    "@lumis-sh/lumis-native-linux-x64-musl": "workspace:*",
+    "@lumis-sh/lumis-native-win32-arm64-msvc": "workspace:*",
     "@lumis-sh/lumis-native-win32-x64-msvc": "workspace:*"
   },
   "engines": {

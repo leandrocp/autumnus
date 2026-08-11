@@ -7,15 +7,12 @@
  * `~/Library/Application Support` on macOS while every Rust caller used XDG.
  */
 import { afterEach, describe, expect, it } from "vitest";
-import { loadAddon } from "../src/native-binding.js";
+import { loadAddon, nativeTarget } from "../src/native-binding.js";
 import { platformDataDir } from "../src/runtime/node-cache.js";
 
 // Asserted directly, so a run that selected the Wasm runtime still covers this.
 const binding = loadAddon();
-
-/** Every platform CI builds for. Elsewhere the Wasm runtime is the answer. */
-const PREBUILT = new Set(["darwin-arm64", "darwin-x64", "linux-x64", "linux-arm64", "win32-x64"]);
-const platform = `${process.platform}-${process.arch}`;
+const hasPrebuiltAddon = nativeTarget() !== undefined;
 
 const XDG = "XDG_DATA_HOME";
 const original = process.env[XDG];
@@ -40,10 +37,10 @@ describe("default data directory", () => {
    * runtime is the sole reader of the directory, so nothing can disagree.
    */
   it("has an addon to pin the port against wherever one is built", () => {
-    if (PREBUILT.has(platform) && !binding) {
+    if (hasPrebuiltAddon && !binding) {
       throw new Error("run `pnpm build:native` (or `mise run test-javascript`) first");
     }
-    expect(binding !== undefined).toBe(PREBUILT.has(platform));
+    expect(binding !== undefined).toBe(hasPrebuiltAddon);
   });
 
   // `process.env` writes reach `std::env::var_os`, so the addon re-reads each of

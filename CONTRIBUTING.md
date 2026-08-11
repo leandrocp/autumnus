@@ -78,7 +78,7 @@ Releases are prepared locally and published from tags.
 - Run `mise run release-needed` to list packages with non-chore path-scoped commits since their latest package tag.
 - Prepare each release with `mise run release-prepare <package> <version>`.
 - `mise run release-prepare` updates only the target package version file and prepends the next changelog entry.
-- If dependent manifests must move together, update them separately in the same release commit. `npm-lumis` is the exception: it also bumps the native crate, the `@lumis-sh/lumis-native` selector and all five platform packages, because the release workflow publishes them under the same version first.
+- If dependent manifests must move together, update them separately in the same release commit. `npm-lumis` is the exception: it also bumps the native crate, the `@lumis-sh/lumis-native` selector and all platform packages, because the release workflow publishes them under the same version first.
 - A `version` requirement on a lumis crate must equal that crate's version in this repository. `mise run release-prepare` keeps them in step, rewriting dependent manifests beyond the package being released, so review and commit every file it touches. `mise run check-crate-deps` reports drift and `--fix` repairs it. Apart from `crates/autumnus`, no build here resolves those requirements, so that check is the only thing that can catch them. See [Crate version requirements](RELEASE.md#crate-version-requirements).
 - Maintainers commit the release prep changes, then push package tags such as `cargo-lumis-cli/v0.2.0`.
 - Pushing a package tag triggers the publish workflows.
@@ -117,8 +117,8 @@ Unset, the CLI and both native addons call
 `lumis_wasm_runtime::store::default_data_dir`, which uses [`etcetera`]'s base
 strategy: `$XDG_DATA_HOME` or `~/.local/share` everywhere except Windows, where
 it is `%APPDATA%`. Node asks the addon for that same value through
-`defaultDataDir()`. Only a platform with no addon, such as musl Linux, falls back
-to the `platformDataDir()` port in `src/runtime/node-cache.ts`, and
+`defaultDataDir()`. A platform with no addon falls back to the
+`platformDataDir()` port in `src/runtime/node-cache.ts`, and
 `test/data-dir-parity.test.ts` pins that port against the addon so the two cannot
 drift.
 
