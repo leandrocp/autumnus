@@ -13,6 +13,7 @@ use regex::Regex;
 use std::collections::HashMap;
 use std::path::Path;
 use std::sync::LazyLock;
+use typed_path::Utf8WindowsPath;
 
 /// Declarative macro that generates the `Language` enum, iteration, `FromStr`,
 /// `name()`, `id_name()`, `language_globs()`, `from_emacs_mode_header()`,
@@ -333,11 +334,7 @@ macro_rules! define_languages {
                     return Ok(lang);
                 }
 
-                // Treat both path separators as paths on every host. Language
-                // hints often come from another machine (for example, an
-                // editor sending a Windows path to a Unix server).
-                let normalized_path = s_lower.replace('\\', "/");
-                let path = Path::new(&normalized_path);
+                let path = Utf8WindowsPath::new(&s_lower);
 
                 if let Some(lang) = Language::from_glob(path) {
                     return Ok(lang);
@@ -486,24 +483,20 @@ impl Language {
         Language::PlainText
     }
 
-    fn from_glob(path: &Path) -> Option<Self> {
-        match path.file_name() {
-            Some(name) => {
-                let name = name.to_string_lossy().into_owned();
-                for language in Language::iter() {
-                    for glob in language.globs() {
-                        let pattern = glob::Pattern::new(&glob.to_ascii_lowercase())
-                            .expect("failed to guess language by path");
-                        if pattern.matches(&name) {
-                            return Some(language);
-                        }
-                    }
-                }
+    fn from_glob(path: &Utf8WindowsPath) -> Option<Self> {
+        let name = path.file_name()?;
 
-                None
+        for language in Language::iter() {
+            for glob in language.globs() {
+                let pattern = glob::Pattern::new(&glob.to_ascii_lowercase())
+                    .expect("failed to guess language by path");
+                if pattern.matches(name) {
+                    return Some(language);
+                }
             }
-            None => None,
         }
+
+        None
     }
 
     fn from_extension(token: &str) -> Option<Self> {

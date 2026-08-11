@@ -103,6 +103,7 @@
   },
   "dependencies": {
     "@noble/hashes": "2.3.0",
+    "pathe": "2.0.3",
     "semver": "7.8.5",
     "web-tree-sitter": "0.26.11"
   },

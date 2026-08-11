@@ -25,8 +25,7 @@ keywords:
 | Java | `lumis4j` | [GitHub](https://github.com/roastedroot/lumis4j) |
 
 `lumis4j` is a community-maintained integration with its own API and release
-cadence. The first-party parity contract covers Rust, the CLI, Elixir, and the
-JavaScript API in Node and browsers.
+cadence.
 
 `@lumis-sh/lumis` covers Node.js, Bun, Deno, and browsers. Node, the CLI and
 Elixir all run the same Wasmtime highlighting from `lumis-wasm-runtime`, so
