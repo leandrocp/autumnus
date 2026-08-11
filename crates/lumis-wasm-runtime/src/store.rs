@@ -125,6 +125,46 @@ impl Fetcher for NoNetwork {
     }
 }
 
+/// The directory Lumis persists under when nothing names one.
+///
+/// `etcetera`'s base strategy is the CLI convention: XDG everywhere except
+/// Windows, where it is `%APPDATA%`. Every runtime resolves through here so the
+/// CLI, both native addons, and Node cannot disagree about where the store is.
+#[must_use]
+pub fn default_data_dir() -> PathBuf {
+    use etcetera::BaseStrategy;
+
+    etcetera::choose_base_strategy()
+        .map(|strategy| strategy.data_dir().join("lumis"))
+        .unwrap_or_else(|_| PathBuf::from(".lumis"))
+}
+
+/// The data directory, preferring `explicit` and then `LUMIS_DATA_DIR`.
+///
+/// Callers that accept a directory of their own pass it as `explicit`; the rest
+/// pass `None` and get the environment or the platform default.
+/// A variable set to the empty string names no directory.
+///
+/// `PathBuf::from("")` is a valid path that resolves to the current directory,
+/// so an empty `LUMIS_DATA_DIR` would otherwise scatter `parsers/` and
+/// `compiled/` wherever the process happened to start. JavaScript already
+/// treats the empty value as unset, and the two must agree.
+fn named_directory(path: PathBuf) -> Option<PathBuf> {
+    (!path.as_os_str().is_empty()).then_some(path)
+}
+
+#[must_use]
+pub fn resolve_data_dir(explicit: Option<PathBuf>) -> PathBuf {
+    explicit
+        .and_then(named_directory)
+        .or_else(|| {
+            std::env::var_os("LUMIS_DATA_DIR")
+                .map(PathBuf::from)
+                .and_then(named_directory)
+        })
+        .unwrap_or_else(default_data_dir)
+}
+
 /// Where a store keeps and looks for assets.
 pub struct StoreConfig {
     /// Directory holding `lumis.json` and parser files, both the ones this
@@ -571,6 +611,28 @@ mod tests {
     const WASM: &[u8] =
         include_bytes!("../../lumis-cli/tests/fixtures/parsers/tree-sitter-json.wasm");
     const PACKAGE_VERSION: &str = "0.26.3";
+
+    #[test]
+    fn an_empty_directory_names_nothing() {
+        assert_eq!(named_directory(PathBuf::new()), None);
+        assert_eq!(
+            named_directory(PathBuf::from("/tmp/store")),
+            Some(PathBuf::from("/tmp/store"))
+        );
+    }
+
+    #[test]
+    fn an_empty_explicit_directory_falls_back_to_the_default() {
+        assert_eq!(resolve_data_dir(Some(PathBuf::new())), default_data_dir());
+    }
+
+    #[test]
+    fn an_explicit_directory_wins() {
+        assert_eq!(
+            resolve_data_dir(Some(PathBuf::from("/tmp/store"))),
+            PathBuf::from("/tmp/store")
+        );
+    }
 
     fn package() -> LanguagePackage {
         LanguagePackage {

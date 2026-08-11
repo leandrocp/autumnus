@@ -80,6 +80,8 @@ export interface NativeBinding {
   runtimeKind(): string;
   /** `false` once the runtime has read them, which it does on first use. */
   configureStore(dataDir?: string): boolean;
+  /** Where the store lives when `LUMIS_DATA_DIR` names nothing. */
+  defaultDataDir(): string;
 }
 
 let cachedBinding: NativeBinding | null | undefined;

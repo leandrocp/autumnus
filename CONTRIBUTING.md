@@ -8,6 +8,7 @@ See `ARCHITECTURE.md` for how the crates, packages, website, and build pipeline 
 - [Testing](#testing)
 - [Releases](#releases)
 - [Benchmarks](#benchmarks)
+- [Environment variables](#environment-variables)
 - [Configuration files](#configuration-files)
   - [highlights.toml](#highlightstoml)
   - [languages.toml](#languagestoml)
@@ -97,6 +98,55 @@ mise run -C benchmarks run
 ```
 
 The root `mise run bench` task runs the same suite. Scenarios and current results are listed in [`benchmarks/README.md`](benchmarks/README.md).
+
+## Environment variables
+
+`mise.toml` sets everything a task needs, so a normal `mise run` invocation needs
+none of these. They exist to override that default from the outside.
+
+Most of them matter only while working on the repository. The exceptions are
+`LUMIS_DATA_DIR`, which every runtime reads, and the tool-specific settings a
+user can hit without cloning anything: `LUMIS_CONFIG` for the CLI, `LUMIS_BUILD`
+and `LUMIS_USE_LEGACY_ARTIFACTS` for the Hex package, and
+`LUMIS_CLI_SKIP_DOWNLOAD` for the npm CLI.
+
+`LUMIS_DATA_DIR` names the directory Lumis persists parsers, themes, and
+compiled modules under. An empty value counts as unset, in every runtime.
+
+Unset, the CLI and both native addons call
+`lumis_wasm_runtime::store::default_data_dir`, which uses [`etcetera`]'s base
+strategy: `$XDG_DATA_HOME` or `~/.local/share` everywhere except Windows, where
+it is `%APPDATA%`. Node asks the addon for that same value through
+`defaultDataDir()`. Only a platform with no addon, such as musl Linux, falls back
+to the `platformDataDir()` port in `src/runtime/node-cache.ts`, and
+`test/data-dir-parity.test.ts` pins that port against the addon so the two cannot
+drift.
+
+| Variable | Read by | Purpose |
+| --- | --- | --- |
+| `LUMIS_DATA_DIR` | every runtime | Directory for parsers, themes, and compiled modules |
+| `LUMIS_CONFIG` | CLI | Config file path, same as `--config` |
+| `LUMIS_BUILD` | Elixir | Build the NIF from source instead of downloading a precompiled one |
+| `LUMIS_USE_LEGACY_ARTIFACTS` | Elixir | Select the legacy-CPU NIF variant |
+| `LUMIS_CLI_SKIP_DOWNLOAD` | `@lumis-sh/cli` install | Skip the postinstall binary download |
+| `LUMIS_TEST_RUNTIME` | JavaScript tests | `native` or `wasm`; fails loudly if the requested runtime is unavailable |
+| `LUMIS_QUERY_LANGUAGES` | `test:queries` | Comma-separated languages, so CI can shard parser builds |
+| `LUMIS_QUERY_BATCH_LIMIT` | `test:queries` | Maximum languages per batch, asserted rather than assumed |
+| `LUMIS_QUERY_COVERAGE` | `test:queries` | `complete` requires full coverage and forbids waivers |
+| `LUMIS_QUERY_PARSERS` | `test:queries` | `published` judges only what npm ships |
+| `LUMIS_WASM_REBUILD` | `crates/dev` | `1` rebuilds a parser already present in `tmp/wasm/build` |
+| `LUMIS_FAKE_NVIM_CAPTURE_DIR` | CLI tests | Where the fake `nvim` records the arguments it was given |
+| `LUMIS_FAKE_NVIM_APPEARANCE` | CLI tests | Appearance the fake `nvim` reports, `dark` by default |
+
+`LUMIS_BUILD` and `LUMIS_USE_LEGACY_ARTIFACTS` are
+[`rustler_precompiled`](https://hexdocs.pm/rustler_precompiled/) conventions,
+which is why they are not named `LUMIS_*_NIF_*`.
+
+The benchmark suite has its own `BENCH_*` set, declared in
+[`benchmarks/mise.toml`](benchmarks/mise.toml) rather than here, since nothing
+outside `benchmarks/` reads them.
+
+[`etcetera`]: https://docs.rs/etcetera/
 
 ## Configuration files
 
