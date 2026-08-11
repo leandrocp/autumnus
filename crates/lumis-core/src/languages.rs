@@ -106,6 +106,86 @@ macro_rules! define_languages {
                 }
             }
 
+            /// Alternative names this language answers to, without its id.
+            pub fn aliases(&self) -> &'static [&'static str] {
+                let all: &'static [&'static str] = match self {
+                    $(
+                        Language::$a_variant => &[$($a_str),*],
+                    )*
+                    $(
+                        #[cfg(feature = $g_feat)]
+                        Language::$g_variant => &[$($g_str),*],
+                    )*
+                };
+
+                // The generated list leads with the id itself.
+                match all.split_first() {
+                    Some((first, rest)) if *first == self.id_name() => rest,
+                    _ => all,
+                }
+            }
+
+            /// File name patterns this language claims, e.g. `*.rs`.
+            pub fn globs(&self) -> &'static [&'static str] {
+                match self {
+                    $(
+                        Language::$a_variant => &[$($a_glob),*],
+                    )*
+                    $(
+                        #[cfg(feature = $g_feat)]
+                        Language::$g_variant => &[$($g_glob),*],
+                    )*
+                }
+            }
+
+            /// Emacs `mode:` names that select this language.
+            pub fn emacs_modes(&self) -> &'static [&'static str] {
+                match self {
+                    $(
+                        Language::$a_variant => &[$($a_emacs),*],
+                    )*
+                    $(
+                        #[cfg(feature = $g_feat)]
+                        Language::$g_variant => &[$($g_emacs),*],
+                    )*
+                }
+            }
+
+            /// Interpreter names in a shebang line that select this language.
+            pub fn shebangs(&self) -> &'static [&'static str] {
+                match self {
+                    $(
+                        Language::$a_variant => &[$($a_shebang),*],
+                    )*
+                    $(
+                        #[cfg(feature = $g_feat)]
+                        Language::$g_variant => &[$($g_shebang),*],
+                    )*
+                }
+            }
+
+            /// The globs that name a bare file extension, e.g. `*.rs`.
+            pub fn extensions(&self) -> Vec<&'static str> {
+                self.globs()
+                    .iter()
+                    .copied()
+                    .filter(|glob| glob.starts_with("*."))
+                    .collect()
+            }
+
+            /// Everything the catalog knows about this language.
+            pub fn info(&self) -> LanguageInfo {
+                LanguageInfo {
+                    id: self.id_name(),
+                    name: self.name(),
+                    aliases: self.aliases(),
+                    extensions: self.extensions(),
+                    globs: self.globs(),
+                    emacs_modes: self.emacs_modes(),
+                    shebangs: self.shebangs(),
+                }
+            }
+
             pub fn id_name(&self) -> &'static str {
                 match self {
                     $(
@@ -218,24 +298,54 @@ macro_rules! define_languages {
             }
         }
 
-        /// Returns a HashMap containing all supported languages with their details.
-        pub fn available_languages() -> HashMap<String, (String, Vec<String>)> {
-            let mut languages = HashMap::new();
-
-            for language in Language::iter() {
-                let id_name = language.id_name();
-                let friendly_name = language.name().to_string();
-                let extensions: Vec<String> = Language::language_globs(language)
-                    .iter()
-                    .map(|p| p.to_string())
-                    .collect();
-
-                languages.insert(id_name.to_string(), (friendly_name, extensions));
-            }
-
+        /// Every compiled-in language and what the catalog knows about it,
+        /// sorted by id.
+        ///
+        /// Elixir's `Lumis.available_languages/0` and JavaScript's
+        /// `availableLanguages()` return this same record.
+        pub fn available_languages() -> Vec<LanguageInfo> {
+            let mut languages: Vec<LanguageInfo> = Language::iter().map(|l| l.info()).collect();
+            languages.sort_unstable_by_key(|language| language.id);
             languages
         }
+
+        #[deprecated(note = "use `available_languages()`, which carries aliases and detection metadata")]
+        pub fn available_languages_map() -> HashMap<String, (String, Vec<String>)> {
+            Language::iter()
+                .map(|language| {
+                    (
+                        language.id_name().to_string(),
+                        (
+                            language.name().to_string(),
+                            language.globs().iter().map(|g| (*g).to_string()).collect(),
+                        ),
+                    )
+                })
+                .collect()
+        }
     };
+}
+
+/// What Lumis knows about one language.
+///
+/// Every runtime returns this same shape, so "list the languages" is one
+/// program everywhere rather than three.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct LanguageInfo {
+    /// Stable identifier, e.g. `rust`.
+    pub id: &'static str,
+    /// Human-readable name, e.g. `Rust`.
+    pub name: &'static str,
+    /// Alternative names this language answers to.
+    pub aliases: &'static [&'static str],
+    /// The subset of [`globs`](Self::globs) that name a bare extension.
+    pub extensions: Vec<&'static str>,
+    /// File name patterns, e.g. `*.rs` and `Cargo.lock`.
+    pub globs: &'static [&'static str],
+    /// Emacs `mode:` names that select this language.
+    pub emacs_modes: &'static [&'static str],
+    /// Interpreter names in a shebang line that select this language.
+    pub shebangs: &'static [&'static str],
 }
 
 include!(concat!(env!("OUT_DIR"), "/languages_data.rs"));

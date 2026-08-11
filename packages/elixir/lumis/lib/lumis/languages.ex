@@ -83,23 +83,54 @@ defmodule Lumis.Languages do
   end
 
   def load(name) when is_atom(name) do
-    case Atom.to_string(name) do
-      "bundle_" <> _ -> load_bundle(name)
-      name -> load(name)
+    case bundle_members(name) do
+      {:ok, members} -> load(members)
+      :error -> {:error, :unknown_bundle}
+      :not_a_bundle -> load(Atom.to_string(name))
     end
   end
 
   def load(name) when is_binary(name) and name in @plaintext_names, do: :ok
 
-  def load(name) when is_binary(name), do: Native.load_language_by_name(name)
+  def load(name) when is_binary(name) do
+    case bundle_members(name) do
+      {:ok, members} -> load(members)
+      :error -> {:error, :unknown_bundle}
+      :not_a_bundle -> Native.load_language_by_name(name)
+    end
+  end
 
-  defp load_bundle(bundle) do
-    case Map.fetch(bundles(), bundle) do
-      {:ok, names} ->
-        load(names)
+  @doc false
+  def bundle_members(name) do
+    string = to_string(name)
 
-      :error ->
-        {:error, :unknown_bundle}
+    if String.starts_with?(string, ["bundle_", "bundle-"]) do
+      key =
+        String.to_atom(
+          "bundle_" <> String.replace(binary_part(string, 7, byte_size(string) - 7), "-", "_")
+        )
+
+      case Map.fetch(bundles(), key) do
+        {:ok, members} -> {:ok, members}
+        :error -> :error
+      end
+    else
+      :not_a_bundle
+    end
+  end
+
+  @doc false
+  def expand_bundles(names) do
+    Enum.reduce_while(names, {:ok, []}, fn name, {:ok, acc} ->
+      case bundle_members(name) do
+        {:ok, members} -> {:cont, {:ok, acc ++ members}}
+        :error -> {:halt, {:error, {:unknown_bundle, to_string(name)}}}
+        :not_a_bundle -> {:cont, {:ok, acc ++ [to_string(name)]}}
+      end
+    end)
+    |> case do
+      {:ok, expanded} -> {:ok, Enum.uniq(expanded)}
+      error -> error
     end
   end
 
@@ -119,8 +150,9 @@ defmodule Lumis.Languages do
   @doc """
   Downloads and caches languages without loading them.
 
-  Returns the paths written. `mix lumis.languages.cache` is the entry point;
-  this is the API behind it.
+  Takes the same names `load/1` does, including `:bundle_*`. Returns the paths
+  written. `mix lumis.languages.cache` is the entry point; this is the API
+  behind it.
 
   ## Options
 
@@ -131,8 +163,13 @@ defmodule Lumis.Languages do
   def cache(names, options \\ []) when is_list(names) and is_list(options) do
     force? = Keyword.get(options, :force, false)
 
+    with {:ok, expanded} <- expand_bundles(names) do
+      do_cache(expanded, force?)
+    end
+  end
+
+  defp do_cache(names, force?) do
     names
-    |> Enum.map(&to_string/1)
     |> Enum.reject(&(&1 in @plaintext_names))
     |> Enum.reduce_while({:ok, []}, fn name, {:ok, paths} ->
       case Native.cache_language_by_name(name, force?) do

@@ -1023,8 +1023,17 @@ fn cache_parsers_no_args_fails() {
         .assert()
         .failure()
         .stderr(predicate::str::contains(
-            "specify language names or use --all",
+            "specify language names, a bundle such as bundle-web, or --all",
         ));
+}
+
+#[test]
+fn cache_parsers_rejects_an_unknown_bundle() {
+    cmd()
+        .args(["parsers", "cache", "bundle-nope"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("unknown bundle 'bundle-nope'"));
 }
 
 #[test]

@@ -168,6 +168,19 @@ pub struct Theme {
     pub highlights: BTreeMap<String, Style>,
 }
 
+/// Name and appearance of a built-in theme, without its highlight data.
+///
+/// Every runtime returns this same shape from its "list the themes" call, so
+/// listing them is one program everywhere rather than three. Use
+/// [`available_themes`] when the whole theme is wanted.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ThemeInfo {
+    /// The name of the theme, e.g. `dracula`.
+    pub name: &'static str,
+    /// Whether the theme is light or dark.
+    pub appearance: Appearance,
+}
+
 /// A style for syntax highlighting.
 ///
 /// Defines the visual appearance of a highlight scope, including colors,

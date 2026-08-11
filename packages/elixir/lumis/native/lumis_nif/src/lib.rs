@@ -237,6 +237,49 @@ pub struct ExLanguagePackageRef<'a> {
     pub package_name: &'a str,
 }
 
+#[derive(Clone, Debug, NifMap)]
+pub struct ExLanguageInfo<'a> {
+    pub id: &'a str,
+    pub name: &'a str,
+    pub aliases: Vec<&'a str>,
+    pub extensions: Vec<&'a str>,
+    pub globs: Vec<&'a str>,
+    pub emacs_modes: Vec<&'a str>,
+    pub shebangs: Vec<&'a str>,
+}
+
+impl From<languages::LanguageInfo> for ExLanguageInfo<'static> {
+    fn from(language: languages::LanguageInfo) -> Self {
+        Self {
+            id: language.id,
+            name: language.name,
+            aliases: language.aliases.to_vec(),
+            extensions: language.extensions,
+            globs: language.globs.to_vec(),
+            emacs_modes: language.emacs_modes.to_vec(),
+            shebangs: language.shebangs.to_vec(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, NifMap)]
+pub struct ExThemeInfo<'a> {
+    pub name: &'a str,
+    pub appearance: &'a str,
+}
+
+impl From<themes::ThemeInfo> for ExThemeInfo<'static> {
+    fn from(theme: themes::ThemeInfo) -> Self {
+        Self {
+            name: theme.name,
+            appearance: match theme.appearance {
+                themes::Appearance::Light => "light",
+                themes::Appearance::Dark => "dark",
+            },
+        }
+    }
+}
+
 impl From<&catalog::LanguagePackageRef> for ExLanguagePackageRef<'static> {
     fn from(language: &catalog::LanguagePackageRef) -> Self {
         Self {
@@ -382,12 +425,23 @@ fn language_bundles() -> HashMap<&'static str, Vec<&'static str>> {
 }
 
 #[rustler::nif]
-fn available_languages() -> HashMap<String, (String, Vec<String>)> {
+fn available_languages() -> Vec<ExLanguageInfo<'static>> {
     languages::available_languages()
+        .into_iter()
+        .map(ExLanguageInfo::from)
+        .collect()
 }
 
 #[rustler::nif]
-fn available_themes() -> Vec<String> {
+fn available_themes() -> Vec<ExThemeInfo<'static>> {
+    themes::available_theme_info()
+        .into_iter()
+        .map(ExThemeInfo::from)
+        .collect()
+}
+
+#[rustler::nif]
+fn available_theme_names() -> Vec<String> {
     // Return a clone of the cached theme names list
     // This is cheaper than rebuilding the list every time
     THEME_NAMES.clone()

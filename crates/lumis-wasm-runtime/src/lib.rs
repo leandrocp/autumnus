@@ -50,6 +50,52 @@ macro_rules! define_catalog {
                         .any(|alias| alias.eq_ignore_ascii_case(name))
             })
         }
+
+        /// Members of `bundle-<name>`, accepting `-` or `_` between words so
+        /// Elixir's `:bundle_web_extra` and the CLI's `bundle-web-extra` reach
+        /// the same entry.
+        pub fn bundle_members(name: &str) -> Option<&'static [&'static str]> {
+            fn separator_insensitive_eq(a: u8, b: u8) -> bool {
+                let normalize =
+                    |byte: u8| if byte == b'_' { b'-' } else { byte.to_ascii_lowercase() };
+                normalize(a) == normalize(b)
+            }
+
+            let suffix = name
+                .strip_prefix("bundle-")
+                .or_else(|| name.strip_prefix("bundle_"))?;
+
+            BUNDLES.iter().find_map(|(bundle, members)| {
+                let matches = bundle.len() == suffix.len()
+                    && bundle
+                        .bytes()
+                        .zip(suffix.bytes())
+                        .all(|(a, b)| separator_insensitive_eq(a, b));
+                matches.then_some(*members)
+            })
+        }
+
+        /// Expand every `bundle-<name>` token into its members, leaving other
+        /// names alone. Returns the first name that looks like a bundle but is
+        /// not one.
+        pub fn expand_bundles<'a>(
+            names: impl IntoIterator<Item = &'a str>,
+        ) -> Result<Vec<String>, String> {
+            let mut expanded = Vec::new();
+
+            for name in names {
+                match bundle_members(name) {
+                    Some(members) => expanded.extend(members.iter().map(|m| (*m).to_string())),
+                    None if name.starts_with("bundle-") || name.starts_with("bundle_") => {
+                        return Err(name.to_string())
+                    }
+                    None => expanded.push(name.to_string()),
+                }
+            }
+
+            expanded.dedup();
+            Ok(expanded)
+        }
     };
 }
 

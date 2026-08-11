@@ -247,10 +247,10 @@ enum ThemesCommands {
 enum ParsersCommands {
     /// Cache parser WASMs so later runs skip the download
     #[command(
-        after_help = "Examples:\n  lumis parsers cache rust javascript\n  lumis parsers cache --all\n  lumis parsers cache rust --force\n  lumis --data-dir /app/lumis parsers cache rust"
+        after_help = "Examples:\n  lumis parsers cache rust javascript\n  lumis parsers cache bundle-web\n  lumis parsers cache --all\n  lumis parsers cache rust --force\n  lumis --data-dir /app/lumis parsers cache rust"
     )]
     Cache {
-        /// Language names to cache (e.g. rust javascript elixir)
+        /// Language names, or a bundle such as bundle-web (e.g. rust javascript elixir)
         languages: Vec<String>,
 
         /// Cache all supported parsers
@@ -389,16 +389,18 @@ fn cache_parsers(
         return Err(anyhow::anyhow!("pass language names or --all, not both"));
     }
 
-    let names: Vec<&str> = if all {
-        registry::all_language_ids().collect()
+    let expanded: Vec<String> = if all {
+        registry::all_language_ids().map(str::to_string).collect()
     } else {
         if languages.is_empty() {
             return Err(anyhow::anyhow!(
-                "specify language names or use --all to cache all parsers"
+                "specify language names, a bundle such as bundle-web, or --all"
             ));
         }
-        languages.iter().map(|s| s.as_str()).collect()
+        lumis_wasm_runtime::catalog::expand_bundles(languages.iter().map(String::as_str))
+            .map_err(|unknown| anyhow::anyhow!("unknown bundle '{}'", unknown))?
     };
+    let names: Vec<&str> = expanded.iter().map(String::as_str).collect();
 
     let mut errors = Vec::new();
     for name in &names {

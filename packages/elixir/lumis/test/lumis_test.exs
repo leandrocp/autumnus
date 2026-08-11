@@ -96,12 +96,32 @@ defmodule Lumis.LumisTest do
 
   test "available_languages" do
     available_languages = Lumis.available_languages()
+    by_id = Map.new(available_languages, &{&1.id, &1})
 
-    assert map_size(available_languages) >= 77
-    assert available_languages["elixir"] == {"Elixir", ["*.ex", "*.exs"]}
-    assert available_languages["comment"] == {"Comment", []}
-    assert available_languages["markdown_inline"] == {"Markdown Inline", []}
-    assert available_languages["plaintext"] == {"Plain Text", []}
+    assert length(available_languages) >= 77
+    assert available_languages == Enum.sort_by(available_languages, & &1.id)
+
+    assert by_id["elixir"] == %{
+             id: "elixir",
+             name: "Elixir",
+             aliases: [],
+             extensions: ["*.ex", "*.exs"],
+             globs: ["*.ex", "*.exs"],
+             emacs_modes: ["elixir"],
+             shebangs: ["elixir"]
+           }
+
+    assert by_id["comment"].name == "Comment"
+    assert by_id["comment"].globs == []
+    assert by_id["markdown_inline"].name == "Markdown Inline"
+    assert by_id["plaintext"].name == "Plain Text"
+
+    # A language's own id is not repeated in its aliases.
+    assert by_id["asm"].aliases == ["assembly"]
+
+    # `extensions` is the subset of `globs` that name a bare extension.
+    assert "PKGBUILD" in by_id["bash"].globs
+    refute "PKGBUILD" in by_id["bash"].extensions
   end
 
   test "available_themes" do
@@ -111,7 +131,20 @@ defmodule Lumis.LumisTest do
       |> File.ls!()
       |> Enum.count(&String.ends_with?(&1, ".json"))
 
-    assert Lumis.available_themes() |> length() == expected_count
+    themes = Lumis.available_themes()
+
+    assert length(themes) == expected_count
+    assert themes == Enum.sort_by(themes, & &1.name)
+    assert %{name: "github_light", appearance: "light"} in themes
+    assert %{name: "dracula", appearance: "dark"} in themes
+  end
+
+  test "available_theme_names" do
+    names = Lumis.available_theme_names()
+
+    assert names == Enum.sort(names)
+    assert "dracula" in names
+    assert length(names) == length(Lumis.available_themes())
   end
 
   describe "Theme.build_css" do
@@ -513,7 +546,7 @@ defmodule Lumis.LumisTest do
     test "with custom css_variable_prefix" do
       assert_contains(
         "test",
-        ~s|style="--custom-light: #1f2328; --custom-light-bg: #ffffff;|,
+        ~s|style="--custom-light:#1f2328; --custom-light-bg:#ffffff;|,
         formatter:
           {:html_multi_themes,
            language: "elixir", themes: [light: "github_light"], css_variable_prefix: "--custom"}
@@ -1442,6 +1475,35 @@ defmodule Lumis.LumisTest do
       options = Lumis.validate_options!(formatter: {:html_inline, language: "elixir"})
 
       assert %{} = Lumis.rust_options!(options)
+    end
+  end
+
+  describe "error contract" do
+    @bad_default {:html_multi_themes,
+                  language: "elixir", themes: [light: "github_light"], default_theme: "nope"}
+
+    test "highlight/2 returns {:error, _} rather than raising" do
+      assert {:error, message} = Lumis.highlight("x = 1", formatter: @bad_default)
+      assert message =~ "Default theme"
+    end
+
+    test "highlight!/2 raises where highlight/2 returns an error" do
+      assert_raise Lumis.HighlightError, ~r/Default theme/, fn ->
+        Lumis.highlight!("x = 1", formatter: @bad_default)
+      end
+    end
+
+    test "an unknown language falls back to plaintext rather than erroring" do
+      assert {:ok, output} =
+               Lumis.highlight("x = 1", formatter: {:html_inline, language: "not_a_language"})
+
+      assert output =~ "language-plaintext"
+    end
+
+    test "invalid options still raise from highlight/2, being a caller mistake" do
+      assert_raise NimbleOptions.ValidationError, fn ->
+        Lumis.highlight("x = 1", formatter: {:html_inline, nonsense: true})
+      end
     end
   end
 end

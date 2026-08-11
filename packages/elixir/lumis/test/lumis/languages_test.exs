@@ -42,11 +42,11 @@ defmodule Lumis.LanguagesTest do
 
     assert "json" in loaded
     assert loaded == Enum.sort(loaded)
-    assert length(loaded) < map_size(Lumis.available_languages())
+    assert length(loaded) < length(Lumis.available_languages())
   end
 
   test "every catalog language is nameable" do
-    names = Map.keys(Lumis.available_languages())
+    names = Enum.map(Lumis.available_languages(), & &1.id)
     assert "elixir" in names
     assert length(names) > 100
   end

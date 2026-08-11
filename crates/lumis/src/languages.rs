@@ -2104,8 +2104,10 @@ mod tests {
 
     #[test]
     fn test_all_available_languages_have_samples_and_highlight() {
-        let mut ids = available_languages().keys().cloned().collect::<Vec<_>>();
-        ids.sort();
+        let ids: Vec<&str> = available_languages()
+            .iter()
+            .map(|language| language.id)
+            .collect();
 
         for id in ids {
             let language = if id == "plaintext" {
@@ -2402,10 +2404,40 @@ mod tests {
     #[test]
     fn test_available_languages() {
         let languages = available_languages();
+        assert!(languages.len() > 100, "catalog looks truncated");
 
-        for (id_name, (friendly_name, _extensions)) in languages {
-            assert!(!id_name.is_empty());
-            assert!(!friendly_name.is_empty());
+        for language in &languages {
+            assert!(!language.id.is_empty());
+            assert!(!language.name.is_empty());
+            assert!(
+                !language.aliases.contains(&language.id),
+                "{} lists its own id as an alias",
+                language.id
+            );
+            assert!(
+                language.extensions.iter().all(|ext| ext.starts_with("*.")),
+                "{} has an extension that is not a bare extension glob",
+                language.id
+            );
         }
+
+        let rust = languages
+            .iter()
+            .find(|language| language.id == "rust")
+            .expect("rust is in the catalog");
+        assert_eq!(rust.name, "Rust");
+        assert!(rust.globs.contains(&"*.rs"));
+
+        let bash = languages
+            .iter()
+            .find(|language| language.id == "bash")
+            .expect("bash is in the catalog");
+        assert!(bash.aliases.contains(&"sh"));
+        assert!(bash.shebangs.contains(&"bash"));
+        assert!(bash.globs.contains(&"PKGBUILD"));
+        assert!(
+            !bash.extensions.contains(&"PKGBUILD"),
+            "extensions must exclude non-extension globs"
+        );
     }
 }

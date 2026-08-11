@@ -11,6 +11,7 @@ import {
   type LanguagePackageResolver,
   type WasmResolver,
 } from "./core/languages.js";
+import { BUNDLES } from "./generated/bundles-meta.js";
 import { EXACT_LANGUAGE_MAP } from "./generated/language-detection.js";
 import { LANGUAGE_LOADERS } from "./generated/language-loaders.js";
 import { LANGUAGE_PACKAGE_VERSION_RANGE } from "./generated/package-version-range.js";
@@ -55,6 +56,43 @@ async function loadLanguage(name: string): Promise<Language> {
   const loader = LANGUAGE_LOADERS[id];
   if (!loader) throw new Error(`Unknown language "${name}"`);
   return (await loader()).default;
+}
+
+/**
+ * Members of `bundle-<name>`, accepting `-` or `_` between words so Elixir's
+ * `:bundle_web_extra` and the CLI's `bundle-web-extra` reach the same entry.
+ */
+function bundleMembers(name: string): string[] | undefined {
+  const lower = name.toLowerCase();
+  if (!lower.startsWith("bundle-") && !lower.startsWith("bundle_")) return undefined;
+
+  const suffix = lower.slice("bundle-".length).replaceAll("_", "-");
+  return BUNDLES[suffix];
+}
+
+/**
+ * Expand every `bundle-<name>` token into its members, leaving other names
+ * alone. Mirrors `catalog::expand_bundles` in `lumis-wasm-runtime`.
+ */
+export function expandBundles(names: Iterable<string>): string[] {
+  const expanded: string[] = [];
+
+  for (const name of names) {
+    const members = bundleMembers(name);
+    if (members) {
+      expanded.push(...members);
+      continue;
+    }
+
+    const lower = name.toLowerCase();
+    if (lower.startsWith("bundle-") || lower.startsWith("bundle_")) {
+      throw new Error(`Unknown bundle "${name}"`);
+    }
+
+    expanded.push(name);
+  }
+
+  return [...new Set(expanded)];
 }
 
 async function fetchWasm(language: Language, ref: WasmRef, resolver: WasmResolver) {
@@ -143,6 +181,9 @@ async function writeSharedLanguagePackage(
 /**
  * Resolve compatible packages and cache exact, integrity-pinned parser WASMs.
  *
+ * Accepts language names and `bundle-<name>` tokens, the same set
+ * `Lumis.Languages.cache/2` and `lumis parsers cache` accept.
+ *
  * Point `LUMIS_DATA_DIR` at the same directory in the deployed process.
  */
 export async function cacheLanguages(
@@ -152,7 +193,7 @@ export async function cacheLanguages(
   const directory = options.directory;
   const resolver = options.resolver ?? DEFAULT_RESOLVER;
   const packageResolver = options.languagePackageResolver ?? DEFAULT_LANGUAGE_PACKAGE_RESOLVER;
-  const languages = await Promise.all([...names].map(loadLanguage));
+  const languages = await Promise.all(expandBundles(names).map(loadLanguage));
   const seen = new Set<string>();
   const packages = new Map<string, LanguagePackage>();
   const persisted = new Set<string>();

@@ -8,6 +8,7 @@ defmodule Mix.Tasks.Lumis.Languages.Cache do
   with no network at all is then a side effect rather than the point.
 
       mix lumis.languages.cache elixir html javascript css
+      mix lumis.languages.cache bundle_web
       mix lumis.languages.cache --all
       mix lumis.languages.cache --force elixir
 
@@ -75,9 +76,9 @@ defmodule Mix.Tasks.Lumis.Languages.Cache do
 
   defp languages(options, []) do
     if options[:all] do
-      Lumis.available_languages() |> Map.keys() |> Enum.sort()
+      Lumis.available_languages() |> Enum.map(& &1.id) |> Enum.sort()
     else
-      Mix.raise("name the languages to cache, or pass --all")
+      Mix.raise("name the languages to cache, a bundle such as bundle_web, or pass --all")
     end
   end
 
