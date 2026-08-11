@@ -2,7 +2,7 @@
 sidebar_position: 1
 slug: /
 title: Intro
-description: Lumis is a Tree-sitter syntax highlighter with Neovim themes and one first-party API across CLI, Rust, Elixir, and JavaScript.
+description: Lumis is a Tree-sitter syntax highlighter with Neovim themes and one workflow across CLI, Rust, Elixir, JavaScript, Browsers / CDN, and Java.
 keywords:
   - lumis
   - syntax highlighting
@@ -32,10 +32,7 @@ It keeps the same core workflow across runtimes:
 - 250+ themes sourced from Neovim colorschemes
 - 5 formatters: HTML Inline, HTML Linked, HTML Multi-Themes, Terminal, and BBCode Scoped
 - handles incomplete code (useful for streaming)
-- one API across first-party runtimes: CLI, Rust, Elixir, and JavaScript in Node and browsers
-
-The community-maintained [Java integration](https://github.com/roastedroot/lumis4j)
-has its own API and release cadence.
+- one API across 6 runtimes: CLI, Rust, Elixir, JavaScript, Browsers / CDN, and Java
 
 ## How it works
 

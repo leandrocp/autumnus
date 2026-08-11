@@ -9,8 +9,10 @@
 Scan of the public surface of every runtime against Rust, the reference
 implementation. Rust = `crates/lumis`, CLI = `crates/lumis-cli`, Elixir =
 `packages/elixir/lumis`, JavaScript = `packages/javascript/lumis` (Node addon and
-browser share one entry). Java (`lumis4j`) lives outside this repository and is
-only covered where this repo's docs make claims about it.
+browser share one entry), and Java =
+[`lumis4j`](https://github.com/roastedroot/lumis4j). The first pass below did not
+fully inventory Java; that was an audit omission, not a parity boundary. Section
+7 adds the missing review, and `API_DRIFT.md` tracks its findings as open work.
 
 Ordered by consequence, not by size.
 
@@ -246,7 +248,7 @@ default.
 
 ## 5. Structural: nothing checks any of this
 
-`mise run test-conformance` runs all five runtimes against
+`mise run test-conformance` runs the five implementations in this repository against
 `fixtures/conformance/*`, which pins *output* for `language`, `theme`,
 `rainbowBrackets`, and one `htmlMultiThemes` configuration. It pins nothing about
 the option surface, so §2 and §3 are invisible to CI, and §1.1 slipped through
@@ -270,6 +272,10 @@ Two things would close most of this:
    variant including `nil`, `background`, `width`, and `htmlMultiThemes` with
    `defaultTheme` omitted and with three themes.
 
+Java must consume the same manifest and conformance fixtures from its repository
+for these checks to cover all six runtimes. That integration is still open as
+D26 in `API_DRIFT.md`.
+
 ## 6. Unrelated but found on the way: `crates/lumis` duplicates `crates/lumis-core`
 
 `crates/lumis/src/formatter/html.rs` re-declares 15 of the 18 public functions
@@ -288,3 +294,23 @@ copies:
 in another language, or in another Rust crate, is a divergence that will drift."
 `span_multi_themes_attrs` is where §1.1 and §1.2 both live, in two places, and
 the function immediately below it already delegates — so the fix is mechanical.
+
+## 7. Java was omitted from the first pass
+
+Checked against
+[`lumis4j@23e9e85`](https://github.com/roastedroot/lumis4j/tree/23e9e8581eaf16c5fc3d46293426c422afcbf3b2):
+
+- `Formatter` exposes Terminal, HTML Inline, HTML Linked, and BBCode, but not
+  HTML Multi-Themes.
+- `Highlighter.Builder` exposes language, theme, and formatter selection. The
+  formatter-specific options audited above are not exposed.
+- `Lang` and `Theme` expose enum catalogs but not the cross-runtime metadata
+  records or a public language-guessing API. The WASM bridge calls
+  `Language::guess(Some(&lang), "")`, so the default/plaintext selection cannot
+  inspect the source for a shebang, Emacs mode, or content signature.
+- Java has its own output tests, but it does not consume this repository's
+  formatter manifest or conformance fixtures.
+
+These are D24–D26 in `API_DRIFT.md`. They stay open until the Java surface and
+shared regression checks land; a separate repository or release cadence is not
+an accepted parity exception.

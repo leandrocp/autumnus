@@ -1,6 +1,6 @@
 //! Rust's half of the cross-runtime formatter option check.
 //!
-//! `fixtures/formatter-options.json` lists the options every runtime must
+//! `fixtures/formatter-options.json` lists the options every covered runtime must
 //! accept. Rust cannot reflect on builder setters at runtime, so the check has
 //! three parts:
 //!
@@ -297,6 +297,6 @@ fn no_waiver_outlives_its_reason() {
 
     assert!(
         waivers.is_empty(),
-        "every runtime offers every option; drop these waivers: {waivers:?}"
+        "every covered runtime offers every option; drop these waivers: {waivers:?}"
     );
 }

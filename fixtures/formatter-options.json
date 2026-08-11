@@ -4,17 +4,18 @@
     "",
     "Conformance fixtures pin what the formatters OUTPUT. This pins what they",
     "ACCEPT, which nothing else checks: a Rust builder can grow a field and ship",
-    "while Elixir, JavaScript and the CLI silently lack it. Every runtime has a",
-    "test that reads this file and fails on a missing option and on a waiver that",
-    "is no longer needed.",
+    "while Elixir, JavaScript and the CLI silently lack it. Every implementation",
+    "in this repository has a test that reads this file and fails on a missing",
+    "option and on a waiver that is no longer needed. Java coverage is open D26",
+    "in API_DRIFT.md.",
     "",
     "`name` is the canonical snake_case option. Each runtime spells it its own",
     "way: Rust and Elixir use it verbatim, JavaScript camelCases it, the CLI",
     "kebab-cases it behind `--`. Where a runtime needs a different spelling,",
     "`spelling` records it.",
     "",
-    "Adding an option means adding it here first, then watching four runtimes go",
-    "red. `waived` is the escape hatch and it can only shrink."
+    "Adding an option means adding it here first, then watching the four local",
+    "implementations go red. `waived` is the escape hatch and it can only shrink."
   ],
   "formatters": {
     "html_inline": {
@@ -69,7 +70,8 @@
     "$comment": [
       "Options a runtime genuinely cannot offer, keyed by runtime then formatter.",
       "Empty, and the tests fail on an entry that is no longer needed, so it can",
-      "only shrink. Every runtime currently offers every option above."
+      "only shrink. Every implementation checked here currently offers every",
+      "option above."
     ]
   }
 }

@@ -76,7 +76,7 @@ a field and ship while Elixir, JavaScript and the CLI silently lack it. That is
 how `rainbow_brackets` reached four runtimes and no options table, and how
 JavaScript's `terminal` went without `background` and `width`.
 
-Each runtime has a test that reads the manifest:
+Each implementation in this repository has a test that reads the manifest:
 
 | Runtime | Test | How it checks |
 | --- | --- | --- |
@@ -84,6 +84,10 @@ Each runtime has a test that reads the manifest:
 | CLI | `crates/lumis-cli/tests/formatter_options.rs` | reads `lumis highlight --help`, so it sees the flags clap parses |
 | Elixir | `packages/elixir/lumis/test/formatter_options_test.exs` | reads the keys off the NimbleOptions schema |
 | JavaScript | `packages/javascript/lumis/test/formatter-options.test.ts` | `Required<Options>` literals, so a missing field fails type-aware lint |
+
+These are the four implementations in this repository. Java is part of the
+same parity target, but its implementation lives in `lumis4j`; D26 in
+`API_DRIFT.md` tracks making that repository consume this contract too.
 
 Adding a formatter option means adding it to the manifest first and watching
 four runtimes go red. `waived` is the escape hatch for something a runtime
@@ -127,7 +131,7 @@ These files drive code generation, builds, detection metadata, and theme extract
 | File | Purpose |
 | ------ | --------- |
 | [`highlights.toml`](highlights.toml) | Tree-sitter highlight scope names |
-| [`languages.toml`](languages.toml) | Language and parser metadata, query sources, language bundles, feature flags |
+| [`languages.toml`](languages.toml) | Parser metadata, query sources, language bundles, feature flags |
 | [`themes/themes.lua`](themes/themes.lua) | Theme definitions from Neovim colorscheme sources |
 
 ### highlights.toml
@@ -158,10 +162,6 @@ All language metadata lives in `languages.toml`. It is consumed by:
 - CI workflows: build WASMs and update parser and query revisions
 
 Bundle definitions also live here under `[bundles.*]`.
-
-Parser-free plaintext metadata lives under `[plaintext]`. Keep its display
-name, aliases, globs, Emacs modes, and shebangs there too: Rust, Elixir, and
-JavaScript derive their public catalog and detection behavior from that record.
 
 For Rust crates, bundle support is implemented as Cargo features such as `lang-bundle-web` and `lang-bundle-system`, which enable the related `lang-*` features transitively. The `lang-bundle-*` feature lists in `crates/lumis/Cargo.toml` and `crates/lumis-core/Cargo.toml` are generated from `languages.toml` by `mise run cargo-update-features`.
 

@@ -1155,7 +1155,7 @@ fn cache_parsers_already_cached_verbose() {
 }
 
 #[test]
-fn cache_parsers_treats_plaintext_names_as_parser_free() {
+fn cache_parsers_skips_plaintext_aliases() {
     let tmp = tempfile::tempdir().unwrap();
 
     cmd()

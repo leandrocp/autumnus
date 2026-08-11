@@ -1,16 +1,13 @@
 import type { TomlTableWithoutBigInt, TomlValueWithoutBigInt } from "smol-toml";
 
-export interface LanguageMetadata {
+export interface ParserEntry {
   aliases?: string[];
   emacs?: string[];
   shebang?: string[];
+  wasm_name?: string;
   display_name?: string;
   variant?: string;
   globs?: string[];
-}
-
-export interface ParserEntry extends LanguageMetadata {
-  wasm_name?: string;
 }
 
 export interface BundleEntry {
@@ -18,7 +15,6 @@ export interface BundleEntry {
 }
 
 export interface LanguagesToml {
-  plaintext: LanguageMetadata;
   parsers: Record<string, ParserEntry>;
   bundles?: Record<string, BundleEntry>;
 }
@@ -69,24 +65,17 @@ function optionalStringArray(
   return invalid(`${path}.${key}`);
 }
 
-function parseLanguageMetadata(value: TomlValueWithoutBigInt, path: string): LanguageMetadata {
+function parseParser(value: TomlValueWithoutBigInt, id: string): ParserEntry {
+  const path = `parsers.${id}`;
   const table = requireTable(value, path);
   return {
     aliases: optionalStringArray(table, "aliases", path),
     emacs: optionalStringArray(table, "emacs", path),
     shebang: optionalStringArray(table, "shebang", path),
+    wasm_name: optionalString(table, "wasm_name", path),
     display_name: optionalString(table, "display_name", path),
     variant: optionalString(table, "variant", path),
     globs: optionalStringArray(table, "globs", path),
-  };
-}
-
-function parseParser(value: TomlValueWithoutBigInt, id: string): ParserEntry {
-  const path = `parsers.${id}`;
-  const table = requireTable(value, path);
-  return {
-    ...parseLanguageMetadata(value, path),
-    wasm_name: optionalString(table, "wasm_name", path),
   };
 }
 
@@ -102,7 +91,6 @@ function parseBundle(value: TomlValueWithoutBigInt, name: string): BundleEntry {
 }
 
 export function parseLanguagesToml(document: TomlTableWithoutBigInt): LanguagesToml {
-  const plaintext = parseLanguageMetadata(document.plaintext, "plaintext");
   const parserTable = requireTable(document.parsers, "parsers");
   const parsers = Object.fromEntries(
     Object.entries(parserTable).map(([id, value]) => {
@@ -111,7 +99,7 @@ export function parseLanguagesToml(document: TomlTableWithoutBigInt): LanguagesT
     }),
   );
 
-  if (document.bundles === undefined) return { plaintext, parsers };
+  if (document.bundles === undefined) return { parsers };
   const bundleTable = requireTable(document.bundles, "bundles");
   const bundles = Object.fromEntries(
     Object.entries(bundleTable).map(([name, value]) => {
@@ -127,5 +115,5 @@ export function parseLanguagesToml(document: TomlTableWithoutBigInt): LanguagesT
       return [name, bundle];
     }),
   );
-  return { plaintext, parsers, bundles };
+  return { parsers, bundles };
 }

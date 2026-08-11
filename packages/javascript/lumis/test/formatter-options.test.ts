@@ -1,7 +1,7 @@
 /**
  * JavaScript's half of the cross-runtime formatter option check.
  *
- * `fixtures/formatter-options.json` lists the options every runtime must
+ * `fixtures/formatter-options.json` lists the options every covered runtime must
  * accept. This has two halves, like the Rust one:
  *
  * - The literals below name every option. TypeScript rejects unknown

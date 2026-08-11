@@ -2,7 +2,7 @@ defmodule Lumis.FormatterOptionsTest do
   @moduledoc """
   Elixir's half of the cross-runtime formatter option check.
 
-  `fixtures/formatter-options.json` lists the options every runtime must accept.
+  `fixtures/formatter-options.json` lists the options every covered runtime must accept.
   `Lumis.formatter_type/1` returns the validated defaults for a formatter, so
   unlike the other runtimes this can read the option names straight off the
   schema rather than naming them again.
@@ -66,6 +66,6 @@ defmodule Lumis.FormatterOptionsTest do
       |> Enum.reject(&String.starts_with?(&1, "$"))
 
     assert waivers == [],
-           "every runtime offers every option; drop these waivers: #{inspect(waivers)}"
+           "every covered runtime offers every option; drop these waivers: #{inspect(waivers)}"
   end
 end

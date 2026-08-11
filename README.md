@@ -25,7 +25,7 @@
 
 - **110+ Tree-sitter languages** - Fast, accurate, and updated syntax parsing
 - **250+ built-in Neovim themes** - Updated and curated themes from the Neovim community
-- **One API across first-party runtimes** - CLI, Rust, Elixir, and JavaScript (Node and browsers), aligned in naming, options, and output
+- **6 runtimes, one API** - CLI, Rust, Elixir, JavaScript, Browsers / CDN, and Java, aligned in naming, options, and output
 - **Built-in formatters** - HTML (inline/linked), Terminal (ANSI), Multi-theme (light/dark), BBCode
 - **Custom formatters** - Build your own output
 - **Language auto-detection** - File extension, shebang, and emacs-mode support
@@ -114,8 +114,7 @@ See [Elixir integration](https://lumis.sh/docs/usage/elixir-integration).
 
 ### [Java](https://github.com/roastedroot/lumis4j)
 
-Community-maintained by [@andreaTP](https://github.com/andreaTP), with its own
-API and release cadence. More details at https://chicory.dev/blog/syntax-highlight
+By [@andreaTP](https://github.com/andreaTP). More details at https://chicory.dev/blog/syntax-highlight
 
 ```java
 import io.roastedroot.lumis4j.core.Lumis;

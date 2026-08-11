@@ -1,8 +1,13 @@
 # API drift tracker
 
-Lumis presents one mental model across its first-party Rust, CLI, Elixir, and
-JavaScript runtimes. Rust is the reference; where a runtime disagrees, the
+Lumis presents one mental model across Rust, CLI, Elixir, JavaScript in Node and
+browsers, and Java. Rust is the reference; where a runtime disagrees, the
 runtime moves unless Rust is the one that is wrong.
+
+Java is developed in [`lumis4j`](https://github.com/roastedroot/lumis4j). Being
+in a separate repository changes where a fix lands, not whether Java counts.
+The Java findings below were checked against
+[`23e9e85`](https://github.com/roastedroot/lumis4j/tree/23e9e8581eaf16c5fc3d46293426c422afcbf3b2).
 
 This file tracks every known divergence, what was decided, and where the fix
 landed. An entry leaves this file only when the drift is gone **and** something
@@ -46,6 +51,8 @@ that.
 | D7 | `:bundle_*` names work in `Languages.load/1` but not `Languages.cache/2`, the mix task, `cacheLanguages`, `lumis-wasm-cache`, or `lumis parsers cache` | Elixir, JavaScript, CLI | fixed |
 | D8 | `guessLanguage` is implemented but not exported; `sanitizeThemeName` is not in `formatters/html`; `runtimeKind` is missing from the browser entry | JavaScript | fixed |
 | D18 | Language detection is public as `Language::guess` in Rust and `guessLanguage()` in JavaScript, and unreachable in Elixir | Elixir | fixed |
+| D24 | `lumis4j` exposes four of the five built-in formatters and only language, theme, and formatter selection; HTML Multi-Themes and the formatter-specific options are absent | Java | open |
+| D25 | `lumis4j` has no public equivalent of language guessing or rich language/theme metadata, and its default-language path does not pass source text into Rust detection | Java | open |
 
 **D4.** Rust models this as `Option<HighlightLinesStyle>` where `None` means no
 style, and Elixir documents `style: nil` for exactly this. JavaScript types it
@@ -71,6 +78,14 @@ landed alongside it compares normalized strings rather than
 would grow the atom table without bound. A test asserts `:erlang.system_info(:atom_count)`
 is unchanged across fifty unknown names.
 
+**D24/D25 — open.** Java's `Formatter` enum currently has Terminal, HTML
+Inline, HTML Linked, and BBCode; `Highlighter.Builder` exposes only
+`withLang`, `withTheme`, and `withFormatter`. `Lang` and `Theme` are enums rather
+than the metadata records exposed elsewhere, and the WASM bridge calls
+`Language::guess(Some(&lang), "")`, so selecting the default/plaintext language
+cannot inspect the source. These remain open cross-repository parity work, not
+accepted reasons to remove Java from the parity target.
+
 ## Detection behavior
 
 | # | Drift | Runtimes | Status |
@@ -88,8 +103,8 @@ explicit choices that override content detection.
 
 | # | Drift | Runtimes | Status |
 | --- | --- | --- | --- |
-| D9 | `available_languages` returns a tuple map (Rust, Elixir) or a record array with five extra fields (JavaScript) | all | fixed |
-| D10 | `available_themes` returns full themes (Rust), names (Elixir), or `{name, appearance}` (JavaScript) | all | fixed |
+| D9 | `available_languages` returns a tuple map (Rust, Elixir) or a record array with five extra fields (JavaScript) | Rust, Elixir, JavaScript | fixed |
+| D10 | `available_themes` returns full themes (Rust), names (Elixir), or `{name, appearance}` (JavaScript) | Rust, Elixir, JavaScript | fixed |
 | D19 | `available_themes` named two different returns after D10: whole themes in Rust, a summary elsewhere, with a Rust-only `available_theme_info()` bolted on | Rust vs Elixir, JavaScript | fixed |
 | D11 | `highlight/2` is spec'd `{:ok, _}` and raises on every error path, so `highlight!/2` is the same function | Elixir | fixed |
 | D12 | `Highlighter` names a per-language token iterator in Rust and a language registry in JavaScript | Rust vs JavaScript | accepted |
@@ -123,12 +138,14 @@ the same program. Recorded so the next reader does not "fix" one into the other.
 the formatters need — and `HighlightEvent::scope()` returns the name JavaScript
 carries directly, so a custom formatter reads the same value in both.
 
-**D20/D21.** Plaintext is parser-free, but its metadata is still public API.
-Its record now lives in `languages.toml` beside the parser records, and both the
-Rust and JavaScript generators consume it. The JavaScript generator sorts the
-complete list after adding plaintext, matching Rust and Elixir rather than
-depending on TOML insertion order. Parser-cache entry points treat the id and
-every alias as a successful no-op because plaintext has no parser to fetch.
+**D20/D21.** Plaintext has no parser, but its metadata is still public API. It
+remains an explicit special case in the Rust and JavaScript generators instead
+of adding a non-parser section to `languages.toml`. Both expose the same aliases
+and Emacs modes, and the shared detection corpus pins the behavior. The
+JavaScript generator sorts the complete list after adding plaintext, matching
+Rust and Elixir rather than depending on TOML insertion order. Parser-cache
+entry points treat the id and every alias as a successful no-op because there
+is no parser to fetch.
 
 **D22.** JavaScript returns a fresh outer array, record, and nested arrays on
 every call. A caller can edit its result without changing later catalog reads,
@@ -139,7 +156,7 @@ Node/browser difference.
 
 | # | Drift | Runtimes | Status |
 | --- | --- | --- | --- |
-| D14 | `rainbow_brackets` is implemented on all five formatters everywhere and appears in no docs option table, no Elixir `@type formatter` variant, and no Elixir `@typedoc` option list | all | fixed |
+| D14 | `rainbow_brackets` is implemented on all five formatters in Rust, Elixir, JavaScript, and the CLI, but appears in no docs option table, no Elixir `@type formatter` variant, and no Elixir `@typedoc` option list | Rust, CLI, Elixir, JavaScript | fixed |
 | D15 | `css_variable_prefix` is missing from the Rust row of the `html_multi_themes` options table | docs | fixed |
 
 ## Structural
@@ -148,6 +165,7 @@ Node/browser difference.
 | --- | --- | --- |
 | D16 | `crates/lumis/src/formatter/html.rs` re-declares 15 of the 18 public functions in `crates/lumis-core/src/formatter/html.rs`, including a 199-line byte-identical `span_multi_themes_attrs`, while the function directly below it delegates | fixed |
 | D17 | Nothing checks the option surface across runtimes. Conformance pins output for `language`, `theme` and `rainbowBrackets` only; `runtime-parity.test.ts` compares Node native against wasm inside JavaScript | fixed |
+| D26 | The shared formatter manifest and conformance fixtures have no Java consumer, so Java surface and output drift cannot fail either repository's CI | open |
 
 **D16** is where both D1 and D2 live, in two copies. It is fixed first so the
 output fixes are written once.
@@ -158,6 +176,11 @@ test, so adding a builder field cannot pass by leaving both the manifest and its
 manual setter exercise unchanged. Once the manifest moves, Elixir, JavaScript,
 and the CLI fail until they catch up. Conformance fixtures cover output; the
 manifest covers surface. Neither substitutes for the other.
+
+**D26 — open.** The manifest now protects every implementation in this
+repository, but Java remains part of the contract. Close this by making
+`lumis4j` consume the same formatter manifest and conformance fixtures (or an
+equivalent versioned artifact), not by defining Java out of scope.
 
 ## What counts as drift, and what does not
 
@@ -203,4 +226,3 @@ Not drift. Recorded so they are not re-litigated.
 | Elixir has no custom formatter API | Formatters run inside the NIF. A formatter written in Elixir would mean crossing the BEAM boundary per token. |
 | Elixir loads languages globally to the VM; JavaScript loads per highlighter | One `Runtime` lives in the NIF, so the first process to need a language pays and every process after it does not. |
 | Rust compiles languages in behind feature flags; the dynamic runtimes fetch them | Different distribution model, same catalog and the same bundle names. |
-| Java uses a smaller formatter and option surface | `lumis4j` is a community-maintained repository with its own API and release cadence. This repository links to it but no longer includes it in the first-party parity claim. |

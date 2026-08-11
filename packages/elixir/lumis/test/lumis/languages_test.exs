@@ -3,7 +3,7 @@ defmodule Lumis.LanguagesTest do
 
   import ExUnit.CaptureIO
 
-  test "treats plaintext names as parser-free languages" do
+  test "does not load a parser for plaintext aliases" do
     plaintext = Enum.find(Lumis.available_languages(), &(&1.id == "plaintext"))
 
     for name <- [plaintext.id | plaintext.aliases] do

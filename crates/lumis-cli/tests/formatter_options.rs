@@ -1,6 +1,6 @@
 //! The CLI's half of the cross-runtime formatter option check.
 //!
-//! `fixtures/formatter-options.json` lists the options every runtime must
+//! `fixtures/formatter-options.json` lists the options every covered runtime must
 //! accept. This reads `lumis highlight --help`, so it checks the flags clap
 //! actually parses rather than a list maintained beside them.
 //!
@@ -102,6 +102,6 @@ fn no_waiver_outlives_its_reason() {
 
     assert!(
         waivers.is_empty(),
-        "every runtime offers every option; drop these waivers: {waivers:?}"
+        "every covered runtime offers every option; drop these waivers: {waivers:?}"
     );
 }
