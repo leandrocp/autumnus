@@ -126,8 +126,8 @@ jobs:
 
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
 
-      - name: Package Lumis
-        run: cargo package -p lumis --no-verify
+      - name: Package Lumis and the crates released with it
+        run: cargo package -p lumis -p lumis-core -p lumis-build -p lumis-wasm-runtime --no-verify
 
       - name: Test and audit the extracted package
         shell: bash
@@ -135,14 +135,30 @@ jobs:
           set -euo pipefail
 
           package_root="$RUNNER_TEMP/lumis-package"
-          archive="$(find target/package -maxdepth 1 -name 'lumis-*.crate' -print -quit)"
-          test -n "$archive"
-
           mkdir -p "$package_root"
-          tar -xzf "$archive" -C "$package_root"
-          package_dir="$(find "$package_root" -mindepth 1 -maxdepth 1 -type d -name 'lumis-*' -print -quit)"
+
+          for crate in lumis lumis-core lumis-build lumis-wasm-runtime; do
+            archive="$(find target/package -maxdepth 1 -name "$crate-[0-9]*.crate" -print -quit)"
+            test -n "$archive"
+            tar -xzf "$archive" -C "$package_root"
+          done
+
+          package_dir="$(find "$package_root" -mindepth 1 -maxdepth 1 -type d -name 'lumis-[0-9]*' -print -quit)"
           test -n "$package_dir"
           test ! -e "$package_dir/.cargo/config.toml"
+
+          # Resolve the sibling lumis crates to the tarballs built alongside this
+          # one rather than to whatever is on crates.io. Publish order releases
+          # them before `lumis`, so "new lumis against last release's core" is a
+          # combination that never ships; testing it only fails whenever a
+          # release adds core API. `mise run check-crate-deps` is what keeps each
+          # `version` requirement honest.
+          patches=()
+          for crate in lumis-core lumis-build lumis-wasm-runtime; do
+            sibling="$(find "$package_root" -mindepth 1 -maxdepth 1 -type d -name "$crate-[0-9]*" -print -quit)"
+            test -n "$sibling"
+            patches+=(--config "patch.crates-io.$crate.path=\"$sibling\"")
+          done
 
           cp -R samples "$RUNNER_TEMP/samples"
 
@@ -152,6 +168,7 @@ jobs:
             --release \
             --no-default-features \
             --features all-languages \
+            "${patches[@]}" \
             languages::tests::test_all_available_languages_have_samples_and_highlight \
             -- --exact --nocapture
 
@@ -160,6 +177,7 @@ jobs:
           cargo metadata \
             --format-version 1 \
             --all-features \
+            "${patches[@]}" \
             >"$metadata"
           : >"$offenders"
 
