@@ -255,10 +255,10 @@ export const BUNDLES: Record<string, string[]> = ${JSON.stringify(bundleMembers,
       aliases[id] = entry?.aliases ?? [];
     }
 
-    // Always include plaintext
-    if (!parserIds.includes("plaintext")) {
-      aliases["plaintext"] = plaintextAliases;
-    }
+    // Plaintext needs no parser, so it has no `languages.toml` entry and the
+    // loop above can only ever give it an empty alias list. Assigning after it
+    // covers a bundle that names plaintext explicitly, which the schema allows.
+    aliases["plaintext"] = plaintextAliases;
 
     const allIds = [...parserIds];
     if (!allIds.includes("plaintext")) {
