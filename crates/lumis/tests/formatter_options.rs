@@ -75,47 +75,76 @@ fn header() -> HtmlElement {
     }
 }
 
-fn formatter_fields() -> BTreeMap<&'static str, BTreeSet<String>> {
-    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    let formatters = [
-        ("html_inline", "src/formatter/html_inline.rs", "HtmlInline"),
-        ("html_linked", "src/formatter/html_linked.rs", "HtmlLinked"),
-        (
-            "html_multi_themes",
-            "src/formatter/html_multi_themes.rs",
-            "HtmlMultiThemes",
-        ),
-        ("terminal", "src/formatter/terminal.rs", "Terminal"),
-        ("bbcode_scoped", "src/formatter/bbcode.rs", "BBCodeScoped"),
-    ];
+/// Named fields of every struct declared under `src/formatter`, by struct name.
+///
+/// Discovered by scanning the directory rather than by listing files, so moving
+/// a formatter between modules does not also mean editing this test.
+fn formatter_struct_fields() -> BTreeMap<String, BTreeSet<String>> {
+    let formatter_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("src/formatter");
+    let mut structs = BTreeMap::new();
 
-    formatters
-        .into_iter()
-        .map(|(formatter, path, struct_name)| {
-            let source = fs::read_to_string(manifest_dir.join(path))
-                .unwrap_or_else(|error| panic!("read {path}: {error}"));
-            let syntax =
-                syn::parse_file(&source).unwrap_or_else(|error| panic!("parse {path}: {error}"));
-            let item = syntax
-                .items
-                .iter()
-                .find_map(|item| match item {
-                    Item::Struct(item) if item.ident == struct_name => Some(item),
-                    _ => None,
-                })
-                .unwrap_or_else(|| panic!("find struct {struct_name} in {path}"));
+    let entries = fs::read_dir(&formatter_dir)
+        .unwrap_or_else(|error| panic!("read {}: {error}", formatter_dir.display()));
+
+    for entry in entries {
+        let path = entry.expect("read formatter dir entry").path();
+        if path.extension().is_none_or(|extension| extension != "rs") {
+            continue;
+        }
+
+        let source = fs::read_to_string(&path)
+            .unwrap_or_else(|error| panic!("read {}: {error}", path.display()));
+        let syntax = syn::parse_file(&source)
+            .unwrap_or_else(|error| panic!("parse {}: {error}", path.display()));
+
+        for item in &syntax.items {
+            let Item::Struct(item) = item else { continue };
             let Fields::Named(fields) = &item.fields else {
-                panic!("{struct_name} must keep named fields");
+                continue;
             };
-            let fields = fields
-                .named
-                .iter()
-                .map(|field| field.ident.as_ref().expect("named field").to_string())
-                .collect();
 
-            (formatter, fields)
-        })
-        .collect()
+            structs.insert(
+                item.ident.to_string(),
+                fields
+                    .named
+                    .iter()
+                    .map(|field| field.ident.as_ref().expect("named field").to_string())
+                    .collect(),
+            );
+        }
+    }
+
+    assert!(
+        structs.len() > 5,
+        "formatter directory scan found almost nothing: {} structs",
+        structs.len()
+    );
+
+    structs
+}
+
+/// The struct behind each manifest formatter. `BBCodeScoped` does not
+/// snake_case to `bbcode_scoped`, so the pairing is written out.
+fn formatter_fields() -> BTreeMap<&'static str, BTreeSet<String>> {
+    let structs = formatter_struct_fields();
+
+    [
+        ("html_inline", "HtmlInline"),
+        ("html_linked", "HtmlLinked"),
+        ("html_multi_themes", "HtmlMultiThemes"),
+        ("terminal", "Terminal"),
+        ("bbcode_scoped", "BBCodeScoped"),
+    ]
+    .into_iter()
+    .map(|(formatter, struct_name)| {
+        let fields = structs
+            .get(struct_name)
+            .unwrap_or_else(|| panic!("no struct {struct_name} under src/formatter"))
+            .clone();
+
+        (formatter, fields)
+    })
+    .collect()
 }
 
 /// Every option in the manifest, named once per formatter. Adding an option to
