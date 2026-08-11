@@ -10,6 +10,9 @@ import type {
 import { HIGHLIGHT_NAMES } from "../highlights.js";
 import { sanitizeThemeName } from "../themes.js";
 
+// Rust exposes this from `lumis::formatters::html`, so the helper modules line up.
+export { sanitizeThemeName } from "../themes.js";
+
 const _encoder = new TextEncoder();
 const _decoder = new TextDecoder();
 

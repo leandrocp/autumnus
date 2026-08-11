@@ -225,3 +225,12 @@ export function availableLanguages(...args: Parameters<typeof runtime.availableL
 export function getDefaultRuntime(...args: Parameters<typeof runtime.getDefaultRuntime>) {
   return runtime.getDefaultRuntime(...args);
 }
+
+/**
+ * {@inheritDoc node.runtimeKind}
+ *
+ * Always `"wasm"` in a browser: the native addon is a Node addon.
+ */
+export function runtimeKind(): "native" | "wasm" {
+  return "wasm";
+}

@@ -107,6 +107,12 @@ function highlightLineStyle(
     return undefined;
   }
 
+  // Explicit `null` opts out of the inline style entirely, leaving the class to
+  // do the highlighting. Absent still means the theme's `highlighted` style.
+  if (highlightLines?.style === null) {
+    return undefined;
+  }
+
   if (highlightLines?.style && highlightLines.style !== "theme") {
     return highlightLines.style;
   }

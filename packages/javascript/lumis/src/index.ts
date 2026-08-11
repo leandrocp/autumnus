@@ -13,6 +13,7 @@ import {
 export { runtimeKind } from "./runtime/node.js";
 
 export { highlightIter, highlightEvents } from "./core/highlighter.js";
+export { guessLanguage } from "./guess-language.js";
 
 const highlighter = createHighlighterModule({
   createRuntime,

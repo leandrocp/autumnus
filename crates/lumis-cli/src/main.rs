@@ -59,50 +59,7 @@ enum Commands {
     #[command(
         after_help = "Examples:\n  lumis highlight main.rs\n  lumis highlight -l javascript main.txt\n  lumis highlight -f html-inline -t dracula main.rs\n  lumis highlight -b theme -w 120 main.rs\n  lumis highlight --background '#282a36' --width 120 main.rs\n  lumis highlight -h 1,3-5 lib.rs\n  cat main.rs | lumis highlight -l rust\n  echo 'fn main() {}' | lumis highlight -l rust"
     )]
-    Highlight {
-        /// File to highlight (reads from stdin if omitted)
-        path: Option<String>,
-
-        /// Language id (e.g. rust, javascript, elixir)
-        #[arg(short = 'l', long)]
-        language: Option<String>,
-
-        /// Output format [default: terminal]
-        #[arg(short = 'f', long)]
-        formatter: Option<Formatter>,
-
-        /// Theme name, e.g. dracula, github_dark, or auto
-        #[arg(short = 't', long)]
-        theme: Option<String>,
-
-        /// Terminal background: use `theme`, a hex color, or omit it to inherit the output background
-        #[arg(short = 'b', long = "background")]
-        background: Option<String>,
-
-        /// Terminal render width for background padding. Use a number or 'auto'.
-        #[arg(short = 'w', long)]
-        width: Option<String>,
-
-        /// Theme pair as name:theme_id, can be repeated (requires html-multi-themes)
-        #[arg(long)]
-        themes: Vec<String>,
-
-        /// Which --themes entry gets inline styles
-        #[arg(long)]
-        default_theme: Option<String>,
-
-        /// Prefix for CSS custom properties
-        #[arg(long, default_value = "--lumis")]
-        css_variable_prefix: String,
-
-        /// Lines to highlight, e.g. "1,3-5,10"
-        #[arg(short = 'h', long)]
-        highlight_lines: Option<String>,
-
-        /// Render nested brackets using rainbow bracket scopes
-        #[arg(long)]
-        rainbow_brackets: bool,
-    },
+    Highlight(HighlightArgs),
 
     /// Dump Tree-sitter parsing and highlighting output
     Dump {
@@ -127,6 +84,80 @@ enum Commands {
         #[command(subcommand)]
         command: ParsersCommands,
     },
+}
+
+#[derive(clap::Args)]
+struct HighlightArgs {
+    /// File to highlight (reads from stdin if omitted)
+    path: Option<String>,
+
+    /// Language id (e.g. rust, javascript, elixir)
+    #[arg(short = 'l', long)]
+    language: Option<String>,
+
+    /// Output format [default: terminal]
+    #[arg(short = 'f', long)]
+    formatter: Option<Formatter>,
+
+    /// Theme name, e.g. dracula, github_dark, or auto
+    #[arg(short = 't', long)]
+    theme: Option<String>,
+
+    /// Terminal background: use `theme`, a hex color, or omit it to inherit the output background
+    #[arg(short = 'b', long = "background")]
+    background: Option<String>,
+
+    /// Terminal render width for background padding. Use a number or 'auto'.
+    #[arg(short = 'w', long)]
+    width: Option<String>,
+
+    /// Theme pair as name:theme_id, can be repeated (requires html-multi-themes)
+    #[arg(long)]
+    themes: Vec<String>,
+
+    /// Which --themes entry gets inline styles
+    #[arg(long)]
+    default_theme: Option<String>,
+
+    /// Prefix for CSS custom properties
+    #[arg(long, default_value = "--lumis")]
+    css_variable_prefix: String,
+
+    /// CSS class appended to the wrapping <pre> tag
+    #[arg(long)]
+    pre_class: Option<String>,
+
+    /// Apply italic styles from the theme
+    #[arg(long)]
+    italic: bool,
+
+    /// Add data-highlight attributes naming each scope
+    #[arg(long)]
+    include_highlights: bool,
+
+    /// Opening tag wrapped around the output, e.g. '<figure>'
+    #[arg(long, requires = "header_close")]
+    header_open: Option<String>,
+
+    /// Closing tag wrapped around the output, e.g. '</figure>'
+    #[arg(long, requires = "header_open")]
+    header_close: Option<String>,
+
+    /// Lines to highlight, e.g. "1,3-5,10"
+    #[arg(short = 'h', long)]
+    highlight_lines: Option<String>,
+
+    /// CSS class added to highlighted lines
+    #[arg(long)]
+    highlight_lines_class: Option<String>,
+
+    /// Style for highlighted lines: `theme`, `none`, or raw CSS [default: theme]
+    #[arg(long)]
+    highlight_lines_style: Option<String>,
+
+    /// Render nested brackets using rainbow bracket scopes
+    #[arg(long)]
+    rainbow_brackets: bool,
 }
 
 #[derive(Subcommand)]
@@ -295,36 +326,11 @@ fn main() -> Result<()> {
     let verbose = cli.verbose;
 
     match cli.command {
-        Commands::Highlight {
-            path,
-            language,
-            formatter,
-            theme,
-            background,
-            width,
-            themes,
-            default_theme,
-            css_variable_prefix,
-            highlight_lines,
-            rainbow_brackets,
-        } => {
+        Commands::Highlight(mut args) => {
             let config = config::Config::load(&config_path)?;
             let reg = registry::Registry::new(data_dir)?;
-            do_highlight(
-                &reg,
-                path,
-                language,
-                formatter,
-                theme.or(config.highlight.theme),
-                background,
-                width,
-                themes,
-                default_theme,
-                css_variable_prefix,
-                highlight_lines,
-                rainbow_brackets,
-                verbose,
-            )
+            args.theme = args.theme.or(config.highlight.theme);
+            do_highlight(&reg, args, verbose)
         }
         Commands::Dump { command } => {
             let reg = registry::Registry::new(data_dir)?;
@@ -1169,22 +1175,8 @@ fn dump_tree_lines(
 }
 
 #[allow(clippy::too_many_arguments)]
-fn do_highlight(
-    reg: &registry::Registry,
-    path: Option<String>,
-    language: Option<String>,
-    formatter: Option<Formatter>,
-    theme: Option<String>,
-    background: Option<String>,
-    width: Option<String>,
-    themes: Vec<String>,
-    default_theme: Option<String>,
-    css_variable_prefix: String,
-    highlight_lines: Option<String>,
-    rainbow_brackets: bool,
-    verbose: bool,
-) -> Result<()> {
-    let (source, lang) = read_source(path, language)?;
+fn do_highlight(reg: &registry::Registry, args: HighlightArgs, verbose: bool) -> Result<()> {
+    let (source, lang) = read_source(args.path.clone(), args.language.clone())?;
 
     if verbose {
         eprintln!("--");
@@ -1200,50 +1192,91 @@ fn do_highlight(
     }
 
     let lang_name = lang.id_name();
-    let events = highlight_to_events(reg, &source, lang_name, rainbow_brackets)?;
+    let events = highlight_to_events(reg, &source, lang_name, args.rainbow_brackets)?;
 
-    let parsed_highlight_lines = if let Some(lines_str) = highlight_lines {
-        Some(parse_highlight_lines(&lines_str)?)
-    } else {
-        None
-    };
-
-    render_output(
-        reg,
-        &source,
-        &events,
-        lang,
-        formatter,
-        theme,
-        background,
-        width,
-        themes,
-        default_theme,
-        css_variable_prefix,
-        parsed_highlight_lines,
-        verbose,
-    )
+    render_output(reg, &source, &events, lang, args, verbose)
 }
 
-#[allow(clippy::too_many_arguments)]
+/// Line ranges plus the class and style that apply to them, or `None` when no
+/// lines were named.
+fn inline_highlight_lines(
+    args: &HighlightArgs,
+) -> Result<Option<lumis_core::formatter::html_inline::HighlightLines>> {
+    use lumis_core::formatter::html_inline::{HighlightLines, HighlightLinesStyle};
+
+    let Some(lines) = args.highlight_lines.as_deref() else {
+        return Ok(None);
+    };
+
+    let style = match args.highlight_lines_style.as_deref() {
+        None | Some("theme") => Some(HighlightLinesStyle::Theme),
+        Some("none") => None,
+        Some(css) => Some(HighlightLinesStyle::Style(css.to_string())),
+    };
+
+    Ok(Some(HighlightLines {
+        lines: parse_highlight_lines(lines)?,
+        style,
+        class: args.highlight_lines_class.clone(),
+    }))
+}
+
+fn linked_highlight_lines(
+    args: &HighlightArgs,
+) -> Result<Option<lumis_core::formatter::html_linked::HighlightLines>> {
+    use lumis_core::formatter::html_linked::HighlightLines;
+
+    let Some(lines) = args.highlight_lines.as_deref() else {
+        return Ok(None);
+    };
+
+    Ok(Some(HighlightLines {
+        lines: parse_highlight_lines(lines)?,
+        class: args
+            .highlight_lines_class
+            .clone()
+            .unwrap_or_else(|| "l-highlighted".to_string()),
+    }))
+}
+
+fn header_element(args: &HighlightArgs) -> Option<lumis_core::formatter::HtmlElement> {
+    // clap's `requires` keeps these two either both set or both absent.
+    let open_tag = args.header_open.clone()?;
+    let close_tag = args.header_close.clone()?;
+    Some(lumis_core::formatter::HtmlElement {
+        open_tag,
+        close_tag,
+    })
+}
+
 fn render_output(
     reg: &registry::Registry,
     source: &str,
     events: &[HighlightEvent],
     lang: Language,
-    formatter: Option<Formatter>,
-    theme: Option<String>,
-    background: Option<String>,
-    width: Option<String>,
-    themes: Vec<String>,
-    default_theme: Option<String>,
-    css_variable_prefix: String,
-    highlight_lines: Option<Vec<RangeInclusive<usize>>>,
+    args: HighlightArgs,
     verbose: bool,
 ) -> Result<()> {
-    match formatter.unwrap_or_default() {
+    let HighlightArgs {
+        ref formatter,
+        ref theme,
+        ref background,
+        ref width,
+        ref themes,
+        ref default_theme,
+        ref css_variable_prefix,
+        ref pre_class,
+        italic,
+        include_highlights,
+        ..
+    } = args;
+
+    let highlight_lines = inline_highlight_lines(&args)?;
+    let header = header_element(&args);
+
+    match formatter.clone().unwrap_or_default() {
         Formatter::HtmlInline => {
-            let theme_obj = resolve_theme(theme, Some(reg.data_dir()), verbose);
+            let theme_obj = resolve_theme(theme.clone(), Some(reg.data_dir()), verbose);
             if verbose {
                 eprintln!("--\n");
             }
@@ -1251,17 +1284,11 @@ fn render_output(
             builder
                 .language(lang)
                 .theme(theme_obj)
-                .italic(false)
-                .include_highlights(false);
-
-            if let Some(lines) = highlight_lines {
-                let hl = lumis_core::formatter::html_inline::HighlightLines {
-                    lines,
-                    style: Some(lumis_core::formatter::html_inline::HighlightLinesStyle::Theme),
-                    class: None,
-                };
-                builder.highlight_lines(Some(hl));
-            }
+                .pre_class(pre_class.clone())
+                .italic(italic)
+                .include_highlights(include_highlights)
+                .highlight_lines(highlight_lines)
+                .header(header);
 
             let fmt = builder.build().map_err(|e| anyhow::anyhow!("{}", e))?;
             let mut output = Vec::new();
@@ -1300,19 +1327,15 @@ fn render_output(
             builder
                 .language(lang)
                 .themes(theme_map)
-                .css_variable_prefix(css_variable_prefix);
+                .css_variable_prefix(css_variable_prefix.clone())
+                .pre_class(pre_class.clone())
+                .italic(italic)
+                .include_highlights(include_highlights)
+                .highlight_lines(highlight_lines)
+                .header(header);
 
             if let Some(default) = default_theme {
-                builder.default_theme(default);
-            }
-
-            if let Some(lines) = highlight_lines {
-                let hl = lumis_core::formatter::html_inline::HighlightLines {
-                    lines,
-                    style: Some(lumis_core::formatter::html_inline::HighlightLinesStyle::Theme),
-                    class: None,
-                };
-                builder.highlight_lines(Some(hl));
+                builder.default_theme(default.clone());
             }
 
             let fmt = builder.build().map_err(|e| anyhow::anyhow!("{}", e))?;
@@ -1326,15 +1349,11 @@ fn render_output(
                 eprintln!("--\n");
             }
             let mut builder = lumis_core::formatter::HtmlLinkedBuilder::new();
-            builder.language(lang);
-
-            if let Some(lines) = highlight_lines {
-                let hl = lumis_core::formatter::html_linked::HighlightLines {
-                    lines,
-                    class: "l-highlighted".to_string(),
-                };
-                builder.highlight_lines(Some(hl));
-            }
+            builder
+                .language(lang)
+                .pre_class(pre_class.clone())
+                .highlight_lines(linked_highlight_lines(&args)?)
+                .header(header);
 
             let fmt = builder.build().map_err(|e| anyhow::anyhow!("{}", e))?;
             let mut output = Vec::new();
@@ -1343,7 +1362,7 @@ fn render_output(
         }
 
         Formatter::Terminal => {
-            let theme_obj = resolve_theme(theme, Some(reg.data_dir()), verbose);
+            let theme_obj = resolve_theme(theme.clone(), Some(reg.data_dir()), verbose);
             if verbose {
                 eprintln!("--\n");
             }
