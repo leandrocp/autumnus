@@ -280,18 +280,22 @@ macro_rules! define_languages {
                     if let Some(cap) = RE.captures(first_line) {
                         let interpreter_path = Path::new(&cap[1]);
                         if let Some(name) = interpreter_path.file_name() {
-                            match name.to_string_lossy().as_ref() {
-                                $(
-                                    $($a_shebang => return Some(Language::$a_variant),)*
-                                )*
-                                $(
-                                    $(
-                                        #[cfg(feature = $g_feat)]
-                                        $g_shebang => return Some(Language::$g_variant),
-                                    )*
-                                )*
-                                _ => {}
-                            }
+                            let name = normalize_shebang_command(&name.to_string_lossy());
+                            $(
+                                if (&[$($a_shebang),*] as &[&str]).iter().any(|candidate| {
+                                    normalize_shebang_command(candidate) == name
+                                }) {
+                                    return Some(Language::$a_variant);
+                                }
+                            )*
+                            $(
+                                #[cfg(feature = $g_feat)]
+                                if (&[$($g_shebang),*] as &[&str]).iter().any(|candidate| {
+                                    normalize_shebang_command(candidate) == name
+                                }) {
+                                    return Some(Language::$g_variant);
+                                }
+                            )*
                         }
                     }
                 }
@@ -304,6 +308,8 @@ macro_rules! define_languages {
             type Err = LanguageParseError;
 
             fn from_str(s: &str) -> Result<Self, Self::Err> {
+                let original = s;
+                let s = s.trim();
                 if s.is_empty() {
                     return Ok(Language::PlainText);
                 }
@@ -327,7 +333,11 @@ macro_rules! define_languages {
                     return Ok(lang);
                 }
 
-                let path = Path::new(&s_lower);
+                // Treat both path separators as paths on every host. Language
+                // hints often come from another machine (for example, an
+                // editor sending a Windows path to a Unix server).
+                let normalized_path = s_lower.replace('\\', "/");
+                let path = Path::new(&normalized_path);
 
                 if let Some(lang) = Language::from_glob(path) {
                     return Ok(lang);
@@ -337,7 +347,7 @@ macro_rules! define_languages {
                     return Ok(lang);
                 }
 
-                Err(LanguageParseError(s.to_string()))
+                Err(LanguageParseError(original.to_string()))
             }
         }
 
@@ -481,8 +491,10 @@ impl Language {
             Some(name) => {
                 let name = name.to_string_lossy().into_owned();
                 for language in Language::iter() {
-                    for glob in Language::language_globs(language) {
-                        if glob.matches(&name) {
+                    for glob in language.globs() {
+                        let pattern = glob::Pattern::new(&glob.to_ascii_lowercase())
+                            .expect("failed to guess language by path");
+                        if pattern.matches(&name) {
                             return Some(language);
                         }
                     }
@@ -495,6 +507,7 @@ impl Language {
     }
 
     fn from_extension(token: &str) -> Option<Self> {
+        let token = token.strip_prefix('.').unwrap_or(token);
         let token_pattern = format!("*.{token}");
 
         for language in Language::iter() {
@@ -524,12 +537,14 @@ impl Language {
 
     #[allow(dead_code)]
     fn looks_like_xml(src: &str) -> bool {
-        src.to_lowercase().starts_with("<?xml")
+        src.trim_start().to_lowercase().starts_with("<?xml")
     }
 
     #[allow(dead_code)]
     fn looks_like_html(src: &str) -> bool {
-        src.to_lowercase().starts_with("<!doctype html")
+        src.trim_start()
+            .to_lowercase()
+            .starts_with("<!doctype html")
     }
 }
 
@@ -547,4 +562,39 @@ fn split_on_newlines(s: &str) -> impl Iterator<Item = &str> {
             l
         }
     })
+}
+
+fn normalize_shebang_command(command: &str) -> String {
+    static VERSION_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\d+(?:\.\d+)*$").unwrap());
+
+    let command = command.to_ascii_lowercase();
+    VERSION_RE.replace(&command, "").into_owned()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn plaintext_metadata_and_detection_are_consistent() {
+        let plaintext = Language::PlainText.info();
+
+        assert_eq!(plaintext.name, "Plain Text");
+        assert_eq!(plaintext.aliases, ["text", "txt", "plain"]);
+        assert_eq!(plaintext.emacs_modes, ["fundamental", "text"]);
+        assert!(plaintext.extensions.is_empty());
+        assert!(plaintext.globs.is_empty());
+        assert!(plaintext.shebangs.is_empty());
+
+        for name in std::iter::once(plaintext.id).chain(plaintext.aliases.iter().copied()) {
+            assert_eq!(
+                Language::guess(Some(name), "#!/usr/bin/env bash"),
+                Language::PlainText
+            );
+        }
+        assert_eq!(
+            Language::guess(None, "// -*- mode: text -*-\nfn main() {}"),
+            Language::PlainText
+        );
+    }
 }

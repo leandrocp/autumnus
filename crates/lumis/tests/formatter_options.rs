@@ -2,13 +2,14 @@
 //!
 //! `fixtures/formatter-options.json` lists the options every runtime must
 //! accept. Rust cannot reflect on builder setters at runtime, so the check has
-//! two halves:
+//! three parts:
 //!
 //! - `every_manifest_option_has_a_builder_setter` calls every setter by name.
 //!   An option added to the manifest that Rust lacks fails to **compile**.
 //! - `manifest_matches_the_setters_exercised_here` reads the manifest and
-//!   requires it to name exactly the options exercised above, so a setter added
-//!   to Rust without a manifest entry fails too.
+//!   requires it to name exactly the options exercised above.
+//! - `manifest_matches_formatter_fields` parses the formatter structs and
+//!   catches a new builder field even if nobody updates either manual list.
 //!
 //! Together they pin the manifest and the builders to each other in both
 //! directions.
@@ -28,6 +29,7 @@ use serde::Deserialize;
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::fs;
 use std::path::PathBuf;
+use syn::{Fields, Item};
 
 #[derive(Debug, Deserialize)]
 struct Manifest {
@@ -71,6 +73,49 @@ fn header() -> HtmlElement {
         open_tag: "<figure>".to_string(),
         close_tag: "</figure>".to_string(),
     }
+}
+
+fn formatter_fields() -> BTreeMap<&'static str, BTreeSet<String>> {
+    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let formatters = [
+        ("html_inline", "src/formatter/html_inline.rs", "HtmlInline"),
+        ("html_linked", "src/formatter/html_linked.rs", "HtmlLinked"),
+        (
+            "html_multi_themes",
+            "src/formatter/html_multi_themes.rs",
+            "HtmlMultiThemes",
+        ),
+        ("terminal", "src/formatter/terminal.rs", "Terminal"),
+        ("bbcode_scoped", "src/formatter/bbcode.rs", "BBCodeScoped"),
+    ];
+
+    formatters
+        .into_iter()
+        .map(|(formatter, path, struct_name)| {
+            let source = fs::read_to_string(manifest_dir.join(path))
+                .unwrap_or_else(|error| panic!("read {path}: {error}"));
+            let syntax =
+                syn::parse_file(&source).unwrap_or_else(|error| panic!("parse {path}: {error}"));
+            let item = syntax
+                .items
+                .iter()
+                .find_map(|item| match item {
+                    Item::Struct(item) if item.ident == struct_name => Some(item),
+                    _ => None,
+                })
+                .unwrap_or_else(|| panic!("find struct {struct_name} in {path}"));
+            let Fields::Named(fields) = &item.fields else {
+                panic!("{struct_name} must keep named fields");
+            };
+            let fields = fields
+                .named
+                .iter()
+                .map(|field| field.ident.as_ref().expect("named field").to_string())
+                .collect();
+
+            (formatter, fields)
+        })
+        .collect()
 }
 
 /// Every option in the manifest, named once per formatter. Adding an option to
@@ -216,6 +261,27 @@ fn manifest_matches_the_setters_exercised_here() {
         assert_eq!(
             &expected, actual,
             "{formatter}: manifest options and Rust builder setters disagree"
+        );
+    }
+}
+
+#[test]
+fn manifest_matches_formatter_fields() {
+    let manifest = manifest();
+    let fields = formatter_fields();
+
+    assert_eq!(
+        manifest.formatters.keys().collect::<Vec<_>>(),
+        fields.keys().collect::<Vec<_>>(),
+        "manifest and Rust disagree about which formatters exist"
+    );
+
+    for (formatter, entry) in &manifest.formatters {
+        let expected: BTreeSet<String> = entry.options.iter().map(|o| o.name.clone()).collect();
+        assert_eq!(
+            expected,
+            fields[formatter.as_str()],
+            "{formatter}: manifest options and formatter fields disagree"
         );
     }
 }

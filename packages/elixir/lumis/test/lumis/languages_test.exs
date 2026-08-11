@@ -4,7 +4,9 @@ defmodule Lumis.LanguagesTest do
   import ExUnit.CaptureIO
 
   test "treats plaintext names as parser-free languages" do
-    for name <- ~w(plaintext text txt plain) do
+    plaintext = Enum.find(Lumis.available_languages(), &(&1.id == "plaintext"))
+
+    for name <- [plaintext.id | plaintext.aliases] do
       assert :ok = Lumis.Languages.load(name)
     end
   end
@@ -52,6 +54,18 @@ defmodule Lumis.LanguagesTest do
   end
 
   describe "guess/2" do
+    test "matches the shared language detection cases" do
+      cases =
+        __DIR__
+        |> Path.join("../../../../../fixtures/language-detection.json")
+        |> File.read!()
+        |> Jason.decode!()
+
+      for %{"name" => name, "hint" => hint, "source" => source, "expected" => expected} <- cases do
+        assert Lumis.Languages.guess(hint, source) == expected, name
+      end
+    end
+
     test "resolves an id, alias, file name and path" do
       assert Lumis.Languages.guess("elixir") == "elixir"
       assert Lumis.Languages.guess("sh") == "bash"

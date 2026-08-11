@@ -1,8 +1,8 @@
 # API drift tracker
 
-Lumis presents one mental model across Rust, the CLI, Elixir, and JavaScript.
-Rust is the reference; where a runtime disagrees, the runtime moves unless Rust
-is the one that is wrong.
+Lumis presents one mental model across its first-party Rust, CLI, Elixir, and
+JavaScript runtimes. Rust is the reference; where a runtime disagrees, the
+runtime moves unless Rust is the one that is wrong.
 
 This file tracks every known divergence, what was decided, and where the fix
 landed. An entry leaves this file only when the drift is gone **and** something
@@ -55,7 +55,13 @@ opts out.
 
 **D5.** `HtmlMultiThemesBuilder::build` rejects all three. Elixir rejects empty
 themes itself and inherits the other two through the builder. JavaScript builds
-no formatter object, so it needs the checks at call time.
+a mutable formatter object, so it validates both when the formatter is created
+and again at the render boundary.
+
+**D6.** CLI integration tests send the added wrapper, class, style, italic,
+and highlight-attribute flags through each HTML formatter that accepts them and
+assert the rendered HTML, so the help-surface check cannot pass with unwired
+flags.
 
 **D18.** `Lumis.Languages.guess/2` calls the same `Language::guess` that
 `highlight/2` already uses when no language is given, so the two cannot answer
@@ -64,6 +70,19 @@ landed alongside it compares normalized strings rather than
 `String.to_atom/1`: atoms are never collected, so a name arriving from a request
 would grow the atom table without bound. A test asserts `:erlang.system_info(:atom_count)`
 is unchanged across fifty unknown names.
+
+## Detection behavior
+
+| # | Drift | Runtimes | Status |
+| --- | --- | --- | --- |
+| D23 | Language hints, path separators, dotted extensions, case-bearing filename globs, leading content whitespace, and versioned or case-varied shebangs normalize differently | Rust, Elixir vs JavaScript | fixed |
+
+**D23.** One checked-in detection corpus now runs through `Language::guess`,
+`Lumis.Languages.guess/2`, and `guessLanguage()`. Rust trims explicit hints,
+accepts both host and foreign-platform path separators plus dotted extensions,
+compares normalized glob patterns, and normalizes interpreter names the same
+way the JavaScript detection tables do. The corpus also pins plaintext hints as
+explicit choices that override content detection.
 
 ## Shape and naming
 
@@ -75,6 +94,9 @@ is unchanged across fifty unknown names.
 | D11 | `highlight/2` is spec'd `{:ok, _}` and raises on every error path, so `highlight!/2` is the same function | Elixir | fixed |
 | D12 | `Highlighter` names a per-language token iterator in Rust and a language registry in JavaScript | Rust vs JavaScript | accepted |
 | D13 | `HighlightEvent` and `highlightEvents` are documented public API in JavaScript and `#[doc(hidden)]` in Rust, with a different payload (`scope_index` vs `scope`) | Rust vs JavaScript | fixed |
+| D20 | Plaintext has aliases and Emacs modes in JavaScript but empty metadata in Rust and Elixir, so explicit `text`, `txt`, or `plain` hints can detect different languages | Rust, Elixir vs JavaScript | fixed |
+| D21 | Rust and Elixir sort `available_languages` by id while JavaScript appends plaintext after every parser | JavaScript | fixed |
+| D22 | `availableThemes()` shares its generated array in every JavaScript runtime; browser `availableLanguages()` does too, while Node only shallow-copies records and still shares their nested arrays | JavaScript | fixed |
 
 **D9.** Rust is the reference but had the weakest shape here — a map of
 positional tuples, which Elixir copied. Rust gets a named `LanguageInfo` record
@@ -101,6 +123,18 @@ the same program. Recorded so the next reader does not "fix" one into the other.
 the formatters need — and `HighlightEvent::scope()` returns the name JavaScript
 carries directly, so a custom formatter reads the same value in both.
 
+**D20/D21.** Plaintext is parser-free, but its metadata is still public API.
+Its record now lives in `languages.toml` beside the parser records, and both the
+Rust and JavaScript generators consume it. The JavaScript generator sorts the
+complete list after adding plaintext, matching Rust and Elixir rather than
+depending on TOML insertion order. Parser-cache entry points treat the id and
+every alias as a successful no-op because plaintext has no parser to fetch.
+
+**D22.** JavaScript returns a fresh outer array, record, and nested arrays on
+every call. A caller can edit its result without changing later catalog reads,
+matching the value semantics callers get from Rust and Elixir and removing the
+Node/browser difference.
+
 ## Documentation
 
 | # | Drift | Runtimes | Status |
@@ -119,9 +153,11 @@ carries directly, so a custom formatter reads the same value in both.
 output fixes are written once.
 
 **D17** is why everything above shipped. The fix is a checked-in option manifest
-each runtime asserts against, so adding an option to a Rust builder fails Elixir,
-JavaScript and the CLI until they catch up. Conformance fixtures cover output;
-the manifest covers surface. Neither substitutes for the other.
+each runtime asserts against. Rust also parses the five formatter structs in its
+test, so adding a builder field cannot pass by leaving both the manifest and its
+manual setter exercise unchanged. Once the manifest moves, Elixir, JavaScript,
+and the CLI fail until they catch up. Conformance fixtures cover output; the
+manifest covers surface. Neither substitutes for the other.
 
 ## What counts as drift, and what does not
 
@@ -167,3 +203,4 @@ Not drift. Recorded so they are not re-litigated.
 | Elixir has no custom formatter API | Formatters run inside the NIF. A formatter written in Elixir would mean crossing the BEAM boundary per token. |
 | Elixir loads languages globally to the VM; JavaScript loads per highlighter | One `Runtime` lives in the NIF, so the first process to need a language pays and every process after it does not. |
 | Rust compiles languages in behind feature flags; the dynamic runtimes fetch them | Different distribution model, same catalog and the same bundle names. |
+| Java uses a smaller formatter and option surface | `lumis4j` is a community-maintained repository with its own API and release cadence. This repository links to it but no longer includes it in the first-party parity claim. |

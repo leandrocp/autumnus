@@ -55,6 +55,7 @@
 //! ## Getting language information
 //!
 //! ```rust
+//! # #[cfg(all(feature = "lang-rust", feature = "lang-csharp", feature = "lang-bash"))] {
 //! use lumis::languages::{Language, available_languages};
 //!
 //! // Get friendly name
@@ -73,6 +74,7 @@
 //! let bash = languages.iter().find(|language| language.id == "bash").unwrap();
 //! assert!(bash.aliases.contains(&"sh"));
 //! assert!(bash.shebangs.contains(&"bash"));
+//! # }
 //! ```
 //!
 pub use lumis_core::languages::{available_languages, Language, LanguageInfo, LanguageParseError};

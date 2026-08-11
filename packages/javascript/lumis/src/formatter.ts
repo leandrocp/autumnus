@@ -130,6 +130,9 @@ export function htmlMultiThemes(options: HtmlMultiThemesOptions): HtmlMultiTheme
   const formatter: HtmlMultiThemesFormatter = {
     ...options,
     format(source: string): string {
+      // Formatter objects are mutable in JavaScript, so construction-time
+      // validation alone does not protect the actual render boundary.
+      validateMultiThemes(formatter);
       return formatHtmlMultiThemes(
         source,
         highlightEvents(source, formatter.language, { rainbowBrackets: formatter.rainbowBrackets }),

@@ -156,4 +156,11 @@ describe("D5 htmlMultiThemes validation", () => {
   it("accepts a themes map with no defaultTheme, the CSS-variables-only mode", () => {
     expect(() => htmlMultiThemes({ themes: { light: theme } })).not.toThrow();
   });
+
+  it("revalidates mutable options when rendering", () => {
+    const formatter = htmlMultiThemes({ themes: { light: theme }, defaultTheme: "light" });
+    formatter.themes = {};
+
+    expect(() => formatter.format("const x = 1")).toThrow(/at least one theme/);
+  });
 });

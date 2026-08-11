@@ -1,6 +1,14 @@
-# languages.toml — single source of truth for parser and query metadata.
+# languages.toml — single source of truth for language, parser, and query metadata.
 #
 # See CONTRIBUTING.md for field documentation.
+
+# -- Parser-free languages
+
+[plaintext]
+display_name = "Plain Text"
+variant = "PlainText"
+aliases = ["text", "txt", "plain"]
+emacs = ["fundamental", "text"]
 
 # -- Queries
 

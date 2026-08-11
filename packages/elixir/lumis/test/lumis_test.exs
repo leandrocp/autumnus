@@ -114,7 +114,16 @@ defmodule Lumis.LumisTest do
     assert by_id["comment"].name == "Comment"
     assert by_id["comment"].globs == []
     assert by_id["markdown_inline"].name == "Markdown Inline"
-    assert by_id["plaintext"].name == "Plain Text"
+
+    assert by_id["plaintext"] == %{
+             id: "plaintext",
+             name: "Plain Text",
+             aliases: ["text", "txt", "plain"],
+             extensions: [],
+             globs: [],
+             emacs_modes: ["fundamental", "text"],
+             shebangs: []
+           }
 
     # A language's own id is not repeated in its aliases.
     assert by_id["asm"].aliases == ["assembly"]

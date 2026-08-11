@@ -30,6 +30,7 @@ use std::path::{Path, PathBuf};
 
 #[derive(Deserialize)]
 struct LanguagesToml {
+    plaintext: ParserEntry,
     parsers: BTreeMap<String, ParserEntry>,
     #[serde(flatten)]
     _rest: toml::Value,
@@ -131,18 +132,11 @@ fn languages() {
     let mut always_entries = Vec::new();
     let mut gated_entries = Vec::new();
 
-    // PlainText is always hardcoded (no parser entry in languages.toml)
-    always_entries.push(
-        r#"        PlainText {
-            id: "plaintext",
-            name: "Plain Text",
-            from_str: [],
-            globs: [],
-            emacs: [],
-            shebang: []
-        }"#
-        .to_string(),
-    );
+    // PlainText has metadata but no parser, so it is always available.
+    always_entries.push(format!(
+        "        {}",
+        format_entry("plaintext", &toml.plaintext)
+    ));
 
     for (key, entry) in &toml.parsers {
         let body = format_entry(key, entry);

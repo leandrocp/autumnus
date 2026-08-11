@@ -399,7 +399,15 @@ fn cache_parsers(
         }
         lumis_wasm_runtime::catalog::expand_bundles(languages.iter().map(String::as_str))?
     };
-    let names: Vec<&str> = expanded.iter().map(String::as_str).collect();
+    let mut seen = std::collections::HashSet::new();
+    let names: Vec<&str> = expanded
+        .iter()
+        .map(String::as_str)
+        .filter(|name| {
+            let language_id = resolve_language_id(name);
+            language_id != "plaintext" && seen.insert(language_id)
+        })
+        .collect();
 
     let mut errors = Vec::new();
     for name in &names {
@@ -451,12 +459,8 @@ fn cache_parsers(
 
 /// Resolve a user-provided language name to its stable package language ID.
 fn resolve_language_id(name: &str) -> &str {
-    let lang = Language::guess(Some(name), "");
-    if lang != Language::PlainText || name == "plaintext" {
-        lang.id_name()
-    } else {
-        name
-    }
+    name.parse::<Language>()
+        .map_or(name, |language| language.id_name())
 }
 
 fn list_themes(data_dir: &Path) -> Result<()> {

@@ -413,6 +413,7 @@ where
 /// # Examples
 ///
 /// ```rust
+/// # #[cfg(feature = "lang-rust")] {
 /// use lumis::{highlight::highlight_events, languages::Language};
 /// use lumis::events::HighlightEvent;
 ///
@@ -424,6 +425,7 @@ where
 /// });
 ///
 /// assert_eq!(first_scope, Some("keyword"));
+/// # }
 /// ```
 pub fn highlight_events(
     source: &str,
