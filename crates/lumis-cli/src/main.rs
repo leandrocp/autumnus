@@ -283,7 +283,10 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
     let data_dir = lumis_wasm_runtime::store::resolve_data_dir(cli.data_dir);
     lumis_wasm_runtime::set_compile_cache_dir(data_dir.clone());
-    let config_path = cli.config.unwrap_or_else(config::default_path);
+    let config_path = match cli.config {
+        Some(path) => path,
+        None => config::default_path()?,
+    };
     let verbose = cli.verbose;
 
     match cli.command {

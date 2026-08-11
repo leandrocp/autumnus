@@ -19,12 +19,15 @@ pub struct HighlightConfig {
 
 /// `etcetera` resolves `XDG_CONFIG_HOME` on Unix and `%APPDATA%` on Windows, the
 /// same base strategy [`lumis_wasm_runtime::store::default_data_dir`] uses.
-pub fn default_path() -> PathBuf {
-    etcetera::choose_base_strategy()
-        .expect("failed to determine home directory")
+///
+/// Errors rather than panics when there is no home directory, since `--config`
+/// and `LUMIS_CONFIG` both name a file without needing one.
+pub fn default_path() -> Result<PathBuf> {
+    Ok(etcetera::choose_base_strategy()
+        .context("failed to determine the home directory holding config.toml")?
         .config_dir()
         .join("lumis")
-        .join("config.toml")
+        .join("config.toml"))
 }
 
 impl Config {
@@ -55,11 +58,11 @@ mod tests {
             etcetera::choose_base_strategy().expect("failed to determine home directory");
 
         assert_eq!(
-            default_path(),
+            default_path().unwrap(),
             strategy.config_dir().join("lumis").join("config.toml")
         );
         assert_ne!(
-            default_path(),
+            default_path().unwrap(),
             strategy.data_dir().join("lumis").join("config.toml")
         );
     }

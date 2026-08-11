@@ -104,13 +104,23 @@ The root `mise run bench` task runs the same suite. Scenarios and current result
 `mise.toml` sets everything a task needs, so a normal `mise run` invocation needs
 none of these. They exist to override that default from the outside.
 
-`LUMIS_DATA_DIR` is the only one that matters at runtime rather than while
-working on the repository. It names the directory Lumis persists parsers, themes,
-and compiled modules under. Unset, every runtime falls back to
+Most of them matter only while working on the repository. The exceptions are
+`LUMIS_DATA_DIR`, which every runtime reads, and the tool-specific settings a
+user can hit without cloning anything: `LUMIS_CONFIG` for the CLI, `LUMIS_BUILD`
+and `LUMIS_USE_LEGACY_ARTIFACTS` for the Hex package, and
+`LUMIS_CLI_SKIP_DOWNLOAD` for the npm CLI.
+
+`LUMIS_DATA_DIR` names the directory Lumis persists parsers, themes, and
+compiled modules under. An empty value counts as unset, in every runtime.
+
+Unset, the CLI and both native addons call
 `lumis_wasm_runtime::store::default_data_dir`, which uses [`etcetera`]'s base
 strategy: `$XDG_DATA_HOME` or `~/.local/share` everywhere except Windows, where
-it is `%APPDATA%`. The CLI, both native addons, and Node all resolve through that
-one function so they cannot disagree about where the store is.
+it is `%APPDATA%`. Node asks the addon for that same value through
+`defaultDataDir()`. Only a platform with no addon, such as musl Linux, falls back
+to the `platformDataDir()` port in `src/runtime/node-cache.ts`, and
+`test/data-dir-parity.test.ts` pins that port against the addon so the two cannot
+drift.
 
 | Variable | Read by | Purpose |
 | --- | --- | --- |

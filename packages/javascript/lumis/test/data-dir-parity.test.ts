@@ -33,15 +33,17 @@ afterEach(() => {
 });
 
 describe("default data directory", () => {
+  /**
+   * The parity cases below need an addon to compare against, so a prebuilt
+   * target that has not built one fails here rather than skipping them. Only a
+   * target with no addon at all leaves parity unverifiable, and there the Wasm
+   * runtime is the sole reader of the directory, so nothing can disagree.
+   */
   it("has an addon to pin the port against wherever one is built", () => {
-    if (!PREBUILT.has(platform)) {
-      expect(binding).toBeUndefined();
-      return;
-    }
-    if (!binding) {
+    if (PREBUILT.has(platform) && !binding) {
       throw new Error("run `pnpm build:native` (or `mise run test-javascript`) first");
     }
-    expect(typeof binding.defaultDataDir()).toBe("string");
+    expect(binding !== undefined).toBe(PREBUILT.has(platform));
   });
 
   // `process.env` writes reach `std::env::var_os`, so the addon re-reads each of
