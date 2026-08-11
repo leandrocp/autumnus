@@ -61,6 +61,8 @@ defmodule Lumis.LanguagesTest do
         |> File.read!()
         |> Jason.decode!()
 
+      assert length(cases) == 23
+
       for %{"name" => name, "hint" => hint, "source" => source, "expected" => expected} <- cases do
         assert Lumis.Languages.guess(hint, source) == expected, name
       end

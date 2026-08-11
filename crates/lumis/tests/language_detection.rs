@@ -16,6 +16,7 @@ fn shared_language_detection_cases() {
     let cases: Vec<DetectionCase> =
         serde_json::from_str(include_str!("../../../fixtures/language-detection.json"))
             .expect("language detection fixture parses");
+    assert_eq!(cases.len(), 23, "language detection fixture is complete");
 
     for case in cases {
         let actual = Language::guess(case.hint.as_deref(), &case.source).id_name();

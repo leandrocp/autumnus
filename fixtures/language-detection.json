@@ -98,7 +98,7 @@
   {
     "name": "case-insensitive shebang",
     "hint": null,
-    "source": "#!/usr/bin/env rscript\nprint('ok')",
+    "source": "#!/usr/bin/env RScript\nprint('ok')",
     "expected": "r"
   },
   {

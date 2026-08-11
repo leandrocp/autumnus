@@ -14,6 +14,10 @@ const cases: DetectionCase[] = JSON.parse(
 );
 
 describe("shared language detection", () => {
+  it("has the expected fixture corpus", () => {
+    expect(cases).toHaveLength(23);
+  });
+
   for (const detection of cases) {
     it(detection.name, () => {
       expect(guessLanguage(detection.hint ?? undefined, detection.source)).toBe(detection.expected);
