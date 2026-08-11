@@ -57,6 +57,7 @@ defmodule Lumis.MixProject do
         native/lumis_nif/Cross.toml
         priv/static/css
         examples
+        guides
         checksum-*.exs
         mix.exs
         README.md
@@ -75,6 +76,7 @@ defmodule Lumis.MixProject do
       source_url_pattern:
         "#{@source_url}/blob/hex-lumis/v#{@version}/packages/elixir/lumis/%{path}#L%{line}",
       extras: [
+        "guides/deployment.md",
         "CHANGELOG.md",
         "examples/bbcode_scoped.livemd",
         "examples/html_linked_scoped_css.livemd",
