@@ -125,7 +125,7 @@ fn version_flag() {
 #[test]
 fn short_version_flag() {
     cmd()
-        .arg("-v")
+        .arg("-V")
         .assert()
         .success()
         .stdout(predicate::str::contains(env!("CARGO_PKG_VERSION")));
@@ -843,7 +843,7 @@ fn highlight_source_html_inline_routes_parity_options() {
             "<figure>",
             "--header-close",
             "</figure>",
-            "-h",
+            "-H",
             "1",
             "--highlight-lines-class",
             "selected",
@@ -881,7 +881,7 @@ fn highlight_source_diff_html_linked() {
             "<figure>",
             "--header-close",
             "</figure>",
-            "-h",
+            "-H",
             "1",
             "--highlight-lines-class",
             "selected",
@@ -957,7 +957,7 @@ fn highlight_source_diff_html_multi_themes_with_all_options() {
             "<figure>",
             "--header-close",
             "</figure>",
-            "-h",
+            "-H",
             "2",
             "--highlight-lines-class",
             "selected",
@@ -998,12 +998,28 @@ fn highlight_rejects_invalid_highlight_line_ranges() {
     cmd()
         .arg("--data-dir")
         .arg(fixtures_dir())
-        .args(["highlight", "-l", "diff", "-h", "3-1"])
+        .args(["highlight", "-l", "diff", "-f", "html-inline", "-H", "3-1"])
         .write_stdin(DIFF_SNIPPET)
         .assert()
         .failure()
         .stderr(predicate::str::contains(
             "Start line (3) must be less than or equal to end line (1)",
+        ));
+}
+
+/// The formatter check runs before the value is parsed, so a flag the formatter
+/// ignores is reported as inapplicable rather than as malformed.
+#[test]
+fn an_inapplicable_flag_is_reported_before_its_value_is_parsed() {
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args(["highlight", "-l", "diff", "-H", "3-1"])
+        .write_stdin(DIFF_SNIPPET)
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "`--highlight-lines` is not accepted by the `terminal` formatter",
         ));
 }
 
@@ -1147,7 +1163,7 @@ fn cache_parsers_already_cached_verbose() {
     cmd()
         .arg("--data-dir")
         .arg(fixtures_dir())
-        .arg("-V")
+        .arg("-v")
         .args(["parsers", "cache", "diff"])
         .assert()
         .success()
@@ -1161,7 +1177,7 @@ fn cache_parsers_skips_plaintext_aliases() {
     cmd()
         .arg("--data-dir")
         .arg(tmp.path())
-        .arg("-V")
+        .arg("-v")
         .args(["parsers", "cache", "plaintext", "text", "txt", "plain"])
         .assert()
         .success()
@@ -1259,7 +1275,7 @@ fn cache_parsers_to_temp_dir() {
 fn cache_parsers_to_temp_dir_verbose() {
     let tmp = seeded_store();
     cmd()
-        .arg("-V")
+        .arg("-v")
         .arg("--data-dir")
         .arg(tmp.path())
         .args(["parsers", "cache", "json"])
@@ -1290,7 +1306,7 @@ fn cache_parsers_reuses_an_existing_file() {
 
     // Then reuse it without a network request.
     cmd()
-        .arg("-V")
+        .arg("-v")
         .arg("--data-dir")
         .arg(tmp.path())
         .args(["parsers", "cache", "json"])
@@ -1355,4 +1371,196 @@ fn an_unloadable_injected_language_does_not_fail_the_document() {
         .assert()
         .success()
         .stdout(predicate::str::contains("\"language\": \"markdown\""));
+}
+
+#[test]
+fn short_h_prints_help_rather_than_asking_for_line_numbers() {
+    cmd()
+        .args(["highlight", "-h"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Highlight source code"));
+}
+
+#[test]
+fn highlight_help_groups_options_by_the_formatters_that_accept_them() {
+    cmd()
+        .args(["highlight", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(
+            "Options for --formatter terminal:",
+        ))
+        .stdout(predicate::str::contains(
+            "Options for --formatter html-inline, html-linked, html-multi-themes:",
+        ))
+        .stdout(predicate::str::contains(
+            "Options for --formatter html-inline, html-multi-themes:",
+        ))
+        .stdout(predicate::str::contains(
+            "Options for --formatter html-multi-themes:",
+        ));
+}
+
+#[test]
+fn highlight_rejects_an_option_the_chosen_formatter_ignores() {
+    cmd()
+        .args(["highlight", "-l", "diff", "--pre-class", "custom"])
+        .write_stdin(DIFF_SNIPPET)
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "`--pre-class` is not accepted by the `terminal` formatter",
+        ))
+        .stderr(predicate::str::contains(
+            "HTML options apply to: html-inline, html-linked, html-multi-themes",
+        ))
+        .stderr(predicate::str::contains("lumis formatters show terminal"));
+}
+
+/// Every offending flag in a group is named at once, so fixing the command
+/// takes one round trip rather than one per flag.
+#[test]
+fn highlight_names_every_rejected_flag_in_one_error() {
+    cmd()
+        .args([
+            "highlight",
+            "-l",
+            "diff",
+            "-f",
+            "html-inline",
+            "-b",
+            "theme",
+            "-w",
+            "120",
+        ])
+        .write_stdin(DIFF_SNIPPET)
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "`--background`, `--width` are not accepted by the `html-inline` formatter",
+        ));
+}
+
+/// The most misleading of the silently ignored combinations: it rendered
+/// uncolored class names and exited 0.
+#[test]
+fn highlight_rejects_theme_for_a_formatter_that_cannot_color() {
+    cmd()
+        .args([
+            "highlight",
+            "-l",
+            "diff",
+            "-f",
+            "html-linked",
+            "-t",
+            "dracula",
+        ])
+        .write_stdin(DIFF_SNIPPET)
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "`--theme` is not accepted by the `html-linked` formatter",
+        ))
+        .stderr(predicate::str::contains(
+            "`--theme` applies to: html-inline, terminal",
+        ));
+}
+
+/// `html_linked::HighlightLines` has no `style` field, so the flag is rejected
+/// even though `--highlight-lines` itself is accepted.
+#[test]
+fn highlight_rejects_highlight_lines_style_for_html_linked() {
+    cmd()
+        .args([
+            "highlight",
+            "-l",
+            "diff",
+            "-f",
+            "html-linked",
+            "-H",
+            "1",
+            "--highlight-lines-style",
+            "none",
+        ])
+        .write_stdin(DIFF_SNIPPET)
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "`--highlight-lines-style` is not accepted by the `html-linked` formatter",
+        ));
+}
+
+/// A theme in the config file applies to every command, so it must not turn
+/// `-f html-linked` into an error the user cannot see the cause of.
+#[test]
+fn a_config_theme_does_not_trip_the_formatter_check() {
+    let tmp = tempfile::tempdir().unwrap();
+    let config = tmp.path().join("config.toml");
+    write_file(&config, "[highlight]\ntheme = \"dracula\"\n");
+
+    cmd()
+        .env("LUMIS_CONFIG", &config)
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args(["highlight", "-l", "diff", "-f", "html-linked"])
+        .write_stdin(DIFF_SNIPPET)
+        .assert()
+        .success();
+}
+
+#[test]
+fn css_variable_prefix_accepts_a_leading_dash_value() {
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args([
+            "highlight",
+            "-l",
+            "diff",
+            "-f",
+            "html-multi-themes",
+            "--themes",
+            "main:dracula",
+            "--css-variable-prefix=--shiki",
+        ])
+        .write_stdin(DIFF_SNIPPET)
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("--shiki-"));
+}
+
+#[test]
+fn formatters_list_names_every_formatter() {
+    cmd()
+        .args(["formatters", "list"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("html-inline"))
+        .stdout(predicate::str::contains("html-linked"))
+        .stdout(predicate::str::contains("html-multi-themes"))
+        .stdout(predicate::str::contains("terminal"))
+        .stdout(predicate::str::contains("bbcode-scoped"));
+}
+
+#[test]
+fn formatters_show_lists_only_what_the_formatter_accepts() {
+    cmd()
+        .args(["formatters", "show", "terminal"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("--background"))
+        .stdout(predicate::str::contains("--width"))
+        .stdout(predicate::str::contains("--theme"))
+        .stdout(predicate::str::contains("--pre-class").not())
+        .stdout(predicate::str::contains("--italic").not());
+}
+
+#[test]
+fn formatters_show_rejects_an_unknown_formatter() {
+    cmd()
+        .args(["formatters", "show", "nonsense"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("nonsense"));
 }
