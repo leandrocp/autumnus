@@ -218,6 +218,10 @@ export function getLoadedLanguage(...args: Parameters<typeof runtime.getLoadedLa
 export function getLoadedLanguageIds(...args: Parameters<typeof runtime.getLoadedLanguageIds>) {
   return runtime.getLoadedLanguageIds(...args);
 }
+/** {@inheritDoc node.loadedLanguages} */
+export function loadedLanguages(): string[] {
+  return runtime.getLoadedLanguageIds();
+}
 /** {@inheritDoc node.availableLanguages} */
 export function availableLanguages(...args: Parameters<typeof runtime.availableLanguages>) {
   return runtime.availableLanguages(...args);
