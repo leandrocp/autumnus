@@ -299,7 +299,7 @@ enum LanguagesCommands {
         language: String,
     },
 
-    /// Download and verify parsers so later runs skip the download
+    /// Download and compile parsers so later runs skip both
     #[command(
         after_help = "Examples:\n  lumis languages cache rust javascript\n  lumis languages cache bundle-web\n  lumis languages cache --all\n  lumis languages cache rust --force\n  lumis --data-dir /app/lumis languages cache rust"
     )]
