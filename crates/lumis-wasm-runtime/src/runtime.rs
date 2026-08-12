@@ -206,6 +206,23 @@ impl Runtime {
         Self::with_engine(ENGINE.get().cloned().unwrap_or(engine), worker_limit)
     }
 
+    /// Construct a runtime with an independent engine whose compiled modules
+    /// are persisted under `data_dir`.
+    ///
+    /// This is for build-time preparation of a caller-selected data directory.
+    /// The ordinary runtime uses one process-global engine and therefore cannot
+    /// change its cache directory after its first use.
+    ///
+    /// # Errors
+    /// Fails when Wasmtime or Tree-sitter's WASM store cannot be initialized.
+    pub fn with_compile_cache_dir(
+        worker_limit: usize,
+        data_dir: std::path::PathBuf,
+    ) -> Result<Self, RuntimeError> {
+        let data_dir = crate::store::resolve_data_dir(Some(data_dir));
+        Self::with_engine(engine_with_compile_cache(data_dir)?, worker_limit)
+    }
+
     fn with_engine(engine: Engine, worker_limit: usize) -> Result<Self, RuntimeError> {
         let store =
             WasmStore::new(&engine).map_err(|error| RuntimeError::TreeSitter(error.to_string()))?;
@@ -835,13 +852,17 @@ pub fn set_compile_cache_dir(dir: std::path::PathBuf) {
 }
 
 fn cached_engine() -> Result<Engine, wasmtime::Error> {
-    let mut config = Config::new();
     let root = crate::store::resolve_data_dir(
         COMPILE_CACHE_DIR
             .read()
             .expect("compile cache lock poisoned")
             .clone(),
     );
+    engine_with_compile_cache(root)
+}
+
+fn engine_with_compile_cache(root: std::path::PathBuf) -> Result<Engine, wasmtime::Error> {
+    let mut config = Config::new();
     let mut cache_config = CacheConfig::new();
     cache_config.with_directory(root.join("compiled"));
 

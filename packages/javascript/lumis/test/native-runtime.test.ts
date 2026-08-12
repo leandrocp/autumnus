@@ -4,12 +4,13 @@
  * worth having: it resolves parsers itself, and it loads a language injected
  * inside a document during the walk that finds it.
  */
-import { existsSync, mkdtempSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, expect, it, vi } from "vitest";
+import { cacheLanguages } from "../src/cache.js";
 import { createNativeLanguagesModule } from "../src/core/native-languages.js";
 import { LANGUAGE_PACKAGE_VERSION_RANGE } from "../src/generated/package-version-range.js";
 import type { LanguagesModule, RuntimeLike } from "../src/core/languages.js";
@@ -35,6 +36,15 @@ const { loadAddon, nativeTarget } = await import("../src/native-binding.js");
 const binding = loadAddon();
 const hasPrebuiltAddon = nativeTarget() !== undefined;
 
+function filesUnder(directory: string): string[] {
+  if (!existsSync(directory)) return [];
+
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(directory, entry.name);
+    return entry.isDirectory() ? filesUnder(path) : [path];
+  });
+}
+
 describe("native runtime", () => {
   it("is present wherever an addon is built", () => {
     if (!hasPrebuiltAddon) {
@@ -51,6 +61,27 @@ describe("native runtime", () => {
     const runtime = new binding!.NativeRuntime();
     runtime.loadLanguage("json");
     expect(runtime.hasLanguage("json")).toBe(true);
+  });
+
+  it.runIf(binding)("compiles cached parsers into the selected deployment directory", async () => {
+    new binding!.NativeRuntime().loadLanguage("json");
+    const directory = mkdtempSync(join(tmpdir(), "lumis-native-cache-"));
+    try {
+      await cacheLanguages(["diff"], {
+        directory,
+        resolver: (language, wasm) => ensureLocalParserWasm(language, wasm.name),
+        languagePackageResolver: localLanguagePackageResolver,
+      });
+
+      const compiled = filesUnder(join(directory, "compiled", "modules"));
+      if (process.env.LUMIS_TEST_RUNTIME === "wasm") {
+        expect(compiled).toEqual([]);
+      } else {
+        expect(compiled).not.toEqual([]);
+      }
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
   });
 
   it.runIf(binding)("shares catalog languages until caller behavior requires isolation", () => {

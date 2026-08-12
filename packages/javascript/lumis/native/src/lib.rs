@@ -272,6 +272,16 @@ pub fn default_data_dir_js() -> String {
     store::default_data_dir().to_string_lossy().into_owned()
 }
 
+/// Compile and validate cached parsers on Node's worker pool, writing their
+/// Wasmtime modules into the selected data directory.
+#[napi(js_name = "precompileLanguages")]
+pub fn precompile_languages(
+    names: Vec<String>,
+    directory: Option<String>,
+) -> AsyncTask<PrecompileLanguagesTask> {
+    AsyncTask::new(PrecompileLanguagesTask { names, directory })
+}
+
 /// The same resolve, verify and cache path the CLI and the Elixir NIF use.
 fn language_store(cache_dir: Option<PathBuf>) -> store::LanguageStore {
     let mut configured = STORE_PATHS.lock().expect("store path lock poisoned");
@@ -569,6 +579,51 @@ impl Task for FormatTask {
             output: output.0,
             unresolved: output.1,
         })
+    }
+}
+
+pub struct PrecompileLanguagesTask {
+    names: Vec<String>,
+    directory: Option<String>,
+}
+
+impl Task for PrecompileLanguagesTask {
+    type Output = bool;
+    type JsValue = bool;
+
+    fn compute(&mut self) -> Result<Self::Output> {
+        let data_dir = store::resolve_data_dir(self.directory.clone().map(PathBuf::from));
+        let language_store = store::LanguageStore::new(
+            store::StoreConfig {
+                cache_dir: data_dir.clone(),
+            },
+            Box::new(store::NoNetwork),
+        );
+        let runtime = Runtime::with_compile_cache_dir(1, data_dir)
+            .map_err(native_error)?
+            .with_store(language_store);
+        let failures = self
+            .names
+            .iter()
+            .zip(
+                runtime
+                    .precompile_languages(&self.names, lumis_wasm_runtime::compile_concurrency()),
+            )
+            .filter_map(|(name, result)| result.err().map(|error| format!("{name} ({error})")))
+            .collect::<Vec<_>>();
+
+        if failures.is_empty() {
+            Ok(true)
+        } else {
+            Err(native_error(format!(
+                "could not compile: {}",
+                failures.join(", ")
+            )))
+        }
+    }
+
+    fn resolve(&mut self, _env: Env, output: Self::Output) -> Result<Self::JsValue> {
+        Ok(output)
     }
 }
 

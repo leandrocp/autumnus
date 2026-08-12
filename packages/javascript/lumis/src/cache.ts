@@ -23,10 +23,11 @@ import {
   withWasmCacheLock,
   writeCachedWasm,
 } from "./runtime/node-cache.js";
+import { loadNativeBinding } from "./native-binding.js";
 import type { Language, WasmRef } from "./types.js";
 
 export interface CacheLanguagesOptions {
-  /** Destination containing verified, content-addressed parser files. */
+  /** Destination for verified parsers and native compiled modules. */
   directory?: string;
   /** Resolve the compatible package range again and replace verified parser files. */
   force?: boolean;
@@ -180,6 +181,8 @@ async function writeSharedLanguagePackage(
 
 /**
  * Resolve compatible packages and cache exact, integrity-pinned parser WASMs.
+ * When the native Node addon is available, also compile and validate every
+ * selected language and persist its Wasmtime module in the same directory.
  *
  * Accepts language names and `bundle-<name>` tokens, the same set
  * `Lumis.Languages.cache/2` and `lumis languages cache` accept.
@@ -279,6 +282,14 @@ export async function cacheLanguages(
     }
 
     cached.push({ language: language.id, wasm: ref, ...result });
+  }
+
+  const binding = loadNativeBinding();
+  if (binding) {
+    const names = [...new Set(languages.map((language) => language.id))].filter(
+      (name) => name !== "plaintext",
+    );
+    if (names.length > 0) await binding.precompileLanguages(names, directory);
   }
 
   return cached;

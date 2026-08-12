@@ -114,9 +114,10 @@ lumis languages cache rust javascript elixir
 Each writes a self-sufficient directory — parser bytes plus the metadata naming
 them — so pointing `LUMIS_DATA_DIR` at it is all the deployment needs. Pass
 `--all` to take the whole catalog. The native CLI and Elixir task validate each
-parser and its queries in a disposable Tree-sitter store, so Wasmtime's compiled
-forms travel with the cache without retaining the full catalog in memory. The
-first request therefore pays neither the download nor the compile.
+parser and its queries in a disposable Tree-sitter store; the Node cache
+command/API does the same wherever its native addon is available. Wasmtime's
+compiled forms then travel with the cache without retaining the full catalog in
+memory, so the first native request pays neither the download nor the compile.
 
 ## What ships where
 

@@ -261,20 +261,21 @@ runtime release. Publishing `@lumis-sh/wasm-rust@0.26.x` does not.
 Keeping both costs off the first request means paying them during the build:
 
 ```sh
-lumis parsers cache rust javascript      # CLI
+lumis languages cache rust javascript    # CLI
 mix lumis.languages.cache rust javascript # Elixir
+npx lumis-languages-cache rust javascript # Node
 ```
 
-Both write a self-sufficient directory — parser bytes plus the `lumis.json`
+All three write a self-sufficient directory — parser bytes plus the `lumis.json`
 that names them — so pointing `LUMIS_DATA_DIR` at it is all a deployment needs.
-Both go through `LanguageStore::cache_languages`, which needs no Wasmtime
-runtime, so the two commands cannot disagree about what a prepared cache
-contains. Downloads run concurrently and return one ordered result per name.
+The CLI and Elixir go through `LanguageStore::cache_languages`; Node writes the
+same verified layout, which the addon then reads through `LanguageStore`.
 
-Both then validate each parser and its queries in a disposable Tree-sitter
-store. Validation writes Wasmtime's compiled module under `compiled/` and
-catches link and external scanner failures that raw compilation cannot. Each
-worker drops its store after validating one parser, and the compilation limit
+The CLI, Elixir, and Node with its native addon then validate each parser and
+its queries in a disposable Tree-sitter store. Validation writes Wasmtime's
+compiled module under `compiled/` and catches link and external scanner
+failures that raw compilation cannot. Each worker drops its store after
+validating one parser, and the compilation limit
 bounds simultaneous stores to four. A full catalog therefore never accumulates
 in Tree-sitter's shared 128 MiB address space, and peak memory stays bounded on
 high-core builders.

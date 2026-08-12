@@ -230,6 +230,10 @@ manifest and verify its parser size plus SHA-256 before writing. A cached parser
 is served without a network request, so caching every language a deployment
 needs makes it self-contained. Pass `--force` to the command, or `force: true`
 to the API, to resolve the range again and adopt a newer compatible package.
+When the native Node addon is available, both paths also validate each parser
+and its queries and persist the compiled Wasmtime module in the same directory.
+The portable fallback still caches the verified parser bytes, but
+`web-tree-sitter` cannot persist its compilation across processes.
 
 :::note Edge is not supported yet
 The portable JavaScript runtime uses `web-tree-sitter`, but Edge runtimes are not supported yet because of an upstream Tree-sitter limitation: [tree-sitter/tree-sitter#2160](https://github.com/tree-sitter/tree-sitter/issues/2160).
