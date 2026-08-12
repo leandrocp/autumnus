@@ -91,7 +91,7 @@ defmodule Lumis.MixProject do
   defp deps do
     [
       {:rustler, "~> 0.29", optional: true},
-      {:rustler_precompiled, "~> 0.6"},
+      {:rustler_precompiled, "~> 0.8"},
       {:nimble_options, "~> 1.0"},
       {:ex_doc, ">= 0.0.0", only: :docs},
       {:makeup_elixir, ">= 0.0.0", only: :docs},
