@@ -1,7 +1,42 @@
 import { describe, it, expect } from "vitest";
 import { readdirSync } from "node:fs";
 import { resolve } from "node:path";
-import { availableLanguages, availableThemes } from "../src/index.js";
+import { availableLanguages, availableThemes, getLanguage } from "../src/index.js";
+
+describe("getLanguage", () => {
+  it("finds a language by id", () => {
+    expect(getLanguage("javascript")?.name).toBe("JavaScript");
+  });
+
+  it("finds a language by alias", () => {
+    expect(getLanguage("js")?.id).toBe("javascript");
+    expect(getLanguage("JS")?.id).toBe("javascript");
+    expect(getLanguage("  js  ")?.id).toBe("javascript");
+  });
+
+  it("returns undefined for an unknown name", () => {
+    expect(getLanguage("not-a-language")).toBeUndefined();
+  });
+
+  it("returns the same record availableLanguages yields", () => {
+    const fromList = availableLanguages().find((language) => language.id === "rust");
+    expect(getLanguage("rust")).toEqual(fromList);
+  });
+
+  it("returns a fresh record the caller can mutate", () => {
+    const first = getLanguage("rust")!;
+    first.aliases.push("mutated");
+    expect(getLanguage("rust")!.aliases).not.toContain("mutated");
+  });
+
+  it("resolves every alias in the catalog", () => {
+    for (const language of availableLanguages()) {
+      for (const alias of language.aliases) {
+        expect(getLanguage(alias)?.id, `alias ${alias}`).toBe(language.id);
+      }
+    }
+  });
+});
 
 describe("availableLanguages", () => {
   it("returns a non-empty array", () => {

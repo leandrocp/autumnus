@@ -5,12 +5,12 @@ import { availableLanguages } from "./runtime/node.js";
 
 function usage(): never {
   console.error(
-    "Usage: lumis-wasm-cache <language|bundle-name...> [--output <directory>] [--force]\n" +
-      "       lumis-wasm-cache --all [--output <directory>] [--force]\n" +
+    "Usage: lumis-languages-cache <language|bundle-name...> [--output <directory>] [--force]\n" +
+      "       lumis-languages-cache --all [--output <directory>] [--force]\n" +
       "\n" +
       "Examples:\n" +
-      "  lumis-wasm-cache rust javascript\n" +
-      "  lumis-wasm-cache bundle-web",
+      "  lumis-languages-cache rust javascript\n" +
+      "  lumis-languages-cache bundle-web",
   );
   process.exit(2);
 }

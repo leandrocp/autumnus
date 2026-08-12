@@ -8,6 +8,7 @@ import {
   configureWasmResolver,
   createRuntime,
   getDefaultRuntime,
+  loadedLanguages,
 } from "./runtime/node.js";
 
 export { runtimeKind } from "./runtime/node.js";
@@ -137,6 +138,12 @@ export type {
   LanguageInfo,
   ThemeInfo,
 } from "./types.js";
-export { availableLanguages, configureLanguagePackageResolver, configureWasmResolver };
+export {
+  availableLanguages,
+  configureLanguagePackageResolver,
+  configureWasmResolver,
+  loadedLanguages,
+};
+export { getLanguage } from "./catalog-metadata.js";
 export type { LanguagePackageResolver, WasmResolver } from "./core/languages.js";
 export { availableThemes, sanitizeThemeName } from "./themes.js";

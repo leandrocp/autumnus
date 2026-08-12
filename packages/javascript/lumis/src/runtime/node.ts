@@ -191,6 +191,19 @@ export function getLoadedLanguageIds(...args: Parameters<LanguagesModule["getLoa
   return runtime.getLoadedLanguageIds(...args);
 }
 /**
+ * Ids of the languages loaded into this process, ready to highlight without a download.
+ *
+ * The complement of {@link availableLanguages}. Elixir spells it `Lumis.loaded_languages/0`.
+ *
+ * ```ts
+ * import { loadedLanguages } from '@lumis-sh/lumis'
+ * loadedLanguages()  // ['json', 'rust']
+ * ```
+ */
+export function loadedLanguages(): string[] {
+  return runtime.getLoadedLanguageIds();
+}
+/**
  * List all supported languages with their ID, name, aliases, and file extensions.
  *
  * ```ts

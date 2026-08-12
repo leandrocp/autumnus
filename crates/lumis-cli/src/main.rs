@@ -87,12 +87,6 @@ enum Commands {
         #[command(subcommand)]
         command: ThemesCommands,
     },
-
-    /// Manage Tree-sitter WASM parsers
-    Parsers {
-        #[command(subcommand)]
-        command: ParsersCommands,
-    },
 }
 
 #[derive(clap::Args)]
@@ -297,6 +291,30 @@ enum DumpCommands {
 enum LanguagesCommands {
     /// Print supported languages and their file patterns
     List,
+
+    /// Print what the catalog knows about one language
+    #[command(after_help = "Examples:\n  lumis languages show elixir\n  lumis languages show js")]
+    Show {
+        /// Language id or alias, e.g. elixir, js
+        language: String,
+    },
+
+    /// Download and compile parsers so later runs skip both
+    #[command(
+        after_help = "Examples:\n  lumis languages cache rust javascript\n  lumis languages cache bundle-web\n  lumis languages cache --all\n  lumis languages cache rust --force\n  lumis --data-dir /app/lumis languages cache rust"
+    )]
+    Cache {
+        /// Language names, or a bundle such as bundle-web (e.g. rust javascript elixir)
+        languages: Vec<String>,
+
+        /// Cache every language in the catalog
+        #[arg(long)]
+        all: bool,
+
+        /// Resolve compatible packages again and replace valid cached parsers
+        #[arg(long)]
+        force: bool,
+    },
 }
 
 #[derive(Subcommand)]
@@ -318,6 +336,15 @@ enum FormattersCommands {
 enum ThemesCommands {
     /// Print available themes (built-in and from --data-dir)
     List,
+
+    /// Print one theme's appearance and colors
+    #[command(
+        after_help = "Examples:\n  lumis themes show dracula\n  lumis themes show github_light"
+    )]
+    Show {
+        /// Theme name, e.g. dracula
+        theme: String,
+    },
 
     /// Extract a theme from a Neovim colorscheme Git repo
     #[command(
@@ -343,26 +370,6 @@ enum ThemesCommands {
         /// light or dark [default: dark]
         #[arg(short = 'a', long)]
         appearance: Option<String>,
-    },
-}
-
-#[derive(Subcommand)]
-enum ParsersCommands {
-    /// Cache parser WASMs so later runs skip the download
-    #[command(
-        after_help = "Examples:\n  lumis parsers cache rust javascript\n  lumis parsers cache bundle-web\n  lumis parsers cache --all\n  lumis parsers cache rust --force\n  lumis --data-dir /app/lumis parsers cache rust"
-    )]
-    Cache {
-        /// Language names, or a bundle such as bundle-web (e.g. rust javascript elixir)
-        languages: Vec<String>,
-
-        /// Cache all supported parsers
-        #[arg(long)]
-        all: bool,
-
-        /// Resolve compatible packages again and replace valid cached parsers
-        #[arg(long)]
-        force: bool,
     },
 }
 
@@ -484,9 +491,19 @@ fn main() -> Result<()> {
         }
         Commands::Languages { command } => match command {
             LanguagesCommands::List => list_languages(),
+            LanguagesCommands::Show { language } => show_language(&language),
+            LanguagesCommands::Cache {
+                languages,
+                all,
+                force,
+            } => {
+                let reg = registry::Registry::new(data_dir)?;
+                cache_languages(&reg, &languages, all, force, verbose)
+            }
         },
         Commands::Themes { command } => match command {
             ThemesCommands::List => list_themes(&data_dir),
+            ThemesCommands::Show { theme } => show_theme(&theme, &data_dir),
             ThemesCommands::Generate {
                 url,
                 colorscheme,
@@ -500,16 +517,6 @@ fn main() -> Result<()> {
                 output.as_deref(),
                 appearance.as_deref(),
             ),
-        },
-        Commands::Parsers { command } => match command {
-            ParsersCommands::Cache {
-                languages,
-                all,
-                force,
-            } => {
-                let reg = registry::Registry::new(data_dir)?;
-                cache_parsers(&reg, &languages, all, force, verbose)
-            }
         },
     }
 }
@@ -590,7 +597,43 @@ fn show_formatter(formatter: Formatter) -> Result<()> {
     Ok(())
 }
 
-fn cache_parsers(
+fn print_field(label: &str, values: &[&str]) {
+    if !values.is_empty() {
+        println!("  {label}: {}", values.join(", "));
+    }
+}
+
+fn show_language(name: &str) -> Result<()> {
+    let language: Language = name
+        .parse()
+        .map_err(|_| anyhow::anyhow!("unknown language: {name}"))?;
+    let info = language.info();
+
+    println!("{}: {}\n", info.id, info.name);
+    print_field("aliases", info.aliases);
+    print_field("extensions", &info.extensions);
+    print_field("globs", info.globs);
+    print_field("emacs modes", info.emacs_modes);
+    print_field("shebangs", info.shebangs);
+    Ok(())
+}
+
+fn show_theme(name: &str, data_dir: &Path) -> Result<()> {
+    let theme = resolve_theme(Some(name.to_string()), Some(data_dir), false)
+        .ok_or_else(|| anyhow::anyhow!("unknown theme: {name}"))?;
+
+    println!("{}: {}\n", theme.name, theme.appearance);
+    if let Some(fg) = theme.fg() {
+        println!("  foreground: {fg}");
+    }
+    if let Some(bg) = theme.bg() {
+        println!("  background: {bg}");
+    }
+    println!("  highlights: {}", theme.highlights.len());
+    Ok(())
+}
+
+fn cache_languages(
     reg: &registry::Registry,
     languages: &[String],
     all: bool,

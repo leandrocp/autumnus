@@ -61,7 +61,7 @@ injected languages up front or use a bundle.
 For a host with no network access, prepare a cache before starting:
 
 ```sh
-npx lumis-wasm-cache javascript html css --output ./wasm-cache
+npx lumis-languages-cache javascript html css --output ./wasm-cache
 LUMIS_DATA_DIR=./wasm-cache node app.mjs
 ```
 

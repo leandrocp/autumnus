@@ -9,7 +9,7 @@ use std::sync::Arc;
 use tree_sitter::Tree;
 
 /// The CLI's view of [`Runtime`]: the same one-pass highlighting Elixir and Node
-/// use, plus the paths and cache reporting `lumis parsers` prints.
+/// use, plus the paths and cache reporting `lumis languages cache` prints.
 pub struct Registry {
     data_dir: PathBuf,
     runtime: Runtime,

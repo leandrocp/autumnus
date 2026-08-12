@@ -17,14 +17,6 @@ use rustler::{Encoder, Env, Error, NifMap, NifResult, Term};
 static THEME_CACHE: Lazy<RwLock<HashMap<String, ExTheme>>> =
     Lazy::new(|| RwLock::new(HashMap::new()));
 
-/// Cached list of theme names to avoid repeated allocations.
-/// Built once on first call to available_themes().
-static THEME_NAMES: Lazy<Vec<String>> = Lazy::new(|| {
-    themes::available_themes()
-        .map(|theme| theme.name.to_owned())
-        .collect()
-});
-
 static EXECUTOR: Lazy<Result<WasmExecutor, String>> = Lazy::new(WasmExecutor::new);
 
 enum WasmJob {
@@ -426,6 +418,13 @@ fn available_languages() -> Vec<ExLanguageInfo<'static>> {
 }
 
 #[rustler::nif]
+fn language_info(name: &str) -> Option<ExLanguageInfo<'static>> {
+    name.parse::<languages::Language>()
+        .ok()
+        .map(|language| ExLanguageInfo::from(language.info()))
+}
+
+#[rustler::nif]
 fn available_themes() -> Vec<ExThemeInfo<'static>> {
     // Rust's `available_themes` yields whole themes, which carry more than the
     // wire needs; the summary is built here rather than shipping 246 of them.
@@ -433,13 +432,6 @@ fn available_themes() -> Vec<ExThemeInfo<'static>> {
         themes::available_themes().map(ExThemeInfo::from).collect();
     summaries.sort_unstable_by_key(|theme| theme.name);
     summaries
-}
-
-#[rustler::nif]
-fn available_theme_names() -> Vec<String> {
-    // Return a clone of the cached theme names list
-    // This is cheaper than rebuilding the list every time
-    THEME_NAMES.clone()
 }
 
 #[rustler::nif]

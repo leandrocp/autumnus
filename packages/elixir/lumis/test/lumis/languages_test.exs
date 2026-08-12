@@ -53,6 +53,40 @@ defmodule Lumis.LanguagesTest do
     assert length(names) > 100
   end
 
+  describe "get/2" do
+    test "finds a language by id" do
+      assert %{id: "elixir", name: "Elixir"} = Lumis.Languages.get("elixir")
+    end
+
+    test "resolves aliases the way highlighting does" do
+      assert Lumis.Languages.get("js").id == "javascript"
+      assert Lumis.Languages.get(:js).id == "javascript"
+    end
+
+    test "returns the same record available_languages/0 yields" do
+      from_list = Enum.find(Lumis.available_languages(), &(&1.id == "rust"))
+      assert Lumis.Languages.get("rust") == from_list
+    end
+
+    test "returns every alias in the catalog" do
+      for language <- Lumis.available_languages(), alias_name <- language.aliases do
+        assert Lumis.Languages.get(alias_name).id == language.id,
+               "alias #{alias_name} did not resolve to #{language.id}"
+      end
+    end
+
+    test "returns nil or the given default for an unknown name" do
+      assert Lumis.Languages.get("not-a-language") == nil
+      assert Lumis.Languages.get("not-a-language", :missing) == :missing
+    end
+
+    test "does not grow the atom table on unknown names" do
+      before = :erlang.system_info(:atom_count)
+      for index <- 1..50, do: Lumis.Languages.get("unknown-language-#{index}")
+      assert :erlang.system_info(:atom_count) == before
+    end
+  end
+
   describe "guess/2" do
     test "matches the shared language detection cases" do
       cases =

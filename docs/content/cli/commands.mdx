@@ -3,12 +3,12 @@ sidebar_position: 1
 slug: /cli/commands
 title: CLI Commands
 description: >-
-  Highlight files, inspect Tree-sitter output, manage parsers, and generate
+  Highlight files, inspect Tree-sitter output, manage languages, and generate
   themes with the Lumis CLI.
 keywords:
   - lumis cli
   - themes generate
-  - parsers cache
+  - languages cache
   - highlight command
 ---
 
@@ -36,9 +36,11 @@ These flags work with any subcommand:
 | `lumis formatters list` | List output formatters |
 | `lumis formatters show` | List the options one formatter accepts |
 | `lumis languages list` | List supported languages and file patterns |
+| `lumis languages show` | Print what the catalog knows about one language |
+| `lumis languages cache` | Download and compile parsers so later runs skip both |
 | `lumis themes list` | List built-in and local themes |
+| `lumis themes show` | Print one theme's appearance and colors |
 | `lumis themes generate` | Generate a theme from a Neovim colorscheme repo |
-| `lumis parsers cache` | Cache parser WASMs so later runs skip the download |
 
 ## `lumis highlight`
 
@@ -256,6 +258,47 @@ lumis languages list
 
 Prints all supported languages with their file extensions and patterns.
 
+## `lumis languages show`
+
+```bash
+lumis languages show elixir
+lumis languages show js
+```
+
+Prints one language's id, name, aliases, extensions, globs, Emacs modes and
+shebangs. Aliases resolve the way highlighting resolves them, so `js` finds
+JavaScript. Exits non-zero on an unknown name.
+
+## `lumis languages cache`
+
+Download exact, integrity-checked parser WASM files ahead of time, and compile
+them. Highlighting does both anyway; this moves them off the first run.
+
+A cold parser costs a download and then a Wasmtime compile, and the compile is
+the larger half, so each parser is loaded once here and its compiled form is
+written beside it. `mix lumis.languages.cache` prepares the identical directory,
+and every runtime reads it: cache with the CLI, and Elixir or Node start warm.
+
+```bash title="Selected parsers"
+lumis languages cache rust javascript elixir
+```
+
+```bash title="A bundle"
+lumis languages cache bundle-web
+```
+
+The `bundle-*` names cover the same languages as the matching
+`@lumis-sh/wasm-bundle-*` package, and `Lumis.Languages.cache/2` and
+`lumis-languages-cache` accept them too.
+
+```bash title="All parsers"
+lumis languages cache --all
+```
+
+```bash title="Replace valid cached parsers"
+lumis languages cache rust javascript --force
+```
+
 ## `lumis themes list`
 
 ```bash
@@ -263,6 +306,16 @@ lumis themes list
 ```
 
 Lists built-in themes and any custom themes found in the data directory.
+
+## `lumis themes show`
+
+```bash
+lumis themes show dracula
+```
+
+Prints a theme's appearance, foreground, background and how many highlight
+scopes it defines. Finds themes in the data directory as well as built-in ones.
+Exits non-zero on an unknown name.
 
 ## `lumis themes generate`
 
@@ -289,36 +342,6 @@ lumis themes generate \
   -c github_light \
   -a light \
   -o github-light.json
-```
-
-## `lumis parsers cache`
-
-Download exact, integrity-checked parser WASM files ahead of time, and compile
-them. Highlighting does both anyway; this moves them off the first run.
-
-A cold parser costs a download and then a Wasmtime compile, and the compile is
-the larger half, so each parser is loaded once here and its compiled form is
-written beside it. `mix lumis.languages.cache` prepares the identical directory,
-and every runtime reads it: cache with the CLI, and Elixir or Node start warm.
-
-```bash title="Selected parsers"
-lumis parsers cache rust javascript elixir
-```
-
-```bash title="A bundle"
-lumis parsers cache bundle-web
-```
-
-The `bundle-*` names cover the same languages as the matching
-`@lumis-sh/wasm-bundle-*` package, and `Lumis.Languages.cache/2` and
-`lumis-wasm-cache` accept them too.
-
-```bash title="All parsers"
-lumis parsers cache --all
-```
-
-```bash title="Replace valid cached parsers"
-lumis parsers cache rust javascript --force
 ```
 
 ## Configuration

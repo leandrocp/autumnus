@@ -304,7 +304,7 @@ impl LanguageStore {
 
     /// Download and cache `name` and its parser without loading either.
     ///
-    /// Caching is pure I/O, so it needs no Wasmtime runtime: `lumis parsers
+    /// Caching is pure I/O, so it needs no Wasmtime runtime: `lumis languages
     /// cache` and `mix lumis.languages.cache` both land here.
     ///
     /// # Errors
@@ -1260,7 +1260,7 @@ mod tests {
         );
     }
 
-    /// `lumis parsers cache` and `mix lumis.languages.cache` land here. A parser
+    /// `lumis languages cache` and `mix lumis.languages.cache` land here. A parser
     /// already in the store is left alone, so the command is idempotent and
     /// needs no network once the store holds what was asked for.
     #[test]

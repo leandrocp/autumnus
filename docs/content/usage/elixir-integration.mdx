@@ -149,17 +149,23 @@ lives in the shared Rust store:
 | `config :lumis, :wasm_path` | one directory now: `config :lumis, data_dir:` |
 
 `mix lumis.languages.cache` takes language names, a `:bundle_*` name, or
-`--all` rather than reading configuration, matching `lumis parsers cache`.
+`--all` rather than reading configuration, matching `lumis languages cache`.
 
 ## Discover supported languages and themes
 
 ```elixir
 Lumis.available_languages()
 Lumis.available_themes()
+Lumis.loaded_languages()
+
+Lumis.Languages.get("js")
 Lumis.Theme.get("github_light")
 ```
 
-See [`Lumis`](https://hexdocs.pm/lumis/Lumis.html) and [`Lumis.Theme`](https://hexdocs.pm/lumis/Lumis.Theme.html) on HexDocs.
+`Lumis.Languages.get/2` and `Lumis.Theme.get/2` look one up by name, returning
+`nil` (or a default you pass) when there is no such language or theme.
+
+See [`Lumis`](https://hexdocs.pm/lumis/Lumis.html), [`Lumis.Languages`](https://hexdocs.pm/lumis/Lumis.Languages.html) and [`Lumis.Theme`](https://hexdocs.pm/lumis/Lumis.Theme.html) on HexDocs.
 
 ## Phoenix and LiveView
 
