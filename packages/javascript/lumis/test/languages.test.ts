@@ -89,6 +89,15 @@ describe("getLoadedLanguageIds", () => {
 });
 
 describe("loadedLanguages", () => {
+  // Loaded here rather than inherited from an earlier test, so this block still
+  // passes when run on its own.
+  beforeAll(async () => {
+    await loadLanguage({
+      definition: { id: json.id, aliases: json.aliases },
+      packageName: json.packageName,
+    });
+  });
+
   it("is reachable from the package entry point", async () => {
     const { loadedLanguages } = await import("../src/index.js");
 

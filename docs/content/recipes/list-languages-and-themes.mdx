@@ -76,7 +76,10 @@ lumis themes list
 ## Look one up by name
 
 Aliases resolve the way highlighting resolves them, so `js` finds JavaScript.
-An unknown name comes back empty rather than raising.
+
+How an unknown name is reported follows each host's convention: JavaScript
+returns `undefined` and Elixir returns `nil`, both without raising, while Rust
+returns a `Result` and the CLI exits non-zero.
 
 <Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
   <TabItem value="javascript" label="JavaScript">
@@ -169,6 +172,12 @@ Loading is global to the VM, so this is the same list in every process.
 
   </TabItem>
   <TabItem value="cli" label="CLI">
+
+There is nothing to list. Each invocation is a fresh process that loads what
+the document needs and exits, so nothing stays loaded between runs.
+
+What does persist is the parser cache on disk, which `lumis parsers cache`
+fills so later runs skip the download:
 
 ```bash
 lumis parsers cache rust javascript
