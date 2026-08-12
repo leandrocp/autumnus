@@ -1,3 +1,21 @@
+## Next release migration
+
+Why: commands now use one vocabulary.
+
+1. Replace `lumis parsers fetch <names>` with `lumis languages cache <names>`.
+2. Replace `lumis parsers update <names>` with `lumis languages cache --force <names>`.
+3. Use `-H` for highlighted lines and `-h` for help.
+4. Use `-V` for version and `-v` for verbose output.
+5. Remove flags rejected by `lumis formatters show <name>`.
+
+Why: `--all` now means every language.
+
+1. Name languages explicitly to refresh only selected cache entries.
+
+Why: HTML output now matches.
+
+1. Regenerate exact HTML snapshots.
+
 ## [0.5.0](https://github.com/leandrocp/lumis/compare/npm-cli/v0.4.1...npm-cli/v0.5.0) (2026-07-23)
 
 

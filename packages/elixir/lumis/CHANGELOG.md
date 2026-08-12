@@ -1,3 +1,28 @@
+## Next release migration
+
+Why: parsers now use shared packages.
+
+1. Online deployments need no change.
+2. During the build, cache every root and injected language with `mix lumis.languages.cache <names>`.
+
+Why: defaults now match.
+
+1. Add `theme: "onedark"` to `:html_inline` and `:terminal` to keep old colors.
+
+Why: catalogs now share one shape.
+
+1. Replace `Lumis.available_languages()["elixir"]` with `Lumis.Languages.get("elixir")`.
+2. Get theme names with `Enum.map(Lumis.available_themes(), & &1.name)`.
+
+Why: errors are now explicit.
+
+1. Use `Lumis.highlight!/2` to keep raising.
+2. Otherwise handle `{:ok, output}` and `{:error, reason}`.
+
+Why: HTML output now matches.
+
+1. Regenerate exact HTML snapshots.
+
 ## [0.6.3](https://github.com/leandrocp/lumis/compare/hex-lumis/v0.6.2...hex-lumis/v0.6.3) (2026-07-23)
 
 

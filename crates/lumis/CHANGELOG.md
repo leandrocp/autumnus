@@ -1,3 +1,16 @@
+## Next release migration
+
+Why: catalog shapes now match.
+
+1. Treat `available_languages()` as a sorted `Vec<LanguageInfo>`, not a `HashMap`.
+2. Use `Language::Rust.info()` for known languages; search the vector for dynamic ids.
+
+Why: HTML output now matches.
+
+1. Regenerate exact HTML snapshots.
+2. Expect attribute-less tokens as `<span>...</span>`.
+3. Expect compact, sorted multi-theme CSS and `light-dark()` highlighted-line backgrounds.
+
 ## [0.12.1](https://github.com/leandrocp/lumis/compare/cargo-lumis/v0.12.0...cargo-lumis/v0.12.1) (2026-07-23)
 
 
