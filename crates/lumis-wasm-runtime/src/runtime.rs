@@ -961,7 +961,7 @@ mod tests {
     ) -> crate::LanguagePackage {
         crate::LanguagePackage {
             package_name: package_name.into(),
-            version: "0.26.0".into(),
+            version: crate::lowest_compatible_package_version(),
             definition_hash: "test".into(),
             parser: crate::ParserMetadata {
                 name: format!("tree-sitter-{grammar_name}"),

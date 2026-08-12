@@ -1264,7 +1264,6 @@ fn cache_languages_already_cached() {
 
 #[test]
 fn cache_languages_already_cached_verbose() {
-    // With -V it shows the cached path
     cmd()
         .arg("--data-dir")
         .arg(fixtures_dir())
@@ -1272,7 +1271,11 @@ fn cache_languages_already_cached_verbose() {
         .args(["languages", "cache", "diff"])
         .assert()
         .success()
-        .stderr(predicate::str::contains("tree-sitter-diff-"));
+        .stderr(predicate::str::contains("--> diff"))
+        .stderr(predicate::str::contains("downloaded to "))
+        .stderr(predicate::str::contains("tree-sitter-diff-"))
+        .stderr(predicate::str::is_match("cached in [0-9]+\\.[0-9]{3}s").unwrap())
+        .stderr(predicate::str::is_match("compiled in [0-9]+\\.[0-9]{3}s").unwrap());
 }
 
 #[test]
@@ -1286,7 +1289,8 @@ fn cache_languages_skips_plaintext_aliases() {
         .args(["languages", "cache", "plaintext", "text", "txt", "plain"])
         .assert()
         .success()
-        .stderr(predicate::str::contains("compiled 0 parser(s)"));
+        .stdout("")
+        .stderr("");
 
     assert!(fs::read_dir(tmp.path().join("parsers"))
         .unwrap()

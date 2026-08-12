@@ -311,6 +311,16 @@ defmodule Lumis.LanguagesTest do
       refute output =~ "tree-sitter-comment-"
     end
 
+    test "skips parserless languages with --verbose" do
+      output =
+        capture_io(fn ->
+          Mix.Task.reenable("lumis.languages.cache")
+          Mix.Task.run("lumis.languages.cache", ["--verbose", "plaintext"])
+        end)
+
+      assert output == ""
+    end
+
     test "reports per-language details without totals with --verbose" do
       output =
         capture_io(fn ->

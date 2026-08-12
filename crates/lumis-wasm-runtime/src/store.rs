@@ -68,7 +68,7 @@ pub enum StoreError {
 }
 
 /// Result of caching one language package.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct CacheLanguageOutcome {
     pub path: PathBuf,
     pub download_url: Option<String>,
@@ -393,9 +393,48 @@ impl LanguageStore {
         force: bool,
         concurrency: usize,
     ) -> Vec<Result<CacheLanguageOutcome, StoreError>> {
-        crate::parallel_map(names, concurrency, |name| {
-            self.cache_language_detailed(name, force)
-        })
+        let mut groups: Vec<Vec<usize>> = Vec::new();
+        let mut packages: HashMap<&str, usize> = HashMap::new();
+
+        for (index, name) in names.iter().enumerate() {
+            let package_name = crate::catalog::find(name).map(|location| location.package_name);
+            if let Some(&group) = package_name.and_then(|name| packages.get(name)) {
+                groups[group].push(index);
+            } else {
+                if let Some(package_name) = package_name {
+                    packages.insert(package_name, groups.len());
+                }
+                groups.push(vec![index]);
+            }
+        }
+
+        let grouped = crate::parallel_map(&groups, concurrency, |indices| {
+            let first = indices[0];
+            self.cache_language_detailed(&names[first], force)
+        });
+        let mut results: Vec<Option<Result<CacheLanguageOutcome, StoreError>>> =
+            (0..names.len()).map(|_| None).collect();
+
+        for (indices, result) in groups.iter().zip(grouped) {
+            match result {
+                Ok(outcome) => {
+                    for &index in indices {
+                        results[index] = Some(Ok(outcome.clone()));
+                    }
+                }
+                Err(error) => {
+                    results[indices[0]] = Some(Err(error));
+                    for &index in &indices[1..] {
+                        results[index] = Some(self.cache_language_detailed(&names[index], force));
+                    }
+                }
+            }
+        }
+
+        results
+            .into_iter()
+            .map(|result| result.expect("every language belongs to one cache group"))
+            .collect()
     }
 
     /// Write `package` into the cache, so a later run needs neither a source
@@ -725,6 +764,23 @@ mod tests {
     impl Fetcher for Canned {
         fn get(&self, _url: &str) -> Result<Vec<u8>, String> {
             Ok(self.0.clone())
+        }
+    }
+
+    struct PackageFetcher {
+        package: Vec<u8>,
+        requests: Arc<std::sync::atomic::AtomicUsize>,
+    }
+
+    impl Fetcher for PackageFetcher {
+        fn get(&self, url: &str) -> Result<Vec<u8>, String> {
+            self.requests
+                .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            if url.ends_with("/lumis.json") {
+                Ok(self.package.clone())
+            } else {
+                Ok(WASM.to_vec())
+            }
         }
     }
 
@@ -1293,6 +1349,35 @@ mod tests {
 
     /// A cache that holds a parser but not its metadata cannot be used offline,
     /// so `cache_language` writes both.
+    #[test]
+    fn a_batch_caches_a_shared_package_once() {
+        let dir = tempdir();
+        let mut shared = package();
+        shared.package_name = "@lumis-sh/wasm-markdown".into();
+        shared.languages = BTreeMap::from([
+            ("markdown".into(), PackagedLanguage::default()),
+            ("mdx".into(), PackagedLanguage::default()),
+        ]);
+        let requests = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let store = make(
+            dir.path(),
+            Box::new(PackageFetcher {
+                package: serde_json::to_vec(&shared).unwrap(),
+                requests: Arc::clone(&requests),
+            }),
+        );
+        let names = vec!["markdown".to_string(), "mdx".to_string()];
+
+        let results = store.cache_languages_detailed(&names, true, 8);
+
+        assert!(results.iter().all(Result::is_ok));
+        assert_eq!(
+            results[0].as_ref().unwrap().path,
+            results[1].as_ref().unwrap().path
+        );
+        assert_eq!(requests.load(std::sync::atomic::Ordering::Relaxed), 2);
+    }
+
     #[test]
     fn caching_a_language_leaves_the_cache_self_sufficient() {
         let dir = tempdir();

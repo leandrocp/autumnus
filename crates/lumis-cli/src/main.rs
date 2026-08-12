@@ -664,27 +664,20 @@ fn cache_languages(
         .map(|name| resolve_language_id(name).to_string())
         .collect();
 
-    // Verifying a cached parser rehashes it, so only ask when the answer is
-    // going to be printed; the download itself checks anyway.
-    let already_cached: Vec<bool> = names
-        .iter()
-        .map(|name| verbose && !force && reg.is_cached(name))
-        .collect();
-
     let mut errors = Vec::new();
-    for ((name, cached), result) in names
-        .iter()
-        .zip(already_cached)
-        .zip(reg.cache_parsers(&names, force))
-    {
+    for (name, result) in names.iter().zip(reg.cache_parsers_detailed(&names, force)) {
         match result {
-            Ok(path) if verbose && cached => eprintln!("{}: {}", name, path.display()),
-            Ok(path) if verbose => eprintln!(
-                "{}: {} -> {}",
-                name,
-                reg.parser_download_url(name)?,
-                path.display()
-            ),
+            Ok(outcome) if verbose => {
+                eprintln!("--> {name}");
+                if let Some(url) = outcome.download_url {
+                    eprintln!("downloading from {url}");
+                }
+                eprintln!(
+                    "downloaded to {}",
+                    relative_to_current(&outcome.path).display()
+                );
+                eprintln!("cached in {:.3}s", outcome.elapsed.as_secs_f64());
+            }
             Ok(_) => {}
             Err(error) => {
                 eprintln!("{name}: failed");
@@ -703,19 +696,16 @@ fn cache_languages(
     // Downloading is the smaller half of a cold parser; the Wasmtime compile is
     // the larger. Compiling each one here writes it into `compiled/`, so a
     // prepared directory carries both. `mix lumis.languages.cache` does the same.
-    let mut compiled = 0;
     let mut compile_errors = Vec::new();
-    for (name, result) in names.iter().zip(reg.precompile_parsers(&names)) {
+    for (name, result) in names.iter().zip(reg.precompile_parsers_detailed(&names)) {
         match result {
-            Ok(()) => compiled += 1,
+            Ok(elapsed) if verbose => eprintln!("compiled in {:.3}s", elapsed.as_secs_f64()),
+            Ok(_) => {}
             Err(error) => {
                 eprintln!("{name}: failed to compile");
                 compile_errors.push((name, error));
             }
         }
-    }
-    if verbose {
-        eprintln!("compiled {compiled} parser(s)");
     }
     if !compile_errors.is_empty() {
         return Err(anyhow::anyhow!(

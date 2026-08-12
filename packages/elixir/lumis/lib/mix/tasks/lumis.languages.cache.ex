@@ -63,6 +63,8 @@ defmodule Mix.Tasks.Lumis.Languages.Cache do
   end
 
   defp verbose(names, options) do
+    names = Enum.reject(names, &(&1 in ~w(plaintext text txt plain)))
+
     cached =
       case Lumis.Languages.__cache_details__(names, force: options[:force] || false) do
         {:ok, details} -> Map.new(details)

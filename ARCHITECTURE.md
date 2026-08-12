@@ -272,11 +272,12 @@ runtime, so the two commands cannot disagree about what a prepared cache
 contains. Downloads run concurrently and return one ordered result per name.
 
 Both then validate each parser and its queries in a disposable Tree-sitter
-store. Validation writes Wasmtime's compiled module under `compiled/`, catches
-link and external scanner failures that raw compilation cannot, and drops the
-store before moving to the next parser. A full catalog therefore never accumulates in Tree-sitter's
-shared 128 MiB address space. Compilation concurrency is capped at four to bound
-peak memory on high-core builders.
+store. Validation writes Wasmtime's compiled module under `compiled/` and
+catches link and external scanner failures that raw compilation cannot. Each
+worker drops its store after validating one parser, and the compilation limit
+bounds simultaneous stores to four. A full catalog therefore never accumulates
+in Tree-sitter's shared 128 MiB address space, and peak memory stays bounded on
+high-core builders.
 
 **One prepared directory serves every runtime, including the compile.** Wasmtime
 keys its module cache on the compiler and its version, so a release build of the

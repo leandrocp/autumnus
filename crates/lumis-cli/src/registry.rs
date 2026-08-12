@@ -1,10 +1,14 @@
-use anyhow::{Context, Result};
+#[cfg(test)]
+use anyhow::Context;
+use anyhow::Result;
 use lumis_wasm_runtime::catalog;
+#[cfg(test)]
+use lumis_wasm_runtime::LanguagePackage;
 use lumis_wasm_runtime::{
-    HighlightOptions, HighlightOutput, HttpFetcher, LanguagePackage, LanguageStore, Runtime,
-    StoreConfig,
+    HighlightOptions, HighlightOutput, HttpFetcher, LanguageStore, Runtime, StoreConfig,
 };
 use std::path::{Path, PathBuf};
+#[cfg(test)]
 use std::sync::Arc;
 use tree_sitter::Tree;
 
@@ -55,9 +59,13 @@ impl Registry {
     ///
     /// Caching a bundle one language at a time is a hundred sequential round
     /// trips to the CDN, which is most of the wall clock.
-    pub fn cache_parsers(&self, languages: &[String], force: bool) -> Vec<Result<PathBuf>> {
+    pub fn cache_parsers_detailed(
+        &self,
+        languages: &[String],
+        force: bool,
+    ) -> Vec<Result<lumis_wasm_runtime::CacheLanguageOutcome>> {
         self.store()
-            .cache_languages(languages, force, lumis_wasm_runtime::DOWNLOAD_CONCURRENCY)
+            .cache_languages_detailed(languages, force, lumis_wasm_runtime::DOWNLOAD_CONCURRENCY)
             .into_iter()
             .map(|result| result.map_err(Into::into))
             .collect()
@@ -68,14 +76,18 @@ impl Registry {
     /// Each parser uses a disposable Tree-sitter store, so a whole catalog never
     /// shares one address space. The load validates the parser and writes its
     /// compiled form into the image; query configuration is validated too.
-    pub fn precompile_parsers(&self, languages: &[String]) -> Vec<Result<()>> {
+    pub fn precompile_parsers_detailed(
+        &self,
+        languages: &[String],
+    ) -> Vec<Result<std::time::Duration>> {
         self.runtime
-            .precompile_languages(languages, lumis_wasm_runtime::compile_concurrency())
+            .precompile_languages_detailed(languages, lumis_wasm_runtime::compile_concurrency())
             .into_iter()
             .map(|result| result.map_err(Into::into))
             .collect()
     }
 
+    #[cfg(test)]
     pub fn is_cached(&self, language: &str) -> bool {
         self.local_package(language)
             .is_some_and(|package| self.store().cached_parser(&package).is_some())
@@ -86,6 +98,7 @@ impl Registry {
         Ok(self.store().parser_path(self.package(language)?.as_ref())?)
     }
 
+    #[cfg(test)]
     pub fn parser_download_url(&self, language: &str) -> Result<String> {
         Ok(LanguageStore::parser_url(self.package(language)?.as_ref())?)
     }
@@ -94,12 +107,14 @@ impl Registry {
         self.runtime.store().expect("the CLI always has a store")
     }
 
+    #[cfg(test)]
     fn package(&self, language: &str) -> Result<Arc<LanguagePackage>> {
         let location =
             catalog::find(language).with_context(|| format!("unknown language '{language}'"))?;
         Ok(self.store().package(location.package_name)?)
     }
 
+    #[cfg(test)]
     fn local_package(&self, language: &str) -> Option<Arc<LanguagePackage>> {
         let location = catalog::find(language)?;
         self.store().local_package(location.package_name)
