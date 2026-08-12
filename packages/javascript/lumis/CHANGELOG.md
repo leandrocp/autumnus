@@ -1,3 +1,29 @@
+## Next release migration
+
+Why: parsers and queries are now atomic.
+
+1. Built-in `@lumis-sh/lumis/langs/*` imports need no change.
+2. Replace custom objects carrying query fields with `{id, aliases, packageName}` package handles.
+3. Resolve package `lumis.json` files with `languagePackageResolver`.
+4. Use `wasmResolver` or `withWasm()` only to override verified parser bytes.
+5. Add exact `sha256` and `size` values to manually created `WasmRef` objects.
+
+Why: invalid formatter options now fail.
+
+1. Give `htmlMultiThemes()` at least one theme.
+2. Make `defaultTheme` name one of them; `light-dark()` requires `light` and `dark`.
+
+Why: Node runtimes now share one cache.
+
+1. Expect one parser download into the shared macOS or Windows directory.
+2. Set `LUMIS_DATA_DIR` to keep a fixed location.
+
+Why: HTML output now matches.
+
+1. Regenerate exact HTML snapshots.
+2. Expect attribute-less tokens as `<span>...</span>`.
+3. Expect compact, sorted multi-theme CSS and `light-dark()` highlighted-line backgrounds.
+
 ## [0.6.1](https://github.com/leandrocp/lumis/compare/npm-lumis/v0.6.0...npm-lumis/v0.6.1) (2026-07-23)
 
 
