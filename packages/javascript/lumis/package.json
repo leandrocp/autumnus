@@ -81,7 +81,7 @@
     "CHANGELOG.md"
   ],
   "bin": {
-    "lumis-wasm-cache": "./dist/cache-cli.js"
+    "lumis-languages-cache": "./dist/cache-cli.js"
   },
   "packageManager": "pnpm@11.15.1",
   "scripts": {

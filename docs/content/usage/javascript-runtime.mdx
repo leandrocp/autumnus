@@ -204,7 +204,7 @@ To keep the download and compile off a first request, populate a project or imag
 before the application starts:
 
 ```bash
-npx lumis-wasm-cache javascript html css --output ./wasm-cache
+npx lumis-languages-cache javascript html css --output ./wasm-cache
 LUMIS_DATA_DIR=./wasm-cache node app.mjs
 ```
 
@@ -222,7 +222,7 @@ Both accept `bundle-*` names as well, covering the same languages as the
 matching `@lumis-sh/wasm-bundle-*` package:
 
 ```bash
-npx lumis-wasm-cache bundle-web --output ./wasm-cache
+npx lumis-languages-cache bundle-web --output ./wasm-cache
 ```
 
 Both paths resolve the runtime's compatible package range, then cache the exact

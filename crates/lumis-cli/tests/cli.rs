@@ -1199,12 +1199,18 @@ fn themes_generate_supports_output_setup_and_appearance_options() {
     assert!(themes_lua.contains("vim.g.test_setup = true"));
 }
 
-// -- parsers cache --
+// -- languages cache --
 
+/// clap prints each env-backed option's current value, so `$LUMIS_DATA_DIR` and
+/// `$LUMIS_CONFIG` land in this output. A checkout under a path containing
+/// "fetch" or "update" would fail the assertions below on the paths rather than
+/// on the wording, so both are cleared.
 #[test]
-fn parsers_help_uses_cache_terminology() {
+fn languages_help_uses_cache_terminology() {
     cmd()
-        .args(["parsers", "--help"])
+        .env("LUMIS_DATA_DIR", "")
+        .env("LUMIS_CONFIG", "")
+        .args(["languages", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("cache"))
@@ -1213,9 +1219,9 @@ fn parsers_help_uses_cache_terminology() {
 }
 
 #[test]
-fn cache_parsers_no_args_fails() {
+fn cache_languages_no_args_fails() {
     cmd()
-        .args(["parsers", "cache"])
+        .args(["languages", "cache"])
         .assert()
         .failure()
         .stderr(predicate::str::contains(
@@ -1224,18 +1230,18 @@ fn cache_parsers_no_args_fails() {
 }
 
 #[test]
-fn cache_parsers_rejects_an_unknown_bundle() {
+fn cache_languages_rejects_an_unknown_bundle() {
     cmd()
-        .args(["parsers", "cache", "bundle-nope"])
+        .args(["languages", "cache", "bundle-nope"])
         .assert()
         .failure()
         .stderr(predicate::str::contains("unknown bundle 'bundle-nope'"));
 }
 
 #[test]
-fn cache_parsers_rejects_languages_with_all() {
+fn cache_languages_rejects_languages_with_all() {
     cmd()
-        .args(["parsers", "cache", "rust", "--all"])
+        .args(["languages", "cache", "rust", "--all"])
         .assert()
         .failure()
         .stderr(predicate::str::contains(
@@ -1244,38 +1250,38 @@ fn cache_parsers_rejects_languages_with_all() {
 }
 
 #[test]
-fn cache_parsers_already_cached() {
+fn cache_languages_already_cached() {
     // The fixtures dir already has the diff package cached — silent without -v.
     cmd()
         .arg("--data-dir")
         .arg(fixtures_dir())
-        .args(["parsers", "cache", "diff"])
+        .args(["languages", "cache", "diff"])
         .assert()
         .success();
 }
 
 #[test]
-fn cache_parsers_already_cached_verbose() {
+fn cache_languages_already_cached_verbose() {
     // With -V it shows the cached path
     cmd()
         .arg("--data-dir")
         .arg(fixtures_dir())
         .arg("-v")
-        .args(["parsers", "cache", "diff"])
+        .args(["languages", "cache", "diff"])
         .assert()
         .success()
         .stderr(predicate::str::contains("tree-sitter-diff-"));
 }
 
 #[test]
-fn cache_parsers_skips_plaintext_aliases() {
+fn cache_languages_skips_plaintext_aliases() {
     let tmp = tempfile::tempdir().unwrap();
 
     cmd()
         .arg("--data-dir")
         .arg(tmp.path())
         .arg("-v")
-        .args(["parsers", "cache", "plaintext", "text", "txt", "plain"])
+        .args(["languages", "cache", "plaintext", "text", "txt", "plain"])
         .assert()
         .success()
         .stderr(predicate::str::contains("compiled 0 parser(s)"));
@@ -1291,7 +1297,7 @@ fn cache_parsers_skips_plaintext_aliases() {
 /// lumis.languages.cache` does the same, so the two cannot prepare different
 /// things.
 #[test]
-fn cache_parsers_compiles_what_it_downloads() {
+fn cache_languages_compiles_what_it_downloads() {
     // Building a runtime at all compiles Tree-sitter's own module, so a
     // non-empty cache proves nothing. Each additional parser adds an entry
     // beside it, and only compiling produces that.
@@ -1312,7 +1318,7 @@ fn cache_parsers_compiles_what_it_downloads() {
     cmd()
         .arg("--data-dir")
         .arg(one.path())
-        .args(["parsers", "cache", "json"])
+        .args(["languages", "cache", "json"])
         .assert()
         .success();
 
@@ -1320,7 +1326,7 @@ fn cache_parsers_compiles_what_it_downloads() {
     cmd()
         .arg("--data-dir")
         .arg(two.path())
-        .args(["parsers", "cache", "json", "css"])
+        .args(["languages", "cache", "json", "css"])
         .assert()
         .success();
 
@@ -1332,7 +1338,7 @@ fn cache_parsers_compiles_what_it_downloads() {
     );
 }
 
-/// A store directory holding the committed fixtures, so `parsers cache` can be
+/// A store directory holding the committed fixtures, so `languages cache` can be
 /// exercised without a download. Caching into an empty directory needs the
 /// network by construction; there is no second directory to copy from.
 fn seeded_store() -> tempfile::TempDir {
@@ -1349,12 +1355,12 @@ fn seeded_store() -> tempfile::TempDir {
 }
 
 #[test]
-fn cache_parsers_to_temp_dir() {
+fn cache_languages_to_temp_dir() {
     let tmp = seeded_store();
     cmd()
         .arg("--data-dir")
         .arg(tmp.path())
-        .args(["parsers", "cache", "json"])
+        .args(["languages", "cache", "json"])
         .assert()
         .success();
 
@@ -1369,13 +1375,13 @@ fn cache_parsers_to_temp_dir() {
 }
 
 #[test]
-fn cache_parsers_to_temp_dir_verbose() {
+fn cache_languages_to_temp_dir_verbose() {
     let tmp = seeded_store();
     cmd()
         .arg("-v")
         .arg("--data-dir")
         .arg(tmp.path())
-        .args(["parsers", "cache", "json"])
+        .args(["languages", "cache", "json"])
         .assert()
         .success()
         .stderr(predicate::str::contains("tree-sitter-json-"));
@@ -1390,14 +1396,14 @@ fn cache_parsers_to_temp_dir_verbose() {
 }
 
 #[test]
-fn cache_parsers_reuses_an_existing_file() {
+fn cache_languages_reuses_an_existing_file() {
     let tmp = seeded_store();
 
     // Cache once.
     cmd()
         .arg("--data-dir")
         .arg(tmp.path())
-        .args(["parsers", "cache", "json"])
+        .args(["languages", "cache", "json"])
         .assert()
         .success();
 
@@ -1406,21 +1412,21 @@ fn cache_parsers_reuses_an_existing_file() {
         .arg("-v")
         .arg("--data-dir")
         .arg(tmp.path())
-        .args(["parsers", "cache", "json"])
+        .args(["languages", "cache", "json"])
         .assert()
         .success()
         .stderr(predicate::str::contains("tree-sitter-json-"));
 }
 
 #[test]
-fn cache_parsers_then_highlight() {
+fn cache_languages_then_highlight() {
     let tmp = seeded_store();
 
     // Cache the parser first.
     cmd()
         .arg("--data-dir")
         .arg(tmp.path())
-        .args(["parsers", "cache", "json"])
+        .args(["languages", "cache", "json"])
         .assert()
         .success();
 
@@ -1437,7 +1443,7 @@ fn cache_parsers_then_highlight() {
 
 /// Highlighting an HTML document loads JavaScript for its `<script>` block
 /// during the same pass, from a data directory that has never held either
-/// parser. Before this, the block stayed plain until `parsers cache javascript`
+/// parser. Before this, the block stayed plain until `languages cache javascript`
 /// had been run.
 /// One pass: nothing names javascript, so the walk had to discover the `<script>`
 /// injection and load it mid-walk. Whether the parser was already on disk is a

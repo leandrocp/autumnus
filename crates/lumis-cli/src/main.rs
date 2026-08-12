@@ -87,12 +87,6 @@ enum Commands {
         #[command(subcommand)]
         command: ThemesCommands,
     },
-
-    /// Manage Tree-sitter WASM parsers
-    Parsers {
-        #[command(subcommand)]
-        command: ParsersCommands,
-    },
 }
 
 #[derive(clap::Args)]
@@ -304,6 +298,23 @@ enum LanguagesCommands {
         /// Language id or alias, e.g. elixir, js
         language: String,
     },
+
+    /// Download and verify parsers so later runs skip the download
+    #[command(
+        after_help = "Examples:\n  lumis languages cache rust javascript\n  lumis languages cache bundle-web\n  lumis languages cache --all\n  lumis languages cache rust --force\n  lumis --data-dir /app/lumis languages cache rust"
+    )]
+    Cache {
+        /// Language names, or a bundle such as bundle-web (e.g. rust javascript elixir)
+        languages: Vec<String>,
+
+        /// Cache every language in the catalog
+        #[arg(long)]
+        all: bool,
+
+        /// Resolve compatible packages again and replace valid cached parsers
+        #[arg(long)]
+        force: bool,
+    },
 }
 
 #[derive(Subcommand)]
@@ -359,26 +370,6 @@ enum ThemesCommands {
         /// light or dark [default: dark]
         #[arg(short = 'a', long)]
         appearance: Option<String>,
-    },
-}
-
-#[derive(Subcommand)]
-enum ParsersCommands {
-    /// Cache parser WASMs so later runs skip the download
-    #[command(
-        after_help = "Examples:\n  lumis parsers cache rust javascript\n  lumis parsers cache bundle-web\n  lumis parsers cache --all\n  lumis parsers cache rust --force\n  lumis --data-dir /app/lumis parsers cache rust"
-    )]
-    Cache {
-        /// Language names, or a bundle such as bundle-web (e.g. rust javascript elixir)
-        languages: Vec<String>,
-
-        /// Cache all supported parsers
-        #[arg(long)]
-        all: bool,
-
-        /// Resolve compatible packages again and replace valid cached parsers
-        #[arg(long)]
-        force: bool,
     },
 }
 
@@ -501,6 +492,14 @@ fn main() -> Result<()> {
         Commands::Languages { command } => match command {
             LanguagesCommands::List => list_languages(),
             LanguagesCommands::Show { language } => show_language(&language),
+            LanguagesCommands::Cache {
+                languages,
+                all,
+                force,
+            } => {
+                let reg = registry::Registry::new(data_dir)?;
+                cache_languages(&reg, &languages, all, force, verbose)
+            }
         },
         Commands::Themes { command } => match command {
             ThemesCommands::List => list_themes(&data_dir),
@@ -518,16 +517,6 @@ fn main() -> Result<()> {
                 output.as_deref(),
                 appearance.as_deref(),
             ),
-        },
-        Commands::Parsers { command } => match command {
-            ParsersCommands::Cache {
-                languages,
-                all,
-                force,
-            } => {
-                let reg = registry::Registry::new(data_dir)?;
-                cache_parsers(&reg, &languages, all, force, verbose)
-            }
         },
     }
 }
@@ -644,7 +633,7 @@ fn show_theme(name: &str, data_dir: &Path) -> Result<()> {
     Ok(())
 }
 
-fn cache_parsers(
+fn cache_languages(
     reg: &registry::Registry,
     languages: &[String],
     all: bool,

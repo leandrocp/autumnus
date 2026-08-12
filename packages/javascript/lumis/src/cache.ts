@@ -182,7 +182,7 @@ async function writeSharedLanguagePackage(
  * Resolve compatible packages and cache exact, integrity-pinned parser WASMs.
  *
  * Accepts language names and `bundle-<name>` tokens, the same set
- * `Lumis.Languages.cache/2` and `lumis parsers cache` accept.
+ * `Lumis.Languages.cache/2` and `lumis languages cache` accept.
  *
  * Point `LUMIS_DATA_DIR` at the same directory in the deployed process.
  */

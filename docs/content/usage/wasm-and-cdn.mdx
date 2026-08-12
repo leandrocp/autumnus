@@ -78,7 +78,7 @@ and every process after it does not.
   <TabItem value="cli" label="CLI">
 
 ```bash
-lumis parsers cache rust javascript elixir
+lumis languages cache rust javascript elixir
 ```
 
   </TabItem>
@@ -90,7 +90,7 @@ lumis parsers cache rust javascript elixir
   <TabItem value="javascript" label="JavaScript">
 
 ```bash
-npx lumis-wasm-cache rust javascript elixir --output ./wasm-cache
+npx lumis-languages-cache rust javascript elixir --output ./wasm-cache
 LUMIS_DATA_DIR=./wasm-cache node app.mjs
 ```
 
@@ -105,7 +105,7 @@ mix lumis.languages.cache rust javascript elixir
   <TabItem value="cli" label="CLI">
 
 ```bash
-lumis parsers cache rust javascript elixir
+lumis languages cache rust javascript elixir
 ```
 
   </TabItem>
@@ -208,7 +208,7 @@ COPY --from=builder --chown=nobody:root /app/lumis /app/lumis
 ENV LUMIS_DATA_DIR=/app/lumis
 ```
 
-The CLI writes the same layout with `lumis --data-dir /app/lumis parsers cache`.
+The CLI writes the same layout with `lumis --data-dir /app/lumis languages cache`.
 There is one directory and one way to name it, so a directory written this way is
 self-sufficient: parser bytes plus the metadata naming them.
 
@@ -423,18 +423,18 @@ can read it, while the native walk cannot access JavaScript's blob registry.
   <TabItem value="cli" label="CLI">
 
 ```bash title="Cache parsers"
-lumis parsers cache rust javascript elixir
+lumis languages cache rust javascript elixir
 ```
 
 ```bash title="Cache all parsers"
-lumis parsers cache --all
+lumis languages cache --all
 ```
 
 ```bash title="Replace cached parsers"
-lumis parsers cache rust --force
+lumis languages cache rust --force
 ```
 
-The CLI does not expose a custom WASM resolver hook. Use `lumis parsers cache`
+The CLI does not expose a custom WASM resolver hook. Use `lumis languages cache`
 and `--data-dir` when you need local control over parser files.
 
   </TabItem>
