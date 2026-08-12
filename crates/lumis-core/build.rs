@@ -184,7 +184,7 @@ fn themes() {
     let out_dir = env::var("OUT_DIR").unwrap();
     let dest_path = Path::new(&out_dir).join("theme_data.rs");
 
-    let theme_names: Vec<String> = fs::read_dir(&themes_dir)
+    let mut theme_names: Vec<String> = fs::read_dir(&themes_dir)
         .unwrap()
         .filter_map(|entry| {
             let entry = entry.ok()?;
@@ -196,6 +196,9 @@ fn themes() {
             }
         })
         .collect();
+
+    // `read_dir` yields filesystem order, which differs per machine.
+    theme_names.sort();
 
     let theme_constants = theme_names.iter().map(|name| {
         let constant_name = format_ident!("{}", name.to_uppercase());
