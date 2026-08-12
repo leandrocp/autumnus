@@ -176,6 +176,103 @@ fn list_themes_uses_data_dir_from_env() {
         .stdout(predicate::str::contains("custom (file)"));
 }
 
+/// The format was unpinned, so nothing would have noticed it changing. One
+/// language and one theme are enough to hold the shape of each.
+#[test]
+fn list_languages_prints_an_id_then_its_globs() {
+    let output = cmd().args(["languages", "list"]).assert().success();
+    let stdout = String::from_utf8(output.get_output().stdout.clone()).unwrap();
+
+    let elixir = stdout
+        .lines()
+        .position(|line| line == "elixir")
+        .expect("elixir is listed on a line of its own");
+    assert_eq!(stdout.lines().nth(elixir + 1).unwrap(), "  *.ex  *.exs");
+}
+
+#[test]
+fn list_themes_prints_one_sorted_name_per_line() {
+    let output = cmd().args(["themes", "list"]).assert().success();
+    let stdout = String::from_utf8(output.get_output().stdout.clone()).unwrap();
+    let names: Vec<&str> = stdout.lines().collect();
+
+    assert!(
+        names.len() > 200,
+        "expected the full corpus, got {}",
+        names.len()
+    );
+    assert!(names.contains(&"dracula"));
+
+    let mut sorted = names.clone();
+    sorted.sort_unstable();
+    assert_eq!(names, sorted);
+}
+
+#[test]
+fn languages_show_prints_what_the_catalog_knows() {
+    cmd()
+        .args(["languages", "show", "elixir"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("elixir: Elixir"))
+        .stdout(predicate::str::contains("extensions: *.ex, *.exs"))
+        .stdout(predicate::str::contains("emacs modes: elixir"));
+}
+
+#[test]
+fn languages_show_resolves_an_alias() {
+    cmd()
+        .args(["languages", "show", "js"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("javascript: JavaScript"))
+        .stdout(predicate::str::contains("aliases: js, jsx"));
+}
+
+#[test]
+fn languages_show_rejects_an_unknown_language() {
+    cmd()
+        .args(["languages", "show", "not-a-language"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("unknown language: not-a-language"));
+}
+
+#[test]
+fn themes_show_prints_appearance_and_colors() {
+    cmd()
+        .args(["themes", "show", "dracula"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("dracula: dark"))
+        .stdout(predicate::str::contains("background: #282a36"));
+}
+
+#[test]
+fn themes_show_finds_a_theme_from_the_data_dir() {
+    let tmp = tempfile::tempdir().unwrap();
+    write_file(
+        &tmp.path().join("themes/custom.json"),
+        r#"{"name":"custom","appearance":"dark","revision":"test","highlights":{}}"#,
+    );
+
+    cmd()
+        .env("LUMIS_DATA_DIR", tmp.path())
+        .args(["themes", "show", "custom"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("custom: dark"));
+}
+
+#[test]
+fn themes_show_rejects_an_unknown_theme() {
+    cmd()
+        .args(["themes", "show", "not-a-theme"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("unknown theme: not-a-theme"));
+}
+
 #[test]
 fn highlight_nonexistent_file() {
     cmd()

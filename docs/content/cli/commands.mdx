@@ -36,7 +36,9 @@ These flags work with any subcommand:
 | `lumis formatters list` | List output formatters |
 | `lumis formatters show` | List the options one formatter accepts |
 | `lumis languages list` | List supported languages and file patterns |
+| `lumis languages show` | Print what the catalog knows about one language |
 | `lumis themes list` | List built-in and local themes |
+| `lumis themes show` | Print one theme's appearance and colors |
 | `lumis themes generate` | Generate a theme from a Neovim colorscheme repo |
 | `lumis parsers cache` | Cache parser WASMs so later runs skip the download |
 
@@ -256,6 +258,17 @@ lumis languages list
 
 Prints all supported languages with their file extensions and patterns.
 
+## `lumis languages show`
+
+```bash
+lumis languages show elixir
+lumis languages show js
+```
+
+Prints one language's id, name, aliases, extensions, globs, Emacs modes and
+shebangs. Aliases resolve the way highlighting resolves them, so `js` finds
+JavaScript. Exits non-zero on an unknown name.
+
 ## `lumis themes list`
 
 ```bash
@@ -263,6 +276,16 @@ lumis themes list
 ```
 
 Lists built-in themes and any custom themes found in the data directory.
+
+## `lumis themes show`
+
+```bash
+lumis themes show dracula
+```
+
+Prints a theme's appearance, foreground, background and how many highlight
+scopes it defines. Finds themes in the data directory as well as built-in ones.
+Exits non-zero on an unknown name.
 
 ## `lumis themes generate`
 
