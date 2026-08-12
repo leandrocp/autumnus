@@ -151,6 +151,31 @@ lives in the shared Rust store:
 `mix lumis.languages.cache` takes language names, a `:bundle_*` name, or
 `--all` rather than reading configuration, matching `lumis languages cache`.
 
+## Where the precompiled NIF comes from
+
+The NIF ships precompiled, and it is downloaded once while the `lumis` dependency
+compiles. GitHub Releases serves it by default. The same artifacts are mirrored
+to Cloudflare R2, which you can opt into when GitHub is unreachable:
+
+```elixir title="config/config.exs"
+config :lumis, artifact_source: :cloudflare
+```
+
+`LUMIS_ARTIFACT_SOURCE=cloudflare` does the same thing, and is easier to reach
+inside a Dockerfile or a CI job than a config file that has already been baked
+into an image. Configuration wins when both are set. Valid values are `:github`
+and `:cloudflare`.
+
+This is a switch, not a fallback. The source you choose is the only one tried, so
+a failed download does not reach for the other one. Both serve byte-identical
+files, and either way the download is checked against the SHA-256 in
+`checksum-Elixir.Lumis.Native.exs` from the Hex package before it is used, so the
+mirror cannot hand you a different NIF.
+
+Two other escape hatches sit alongside it: `LUMIS_BUILD=1` builds the NIF from
+source instead of downloading anything, and `LUMIS_USE_LEGACY_ARTIFACTS=1` takes
+the legacy-CPU variant on a machine without the newer instruction sets.
+
 ## Discover supported languages and themes
 
 ```elixir

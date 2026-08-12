@@ -174,6 +174,16 @@ Publish `hex-lumis` after the required `cargo-lumis-wasm-runtime` release.
 Refresh and commit `packages/elixir/lumis/native/lumis_nif/Cargo.lock` against
 that published runtime before creating the Hex tag.
 
+`elixir-release.yml` uploads the precompiled NIFs to a GitHub Release and syncs
+the same files to Cloudflare R2 under `releases/download/<tag>`, served from
+`https://artifacts.lumis.sh`. The R2 step fails the release if any of
+`R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` or `R2_BUCKET` is
+missing, so the mirror cannot silently fall behind the GitHub Release.
+
+Checksums are generated from GitHub, which `Lumis.Native.ArtifactURL` defaults
+to. Changing that default would put checksum generation behind the R2 sync, so
+leave it alone unless the ordering in the workflow changes too.
+
 ## Failed releases
 
 If a release fails before any registry accepts the new version:

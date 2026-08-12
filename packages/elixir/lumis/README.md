@@ -86,6 +86,11 @@ The NIF is precompiled. Set `LUMIS_BUILD=1` to build it from source instead, or
 `LUMIS_USE_LEGACY_ARTIFACTS=1` to take the legacy-CPU variant on a machine
 without the newer instruction sets.
 
+It downloads from GitHub Releases, mirrored to Cloudflare R2. Set
+`config :lumis, artifact_source: :cloudflare` or `LUMIS_ARTIFACT_SOURCE=cloudflare`
+to use the mirror when GitHub is down, see
+[where the precompiled NIF comes from](https://lumis.sh/docs/usage/elixir-integration#where-the-precompiled-nif-comes-from).
+
 ## Documentation
 
 - [Elixir integration](https://lumis.sh/docs/usage/elixir-integration) — configuration, releases, Phoenix
