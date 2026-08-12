@@ -225,32 +225,113 @@ defmodule Lumis.Languages do
   written. `mix lumis.languages.cache` is the entry point; this is the API
   behind it.
 
+  Names are downloaded concurrently, and every one is attempted: a bundle
+  reports each language it could not obtain rather than stopping at the first,
+  the same way `load/1` does.
+
+      {:ok, paths} = Lumis.Languages.cache(["elixir", "html"])
+      {:error, %{"css" => reason}} = Lumis.Languages.cache(["elixir", "css"])
+
   ## Options
 
     * `:force` — resolve the compatible package range again and replace a
       verified parser
   """
-  @spec cache([String.t() | atom()], keyword()) :: {:ok, [String.t()]} | {:error, term()}
+  @spec cache([String.t() | atom()], keyword()) ::
+          {:ok, [String.t()]}
+          | {:error, String.t() | {:unknown_bundle, String.t()} | %{String.t() => String.t()}}
   def cache(names, options \\ []) when is_list(names) and is_list(options) do
     force? = Keyword.get(options, :force, false)
 
     with {:ok, expanded} <- expand_bundles(names) do
-      do_cache(expanded, force?)
+      expanded
+      |> Enum.reject(&(&1 in @plaintext_names))
+      |> do_cache(force?)
     end
   end
 
+  defp do_cache([], _force?), do: {:ok, []}
+
   defp do_cache(names, force?) do
     names
-    |> Enum.reject(&(&1 in @plaintext_names))
-    |> Enum.reduce_while({:ok, []}, fn name, {:ok, paths} ->
-      case Native.cache_language_by_name(name, force?) do
-        {:ok, path} -> {:cont, {:ok, [path | paths]}}
-        {:error, reason} -> {:halt, {:error, reason}}
-      end
-    end)
+    |> Native.cache_languages(force?)
+    |> collect(names, fn {:ok, {_download_url, path, _elapsed}}, _name -> path end)
     |> case do
-      {:ok, paths} -> {:ok, paths |> Enum.reverse() |> Enum.uniq()}
-      {:error, reason} -> {:error, reason}
+      # A few languages share one grammar, so this is shorter than `names`.
+      {:ok, paths} ->
+        {:ok, Enum.uniq(paths)}
+
+      {:error, failures} when length(names) == 1 ->
+        {:error, Map.fetch!(failures, hd(names))}
+
+      error ->
+        error
     end
+  end
+
+  @doc false
+  def __cache_details__(names, options \\ []) do
+    force? = Keyword.get(options, :force, false)
+
+    with {:ok, expanded} <- expand_bundles(names) do
+      names = Enum.reject(expanded, &(&1 in @plaintext_names))
+
+      names
+      |> Native.cache_languages(force?)
+      |> collect(names, fn {:ok, details}, name -> {name, details} end)
+    end
+  end
+
+  @doc false
+  @spec __precompile__([String.t() | atom()]) ::
+          {:ok, [String.t()]}
+          | {:error, {:unknown_bundle, String.t()} | %{String.t() => String.t()}}
+  def __precompile__(names) when is_list(names) do
+    with {:ok, expanded} <- expand_bundles(names) do
+      expanded
+      |> Enum.reject(&(&1 in @plaintext_names))
+      |> do_precompile()
+    end
+  end
+
+  defp do_precompile([]), do: {:ok, []}
+
+  defp do_precompile(names) do
+    names
+    |> Native.precompile_languages()
+    |> collect(names, fn {:ok, _elapsed}, name -> name end)
+  end
+
+  @doc false
+  def __precompile_details__(names) when is_list(names) do
+    with {:ok, expanded} <- expand_bundles(names) do
+      names = Enum.reject(expanded, &(&1 in @plaintext_names))
+
+      names
+      |> Native.precompile_languages()
+      |> collect(names, fn {:ok, elapsed}, name -> {name, elapsed} end)
+    end
+  end
+
+  # The batch NIFs answer positionally, one result per name, so a failure is
+  # named by zipping rather than by threading the name through the batch.
+  # `Enum.zip/1` would quietly drop the tail if the two ever disagreed, and a
+  # language silently missing from a prepared image is the bug that costs most.
+  defp collect(results, names, success) do
+    if length(results) != length(names) do
+      raise "expected one result per language, got #{length(results)} for #{length(names)}"
+    end
+
+    {values, failures} =
+      [names, results]
+      |> Enum.zip()
+      |> Enum.reduce({[], %{}}, fn {name, result}, {values, failures} ->
+        case result do
+          {:error, reason} -> {values, Map.put(failures, name, reason)}
+          result -> {[success.(result, name) | values], failures}
+        end
+      end)
+
+    if failures == %{}, do: {:ok, Enum.reverse(values)}, else: {:error, failures}
   end
 end

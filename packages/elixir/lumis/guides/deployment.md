@@ -15,7 +15,13 @@ RUN mix release
 Include the root languages and any injected languages, such as the languages in
 Markdown code fences. The task accepts language names, bundles such as
 `bundle_web` and `bundle_system`, or `--all`. Use `--force` to refresh compatible
-versions already in the cache.
+versions already in the cache. `--verbose` prints one section per language with
+the download URL when fetched, destination path, cache time, and compile time.
+
+Downloads and parser validation both run concurrently, so a large bundle is
+worth naming directly rather than splitting across layers. The task prints a
+two-line summary unless asked for more, and reports every failure in a phase
+instead of stopping at the first.
 
 By default, the task writes parser metadata, verified WASM, and compiled modules
 to Lumis's `priv/lumis` directory. `mix release` includes that directory

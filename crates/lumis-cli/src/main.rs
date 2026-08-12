@@ -655,35 +655,33 @@ fn cache_languages(
         lumis_wasm_runtime::catalog::expand_bundles(languages.iter().map(String::as_str))?
     };
     let mut seen = std::collections::HashSet::new();
-    let names: Vec<&str> = expanded
+    let names: Vec<String> = expanded
         .iter()
-        .map(String::as_str)
         .filter(|name| {
             let language_id = resolve_language_id(name);
             language_id != "plaintext" && seen.insert(language_id)
         })
+        .map(|name| resolve_language_id(name).to_string())
         .collect();
 
     let mut errors = Vec::new();
-    for name in &names {
-        let language_id = resolve_language_id(name);
-        let already_cached = !force && reg.is_cached(language_id);
-        match reg.cache_parser(language_id, force) {
-            Ok(path) => {
-                if verbose && already_cached {
-                    eprintln!("{}: {}", name, path.display());
-                } else if verbose {
-                    eprintln!(
-                        "{}: {} -> {}",
-                        name,
-                        reg.parser_download_url(language_id)?,
-                        path.display()
-                    );
+    for (name, result) in names.iter().zip(reg.cache_parsers_detailed(&names, force)) {
+        match result {
+            Ok(outcome) if verbose => {
+                eprintln!("--> {name}");
+                if let Some(url) = outcome.download_url {
+                    eprintln!("downloading from {url}");
                 }
+                eprintln!(
+                    "downloaded to {}",
+                    relative_to_current(&outcome.path).display()
+                );
+                eprintln!("cached in {:.3}s", outcome.elapsed.as_secs_f64());
             }
-            Err(e) => {
-                eprintln!("{}: failed", name);
-                errors.push((*name, e));
+            Ok(_) => {}
+            Err(error) => {
+                eprintln!("{name}: failed");
+                errors.push((name, error));
             }
         }
     }
@@ -696,17 +694,24 @@ fn cache_languages(
     }
 
     // Downloading is the smaller half of a cold parser; the Wasmtime compile is
-    // the larger. Loading each one here writes it into `compiled/`, so a
+    // the larger. Compiling each one here writes it into `compiled/`, so a
     // prepared directory carries both. `mix lumis.languages.cache` does the same.
-    let mut compiled = 0;
-    for name in &names {
-        match reg.load_language(resolve_language_id(name)) {
-            Ok(()) => compiled += 1,
-            Err(error) => eprintln!("{name}: cached but not compiled ({error})"),
+    let mut compile_errors = Vec::new();
+    for (name, result) in names.iter().zip(reg.precompile_parsers_detailed(&names)) {
+        match result {
+            Ok(elapsed) if verbose => eprintln!("compiled in {:.3}s", elapsed.as_secs_f64()),
+            Ok(_) => {}
+            Err(error) => {
+                eprintln!("{name}: failed to compile");
+                compile_errors.push((name, error));
+            }
         }
     }
-    if verbose {
-        eprintln!("compiled {compiled} parser(s)");
+    if !compile_errors.is_empty() {
+        return Err(anyhow::anyhow!(
+            "failed to compile {} parser(s)",
+            compile_errors.len()
+        ));
     }
 
     Ok(())

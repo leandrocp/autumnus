@@ -4,6 +4,7 @@ use std::thread;
 
 mod elixir;
 
+use anyhow::{anyhow, Context, Result};
 use elixir::{ExCssOptions, ExFormatterOption, ExTheme};
 use lumis_core::events::HighlightEvent;
 use lumis_core::{languages, themes};
@@ -17,17 +18,14 @@ use rustler::{Encoder, Env, Error, NifMap, NifResult, Term};
 static THEME_CACHE: Lazy<RwLock<HashMap<String, ExTheme>>> =
     Lazy::new(|| RwLock::new(HashMap::new()));
 
-static EXECUTOR: Lazy<Result<WasmExecutor, String>> = Lazy::new(WasmExecutor::new);
+static EXECUTOR: Lazy<Result<WasmExecutor>> = Lazy::new(WasmExecutor::new);
+static CACHE_BATCH: Lazy<parking_lot::Mutex<()>> = Lazy::new(|| parking_lot::Mutex::new(()));
+static PRECOMPILE_BATCH: Lazy<parking_lot::Mutex<()>> = Lazy::new(|| parking_lot::Mutex::new(()));
 
 enum WasmJob {
     LoadNamed {
         name: String,
         reply: mpsc::SyncSender<Result<(), RuntimeError>>,
-    },
-    CacheNamed {
-        name: String,
-        force: bool,
-        reply: mpsc::SyncSender<Result<String, String>>,
     },
     Highlight {
         source: String,
@@ -82,7 +80,7 @@ struct WasmExecutor {
 }
 
 impl WasmExecutor {
-    fn new() -> Result<Self, String> {
+    fn new() -> Result<Self> {
         // Sized to the machine, not capped. These threads exist for their 8 MiB
         // stacks: nested injections recurse per layer and overflow the BEAM
         // dirty-scheduler default, which crashes the VM rather than erroring.
@@ -99,10 +97,9 @@ impl WasmExecutor {
                 }
                 Ok(runtime)
             })
-            .map_err(|error| error.to_string())?
+            .context("could not spawn the Lumis WASM runtime initializer")?
             .join()
-            .map_err(|_| "Lumis WASM runtime initialization panicked".to_string())?
-            .map_err(|error| error.to_string())?;
+            .map_err(|_| anyhow!("Lumis WASM runtime initialization panicked"))??;
         let runtime = Arc::new(runtime);
         let (sender, receiver) = mpsc::sync_channel::<WasmJob>(workers * 2);
         let receiver = Arc::new(Mutex::new(receiver));
@@ -122,10 +119,6 @@ impl WasmExecutor {
                         WasmJob::LoadNamed { name, reply } => {
                             let _ = reply.send(runtime.load_named_language(&name));
                         }
-                        WasmJob::CacheNamed { name, force, reply } => {
-                            let _ =
-                                reply.send(cache_named_language(runtime.as_ref(), &name, force));
-                        }
                         WasmJob::Highlight {
                             source,
                             language,
@@ -137,7 +130,7 @@ impl WasmExecutor {
                         }
                     }
                 })
-                .map_err(|error| error.to_string())?;
+                .with_context(|| format!("could not spawn Lumis WASM worker {index}"))?;
         }
 
         Ok(Self { runtime, sender })
@@ -158,20 +151,6 @@ impl WasmExecutor {
             Err(RuntimeError::LanguageNotLoaded(_)) => Err(LoadFailure::UnknownLanguage),
             Err(_) => Err(LoadFailure::Parser),
         }
-    }
-
-    fn cache_named_language(&self, name: &str, force: bool) -> Result<String, String> {
-        let (reply, result) = mpsc::sync_channel(1);
-        self.sender
-            .send(WasmJob::CacheNamed {
-                name: name.to_string(),
-                force,
-                reply,
-            })
-            .map_err(|_| "WASM executor is unavailable".to_string())?;
-        result
-            .recv()
-            .map_err(|_| "WASM executor stopped while caching the language".to_string())?
     }
 
     fn highlight(
@@ -287,7 +266,7 @@ pub fn highlight<'a>(env: Env<'a>, source: &'a str, options: ExOptions) -> NifRe
     } else {
         let executor = match executor() {
             Ok(executor) => executor,
-            Err(message) => return Ok((error(), message).encode(env)),
+            Err(reason) => return Ok((error(), format!("{reason:#}")).encode(env)),
         };
         match executor.highlight(source, language.id_name(), rainbow_brackets) {
             Ok(events) => events,
@@ -309,8 +288,8 @@ pub fn highlight<'a>(env: Env<'a>, source: &'a str, options: ExOptions) -> NifRe
     Ok((ok(), output).encode(env))
 }
 
-fn executor() -> Result<&'static WasmExecutor, String> {
-    EXECUTOR.as_ref().map_err(Clone::clone)
+fn executor() -> Result<&'static WasmExecutor> {
+    EXECUTOR.as_ref().map_err(|error| anyhow!("{error:#}"))
 }
 
 /// Point the store at `data_dir`, overriding `LUMIS_DATA_DIR`.
@@ -345,30 +324,114 @@ fn load_language_by_name<'a>(env: Env<'a>, name: &str) -> Term<'a> {
     }
 }
 
-/// Download and cache without loading, for `mix lumis.languages.cache`.
+/// Stack for a thread that resolves TLS or runs Cranelift.
 ///
-/// Returns the path the parser was written to.
+/// Both want far more than a BEAM dirty scheduler carries, and overrunning one
+/// takes the whole emulator down rather than raising. The executor's workers are
+/// sized the same way, for the same reason.
+const DEEP_STACK: usize = 8 * 1024 * 1024;
+
+/// Run `work` on a thread with a stack the emulator's own do not have.
+///
+/// The batch entry points below do their work on the calling thread when there
+/// is only one item, and `parallel_map` drains from the caller too, so a dirty
+/// scheduler must not be the thread that ends up running either.
+fn on_deep_stack<Output: Send>(work: impl FnOnce() -> Output + Send) -> Result<Output> {
+    std::thread::scope(|scope| {
+        thread::Builder::new()
+            .name("lumis-batch".into())
+            .stack_size(DEEP_STACK)
+            .spawn_scoped(scope, work)
+            .context("could not spawn the Lumis batch thread")?
+            .join()
+            .map_err(|_| anyhow!("the Lumis batch thread panicked"))
+    })
+}
+
+/// Download and cache `names` concurrently, for `mix lumis.languages.cache`.
+///
+/// One result per name, in order, so the caller reports every language that
+/// could not be obtained instead of stopping at the first. Caching a bundle one
+/// language at a time is a hundred sequential round trips to the CDN.
+///
+/// Downloading needs no Wasmtime runtime, so this goes straight to a store
+/// rather than waking the executor.
 #[rustler::nif(schedule = "DirtyIo")]
-fn cache_language_by_name<'a>(env: Env<'a>, name: &str, force: bool) -> Term<'a> {
-    let executor = match executor() {
-        Ok(executor) => executor,
-        Err(message) => return (error(), message).encode(env),
-    };
-    match executor.cache_named_language(name, force) {
-        Ok(path) => (ok(), path).encode(env),
-        Err(message) => (error(), message).encode(env),
+fn cache_languages<'a>(env: Env<'a>, names: Vec<String>, force: bool) -> Term<'a> {
+    let results = on_deep_stack(|| {
+        let _batch = CACHE_BATCH.lock();
+        language_store(None)
+            .cache_languages_detailed(&names, force, lumis_wasm_runtime::DOWNLOAD_CONCURRENCY)
+            .into_iter()
+            .map(|result| result.map_err(|failure| failure.to_string()))
+            .collect::<Vec<_>>()
+    });
+
+    match results {
+        Ok(results) => results
+            .into_iter()
+            .map(|result| match result {
+                Ok(outcome) => {
+                    let details = (
+                        outcome.download_url,
+                        outcome.path.display().to_string(),
+                        duration_seconds(outcome.elapsed),
+                    );
+                    (ok(), details).encode(env)
+                }
+                Err(message) => (error(), message).encode(env),
+            })
+            .collect::<Vec<_>>()
+            .encode(env),
+        Err(error) => repeated_failure(env, &format!("{error:#}"), names.len()),
     }
 }
 
-/// Caching needs no Wasmtime runtime, but it does do a TLS handshake, so it
-/// still runs on an executor thread rather than a dirty scheduler.
-fn cache_named_language(runtime: &Runtime, name: &str, force: bool) -> Result<String, String> {
-    runtime
-        .store()
-        .ok_or_else(|| "this runtime has no language store".to_string())?
-        .cache_language(name, force)
-        .map(|path| path.display().to_string())
-        .map_err(|error| error.to_string())
+/// Compile `names` into the on-disk Wasmtime cache without loading them.
+///
+/// Downloading is the smaller half of a cold parser; the Cranelift compile is
+/// the larger, and this is what puts it in the image. One result per name, in
+/// order.
+#[rustler::nif(schedule = "DirtyCpu")]
+fn precompile_languages<'a>(env: Env<'a>, names: Vec<String>) -> Term<'a> {
+    let executor = match executor() {
+        Ok(executor) => executor,
+        Err(error) => return repeated_failure(env, &format!("{error:#}"), names.len()),
+    };
+
+    let results = on_deep_stack(|| {
+        let _batch = PRECOMPILE_BATCH.lock();
+        executor
+            .runtime
+            .precompile_languages_detailed(&names, lumis_wasm_runtime::compile_concurrency())
+            .into_iter()
+            .map(|result| result.map(duration_seconds))
+            .map(|result| result.map_err(|failure| failure.to_string()))
+            .collect::<Vec<_>>()
+    });
+
+    match results {
+        Ok(results) => results
+            .into_iter()
+            .map(|result| match result {
+                Ok(seconds) => (ok(), seconds).encode(env),
+                Err(message) => (error(), message).encode(env),
+            })
+            .collect::<Vec<_>>()
+            .encode(env),
+        Err(error) => repeated_failure(env, &format!("{error:#}"), names.len()),
+    }
+}
+
+fn duration_seconds(duration: std::time::Duration) -> f64 {
+    duration.as_secs_f64()
+}
+
+/// One failure per name, for the cases that fail before any name is attempted.
+/// The batch NIFs answer positionally, so the list still has to line up.
+fn repeated_failure<'a>(env: Env<'a>, message: &str, count: usize) -> Term<'a> {
+    let failure = (error(), message).encode(env);
+    vec![failure; count].encode(env)
 }
 
 /// Dirty because the source is caller-supplied and unbounded: detection runs
