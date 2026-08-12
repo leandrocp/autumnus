@@ -5,7 +5,6 @@ defmodule Lumis.Native do
 
   mix_config = Mix.Project.config()
   version = mix_config[:version]
-  github_url = mix_config[:package][:links][:GitHub]
   mode = if Mix.env() in [:dev, :test], do: :debug, else: :release
 
   use_legacy =
@@ -33,7 +32,7 @@ defmodule Lumis.Native do
     otp_app: :lumis,
     crate: "lumis_nif",
     version: version,
-    base_url: "#{github_url}/releases/download/hex-lumis/v#{version}",
+    base_url: {Lumis.Native.ArtifactURL, :url},
     targets: ~w(
       aarch64-apple-darwin
       aarch64-unknown-linux-gnu
