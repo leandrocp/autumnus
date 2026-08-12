@@ -148,14 +148,6 @@ defmodule Lumis.LumisTest do
     assert %{name: "dracula", appearance: "dark"} in themes
   end
 
-  test "available_theme_names" do
-    names = Lumis.available_theme_names()
-
-    assert names == Enum.sort(names)
-    assert "dracula" in names
-    assert length(names) == length(Lumis.available_themes())
-  end
-
   describe "Theme.build_css" do
     test "builds default linked CSS from a theme name" do
       assert {:ok, css} = Lumis.Theme.build_css("github_light")

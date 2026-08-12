@@ -753,8 +753,7 @@ defmodule Lumis do
   @doc """
   Returns every built-in theme's name and appearance, sorted by name.
 
-  Use `Lumis.Theme.get/1` to get the actual theme struct, or
-  `available_theme_names/0` for names alone.
+  Use `Lumis.Theme.get/2` to get the actual theme struct.
 
   ## Example
 
@@ -764,18 +763,6 @@ defmodule Lumis do
   """
   @spec available_themes() :: [theme_info()]
   def available_themes, do: Lumis.Native.available_themes()
-
-  @doc """
-  Returns the name of every built-in theme, sorted.
-
-  ## Example
-
-      iex> "dracula" in Lumis.available_theme_names()
-      true
-
-  """
-  @spec available_theme_names() :: [name :: String.t()]
-  def available_theme_names, do: Enum.sort(Lumis.Native.available_theme_names())
 
   @deprecated "Use highlight/2 instead"
   def highlight(language, source, options) do

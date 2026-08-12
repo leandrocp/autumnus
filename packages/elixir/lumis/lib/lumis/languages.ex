@@ -179,6 +179,33 @@ defmodule Lumis.Languages do
   end
 
   @doc """
+  Looks one language up by id or alias, or returns `default`.
+
+  The same record `Lumis.available_languages/0` returns one of, without scanning
+  the catalog, and resolving aliases the way highlighting does: `"js"` finds
+  JavaScript.
+
+      iex> Lumis.Languages.get("js").id
+      "javascript"
+
+      iex> Lumis.Languages.get("not-a-language")
+      nil
+
+  """
+  @spec get(String.t() | atom(), any()) :: Lumis.language_info() | any()
+  def get(name, default \\ nil)
+
+  def get(name, default) when is_atom(name) and not is_nil(name),
+    do: get(Atom.to_string(name), default)
+
+  def get(name, default) when is_binary(name) do
+    case Native.language_info(name) do
+      nil -> default
+      language -> language
+    end
+  end
+
+  @doc """
   The languages each `:bundle_*` name covers.
 
   These are the same sets the `@lumis-sh/wasm-bundle-*` packages ship, so naming

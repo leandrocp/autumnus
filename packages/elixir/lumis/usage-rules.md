@@ -85,6 +85,12 @@ languages = Lumis.available_languages()
 # Check if a language is supported
 Enum.any?(Lumis.available_languages(), &(&1.id == "elixir"))
 
+# Look one up by id or alias, without scanning the catalog
+Lumis.Languages.get("js")
+# Returns: %{id: "javascript", name: "JavaScript", ...}
+Lumis.Languages.get("not-a-language")
+# Returns: nil
+
 # Or resolve a name, path or source the way highlighting does
 "elixir" = Lumis.Languages.guess("lib/app.ex")
 ```
@@ -328,7 +334,7 @@ themes = Lumis.available_themes()
 # Returns: [%{name: "dracula", appearance: "dark"}, ...]
 
 # Or just the names
-names = Lumis.available_theme_names()
+names = Enum.map(Lumis.available_themes(), & &1.name)
 # Returns: ["adwaita_dark", "adwaita_light", ...]
 
 # Use a theme by name
@@ -694,6 +700,12 @@ html = Lumis.highlight!(source, opts)
 
 # Get all available languages
 [%{id: _} | _] = Lumis.available_languages()
+
+# Get one language by id or alias
+%{id: "javascript"} = Lumis.Languages.get("js")
+
+# Get the ids loaded into this VM
+[_ | _] = Lumis.loaded_languages()
 
 # Get all available themes
 [%{name: _, appearance: _} | _] = Lumis.available_themes()
