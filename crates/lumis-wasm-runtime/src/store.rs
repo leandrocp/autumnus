@@ -12,7 +12,7 @@
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, OnceLock};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use semver::{Version, VersionReq};
 use thiserror::Error;
@@ -65,6 +65,14 @@ pub enum StoreError {
     },
     #[error(transparent)]
     Package(#[from] LanguagePackageError),
+}
+
+/// Result of caching one language package.
+#[derive(Debug)]
+pub struct CacheLanguageOutcome {
+    pub path: PathBuf,
+    pub download_url: Option<String>,
+    pub elapsed: Duration,
 }
 
 impl StoreError {
@@ -311,28 +319,83 @@ impl LanguageStore {
     /// Fails when the name is unknown, or the package or parser cannot be
     /// obtained or verified.
     pub fn cache_language(&self, name: &str, force: bool) -> Result<PathBuf, StoreError> {
+        self.cache_language_detailed(name, force)
+            .map(|outcome| outcome.path)
+    }
+
+    fn cache_language_detailed(
+        &self,
+        name: &str,
+        force: bool,
+    ) -> Result<CacheLanguageOutcome, StoreError> {
+        let started = Instant::now();
         let location =
             crate::catalog::find(name).ok_or_else(|| StoreError::UnknownLanguage(name.into()))?;
 
-        if force {
+        let (path, download_url) = if force {
             let (package, bytes) = self
                 .resolve_package(location.package_name)
                 .map_err(|error| self.unavailable(location.package_name, error))?;
             let path = self.parser_path(&package)?;
+            let download_url = Self::parser_url(&package)?;
             self.refresh_parser(&package)?;
             write_atomic(&self.package_path(location.package_name)?, &bytes)?;
             self.remember(location.package_name, package);
-            return Ok(path);
-        }
+            (path, Some(download_url))
+        } else {
+            let package = self.package(location.package_name)?;
+            let path = self.parser_path(&package)?;
+            let download_url = if self.cached_parser(&package).is_none() {
+                let url = Self::parser_url(&package)?;
+                self.fetch_parser(&package, &path)?;
+                Some(url)
+            } else {
+                None
+            };
+            self.cache_package(&package)?;
+            (path, download_url)
+        };
 
-        let package = self.package(location.package_name)?;
-        let path = self.parser_path(&package)?;
-        if self.cached_parser(&package).is_none() {
-            self.fetch_parser(&package, &path)?;
-        }
+        Ok(CacheLanguageOutcome {
+            path,
+            download_url,
+            elapsed: started.elapsed(),
+        })
+    }
 
-        self.cache_package(&package)?;
-        Ok(path)
+    /// Cache every name in `names`, downloading up to `concurrency` at a time.
+    ///
+    /// Results come back in the order the names were given, one per name, so a
+    /// caller reports every language that could not be obtained rather than only
+    /// the first. Preparing a bundle is otherwise a hundred sequential round
+    /// trips to the CDN, which dominates the wall clock even on a fast link.
+    ///
+    /// Concurrent writers are already safe — see the module docs — so the
+    /// threads share one store and one connection pool.
+    #[must_use]
+    pub fn cache_languages(
+        &self,
+        names: &[String],
+        force: bool,
+        concurrency: usize,
+    ) -> Vec<Result<PathBuf, StoreError>> {
+        self.cache_languages_detailed(names, force, concurrency)
+            .into_iter()
+            .map(|result| result.map(|outcome| outcome.path))
+            .collect()
+    }
+
+    /// Cache every name and report its source, destination, and elapsed time.
+    #[must_use]
+    pub fn cache_languages_detailed(
+        &self,
+        names: &[String],
+        force: bool,
+        concurrency: usize,
+    ) -> Vec<Result<CacheLanguageOutcome, StoreError>> {
+        crate::parallel_map(names, concurrency, |name| {
+            self.cache_language_detailed(name, force)
+        })
     }
 
     /// Write `package` into the cache, so a later run needs neither a source

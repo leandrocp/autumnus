@@ -1597,6 +1597,7 @@ dependencies = [
 name = "lumis_nif"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "lumis-core",
  "lumis-wasm-runtime",
  "once_cell",

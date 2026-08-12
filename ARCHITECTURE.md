@@ -267,12 +267,16 @@ mix lumis.languages.cache rust javascript # Elixir
 
 Both write a self-sufficient directory — parser bytes plus the `lumis.json`
 that names them — so pointing `LUMIS_DATA_DIR` at it is all a deployment needs.
-Both go through `LanguageStore::cache_language`, which needs no Wasmtime
+Both go through `LanguageStore::cache_languages`, which needs no Wasmtime
 runtime, so the two commands cannot disagree about what a prepared cache
-contains.
+contains. Downloads run concurrently and return one ordered result per name.
 
-Both then load each parser once, so Wasmtime writes `compiled/` beside them and
-an image ships the compile as well as the download.
+Both then validate each parser and its queries in a disposable Tree-sitter
+store. Validation writes Wasmtime's compiled module under `compiled/`, catches
+link and external scanner failures that raw compilation cannot, and drops the
+store before moving to the next parser. A full catalog therefore never accumulates in Tree-sitter's
+shared 128 MiB address space. Compilation concurrency is capped at four to bound
+peak memory on high-core builders.
 
 **One prepared directory serves every runtime, including the compile.** Wasmtime
 keys its module cache on the compiler and its version, so a release build of the

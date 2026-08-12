@@ -100,9 +100,10 @@ mix lumis.languages.cache elixir html javascript css
 mix lumis.languages.cache --all
 ```
 
-Each parser is downloaded *and* loaded once, so Wasmtime writes its compiled
-form beside it. An image built this way starts serving without paying either
-cost, and a restart or a new pod does not pay it again.
+Each parser and its queries are validated in a disposable Tree-sitter store, so
+Wasmtime writes its compiled form beside it without retaining the full catalog.
+An image built this way starts serving without paying either cost, and a restart
+or a new pod does not pay it again.
 
 Parsers land under `LUMIS_DATA_DIR`, which defaults to the user data directory.
 The result is self-sufficient — parser bytes, their metadata, and the compiled

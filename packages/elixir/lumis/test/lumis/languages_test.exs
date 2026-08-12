@@ -266,21 +266,66 @@ defmodule Lumis.LanguagesTest do
       assert File.exists?(Path.join([@store, "parsers", "python.lumis.json"]))
     end
 
-    test "reports an unknown language" do
+    test "preserves the single-language error shape" do
       assert {:error, reason} = Lumis.Languages.cache(["not-a-language"])
       assert reason =~ "not-a-language"
+    end
+
+    test "reports every failure rather than stopping at the first" do
+      assert {:error, failures} = Lumis.Languages.cache(["not-a-language", "also-not", "comment"])
+      assert Map.keys(failures) |> Enum.sort() == ["also-not", "not-a-language"]
+    end
+  end
+
+  describe "build-time parser validation" do
+    test "returns the languages it compiled" do
+      assert {:ok, _} = Lumis.Languages.cache(["comment"])
+      assert {:ok, ["comment"]} = Lumis.Languages.__precompile__(["comment"])
+    end
+
+    test "skips names that have no parser to compile" do
+      assert {:ok, []} = Lumis.Languages.__precompile__(["plaintext"])
+    end
+
+    test "reports failures by name rather than stopping at the first" do
+      assert {:error, %{"not-a-language" => _}} =
+               Lumis.Languages.__precompile__(["not-a-language"])
+    end
+
+    test "rejects an unknown bundle" do
+      assert {:error, {:unknown_bundle, "bundle_nope"}} =
+               Lumis.Languages.__precompile__([:bundle_nope])
     end
   end
 
   describe "mix lumis.languages.cache" do
-    test "writes the named parsers and prints their paths" do
+    test "summarizes instead of listing every parser" do
       output =
         capture_io(fn ->
           Mix.Task.reenable("lumis.languages.cache")
           Mix.Task.run("lumis.languages.cache", ["comment"])
         end)
 
+      assert output =~ ~r/cached 1 parser\(s\) in \d+\.\d{3}s/
+      assert output =~ ~r/compiled 1 language\(s\) in \d+\.\d{3}s/
+      refute output =~ "tree-sitter-comment-"
+    end
+
+    test "reports per-language details without totals with --verbose" do
+      output =
+        capture_io(fn ->
+          Mix.Task.reenable("lumis.languages.cache")
+          Mix.Task.run("lumis.languages.cache", ["--verbose", "comment"])
+        end)
+
+      assert output =~ "--> comment"
+      assert output =~ "downloaded to "
       assert output =~ "tree-sitter-comment-"
+      refute output =~ "downloaded to #{File.cwd!()}"
+      assert output =~ ~r/cached in \d+\.\d{3}s/
+      assert output =~ ~r/compiled in \d+\.\d{3}s/
+      refute output =~ ~r/cached \d+ parser/
+      refute output =~ ~r/compiled \d+ language/
     end
 
     test "refuses to guess when given neither names nor --all" do

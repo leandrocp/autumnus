@@ -1257,7 +1257,9 @@ fn cache_languages_already_cached() {
         .arg(fixtures_dir())
         .args(["languages", "cache", "diff"])
         .assert()
-        .success();
+        .success()
+        .stdout("")
+        .stderr("");
 }
 
 #[test]

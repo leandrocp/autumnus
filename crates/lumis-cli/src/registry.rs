@@ -51,14 +51,29 @@ impl Registry {
         Ok(self.runtime.highlight_with(source, language, options)?)
     }
 
-    /// Download and cache `language`, returning where its parser landed.
-    pub fn cache_parser(&self, language: &str, force: bool) -> Result<PathBuf> {
-        Ok(self.store().cache_language(language, force)?)
+    /// Download and cache `languages` concurrently, one result per name.
+    ///
+    /// Caching a bundle one language at a time is a hundred sequential round
+    /// trips to the CDN, which is most of the wall clock.
+    pub fn cache_parsers(&self, languages: &[String], force: bool) -> Vec<Result<PathBuf>> {
+        self.store()
+            .cache_languages(languages, force, lumis_wasm_runtime::DOWNLOAD_CONCURRENCY)
+            .into_iter()
+            .map(|result| result.map_err(Into::into))
+            .collect()
     }
 
-    /// Load `language`, so Wasmtime writes its compiled form beside the parser.
-    pub fn load_language(&self, language: &str) -> Result<()> {
-        Ok(self.runtime.load_named_language(language)?)
+    /// Compile and validate `languages` without retaining them.
+    ///
+    /// Each parser uses a disposable Tree-sitter store, so a whole catalog never
+    /// shares one address space. The load validates the parser and writes its
+    /// compiled form into the image; query configuration is validated too.
+    pub fn precompile_parsers(&self, languages: &[String]) -> Vec<Result<()>> {
+        self.runtime
+            .precompile_languages(languages, lumis_wasm_runtime::compile_concurrency())
+            .into_iter()
+            .map(|result| result.map_err(Into::into))
+            .collect()
     }
 
     pub fn is_cached(&self, language: &str) -> bool {

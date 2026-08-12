@@ -275,9 +275,10 @@ Download exact, integrity-checked parser WASM files ahead of time, and compile
 them. Highlighting does both anyway; this moves them off the first run.
 
 A cold parser costs a download and then a Wasmtime compile, and the compile is
-the larger half, so each parser is loaded once here and its compiled form is
-written beside it. `mix lumis.languages.cache` prepares the identical directory,
-and every runtime reads it: cache with the CLI, and Elixir or Node start warm.
+the larger half. Each parser and its queries are validated in a disposable
+Tree-sitter store, so its compiled form is written beside it without retaining
+the full catalog in memory. `mix lumis.languages.cache` prepares the identical directory, and every
+runtime reads it: cache with the CLI, and Elixir or Node start warm.
 
 ```bash title="Selected parsers"
 lumis languages cache rust javascript elixir
