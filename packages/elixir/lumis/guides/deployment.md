@@ -35,13 +35,15 @@ If cache preparation belongs in an image build instead of application startup,
 use the standalone CLI and copy the resulting directory into the runtime image:
 
 ```dockerfile
-FROM hexpm/elixir:1.18.4-erlang-27.3.4-debian-bookworm-20250428-slim AS builder
-# Install the Lumis CLI here, then fill the directory the release will read.
-RUN lumis --data-dir /app/lumis languages cache markdown elixir javascript rust css html comment
+FROM node:22-bookworm-slim AS parsers
+RUN npx --yes @lumis-sh/cli --data-dir /app/lumis languages cache markdown elixir javascript rust css html comment
 
 FROM debian:bookworm-20250428-slim
-COPY --from=builder --chown=nobody:root /app/lumis /app/lumis
+COPY --from=parsers --chown=nobody:root /app/lumis /app/lumis
 ```
+
+`npx` is the shortest way to get the CLI for one command; the Node image is
+only that stage's, and nothing from it lands in the runtime image.
 
 Point the release at that directory with `config :lumis, data_dir: "/app/lumis"`
 or `LUMIS_DATA_DIR=/app/lumis`. Keep the `async_load/1` call: against a prepared
