@@ -72,15 +72,18 @@ Lumis.Languages.load(["elixir", "html", "javascript", "css"])
 
 ## Application startup
 
-Prepare parsers before starting your supervision tree so production does not
-download or compile them on the first request:
+Warm parsers from your application's `start/2` so production does not download
+or compile them on the first request:
 
 ```elixir
 def start(_type, _args) do
-  {:ok, _paths} = Lumis.Languages.cache(~w(elixir html javascript css))
+  Lumis.Languages.async_load(~w(elixir html javascript css))
   Supervisor.start_link(children(), strategy: :one_for_one, name: MyApp.Supervisor)
 end
 ```
+
+It returns immediately, so the boot never waits on the network, and a failed
+warm-up is logged rather than able to stop the application from starting.
 
 See the [deployment guide](https://lumis.hexdocs.pm/deployment.html) for the
 full lifecycle example, bundles, the standalone CLI, and custom cache directories.

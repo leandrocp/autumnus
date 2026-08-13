@@ -58,14 +58,18 @@ same pass, so a Markdown file with a fenced Rust block highlights that block
 without Rust being named in your code. Browsers load asynchronously, so name
 injected languages up front or use a bundle.
 
-Prepare the cache in your application's startup lifecycle, before it begins
-accepting requests:
+Warm the cache alongside startup, without putting the CDN on the boot path:
 
 ```typescript
 import { cacheLanguages } from '@lumis-sh/lumis/cache'
 
-await cacheLanguages(['javascript', 'html', 'css'])
 await startServer()
+
+// Not awaited. The `.catch()` is required: an unhandled rejection would
+// terminate the process.
+cacheLanguages(['javascript', 'html', 'css']).catch((error) => {
+  logger.warn({ error }, 'Lumis warm-up failed; languages load on demand')
+})
 ```
 
 On native Node platforms this also validates the parsers and persists their

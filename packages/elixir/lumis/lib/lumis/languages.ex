@@ -9,12 +9,15 @@ defmodule Lumis.Languages do
 
   Reach for it in two situations.
 
-  Load ahead of the first request, so a download does not land on a user:
+  Load ahead of the first request, so a download does not land on a user. From
+  an application's `start/2`, use `async_load/1`, which returns before the
+  network work rather than holding up the boot:
 
+      Lumis.Languages.async_load(["elixir", "html"])
       :ok = Lumis.Languages.load(["elixir", "html"])
 
-  Or cache parsers during application startup, validating them and persisting
-  their compiled modules without retaining every language in memory:
+  Or prepare a directory a *different* process will read, validating parsers and
+  persisting their compiled modules without retaining any language in memory:
 
       {:ok, _paths} = Lumis.Languages.cache(["elixir", "html"])
 
@@ -29,6 +32,8 @@ defmodule Lumis.Languages do
   than each downloading it, and loading is global to the VM: the process that
   pays for a language pays once, for every process after it.
   """
+
+  require Logger
 
   alias Lumis.Native
 
@@ -100,6 +105,44 @@ defmodule Lumis.Languages do
       :error -> {:error, :unknown_bundle}
       :not_a_bundle -> Native.load_language_by_name(name)
     end
+  end
+
+  @doc """
+  Runs `load/1` in the background and returns immediately.
+
+  Written for `start/2`, where the alternative is holding the whole boot on a
+  download. Highlighting loads on demand anyway, so an application that starts
+  before its parsers are warm serves correctly the entire time; it only pays for
+  a language on the first request that names one the warm-up has not reached.
+
+      def start(_type, _args) do
+        Lumis.Languages.async_load(~w(markdown elixir javascript))
+        Supervisor.start_link(children(), strategy: :one_for_one, name: MyApp.Supervisor)
+      end
+
+  Failures are logged rather than returned, because nothing is waiting on them.
+  Nothing this function does can stop an application from booting: the work runs
+  under a `:temporary` child of Lumis's own supervisor, so it is never retried
+  and never escalates. Use `load/1` when the caller does need the result.
+
+  Returns `{:ok, pid}`; the docs above ignore it deliberately, since matching on
+  it is how a warm-up ends up able to break a boot after all.
+  """
+  @spec async_load(bundle() | String.t() | atom() | [String.t() | atom()]) ::
+          DynamicSupervisor.on_start_child()
+  def async_load(names) do
+    Task.Supervisor.start_child(Lumis.TaskSupervisor, fn ->
+      case load(names) do
+        :ok ->
+          :ok
+
+        {:error, reason} ->
+          Logger.warning(
+            "Lumis could not warm #{inspect(names)}: #{inspect(reason)}. " <>
+              "Highlighting will load these on demand."
+          )
+      end
+    end)
   end
 
   @bundle_prefixes ["bundle_", "bundle-"]
@@ -224,9 +267,14 @@ defmodule Lumis.Languages do
   Downloads, validates and compiles languages without loading them permanently.
 
   Takes the same names `load/1` does, including `:bundle_*`. Returns the paths
-  written. Call it during application startup to move parser preparation off
-  the first request. Already verified parser bytes and compiled modules are
-  reused on later starts.
+  written. Already verified parser bytes and compiled modules are reused on
+  later calls.
+
+  This fills a directory for a process that has not started yet, so it validates
+  and compiles without keeping anything: a release step preparing a volume, or a
+  task run before the VM that will serve. To warm the VM you are already in, use
+  `async_load/1` or `load/1`, which do the same work and keep the result, so no
+  request reloads what this would have discarded.
 
   Names are downloaded and compiled concurrently. Every one is attempted: a
   bundle reports each language it could not prepare rather than stopping at the

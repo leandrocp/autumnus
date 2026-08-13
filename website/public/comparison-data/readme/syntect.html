@@ -128,8 +128,8 @@
 </span><span style="color:#f8f8f2;">```
 </span><span style="color:#f8f8f2;">
 </span><span style="color:#f8f8f2;">Parsers download on demand and load once per VM. Call
-</span><span style="color:#50fa7b;">`Lumis.Languages.cache/2`</span><span style="color:#f8f8f2;"> during application startup to move the download and
-</span><span style="color:#f8f8f2;">compile off the first request.
+</span><span style="color:#50fa7b;">`Lumis.Languages.async_load/1`</span><span style="color:#f8f8f2;"> from your application&#39;s </span><span style="color:#50fa7b;">`start/2`</span><span style="color:#f8f8f2;"> to move the
+</span><span style="color:#f8f8f2;">download and compile off the first request without holding up the boot.
 </span><span style="color:#f8f8f2;">See [Elixir integration](</span><span style="text-decoration:underline;color:#bd93f9;">https://lumis.sh/docs/usage/elixir-integration</span><span style="color:#f8f8f2;">).
 </span><span style="color:#f8f8f2;">
 </span><span style="color:#8be9fd;">### [Java](</span><span style="text-decoration:underline;color:#bd93f9;">https://github.com/roastedroot/lumis4j</span><span style="color:#8be9fd;">)

@@ -8,7 +8,7 @@ defmodule Lumis.Application do
     Lumis.Native.configure_store(data_dir())
 
     opts = [strategy: :one_for_one, name: Lumis.Supervisor]
-    Supervisor.start_link([], opts)
+    Supervisor.start_link([{Task.Supervisor, name: Lumis.TaskSupervisor}], opts)
   end
 
   # `nil` hands the decision back to the NIF, which reads `LUMIS_DATA_DIR` and

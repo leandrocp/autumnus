@@ -3,8 +3,8 @@
 Why: parsers now use shared packages.
 
 1. Online deployments need no change.
-2. Replace `mix lumis.languages.cache <names>` with `Lumis.Languages.cache/2` during application startup.
-3. Use `lumis languages cache` when a standalone build or operations command is preferable.
+2. Replace `mix lumis.languages.cache <names>` with `Lumis.Languages.async_load/1` in your application's `start/2`.
+3. Use `lumis languages cache`, or `Lumis.Languages.cache/2`, when a build or operations step prepares the directory instead.
 
 Why: defaults now match.
 

@@ -1,6 +1,8 @@
 defmodule Lumis.LanguagesTest do
   use ExUnit.Case, async: false
 
+  import ExUnit.CaptureLog
+
   test "does not load a parser for plaintext aliases" do
     plaintext = Enum.find(Lumis.available_languages(), &(&1.id == "plaintext"))
 
@@ -241,6 +243,66 @@ defmodule Lumis.LanguagesTest do
 
     for language <- ~w(markdown python css lua javascript) do
       assert Lumis.Native.has_language(language), "#{language} should have been loaded"
+    end
+  end
+
+  describe "async_load/1" do
+    # Every assertion here is about the caller, not the load: a warm-up able to
+    # block or crash `start/2` is the failure this function exists to prevent.
+    #
+    # `:noproc` rather than `:normal` when the task beat the monitor to it. The
+    # exit reason is therefore not evidence of anything, so no test reads it;
+    # what the warm-up did is asserted through the runtime and the log instead.
+    defp await_warm_up(pid) do
+      ref = Process.monitor(pid)
+      assert_receive {:DOWN, ^ref, :process, ^pid, _reason}, 30_000
+      :ok
+    end
+
+    test "loads in the background" do
+      refute Lumis.Native.has_language("erlang")
+
+      assert {:ok, pid} = Lumis.Languages.async_load(["erlang"])
+      await_warm_up(pid)
+
+      assert Lumis.Native.has_language("erlang")
+    end
+
+    test "returns before the load finishes" do
+      # A whole bundle, so the work is far larger than the budget below however
+      # much of it is already staged. Anything over a millisecond here is
+      # `start/2` waiting on parsers, which is the regression being pinned.
+      {microseconds, {:ok, pid}} =
+        :timer.tc(fn -> Lumis.Languages.async_load([:bundle_web]) end)
+
+      assert microseconds < 1_000
+      await_warm_up(pid)
+    end
+
+    test "logs a failure rather than crashing the task" do
+      log =
+        capture_log(fn ->
+          {:ok, pid} = Lumis.Languages.async_load(["not-a-language"])
+          await_warm_up(pid)
+        end)
+
+      # A crashed task would report the exception instead of this.
+      assert log =~ "could not warm"
+      assert log =~ "not-a-language"
+      assert log =~ "load these on demand"
+    end
+
+    test "leaves the caller and the supervisor alive after a failure" do
+      supervisor = Process.whereis(Lumis.TaskSupervisor)
+
+      capture_log(fn ->
+        {:ok, pid} = Lumis.Languages.async_load(["not-a-language"])
+        await_warm_up(pid)
+      end)
+
+      assert Process.alive?(self())
+      assert Process.whereis(Lumis.TaskSupervisor) == supervisor
+      assert Process.alive?(supervisor)
     end
   end
 

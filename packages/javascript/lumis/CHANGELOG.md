@@ -2,8 +2,8 @@
 
 Why: cache preparation now belongs to the application lifecycle.
 
-1. Replace `npx lumis-languages-cache ...` with `cacheLanguages()` before the application starts accepting requests.
-2. Use `lumis languages cache` when a standalone build or operations command is preferable.
+1. Replace `npx lumis-languages-cache ...` with `cacheLanguages()`, left unawaited with a `.catch()`, alongside startup.
+2. Use `lumis languages cache` when a build or operations step prepares the directory instead.
 
 Why: parsers and queries are now atomic.
 

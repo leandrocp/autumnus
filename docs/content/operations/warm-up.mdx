@@ -19,13 +19,17 @@ Warm-up moves parser setup ahead of the first request. Prefer the host
 application's startup lifecycle when it owns the process. Use the Lumis CLI
 when a separate image-build or operations step owns the cache instead.
 
+Warm-up is an optimization, never a prerequisite: highlighting loads what a
+document names on demand. So it should not be able to delay a boot or fail one,
+and the examples below are written to keep both true.
+
 Only the dynamic runtimes download per-language parsers. Rust and Java package
 their parser code with the application, so they do not use the parser store.
 
 | Runtime | Warm-up operation | Persists across restarts |
 | --- | --- | --- |
-| Elixir | `Lumis.Languages.cache/2` during application startup | parser metadata, verified WASM, and compiled Wasmtime modules |
-| Server-side JavaScript | `cacheLanguages()` during application startup | parser metadata and verified WASM; compiled Wasmtime modules when the native addon is available |
+| Elixir | `Lumis.Languages.async_load/1` from `start/2` | parser metadata, verified WASM, and compiled Wasmtime modules |
+| Server-side JavaScript | `cacheLanguages()`, not awaited, alongside startup | parser metadata and verified WASM; compiled Wasmtime modules when the native addon is available |
 | CLI | `lumis languages cache` | parser metadata, verified WASM, and compiled Wasmtime modules |
 | Browsers / CDN | create and retain a highlighter with eager languages | verified parser bytes, when browser storage is available |
 | Rust | no parser warm-up required | parsers are selected with Cargo features and compiled into the binary |
@@ -36,14 +40,25 @@ their parser code with the application, so they do not use the parser store.
 <Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
   <TabItem value="javascript" label="JavaScript">
 
-Call `cacheLanguages()` before the server begins accepting requests:
+Start serving, then warm in the background:
 
 ```ts title="bootstrap.ts"
 import { cacheLanguages } from "@lumis-sh/lumis/cache";
 
-await cacheLanguages(["javascript", "html", "css"]);
 await startServer();
+
+// Not awaited, so a slow CDN delays no request. The `.catch()` is required:
+// an unhandled rejection terminates the process, which is exactly the failure
+// warming in the background is meant to avoid.
+cacheLanguages(["javascript", "html", "css"]).catch((error) => {
+  logger.warn({ error }, "Lumis warm-up failed; languages load on demand");
+});
 ```
+
+Await it instead when something downstream should not start without a prepared
+cache, such as a build step or a prestart task. In a serving process, awaiting
+it before `startServer()` means an unreachable CDN keeps the process from ever
+accepting a request.
 
 The API accepts language names and bundle names such as `bundle-web`. Pass
 `{force: true}` to resolve the compatible package range again and replace valid
@@ -58,15 +73,19 @@ persists the compiled Wasmtime module. Bun and Deno, or a Node installation
 without the addon, can use the same API, but the portable `web-tree-sitter`
 fallback cannot persist compiled modules across processes.
 
+`cacheLanguages()` fills the store rather than loading languages into the
+runtime, so the first document naming one still loads it — from disk, with the
+compile already done. For a highlighter you reuse, `createHighlighter({
+languages })` warms and keeps them in the instance.
+
   </TabItem>
   <TabItem value="elixir" label="Elixir">
 
-Call `Lumis.Languages.cache/2` before starting the supervision tree:
+Call `Lumis.Languages.async_load/1` from your application's `start/2`:
 
 ```elixir title="lib/my_app/application.ex"
 def start(_type, _args) do
-  {:ok, _paths} =
-    Lumis.Languages.cache(["markdown", "elixir", "javascript"])
+  Lumis.Languages.async_load(["markdown", "elixir", "javascript"])
 
   Supervisor.start_link(children(),
     strategy: :one_for_one,
@@ -75,21 +94,25 @@ def start(_type, _args) do
 end
 ```
 
+It returns before the download starts, so the boot never waits on the network.
+The return value is deliberately not matched: the work runs under a
+`:temporary` child of Lumis's own supervisor, so a failure is logged and never
+retried, never escalates, and cannot stop the application from starting.
+
 The API accepts language names and `:bundle_*` names such as `:bundle_web`.
-Pass `force: true` to refresh compatible packages already in the cache:
 
-```elixir
-{:ok, _paths} = Lumis.Languages.cache([:bundle_web], force: true)
-```
-
-Use `Lumis.Languages.load/1` instead when the current VM should also retain the
-loaded languages. For release and container details, see the standalone
+Use `Lumis.Languages.load/1` when the caller does want the result and can wait
+— a release task, or a smoke test that should fail if a parser is unreachable.
+For release and container details, see the standalone
 [Elixir deployment guide](https://lumis.hexdocs.pm/deployment.html).
 
   </TabItem>
   <TabItem value="cli" label="CLI">
 
 Use the CLI when cache preparation belongs outside the application lifecycle:
+an image build, a release task, or an operations step. It fills the store for a
+process that has not started yet, which is the case a startup warm-up cannot
+cover.
 
 ```bash
 lumis languages cache rust javascript elixir
@@ -115,6 +138,12 @@ FROM debian:bookworm-slim
 COPY --from=builder --chown=nobody:root /app/lumis /app/lumis
 ENV LUMIS_DATA_DIR=/app/lumis
 ```
+
+`Lumis.Languages.cache/2` and `cacheLanguages()` do the same preparation from
+Elixir and JavaScript, for a release task that runs before the process that
+serves. Keep the startup warm-up as well: a prepared directory removes the
+download and the compile, and the warm-up still has to move the parsers into
+the runtime, which needs no network once that directory is there.
 
   </TabItem>
   <TabItem value="browser" label="Browsers / CDN">

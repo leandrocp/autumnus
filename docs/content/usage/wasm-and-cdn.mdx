@@ -46,11 +46,11 @@ this limit: it highlights through a native addon, including when configured
 `configureLanguagePackageResolver()` and `configureWasmResolver()` callbacks
 supply the injected language.
 
-### Preparing during application startup
+### Warming during application startup
 
 A cold parser costs a download and then a Wasmtime compile. The compile is the
-larger half, so call the host API before accepting requests rather than letting
-a first request pay for either:
+larger half, so warm at startup rather than letting a first request pay for
+either — beside the boot, not in front of it:
 
 <Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
   <TabItem value="javascript" label="JavaScript">
@@ -58,8 +58,11 @@ a first request pay for either:
 ```js title="bootstrap.mjs"
 import { cacheLanguages } from "@lumis-sh/lumis/cache";
 
-await cacheLanguages(["rust", "javascript", "elixir"]);
 await startServer();
+
+cacheLanguages(["rust", "javascript", "elixir"]).catch((error) => {
+  logger.warn({ error }, "Lumis warm-up failed; languages load on demand");
+});
 ```
 
   </TabItem>
@@ -67,7 +70,7 @@ await startServer();
 
 ```elixir title="lib/my_app/application.ex"
 def start(_type, _args) do
-  {:ok, _paths} = Lumis.Languages.cache(~w(elixir html javascript css))
+  Lumis.Languages.async_load(~w(elixir html javascript css))
   Supervisor.start_link(children(), strategy: :one_for_one, name: MyApp.Supervisor)
 end
 ```
@@ -75,10 +78,13 @@ end
   </TabItem>
 </Tabs>
 
-Both APIs are idempotent and reuse verified parser bytes on later starts. Native
-hosts also reuse their compiled modules. `Lumis.Languages.load/1` and
-JavaScript's highlighter setup are still available when an application also
-wants to retain languages in memory.
+Neither blocks the boot, and neither can fail one: warm-up is an optimization,
+so a CDN that is slow or down costs the first request rather than the process.
+Both are idempotent and reuse verified parser bytes on later starts. Native
+hosts also reuse their compiled modules.
+
+Await `cacheLanguages()`, or call `Lumis.Languages.cache/2`, when a build or
+operations step should fail if the store cannot be prepared.
 
 ### Filling the store at build time
 

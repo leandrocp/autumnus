@@ -289,8 +289,8 @@ Lumis.highlight!(&quot;const x = 1&quot;, formatter: {:html_inline, language: &q
 ```</span>
 
 Parsers download on demand and load once per VM. Call
-<span class="hljs-code">`Lumis.Languages.cache/2`</span> during application startup to move the download and
-compile off the first request.
+<span class="hljs-code">`Lumis.Languages.async_load/1`</span> from your application&#x27;s <span class="hljs-code">`start/2`</span> to move the
+download and compile off the first request without holding up the boot.
 See [<span class="hljs-string">Elixir integration</span>](<span class="hljs-link">https://lumis.sh/docs/usage/elixir-integration</span>).
 
 <span class="hljs-section">### [<span class="hljs-string">Java</span>](<span class="hljs-link">https://github.com/roastedroot/lumis4j</span>)</span>

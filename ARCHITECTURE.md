@@ -258,14 +258,17 @@ runtime release. Publishing `@lumis-sh/wasm-rust@0.26.x` does not.
 
 ### Preparing the persistent store
 
-Applications pay both costs during startup through the host APIs:
+An application warms at startup without waiting for it. Elixir runs the load
+under a `:temporary` child of Lumis's supervisor; JavaScript leaves the promise
+unawaited. Neither can delay a boot or fail one, which matters because warm-up
+is an optimization and highlighting loads on demand regardless:
 
 ```elixir
-Lumis.Languages.cache(["rust", "javascript"])
+Lumis.Languages.async_load(["rust", "javascript"])
 ```
 
 ```javascript
-await cacheLanguages(["rust", "javascript"])
+cacheLanguages(["rust", "javascript"]).catch(report)
 ```
 
 For a separate build or operations step, the CLI remains the one command:
@@ -276,17 +279,25 @@ lumis languages cache rust javascript
 
 All paths write a self-sufficient directory — parser bytes plus the `lumis.json`
 that names them — so pointing `LUMIS_DATA_DIR` at it is all a deployment needs.
-The CLI and Elixir go through `LanguageStore::cache_languages`; JavaScript writes
-the same verified layout, which the addon then reads through `LanguageStore`.
+The CLI and `Lumis.Languages.cache/2` go through `LanguageStore::cache_languages`;
+JavaScript writes the same verified layout, which the addon then reads through
+`LanguageStore`.
 
-The CLI, Elixir, and Node with its native addon then validate each parser and
-its queries in a disposable Tree-sitter store. Validation writes Wasmtime's
-compiled module under `compiled/` and catches link and external scanner
-failures that raw compilation cannot. Each worker drops its store after
-validating one parser, and the compilation limit
-bounds simultaneous stores to four. A full catalog therefore never accumulates
-in Tree-sitter's shared 128 MiB address space, and peak memory stays bounded on
-high-core builders.
+They differ in what they keep, and that is the whole reason both exist. The
+preparation paths validate each parser and its queries in a disposable
+Tree-sitter store and then drop it, because the process that will use the
+directory is not this one. A startup warm-up loads into the runtime and keeps
+it, so no request reloads what the warm-up already paid for. Preparing a
+directory and warming a VM are therefore complementary rather than alternatives:
+a release fills the directory, and the application that reads it still loads
+from disk into memory.
+
+Validation writes Wasmtime's compiled module under `compiled/` and catches link
+and external scanner failures that raw compilation cannot. Each worker drops its
+store after validating one parser, and the compilation limit bounds simultaneous
+stores to four. A full catalog therefore never accumulates in Tree-sitter's
+shared 128 MiB address space, and peak memory stays bounded on high-core
+builders.
 
 **One prepared directory serves every runtime, including the compile.** Wasmtime
 keys its module cache on the compiler and its version, so a release build of the

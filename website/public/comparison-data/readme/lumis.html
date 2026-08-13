@@ -127,8 +127,8 @@
 </div><div class="l-line" data-line="109"><span style="color: #f1fa8c;"><span style="color: #f1fa8c;"><span style="color: #50fa7b;"></span>```</span></span>
 </div><div class="l-line" data-line="110"><span style="color: #f1fa8c;"></span>
 </div><div class="l-line" data-line="111">Parsers download on demand and load once per VM. Call
-</div><div class="l-line" data-line="112"><span style="color: #f1fa8c;">`Lumis.Languages.cache/2`</span> during application startup to move the download and
-</div><div class="l-line" data-line="113">compile off the first request.
+</div><div class="l-line" data-line="112"><span style="color: #f1fa8c;">`Lumis.Languages.async_load/1`</span> from your application&#39;s <span style="color: #f1fa8c;">`start/2`</span> to move the
+</div><div class="l-line" data-line="113">download and compile off the first request without holding up the boot.
 </div><div class="l-line" data-line="114">See <span style="color: #ffb86c; font-weight: bold;">[</span><span style="color: #ffb86c; font-weight: bold;">Elixir integration</span><span style="color: #ffb86c; font-weight: bold;">]</span><span style="color: #ffb86c; font-weight: bold;">(</span><span style="color: #f1fa8c;">https://lumis.sh/docs/usage/elixir-integration</span><span style="color: #ffb86c; font-weight: bold;">)</span>.
 </div><div class="l-line" data-line="115">
 </div><div class="l-line" data-line="116"><span style="color: #8be9fd;">### <span style="color: #ffb86c; font-weight: bold;">[</span><span style="color: #ffb86c; font-weight: bold;">Java</span><span style="color: #ffb86c; font-weight: bold;">]</span><span style="color: #ffb86c; font-weight: bold;">(</span><span style="color: #f1fa8c;">https://github.com/roastedroot/lumis4j</span><span style="color: #ffb86c; font-weight: bold;">)</span></span>

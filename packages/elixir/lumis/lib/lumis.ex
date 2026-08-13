@@ -895,9 +895,9 @@ defmodule Lumis do
     case Lumis.Native.highlight(source, options) do
       {:error, {:language_not_loaded, language}} ->
         {:error,
-         "language #{inspect(language)} could not be loaded. Prepare it with " <>
-           "`Lumis.Languages.cache([#{inspect(language)}])` during application " <>
-           "startup if this host has no network access"}
+         "language #{inspect(language)} could not be loaded. Warm it with " <>
+           "`Lumis.Languages.async_load([#{inspect(language)}])` from your " <>
+           "application's start/2 if this host has no network access"}
 
       other ->
         other
