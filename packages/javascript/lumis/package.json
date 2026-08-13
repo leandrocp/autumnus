@@ -1,6 +1,6 @@
 {
   "name": "@lumis-sh/lumis",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "description": "Syntax Highlighter powered by Tree-sitter and Neovim themes",
   "author": "Leandro Pereira",
   "license": "MIT",
@@ -80,13 +80,9 @@
     "dist",
     "CHANGELOG.md"
   ],
-  "bin": {
-    "lumis-wasm-cache": "./dist/cache-cli.js"
-  },
   "packageManager": "pnpm@11.15.1",
   "scripts": {
     "build:langs": "tsx scripts/build-langs.ts",
-    "cache-languages": "tsx src/cache-cli.ts",
     "build:runtime-wasm": "tsx scripts/build-runtime-wasm.ts",
     "build:generate": "pnpm run build:runtime-wasm && pnpm run build:langs",
     "build:native": "cargo build -p lumis-js-native --release && tsx scripts/copy-native.ts",
@@ -103,6 +99,7 @@
   },
   "dependencies": {
     "@noble/hashes": "2.3.0",
+    "pathe": "2.0.3",
     "semver": "7.8.5",
     "web-tree-sitter": "0.26.11"
   },
@@ -110,7 +107,10 @@
     "@lumis-sh/lumis-native-darwin-arm64": "workspace:*",
     "@lumis-sh/lumis-native-darwin-x64": "workspace:*",
     "@lumis-sh/lumis-native-linux-arm64-gnu": "workspace:*",
+    "@lumis-sh/lumis-native-linux-arm64-musl": "workspace:*",
     "@lumis-sh/lumis-native-linux-x64-gnu": "workspace:*",
+    "@lumis-sh/lumis-native-linux-x64-musl": "workspace:*",
+    "@lumis-sh/lumis-native-win32-arm64-msvc": "workspace:*",
     "@lumis-sh/lumis-native-win32-x64-msvc": "workspace:*"
   },
   "engines": {

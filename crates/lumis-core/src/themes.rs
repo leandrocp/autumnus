@@ -830,6 +830,26 @@ mod tests {
     }
 
     #[test]
+    fn available_themes_is_sorted_by_name() {
+        let names: Vec<&str> = available_themes()
+            .map(|theme| theme.name.as_str())
+            .collect();
+
+        assert!(
+            names.len() > 200,
+            "expected the full theme corpus, got {}",
+            names.len()
+        );
+
+        let mut sorted = names.clone();
+        sorted.sort_unstable();
+        assert_eq!(
+            names, sorted,
+            "available_themes() must not depend on filesystem order"
+        );
+    }
+
+    #[test]
     fn test_load_all_themes() {
         for theme in ALL_THEMES.iter() {
             assert!(!theme.name.is_empty());

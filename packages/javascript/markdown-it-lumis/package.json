@@ -1,6 +1,6 @@
 {
   "name": "@lumis-sh/markdown-it-lumis",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "markdown-it plugin for Lumis syntax highlighter",
   "author": "Leandro Pereira",
   "license": "MIT",

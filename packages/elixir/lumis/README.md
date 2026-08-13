@@ -70,12 +70,32 @@ global to the VM, so only the first process pays.
 Lumis.Languages.load(["elixir", "html", "javascript", "css"])
 ```
 
-```sh
-# better: bake parsers into the image, so no request ever pays
-mix lumis.languages.cache elixir html javascript css
+## Application startup
+
+Warm parsers from your application's `start/2` so production does not download
+or compile them on the first request:
+
+```elixir
+def start(_type, _args) do
+  Lumis.Languages.async_load(~w(elixir html javascript css))
+  Supervisor.start_link(children(), strategy: :one_for_one, name: MyApp.Supervisor)
+end
 ```
 
-Parsers live under `LUMIS_DATA_DIR`, or `config :lumis, data_dir:`.
+It returns immediately, so the boot never waits on the network, and a failed
+warm-up is logged rather than able to stop the application from starting.
+
+See the [deployment guide](https://lumis.hexdocs.pm/deployment.html) for the
+full lifecycle example, bundles, the standalone CLI, and custom cache directories.
+
+The NIF is precompiled. Set `LUMIS_BUILD=1` to build it from source instead, or
+`LUMIS_USE_LEGACY_ARTIFACTS=1` to take the legacy-CPU variant on a machine
+without the newer instruction sets.
+
+It downloads from GitHub Releases, mirrored to Cloudflare R2. Set
+`config :lumis, artifact_source: :cloudflare` or `LUMIS_ARTIFACT_SOURCE=cloudflare`
+to use the mirror when GitHub is down, see
+[where the precompiled NIF comes from](https://lumis.sh/docs/usage/elixir-integration#where-the-precompiled-nif-comes-from).
 
 ## Documentation
 

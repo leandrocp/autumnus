@@ -19,6 +19,25 @@ beforeAll(() => {
   configureLocalWasmResolver(["diff", "json", "javascript", "html", "css", "bash", "c", "rust"]);
 }, 120_000);
 
+describe("bundled plaintext", () => {
+  // Plaintext has no `languages.toml` entry, so its aliases come from the
+  // generator rather than the catalog. Every other assertion here checks that
+  // plaintext is present, which an empty alias list still satisfies.
+  const bundles = {
+    web: webBundle,
+    "web-extra": webExtraBundle,
+    system: systemBundle,
+    backend: backendBundle,
+    full: fullBundle,
+  };
+
+  for (const [name, bundle] of Object.entries(bundles)) {
+    it(`${name} resolves text, txt and plain`, () => {
+      expect(bundle.plaintext?.aliases).toEqual(["text", "txt", "plain"]);
+    });
+  }
+});
+
 describe("LanguageBundle type", () => {
   it("web bundle has expected languages", () => {
     expect(Object.keys(webBundle)).toContain("html");

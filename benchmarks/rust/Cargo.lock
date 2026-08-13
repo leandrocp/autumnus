@@ -376,6 +376,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "etcetera"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "de48cc4d1c1d97a20fd819def54b890cadde72ed3ad0c614822a0a433361be96"
+dependencies = [
+ "cfg-if",
+ "windows-sys",
+]
+
+[[package]]
 name = "fastrand"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -616,6 +626,7 @@ dependencies = [
  "serde_json",
  "syn 3.0.3",
  "toml",
+ "typed-path",
  "v_htmlescape",
 ]
 
@@ -623,6 +634,7 @@ dependencies = [
 name = "lumis-wasm-runtime"
 version = "0.1.0"
 dependencies = [
+ "etcetera",
  "semver",
  "serde",
  "serde_json",
@@ -1323,6 +1335,12 @@ dependencies = [
  "serde_derive",
  "syntect",
 ]
+
+[[package]]
+name = "typed-path"
+version = "0.12.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8e28f89b80c87b8fb0cf04ab448d5dd0dd0ade2f8891bae878de66a75a28600e"
 
 [[package]]
 name = "typenum"

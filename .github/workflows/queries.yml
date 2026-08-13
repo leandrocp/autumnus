@@ -53,9 +53,8 @@ env:
 jobs:
   portability:
     if: >-
-      ${{ github.event_name == 'workflow_dispatch' ||
-          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
-          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
+      ${{ github.event_name != 'push' ||
+          !startsWith(github.event.head_commit.message, 'chore(release):') }}
     name: Portability
     runs-on: ubuntu-latest
     steps:
@@ -88,9 +87,8 @@ jobs:
   # because that is 113 builds.
   compile:
     if: >-
-      ${{ github.event_name == 'workflow_dispatch' ||
-          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
-          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
+      ${{ github.event_name != 'push' ||
+          !startsWith(github.event.head_commit.message, 'chore(release):') }}
     name: Compile queries (shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
     # llvm takes about eight minutes to compile through the WASI SDK; vim and
@@ -209,9 +207,8 @@ jobs:
   # its memory on a runner.
   compile-published:
     if: >-
-      ${{ github.event_name == 'workflow_dispatch' ||
-          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
-          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
+      ${{ github.event_name != 'push' ||
+          !startsWith(github.event.head_commit.message, 'chore(release):') }}
     name: Compile queries (published parsers, shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
     strategy:

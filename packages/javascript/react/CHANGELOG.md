@@ -1,3 +1,15 @@
+## [0.3.0](https://github.com/leandrocp/lumis/compare/npm-react/v0.2.0...npm-react/v0.3.0) (2026-08-13)
+
+
+### Bug Fixes
+
+- validate boundary data - [#1262](https://github.com/leandrocp/lumis/pull/1262)
+
+
+### Features
+
+- unify dynamic WASM language loading - [#1099](https://github.com/leandrocp/lumis/pull/1099)
+
 ## [0.2.0](https://github.com/leandrocp/lumis/compare/npm-react/v0.1.3...npm-react/v0.2.0) (2026-07-23)
 
 

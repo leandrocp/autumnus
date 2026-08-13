@@ -218,10 +218,23 @@ export function getLoadedLanguage(...args: Parameters<typeof runtime.getLoadedLa
 export function getLoadedLanguageIds(...args: Parameters<typeof runtime.getLoadedLanguageIds>) {
   return runtime.getLoadedLanguageIds(...args);
 }
+/** {@inheritDoc node.loadedLanguages} */
+export function loadedLanguages(): string[] {
+  return runtime.getLoadedLanguageIds();
+}
 /** {@inheritDoc node.availableLanguages} */
 export function availableLanguages(...args: Parameters<typeof runtime.availableLanguages>) {
   return runtime.availableLanguages(...args);
 }
 export function getDefaultRuntime(...args: Parameters<typeof runtime.getDefaultRuntime>) {
   return runtime.getDefaultRuntime(...args);
+}
+
+/**
+ * {@inheritDoc node.runtimeKind}
+ *
+ * Always `"wasm"` in a browser: the native addon is a Node addon.
+ */
+export function runtimeKind(): "native" | "wasm" {
+  return "wasm";
 }

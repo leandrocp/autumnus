@@ -4,12 +4,13 @@
  * worth having: it resolves parsers itself, and it loads a language injected
  * inside a document during the walk that finds it.
  */
-import { existsSync, mkdtempSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, expect, it, vi } from "vitest";
+import { cacheLanguages } from "../src/cache.js";
 import { createNativeLanguagesModule } from "../src/core/native-languages.js";
 import { LANGUAGE_PACKAGE_VERSION_RANGE } from "../src/generated/package-version-range.js";
 import type { LanguagesModule, RuntimeLike } from "../src/core/languages.js";
@@ -22,21 +23,55 @@ import {
 } from "./wasm.js";
 
 // Read when the addon builds its store, which is the first call into it below.
-process.env.LUMIS_DATA_DIR ??= resolve(import.meta.dirname, "../../../../target/test-parsers");
-process.env.LUMIS_DATA_DIR ??= mkdtempSync(join(tmpdir(), "lumis-native-test-"));
+// Without `mise run stage-test-parsers` there is nothing staged, so fall back to
+// an empty directory rather than pointing the store at a path that is not there.
+const stagedParsers = resolve(import.meta.dirname, "../../../../target/test-parsers");
+process.env.LUMIS_DATA_DIR ??= existsSync(stagedParsers)
+  ? stagedParsers
+  : mkdtempSync(join(tmpdir(), "lumis-native-test-"));
 
-const { loadAddon } = await import("../src/native-binding.js");
+const { loadAddon, nativeTarget } = await import("../src/native-binding.js");
 
 // Asserted directly, so a run that selected the Wasm runtime still covers this.
 const binding = loadAddon();
+const hasPrebuiltAddon = nativeTarget() !== undefined;
 
-/** Every platform CI builds for. Elsewhere the Wasm runtime is the answer. */
-const PREBUILT = new Set(["darwin-arm64", "darwin-x64", "linux-x64", "linux-arm64", "win32-x64"]);
-const platform = `${process.platform}-${process.arch}`;
+/**
+ * `it`, for a test the addon is the subject of.
+ *
+ * Skipping is keyed on whether Lumis publishes an addon for this platform, never
+ * on whether one loaded. Those differ exactly when the addon is missing or
+ * broken on a platform that should have it, which is the defect these tests
+ * exist to catch — `it.runIf(binding)` reported that as green.
+ *
+ * The remaining skip is a platform Lumis publishes no addon for, where there is
+ * nothing to run rather than something unverified. `native-targets.test.ts` pins
+ * that list, so the waiver can only shrink as targets are added.
+ */
+const itWithAddon = hasPrebuiltAddon ? it : it.skip;
+
+function newRuntime(): NativeRuntimeInstance {
+  if (!binding) {
+    throw new Error(
+      `no addon loaded for ${nativeTarget()}; run \`pnpm build:native\` (or \`mise run test-javascript\`) first`,
+    );
+  }
+
+  return new binding.NativeRuntime();
+}
+
+function filesUnder(directory: string): string[] {
+  if (!existsSync(directory)) return [];
+
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(directory, entry.name);
+    return entry.isDirectory() ? filesUnder(path) : [path];
+  });
+}
 
 describe("native runtime", () => {
   it("is present wherever an addon is built", () => {
-    if (!PREBUILT.has(platform)) {
+    if (!hasPrebuiltAddon) {
       expect(binding).toBeUndefined();
       return;
     }
@@ -46,15 +81,50 @@ describe("native runtime", () => {
     expect(binding?.runtimeKind()).toBe("native");
   });
 
-  it.runIf(binding)("resolves a parser without any JavaScript resolver", () => {
-    const runtime = new binding!.NativeRuntime();
+  itWithAddon("resolves a parser without any JavaScript resolver", () => {
+    const runtime = newRuntime();
     runtime.loadLanguage("json");
     expect(runtime.hasLanguage("json")).toBe(true);
   });
 
-  it.runIf(binding)("shares catalog languages until caller behavior requires isolation", () => {
-    const first = new binding!.NativeRuntime();
-    const second = new binding!.NativeRuntime();
+  // Compiling is the addon's, so this asserts one thing on a native run and its
+  // negation on a Wasm one. Only the native half needs a binding: a host with no
+  // published target runs the portable fallback, which is exactly where "caches
+  // without compiling" is the behaviour in use, so gating that half on an addon
+  // would drop the assertion on the platform it describes.
+  const compilesWhenCaching = process.env.LUMIS_TEST_RUNTIME !== "wasm";
+  const itForCacheCompilation = compilesWhenCaching ? itWithAddon : it;
+
+  itForCacheCompilation("persists compiled modules only where the addon does it", async () => {
+    // Fixes the process-global engine's cache directory first. Preparing another
+    // one afterwards is the case this pins: it needs an engine of its own.
+    if (compilesWhenCaching) newRuntime().loadLanguage("json");
+    const directory = mkdtempSync(join(tmpdir(), "lumis-native-cache-"));
+    try {
+      await cacheLanguages(["diff"], {
+        directory,
+        resolver: (language, wasm) => ensureLocalParserWasm(language, wasm.name),
+        languagePackageResolver: localLanguagePackageResolver,
+      });
+
+      const compiled = filesUnder(join(directory, "compiled", "modules"));
+      if (compilesWhenCaching) {
+        expect(compiled).not.toEqual([]);
+      } else {
+        expect(compiled).toEqual([]);
+      }
+
+      // Either way the parser itself is cached, which is the half that does not
+      // depend on which runtime the process selected.
+      expect(filesUnder(join(directory, "parsers"))).not.toEqual([]);
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
+  });
+
+  itWithAddon("shares catalog languages until caller behavior requires isolation", () => {
+    const first = newRuntime();
+    const second = newRuntime();
     first.loadLanguage("markdown");
     expect(second.hasLanguage("markdown")).toBe(true);
 
@@ -73,8 +143,8 @@ describe("native runtime", () => {
     ).toBeGreaterThan(0);
   });
 
-  it.runIf(binding)("loads an injected language during the walk that finds it", () => {
-    const runtime = new binding!.NativeRuntime();
+  itWithAddon("loads an injected language during the walk that finds it", () => {
+    const runtime = newRuntime();
     runtime.loadLanguage("html");
     expect(runtime.hasLanguage("javascript")).toBe(false);
 
@@ -83,8 +153,8 @@ describe("native runtime", () => {
     expect(runtime.hasLanguage("javascript")).toBe(true);
   });
 
-  it.runIf(binding)("rejects installed metadata for a different package", () => {
-    const runtime = new binding!.NativeRuntime();
+  itWithAddon("rejects installed metadata for a different package", () => {
+    const runtime = newRuntime();
     const metadata = localLanguagePackageMetadata("@lumis-sh/wasm-json");
     const wasm = readFileSync(ensureLocalParserWasm("json", metadata.parser.name));
 
@@ -93,8 +163,8 @@ describe("native runtime", () => {
     ).toThrow(/resolver returned @lumis-sh\/wasm-json for @test\/not-json/);
   });
 
-  it.runIf(binding)("replays a trusted installed definition when resolver use isolates it", () => {
-    const runtime = new binding!.NativeRuntime();
+  itWithAddon("replays a trusted installed definition when resolver use isolates it", () => {
+    const runtime = newRuntime();
     const metadata = localLanguagePackageMetadata("@lumis-sh/wasm-json");
     const wasm = readFileSync(ensureLocalParserWasm("json", metadata.parser.name));
     const internalId = runtime.loadInstalledLanguagePackage(
@@ -116,11 +186,11 @@ describe("native runtime", () => {
     expect(runtime.hasLanguage(internalId)).toBe(true);
   });
 
-  it.runIf(binding)("rejects direct addon reentry from a resolver callback", () => {
+  itWithAddon("rejects direct addon reentry from a resolver callback", () => {
     const source = '```json\n{"answer": 42}\n```\n';
     let runtime: NativeRuntimeInstance;
     let reentrantError: unknown;
-    runtime = new binding!.NativeRuntime();
+    runtime = newRuntime();
     const wasmResolver = (language: string, wasmJson: string) => {
       if (language === "json" && reentrantError === undefined) {
         try {
@@ -148,7 +218,7 @@ describe("native runtime", () => {
     expect(highlighted.unresolved).toEqual([]);
   });
 
-  it.runIf(binding)("uses stable content ids without sharing caller definitions", () => {
+  itWithAddon("uses stable content ids without sharing caller definitions", () => {
     const parserDirectory = resolve(process.env.LUMIS_DATA_DIR!, "parsers");
     const parser = readdirSync(parserDirectory).find(
       (name) => name.startsWith("tree-sitter-json-") && name.endsWith(".wasm"),
@@ -161,10 +231,10 @@ describe("native runtime", () => {
       highlights: "(string) @string",
     };
 
-    const firstRuntime = new binding!.NativeRuntime();
-    const identicalRuntime = new binding!.NativeRuntime();
-    const differentRuntime = new binding!.NativeRuntime();
-    const observer = new binding!.NativeRuntime();
+    const firstRuntime = newRuntime();
+    const identicalRuntime = newRuntime();
+    const differentRuntime = newRuntime();
+    const observer = newRuntime();
     const first = firstRuntime.loadLanguageDefinition(spec, wasm);
     const identical = identicalRuntime.loadLanguageDefinition(spec, wasm);
     const different = differentRuntime.loadLanguageDefinition(
@@ -179,7 +249,7 @@ describe("native runtime", () => {
     expect(observer.hasLanguage(first)).toBe(false);
   });
 
-  it.runIf(binding)("lets async work outlive an isolated runtime wrapper", () => {
+  itWithAddon("lets async work outlive an isolated runtime wrapper", () => {
     const nativeDirectory = resolve(import.meta.dirname, "../native");
     const addon = readdirSync(nativeDirectory).find(
       (name) => name.startsWith("lumis-native.") && name.endsWith(".node"),
@@ -254,8 +324,8 @@ describe("native runtime", () => {
     expect(result.status).toBe(0);
   });
 
-  it.runIf(binding)("uses caller-owned injected definitions in async formatting", async () => {
-    const runtime = new binding!.NativeRuntime();
+  itWithAddon("uses caller-owned injected definitions in async formatting", async () => {
+    const runtime = newRuntime();
     const wasm = readFileSync(ensureLocalParserWasm("json", "tree-sitter-json"));
     runtime.loadLanguageDefinition(
       {
@@ -277,7 +347,7 @@ describe("native runtime", () => {
     expect(async).toBe(sync);
   });
 
-  it.runIf(binding)("leaves a document alone when an injected language is unavailable", () => {
+  itWithAddon("leaves a document alone when an injected language is unavailable", () => {
     const nativeDirectory = resolve(import.meta.dirname, "../native");
     const addon = readdirSync(nativeDirectory).find(
       (name) => name.startsWith("lumis-native.") && name.endsWith(".node"),

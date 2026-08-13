@@ -4,6 +4,7 @@ use lumis_core::events::HighlightEvent;
 use lumis_core::highlights::HIGHLIGHT_NAMES;
 use std::collections::HashMap;
 use std::sync::{Arc, Condvar, Mutex, OnceLock, RwLock};
+use std::time::{Duration, Instant};
 use thiserror::Error;
 use tree_sitter::{Language, Parser, Query, Tree, WasmStore};
 use wasmtime::{Cache, CacheConfig, Config, Engine};
@@ -83,6 +84,10 @@ impl WorkerPool {
             state: Mutex::new(WorkerPoolState::default()),
             available: Condvar::new(),
         }
+    }
+
+    fn engine(&self) -> &Engine {
+        &self.engine
     }
 
     fn lease(&self) -> Result<WorkerLease<'_>, RuntimeError> {
@@ -172,6 +177,12 @@ pub enum RuntimeError {
     Query { language: String, message: String },
     #[error("language '{0}' is not loaded")]
     LanguageNotLoaded(String),
+    #[error("unknown language '{0}'")]
+    UnknownLanguage(String),
+    #[error("language store is not configured")]
+    LanguageStoreUnavailable,
+    #[error("language '{0}' is not cached")]
+    LanguageNotCached(String),
     #[error("highlighting failed: {0}")]
     Highlight(String),
 }
@@ -193,6 +204,23 @@ impl Runtime {
         let engine = cached_engine()?;
         let _ = ENGINE.set(engine.clone());
         Self::with_engine(ENGINE.get().cloned().unwrap_or(engine), worker_limit)
+    }
+
+    /// Construct a runtime with an independent engine whose compiled modules
+    /// are persisted under `data_dir`.
+    ///
+    /// This is for build-time preparation of a caller-selected data directory.
+    /// The ordinary runtime uses one process-global engine and therefore cannot
+    /// change its cache directory after its first use.
+    ///
+    /// # Errors
+    /// Fails when Wasmtime or Tree-sitter's WASM store cannot be initialized.
+    pub fn with_compile_cache_dir(
+        worker_limit: usize,
+        data_dir: std::path::PathBuf,
+    ) -> Result<Self, RuntimeError> {
+        let data_dir = crate::store::resolve_data_dir(Some(data_dir));
+        Self::with_engine(engine_with_compile_cache(data_dir)?, worker_limit)
     }
 
     fn with_engine(engine: Engine, worker_limit: usize) -> Result<Self, RuntimeError> {
@@ -232,6 +260,83 @@ impl Runtime {
     /// parser cannot be obtained or verified.
     pub fn load_named_language(&self, name: &str) -> Result<(), RuntimeError> {
         self.load_through_store(name).map(|_| ())
+    }
+
+    /// Compile and validate every cached parser and its queries in `names`, up
+    /// to `concurrency` at a time.
+    ///
+    /// Each parser gets a disposable Tree-sitter [`WasmStore`]. Loading through
+    /// that store performs the link and scanner validation that compiling a raw
+    /// Wasmtime module does not; building its highlight configuration validates
+    /// the queries. Dropping the store after one parser avoids the shared 128 MiB
+    /// address space filling across a full catalog. The load also writes the
+    /// compiled module to the engine's on-disk cache.
+    ///
+    /// Results come back in the order the names were given, one per name.
+    #[must_use]
+    pub fn precompile_languages(
+        &self,
+        names: &[String],
+        concurrency: usize,
+    ) -> Vec<Result<(), RuntimeError>> {
+        self.precompile_languages_detailed(names, concurrency)
+            .into_iter()
+            .map(|result| result.map(|_| ()))
+            .collect()
+    }
+
+    /// Compile and validate every cached parser and report per-language timing.
+    #[must_use]
+    pub fn precompile_languages_detailed(
+        &self,
+        names: &[String],
+        concurrency: usize,
+    ) -> Vec<Result<Duration, RuntimeError>> {
+        crate::parallel_map(names, concurrency, |name| {
+            let started = Instant::now();
+            self.precompile_language(name).map(|()| started.elapsed())
+        })
+    }
+
+    /// Compile and validate one cached parser and its queries without retaining it.
+    fn precompile_language(&self, name: &str) -> Result<(), RuntimeError> {
+        let store = self
+            .store
+            .as_ref()
+            .ok_or(RuntimeError::LanguageStoreUnavailable)?;
+        let location =
+            crate::catalog::find(name).ok_or_else(|| RuntimeError::UnknownLanguage(name.into()))?;
+        let package = store
+            .local_package(location.package_name)
+            .ok_or_else(|| RuntimeError::LanguageNotCached(name.into()))?;
+        let wasm = store
+            .local_parser(&package)
+            .ok_or_else(|| RuntimeError::LanguageNotCached(name.into()))?;
+
+        let mut wasm_store = WasmStore::new(self.workers.engine())
+            .map_err(|error| RuntimeError::TreeSitter(error.to_string()))?;
+        let language = wasm_store
+            .load_language(&package.parser.grammar_name, &wasm)
+            .map_err(|error| RuntimeError::Parser {
+                language: name.to_string(),
+                message: error.to_string(),
+            })?;
+        let (id, definition) = package
+            .language(name)
+            .ok_or_else(|| RuntimeError::UnknownLanguage(name.into()))?;
+        let mut highlight = HighlightConfiguration::new(
+            language,
+            id.to_string(),
+            &definition.highlights,
+            &definition.injections,
+            &definition.locals,
+        )
+        .map_err(|error| RuntimeError::Query {
+            language: id.to_string(),
+            message: error.to_string(),
+        })?;
+        highlight.configure(&HIGHLIGHT_NAMES);
+        Ok(())
     }
 
     /// Resolve, download and load `id` through the store, if one is attached.
@@ -737,8 +842,9 @@ static COMPILE_CACHE_DIR: RwLock<Option<std::path::PathBuf>> = RwLock::new(None)
 /// The engine is process-global and built once, so the last value set before the
 /// first [`Runtime`] is the one that takes effect and later calls do nothing.
 /// Callers that resolve a data directory of their own should pass it here,
-/// otherwise the cache follows `LUMIS_DATA_DIR` and a caller-supplied directory
-/// would hold the parsers while their compiled forms went somewhere unrelated.
+/// otherwise the cache falls back to [`store::resolve_data_dir`] and a
+/// caller-supplied directory would hold the parsers while their compiled forms
+/// went somewhere unrelated.
 pub fn set_compile_cache_dir(dir: std::path::PathBuf) {
     *COMPILE_CACHE_DIR
         .write()
@@ -746,20 +852,21 @@ pub fn set_compile_cache_dir(dir: std::path::PathBuf) {
 }
 
 fn cached_engine() -> Result<Engine, wasmtime::Error> {
-    let mut config = Config::new();
-    let cache = COMPILE_CACHE_DIR
-        .read()
-        .expect("compile cache lock poisoned")
-        .clone()
-        .or_else(|| std::env::var_os("LUMIS_DATA_DIR").map(std::path::PathBuf::from))
-        .map(|root| {
-            let mut cache_config = CacheConfig::new();
-            cache_config.with_directory(root.join("compiled"));
-            Cache::new(cache_config)
-        })
-        .unwrap_or_else(|| Cache::from_file(None::<&std::path::Path>));
+    let root = crate::store::resolve_data_dir(
+        COMPILE_CACHE_DIR
+            .read()
+            .expect("compile cache lock poisoned")
+            .clone(),
+    );
+    engine_with_compile_cache(root)
+}
 
-    if let Ok(cache) = cache {
+fn engine_with_compile_cache(root: std::path::PathBuf) -> Result<Engine, wasmtime::Error> {
+    let mut config = Config::new();
+    let mut cache_config = CacheConfig::new();
+    cache_config.with_directory(root.join("compiled"));
+
+    if let Ok(cache) = Cache::new(cache_config) {
         config.cache(Some(cache));
     }
 
@@ -860,28 +967,48 @@ mod tests {
 
     const JSON_WASM: &[u8] =
         include_bytes!("../../lumis-cli/tests/fixtures/parsers/tree-sitter-json.wasm");
+    const INVALID_TREE_SITTER_WASM: &[u8] = &[
+        0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, 0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7f,
+        0x03, 0x02, 0x01, 0x00, 0x07, 0x16, 0x01, 0x12, 0x74, 0x72, 0x65, 0x65, 0x5f, 0x73, 0x69,
+        0x74, 0x74, 0x65, 0x72, 0x5f, 0x62, 0x72, 0x6f, 0x6b, 0x65, 0x6e, 0x00, 0x00, 0x0a, 0x06,
+        0x01, 0x04, 0x00, 0x41, 0x00, 0x0b,
+    ];
 
-    fn json_package(wasm: &[u8]) -> crate::LanguagePackage {
+    fn package(
+        package_name: &str,
+        language: &str,
+        grammar_name: &str,
+        wasm: &[u8],
+    ) -> crate::LanguagePackage {
         crate::LanguagePackage {
-            package_name: "@lumis-sh/wasm-json".into(),
-            version: "0.26.0".into(),
+            package_name: package_name.into(),
+            version: crate::lowest_compatible_package_version(),
             definition_hash: "test".into(),
             parser: crate::ParserMetadata {
-                name: "tree-sitter-json".into(),
-                grammar_name: "json".into(),
+                name: format!("tree-sitter-{grammar_name}"),
+                grammar_name: grammar_name.into(),
                 upstream_version: None,
                 revision: None,
                 sha256: crate::sha256_hex(wasm),
                 size: u64::try_from(wasm.len()).expect("parser size fits in u64"),
             },
             languages: std::collections::BTreeMap::from([(
-                "json".into(),
+                language.into(),
                 crate::PackagedLanguage {
                     highlights: "(string) @string".into(),
                     ..crate::PackagedLanguage::default()
                 },
             )]),
         }
+    }
+
+    fn json_package(wasm: &[u8]) -> crate::LanguagePackage {
+        package("@lumis-sh/wasm-json", "json", "json", wasm)
+    }
+
+    fn cache_package(store: &LanguageStore, package: &crate::LanguagePackage, wasm: &[u8]) {
+        store.cache_package(package).unwrap();
+        crate::write_atomic(&store.parser_path(package).unwrap(), wasm).unwrap();
     }
 
     fn install_json(runtime: &Runtime, injections: &str) {
@@ -969,12 +1096,6 @@ mod tests {
 
     #[test]
     fn a_failed_parser_module_load_is_cached_by_content() {
-        const INVALID_TREE_SITTER_WASM: &[u8] = &[
-            0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, 0x01, 0x05, 0x01, 0x60, 0x00, 0x01,
-            0x7f, 0x03, 0x02, 0x01, 0x00, 0x07, 0x16, 0x01, 0x12, 0x74, 0x72, 0x65, 0x65, 0x5f,
-            0x73, 0x69, 0x74, 0x74, 0x65, 0x72, 0x5f, 0x62, 0x72, 0x6f, 0x6b, 0x65, 0x6e, 0x00,
-            0x00, 0x0a, 0x06, 0x01, 0x04, 0x00, 0x41, 0x00, 0x0b,
-        ];
         let runtime = Runtime::with_worker_limit(1).unwrap();
         let spec = LanguageSpec {
             id: "broken-first".into(),
@@ -1007,6 +1128,78 @@ mod tests {
                 && first_message == second_message
         ));
         assert_eq!(runtime.module_load_attempt_count(), 1);
+    }
+
+    #[test]
+    fn precompile_validates_loadability_and_continues_after_a_failure() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = LanguageStore::new(
+            StoreConfig {
+                cache_dir: dir.path().to_path_buf(),
+            },
+            Box::new(crate::NoNetwork),
+        );
+        let invalid = package(
+            "@lumis-sh/wasm-json",
+            "json",
+            "broken",
+            INVALID_TREE_SITTER_WASM,
+        );
+        let valid = package("@lumis-sh/wasm-diff", "diff", "json", JSON_WASM);
+        cache_package(&store, &invalid, INVALID_TREE_SITTER_WASM);
+        cache_package(&store, &valid, JSON_WASM);
+
+        let runtime = Runtime::with_worker_limit(1).unwrap().with_store(store);
+        assert!(wasmtime::Module::new(runtime.workers.engine(), INVALID_TREE_SITTER_WASM).is_ok());
+
+        let names = vec!["json".to_string(), "diff".to_string()];
+        let results = runtime.precompile_languages(&names, 1);
+        assert!(matches!(
+            &results[0],
+            Err(RuntimeError::Parser { language, .. }) if language == "json"
+        ));
+        assert!(results[1].is_ok(), "later parsers must still be attempted");
+    }
+
+    #[test]
+    fn precompile_validates_queries() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = LanguageStore::new(
+            StoreConfig {
+                cache_dir: dir.path().to_path_buf(),
+            },
+            Box::new(crate::NoNetwork),
+        );
+        let mut invalid = json_package(JSON_WASM);
+        invalid.languages.get_mut("json").unwrap().highlights =
+            "(definitely_not_a_json_node) @string".into();
+        cache_package(&store, &invalid, JSON_WASM);
+
+        let runtime = Runtime::with_worker_limit(1).unwrap().with_store(store);
+        let results = runtime.precompile_languages(&["json".to_string()], 1);
+        assert!(matches!(
+            &results[0],
+            Err(RuntimeError::Query { language, .. }) if language == "json"
+        ));
+    }
+
+    #[test]
+    fn precompile_requires_a_cached_parser_even_when_the_language_is_loaded() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = LanguageStore::new(
+            StoreConfig {
+                cache_dir: dir.path().to_path_buf(),
+            },
+            Box::new(crate::NoNetwork),
+        );
+        let runtime = Runtime::with_worker_limit(1).unwrap().with_store(store);
+        install_json(&runtime, "");
+
+        let results = runtime.precompile_languages(&["json".to_string()], 1);
+        assert!(matches!(
+            &results[0],
+            Err(RuntimeError::LanguageNotCached(language)) if language == "json"
+        ));
     }
 
     #[test]

@@ -41,7 +41,10 @@ on:
 
 jobs:
   detect:
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+    if: >-
+      ${{ (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) &&
+          (github.event_name != 'push' ||
+           !startsWith(github.event.head_commit.message, 'chore(release):')) }}
     runs-on: ubuntu-latest
     outputs:
       parsers: ${{ steps.needed.outputs.parsers }}

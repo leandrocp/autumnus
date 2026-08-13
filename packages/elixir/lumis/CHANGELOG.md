@@ -1,3 +1,48 @@
+## [0.7.0](https://github.com/leandrocp/lumis/compare/hex-lumis/v0.6.3...hex-lumis/v0.7.0) (2026-08-13)
+
+### Bug Fixes
+
+- BREAKING: align the default theme on none across runtimes - [#1142](https://github.com/leandrocp/lumis/pull/1142)
+- pin lumis crate requirements to the workspace version - [#1140](https://github.com/leandrocp/lumis/pull/1140)
+- highlight lines in light-dark() mode - [#1260](https://github.com/leandrocp/lumis/pull/1260)
+- resolve compatible WASM package versions - [#1263](https://github.com/leandrocp/lumis/pull/1263)
+- resolve one data directory across every runtime - [#1264](https://github.com/leandrocp/lumis/pull/1264)
+- align the public API across Rust, the CLI, Elixir and JavaScript - [#1266](https://github.com/leandrocp/lumis/pull/1266)
+
+### Documentation
+
+- add deployment guide - [#1268](https://github.com/leandrocp/lumis/pull/1268)
+- add release migration steps - [#1272](https://github.com/leandrocp/lumis/pull/1272)
+
+### Features
+
+- update generated themes - [#1122](https://github.com/leandrocp/lumis/pull/1122)
+- unify dynamic WASM language loading - [#1099](https://github.com/leandrocp/lumis/pull/1099)
+- BREAKING: one vocabulary for the language and theme catalog, in every runtime - [#1269](https://github.com/leandrocp/lumis/pull/1269)
+- mirror precompiled NIFs to Cloudflare R2 - [#1270](https://github.com/leandrocp/lumis/pull/1270)
+- warm-up parsers - [#1273](https://github.com/leandrocp/lumis/pull/1273)
+
+### Performance
+
+- prepare large parser bundles concurrently - [#1271](https://github.com/leandrocp/lumis/pull/1271)
+
+### Breaking changes
+
+**Load languages on-demand**
+
+No changes are required but it's recommended to warm-up parsers to avoid slow first requests.
+
+See https://lumis.hexdocs.pm/deployment.html
+
+**Removed default `onedark` theme**
+
+Add `theme: "onedark"` to `:html_inline` and `:terminal` to keep old colors.
+
+**Align Theme and Language APIs**
+
+1. Replace `Lumis.available_languages()["elixir"]` with `Lumis.Languages.get("elixir")`.
+2. Get theme names with `Enum.map(Lumis.available_themes(), & &1.name)`.
+
 ## [0.6.3](https://github.com/leandrocp/lumis/compare/hex-lumis/v0.6.2...hex-lumis/v0.6.3) (2026-07-23)
 
 

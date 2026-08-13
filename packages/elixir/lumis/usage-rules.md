@@ -77,12 +77,22 @@ Lumis.highlight!(code)
 ### Discovering Available Languages
 
 ```elixir
-# Get all available languages
+# Get all available languages, sorted by id
 languages = Lumis.available_languages()
-# Returns: %{"elixir" => {"Elixir", ["*.ex", "*.exs"]}, ...}
+# Returns: [%{id: "elixir", name: "Elixir", aliases: [], extensions: ["*.ex", "*.exs"],
+#            globs: ["*.ex", "*.exs"], emacs_modes: ["elixir"], shebangs: ["elixir"]}, ...]
 
 # Check if a language is supported
-Map.has_key?(Lumis.available_languages(), "elixir")
+Enum.any?(Lumis.available_languages(), &(&1.id == "elixir"))
+
+# Look one up by id or alias, without scanning the catalog
+Lumis.Languages.get("js")
+# Returns: %{id: "javascript", name: "JavaScript", ...}
+Lumis.Languages.get("not-a-language")
+# Returns: nil
+
+# Or resolve a name, path or source the way highlighting does
+"elixir" = Lumis.Languages.guess("lib/app.ex")
 ```
 
 ### Parser Loading
@@ -91,24 +101,32 @@ Highlighting loads what a document needs, including languages injected inside
 it, so nothing has to be declared up front. Loading is global to the VM, so the
 cost is paid once.
 
-Load ahead of time to keep the first download off a user's request:
+Load ahead of time to keep the first download off a user's request. A cold
+parser costs a download *and* a Wasmtime compile:
 
 ```elixir
 :ok = Lumis.Languages.load(["markdown", "elixir", "json"])
 ```
 
-Better still, do it at image-build time so no request ever pays. A cold parser
-costs a download *and* a Wasmtime compile — the compile is the larger half, about
-8 s for seven parsers against 1.3 s once cached:
+From an application's `start/2`, use the async variant instead. It returns
+immediately, so a slow or unreachable CDN cannot delay or fail the boot, and it
+is not matched on:
 
-```sh
-mix lumis.languages.cache markdown elixir json
+```elixir
+Lumis.Languages.async_load(["markdown", "elixir", "json"])
 ```
 
-The store checks `:data_dir` and then the CDN. It defaults to `LUMIS_DATA_DIR`,
-and is also where Wasmtime persists compiled modules. A cold cache resolves the
-runtime's compatible package range; the exact package stored in that directory
-is then served without revalidating it.
+The store is checked before the CDN, and is also where Wasmtime persists
+compiled modules. It resolves in that order: `config :lumis, data_dir:` wins,
+`LUMIS_DATA_DIR` is the environment fallback, and Lumis's own `priv/lumis` is
+the zero-configuration default. A cold cache resolves the runtime's compatible
+package range; the exact package stored in that directory is then served
+without revalidating it.
+
+`Lumis.Languages.cache/2` and `lumis languages cache` fill that directory
+without loading anything, for a build or operations step that runs before the
+VM that serves. Inside a running application prefer `async_load/1`, which keeps
+what it loads rather than compiling and discarding it.
 
 ## Formatters
 
@@ -319,9 +337,13 @@ Available options for `:bbcode_scoped`:
 ### Using Themes
 
 ```elixir
-# List all available themes
+# List all available themes, sorted by name
 themes = Lumis.available_themes()
-# Returns: ["onedark", "github_light", "dracula", ...]
+# Returns: [%{name: "dracula", appearance: "dark"}, ...]
+
+# Or just the names
+names = Enum.map(Lumis.available_themes(), & &1.name)
+# Returns: ["adwaita_dark", "adwaita_light", ...]
 
 # Use a theme by name
 Lumis.highlight!(code,
@@ -685,10 +707,16 @@ highlight_lines: %{lines: [1, 2]}
 html = Lumis.highlight!(source, opts)
 
 # Get all available languages
-%{} = Lumis.available_languages()
+[%{id: _} | _] = Lumis.available_languages()
+
+# Get one language by id or alias
+%{id: "javascript"} = Lumis.Languages.get("js")
+
+# Get the ids loaded into this VM
+[_ | _] = Lumis.loaded_languages()
 
 # Get all available themes
-[] = Lumis.available_themes()
+[%{name: _, appearance: _} | _] = Lumis.available_themes()
 
 # Validate options
 opts = Lumis.validate_options!(opts)

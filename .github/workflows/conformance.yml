@@ -47,18 +47,8 @@ on:
 jobs:
   conformance:
     if: >-
-      ${{ github.event_name == 'workflow_dispatch' ||
-          (
-            github.event_name == 'pull_request' &&
-            github.head_ref != 'knope/release'
-          ) ||
-          (
-            github.event_name == 'push' &&
-            !startsWith(
-              github.event.head_commit.message,
-              'chore: prepare releases'
-            )
-          ) }}
+      ${{ github.event_name != 'push' ||
+          !startsWith(github.event.head_commit.message, 'chore(release):') }}
     name: Conformance (${{ matrix.name }})
     runs-on: ubuntu-latest
     timeout-minutes: 45

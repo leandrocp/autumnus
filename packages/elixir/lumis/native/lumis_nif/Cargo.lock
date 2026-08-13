@@ -393,16 +393,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "etcetera"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "de48cc4d1c1d97a20fd819def54b890cadde72ed3ad0c614822a0a433361be96"
-dependencies = [
- "cfg-if",
- "windows-sys 0.61.2",
-]
-
-[[package]]
 name = "fallible-iterator"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -643,7 +633,7 @@ dependencies = [
 name = "lumis_nif"
 version = "0.1.0"
 dependencies = [
- "etcetera",
+ "anyhow",
  "lumis-core",
  "lumis-wasm-runtime",
  "once_cell",

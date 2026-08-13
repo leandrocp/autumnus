@@ -1,0 +1,140 @@
+[
+  {
+    "name": "explicit language id",
+    "hint": "javascript",
+    "source": "",
+    "expected": "javascript"
+  },
+  {
+    "name": "trimmed case-insensitive language id",
+    "hint": "  JavaScript  ",
+    "source": "",
+    "expected": "javascript"
+  },
+  {
+    "name": "language alias",
+    "hint": "sh",
+    "source": "",
+    "expected": "bash"
+  },
+  {
+    "name": "bare extension",
+    "hint": "rs",
+    "source": "",
+    "expected": "rust"
+  },
+  {
+    "name": "dotted extension",
+    "hint": ".rs",
+    "source": "",
+    "expected": "rust"
+  },
+  {
+    "name": "file path",
+    "hint": "src/main.rs",
+    "source": "",
+    "expected": "rust"
+  },
+  {
+    "name": "catalog filename with original case",
+    "hint": "CMakeLists.txt",
+    "source": "",
+    "expected": "cmake"
+  },
+  {
+    "name": "catalog filename case-insensitive",
+    "hint": "cmakelists.txt",
+    "source": "",
+    "expected": "cmake"
+  },
+  {
+    "name": "foreign-platform path separator",
+    "hint": "C:\\project\\CMakeLists.txt",
+    "source": "",
+    "expected": "cmake"
+  },
+  {
+    "name": "dotfile glob case-insensitive",
+    "hint": ".rprofile",
+    "source": "",
+    "expected": "r"
+  },
+  {
+    "name": "canonical plaintext overrides content detection",
+    "hint": "plaintext",
+    "source": "#!/usr/bin/env bash\necho hello",
+    "expected": "plaintext"
+  },
+  {
+    "name": "plaintext alias overrides content detection",
+    "hint": "txt",
+    "source": "#!/usr/bin/env bash\necho hello",
+    "expected": "plaintext"
+  },
+  {
+    "name": "empty hint explicitly selects plaintext",
+    "hint": "",
+    "source": "#!/usr/bin/env bash\necho hello",
+    "expected": "plaintext"
+  },
+  {
+    "name": "Emacs mode header",
+    "hint": null,
+    "source": "// -*- mode: ruby; -*-\nputs :ok",
+    "expected": "ruby"
+  },
+  {
+    "name": "Emacs shorthand header",
+    "hint": null,
+    "source": "# -*-python-*-\nprint('ok')",
+    "expected": "python"
+  },
+  {
+    "name": "shebang",
+    "hint": null,
+    "source": "#!/usr/bin/env bash\necho hello",
+    "expected": "bash"
+  },
+  {
+    "name": "case-insensitive shebang",
+    "hint": null,
+    "source": "#!/usr/bin/env RScript\nprint('ok')",
+    "expected": "r"
+  },
+  {
+    "name": "versioned shebang",
+    "hint": null,
+    "source": "#!/usr/bin/env ruby3.3\nputs :ok",
+    "expected": "ruby"
+  },
+  {
+    "name": "versioned absolute shebang",
+    "hint": null,
+    "source": "#!/usr/bin/python3.12\nprint('ok')",
+    "expected": "python"
+  },
+  {
+    "name": "unknown hint falls through to content",
+    "hint": "not-a-language",
+    "source": "#!/usr/bin/env bash\necho hello",
+    "expected": "bash"
+  },
+  {
+    "name": "HTML content after leading whitespace",
+    "hint": null,
+    "source": "  \n<!DOCTYPE html>\n<html></html>",
+    "expected": "html"
+  },
+  {
+    "name": "XML content after leading whitespace",
+    "hint": null,
+    "source": "\n<?xml version=\"1.0\"?><root />",
+    "expected": "xml"
+  },
+  {
+    "name": "fallback",
+    "hint": null,
+    "source": "ordinary text",
+    "expected": "plaintext"
+  }
+]

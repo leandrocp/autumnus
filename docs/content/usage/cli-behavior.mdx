@@ -91,18 +91,18 @@ package range, then loads the exact parser version and matching queries named
 there. Parser filenames contain the package version and SHA-256 digest.
 
 - first use of a language downloads its parser
-- `lumis parsers cache ...` persists selected parsers ahead of time, so no run
+- `lumis languages cache ...` persists selected parsers ahead of time, so no run
   pays for a download and the Wasmtime compile that follows it
-- `lumis parsers cache ... --force` resolves the package range again and
+- `lumis languages cache ... --force` resolves the package range again and
   replaces valid cached parsers
 
 ```bash
-lumis parsers cache rust javascript elixir
-lumis parsers cache rust --force
+lumis languages cache rust javascript elixir
+lumis languages cache rust --force
 ```
 
 Parsers you build or vendor yourself go in the same `parsers/` directory as
-downloaded ones; `lumis --data-dir <dir> parsers cache ...` writes that layout.
+downloaded ones; `lumis --data-dir <dir> languages cache ...` writes that layout.
 
 ## Data directory
 

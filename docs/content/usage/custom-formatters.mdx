@@ -92,6 +92,48 @@ const formatter: Formatter = {
 const html = hl.highlight('fn main() {}', formatter)
 ```
 
+## Nested events instead of flat tokens
+
+`highlightIter` / `highlight_iter` hand you one callback per token. When the
+nesting matters — a `string` scope wrapping injected `tag` scopes inside a
+template literal — take the events instead. A `start` opens a scope, `source`
+events carry byte ranges, and `end` closes it.
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```ts
+import {highlightEvents} from '@lumis-sh/lumis'
+
+for (const event of highlightEvents(source, rust, {rainbowBrackets: true})) {
+  if (event.type === 'start') console.log(event.scope, event.language)
+}
+```
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```rust
+use lumis::events::HighlightEvent;
+use lumis::highlight::{highlight_events_with_options, HighlightOptions};
+use lumis::languages::Language;
+
+let options = HighlightOptions { rainbow_brackets: true };
+for event in highlight_events_with_options(source, Language::Rust, options)? {
+    if let HighlightEvent::Start { .. } = event {
+        println!("{:?} {:?}", event.scope(), event.language());
+    }
+}
+# Ok::<(), lumis::highlight::HighlightError>(())
+```
+
+Rust stores the scope as an index into `HIGHLIGHT_NAMES` because resolving it
+per event costs more than the formatters need. `event.scope()` returns the same
+name JavaScript's event carries directly.
+
+  </TabItem>
+</Tabs>
+
 ## Available helpers
 
 | Runtime | Module | Reference |

@@ -1,10 +1,13 @@
 mod config;
+mod formatter_options;
 mod gen_theme;
 mod registry;
 
 use anyhow::Result;
-use clap::{ArgAction, Parser, Subcommand, ValueEnum};
-use etcetera::BaseStrategy;
+use clap::{ArgAction, CommandFactory, Parser, Subcommand, ValueEnum};
+use formatter_options::{
+    OPTSET_GLOBAL, OPTSET_HTML, OPTSET_MULTI_THEME, OPTSET_STYLED, OPTSET_TERMINAL,
+};
 use lumis_core::events::HighlightEvent;
 use lumis_core::formatter::Formatter as CoreFormatter;
 use lumis_core::formatter::TerminalBackground;
@@ -29,80 +32,37 @@ use tree_sitter::Node;
     disable_version_flag = true
 )]
 struct Cli {
-    /// Print version
-    #[arg(short = 'v', long, global = true, action = ArgAction::Version, help = "Print version")]
-    version: Option<bool>,
-
     #[command(subcommand)]
     command: Commands,
 
     /// Where to look for WASM parsers and theme JSON files
-    #[arg(short = 'd', long, env("LUMIS_DATA_DIR"), global = true)]
+    #[arg(short = 'd', long, env("LUMIS_DATA_DIR"), global = true, help_heading = OPTSET_GLOBAL)]
     data_dir: Option<PathBuf>,
 
     /// Path to the configuration file
-    #[arg(long, env("LUMIS_CONFIG"), global = true)]
+    #[arg(long, env("LUMIS_CONFIG"), global = true, help_heading = OPTSET_GLOBAL)]
     config: Option<PathBuf>,
 
     /// Show extra output (downloads, cache hits, etc.)
-    #[arg(short = 'V', long, global = true)]
+    #[arg(short = 'v', long, global = true, help_heading = OPTSET_GLOBAL)]
     verbose: bool,
 
     /// Print help
-    #[arg(long, global = true, action = ArgAction::Help, help = "Print help")]
+    #[arg(short = 'h', long, global = true, action = ArgAction::Help, help = "Print help", help_heading = OPTSET_GLOBAL)]
     help: Option<bool>,
+
+    /// Print version
+    #[arg(short = 'V', long, global = true, action = ArgAction::Version, help = "Print version", help_heading = OPTSET_GLOBAL)]
+    version: Option<bool>,
 }
 
 #[derive(Subcommand)]
 enum Commands {
     /// Highlight source code from a file or stdin
     #[command(
-        after_help = "Examples:\n  lumis highlight main.rs\n  lumis highlight -l javascript main.txt\n  lumis highlight -f html-inline -t dracula main.rs\n  lumis highlight -b theme -w 120 main.rs\n  lumis highlight --background '#282a36' --width 120 main.rs\n  lumis highlight -h 1,3-5 lib.rs\n  cat main.rs | lumis highlight -l rust\n  echo 'fn main() {}' | lumis highlight -l rust"
+        after_help = "Examples:\n  lumis highlight main.rs\n  lumis highlight -l javascript main.txt\n  lumis highlight -f html-inline -t dracula main.rs\n  lumis highlight -f html-inline -H 1,3-5 --pre-class code lib.rs\n  lumis highlight -f html-multi-themes --themes light:github_light --themes dark:github_dark main.rs\n  lumis highlight -b theme -w 120 main.rs\n  lumis highlight --background '#282a36' --width 120 main.rs\n  cat main.rs | lumis highlight -l rust\n  echo 'fn main() {}' | lumis highlight -l rust\n\nEach formatter accepts a different set of options; run `lumis formatters show <name>` to see one."
     )]
-    Highlight {
-        /// File to highlight (reads from stdin if omitted)
-        path: Option<String>,
-
-        /// Language id (e.g. rust, javascript, elixir)
-        #[arg(short = 'l', long)]
-        language: Option<String>,
-
-        /// Output format [default: terminal]
-        #[arg(short = 'f', long)]
-        formatter: Option<Formatter>,
-
-        /// Theme name, e.g. dracula, github_dark, or auto
-        #[arg(short = 't', long)]
-        theme: Option<String>,
-
-        /// Terminal background: use `theme`, a hex color, or omit it to inherit the output background
-        #[arg(short = 'b', long = "background")]
-        background: Option<String>,
-
-        /// Terminal render width for background padding. Use a number or 'auto'.
-        #[arg(short = 'w', long)]
-        width: Option<String>,
-
-        /// Theme pair as name:theme_id, can be repeated (requires html-multi-themes)
-        #[arg(long)]
-        themes: Vec<String>,
-
-        /// Which --themes entry gets inline styles
-        #[arg(long)]
-        default_theme: Option<String>,
-
-        /// Prefix for CSS custom properties
-        #[arg(long, default_value = "--lumis")]
-        css_variable_prefix: String,
-
-        /// Lines to highlight, e.g. "1,3-5,10"
-        #[arg(short = 'h', long)]
-        highlight_lines: Option<String>,
-
-        /// Render nested brackets using rainbow bracket scopes
-        #[arg(long)]
-        rainbow_brackets: bool,
-    },
+    Highlight(Box<HighlightArgs>),
 
     /// Dump Tree-sitter parsing and highlighting output
     Dump {
@@ -116,17 +76,170 @@ enum Commands {
         command: LanguagesCommands,
     },
 
+    /// Manage output formatters
+    Formatters {
+        #[command(subcommand)]
+        command: FormattersCommands,
+    },
+
     /// Manage themes
     Themes {
         #[command(subcommand)]
         command: ThemesCommands,
     },
+}
 
-    /// Manage Tree-sitter WASM parsers
-    Parsers {
-        #[command(subcommand)]
-        command: ParsersCommands,
-    },
+#[derive(clap::Args)]
+struct HighlightArgs {
+    /// File to highlight (reads from stdin if omitted)
+    path: Option<String>,
+
+    /// Language id (e.g. rust, javascript, elixir)
+    #[arg(short = 'l', long)]
+    language: Option<String>,
+
+    /// Output format [default: terminal]
+    #[arg(short = 'f', long)]
+    formatter: Option<Formatter>,
+
+    /// Theme name, e.g. dracula, github_dark, or auto
+    #[arg(short = 't', long)]
+    theme: Option<String>,
+
+    /// Render nested brackets using rainbow bracket scopes
+    #[arg(long)]
+    rainbow_brackets: bool,
+
+    #[command(flatten)]
+    terminal: TerminalArgs,
+
+    #[command(flatten)]
+    html: HtmlArgs,
+
+    #[command(flatten)]
+    styled: StyledArgs,
+
+    #[command(flatten)]
+    multi_theme: MultiThemeArgs,
+}
+
+#[derive(clap::Args)]
+#[command(next_help_heading = OPTSET_TERMINAL)]
+struct TerminalArgs {
+    /// Fallback background: use `theme`, a hex color, or omit it to inherit the output background
+    #[arg(short = 'b', long = "background")]
+    background: Option<String>,
+
+    /// Render width for background padding. Use a number or 'auto'.
+    #[arg(short = 'w', long)]
+    width: Option<String>,
+}
+
+#[derive(clap::Args)]
+#[command(next_help_heading = OPTSET_HTML)]
+struct HtmlArgs {
+    /// CSS class appended to the wrapping <pre> tag
+    #[arg(long)]
+    pre_class: Option<String>,
+
+    /// Opening tag wrapped around the output, e.g. '<figure>'
+    #[arg(long, requires = "header_close")]
+    header_open: Option<String>,
+
+    /// Closing tag wrapped around the output, e.g. '</figure>'
+    #[arg(long, requires = "header_open")]
+    header_close: Option<String>,
+
+    /// Lines to highlight, e.g. "1,3-5,10"
+    #[arg(short = 'H', long)]
+    highlight_lines: Option<String>,
+
+    /// CSS class added to highlighted lines
+    #[arg(long, requires = "highlight_lines")]
+    highlight_lines_class: Option<String>,
+}
+
+#[derive(clap::Args)]
+#[command(next_help_heading = OPTSET_STYLED)]
+struct StyledArgs {
+    /// Apply italic styles from the theme
+    #[arg(long)]
+    italic: bool,
+
+    /// Add data-highlight attributes naming each scope
+    #[arg(long)]
+    include_highlights: bool,
+
+    /// Style for highlighted lines: `theme`, `none`, or raw CSS [default: theme]
+    #[arg(long, requires = "highlight_lines")]
+    highlight_lines_style: Option<String>,
+}
+
+#[derive(clap::Args)]
+#[command(next_help_heading = OPTSET_MULTI_THEME)]
+struct MultiThemeArgs {
+    /// Theme pair as name:theme_id, can be repeated
+    #[arg(long)]
+    themes: Vec<String>,
+
+    /// Which --themes entry gets inline styles
+    #[arg(long)]
+    default_theme: Option<String>,
+
+    /// Prefix for CSS custom properties [default: --lumis]
+    ///
+    /// A value beginning with `-` needs the `=` form, as in
+    /// `--css-variable-prefix=--shiki`.
+    #[arg(long, allow_hyphen_values = true)]
+    css_variable_prefix: Option<String>,
+}
+
+const DEFAULT_CSS_VARIABLE_PREFIX: &str = "--lumis";
+
+impl HighlightArgs {
+    fn formatter(&self) -> Formatter {
+        self.formatter.unwrap_or_default()
+    }
+
+    /// Every group holding a flag the user passed that the chosen formatter
+    /// would ignore, so one run reports the whole command rather than the first
+    /// thing wrong with it.
+    fn rejected(&self) -> Vec<(&'static formatter_options::OptionGroup, Vec<&'static str>)> {
+        let chosen = self.formatter();
+        formatter_options::OPTION_GROUPS
+            .iter()
+            .filter(|group| !group.accepts(chosen))
+            .filter_map(|group| {
+                let used: Vec<&'static str> = group
+                    .flags
+                    .iter()
+                    .copied()
+                    .filter(|flag| self.is_set(flag))
+                    .collect();
+                (!used.is_empty()).then_some((group, used))
+            })
+            .collect()
+    }
+
+    fn is_set(&self, flag: &str) -> bool {
+        match flag {
+            "--theme" => self.theme.is_some(),
+            "--background" => self.terminal.background.is_some(),
+            "--width" => self.terminal.width.is_some(),
+            "--pre-class" => self.html.pre_class.is_some(),
+            "--header-open" => self.html.header_open.is_some(),
+            "--header-close" => self.html.header_close.is_some(),
+            "--highlight-lines" => self.html.highlight_lines.is_some(),
+            "--highlight-lines-class" => self.html.highlight_lines_class.is_some(),
+            "--italic" => self.styled.italic,
+            "--include-highlights" => self.styled.include_highlights,
+            "--highlight-lines-style" => self.styled.highlight_lines_style.is_some(),
+            "--themes" => !self.multi_theme.themes.is_empty(),
+            "--default-theme" => self.multi_theme.default_theme.is_some(),
+            "--css-variable-prefix" => self.multi_theme.css_variable_prefix.is_some(),
+            other => unreachable!("OPTION_GROUPS names an unknown flag `{other}`"),
+        }
+    }
 }
 
 #[derive(Subcommand)]
@@ -178,12 +291,60 @@ enum DumpCommands {
 enum LanguagesCommands {
     /// Print supported languages and their file patterns
     List,
+
+    /// Print what the catalog knows about one language
+    #[command(after_help = "Examples:\n  lumis languages show elixir\n  lumis languages show js")]
+    Show {
+        /// Language id or alias, e.g. elixir, js
+        language: String,
+    },
+
+    /// Download and compile parsers so later runs skip both
+    #[command(
+        after_help = "Examples:\n  lumis languages cache rust javascript\n  lumis languages cache bundle-web\n  lumis languages cache --all\n  lumis languages cache rust --force\n  lumis --data-dir /app/lumis languages cache rust"
+    )]
+    Cache {
+        /// Language names, or a bundle such as bundle-web (e.g. rust javascript elixir)
+        languages: Vec<String>,
+
+        /// Cache every language in the catalog
+        #[arg(long)]
+        all: bool,
+
+        /// Resolve compatible packages again and replace valid cached parsers
+        #[arg(long)]
+        force: bool,
+    },
+}
+
+#[derive(Subcommand)]
+enum FormattersCommands {
+    /// Print available formatters
+    List,
+
+    /// Print the options a formatter accepts
+    #[command(
+        after_help = "Examples:\n  lumis formatters show terminal\n  lumis formatters show html-multi-themes"
+    )]
+    Show {
+        /// Formatter name, e.g. terminal, html-inline
+        formatter: Formatter,
+    },
 }
 
 #[derive(Subcommand)]
 enum ThemesCommands {
     /// Print available themes (built-in and from --data-dir)
     List,
+
+    /// Print one theme's appearance and colors
+    #[command(
+        after_help = "Examples:\n  lumis themes show dracula\n  lumis themes show github_light"
+    )]
+    Show {
+        /// Theme name, e.g. dracula
+        theme: String,
+    },
 
     /// Extract a theme from a Neovim colorscheme Git repo
     #[command(
@@ -209,26 +370,6 @@ enum ThemesCommands {
         /// light or dark [default: dark]
         #[arg(short = 'a', long)]
         appearance: Option<String>,
-    },
-}
-
-#[derive(Subcommand)]
-enum ParsersCommands {
-    /// Cache parser WASMs so later runs skip the download
-    #[command(
-        after_help = "Examples:\n  lumis parsers cache rust javascript\n  lumis parsers cache --all\n  lumis parsers cache rust --force\n  lumis --data-dir /app/lumis parsers cache rust"
-    )]
-    Cache {
-        /// Language names to cache (e.g. rust javascript elixir)
-        languages: Vec<String>,
-
-        /// Cache all supported parsers
-        #[arg(long)]
-        all: bool,
-
-        /// Resolve compatible packages again and replace valid cached parsers
-        #[arg(long)]
-        force: bool,
     },
 }
 
@@ -265,14 +406,14 @@ impl std::str::FromStr for TreeText {
     }
 }
 
-#[derive(Clone, Default, ValueEnum)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, ValueEnum)]
 enum Formatter {
     /// HTML with inline style attributes
     HtmlInline,
-    /// HTML with CSS custom properties, one set per theme
-    HtmlMultiThemes,
     /// HTML with CSS class names (pair with a theme stylesheet)
     HtmlLinked,
+    /// HTML with CSS custom properties, one set per theme
+    HtmlMultiThemes,
     /// ANSI escape codes
     #[default]
     Terminal,
@@ -280,52 +421,60 @@ enum Formatter {
     BbcodeScoped,
 }
 
-fn default_data_dir() -> PathBuf {
-    etcetera::choose_base_strategy()
-        .expect("failed to determine home directory")
-        .data_dir()
-        .join("lumis")
+impl Formatter {
+    const ALL: [Self; 5] = [
+        Self::HtmlInline,
+        Self::HtmlLinked,
+        Self::HtmlMultiThemes,
+        Self::Terminal,
+        Self::BbcodeScoped,
+    ];
+
+    fn slug(self) -> &'static str {
+        match self {
+            Self::HtmlInline => "html-inline",
+            Self::HtmlMultiThemes => "html-multi-themes",
+            Self::HtmlLinked => "html-linked",
+            Self::Terminal => "terminal",
+            Self::BbcodeScoped => "bbcode-scoped",
+        }
+    }
+
+    fn description(self) -> &'static str {
+        match self {
+            Self::HtmlInline => "HTML with inline style attributes",
+            Self::HtmlMultiThemes => "HTML with CSS custom properties, one set per theme",
+            Self::HtmlLinked => "HTML with CSS class names (pair with a theme stylesheet)",
+            Self::Terminal => "ANSI escape codes (default)",
+            Self::BbcodeScoped => "BBCode using highlight scope names as tags",
+        }
+    }
 }
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
-    let data_dir = cli.data_dir.unwrap_or_else(default_data_dir);
+    let data_dir = lumis_wasm_runtime::store::resolve_data_dir(cli.data_dir);
     lumis_wasm_runtime::set_compile_cache_dir(data_dir.clone());
-    let config_path = cli.config.unwrap_or_else(config::default_path);
+    let config_path = match cli.config {
+        Some(path) => path,
+        None => config::default_path()?,
+    };
     let verbose = cli.verbose;
 
     match cli.command {
-        Commands::Highlight {
-            path,
-            language,
-            formatter,
-            theme,
-            background,
-            width,
-            themes,
-            default_theme,
-            css_variable_prefix,
-            highlight_lines,
-            rainbow_brackets,
-        } => {
+        Commands::Highlight(mut args) => {
             let config = config::Config::load(&config_path)?;
+            // The config theme is applied after the check, so a config file
+            // cannot make `lumis highlight -f html-linked` fail.
+            reject_unaccepted_options(&args);
             let reg = registry::Registry::new(data_dir)?;
-            do_highlight(
-                &reg,
-                path,
-                language,
-                formatter,
-                theme.or(config.highlight.theme),
-                background,
-                width,
-                themes,
-                default_theme,
-                css_variable_prefix,
-                highlight_lines,
-                rainbow_brackets,
-                verbose,
-            )
+            args.theme = args.theme.or(config.highlight.theme);
+            do_highlight(&reg, *args, verbose)
         }
+        Commands::Formatters { command } => match command {
+            FormattersCommands::List => list_formatters(),
+            FormattersCommands::Show { formatter } => show_formatter(formatter),
+        },
         Commands::Dump { command } => {
             let reg = registry::Registry::new(data_dir)?;
             match command {
@@ -342,9 +491,19 @@ fn main() -> Result<()> {
         }
         Commands::Languages { command } => match command {
             LanguagesCommands::List => list_languages(),
+            LanguagesCommands::Show { language } => show_language(&language),
+            LanguagesCommands::Cache {
+                languages,
+                all,
+                force,
+            } => {
+                let reg = registry::Registry::new(data_dir)?;
+                cache_languages(&reg, &languages, all, force, verbose)
+            }
         },
         Commands::Themes { command } => match command {
             ThemesCommands::List => list_themes(&data_dir),
+            ThemesCommands::Show { theme } => show_theme(&theme, &data_dir),
             ThemesCommands::Generate {
                 url,
                 colorscheme,
@@ -359,20 +518,122 @@ fn main() -> Result<()> {
                 appearance.as_deref(),
             ),
         },
-        Commands::Parsers { command } => match command {
-            ParsersCommands::Cache {
-                languages,
-                all,
-                force,
-            } => {
-                let reg = registry::Registry::new(data_dir)?;
-                cache_parsers(&reg, &languages, all, force, verbose)
-            }
-        },
     }
 }
 
-fn cache_parsers(
+/// Exit with a clap-styled error when the chosen formatter would ignore a flag.
+///
+/// clap cannot express this: `conflicts_with` keys on another argument being
+/// present, and the formatter is a *value* of `--formatter`.
+fn reject_unaccepted_options(args: &HighlightArgs) {
+    let rejected = args.rejected();
+    if rejected.is_empty() {
+        return;
+    }
+
+    let chosen = args.formatter().slug();
+    let all_flags: Vec<String> = rejected
+        .iter()
+        .flat_map(|(_, used)| used.iter().map(|flag| format!("`{flag}`")))
+        .collect();
+
+    // Groups differ in which formatters accept them, so the applicability line
+    // cannot be shared.
+    let mut message = format!(
+        "{} {} not accepted by the `{chosen}` formatter\n",
+        all_flags.join(", "),
+        if all_flags.len() == 1 { "is" } else { "are" },
+    );
+    for (group, _) in &rejected {
+        let accepts: Vec<&str> = group.accepted_by().iter().map(|f| f.slug()).collect();
+        message.push_str(&format!(
+            "\n  {} {} to: {}",
+            group.label,
+            if group.flags.len() == 1 {
+                "applies"
+            } else {
+                "apply"
+            },
+            accepts.join(", "),
+        ));
+    }
+    message.push_str(&format!(
+        "\n  run `lumis formatters show {chosen}` to see what it accepts"
+    ));
+
+    Cli::command()
+        .find_subcommand_mut("highlight")
+        .expect("the highlight subcommand exists")
+        .clone()
+        .bin_name("lumis highlight")
+        .error(clap::error::ErrorKind::ArgumentConflict, message)
+        .exit()
+}
+
+fn list_formatters() -> Result<()> {
+    let width = Formatter::ALL
+        .iter()
+        .map(|f| f.slug().len())
+        .max()
+        .unwrap_or(0);
+    for formatter in Formatter::ALL {
+        println!(
+            "{:width$}  {}",
+            formatter.slug(),
+            formatter.description(),
+            width = width
+        );
+    }
+    Ok(())
+}
+
+fn show_formatter(formatter: Formatter) -> Result<()> {
+    println!("{}: {}\n", formatter.slug(), formatter.description());
+    println!("Accepted options:");
+    for flag in formatter_options::accepted_flags(formatter) {
+        println!("  {flag}");
+    }
+    println!("\nRun `lumis highlight --help` for descriptions.");
+    Ok(())
+}
+
+fn print_field(label: &str, values: &[&str]) {
+    if !values.is_empty() {
+        println!("  {label}: {}", values.join(", "));
+    }
+}
+
+fn show_language(name: &str) -> Result<()> {
+    let language: Language = name
+        .parse()
+        .map_err(|_| anyhow::anyhow!("unknown language: {name}"))?;
+    let info = language.info();
+
+    println!("{}: {}\n", info.id, info.name);
+    print_field("aliases", info.aliases);
+    print_field("extensions", &info.extensions);
+    print_field("globs", info.globs);
+    print_field("emacs modes", info.emacs_modes);
+    print_field("shebangs", info.shebangs);
+    Ok(())
+}
+
+fn show_theme(name: &str, data_dir: &Path) -> Result<()> {
+    let theme = resolve_theme(Some(name.to_string()), Some(data_dir), false)
+        .ok_or_else(|| anyhow::anyhow!("unknown theme: {name}"))?;
+
+    println!("{}: {}\n", theme.name, theme.appearance);
+    if let Some(fg) = theme.fg() {
+        println!("  foreground: {fg}");
+    }
+    if let Some(bg) = theme.bg() {
+        println!("  background: {bg}");
+    }
+    println!("  highlights: {}", theme.highlights.len());
+    Ok(())
+}
+
+fn cache_languages(
     reg: &registry::Registry,
     languages: &[String],
     all: bool,
@@ -383,37 +644,44 @@ fn cache_parsers(
         return Err(anyhow::anyhow!("pass language names or --all, not both"));
     }
 
-    let names: Vec<&str> = if all {
-        registry::all_language_ids().collect()
+    let expanded: Vec<String> = if all {
+        registry::all_language_ids().map(str::to_string).collect()
     } else {
         if languages.is_empty() {
             return Err(anyhow::anyhow!(
-                "specify language names or use --all to cache all parsers"
+                "specify language names, a bundle such as bundle-web, or --all"
             ));
         }
-        languages.iter().map(|s| s.as_str()).collect()
+        lumis_wasm_runtime::catalog::expand_bundles(languages.iter().map(String::as_str))?
     };
+    let mut seen = std::collections::HashSet::new();
+    let names: Vec<String> = expanded
+        .iter()
+        .filter(|name| {
+            let language_id = resolve_language_id(name);
+            language_id != "plaintext" && seen.insert(language_id)
+        })
+        .map(|name| resolve_language_id(name).to_string())
+        .collect();
 
     let mut errors = Vec::new();
-    for name in &names {
-        let language_id = resolve_language_id(name);
-        let already_cached = !force && reg.is_cached(language_id);
-        match reg.cache_parser(language_id, force) {
-            Ok(path) => {
-                if verbose && already_cached {
-                    eprintln!("{}: {}", name, path.display());
-                } else if verbose {
-                    eprintln!(
-                        "{}: {} -> {}",
-                        name,
-                        reg.parser_download_url(language_id)?,
-                        path.display()
-                    );
+    for (name, result) in names.iter().zip(reg.cache_parsers_detailed(&names, force)) {
+        match result {
+            Ok(outcome) if verbose => {
+                eprintln!("--> {name}");
+                if let Some(url) = outcome.download_url {
+                    eprintln!("downloading from {url}");
                 }
+                eprintln!(
+                    "downloaded to {}",
+                    relative_to_current(&outcome.path).display()
+                );
+                eprintln!("cached in {:.3}s", outcome.elapsed.as_secs_f64());
             }
-            Err(e) => {
-                eprintln!("{}: failed", name);
-                errors.push((*name, e));
+            Ok(_) => {}
+            Err(error) => {
+                eprintln!("{name}: failed");
+                errors.push((name, error));
             }
         }
     }
@@ -426,17 +694,24 @@ fn cache_parsers(
     }
 
     // Downloading is the smaller half of a cold parser; the Wasmtime compile is
-    // the larger. Loading each one here writes it into `compiled/`, so a
-    // prepared directory carries both. `mix lumis.languages.cache` does the same.
-    let mut compiled = 0;
-    for name in &names {
-        match reg.load_language(resolve_language_id(name)) {
-            Ok(()) => compiled += 1,
-            Err(error) => eprintln!("{name}: cached but not compiled ({error})"),
+    // the larger. Compiling each one here writes it into `compiled/`, so a
+    // prepared directory carries both. Host cache APIs write the same layout.
+    let mut compile_errors = Vec::new();
+    for (name, result) in names.iter().zip(reg.precompile_parsers_detailed(&names)) {
+        match result {
+            Ok(elapsed) if verbose => eprintln!("compiled in {:.3}s", elapsed.as_secs_f64()),
+            Ok(_) => {}
+            Err(error) => {
+                eprintln!("{name}: failed to compile");
+                compile_errors.push((name, error));
+            }
         }
     }
-    if verbose {
-        eprintln!("compiled {compiled} parser(s)");
+    if !compile_errors.is_empty() {
+        return Err(anyhow::anyhow!(
+            "failed to compile {} parser(s)",
+            compile_errors.len()
+        ));
     }
 
     Ok(())
@@ -444,12 +719,8 @@ fn cache_parsers(
 
 /// Resolve a user-provided language name to its stable package language ID.
 fn resolve_language_id(name: &str) -> &str {
-    let lang = Language::guess(Some(name), "");
-    if lang != Language::PlainText || name == "plaintext" {
-        lang.id_name()
-    } else {
-        name
-    }
+    name.parse::<Language>()
+        .map_or(name, |language| language.id_name())
 }
 
 fn list_themes(data_dir: &Path) -> Result<()> {
@@ -1169,22 +1440,8 @@ fn dump_tree_lines(
 }
 
 #[allow(clippy::too_many_arguments)]
-fn do_highlight(
-    reg: &registry::Registry,
-    path: Option<String>,
-    language: Option<String>,
-    formatter: Option<Formatter>,
-    theme: Option<String>,
-    background: Option<String>,
-    width: Option<String>,
-    themes: Vec<String>,
-    default_theme: Option<String>,
-    css_variable_prefix: String,
-    highlight_lines: Option<String>,
-    rainbow_brackets: bool,
-    verbose: bool,
-) -> Result<()> {
-    let (source, lang) = read_source(path, language)?;
+fn do_highlight(reg: &registry::Registry, args: HighlightArgs, verbose: bool) -> Result<()> {
+    let (source, lang) = read_source(args.path.clone(), args.language.clone())?;
 
     if verbose {
         eprintln!("--");
@@ -1200,50 +1457,101 @@ fn do_highlight(
     }
 
     let lang_name = lang.id_name();
-    let events = highlight_to_events(reg, &source, lang_name, rainbow_brackets)?;
+    let events = highlight_to_events(reg, &source, lang_name, args.rainbow_brackets)?;
 
-    let parsed_highlight_lines = if let Some(lines_str) = highlight_lines {
-        Some(parse_highlight_lines(&lines_str)?)
-    } else {
-        None
-    };
-
-    render_output(
-        reg,
-        &source,
-        &events,
-        lang,
-        formatter,
-        theme,
-        background,
-        width,
-        themes,
-        default_theme,
-        css_variable_prefix,
-        parsed_highlight_lines,
-        verbose,
-    )
+    render_output(reg, &source, &events, lang, args, verbose)
 }
 
-#[allow(clippy::too_many_arguments)]
+/// Line ranges plus the class and style that apply to them, or `None` when no
+/// lines were named.
+fn inline_highlight_lines(
+    args: &HighlightArgs,
+) -> Result<Option<lumis_core::formatter::html_inline::HighlightLines>> {
+    use lumis_core::formatter::html_inline::{HighlightLines, HighlightLinesStyle};
+
+    let Some(lines) = args.html.highlight_lines.as_deref() else {
+        return Ok(None);
+    };
+
+    let style = match args.styled.highlight_lines_style.as_deref() {
+        None | Some("theme") => Some(HighlightLinesStyle::Theme),
+        Some("none") => None,
+        Some(css) => Some(HighlightLinesStyle::Style(css.to_string())),
+    };
+
+    Ok(Some(HighlightLines {
+        lines: parse_highlight_lines(lines)?,
+        style,
+        class: args.html.highlight_lines_class.clone(),
+    }))
+}
+
+fn linked_highlight_lines(
+    args: &HighlightArgs,
+) -> Result<Option<lumis_core::formatter::html_linked::HighlightLines>> {
+    use lumis_core::formatter::html_linked::HighlightLines;
+
+    let Some(lines) = args.html.highlight_lines.as_deref() else {
+        return Ok(None);
+    };
+
+    Ok(Some(HighlightLines {
+        lines: parse_highlight_lines(lines)?,
+        class: args
+            .html
+            .highlight_lines_class
+            .clone()
+            .unwrap_or_else(|| "l-highlighted".to_string()),
+    }))
+}
+
+fn header_element(args: &HighlightArgs) -> Option<lumis_core::formatter::HtmlElement> {
+    // clap's `requires` keeps these two either both set or both absent.
+    let open_tag = args.html.header_open.clone()?;
+    let close_tag = args.html.header_close.clone()?;
+    Some(lumis_core::formatter::HtmlElement {
+        open_tag,
+        close_tag,
+    })
+}
+
 fn render_output(
     reg: &registry::Registry,
     source: &str,
     events: &[HighlightEvent],
     lang: Language,
-    formatter: Option<Formatter>,
-    theme: Option<String>,
-    background: Option<String>,
-    width: Option<String>,
-    themes: Vec<String>,
-    default_theme: Option<String>,
-    css_variable_prefix: String,
-    highlight_lines: Option<Vec<RangeInclusive<usize>>>,
+    args: HighlightArgs,
     verbose: bool,
 ) -> Result<()> {
-    match formatter.unwrap_or_default() {
+    let chosen = args.formatter();
+    let HighlightArgs {
+        ref theme,
+        terminal: TerminalArgs {
+            ref background,
+            ref width,
+        },
+        html: HtmlArgs { ref pre_class, .. },
+        styled:
+            StyledArgs {
+                italic,
+                include_highlights,
+                ..
+            },
+        multi_theme:
+            MultiThemeArgs {
+                ref themes,
+                ref default_theme,
+                ref css_variable_prefix,
+            },
+        ..
+    } = args;
+
+    let highlight_lines = inline_highlight_lines(&args)?;
+    let header = header_element(&args);
+
+    match chosen {
         Formatter::HtmlInline => {
-            let theme_obj = resolve_theme(theme, Some(reg.data_dir()), verbose);
+            let theme_obj = resolve_theme(theme.clone(), Some(reg.data_dir()), verbose);
             if verbose {
                 eprintln!("--\n");
             }
@@ -1251,17 +1559,11 @@ fn render_output(
             builder
                 .language(lang)
                 .theme(theme_obj)
-                .italic(false)
-                .include_highlights(false);
-
-            if let Some(lines) = highlight_lines {
-                let hl = lumis_core::formatter::html_inline::HighlightLines {
-                    lines,
-                    style: Some(lumis_core::formatter::html_inline::HighlightLinesStyle::Theme),
-                    class: None,
-                };
-                builder.highlight_lines(Some(hl));
-            }
+                .pre_class(pre_class.clone())
+                .italic(italic)
+                .include_highlights(include_highlights)
+                .highlight_lines(highlight_lines)
+                .header(header);
 
             let fmt = builder.build().map_err(|e| anyhow::anyhow!("{}", e))?;
             let mut output = Vec::new();
@@ -1300,19 +1602,19 @@ fn render_output(
             builder
                 .language(lang)
                 .themes(theme_map)
-                .css_variable_prefix(css_variable_prefix);
+                .css_variable_prefix(
+                    css_variable_prefix
+                        .clone()
+                        .unwrap_or_else(|| DEFAULT_CSS_VARIABLE_PREFIX.to_string()),
+                )
+                .pre_class(pre_class.clone())
+                .italic(italic)
+                .include_highlights(include_highlights)
+                .highlight_lines(highlight_lines)
+                .header(header);
 
             if let Some(default) = default_theme {
-                builder.default_theme(default);
-            }
-
-            if let Some(lines) = highlight_lines {
-                let hl = lumis_core::formatter::html_inline::HighlightLines {
-                    lines,
-                    style: Some(lumis_core::formatter::html_inline::HighlightLinesStyle::Theme),
-                    class: None,
-                };
-                builder.highlight_lines(Some(hl));
+                builder.default_theme(default.clone());
             }
 
             let fmt = builder.build().map_err(|e| anyhow::anyhow!("{}", e))?;
@@ -1326,15 +1628,11 @@ fn render_output(
                 eprintln!("--\n");
             }
             let mut builder = lumis_core::formatter::HtmlLinkedBuilder::new();
-            builder.language(lang);
-
-            if let Some(lines) = highlight_lines {
-                let hl = lumis_core::formatter::html_linked::HighlightLines {
-                    lines,
-                    class: "l-highlighted".to_string(),
-                };
-                builder.highlight_lines(Some(hl));
-            }
+            builder
+                .language(lang)
+                .pre_class(pre_class.clone())
+                .highlight_lines(linked_highlight_lines(&args)?)
+                .header(header);
 
             let fmt = builder.build().map_err(|e| anyhow::anyhow!("{}", e))?;
             let mut output = Vec::new();
@@ -1343,7 +1641,7 @@ fn render_output(
         }
 
         Formatter::Terminal => {
-            let theme_obj = resolve_theme(theme, Some(reg.data_dir()), verbose);
+            let theme_obj = resolve_theme(theme.clone(), Some(reg.data_dir()), verbose);
             if verbose {
                 eprintln!("--\n");
             }

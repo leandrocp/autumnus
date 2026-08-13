@@ -90,10 +90,49 @@ export function htmlLinked(options: HtmlLinkedOptions = {}): HtmlLinkedFormatter
  * }))
  * ```
  */
+/**
+ * The same three rejections as `HtmlMultiThemesBuilder::build` in Rust. Without
+ * them an unknown `defaultTheme` renders a `<pre>` with no color, and
+ * `light-dark()` with a theme missing renders black-on-white placeholders.
+ */
+function validateMultiThemes(options: HtmlMultiThemesOptions): void {
+  const names = Object.keys(options.themes ?? {});
+
+  if (names.length === 0) {
+    throw new Error("htmlMultiThemes requires at least one theme");
+  }
+
+  const { defaultTheme } = options;
+  if (defaultTheme === undefined) {
+    return;
+  }
+
+  if (defaultTheme === "light-dark()") {
+    const missing = ["light", "dark"].filter((name) => !names.includes(name));
+    if (missing.length > 0) {
+      throw new Error(
+        `htmlMultiThemes defaultTheme "light-dark()" requires themes named "light" and "dark", missing ${missing.join(" and ")}`,
+      );
+    }
+    return;
+  }
+
+  if (!names.includes(defaultTheme)) {
+    throw new Error(
+      `htmlMultiThemes defaultTheme "${defaultTheme}" is not one of the themes given (${names.join(", ")})`,
+    );
+  }
+}
+
 export function htmlMultiThemes(options: HtmlMultiThemesOptions): HtmlMultiThemesFormatter {
+  validateMultiThemes(options);
+
   const formatter: HtmlMultiThemesFormatter = {
     ...options,
     format(source: string): string {
+      // Formatter objects are mutable in JavaScript, so construction-time
+      // validation alone does not protect the actual render boundary.
+      validateMultiThemes(formatter);
       return formatHtmlMultiThemes(
         source,
         highlightEvents(source, formatter.language, { rainbowBrackets: formatter.rainbowBrackets }),

@@ -12,7 +12,7 @@
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, OnceLock};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use semver::{Version, VersionReq};
 use thiserror::Error;
@@ -65,6 +65,14 @@ pub enum StoreError {
     },
     #[error(transparent)]
     Package(#[from] LanguagePackageError),
+}
+
+/// Result of caching one language package.
+#[derive(Clone, Debug)]
+pub struct CacheLanguageOutcome {
+    pub path: PathBuf,
+    pub download_url: Option<String>,
+    pub elapsed: Duration,
 }
 
 impl StoreError {
@@ -123,6 +131,46 @@ impl Fetcher for NoNetwork {
     fn get(&self, _url: &str) -> Result<Vec<u8>, String> {
         Err("network access is disabled".to_string())
     }
+}
+
+/// The directory Lumis persists under when nothing names one.
+///
+/// `etcetera`'s base strategy is the CLI convention: XDG everywhere except
+/// Windows, where it is `%APPDATA%`. Every runtime resolves through here so the
+/// CLI, both native addons, and Node cannot disagree about where the store is.
+#[must_use]
+pub fn default_data_dir() -> PathBuf {
+    use etcetera::BaseStrategy;
+
+    etcetera::choose_base_strategy()
+        .map(|strategy| strategy.data_dir().join("lumis"))
+        .unwrap_or_else(|_| PathBuf::from(".lumis"))
+}
+
+/// The data directory, preferring `explicit` and then `LUMIS_DATA_DIR`.
+///
+/// Callers that accept a directory of their own pass it as `explicit`; the rest
+/// pass `None` and get the environment or the platform default.
+/// A variable set to the empty string names no directory.
+///
+/// `PathBuf::from("")` is a valid path that resolves to the current directory,
+/// so an empty `LUMIS_DATA_DIR` would otherwise scatter `parsers/` and
+/// `compiled/` wherever the process happened to start. JavaScript already
+/// treats the empty value as unset, and the two must agree.
+fn named_directory(path: PathBuf) -> Option<PathBuf> {
+    (!path.as_os_str().is_empty()).then_some(path)
+}
+
+#[must_use]
+pub fn resolve_data_dir(explicit: Option<PathBuf>) -> PathBuf {
+    explicit
+        .and_then(named_directory)
+        .or_else(|| {
+            std::env::var_os("LUMIS_DATA_DIR")
+                .map(PathBuf::from)
+                .and_then(named_directory)
+        })
+        .unwrap_or_else(default_data_dir)
 }
 
 /// Where a store keeps and looks for assets.
@@ -264,35 +312,129 @@ impl LanguageStore {
 
     /// Download and cache `name` and its parser without loading either.
     ///
-    /// Caching is pure I/O, so it needs no Wasmtime runtime: `lumis parsers
-    /// cache` and `mix lumis.languages.cache` both land here.
+    /// Caching is pure I/O, so it needs no Wasmtime runtime: the CLI and host
+    /// cache APIs all land here.
     ///
     /// # Errors
     /// Fails when the name is unknown, or the package or parser cannot be
     /// obtained or verified.
     pub fn cache_language(&self, name: &str, force: bool) -> Result<PathBuf, StoreError> {
+        self.cache_language_detailed(name, force)
+            .map(|outcome| outcome.path)
+    }
+
+    fn cache_language_detailed(
+        &self,
+        name: &str,
+        force: bool,
+    ) -> Result<CacheLanguageOutcome, StoreError> {
+        let started = Instant::now();
         let location =
             crate::catalog::find(name).ok_or_else(|| StoreError::UnknownLanguage(name.into()))?;
 
-        if force {
+        let (path, download_url) = if force {
             let (package, bytes) = self
                 .resolve_package(location.package_name)
                 .map_err(|error| self.unavailable(location.package_name, error))?;
             let path = self.parser_path(&package)?;
+            let download_url = Self::parser_url(&package)?;
             self.refresh_parser(&package)?;
             write_atomic(&self.package_path(location.package_name)?, &bytes)?;
             self.remember(location.package_name, package);
-            return Ok(path);
+            (path, Some(download_url))
+        } else {
+            let package = self.package(location.package_name)?;
+            let path = self.parser_path(&package)?;
+            let download_url = if self.cached_parser(&package).is_none() {
+                let url = Self::parser_url(&package)?;
+                self.fetch_parser(&package, &path)?;
+                Some(url)
+            } else {
+                None
+            };
+            self.cache_package(&package)?;
+            (path, download_url)
+        };
+
+        Ok(CacheLanguageOutcome {
+            path,
+            download_url,
+            elapsed: started.elapsed(),
+        })
+    }
+
+    /// Cache every name in `names`, downloading up to `concurrency` at a time.
+    ///
+    /// Results come back in the order the names were given, one per name, so a
+    /// caller reports every language that could not be obtained rather than only
+    /// the first. Preparing a bundle is otherwise a hundred sequential round
+    /// trips to the CDN, which dominates the wall clock even on a fast link.
+    ///
+    /// Concurrent writers are already safe — see the module docs — so the
+    /// threads share one store and one connection pool.
+    #[must_use]
+    pub fn cache_languages(
+        &self,
+        names: &[String],
+        force: bool,
+        concurrency: usize,
+    ) -> Vec<Result<PathBuf, StoreError>> {
+        self.cache_languages_detailed(names, force, concurrency)
+            .into_iter()
+            .map(|result| result.map(|outcome| outcome.path))
+            .collect()
+    }
+
+    /// Cache every name and report its source, destination, and elapsed time.
+    #[must_use]
+    pub fn cache_languages_detailed(
+        &self,
+        names: &[String],
+        force: bool,
+        concurrency: usize,
+    ) -> Vec<Result<CacheLanguageOutcome, StoreError>> {
+        let mut groups: Vec<Vec<usize>> = Vec::new();
+        let mut packages: HashMap<&str, usize> = HashMap::new();
+
+        for (index, name) in names.iter().enumerate() {
+            let package_name = crate::catalog::find(name).map(|location| location.package_name);
+            if let Some(&group) = package_name.and_then(|name| packages.get(name)) {
+                groups[group].push(index);
+            } else {
+                if let Some(package_name) = package_name {
+                    packages.insert(package_name, groups.len());
+                }
+                groups.push(vec![index]);
+            }
         }
 
-        let package = self.package(location.package_name)?;
-        let path = self.parser_path(&package)?;
-        if self.cached_parser(&package).is_none() {
-            self.fetch_parser(&package, &path)?;
+        let grouped = crate::parallel_map(&groups, concurrency, |indices| {
+            let first = indices[0];
+            self.cache_language_detailed(&names[first], force)
+        });
+        let mut results: Vec<Option<Result<CacheLanguageOutcome, StoreError>>> =
+            (0..names.len()).map(|_| None).collect();
+
+        for (indices, result) in groups.iter().zip(grouped) {
+            match result {
+                Ok(outcome) => {
+                    for &index in indices {
+                        results[index] = Some(Ok(outcome.clone()));
+                    }
+                }
+                Err(error) => {
+                    results[indices[0]] = Some(Err(error));
+                    for &index in &indices[1..] {
+                        results[index] = Some(self.cache_language_detailed(&names[index], force));
+                    }
+                }
+            }
         }
 
-        self.cache_package(&package)?;
-        Ok(path)
+        results
+            .into_iter()
+            .map(|result| result.expect("every language belongs to one cache group"))
+            .collect()
     }
 
     /// Write `package` into the cache, so a later run needs neither a source
@@ -572,6 +714,28 @@ mod tests {
         include_bytes!("../../lumis-cli/tests/fixtures/parsers/tree-sitter-json.wasm");
     const PACKAGE_VERSION: &str = "0.26.3";
 
+    #[test]
+    fn an_empty_directory_names_nothing() {
+        assert_eq!(named_directory(PathBuf::new()), None);
+        assert_eq!(
+            named_directory(PathBuf::from("/tmp/store")),
+            Some(PathBuf::from("/tmp/store"))
+        );
+    }
+
+    #[test]
+    fn an_empty_explicit_directory_falls_back_to_the_default() {
+        assert_eq!(resolve_data_dir(Some(PathBuf::new())), default_data_dir());
+    }
+
+    #[test]
+    fn an_explicit_directory_wins() {
+        assert_eq!(
+            resolve_data_dir(Some(PathBuf::from("/tmp/store"))),
+            PathBuf::from("/tmp/store")
+        );
+    }
+
     fn package() -> LanguagePackage {
         LanguagePackage {
             package_name: "@lumis-sh/wasm-json".into(),
@@ -600,6 +764,23 @@ mod tests {
     impl Fetcher for Canned {
         fn get(&self, _url: &str) -> Result<Vec<u8>, String> {
             Ok(self.0.clone())
+        }
+    }
+
+    struct PackageFetcher {
+        package: Vec<u8>,
+        requests: Arc<std::sync::atomic::AtomicUsize>,
+    }
+
+    impl Fetcher for PackageFetcher {
+        fn get(&self, url: &str) -> Result<Vec<u8>, String> {
+            self.requests
+                .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            if url.ends_with("/lumis.json") {
+                Ok(self.package.clone())
+            } else {
+                Ok(WASM.to_vec())
+            }
         }
     }
 
@@ -1169,6 +1350,35 @@ mod tests {
     /// A cache that holds a parser but not its metadata cannot be used offline,
     /// so `cache_language` writes both.
     #[test]
+    fn a_batch_caches_a_shared_package_once() {
+        let dir = tempdir();
+        let mut shared = package();
+        shared.package_name = "@lumis-sh/wasm-markdown".into();
+        shared.languages = BTreeMap::from([
+            ("markdown".into(), PackagedLanguage::default()),
+            ("mdx".into(), PackagedLanguage::default()),
+        ]);
+        let requests = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let store = make(
+            dir.path(),
+            Box::new(PackageFetcher {
+                package: serde_json::to_vec(&shared).unwrap(),
+                requests: Arc::clone(&requests),
+            }),
+        );
+        let names = vec!["markdown".to_string(), "mdx".to_string()];
+
+        let results = store.cache_languages_detailed(&names, true, 8);
+
+        assert!(results.iter().all(Result::is_ok));
+        assert_eq!(
+            results[0].as_ref().unwrap().path,
+            results[1].as_ref().unwrap().path
+        );
+        assert_eq!(requests.load(std::sync::atomic::Ordering::Relaxed), 2);
+    }
+
+    #[test]
     fn caching_a_language_leaves_the_cache_self_sufficient() {
         let dir = tempdir();
         let package = package();
@@ -1198,9 +1408,9 @@ mod tests {
         );
     }
 
-    /// `lumis parsers cache` and `mix lumis.languages.cache` land here. A parser
-    /// already in the store is left alone, so the command is idempotent and
-    /// needs no network once the store holds what was asked for.
+    /// The CLI and host cache APIs land here. A parser already in the store is
+    /// left alone, so preparation is idempotent and needs no network once the
+    /// store holds what was asked for.
     #[test]
     fn caching_a_language_already_in_the_store_needs_no_network() {
         let dir = tempdir();

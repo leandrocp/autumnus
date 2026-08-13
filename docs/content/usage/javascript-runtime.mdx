@@ -144,6 +144,8 @@ Useful when rendering user-provided content or pasted snippets.
 Useful for dropdowns, config validation, and docs tooling:
 
 - [`availableLanguages()`](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/index.ts)
+- [`getLanguage()`](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/index.ts) — one language by id or alias, or `undefined`
+- [`loadedLanguages()`](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/index.ts) — ids ready to highlight without a download
 - [`availableThemes()`](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/index.ts)
 - [`sanitizeThemeName()`](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/index.ts)
 
@@ -152,6 +154,8 @@ Useful for dropdowns, config validation, and docs tooling:
 - every runtime loads the same per-language parser WASM; what differs is the engine that runs it
 - on Node, `@lumis-sh/lumis` runs those parsers and the highlighting walk under Wasmtime in the same Rust code as the Lumis CLI and Elixir bindings; built-in formatters normally render there too, while custom formatters assemble events in JavaScript and an async call that may need a JavaScript resolver stays on the main thread
 - browsers, and any platform with no prebuilt addon, run them under the host's own WebAssembly through `web-tree-sitter`, and walk and format in JavaScript
+- the addon is prebuilt for macOS arm64 and x64, Linux arm64 and x64 against both glibc and musl, and Windows arm64 and x64; npm installs the one matching the host, so Alpine and other musl images get the same runtime as a glibc host
+- `runtimeKind()` returns `'native'` or `'wasm'` if you need to confirm which one an install resolved
 - the addon carries no parsers and downloads each on first use, so it costs about 4.7 MB of download on top of the Wasm runtime rather than one binary per language
 - the package uses conditional exports so Node and web-standard runtimes get the right entry point automatically
 - every language package contains matching queries plus an exact parser version, size, and SHA-256 digest
@@ -194,31 +198,48 @@ const htmlOutput = hl.highlight(source, htmlInline({ language: html, theme: drac
 
 See [Highlighting loads what a document needs](/advanced/wasm-and-cdn#highlighting-loads-what-a-document-needs).
 
-## Prepare parsers for deployment
+## Warm parsers during application startup
 
-To keep the download and compile off a first request, populate a project or image-local cache
-before the application starts:
+Lumis uses two verbs everywhere: **cache** puts a language on disk, **load**
+caches it *and* keeps it in this runtime. Load is the superset, so a serving
+process wants it. See [Warm up parsers](/operations/warm-up).
 
-```bash
-npx lumis-wasm-cache javascript html css --output ./wasm-cache
-LUMIS_DATA_DIR=./wasm-cache node app.mjs
-```
+Start serving, then load in the background:
 
-The equivalent API is available from `@lumis-sh/lumis/cache`:
+```ts title="bootstrap.ts"
+import { loadLanguages } from "@lumis-sh/lumis";
 
-```ts
-import { cacheLanguages } from "@lumis-sh/lumis/cache";
+await startServer();
 
-await cacheLanguages(["javascript", "html", "css"], {
-  directory: "./wasm-cache",
+// Not awaited, so a slow CDN delays no request. The `.catch()` is required:
+// an unhandled rejection terminates the process.
+loadLanguages(["javascript", "html", "css"]).catch((error) => {
+  logger.warn({ error }, "Lumis warm-up failed; languages load on demand");
 });
 ```
 
-Both paths resolve the runtime's compatible package range, then cache the exact
-manifest and verify its parser size plus SHA-256 before writing. A cached parser
-is served without a network request, so caching every language a deployment
-needs makes it self-contained. Pass `--force` to the command, or `force: true`
-to the API, to resolve the range again and adopt a newer compatible package.
+`loadLanguages()` warms the same default runtime `highlight()` uses, so nothing
+has to be threaded through the application. `createHighlighter({languages})` is
+the same load into an instance you keep yourself.
+
+Awaiting a warm-up before `startServer()` puts the CDN on the boot path, so an
+unreachable one keeps the process from ever accepting a request.
+
+The API accepts `bundle-*` names such as `bundle-web`, covering the same
+languages as the matching `@lumis-sh/wasm-bundle-*` package. It resolves the
+runtime's compatible package range, caches the exact manifest, and verifies the
+parser size plus SHA-256 before writing. Pass `force: true` to resolve the range
+again and adopt a newer compatible package.
+
+When the native Node addon is available, the API also validates each parser and
+its queries and persists the compiled Wasmtime module in the same directory.
+The portable fallback caches the verified parser bytes, but
+`web-tree-sitter` cannot persist its compilation across processes.
+
+`cacheLanguages()` is the caching half on its own — it writes the store and
+holds nothing — for a build or prestart step preparing a directory the serving
+process will read. Await that one; failing is the point. `lumis languages cache`
+does the same from the CLI.
 
 :::note Edge is not supported yet
 The portable JavaScript runtime uses `web-tree-sitter`, but Edge runtimes are not supported yet because of an upstream Tree-sitter limitation: [tree-sitter/tree-sitter#2160](https://github.com/tree-sitter/tree-sitter/issues/2160).

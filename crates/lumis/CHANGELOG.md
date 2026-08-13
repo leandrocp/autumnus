@@ -1,3 +1,37 @@
+## [0.13.0](https://github.com/leandrocp/lumis/compare/cargo-lumis/v0.12.1...cargo-lumis/v0.13.0) (2026-08-13)
+
+### Bug Fixes
+
+- vendor strict-aliasing-unsafe parsers - [#1117](https://github.com/leandrocp/lumis/pull/1117)
+- BREAKING: align the default theme on none across runtimes - [#1142](https://github.com/leandrocp/lumis/pull/1142)
+- pin lumis crate requirements to the workspace version - [#1140](https://github.com/leandrocp/lumis/pull/1140)
+- render attribute-less spans consistently - [#1259](https://github.com/leandrocp/lumis/pull/1259)
+- highlight lines in light-dark() mode - [#1260](https://github.com/leandrocp/lumis/pull/1260)
+- align the public API across Rust, the CLI, Elixir and JavaScript - [#1266](https://github.com/leandrocp/lumis/pull/1266)
+
+### Documentation
+
+- add release migration steps - [#1272](https://github.com/leandrocp/lumis/pull/1272)
+
+### Features
+
+- update lang fsharp - [#1101](https://github.com/leandrocp/lumis/pull/1101)
+- update lang erlang - [#1105](https://github.com/leandrocp/lumis/pull/1105)
+- update generated themes - [#1122](https://github.com/leandrocp/lumis/pull/1122)
+- unify dynamic WASM language loading - [#1099](https://github.com/leandrocp/lumis/pull/1099)
+- update lang wat - [#1125](https://github.com/leandrocp/lumis/pull/1125)
+- update lang terraform - [#1124](https://github.com/leandrocp/lumis/pull/1124)
+- update lang fsharp - [#1121](https://github.com/leandrocp/lumis/pull/1121)
+- update lang csv - [#1120](https://github.com/leandrocp/lumis/pull/1120)
+- update lang jinja_inline - [#1119](https://github.com/leandrocp/lumis/pull/1119)
+- update lang scala - [#1221](https://github.com/leandrocp/lumis/pull/1221)
+
+### Breaking changes
+
+Why: catalog shapes now match.
+
+1. `available_languages()` returns `Vec<LanguageInfo>` instead of `HashMap`.
+
 ## [0.12.1](https://github.com/leandrocp/lumis/compare/cargo-lumis/v0.12.0...cargo-lumis/v0.12.1) (2026-07-23)
 
 

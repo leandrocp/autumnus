@@ -205,10 +205,13 @@ code.hljs {
 
 <span class="hljs-bullet">-</span> <span class="hljs-strong">**110+ Tree-sitter languages**</span> - Fast, accurate, and updated syntax parsing
 <span class="hljs-bullet">-</span> <span class="hljs-strong">**250+ built-in Neovim themes**</span> - Updated and curated themes from the Neovim community
-<span class="hljs-bullet">-</span> <span class="hljs-strong">**6 runtimes**</span> - CLI, Rust, Elixir, JavaScript, Browsers / CDN, Java
-<span class="hljs-bullet">-</span> <span class="hljs-strong">**Multiple outputs**</span> - HTML (inline/linked), Terminal (ANSI), Multi-theme (light/dark), BBCode, and custom formatters
+<span class="hljs-bullet">-</span> <span class="hljs-strong">**6 runtimes, one API**</span> - CLI, Rust, Elixir, JavaScript, Browsers / CDN, and Java, aligned in naming, options, and output
+<span class="hljs-bullet">-</span> <span class="hljs-strong">**Built-in formatters**</span> - HTML (inline/linked), Terminal (ANSI), Multi-theme (light/dark), BBCode
+<span class="hljs-bullet">-</span> <span class="hljs-strong">**Custom formatters**</span> - Build your own output
 <span class="hljs-bullet">-</span> <span class="hljs-strong">**Language auto-detection**</span> - File extension, shebang, and emacs-mode support
+<span class="hljs-bullet">-</span> <span class="hljs-strong">**Line highlighting**</span> - Mark and style individual lines, with custom HTML wrappers
 <span class="hljs-bullet">-</span> <span class="hljs-strong">**Streaming-friendly**</span> - Handles incomplete code
+<span class="hljs-bullet">-</span> <span class="hljs-strong">**Load parsers on demand**</span> - Verified and cached, including injected languages
 
 <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">table</span>&gt;</span></span>
 <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">tr</span>&gt;</span></span>
@@ -262,12 +265,9 @@ import dracula from &#x27;@lumis-sh/themes/dracula&#x27;
 const html = await highlight(&#x27;const x = 1&#x27;, htmlInline({ language: javascript, theme: dracula }))
 ```</span>
 
-On Node, highlighting runs through a native addon over the same Wasmtime runtime
-the CLI and Elixir use. It downloads, verifies and loads whatever a document
-turns out to need, including languages injected inside it, and caches them for
-every later call. Browsers use <span class="hljs-code">`web-tree-sitter`</span> and CacheStorage, where an
-injected language has to be loaded first because loading is asynchronous there.
-<span class="hljs-code">`lumis-wasm-cache`</span> prepares deployment-local parser assets ahead of time.
+Parsers download on demand, including languages injected inside a document.
+Browsers are the exception: loading is asynchronous there, so an injected
+language has to be loaded first. See [<span class="hljs-string">WASM and CDN</span>](<span class="hljs-link">https://lumis.sh/docs/usage/wasm-and-cdn</span>).
 
 <span class="hljs-section">### [<span class="hljs-string">Browsers / CDN</span>](<span class="hljs-link">https://www.npmjs.com/package/@lumis-sh/lumis</span>)</span>
 
@@ -288,11 +288,10 @@ const html = await highlight(&#x27;const x = 1&#x27;, htmlInline({ language: jav
 Lumis.highlight!(&quot;const x = 1&quot;, formatter: {:html_inline, language: &quot;javascript&quot;, theme: &quot;dracula&quot;})
 ```</span>
 
-Elixir runs the same Wasmtime runtime through a NIF, so it highlights a document
-and everything injected inside it in one pass, downloading what it needs.
-Loading is global to the VM. Use <span class="hljs-code">`Lumis.Languages.load/1`</span> at startup to keep the
-first download off a user&#x27;s request, or <span class="hljs-code">`mix lumis.languages.cache`</span> while
-building a release that has to run without network access.
+Parsers download on demand and load once per VM. Call
+<span class="hljs-code">`Lumis.Languages.async_load/1`</span> from your application&#x27;s <span class="hljs-code">`start/2`</span> to move the
+download and compile off the first request without holding up the boot.
+See [<span class="hljs-string">Elixir integration</span>](<span class="hljs-link">https://lumis.sh/docs/usage/elixir-integration</span>).
 
 <span class="hljs-section">### [<span class="hljs-string">Java</span>](<span class="hljs-link">https://github.com/roastedroot/lumis4j</span>)</span>
 

@@ -110,6 +110,7 @@ defmodule Lumis do
       - `:pre_class` (`t:String.t/0` - default: `nil`) - the CSS class to append into the wrapping `<pre>` tag.
       - `:italic` (`t:boolean/0` - default: `false`) - enable italic style for the highlighted code.
       - `:include_highlights` (`t:boolean/0` - default: `false`) - include the highlight scope name in a `data-highlight` attribute. Useful for debugging.
+      - `:rainbow_brackets` (`t:boolean/0` - default: `false`) - render nested brackets with rainbow bracket scopes.
       - `:highlight_lines` (`t:html_inline_highlight_lines/0` - default: `nil`) - highlight specific lines either using the theme `highlighted` style or with custom CSS styling.
       - `:header` (`t:header/0` - default: `nil`) - wrap the highlighted code with custom open and close HTML tags.
 
@@ -117,6 +118,7 @@ defmodule Lumis do
 
       - `:language` (`t:language/0` - default: `nil`) - the language used by the formatter. When omitted, Lumis tries to auto-detect it from the source.
       - `:pre_class` (`t:String.t/0` - default: `nil`) - the CSS class to append into the wrapping `<pre>` tag.
+      - `:rainbow_brackets` (`t:boolean/0` - default: `false`) - render nested brackets with rainbow bracket scopes.
       - `:highlight_lines` (`t:html_linked_highlight_lines/0` - default: `nil`) - highlight specific lines either using the `l-highlighted` class from themes or with a custom CSS class.
       - `:header` (`t:header/0` - default: `nil`) - wrap the highlighted code with custom open and close HTML tags.
 
@@ -129,6 +131,7 @@ defmodule Lumis do
       - `:pre_class` (`t:String.t/0` - default: `nil`) - the CSS class to append into the wrapping `<pre>` tag.
       - `:italic` (`t:boolean/0` - default: `false`) - enable italic style for the highlighted code.
       - `:include_highlights` (`t:boolean/0` - default: `false`) - include the highlight scope name in a `data-highlight` attribute.
+      - `:rainbow_brackets` (`t:boolean/0` - default: `false`) - render nested brackets with rainbow bracket scopes.
       - `:highlight_lines` (`t:html_inline_highlight_lines/0` - default: `nil`) - highlight specific lines (same as html_inline).
       - `:header` (`t:header/0` - default: `nil`) - wrap the highlighted code with custom open and close HTML tags.
 
@@ -138,10 +141,12 @@ defmodule Lumis do
       - `:theme` (`t:theme/0` - default: `nil`) - the theme to apply styles on the highlighted source code.
       - `:background` (`:theme | t:String.t/0 | nil` - default: `nil`) - fallback background behavior: `nil` inherits the output background, `:theme` uses the theme's normal background color, and a string uses that color.
       - `:width` (`pos_integer() | nil` - default: `nil`) - pad each rendered terminal line to the given width. This is most useful with `:background`.
+      - `:rainbow_brackets` (`t:boolean/0` - default: `false`) - render nested brackets with rainbow bracket scopes.
 
   * `bbcode_scoped`:
 
       - `:language` (`t:language/0` - default: `nil`) - available when passed as `{:bbcode_scoped, ...}`.
+      - `:rainbow_brackets` (`t:boolean/0` - default: `false`) - render nested brackets with rainbow bracket scopes.
 
   ## Examples
 
@@ -241,6 +246,7 @@ defmodule Lumis do
                pre_class: String.t(),
                italic: boolean(),
                include_highlights: boolean(),
+               rainbow_brackets: boolean(),
                highlight_lines: html_inline_highlight_lines(),
                header: header()
              ]}
@@ -249,6 +255,7 @@ defmodule Lumis do
              [
                language: language(),
                pre_class: String.t(),
+               rainbow_brackets: boolean(),
                highlight_lines: html_linked_highlight_lines(),
                header: header()
              ]}
@@ -262,6 +269,7 @@ defmodule Lumis do
                pre_class: String.t(),
                italic: boolean(),
                include_highlights: boolean(),
+               rainbow_brackets: boolean(),
                highlight_lines: html_inline_highlight_lines(),
                header: header()
              ]}
@@ -271,10 +279,11 @@ defmodule Lumis do
                language: language(),
                theme: theme(),
                background: :theme | String.t() | nil,
-               width: pos_integer() | nil
+               width: pos_integer() | nil,
+               rainbow_brackets: boolean()
              ]}
           | :bbcode_scoped
-          | {:bbcode_scoped, [language: language()]}
+          | {:bbcode_scoped, [language: language(), rainbow_brackets: boolean()]}
 
   @formatter_schema [
     type: {:custom, Lumis, :formatter_type, []},
@@ -689,27 +698,36 @@ defmodule Lumis do
   @spec default_options() :: options()
   def default_options, do: validate_options!([])
 
+  @typedoc "What Lumis knows about one language."
+  @type language_info :: %{
+          id: String.t(),
+          name: String.t(),
+          aliases: [String.t()],
+          extensions: [String.t()],
+          globs: [String.t()],
+          emacs_modes: [String.t()],
+          shebangs: [String.t()]
+        }
+
   @doc """
-  Returns the list of all available languages.
+  Returns every available language and what the catalog knows about it, sorted
+  by id.
 
   ## Example
 
-      iex> Lumis.available_languages()
+      iex> Lumis.available_languages() |> Enum.find(&(&1.id == "elixir"))
       %{
-        "diff" => {"Diff", ["*.diff"]},
-        "lua" => {"Lua", ["*.lua"]},
-        "javascript" => {"JavaScript", ["*.cjs", "*.js", "*.mjs", "*.snap", "*.jsx"]},
-        "elixir" => {"Elixir", ["*.ex", "*.exs"]},
-        ...
+        id: "elixir",
+        name: "Elixir",
+        aliases: [],
+        extensions: ["*.ex", "*.exs"],
+        globs: ["*.ex", "*.exs"],
+        emacs_modes: ["elixir"],
+        shebangs: ["elixir"]
       }
 
-      iex> Lumis.available_languages()["elixir"]
-      {"Elixir", ["*.ex", "*.exs"]}
-
   """
-  @spec available_languages() :: %{
-          (id :: String.t()) => {name :: String.t(), [extension :: String.t()]}
-        }
+  @spec available_languages() :: [language_info()]
   def available_languages, do: Lumis.Native.available_languages()
 
   @doc """
@@ -729,18 +747,21 @@ defmodule Lumis do
   @spec loaded_languages() :: [id :: String.t()]
   def loaded_languages, do: Lumis.Native.loaded_languages()
 
-  @doc """
-  Returns the list of all available themes.
+  @typedoc "A built-in theme's name and appearance, without its highlight data."
+  @type theme_info :: %{name: String.t(), appearance: String.t()}
 
-  Use `Lumis.Theme.get/1` to get the actual theme struct.
+  @doc """
+  Returns every built-in theme's name and appearance, sorted by name.
+
+  Use `Lumis.Theme.get/2` to get the actual theme struct.
 
   ## Example
 
-      iex> Lumis.available_themes()
-      ["github_light", "github_dark", "catppuccin_frappe", "catppuccin_latte", "nightfox", ...]
+      iex> Lumis.available_themes() |> Enum.find(&(&1.name == "github_light"))
+      %{name: "github_light", appearance: "light"}
 
   """
-  @spec available_themes() :: [name :: String.t()]
+  @spec available_themes() :: [theme_info()]
   def available_themes, do: Lumis.Native.available_themes()
 
   @deprecated "Use highlight/2 instead"
@@ -784,6 +805,14 @@ defmodule Lumis do
 
   @doc """
   Highlights `source` code and outputs into a formatted string.
+
+  Returns `{:error, reason}` when the root language cannot be loaded or the
+  formatter fails. An injected language that cannot be fetched is not an error:
+  that block stays plain and the rest of the document still highlights. Use
+  `highlight!/2` to raise instead.
+
+  Invalid *options* still raise, because those are a caller mistake rather than
+  a runtime condition.
 
   ## Options
 
@@ -854,7 +883,7 @@ defmodule Lumis do
   See https://docs.rs/lumis/latest/lumis/fn.highlight.html for more info.
 
   """
-  @spec highlight(String.t(), options()) :: {:ok, String.t()}
+  @spec highlight(String.t(), options()) :: {:ok, String.t()} | {:error, String.t()}
   def highlight(source, options \\ [])
 
   def highlight(source, options) when is_binary(source) and is_list(options) do
@@ -865,17 +894,13 @@ defmodule Lumis do
 
     case Lumis.Native.highlight(source, options) do
       {:error, {:language_not_loaded, language}} ->
-        raise Lumis.HighlightError,
-          error:
-            "language #{inspect(language)} could not be loaded. Cache it ahead of " <>
-              "time with `mix lumis.languages.cache #{language}` if this host has " <>
-              "no network access"
+        {:error,
+         "language #{inspect(language)} could not be loaded. Warm it with " <>
+           "`Lumis.Languages.async_load([#{inspect(language)}])` from your " <>
+           "application's start/2 if this host has no network access"}
 
-      {:error, error} ->
-        raise Lumis.HighlightError, error: error
-
-      output ->
-        output
+      other ->
+        other
     end
   end
 
@@ -1069,14 +1094,16 @@ defmodule Lumis do
   end
 
   @doc """
-  Same as `highlight/2` but raises in case of failure.
+  Same as `highlight/2` but raises `Lumis.HighlightError` in case of failure.
   """
   @spec highlight!(String.t(), keyword()) :: String.t()
   def highlight!(source, options \\ [])
 
   def highlight!(source, options) when is_binary(source) and is_list(options) do
-    {:ok, highlighted} = highlight(source, options)
-    highlighted
+    case highlight(source, options) do
+      {:ok, highlighted} -> highlighted
+      {:error, error} -> raise Lumis.HighlightError, error: error
+    end
   end
 
   def highlight!(language, source)

@@ -2,7 +2,7 @@ defmodule Lumis.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/leandrocp/lumis"
-  @version "0.6.3"
+  @version "0.7.0"
 
   def project do
     [
@@ -57,6 +57,7 @@ defmodule Lumis.MixProject do
         native/lumis_nif/Cross.toml
         priv/static/css
         examples
+        guides
         checksum-*.exs
         mix.exs
         README.md
@@ -75,6 +76,7 @@ defmodule Lumis.MixProject do
       source_url_pattern:
         "#{@source_url}/blob/hex-lumis/v#{@version}/packages/elixir/lumis/%{path}#L%{line}",
       extras: [
+        "guides/deployment.md",
         "CHANGELOG.md",
         "examples/bbcode_scoped.livemd",
         "examples/html_linked_scoped_css.livemd",
@@ -89,7 +91,7 @@ defmodule Lumis.MixProject do
   defp deps do
     [
       {:rustler, "~> 0.29", optional: true},
-      {:rustler_precompiled, "~> 0.6"},
+      {:rustler_precompiled, "~> 0.8"},
       {:nimble_options, "~> 1.0"},
       {:ex_doc, ">= 0.0.0", only: :docs},
       {:makeup_elixir, ">= 0.0.0", only: :docs},

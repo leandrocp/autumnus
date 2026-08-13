@@ -1411,7 +1411,7 @@ dependencies = [
 
 [[package]]
 name = "lumis"
-version = "0.12.1"
+version = "0.13.0"
 dependencies = [
  "ansi-to-tui",
  "anyhow",
@@ -1510,14 +1510,14 @@ dependencies = [
 
 [[package]]
 name = "lumis-build"
-version = "1.0.0"
+version = "1.1.0"
 dependencies = [
  "regex",
 ]
 
 [[package]]
 name = "lumis-cli"
-version = "0.4.2"
+version = "0.5.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -1540,7 +1540,7 @@ dependencies = [
 
 [[package]]
 name = "lumis-core"
-version = "2.3.0"
+version = "2.4.0"
 dependencies = [
  "derive_builder",
  "glob",
@@ -1553,15 +1553,15 @@ dependencies = [
  "serde_json",
  "syn 3.0.3",
  "toml 1.1.4+spec-1.1.0",
+ "typed-path",
  "v_htmlescape",
 ]
 
 [[package]]
 name = "lumis-js-native"
-version = "0.6.1"
+version = "0.7.0"
 dependencies = [
  "base64",
- "etcetera",
  "lumis-core",
  "lumis-wasm-runtime",
  "napi",
@@ -1574,8 +1574,9 @@ dependencies = [
 
 [[package]]
 name = "lumis-wasm-runtime"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
+ "etcetera",
  "lumis-core",
  "semver",
  "serde",
@@ -1596,7 +1597,7 @@ dependencies = [
 name = "lumis_nif"
 version = "0.1.0"
 dependencies = [
- "etcetera",
+ "anyhow",
  "lumis-core",
  "lumis-wasm-runtime",
  "once_cell",
@@ -3724,6 +3725,12 @@ name = "typed-arena"
 version = "2.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6af6ae20167a9ece4bcb41af5b80f8a1f1df981f6391189ce00fd257af04126a"
+
+[[package]]
+name = "typed-path"
+version = "0.12.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8e28f89b80c87b8fb0cf04ab448d5dd0dd0ade2f8891bae878de66a75a28600e"
 
 [[package]]
 name = "typenum"
