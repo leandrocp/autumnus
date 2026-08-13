@@ -123,7 +123,7 @@ const BRACKETS_SOURCE = `const server = createServer({
 })`;
 
 const THEME_SOURCE = `defp deps do
-  [{:lumis, "~> 0.6"}]
+  [{:lumis, "~> 0.7"}]
 end`;
 
 const CSS_SOURCE = `.cart-row {

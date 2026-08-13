@@ -11,9 +11,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@lumis-sh/lumis": "^0.6.1",
-    "@lumis-sh/themes": "^0.2.2",
-    "@lumis-sh/wasm-bundle-full": "^0.1.0",
+    "@lumis-sh/lumis": "^0.7.0",
+    "@lumis-sh/themes": "^0.3.0",
+    "@lumis-sh/wasm-bundle-full": "^0.1.1",
     "@lumis-sh/wasm-html": "^0.26.3",
     "@lumis-sh/wasm-javascript": "^0.26.3",
     "webgl-fluid-enhanced": "^0.8.0"
