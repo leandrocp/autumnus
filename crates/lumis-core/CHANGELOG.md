@@ -1,3 +1,15 @@
+## [2.4.0](https://github.com/leandrocp/lumis/compare/cargo-lumis-core/v2.3.0...cargo-lumis-core/v2.4.0) (2026-08-13)
+
+### Bug Fixes
+
+- render attribute-less spans consistently - [#1259](https://github.com/leandrocp/lumis/pull/1259)
+- highlight lines in light-dark() mode - [#1260](https://github.com/leandrocp/lumis/pull/1260)
+- align the public API across Rust, the CLI, Elixir and JavaScript - [#1266](https://github.com/leandrocp/lumis/pull/1266)
+
+### Features
+
+- update generated themes - [#1122](https://github.com/leandrocp/lumis/pull/1122)
+
 ## [2.3.0](https://github.com/leandrocp/lumis/compare/cargo-lumis-core/v2.2.0...cargo-lumis-core/v2.3.0) (2026-07-23)
 
 
