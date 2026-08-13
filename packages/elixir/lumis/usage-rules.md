@@ -116,10 +116,12 @@ is not matched on:
 Lumis.Languages.async_load(["markdown", "elixir", "json"])
 ```
 
-The store checks `:data_dir` and then the CDN. It defaults to `LUMIS_DATA_DIR`,
-and is also where Wasmtime persists compiled modules. A cold cache resolves the
-runtime's compatible package range; the exact package stored in that directory
-is then served without revalidating it.
+The store is checked before the CDN, and is also where Wasmtime persists
+compiled modules. It resolves in that order: `config :lumis, data_dir:` wins,
+`LUMIS_DATA_DIR` is the environment fallback, and Lumis's own `priv/lumis` is
+the zero-configuration default. A cold cache resolves the runtime's compatible
+package range; the exact package stored in that directory is then served
+without revalidating it.
 
 `Lumis.Languages.cache/2` and `lumis languages cache` fill that directory
 without loading anything, for a build or operations step that runs before the
