@@ -1411,7 +1411,7 @@ dependencies = [
 
 [[package]]
 name = "lumis"
-version = "0.12.1"
+version = "0.13.0"
 dependencies = [
  "ansi-to-tui",
  "anyhow",
@@ -1421,7 +1421,7 @@ dependencies = [
  "glob",
  "lumis-build",
  "lumis-core",
- "lumis-wasm-runtime 0.2.0",
+ "lumis-wasm-runtime",
  "pretty_assertions",
  "prettyplease 0.3.0",
  "proc-macro2",
@@ -1524,7 +1524,7 @@ dependencies = [
  "clap",
  "etcetera",
  "lumis-core",
- "lumis-wasm-runtime 0.2.0",
+ "lumis-wasm-runtime",
  "predicates",
  "serde",
  "serde_json",
@@ -1563,26 +1563,13 @@ version = "0.6.1"
 dependencies = [
  "base64",
  "lumis-core",
- "lumis-wasm-runtime 0.2.0",
+ "lumis-wasm-runtime",
  "napi",
  "napi-build",
  "napi-derive",
  "percent-encoding",
  "serde",
  "serde_json",
-]
-
-[[package]]
-name = "lumis-wasm-runtime"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dd8985a86bf502f1828df2da60eac7d3887ce7129b0d5fd33ff4ab4d3a28be9d"
-dependencies = [
- "lumis-core",
- "streaming-iterator",
- "thiserror 2.0.19",
- "tree-sitter",
- "wasmtime",
 ]
 
 [[package]]
@@ -1612,7 +1599,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "lumis-core",
- "lumis-wasm-runtime 0.1.0",
+ "lumis-wasm-runtime",
  "once_cell",
  "parking_lot",
  "rustler",
