@@ -1,33 +1,53 @@
-## Next release migration
+## [0.7.0](https://github.com/leandrocp/lumis/compare/npm-lumis/v0.6.1...npm-lumis/v0.7.0) (2026-08-13)
 
-Why: cache preparation now belongs to the application lifecycle.
+### Bug Fixes
 
-1. Replace `npx lumis-languages-cache ...` with `loadLanguages()`, left unawaited with a `.catch()`, alongside startup.
-2. Use `cacheLanguages()` or `lumis languages cache` when a build or operations step prepares a directory another process reads.
+- vendor strict-aliasing-unsafe parsers - [#1117](https://github.com/leandrocp/lumis/pull/1117)
+- BREAKING: align the default theme on none across runtimes - [#1142](https://github.com/leandrocp/lumis/pull/1142)
+- pin lumis crate requirements to the workspace version - [#1140](https://github.com/leandrocp/lumis/pull/1140)
+- resolve the theme asset paths the docs document - [#1143](https://github.com/leandrocp/lumis/pull/1143)
+- render attribute-less spans consistently - [#1259](https://github.com/leandrocp/lumis/pull/1259)
+- highlight lines in light-dark() mode - [#1260](https://github.com/leandrocp/lumis/pull/1260)
+- validate boundary data - [#1262](https://github.com/leandrocp/lumis/pull/1262)
+- resolve compatible WASM package versions - [#1263](https://github.com/leandrocp/lumis/pull/1263)
+- resolve one data directory across every runtime - [#1264](https://github.com/leandrocp/lumis/pull/1264)
+- align the public API across Rust, the CLI, Elixir and JavaScript - [#1266](https://github.com/leandrocp/lumis/pull/1266)
 
-Why: parsers and queries are now atomic.
+### Documentation
 
-1. Built-in `@lumis-sh/lumis/langs/*` imports need no change.
-2. Replace custom objects carrying query fields with `{id, aliases, packageName}` package handles.
-3. Resolve package `lumis.json` files with `languagePackageResolver`.
-4. Use `wasmResolver` or `withWasm()` only to override verified parser bytes.
-5. Add exact `sha256` and `size` values to manually created `WasmRef` objects.
+- add release migration steps - [#1272](https://github.com/leandrocp/lumis/pull/1272)
 
-Why: invalid formatter options now fail.
+### Features
+
+- update lang fsharp - [#1101](https://github.com/leandrocp/lumis/pull/1101)
+- update lang erlang - [#1105](https://github.com/leandrocp/lumis/pull/1105)
+- update generated themes - [#1122](https://github.com/leandrocp/lumis/pull/1122)
+- unify dynamic WASM language loading - [#1099](https://github.com/leandrocp/lumis/pull/1099)
+- update lang wat - [#1125](https://github.com/leandrocp/lumis/pull/1125)
+- update lang terraform - [#1124](https://github.com/leandrocp/lumis/pull/1124)
+- update lang fsharp - [#1121](https://github.com/leandrocp/lumis/pull/1121)
+- update lang csv - [#1120](https://github.com/leandrocp/lumis/pull/1120)
+- update lang jinja_inline - [#1119](https://github.com/leandrocp/lumis/pull/1119)
+- update lang scala - [#1221](https://github.com/leandrocp/lumis/pull/1221)
+- prebuild the addon for musl and Windows arm64 - [#1265](https://github.com/leandrocp/lumis/pull/1265)
+- BREAKING: one vocabulary for the language and theme catalog, in every runtime - [#1269](https://github.com/leandrocp/lumis/pull/1269)
+- warm-up parsers - [#1273](https://github.com/leandrocp/lumis/pull/1273)
+
+### Performance
+
+- prepare large parser bundles concurrently - [#1271](https://github.com/leandrocp/lumis/pull/1271)
+
+### Breaking changes
+
+**Parser warm-up**
+
+1. Replace `npx lumis-languages-cache ...` with `loadLanguages()`.
+2. Use `cacheLanguages()` or `lumis languages cache` to download parsers when needed.
+
+**Invalid formatter options now fail**
 
 1. Give `htmlMultiThemes()` at least one theme.
-2. Make `defaultTheme` name one of them; `light-dark()` requires `light` and `dark`.
-
-Why: Node runtimes now share one cache.
-
-1. Expect one parser download into the shared macOS or Windows directory.
-2. Set `LUMIS_DATA_DIR` to keep a fixed location.
-
-Why: HTML output now matches.
-
-1. Regenerate exact HTML snapshots.
-2. Expect attribute-less tokens as `<span>...</span>`.
-3. Expect compact, sorted multi-theme CSS and `light-dark()` highlighted-line backgrounds.
+2. `light-dark()` requires `light` and `dark`.
 
 ## [0.6.1](https://github.com/leandrocp/lumis/compare/npm-lumis/v0.6.0...npm-lumis/v0.6.1) (2026-07-23)
 
