@@ -87,10 +87,18 @@ describe("native runtime", () => {
     expect(runtime.hasLanguage("json")).toBe(true);
   });
 
-  itWithAddon("compiles cached parsers into the selected deployment directory", async () => {
+  // Compiling is the addon's, so this asserts one thing on a native run and its
+  // negation on a Wasm one. Only the native half needs a binding: a host with no
+  // published target runs the portable fallback, which is exactly where "caches
+  // without compiling" is the behaviour in use, so gating that half on an addon
+  // would drop the assertion on the platform it describes.
+  const compilesWhenCaching = process.env.LUMIS_TEST_RUNTIME !== "wasm";
+  const itForCacheCompilation = compilesWhenCaching ? itWithAddon : it;
+
+  itForCacheCompilation("persists compiled modules only where the addon does it", async () => {
     // Fixes the process-global engine's cache directory first. Preparing another
     // one afterwards is the case this pins: it needs an engine of its own.
-    newRuntime().loadLanguage("json");
+    if (compilesWhenCaching) newRuntime().loadLanguage("json");
     const directory = mkdtempSync(join(tmpdir(), "lumis-native-cache-"));
     try {
       await cacheLanguages(["diff"], {
@@ -100,11 +108,15 @@ describe("native runtime", () => {
       });
 
       const compiled = filesUnder(join(directory, "compiled", "modules"));
-      if (process.env.LUMIS_TEST_RUNTIME === "wasm") {
-        expect(compiled).toEqual([]);
-      } else {
+      if (compilesWhenCaching) {
         expect(compiled).not.toEqual([]);
+      } else {
+        expect(compiled).toEqual([]);
       }
+
+      // Either way the parser itself is cached, which is the half that does not
+      // depend on which runtime the process selected.
+      expect(filesUnder(join(directory, "parsers"))).not.toEqual([]);
     } finally {
       rmSync(directory, { recursive: true, force: true });
     }

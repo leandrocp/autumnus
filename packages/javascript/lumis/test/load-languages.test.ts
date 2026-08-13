@@ -63,7 +63,25 @@ describe("loadLanguages", () => {
   });
 
   it("rejects an unknown bundle rather than treating it as a language", async () => {
-    await expect(loadLanguages(["bundle-nope"])).rejects.toThrow(/Unknown bundle "bundle-nope"/);
+    const error = await loadLanguages(["bundle-nope"]).catch((thrown: unknown) => thrown);
+
+    expect(error).toBeInstanceOf(AggregateError);
+    expect((error as AggregateError).errors[0].cause).toMatchObject({
+      message: expect.stringContaining('Unknown bundle "bundle-nope"'),
+    });
+  });
+
+  it("loads the names beside an unknown bundle", async () => {
+    // Expanding the whole list at once threw here, so `rust` was never
+    // attempted. `Lumis.Languages.load/1` reports the bundle and loads the
+    // rest, and this is the case that pins JavaScript to it.
+    const error = await loadLanguages(["bundle-nope", "rust"]).catch((thrown: unknown) => thrown);
+
+    expect(error).toBeInstanceOf(AggregateError);
+    expect((error as AggregateError).errors.map((each: Error) => each.message)).toEqual([
+      'could not load "bundle-nope"',
+    ]);
+    expect(loadedLanguages()).toContain("rust");
   });
 
   it("reports every failure and still loads the rest", async () => {

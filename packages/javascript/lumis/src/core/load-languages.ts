@@ -12,14 +12,27 @@ export type LoadLanguages = (names: Iterable<string>) => Promise<string[]>;
 
 export function createLoadLanguages(loadLanguage: RuntimeLike["loadLanguage"]): LoadLanguages {
   return async function loadLanguages(names: Iterable<string>): Promise<string[]> {
-    const expanded = expandBundles(names);
+    const failures: Error[] = [];
+    const wanted: string[] = [];
+
+    // Expanded one name at a time. Expanding the whole list at once makes an
+    // unknown bundle abandon every name beside it, and `Lumis.Languages.load/1`
+    // instead reports that bundle and loads the rest. `cacheLanguages()` is the
+    // one that stops, matching `cache/2`.
+    for (const name of names) {
+      try {
+        wanted.push(...expandBundles([name]));
+      } catch (error) {
+        failures.push(new Error(`could not load "${name}"`, { cause: error }));
+      }
+    }
 
     // Every name is attempted and every failure reported, rather than stopping
     // at the first: one unpublished parser in a bundle should not cost the rest,
-    // the same way one bad block does not cost a document. `Lumis.Languages.load/1`
-    // answers the same way.
+    // the same way one bad block does not cost a document.
+    const unique = [...new Set(wanted)];
     const settled = await Promise.allSettled(
-      expanded.map(async (name) => {
+      unique.map(async (name) => {
         const language = await resolveLanguage(name);
         await loadLanguageDefinition({ loadLanguage }, language);
         return language.id;
@@ -27,19 +40,18 @@ export function createLoadLanguages(loadLanguage: RuntimeLike["loadLanguage"]): 
     );
 
     const loaded: string[] = [];
-    const failures: Error[] = [];
     for (const [index, result] of settled.entries()) {
       if (result.status === "fulfilled") {
         loaded.push(result.value);
       } else {
-        failures.push(new Error(`could not load "${expanded[index]}"`, { cause: result.reason }));
+        failures.push(new Error(`could not load "${unique[index]}"`, { cause: result.reason }));
       }
     }
 
     if (failures.length > 0) {
       throw new AggregateError(
         failures,
-        `could not load ${failures.length} of ${expanded.length} languages`,
+        `could not load ${failures.length} of ${failures.length + loaded.length} languages`,
       );
     }
 
