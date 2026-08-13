@@ -33,6 +33,42 @@ git push origin cargo-lumis-cli/v0.2.0
 - If one released package depends on another released package, update the dependent manifest in the same commit. See [Crate version requirements](#crate-version-requirements).
 - Push package tags in dependency order.
 - Watch the tag-triggered publish workflows after pushing tags.
+- Keep the commit subject exactly `chore(release): <package> <version>`. See [CI on the release commit](#ci-on-the-release-commit).
+
+## CI on the release commit
+
+A release commit is a version bump and a changelog entry on top of a commit CI
+already passed, so every branch workflow skips itself when the pushed head
+commit's subject starts with `chore(release):`:
+
+```yaml
+    if: >-
+      ${{ github.event_name != 'push' ||
+          !startsWith(github.event.head_commit.message, 'chore(release):') }}
+```
+
+Two consequences worth knowing:
+
+- **The prefix is the contract.** A subject spelled any other way runs the full
+  matrix — Rust, JavaScript, Elixir, the NIF, conformance, queries, lint,
+  benchmarks and the WASM release detector — against a commit whose only content
+  is a version number. That is not just waste: `Standalone packaged NIF lockfile`
+  resolves `lumis_nif` from crates.io with `--locked`, so between the bump and
+  the `cargo publish` that follows it, the version it now requires does not exist
+  yet and the job fails. Nothing in the commit can fix that, and nothing should
+  try.
+- **`[skip ci]` is the wrong tool here.** It would suppress the runs entirely
+  rather than showing them as skipped, but it keys on the same head commit that
+  the package tag points at, so pushing `<package>/v<version>` would skip the
+  publish workflow the release exists to trigger.
+
+Tag-triggered workflows carry no such guard, and must not grow one.
+
+One branch job is exempt: `crate-deps` in `rust.yml`. `mise run check-crate-deps`
+reads manifests rather than the registry, so it passes on the bump commit, and
+the bump commit is the only one that writes new `version` requirements — see
+[Crate version requirements](#crate-version-requirements) for what shipped when
+nothing checked them. Skipping it there would skip it exactly where it applies.
 
 ## Crate version requirements
 

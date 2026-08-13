@@ -39,9 +39,8 @@ on:
 jobs:
   test-lumis:
     if: >-
-      ${{ github.event_name == 'workflow_dispatch' ||
-          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
-          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
+      ${{ github.event_name != 'push' ||
+          !startsWith(github.event.head_commit.message, 'chore(release):') }}
     uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
     with:
       msrv: '1.91'
@@ -50,9 +49,8 @@ jobs:
       stable-os-versions: ${{ github.event_name == 'pull_request' && '["ubuntu-22.04"]' || '["ubuntu-22.04", "windows-2022", "macos-14"]' }}
   test-lumis-build:
     if: >-
-      ${{ github.event_name == 'workflow_dispatch' ||
-          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
-          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
+      ${{ github.event_name != 'push' ||
+          !startsWith(github.event.head_commit.message, 'chore(release):') }}
     uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
     with:
       msrv: '1.91'
@@ -61,9 +59,8 @@ jobs:
       stable-os-versions: ${{ github.event_name == 'pull_request' && '["ubuntu-22.04"]' || '["ubuntu-22.04", "windows-2022", "macos-14"]' }}
   test-lumis-core:
     if: >-
-      ${{ github.event_name == 'workflow_dispatch' ||
-          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
-          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
+      ${{ github.event_name != 'push' ||
+          !startsWith(github.event.head_commit.message, 'chore(release):') }}
     uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
     with:
       msrv: '1.91'
@@ -72,9 +69,8 @@ jobs:
       stable-os-versions: ${{ github.event_name == 'pull_request' && '["ubuntu-22.04"]' || '["ubuntu-22.04", "windows-2022", "macos-14"]' }}
   test-lumis-cli:
     if: >-
-      ${{ github.event_name == 'workflow_dispatch' ||
-          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
-          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
+      ${{ github.event_name != 'push' ||
+          !startsWith(github.event.head_commit.message, 'chore(release):') }}
     uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
     with:
       msrv: '1.91'
@@ -83,9 +79,8 @@ jobs:
       stable-os-versions: ${{ github.event_name == 'pull_request' && '["ubuntu-22.04"]' || '["ubuntu-22.04", "windows-2022", "macos-14"]' }}
   test-lumis-wasm-runtime:
     if: >-
-      ${{ github.event_name == 'workflow_dispatch' ||
-          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
-          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
+      ${{ github.event_name != 'push' ||
+          !startsWith(github.event.head_commit.message, 'chore(release):') }}
     uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
     with:
       msrv: '1.91'
@@ -94,9 +89,8 @@ jobs:
       stable-os-versions: ${{ github.event_name == 'pull_request' && '["ubuntu-22.04"]' || '["ubuntu-22.04", "windows-2022", "macos-14"]' }}
   check-language-catalog:
     if: >-
-      ${{ github.event_name == 'workflow_dispatch' ||
-          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
-          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
+      ${{ github.event_name != 'push' ||
+          !startsWith(github.event.head_commit.message, 'chore(release):') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -111,9 +105,8 @@ jobs:
           --locked --no-default-features -- gen-language-catalog --check
   test-packaged-parsers:
     if: >-
-      ${{ github.event_name == 'workflow_dispatch' ||
-          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
-          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
+      ${{ github.event_name != 'push' ||
+          !startsWith(github.event.head_commit.message, 'chore(release):') }}
     strategy:
       fail-fast: false
       matrix:
@@ -249,6 +242,9 @@ jobs:
           echo "All external Tree-sitter scanners use strict-aliasing-safe array headers."
   synced-manifest:
     name: Synced formatter-options manifest
+    if: >-
+      ${{ github.event_name != 'push' ||
+          !startsWith(github.event.head_commit.message, 'chore(release):') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -265,6 +261,10 @@ jobs:
       - run: cargo build -p lumis-cli
       - run: git diff --exit-code -- crates/lumis-cli/formatter-options.json
 
+  # Deliberately not skipped on `chore(release):` commits, unlike the rest of
+  # this file. A release commit is the one commit that writes new `version`
+  # requirements, so it is the only commit where this can catch anything, and it
+  # reads manifests rather than the registry, so it passes before `cargo publish`.
   crate-deps:
     name: Crate dependency requirements
     runs-on: ubuntu-latest
@@ -283,9 +283,8 @@ jobs:
 
   lint:
     if: >-
-      ${{ github.event_name == 'workflow_dispatch' ||
-          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
-          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
+      ${{ github.event_name != 'push' ||
+          !startsWith(github.event.head_commit.message, 'chore(release):') }}
     uses: leandrocp/github-actions/.github/workflows/rust-lint.yml@main
     with:
       msrv: '1.91'

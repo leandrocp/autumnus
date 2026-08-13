@@ -346,10 +346,11 @@ For language, theme, query, docs-generation, or bundle changes, run the relevant
 
 ## Release discipline
 
-This repository uses `knope` and automation-driven release PRs.
+Releases are prepared locally with `mise run release-prepare` and published from tags.
 
 - Do not hand-edit versions or changelog release sections in normal feature work.
 - Follow `RELEASE.md` for release-specific tasks.
+- Write the release commit subject as `chore(release): <package> <version>`. CI keys on that prefix to skip itself, so a different spelling silently runs every workflow against a commit that was already green.
 - If a change affects packaging, tags, publish behavior, or release metadata expectations, treat it as a release-sensitive change and review the release docs before touching anything.
 
 ## Commit messages
