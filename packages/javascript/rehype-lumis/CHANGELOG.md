@@ -1,3 +1,15 @@
+## [0.2.0](https://github.com/leandrocp/lumis/compare/npm-rehype-lumis/v0.1.3...npm-rehype-lumis/v0.2.0) (2026-08-13)
+
+
+### Bug Fixes
+
+- validate boundary data - [#1262](https://github.com/leandrocp/lumis/pull/1262)
+
+
+### Features
+
+- unify dynamic WASM language loading - [#1099](https://github.com/leandrocp/lumis/pull/1099)
+
 ## [0.1.3](https://github.com/leandrocp/lumis/compare/npm-rehype-lumis/v0.1.2...npm-rehype-lumis/v0.1.3) (2026-06-16)
 
 ### Features
