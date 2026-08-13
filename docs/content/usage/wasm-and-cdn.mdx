@@ -18,10 +18,15 @@ import TabItem from "@theme/TabItem";
 
 # WASM and CDN
 
-Lumis uses two terms consistently:
+Lumis uses two terms consistently, in every runtime:
 
-- **load** makes a language available in the current runtime
-- **cache** persists verified parser bytes, and their compiled form, so later starts skip both
+- **cache** persists verified parser bytes, and their compiled form, so later
+  starts skip both
+- **load** caches the language *and* keeps it in the current runtime
+
+Load is cache plus keeping it, so a process that will serve wants a load, and
+caching is for preparing a directory some *other* process will read. See
+[Warm up parsers](/operations/warm-up).
 
 ## Highlighting loads what a document needs
 
@@ -56,11 +61,11 @@ either — beside the boot, not in front of it:
   <TabItem value="javascript" label="JavaScript">
 
 ```js title="bootstrap.mjs"
-import { cacheLanguages } from "@lumis-sh/lumis/cache";
+import { loadLanguages } from "@lumis-sh/lumis";
 
 await startServer();
 
-cacheLanguages(["rust", "javascript", "elixir"]).catch((error) => {
+loadLanguages(["rust", "javascript", "elixir"]).catch((error) => {
   logger.warn({ error }, "Lumis warm-up failed; languages load on demand");
 });
 ```
@@ -83,8 +88,10 @@ so a CDN that is slow or down costs the first request rather than the process.
 Both are idempotent and reuse verified parser bytes on later starts. Native
 hosts also reuse their compiled modules.
 
-Await `cacheLanguages()`, or call `Lumis.Languages.cache/2`, when a build or
-operations step should fail if the store cannot be prepared.
+Both **load**: they write the store and keep the languages in the runtime. To
+**cache** without keeping — a build or operations step preparing a directory the
+serving process reads — await `cacheLanguages()` or call `Lumis.Languages.cache/2`,
+where failing is the point. See [Warm up parsers](/operations/warm-up).
 
 ### Filling the store at build time
 

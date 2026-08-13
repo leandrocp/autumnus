@@ -258,7 +258,12 @@ runtime release. Publishing `@lumis-sh/wasm-rust@0.26.x` does not.
 
 ### Preparing the persistent store
 
-An application warms at startup without waiting for it. Elixir runs the load
+Two verbs, the same in every runtime: **cache** puts a language on disk,
+**load** caches it and keeps it in this runtime. Load is the superset, so a
+process that will serve wants a load; caching is for filling a directory some
+other process will read.
+
+An application loads at startup without waiting for it. Elixir runs the load
 under a `:temporary` child of Lumis's supervisor; JavaScript leaves the promise
 unawaited. Neither can delay a boot or fail one, which matters because warm-up
 is an optimization and highlighting loads on demand regardless:
@@ -268,7 +273,7 @@ Lumis.Languages.async_load(["rust", "javascript"])
 ```
 
 ```javascript
-cacheLanguages(["rust", "javascript"]).catch(report)
+loadLanguages(["rust", "javascript"]).catch(report)
 ```
 
 For a separate build or operations step, the CLI remains the one command:

@@ -15,68 +15,94 @@ import TabItem from "@theme/TabItem";
 
 # Warm up parsers
 
-Warm-up moves parser setup ahead of the first request. Prefer the host
-application's startup lifecycle when it owns the process. Use the Lumis CLI
-when a separate image-build or operations step owns the cache instead.
+Warm-up moves parser setup ahead of the first request.
+
+## Two words, one meaning everywhere
+
+Every runtime spells warm-up with the same two verbs:
+
+- **cache** puts a language on disk. It survives restarts and is shared by every
+  native runtime pointed at the same directory.
+- **load** caches the language *and* keeps it in this runtime, so nothing loads
+  it again.
+
+**Load is cache plus keeping it.** Loading writes the same files caching does —
+verified parser bytes, and on the native runtimes their compiled Wasmtime module
+— and then holds the result in memory. So inside a process that will serve,
+loading is always the better of the two.
+
+Caching exists for the process that *is not* the one serving: an image build, a
+release task, a CLI run that exits. There is nothing for those to hold on to.
+
+Compiling belongs to caching, not loading. `compiled/` is a directory, so a
+cache that compiles is still a cache; it is holding the language in memory that
+makes a load.
+
+| Runtime | cache | load |
+| --- | --- | --- |
+| Elixir | `Lumis.Languages.cache/2` | `Lumis.Languages.async_load/1`, `load/1` |
+| Server-side JavaScript | `cacheLanguages()` | `loadLanguages()` |
+| Browsers / CDN | automatic, verified parser bytes only | `loadLanguages()`, or `createHighlighter({languages})` |
+| CLI | `lumis languages cache` | — the process exits, so there is no later to hold for |
+| Rust | — parsers are selected with Cargo features and compiled into the binary | — |
+| Java | — the WASM module and languages ship with `lumis4j` | construct `Lumis` at startup and retain it |
+
+Browsers cache verified parser bytes in CacheStorage, with an IndexedDB fallback
+for WebKit, but never a compiled module: WebAssembly compilation belongs to the
+browser and cannot be persisted by Lumis.
+
+## Warm-up must not own the boot
 
 Warm-up is an optimization, never a prerequisite: highlighting loads what a
-document names on demand. So it should not be able to delay a boot or fail one,
-and the examples below are written to keep both true.
-
-Only the dynamic runtimes download per-language parsers. Rust and Java package
-their parser code with the application, so they do not use the parser store.
-
-| Runtime | Warm-up operation | Persists across restarts |
-| --- | --- | --- |
-| Elixir | `Lumis.Languages.async_load/1` from `start/2` | parser metadata, verified WASM, and compiled Wasmtime modules |
-| Server-side JavaScript | `cacheLanguages()`, not awaited, alongside startup | parser metadata and verified WASM; compiled Wasmtime modules when the native addon is available |
-| CLI | `lumis languages cache` | parser metadata, verified WASM, and compiled Wasmtime modules |
-| Browsers / CDN | create and retain a highlighter with eager languages | verified parser bytes, when browser storage is available |
-| Rust | no parser warm-up required | parsers are selected with Cargo features and compiled into the binary |
-| Java | construct `Lumis` during application startup | the Lumis WASM module and languages ship with `lumis4j` |
+document names on demand, so an application that starts cold serves correctly
+the whole time it is warming. It should therefore never be able to delay a boot
+or fail one, and every example below is written to keep both true.
 
 ## Runtime APIs and commands
 
 <Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
   <TabItem value="javascript" label="JavaScript">
 
-Start serving, then warm in the background:
+Start serving, then load in the background:
 
 ```ts title="bootstrap.ts"
-import { cacheLanguages } from "@lumis-sh/lumis/cache";
+import { loadLanguages } from "@lumis-sh/lumis";
 
 await startServer();
 
 // Not awaited, so a slow CDN delays no request. The `.catch()` is required:
 // an unhandled rejection terminates the process, which is exactly the failure
 // warming in the background is meant to avoid.
-cacheLanguages(["javascript", "html", "css"]).catch((error) => {
+loadLanguages(["javascript", "html", "css"]).catch((error) => {
   logger.warn({ error }, "Lumis warm-up failed; languages load on demand");
 });
 ```
 
-Await it instead when something downstream should not start without a prepared
-cache, such as a build step or a prestart task. In a serving process, awaiting
-it before `startServer()` means an unreachable CDN keeps the process from ever
-accepting a request.
+`loadLanguages()` warms the same default runtime the module-level `highlight()`
+uses, so nothing has to be threaded through your application. It accepts catalog
+names, aliases, and bundle names such as `bundle-web`. Every name is attempted;
+if any fail it rejects with an `AggregateError` naming each one, after the rest
+have loaded.
 
-The API accepts language names and bundle names such as `bundle-web`. Pass
-`{force: true}` to resolve the compatible package range again and replace valid
-cached files:
+`createHighlighter({languages})` is the same load into an instance you keep
+yourself, and is what browsers use.
+
+### Caching without loading
+
+`cacheLanguages()` writes the store and holds nothing, for a build or prestart
+step preparing a directory the serving process will read:
 
 ```ts
 await cacheLanguages(["bundle-web"], { force: true });
 ```
 
-On the native Node addon, warm-up also validates the parser and queries and
+Await that one — failing is the point of a preparation step. `{force: true}`
+resolves the compatible package range again and replaces valid cached files.
+
+On the native Node addon, caching also validates the parser and queries and
 persists the compiled Wasmtime module. Bun and Deno, or a Node installation
 without the addon, can use the same API, but the portable `web-tree-sitter`
 fallback cannot persist compiled modules across processes.
-
-`cacheLanguages()` fills the store rather than loading languages into the
-runtime, so the first document naming one still loads it — from disk, with the
-compile already done. For a highlighter you reuse, `createHighlighter({
-languages })` warms and keeps them in the instance.
 
   </TabItem>
   <TabItem value="elixir" label="Elixir">
@@ -148,8 +174,9 @@ the runtime, which needs no network once that directory is there.
   </TabItem>
   <TabItem value="browser" label="Browsers / CDN">
 
-Browsers do not expose the server-side cache API. Create the highlighter before
-rendering the application and keep that instance for later highlights:
+`loadLanguages()` works here too, warming the runtime the module-level
+`highlight()` uses. When you keep a highlighter instead, load into it and retain
+that instance:
 
 ```ts
 import { createHighlighter } from "@lumis-sh/lumis";
