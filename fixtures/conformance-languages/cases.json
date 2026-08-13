@@ -1,0 +1,52 @@
+{
+  "comment": [
+    "Caching and loading take the same names in every runtime, so the vocabulary",
+    "that turns those names into languages has to mean one thing everywhere.",
+    "Three implementations of it exist — catalog::expand_bundles in Rust,",
+    "expandBundles in JavaScript, and Lumis.Languages.expand_bundles in Elixir —",
+    "and nothing else pins them to each other.",
+    "",
+    "Expected values are expressed as relationships rather than literal language",
+    "lists, so adding a language to a bundle does not require editing this file",
+    "and a divergence is still a failure.",
+    "",
+    "Read by crates/lumis-wasm-runtime/tests/languages_conformance.rs,",
+    "packages/javascript/lumis/test/languages-conformance.test.ts, and",
+    "packages/elixir/lumis/test/languages_conformance_test.exs."
+  ],
+  "spellings": {
+    "comment": "Every spelling in a group names one bundle, so all expand identically.",
+    "groups": [
+      ["bundle-web", "bundle_web", "BUNDLE-WEB", "Bundle_Web"],
+      ["bundle-web-extra", "bundle_web_extra", "bundle_web-extra", "BUNDLE_WEB_EXTRA"],
+      ["bundle-system", "bundle_system"],
+      ["bundle-backend", "bundle_backend"],
+      ["bundle-full", "bundle_full"]
+    ]
+  },
+  "passthrough": {
+    "comment": "Expansion resolves bundles, it does not validate languages, so an unknown language survives it and fails later where the error can say why.",
+    "names": ["rust", "javascript", "not-a-language"]
+  },
+  "deduplication": {
+    "comment": "A bundle followed by one of its own members yields that member once. Adjacent-only dedup would keep both.",
+    "bundle": "bundle-web",
+    "alsoNamed": "css"
+  },
+  "ordering": {
+    "comment": "Names keep the order they were given, with bundle members spliced in place.",
+    "input": ["rust", "bundle-web", "zig"],
+    "firstIs": "rust",
+    "lastIs": "zig"
+  },
+  "unknownBundles": {
+    "comment": "A `bundle-` prefixed name that names no bundle is an error, never a language name to look up.",
+    "names": ["bundle-nope", "bundle_nope", "BUNDLE-NOPE"]
+  },
+  "store": {
+    "comment": "What `cache` leaves behind, and what `load` therefore also leaves behind. Globs, because parser files are content-addressed.",
+    "prepare": ["diff"],
+    "required": ["parsers/diff.lumis.json", "parsers/tree-sitter-diff-*.wasm"],
+    "requiredOnNativeRuntimes": ["compiled/modules"]
+  }
+}

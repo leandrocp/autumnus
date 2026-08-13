@@ -259,6 +259,7 @@ mise run test-conformance-javascript-native
 mise run test-conformance-javascript-wasm
 mise run test-conformance-browser
 mise run test-conformance-elixir
+mise run test-conformance-languages
 '''
 
 [tasks.'test-conformance-rust']
@@ -309,6 +310,22 @@ fi
 packages/javascript/lumis/node_modules/.bin/playwright "${args[@]}"
 pnpm --filter @lumis-sh/lumis run test:conformance:browser
 '''
+
+[tasks.'test-conformance-languages']
+description = "Check every runtime agrees on the language names cache and load accept"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+cargo test -p lumis-wasm-runtime --test languages_conformance
+pnpm --filter @lumis-sh/lumis exec vitest run test/languages-conformance.test.ts
+mise run test-conformance-languages-elixir
+'''
+
+[tasks.'test-conformance-languages-elixir']
+description = "The Elixir half of the language-name conformance suite"
+dir = "{{config_root}}/packages/elixir/lumis"
+env = { LUMIS_BUILD = "1" }
+run = "mix test test/languages_conformance_test.exs"
 
 [tasks.'test-conformance-elixir']
 description = "Run Elixir conformance tests"
