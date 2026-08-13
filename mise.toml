@@ -395,8 +395,19 @@ echo ""
 echo "Checking native package versions..."
 mise run check-native-versions
 echo ""
+echo "Checking CLI platform package versions..."
+mise run check-cli-versions
+echo ""
 echo "Checking crate dependency requirements..."
 mise run check-crate-deps
+'''
+
+[tasks.'check-cli-versions']
+description = "Check the CLI platform packages are versioned in lockstep with @lumis-sh/cli"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+node packages/javascript/scripts/check-cli-versions.mjs
 '''
 
 [tasks.'check-native-versions']
@@ -1070,6 +1081,12 @@ if [ "$package" = "npm-lumis" ]; then
     cargo set-version --manifest-path packages/javascript/lumis/native/Cargo.toml -p lumis-js-native "$version"
     for native_manifest in packages/javascript/lumis/native/npm/*/package.json; do
         npm --prefix "$(dirname "$native_manifest")" version --no-git-tag-version "$version"
+    done
+fi
+
+if [ "$package" = "npm-cli" ]; then
+    for cli_manifest in packages/javascript/cli/npm/*/package.json; do
+        npm --prefix "$(dirname "$cli_manifest")" version --no-git-tag-version "$version"
     done
 fi
 

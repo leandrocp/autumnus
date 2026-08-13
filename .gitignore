@@ -19,3 +19,7 @@ benchmarks/rust/target/
 # Built native addon, produced by `pnpm --filter @lumis-sh/lumis build:native`
 packages/javascript/lumis/native/*.node
 packages/javascript/lumis/native/npm/*/*.node
+
+# CLI binaries, staged into the platform packages by javascript-release.yml
+packages/javascript/cli/npm/*/lumis
+packages/javascript/cli/npm/*/lumis.exe

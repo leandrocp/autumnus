@@ -23,18 +23,20 @@
   },
   "files": [
     "bin",
-    "scripts/install.js",
-    "vendor",
     "CHANGELOG.md",
     "README.md"
   ],
   "packageManager": "pnpm@11.15.1",
   "scripts": {
-    "postinstall": "node scripts/install.js",
     "test": "node scripts/test-shim.js"
   },
-  "dependencies": {
-    "tar": "^7.5.2"
+  "optionalDependencies": {
+    "@lumis-sh/cli-darwin-arm64": "workspace:*",
+    "@lumis-sh/cli-darwin-x64": "workspace:*",
+    "@lumis-sh/cli-linux-arm64-gnu": "workspace:*",
+    "@lumis-sh/cli-linux-x64-gnu": "workspace:*",
+    "@lumis-sh/cli-win32-arm64-msvc": "workspace:*",
+    "@lumis-sh/cli-win32-x64-msvc": "workspace:*"
   },
   "engines": {
     "node": ">=18"
