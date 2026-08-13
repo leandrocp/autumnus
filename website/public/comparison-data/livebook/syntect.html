@@ -1,0 +1,1183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>syntect · Lumis visual comparison</title>
+  <style>
+    * { box-sizing: border-box; }
+    html { background: #171821; color: #f8f8f2; font: 14px/1.5 Inter, ui-sans-serif, system-ui, sans-serif; }
+    body { margin: 0; }
+    main { padding: 16px; min-width: max-content; }
+    pre { margin: 0 !important; padding: 20px !important; border: 1px solid #44475a; border-radius: 10px; overflow: visible !important; font: 13px/1.55 "SFMono-Regular", Consolas, "Liberation Mono", monospace !important; tab-size: 4; }
+    /* Every highlight.js theme ships a 1em pad on pre code.hljs, which would inset
+       one panel by 20px plus 1em while the rest are inset by 20px. */
+    pre code { padding: 0 !important; }
+  </style>
+</head>
+<body>
+  <main><pre style="background-color:#282a36;">
+<span style="color:#ff79c6;">defmodule </span><span style="text-decoration:underline;color:#8be9fd;">LivebookWeb</span><span style="color:#f8f8f2;">.</span><span style="text-decoration:underline;color:#8be9fd;">CoreComponents </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">use </span><span style="text-decoration:underline;color:#8be9fd;">Phoenix</span><span style="color:#f8f8f2;">.</span><span style="text-decoration:underline;color:#8be9fd;">Component
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">alias </span><span style="text-decoration:underline;color:#8be9fd;">Phoenix</span><span style="color:#f8f8f2;">.</span><span style="text-decoration:underline;color:#8be9fd;">LiveView</span><span style="color:#f8f8f2;">.</span><span style="text-decoration:underline;color:#8be9fd;">JS
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Renders [Remix](https://remixicon.com) icon.
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  ## Examples
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">      &lt;.remix_icon icon=&quot;cpu-line&quot; /&gt;
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">      &lt;.remix_icon icon=&quot;cpu-line&quot; class=&quot;align-middle mr-1&quot; /&gt;
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:icon</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:class</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:any</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: nil
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:rest</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:global
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">remix_icon</span><span style="color:#f8f8f2;">(assigns) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="font-style:italic;color:#8be9fd;">~H</span><span style="color:#f1fa8c;">&quot;&quot;&quot;
+</span><span style="color:#f1fa8c;">    &lt;i class={[&quot;ri-#{@icon}&quot;, @class]} aria-hidden=&quot;true&quot; {@rest}&gt;&lt;/i&gt;
+</span><span style="color:#f1fa8c;">    &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Renders flash notices.
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  ## Examples
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">      &lt;.flash kind=&quot;info&quot; flash={@flash} /&gt;
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:flash</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:map</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default:</span><span style="color:#f8f8f2;"> %{}, </span><span style="color:#bd93f9;">doc: </span><span style="color:#f1fa8c;">&quot;the map of flash messages to display&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:kind</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">,
+</span><span style="color:#f8f8f2;">    </span><span style="color:#bd93f9;">values: </span><span style="font-style:italic;color:#8be9fd;">~w</span><span style="color:#f1fa8c;">(info success warning error)</span><span style="color:#f8f8f2;">,
+</span><span style="color:#f8f8f2;">    </span><span style="color:#bd93f9;">doc: </span><span style="color:#f1fa8c;">&quot;used for styling and flash lookup&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:rest</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:global</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">doc: </span><span style="color:#f1fa8c;">&quot;the arbitrary HTML attributes to add to the flash container&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">flash</span><span style="color:#f8f8f2;">(assigns) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="font-style:italic;color:#8be9fd;">~H</span><span style="color:#f1fa8c;">&quot;&quot;&quot;
+</span><span style="color:#f1fa8c;">    &lt;div
+</span><span style="color:#f1fa8c;">      :if={message = Phoenix.Flash.get(@flash, @kind)}
+</span><span style="color:#f1fa8c;">      class=&quot;relative group shadow-lg max-w-xl px-3 py-2 flex items-center gap-2 rounded-lg bg-gray-900 text-gray-200 text-sm&quot;
+</span><span style="color:#f1fa8c;">      role=&quot;alert&quot;
+</span><span style="color:#f1fa8c;">      {@rest}
+</span><span style="color:#f1fa8c;">    &gt;
+</span><span style="color:#f1fa8c;">      &lt;div
+</span><span style="color:#f1fa8c;">        class=&quot;opacity-0 group-hover:opacity-100 absolute -left-2 -top-2 bg-gray-900 border border-gray-600 rounded-full p-0.5 flex leading-none text-gray-200 hover:text-gray-100 hover:bg-gray-700 text-sm cursor-pointer&quot;
+</span><span style="color:#f1fa8c;">        phx-click=&quot;lv:clear-flash&quot;
+</span><span style="color:#f1fa8c;">        phx-value-key={@kind}
+</span><span style="color:#f1fa8c;">      &gt;
+</span><span style="color:#f1fa8c;">        &lt;.remix_icon icon=&quot;close-line&quot; /&gt;
+</span><span style="color:#f1fa8c;">      &lt;/div&gt;
+</span><span style="color:#f1fa8c;">      &lt;.remix_icon :if={@kind == &quot;info&quot;} icon=&quot;information-fill&quot; class=&quot;text-xl text-blue-500&quot; /&gt;
+</span><span style="color:#f1fa8c;">      &lt;.remix_icon
+</span><span style="color:#f1fa8c;">        :if={@kind == &quot;success&quot;}
+</span><span style="color:#f1fa8c;">        icon=&quot;checkbox-circle-fill&quot;
+</span><span style="color:#f1fa8c;">        class=&quot;text-xl text-green-bright-400&quot;
+</span><span style="color:#f1fa8c;">      /&gt;
+</span><span style="color:#f1fa8c;">      &lt;.remix_icon :if={@kind == &quot;warning&quot;} icon=&quot;alert-fill&quot; class=&quot;text-xl text-yellow-500&quot; /&gt;
+</span><span style="color:#f1fa8c;">      &lt;.remix_icon :if={@kind == &quot;error&quot;} icon=&quot;error-warning-fill&quot; class=&quot;text-xl text-red-500&quot; /&gt;
+</span><span style="color:#f1fa8c;">      &lt;span class=&quot;whitespace-pre-wrap pr-2 max-h-52 overflow-y-auto tiny-scrollbar&quot; phx-no-format&gt;{message}&lt;/span&gt;
+</span><span style="color:#f1fa8c;">    &lt;/div&gt;
+</span><span style="color:#f1fa8c;">    &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Shows the flash group with standard titles and content.
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  ## Examples
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">      &lt;.flash_group flash={@flash} /&gt;
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:flash</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:map</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">doc: </span><span style="color:#f1fa8c;">&quot;the map of flash messages&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">flash_group</span><span style="color:#f8f8f2;">(assigns) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="font-style:italic;color:#8be9fd;">~H</span><span style="color:#f1fa8c;">&quot;&quot;&quot;
+</span><span style="color:#f1fa8c;">    &lt;div class=&quot;fixed right-8 top-5 z-1000 flex flex-col space-y-3&quot;&gt;
+</span><span style="color:#f1fa8c;">      &lt;.flash kind=&quot;info&quot; flash={@flash} /&gt;
+</span><span style="color:#f1fa8c;">      &lt;.flash kind=&quot;success&quot; flash={@flash} /&gt;
+</span><span style="color:#f1fa8c;">      &lt;.flash kind=&quot;warning&quot; flash={@flash} /&gt;
+</span><span style="color:#f1fa8c;">      &lt;.flash kind=&quot;error&quot; flash={@flash} /&gt;
+</span><span style="color:#f1fa8c;">    &lt;/div&gt;
+</span><span style="color:#f1fa8c;">    &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Renders page title.
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  ## Examples
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">      &lt;.title text=&quot;Learn&quot; /&gt;
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:text</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: nil
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:back_navigate</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: nil
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  slot </span><span style="color:#bd93f9;">:inner_block
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">title</span><span style="color:#f8f8f2;">(assigns) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="color:#ff79c6;">if</span><span style="color:#f8f8f2;"> assigns.text </span><span style="color:#ff79c6;">== </span><span style="color:#bd93f9;">nil </span><span style="color:#ff79c6;">and</span><span style="color:#f8f8f2;"> assigns.inner_block </span><span style="color:#ff79c6;">== </span><span style="color:#f8f8f2;">[] </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">      </span><span style="color:#ff79c6;">raise </span><span style="text-decoration:underline;color:#8be9fd;">ArgumentError</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;should pass at least text attribute or an inner block&quot;
+</span><span style="color:#f8f8f2;">    </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">    </span><span style="font-style:italic;color:#8be9fd;">~H</span><span style="color:#f1fa8c;">&quot;&quot;&quot;
+</span><span style="color:#f1fa8c;">    &lt;div class=&quot;relative&quot;&gt;
+</span><span style="color:#f1fa8c;">      &lt;div
+</span><span style="color:#f1fa8c;">        :if={@back_navigate}
+</span><span style="color:#f1fa8c;">        class=&quot;hidden md:flex absolute top-0 bottom-0 left-0 transform -translate-x-full&quot;
+</span><span style="color:#f1fa8c;">      &gt;
+</span><span style="color:#f1fa8c;">        &lt;.link navigate={@back_navigate}&gt;
+</span><span style="color:#f1fa8c;">          &lt;.remix_icon icon=&quot;arrow-left-line&quot; class=&quot;align-middle mr-2 text-2xl text-gray-800&quot; /&gt;
+</span><span style="color:#f1fa8c;">        &lt;/.link&gt;
+</span><span style="color:#f1fa8c;">      &lt;/div&gt;
+</span><span style="color:#f1fa8c;">      &lt;h1 class=&quot;text-2xl text-gray-800 font-medium&quot;&gt;
+</span><span style="color:#f1fa8c;">        &lt;%= if @inner_block != [] do %&gt;
+</span><span style="color:#f1fa8c;">          {render_slot(@inner_block)}
+</span><span style="color:#f1fa8c;">        &lt;% else %&gt;
+</span><span style="color:#f1fa8c;">          {@text}
+</span><span style="color:#f1fa8c;">        &lt;% end %&gt;
+</span><span style="color:#f1fa8c;">      &lt;/h1&gt;
+</span><span style="color:#f1fa8c;">    &lt;/div&gt;
+</span><span style="color:#f1fa8c;">    &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Renders a message notice.
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  Similar to `flash/1`, but for permanent messages on the page.
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  ## Examples
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">      &lt;.message_box kind=&quot;info&quot; message=&quot;🦊 in a 📦&quot; /&gt;
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">      &lt;.message_box kind=&quot;info&quot;&gt;
+</span><span style="color:#6272a4;">        &lt;span&gt;🦊&lt;/span&gt; in a &lt;span&gt;📦&lt;/span&gt;
+</span><span style="color:#6272a4;">      &lt;/.message_box&gt;
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:message</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: nil
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:kind</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">values: </span><span style="font-style:italic;color:#8be9fd;">~w</span><span style="color:#f1fa8c;">(info success warning error)
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  slot </span><span style="color:#bd93f9;">:inner_block
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">message_box</span><span style="color:#f8f8f2;">(assigns) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="color:#ff79c6;">if</span><span style="color:#f8f8f2;"> assigns.message </span><span style="color:#ff79c6;">&amp;&amp;</span><span style="color:#f8f8f2;"> assigns.inner_block </span><span style="color:#ff79c6;">!= </span><span style="color:#f8f8f2;">[] </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">      </span><span style="color:#ff79c6;">raise </span><span style="text-decoration:underline;color:#8be9fd;">ArgumentError</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;expected either message or inner_block, got both.&quot;
+</span><span style="color:#f8f8f2;">    </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">    </span><span style="font-style:italic;color:#8be9fd;">~H</span><span style="color:#f1fa8c;">&quot;&quot;&quot;
+</span><span style="color:#f1fa8c;">    &lt;div class={[
+</span><span style="color:#f1fa8c;">      &quot;shadow text-sm rounded-lg px-4 py-2 border-l-4 rounded-l-none bg-white text-gray-700&quot;,
+</span><span style="color:#f1fa8c;">      @kind == &quot;info&quot; &amp;&amp; &quot;border-blue-500&quot;,
+</span><span style="color:#f1fa8c;">      @kind == &quot;success&quot; &amp;&amp; &quot;border-green-bright-400&quot;,
+</span><span style="color:#f1fa8c;">      @kind == &quot;warning&quot; &amp;&amp; &quot;border-yellow-300&quot;,
+</span><span style="color:#f1fa8c;">      @kind == &quot;error&quot; &amp;&amp; &quot;border-red-500&quot;
+</span><span style="color:#f1fa8c;">    ]}&gt;
+</span><span style="color:#f1fa8c;">      &lt;div
+</span><span style="color:#f1fa8c;">        :if={@message}
+</span><span style="color:#f1fa8c;">        class=&quot;whitespace-pre-wrap pr-2 max-h-52 overflow-y-auto tiny-scrollbar&quot;
+</span><span style="color:#f1fa8c;">        phx-no-format
+</span><span style="color:#f1fa8c;">      &gt;{@message}&lt;/div&gt;
+</span><span style="color:#f1fa8c;">      &lt;%= if @inner_block != [] do %&gt;
+</span><span style="color:#f1fa8c;">        {render_slot(@inner_block)}
+</span><span style="color:#f1fa8c;">      &lt;% end %&gt;
+</span><span style="color:#f1fa8c;">    &lt;/div&gt;
+</span><span style="color:#f1fa8c;">    &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Creates a live region with the given role.
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  ## Examples
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">      &lt;.live_region role=&quot;alert&quot; /&gt;
+</span><span style="color:#6272a4;">      &lt;.live_region role=&quot;status&quot; /&gt;
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">live_region</span><span style="color:#f8f8f2;">(assigns) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="font-style:italic;color:#8be9fd;">~H</span><span style="color:#f1fa8c;">&quot;&quot;&quot;
+</span><span style="color:#f1fa8c;">    &lt;div class=&quot;sr-only&quot; role={@role} id=&quot;live-region&quot;&gt;&lt;/div&gt;
+</span><span style="color:#f1fa8c;">    &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Sends a message to be read by the screen reader by changing the text content of the live region
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">sr_message</span><span style="color:#f8f8f2;">(js </span><span style="color:#ff79c6;">\\</span><span style="color:#f8f8f2;"> %</span><span style="text-decoration:underline;color:#8be9fd;">JS</span><span style="color:#f8f8f2;">{}, message) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="text-decoration:underline;color:#8be9fd;">JS</span><span style="color:#f8f8f2;">.dispatch(js, </span><span style="color:#f1fa8c;">&quot;lb:set_text&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">to: </span><span style="color:#f1fa8c;">&quot;#live-region&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">detail:</span><span style="color:#f8f8f2;"> %{</span><span style="color:#bd93f9;">value:</span><span style="color:#f8f8f2;"> message})
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Wraps the given content in a modal dialog.
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  ## Example
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">      &lt;.modal id=&quot;edit-modal&quot; patch={...}&gt;
+</span><span style="color:#6272a4;">        &lt;.live_component module={MyComponent}  /&gt;
+</span><span style="color:#6272a4;">      &lt;/.modal&gt;
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:id</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:show</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:boolean</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: false
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:patch</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: nil
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:navigate</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: nil
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:class</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: nil
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:width</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">values: </span><span style="font-style:italic;color:#8be9fd;">~w</span><span style="color:#f1fa8c;">(small medium big large)</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:rest</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:global
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  slot </span><span style="color:#bd93f9;">:inner_block</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">modal</span><span style="color:#f8f8f2;">(assigns) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="font-style:italic;color:#8be9fd;">~H</span><span style="color:#f1fa8c;">&quot;&quot;&quot;
+</span><span style="color:#f1fa8c;">    &lt;div
+</span><span style="color:#f1fa8c;">      id={@id}
+</span><span style="color:#f1fa8c;">      class=&quot;fixed z-10000 inset-0 hidden&quot;
+</span><span style="color:#f1fa8c;">      phx-mounted={@show &amp;&amp; show_modal(@id)}
+</span><span style="color:#f1fa8c;">      phx-remove={hide_modal(@id)}
+</span><span style="color:#f1fa8c;">      data-cancel={modal_on_cancel(@patch, @navigate)}
+</span><span style="color:#f1fa8c;">      {@rest}
+</span><span style="color:#f1fa8c;">    &gt;
+</span><span style="color:#f1fa8c;">      &lt;!-- Modal container --&gt;
+</span><span style="color:#f1fa8c;">      &lt;div id={&quot;#{@id}-container&quot;} class=&quot;h-screen flex items-center justify-center p-4&quot;&gt;
+</span><span style="color:#f1fa8c;">        &lt;!-- Overlay --&gt;
+</span><span style="color:#f1fa8c;">        &lt;div class=&quot;absolute z-0 inset-0 bg-gray-500 opacity-75&quot; aria-hidden=&quot;true&quot;&gt;&lt;/div&gt;
+</span><span style="color:#f1fa8c;">        &lt;!-- Modal box --&gt;
+</span><span style="color:#f1fa8c;">        &lt;.focus_wrap
+</span><span style="color:#f1fa8c;">          id={&quot;#{@id}-content&quot;}
+</span><span style="color:#f1fa8c;">          class={[
+</span><span style="color:#f1fa8c;">            &quot;relative max-h-full overflow-y-auto bg-white rounded-lg shadow-xl focus-visible:outline-none&quot;,
+</span><span style="color:#f1fa8c;">            &quot;w-full p-6&quot;,
+</span><span style="color:#f1fa8c;">            modal_width_class(@width)
+</span><span style="color:#f1fa8c;">          ]}
+</span><span style="color:#f1fa8c;">          role=&quot;dialog&quot;
+</span><span style="color:#f1fa8c;">          aria-modal=&quot;true&quot;
+</span><span style="color:#f1fa8c;">          tabindex=&quot;0&quot;
+</span><span style="color:#f1fa8c;">          phx-window-keydown={JS.exec(&quot;data-cancel&quot;, to: &quot;##{@id}&quot;)}
+</span><span style="color:#f1fa8c;">          phx-click-away={JS.exec(&quot;data-cancel&quot;, to: &quot;##{@id}&quot;)}
+</span><span style="color:#f1fa8c;">          phx-key=&quot;escape&quot;
+</span><span style="color:#f1fa8c;">        &gt;
+</span><span style="color:#f1fa8c;">          &lt;button
+</span><span style="color:#f1fa8c;">            type=&quot;button&quot;
+</span><span style="color:#f1fa8c;">            class=&quot;absolute top-6 right-6 text-gray-400 flex space-x-1 items-center&quot;
+</span><span style="color:#f1fa8c;">            aria_label=&quot;close modal&quot;
+</span><span style="color:#f1fa8c;">            phx-click={JS.exec(&quot;data-cancel&quot;, to: &quot;##{@id}&quot;)}
+</span><span style="color:#f1fa8c;">          &gt;
+</span><span style="color:#f1fa8c;">            &lt;span class=&quot;text-sm&quot;&gt;(esc)&lt;/span&gt;
+</span><span style="color:#f1fa8c;">            &lt;.remix_icon icon=&quot;close-line&quot; class=&quot;text-2xl&quot; /&gt;
+</span><span style="color:#f1fa8c;">          &lt;/button&gt;
+</span><span style="color:#f1fa8c;">          {render_slot(@inner_block)}
+</span><span style="color:#f1fa8c;">        &lt;/.focus_wrap&gt;
+</span><span style="color:#f1fa8c;">      &lt;/div&gt;
+</span><span style="color:#f1fa8c;">    &lt;/div&gt;
+</span><span style="color:#f1fa8c;">    &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">modal_width_class</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;small&quot;</span><span style="color:#f8f8f2;">), </span><span style="color:#bd93f9;">do: </span><span style="color:#f1fa8c;">&quot;max-w-sm&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">modal_width_class</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;medium&quot;</span><span style="color:#f8f8f2;">), </span><span style="color:#bd93f9;">do: </span><span style="color:#f1fa8c;">&quot;max-w-xl&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">modal_width_class</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;big&quot;</span><span style="color:#f8f8f2;">), </span><span style="color:#bd93f9;">do: </span><span style="color:#f1fa8c;">&quot;max-w-4xl&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">modal_width_class</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;large&quot;</span><span style="color:#f8f8f2;">), </span><span style="color:#bd93f9;">do: </span><span style="color:#f1fa8c;">&quot;max-w-6xl&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">modal_on_cancel</span><span style="color:#f8f8f2;">(</span><span style="color:#bd93f9;">nil</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">nil</span><span style="color:#f8f8f2;">), </span><span style="color:#bd93f9;">do: </span><span style="text-decoration:underline;color:#8be9fd;">JS</span><span style="color:#f8f8f2;">.exec(</span><span style="color:#f1fa8c;">&quot;phx-remove&quot;</span><span style="color:#f8f8f2;">)
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">modal_on_cancel</span><span style="color:#f8f8f2;">(</span><span style="color:#bd93f9;">nil</span><span style="color:#f8f8f2;">, navigate), </span><span style="color:#bd93f9;">do: </span><span style="text-decoration:underline;color:#8be9fd;">JS</span><span style="color:#f8f8f2;">.patch(navigate)
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">modal_on_cancel</span><span style="color:#f8f8f2;">(patch, </span><span style="color:#bd93f9;">nil</span><span style="color:#f8f8f2;">), </span><span style="color:#bd93f9;">do: </span><span style="text-decoration:underline;color:#8be9fd;">JS</span><span style="color:#f8f8f2;">.patch(patch)
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Shows a modal rendered with `modal/1`.
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">show_modal</span><span style="color:#f8f8f2;">(js </span><span style="color:#ff79c6;">\\</span><span style="color:#f8f8f2;"> %</span><span style="text-decoration:underline;color:#8be9fd;">JS</span><span style="color:#f8f8f2;">{}, id) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    js
+</span><span style="color:#f8f8f2;">    </span><span style="color:#ff79c6;">|&gt; </span><span style="text-decoration:underline;color:#8be9fd;">JS</span><span style="color:#f8f8f2;">.show(</span><span style="color:#bd93f9;">to: </span><span style="color:#f1fa8c;">&quot;#</span><span style="color:#ff79c6;">#{</span><span style="color:#f8f8f2;">id}</span><span style="color:#f1fa8c;">&quot;</span><span style="color:#f8f8f2;">)
+</span><span style="color:#f8f8f2;">    </span><span style="color:#ff79c6;">|&gt; </span><span style="text-decoration:underline;color:#8be9fd;">JS</span><span style="color:#f8f8f2;">.dispatch(</span><span style="color:#f1fa8c;">&quot;lb:focus&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">to: </span><span style="color:#f1fa8c;">&quot;#</span><span style="color:#ff79c6;">#{</span><span style="color:#f8f8f2;">id}</span><span style="color:#f1fa8c;">-content&quot;</span><span style="color:#f8f8f2;">)
+</span><span style="color:#f8f8f2;">    </span><span style="color:#ff79c6;">|&gt; </span><span style="text-decoration:underline;color:#8be9fd;">JS</span><span style="color:#f8f8f2;">.transition(
+</span><span style="color:#f8f8f2;">      {</span><span style="color:#f1fa8c;">&quot;ease-out duration-200&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;opacity-0&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;opacity-100&quot;</span><span style="color:#f8f8f2;">},
+</span><span style="color:#f8f8f2;">      </span><span style="color:#bd93f9;">to: </span><span style="color:#f1fa8c;">&quot;#</span><span style="color:#ff79c6;">#{</span><span style="color:#f8f8f2;">id}</span><span style="color:#f1fa8c;">-container&quot;
+</span><span style="color:#f8f8f2;">    )
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Hides a modal rendered with `modal/1`.
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">hide_modal</span><span style="color:#f8f8f2;">(js </span><span style="color:#ff79c6;">\\</span><span style="color:#f8f8f2;"> %</span><span style="text-decoration:underline;color:#8be9fd;">JS</span><span style="color:#f8f8f2;">{}, id) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    js
+</span><span style="color:#f8f8f2;">    </span><span style="color:#ff79c6;">|&gt; </span><span style="text-decoration:underline;color:#8be9fd;">JS</span><span style="color:#f8f8f2;">.transition(
+</span><span style="color:#f8f8f2;">      {</span><span style="color:#f1fa8c;">&quot;ease-in duration-200&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;opacity-100&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;opacity-0&quot;</span><span style="color:#f8f8f2;">},
+</span><span style="color:#f8f8f2;">      </span><span style="color:#bd93f9;">to: </span><span style="color:#f1fa8c;">&quot;#</span><span style="color:#ff79c6;">#{</span><span style="color:#f8f8f2;">id}</span><span style="color:#f1fa8c;">-container&quot;
+</span><span style="color:#f8f8f2;">    )
+</span><span style="color:#f8f8f2;">    </span><span style="color:#ff79c6;">|&gt; </span><span style="text-decoration:underline;color:#8be9fd;">JS</span><span style="color:#f8f8f2;">.hide(</span><span style="color:#bd93f9;">to: </span><span style="color:#f1fa8c;">&quot;#</span><span style="color:#ff79c6;">#{</span><span style="color:#f8f8f2;">id}</span><span style="color:#f1fa8c;">&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">transition: </span><span style="color:#f8f8f2;">{</span><span style="color:#f1fa8c;">&quot;block&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;block&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;hidden&quot;</span><span style="color:#f8f8f2;">})
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Renders a popup menu that shows up on toggle click.
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  ## Examples
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">      &lt;.menu id=&quot;my-menu&quot;&gt;
+</span><span style="color:#6272a4;">        &lt;:toggle&gt;
+</span><span style="color:#6272a4;">          &lt;button&gt;Open&lt;/button&gt;
+</span><span style="color:#6272a4;">        &lt;/:toggle&gt;
+</span><span style="color:#6272a4;">        &lt;.menu_item&gt;
+</span><span style="color:#6272a4;">          &lt;button role=&quot;menuitem&quot;&gt;Option 1&lt;/button&gt;
+</span><span style="color:#6272a4;">        &lt;/.menu_item&gt;
+</span><span style="color:#6272a4;">        &lt;.menu_item&gt;
+</span><span style="color:#6272a4;">          &lt;button role=&quot;menuitem&quot;&gt;Option 2&lt;/button&gt;
+</span><span style="color:#6272a4;">        &lt;/.menu_item&gt;
+</span><span style="color:#6272a4;">      &lt;/.menu&gt;
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:id</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:disabled</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:boolean</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: false</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">doc: </span><span style="color:#f1fa8c;">&quot;whether the menu is active&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:position</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">,
+</span><span style="color:#f8f8f2;">    </span><span style="color:#bd93f9;">default: </span><span style="color:#f1fa8c;">&quot;bottom-right&quot;</span><span style="color:#f8f8f2;">,
+</span><span style="color:#f8f8f2;">    </span><span style="color:#bd93f9;">values: </span><span style="font-style:italic;color:#8be9fd;">~w</span><span style="color:#f1fa8c;">(top-left top-right bottom-left bottom-right)
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:sm_position</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">,
+</span><span style="color:#f8f8f2;">    </span><span style="color:#bd93f9;">default: nil</span><span style="color:#f8f8f2;">,
+</span><span style="color:#f8f8f2;">    </span><span style="color:#bd93f9;">values: </span><span style="color:#f8f8f2;">[</span><span style="color:#bd93f9;">nil</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;top-left&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;top-right&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;bottom-left&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;bottom-right&quot;</span><span style="color:#f8f8f2;">]
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:md_position</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">,
+</span><span style="color:#f8f8f2;">    </span><span style="color:#bd93f9;">default: nil</span><span style="color:#f8f8f2;">,
+</span><span style="color:#f8f8f2;">    </span><span style="color:#bd93f9;">values: </span><span style="color:#f8f8f2;">[</span><span style="color:#bd93f9;">nil</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;top-left&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;top-right&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;bottom-left&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;bottom-right&quot;</span><span style="color:#f8f8f2;">]
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:distant</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:boolean</span><span style="color:#f8f8f2;">,
+</span><span style="color:#f8f8f2;">    </span><span style="color:#bd93f9;">default: false</span><span style="color:#f8f8f2;">,
+</span><span style="color:#f8f8f2;">    </span><span style="color:#bd93f9;">doc: </span><span style="color:#f1fa8c;">&quot;whether the menu should be further from the anchor element&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:secondary_click</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:boolean</span><span style="color:#f8f8f2;">,
+</span><span style="color:#f8f8f2;">    </span><span style="color:#bd93f9;">default: false</span><span style="color:#f8f8f2;">,
+</span><span style="color:#f8f8f2;">    </span><span style="color:#bd93f9;">doc: </span><span style="color:#f1fa8c;">&quot;whether secondary click (usually right mouse click) should open the menu&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  slot </span><span style="color:#bd93f9;">:toggle</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  slot </span><span style="color:#bd93f9;">:inner_block</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">menu</span><span style="color:#f8f8f2;">(assigns) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="font-style:italic;color:#8be9fd;">~H</span><span style="color:#f1fa8c;">&quot;&quot;&quot;
+</span><span style="color:#f1fa8c;">    &lt;div class=&quot;relative&quot; id={@id}&gt;
+</span><span style="color:#f1fa8c;">      &lt;div
+</span><span style="color:#f1fa8c;">        phx-click={not @disabled &amp;&amp; show_menu(@id)}
+</span><span style="color:#f1fa8c;">        data-contextmenu-trigger-click={@secondary_click}
+</span><span style="color:#f1fa8c;">        phx-window-keydown={hide_menu(@id)}
+</span><span style="color:#f1fa8c;">        phx-key=&quot;escape&quot;
+</span><span style="color:#f1fa8c;">      &gt;
+</span><span style="color:#f1fa8c;">        {render_slot(@toggle)}
+</span><span style="color:#f1fa8c;">      &lt;/div&gt;
+</span><span style="color:#f1fa8c;">      &lt;div id={&quot;#{@id}-overlay&quot;} class=&quot;fixed z-90 inset-0 hidden&quot; phx-click-away={hide_menu(@id)}&gt;
+</span><span style="color:#f1fa8c;">      &lt;/div&gt;
+</span><span style="color:#f1fa8c;">      &lt;menu
+</span><span style="color:#f1fa8c;">        id={&quot;#{@id}-content&quot;}
+</span><span style="color:#f1fa8c;">        class={[
+</span><span style="color:#f1fa8c;">          &quot;absolute z-100 hidden&quot;,
+</span><span style="color:#f1fa8c;">          menu_position_class(@position),
+</span><span style="color:#f1fa8c;">          @md_position &amp;&amp; menu_md_position_class(@md_position),
+</span><span style="color:#f1fa8c;">          @sm_position &amp;&amp; menu_sm_position_class(@sm_position),
+</span><span style="color:#f1fa8c;">          @distant &amp;&amp; menu_distant_class(@position)
+</span><span style="color:#f1fa8c;">        ]}
+</span><span style="color:#f1fa8c;">        role=&quot;menu&quot;
+</span><span style="color:#f1fa8c;">        phx-click-away={hide_menu(@id)}
+</span><span style="color:#f1fa8c;">      &gt;
+</span><span style="color:#f1fa8c;">        &lt;div
+</span><span style="color:#f1fa8c;">          id={&quot;#{@id}-content-inner&quot;}
+</span><span style="color:#f1fa8c;">          class=&quot;rounded-lg bg-white flex flex-col py-2 shadow-[0_15px_99px_-0px_rgba(12,24,41,0.15)]&quot;
+</span><span style="color:#f1fa8c;">        &gt;
+</span><span style="color:#f1fa8c;">          {render_slot(@inner_block)}
+</span><span style="color:#f1fa8c;">        &lt;/div&gt;
+</span><span style="color:#f1fa8c;">      &lt;/menu&gt;
+</span><span style="color:#f1fa8c;">    &lt;/div&gt;
+</span><span style="color:#f1fa8c;">    &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Shows a menu rendered with `menu/1`.
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  ## Options
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">    * `:animate` - whether to play an animation when the menu is opened.
+</span><span style="color:#6272a4;">      Defaults to `false`
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">show_menu</span><span style="color:#f8f8f2;">(js </span><span style="color:#ff79c6;">\\</span><span style="color:#f8f8f2;"> %</span><span style="text-decoration:underline;color:#8be9fd;">JS</span><span style="color:#f8f8f2;">{}, id, opts </span><span style="color:#ff79c6;">\\ </span><span style="color:#f8f8f2;">[]) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    opts </span><span style="color:#ff79c6;">= </span><span style="text-decoration:underline;color:#8be9fd;">Keyword</span><span style="color:#f8f8f2;">.validate!(opts, </span><span style="color:#bd93f9;">animate: false</span><span style="color:#f8f8f2;">)
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">    js </span><span style="color:#ff79c6;">=
+</span><span style="color:#f8f8f2;">      js
+</span><span style="color:#f8f8f2;">      </span><span style="color:#ff79c6;">|&gt; </span><span style="text-decoration:underline;color:#8be9fd;">JS</span><span style="color:#f8f8f2;">.show(</span><span style="color:#bd93f9;">to: </span><span style="color:#f1fa8c;">&quot;#</span><span style="color:#ff79c6;">#{</span><span style="color:#f8f8f2;">id}</span><span style="color:#f1fa8c;">-overlay&quot;</span><span style="color:#f8f8f2;">)
+</span><span style="color:#f8f8f2;">      </span><span style="color:#ff79c6;">|&gt; </span><span style="text-decoration:underline;color:#8be9fd;">JS</span><span style="color:#f8f8f2;">.show(</span><span style="color:#bd93f9;">to: </span><span style="color:#f1fa8c;">&quot;#</span><span style="color:#ff79c6;">#{</span><span style="color:#f8f8f2;">id}</span><span style="color:#f1fa8c;">-content&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">display: </span><span style="color:#f1fa8c;">&quot;flex&quot;</span><span style="color:#f8f8f2;">)
+</span><span style="color:#f8f8f2;">      </span><span style="color:#ff79c6;">|&gt; </span><span style="text-decoration:underline;color:#8be9fd;">JS</span><span style="color:#f8f8f2;">.dispatch(</span><span style="color:#f1fa8c;">&quot;lb:scroll_into_view&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">to: </span><span style="color:#f1fa8c;">&quot;#</span><span style="color:#ff79c6;">#{</span><span style="color:#f8f8f2;">id}</span><span style="color:#f1fa8c;">-content&quot;</span><span style="color:#f8f8f2;">)
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">    </span><span style="color:#ff79c6;">if</span><span style="color:#f8f8f2;"> opts[</span><span style="color:#bd93f9;">:animate</span><span style="color:#f8f8f2;">] </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">      </span><span style="text-decoration:underline;color:#8be9fd;">JS</span><span style="color:#f8f8f2;">.add_class(js, </span><span style="color:#f1fa8c;">&quot;animate-shake&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">to: </span><span style="color:#f1fa8c;">&quot;#</span><span style="color:#ff79c6;">#{</span><span style="color:#f8f8f2;">id}</span><span style="color:#f1fa8c;">-content-inner&quot;</span><span style="color:#f8f8f2;">)
+</span><span style="color:#f8f8f2;">    </span><span style="color:#ff79c6;">else
+</span><span style="color:#f8f8f2;">      js
+</span><span style="color:#f8f8f2;">    </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Hides a menu rendered with `menu/1`.
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">hide_menu</span><span style="color:#f8f8f2;">(js </span><span style="color:#ff79c6;">\\</span><span style="color:#f8f8f2;"> %</span><span style="text-decoration:underline;color:#8be9fd;">JS</span><span style="color:#f8f8f2;">{}, id) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    js
+</span><span style="color:#f8f8f2;">    </span><span style="color:#ff79c6;">|&gt; </span><span style="text-decoration:underline;color:#8be9fd;">JS</span><span style="color:#f8f8f2;">.hide(</span><span style="color:#bd93f9;">to: </span><span style="color:#f1fa8c;">&quot;#</span><span style="color:#ff79c6;">#{</span><span style="color:#f8f8f2;">id}</span><span style="color:#f1fa8c;">-overlay&quot;</span><span style="color:#f8f8f2;">)
+</span><span style="color:#f8f8f2;">    </span><span style="color:#ff79c6;">|&gt; </span><span style="text-decoration:underline;color:#8be9fd;">JS</span><span style="color:#f8f8f2;">.hide(</span><span style="color:#bd93f9;">to: </span><span style="color:#f1fa8c;">&quot;#</span><span style="color:#ff79c6;">#{</span><span style="color:#f8f8f2;">id}</span><span style="color:#f1fa8c;">-content&quot;</span><span style="color:#f8f8f2;">)
+</span><span style="color:#f8f8f2;">    </span><span style="color:#ff79c6;">|&gt; </span><span style="text-decoration:underline;color:#8be9fd;">JS</span><span style="color:#f8f8f2;">.remove_class(</span><span style="color:#f1fa8c;">&quot;animate-shake&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">to: </span><span style="color:#f1fa8c;">&quot;#</span><span style="color:#ff79c6;">#{</span><span style="color:#f8f8f2;">id}</span><span style="color:#f1fa8c;">-content-inner&quot;</span><span style="color:#f8f8f2;">)
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">menu_position_class</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;top-left&quot;</span><span style="color:#f8f8f2;">), </span><span style="color:#bd93f9;">do: </span><span style="color:#f1fa8c;">&quot;top-0 left-0 transform -translate-y-full -mt-1&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">menu_position_class</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;top-right&quot;</span><span style="color:#f8f8f2;">), </span><span style="color:#bd93f9;">do: </span><span style="color:#f1fa8c;">&quot;top-0 right-0 transform -translate-y-full -mt-1&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">menu_position_class</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;bottom-left&quot;</span><span style="color:#f8f8f2;">), </span><span style="color:#bd93f9;">do: </span><span style="color:#f1fa8c;">&quot;bottom-0 left-0 transform translate-y-full -mb-1&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">menu_position_class</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;bottom-right&quot;</span><span style="color:#f8f8f2;">),
+</span><span style="color:#f8f8f2;">    </span><span style="color:#bd93f9;">do: </span><span style="color:#f1fa8c;">&quot;bottom-0 right-0 transform translate-y-full -mb-1&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">menu_md_position_class</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;top-left&quot;</span><span style="color:#f8f8f2;">) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="color:#f1fa8c;">&quot;md:top-0 md:left-0 md:bottom-auto md:right-auto md:transform md:-translate-y-full md:-mt-1 md:mb-0&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">menu_md_position_class</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;top-right&quot;</span><span style="color:#f8f8f2;">) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="color:#f1fa8c;">&quot;md:top-0 md:right-0 md:bottom-auto md:left-auto md:transform md:-translate-y-full md:-mt-1 md:mb-0&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">menu_md_position_class</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;bottom-left&quot;</span><span style="color:#f8f8f2;">) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="color:#f1fa8c;">&quot;md:bottom-0 md:left-0 md:top-auto md:right-auto md:transform md:translate-y-full md:-mb-1 md:mt-0&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">menu_md_position_class</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;bottom-right&quot;</span><span style="color:#f8f8f2;">) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="color:#f1fa8c;">&quot;md:bottom-0 md:right-0 md:top-auto md:left-auto md:transform md:translate-y-full md:-mb-1 md:mt-0&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">menu_sm_position_class</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;top-left&quot;</span><span style="color:#f8f8f2;">) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="color:#f1fa8c;">&quot;sm:top-0 sm:left-0 sm:bottom-auto sm:right-auto sm:transform sm:-translate-y-full sm:-mt-1 sm:mb-0&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">menu_sm_position_class</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;top-right&quot;</span><span style="color:#f8f8f2;">) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="color:#f1fa8c;">&quot;sm:top-0 sm:right-0 sm:bottom-auto sm:left-auto sm:transform sm:-translate-y-full sm:-mt-1 sm:mb-0&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">menu_sm_position_class</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;bottom-left&quot;</span><span style="color:#f8f8f2;">) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="color:#f1fa8c;">&quot;sm:bottom-0 sm:left-0 sm:top-auto sm:right-auto sm:transform sm:translate-y-full sm:-mb-1 sm:mt-0&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">menu_sm_position_class</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;bottom-right&quot;</span><span style="color:#f8f8f2;">) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="color:#f1fa8c;">&quot;sm:bottom-0 sm:right-0 sm:top-auto sm:left-auto sm:transform sm:translate-y-full sm:-mb-1 sm:mt-0&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">menu_distant_class</span><span style="color:#f8f8f2;">(position) </span><span style="color:#ff79c6;">when</span><span style="color:#f8f8f2;"> position </span><span style="color:#ff79c6;">in </span><span style="color:#f8f8f2;">[</span><span style="color:#f1fa8c;">&quot;top-left&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;top-right&quot;</span><span style="color:#f8f8f2;">], </span><span style="color:#bd93f9;">do: </span><span style="color:#f1fa8c;">&quot;-mt-2&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">menu_distant_class</span><span style="color:#f8f8f2;">(position) </span><span style="color:#ff79c6;">when</span><span style="color:#f8f8f2;"> position </span><span style="color:#ff79c6;">in </span><span style="color:#f8f8f2;">[</span><span style="color:#f1fa8c;">&quot;bottom-left&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;bottom-right&quot;</span><span style="color:#f8f8f2;">], </span><span style="color:#bd93f9;">do: </span><span style="color:#f1fa8c;">&quot;-mb-2&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Wraps a menu item that shows a submenu on hover.
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  This component should be used within `menu/1` content.
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  ## Example
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">      &lt;.submenu&gt;
+</span><span style="color:#6272a4;">        &lt;:primary&gt;
+</span><span style="color:#6272a4;">          &lt;button class&quot;menu-item&quot; role=&quot;menuitem&quot;&gt;Submenu&lt;/button&gt;
+</span><span style="color:#6272a4;">        &lt;/:primary&gt;
+</span><span style="color:#6272a4;">        &lt;.menu_item&gt;
+</span><span style="color:#6272a4;">          &lt;button class&quot;menu-item&quot; role=&quot;menuitem&quot;&gt;Option 1&lt;/button&gt;
+</span><span style="color:#6272a4;">        &lt;/.menu_item&gt;
+</span><span style="color:#6272a4;">      &lt;/.submenu&gt;
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  slot </span><span style="color:#bd93f9;">:primary</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">  slot </span><span style="color:#bd93f9;">:inner_block</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">submenu</span><span style="color:#f8f8f2;">(assigns) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="font-style:italic;color:#8be9fd;">~H</span><span style="color:#f1fa8c;">&quot;&quot;&quot;
+</span><span style="color:#f1fa8c;">    &lt;div class=&quot;group relative&quot;&gt;
+</span><span style="color:#f1fa8c;">      {render_slot(@primary)}
+</span><span style="color:#f1fa8c;">      &lt;div class=&quot;absolute -top-2 right-0 translate-x-full pl-2 hidden group-hover:flex group-focus-within:flex&quot;&gt;
+</span><span style="color:#f1fa8c;">        &lt;menu class=&quot;relative mt-0 z-100 rounded-lg bg-white flex flex-col py-2 shadow-[0_15px_99px_-0px_rgba(12,24,41,0.15)]&quot;&gt;
+</span><span style="color:#f1fa8c;">          {render_slot(@inner_block)}
+</span><span style="color:#f1fa8c;">        &lt;/menu&gt;
+</span><span style="color:#f1fa8c;">      &lt;/div&gt;
+</span><span style="color:#f1fa8c;">    &lt;/div&gt;
+</span><span style="color:#f1fa8c;">    &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Renders a menu item used in `menu/1` and `submenu/1`.
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:disabled</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:boolean</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: false
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:variant</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: </span><span style="color:#f1fa8c;">&quot;default&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">values: </span><span style="font-style:italic;color:#8be9fd;">~w</span><span style="color:#f1fa8c;">(default selected danger)
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  slot </span><span style="color:#bd93f9;">:inner_block</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">menu_item</span><span style="color:#f8f8f2;">(assigns) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="font-style:italic;color:#8be9fd;">~H</span><span style="color:#f1fa8c;">&quot;&quot;&quot;
+</span><span style="color:#f1fa8c;">    &lt;li class={[
+</span><span style="color:#f1fa8c;">      &quot;w-full&quot;,
+</span><span style="color:#f1fa8c;">      &quot;*:first:w-full *:first:flex *:first:space-x-3 *:first:px-5 *:first:py-2 *:first:items-center [&amp;&gt;:first-child:hover]:bg-gray-100 [&amp;&gt;:first-child:focus-visible]:bg-gray-100 [&amp;&gt;:first-child:focus-visible]:outline-none *:first:whitespace-nowrap font-medium&quot;,
+</span><span style="color:#f1fa8c;">      menu_item_class(@variant),
+</span><span style="color:#f1fa8c;">      @disabled &amp;&amp; &quot;pointer-events-none opacity-50&quot;
+</span><span style="color:#f1fa8c;">    ]}&gt;
+</span><span style="color:#f1fa8c;">      {render_slot(@inner_block)}
+</span><span style="color:#f1fa8c;">    &lt;/li&gt;
+</span><span style="color:#f1fa8c;">    &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">menu_item_class</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;default&quot;</span><span style="color:#f8f8f2;">), </span><span style="color:#bd93f9;">do: </span><span style="color:#f1fa8c;">&quot;text-gray-500&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">menu_item_class</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;selected&quot;</span><span style="color:#f8f8f2;">), </span><span style="color:#bd93f9;">do: </span><span style="color:#f1fa8c;">&quot;text-gray-900&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">menu_item_class</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;danger&quot;</span><span style="color:#f8f8f2;">), </span><span style="color:#bd93f9;">do: </span><span style="color:#f1fa8c;">&quot;text-red-600&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Renders a text content skeleton.
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:empty</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:boolean</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: false</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">doc: </span><span style="color:#f1fa8c;">&quot;if the source is empty&quot;
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:bg_class</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: </span><span style="color:#f1fa8c;">&quot;bg-gray-200&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">doc: </span><span style="color:#f1fa8c;">&quot;the skeleton background color&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">content_skeleton</span><span style="color:#f8f8f2;">(assigns) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="font-style:italic;color:#8be9fd;">~H</span><span style="color:#f1fa8c;">&quot;&quot;&quot;
+</span><span style="color:#f1fa8c;">    &lt;%= if @empty do %&gt;
+</span><span style="color:#f1fa8c;">      &lt;div class=&quot;h-4&quot;&gt;&lt;/div&gt;
+</span><span style="color:#f1fa8c;">    &lt;% else %&gt;
+</span><span style="color:#f1fa8c;">      &lt;div class=&quot;max-w-2xl w-full animate-pulse&quot;&gt;
+</span><span style="color:#f1fa8c;">        &lt;div class=&quot;flex-1 space-y-4&quot;&gt;
+</span><span style="color:#f1fa8c;">          &lt;div class={[@bg_class, &quot;h-4 rounded-lg w-3/4&quot;]}&gt;&lt;/div&gt;
+</span><span style="color:#f1fa8c;">          &lt;div class={[@bg_class, &quot;h-4 rounded-lg&quot;]}&gt;&lt;/div&gt;
+</span><span style="color:#f1fa8c;">          &lt;div class={[@bg_class, &quot;h-4 rounded-lg w-5/6&quot;]}&gt;&lt;/div&gt;
+</span><span style="color:#f1fa8c;">        &lt;/div&gt;
+</span><span style="color:#f1fa8c;">      &lt;/div&gt;
+</span><span style="color:#f1fa8c;">    &lt;% end %&gt;
+</span><span style="color:#f1fa8c;">    &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Renders a file content skeleton.
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:empty</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:boolean</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: false</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">doc: </span><span style="color:#f1fa8c;">&quot;if the source is empty&quot;
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:bg_class</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: </span><span style="color:#f1fa8c;">&quot;bg-gray-200&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">doc: </span><span style="color:#f1fa8c;">&quot;the skeleton background color&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">file_skeleton</span><span style="color:#f8f8f2;">(assigns) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="font-style:italic;color:#8be9fd;">~H</span><span style="color:#f1fa8c;">&quot;&quot;&quot;
+</span><span style="color:#f1fa8c;">    &lt;%= if @empty do %&gt;
+</span><span style="color:#f1fa8c;">      &lt;div class=&quot;h-4&quot;&gt;&lt;/div&gt;
+</span><span style="color:#f1fa8c;">    &lt;% else %&gt;
+</span><span style="color:#f1fa8c;">      &lt;div class=&quot;max-w-2xl w-full animate-pulse&quot;&gt;
+</span><span style="color:#f1fa8c;">        &lt;div class=&quot;flex-1 space-y-4&quot;&gt;
+</span><span style="color:#f1fa8c;">          &lt;div class=&quot;w-full flex space-x-2 items-center p-2&quot;&gt;
+</span><span style="color:#f1fa8c;">            &lt;div class={[@bg_class, &quot;h-6 rounded-md w-5&quot;]} /&gt;
+</span><span style="color:#f1fa8c;">            &lt;div class={[
+</span><span style="color:#f1fa8c;">              @bg_class,
+</span><span style="color:#f1fa8c;">              &quot;h-4 rounded-lg&quot;,
+</span><span style="color:#f1fa8c;">              Enum.random([&quot;w-1/2&quot;, &quot;w-2/3&quot;, &quot;w-3/4&quot;, &quot;w-4/5&quot;, &quot;w-full&quot;])
+</span><span style="color:#f1fa8c;">            ]} /&gt;
+</span><span style="color:#f1fa8c;">          &lt;/div&gt;
+</span><span style="color:#f1fa8c;">        &lt;/div&gt;
+</span><span style="color:#f1fa8c;">      &lt;/div&gt;
+</span><span style="color:#f1fa8c;">    &lt;% end %&gt;
+</span><span style="color:#f1fa8c;">    &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Renders a highlighted code snippet.
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  ## Examples
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">      &lt;.code_preview
+</span><span style="color:#6272a4;">        source_id=&quot;my-snippet&quot;
+</span><span style="color:#6272a4;">        language=&quot;elixir&quot;
+</span><span style="color:#6272a4;">        source=&quot;System.version()&quot; /&gt;
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:source_id</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:language</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:source</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:wrap</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:boolean</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: false
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">code_preview</span><span style="color:#f8f8f2;">(assigns) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="font-style:italic;color:#8be9fd;">~H</span><span style="color:#f1fa8c;">&quot;&quot;&quot;
+</span><span style="color:#f1fa8c;">    &lt;div class=&quot;markdown&quot;&gt;
+</span><span style="color:#f1fa8c;">      &lt;pre&gt;&lt;code
+</span><span style="color:#f1fa8c;">      class={if(@wrap, do: &quot;break-all whitespace-pre-wrap&quot;, else: &quot;tiny-scrollbar&quot;)}
+</span><span style="color:#f1fa8c;">      id={&quot;#{@source_id}-highlight&quot;}
+</span><span style="color:#f1fa8c;">      phx-hook=&quot;Highlight&quot;
+</span><span style="color:#f1fa8c;">      data-p-language={hook_prop(@language)}
+</span><span style="color:#f1fa8c;">    &gt;&lt;div id={@source_id} data-source&gt;{@source}&lt;/div&gt;&lt;div data-target&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;
+</span><span style="color:#f1fa8c;">    &lt;/div&gt;
+</span><span style="color:#f1fa8c;">    &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Renders a highlighted code snippet with a title and a copy button.
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  ## Examples
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">      &lt;.code_preview_with_title_and_copy
+</span><span style="color:#6272a4;">        title=&quot;
+</span><span style="color:#6272a4;">        source_id=&quot;my-snippet&quot;
+</span><span style="color:#6272a4;">        language=&quot;elixir&quot;
+</span><span style="color:#6272a4;">        source=&quot;System.version()&quot; /&gt;
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:title</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:source_id</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:language</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:source</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">code_preview_with_title_and_copy</span><span style="color:#f8f8f2;">(assigns) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="font-style:italic;color:#8be9fd;">~H</span><span style="color:#f1fa8c;">&quot;&quot;&quot;
+</span><span style="color:#f1fa8c;">    &lt;div&gt;
+</span><span style="color:#f1fa8c;">      &lt;div class=&quot;flex justify-between items-center&quot;&gt;
+</span><span style="color:#f1fa8c;">        &lt;span class=&quot;text-sm text-gray-700 font-semibold&quot;&gt;{@title}&lt;/span&gt;
+</span><span style="color:#f1fa8c;">        &lt;div class=&quot;flex justify-end space-x-2&quot;&gt;
+</span><span style="color:#f1fa8c;">          &lt;span class=&quot;tooltip left&quot; data-tooltip=&quot;Copy source&quot;&gt;
+</span><span style="color:#f1fa8c;">            &lt;.icon_button
+</span><span style="color:#f1fa8c;">              aria-label=&quot;copy source&quot;
+</span><span style="color:#f1fa8c;">              phx-click={JS.dispatch(&quot;lb:clipcopy&quot;, to: &quot;##{@source_id}&quot;)}
+</span><span style="color:#f1fa8c;">            &gt;
+</span><span style="color:#f1fa8c;">              &lt;.remix_icon icon=&quot;clipboard-line&quot; /&gt;
+</span><span style="color:#f1fa8c;">            &lt;/.icon_button&gt;
+</span><span style="color:#f1fa8c;">          &lt;/span&gt;
+</span><span style="color:#f1fa8c;">        &lt;/div&gt;
+</span><span style="color:#f1fa8c;">      &lt;/div&gt;
+</span><span style="color:#f1fa8c;">
+</span><span style="color:#f1fa8c;">      &lt;div class=&quot;markdown&quot;&gt;
+</span><span style="color:#f1fa8c;">        &lt;.code_preview source_id={@source_id} language={@language} source={@source} /&gt;
+</span><span style="color:#f1fa8c;">      &lt;/div&gt;
+</span><span style="color:#f1fa8c;">    &lt;/div&gt;
+</span><span style="color:#f1fa8c;">    &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Renders text with a tiny label.
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  ## Examples
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">      &lt;.labeled_text label=&quot;Name&quot;&gt;Sherlock Holmes&lt;/.labeled_text&gt;
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:label</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:one_line</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:boolean</span><span style="color:#f8f8f2;">,
+</span><span style="color:#f8f8f2;">    </span><span style="color:#bd93f9;">default: false</span><span style="color:#f8f8f2;">,
+</span><span style="color:#f8f8f2;">    </span><span style="color:#bd93f9;">doc: </span><span style="color:#f1fa8c;">&quot;whether to force the text into a single scrollable line&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:class</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: nil
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  slot </span><span style="color:#bd93f9;">:inner_block</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">labeled_text</span><span style="color:#f8f8f2;">(assigns) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="font-style:italic;color:#8be9fd;">~H</span><span style="color:#f1fa8c;">&quot;&quot;&quot;
+</span><span style="color:#f1fa8c;">    &lt;div class={[&quot;flex flex-col space-y-1&quot;, @class]}&gt;
+</span><span style="color:#f1fa8c;">      &lt;span class=&quot;text-sm text-gray-500&quot;&gt;
+</span><span style="color:#f1fa8c;">        {@label}
+</span><span style="color:#f1fa8c;">      &lt;/span&gt;
+</span><span style="color:#f1fa8c;">      &lt;span class={[
+</span><span style="color:#f1fa8c;">        &quot;text-gray-800 text-sm font-semibold&quot;,
+</span><span style="color:#f1fa8c;">        @one_line &amp;&amp;
+</span><span style="color:#f1fa8c;">          &quot;whitespace-nowrap overflow-hidden text-ellipsis hover:text-clip hover:overflow-auto hover:tiny-scrollbar&quot;
+</span><span style="color:#f1fa8c;">      ]}&gt;
+</span><span style="color:#f1fa8c;">        {render_slot(@inner_block)}
+</span><span style="color:#f1fa8c;">      &lt;/span&gt;
+</span><span style="color:#f1fa8c;">    &lt;/div&gt;
+</span><span style="color:#f1fa8c;">    &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Renders a choice button that is either active or not.
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  ## Examples
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">      &lt;.choice_button active={@tab == &quot;my_tab&quot;} phx-click=&quot;set_my_tab&quot;&gt;
+</span><span style="color:#6272a4;">        My tab
+</span><span style="color:#6272a4;">      &lt;/.choice_button&gt;
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:active</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:boolean</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:disabled</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:boolean
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:class</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: nil
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:rest</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:global
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  slot </span><span style="color:#bd93f9;">:inner_block</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">choice_button</span><span style="color:#f8f8f2;">(assigns) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    assigns </span><span style="color:#ff79c6;">=
+</span><span style="color:#f8f8f2;">      assigns
+</span><span style="color:#f8f8f2;">      </span><span style="color:#ff79c6;">|&gt;</span><span style="color:#f8f8f2;"> assign_new(</span><span style="color:#bd93f9;">:disabled</span><span style="color:#f8f8f2;">, </span><span style="color:#ff79c6;">fn -&gt;</span><span style="color:#f8f8f2;"> assigns.active </span><span style="color:#ff79c6;">end</span><span style="color:#f8f8f2;">)
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">    </span><span style="font-style:italic;color:#8be9fd;">~H</span><span style="color:#f1fa8c;">&quot;&quot;&quot;
+</span><span style="color:#f1fa8c;">    &lt;button
+</span><span style="color:#f1fa8c;">      class={[
+</span><span style="color:#f1fa8c;">        &quot;px-5 py-2 rounded-lg text-gray-700 border&quot;,
+</span><span style="color:#f1fa8c;">        if(@active, do: &quot;bg-blue-100 border-blue-600&quot;, else: &quot;bg-white border-gray-200&quot;),
+</span><span style="color:#f1fa8c;">        @class
+</span><span style="color:#f1fa8c;">      ]}
+</span><span style="color:#f1fa8c;">      disabled={@disabled}
+</span><span style="color:#f1fa8c;">      {@rest}
+</span><span style="color:#f1fa8c;">    &gt;
+</span><span style="color:#f1fa8c;">      {render_slot(@inner_block)}
+</span><span style="color:#f1fa8c;">    &lt;/button&gt;
+</span><span style="color:#f1fa8c;">    &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Renders an status indicator circle.
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:variant</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">,
+</span><span style="color:#f8f8f2;">    </span><span style="color:#bd93f9;">required: true</span><span style="color:#f8f8f2;">,
+</span><span style="color:#f8f8f2;">    </span><span style="color:#bd93f9;">values: </span><span style="font-style:italic;color:#8be9fd;">~w</span><span style="color:#f1fa8c;">(success warning error inactive waiting progressing)
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">status_indicator</span><span style="color:#f8f8f2;">(assigns) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="font-style:italic;color:#8be9fd;">~H</span><span style="color:#f1fa8c;">&quot;&quot;&quot;
+</span><span style="color:#f1fa8c;">    &lt;span class=&quot;relative flex h-2.5 w-2.5&quot;&gt;
+</span><span style="color:#f1fa8c;">      &lt;span
+</span><span style="color:#f1fa8c;">        :if={animated_status_circle_class(@variant)}
+</span><span style="color:#f1fa8c;">        class={[
+</span><span style="color:#f1fa8c;">          animated_status_circle_class(@variant),
+</span><span style="color:#f1fa8c;">          &quot;animate-ping absolute inline-flex h-full w-full rounded-full opacity-75&quot;
+</span><span style="color:#f1fa8c;">        ]}
+</span><span style="color:#f1fa8c;">      &gt;
+</span><span style="color:#f1fa8c;">      &lt;/span&gt;
+</span><span style="color:#f1fa8c;">      &lt;span class={[status_circle_class(@variant), &quot;relative inline-flex rounded-full h-2.5 w-2.5&quot;]}&gt;
+</span><span style="color:#f1fa8c;">      &lt;/span&gt;
+</span><span style="color:#f1fa8c;">    &lt;/span&gt;
+</span><span style="color:#f1fa8c;">    &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Returns background class based on the given variant.
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  See `status_indicator/1` for available variants.
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">status_circle_class</span><span style="color:#f8f8f2;">(variant)
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">status_circle_class</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;success&quot;</span><span style="color:#f8f8f2;">), </span><span style="color:#bd93f9;">do: </span><span style="color:#f1fa8c;">&quot;bg-green-bright-400&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">status_circle_class</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;warning&quot;</span><span style="color:#f8f8f2;">), </span><span style="color:#bd93f9;">do: </span><span style="color:#f1fa8c;">&quot;bg-yellow-bright-200&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">status_circle_class</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;error&quot;</span><span style="color:#f8f8f2;">), </span><span style="color:#bd93f9;">do: </span><span style="color:#f1fa8c;">&quot;bg-red-400&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">status_circle_class</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;inactive&quot;</span><span style="color:#f8f8f2;">), </span><span style="color:#bd93f9;">do: </span><span style="color:#f1fa8c;">&quot;bg-gray-500&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">status_circle_class</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;waiting&quot;</span><span style="color:#f8f8f2;">), </span><span style="color:#bd93f9;">do: </span><span style="color:#f1fa8c;">&quot;bg-gray-400&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">status_circle_class</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;progressing&quot;</span><span style="color:#f8f8f2;">), </span><span style="color:#bd93f9;">do: </span><span style="color:#f1fa8c;">&quot;bg-blue-500&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">animated_status_circle_class</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;waiting&quot;</span><span style="color:#f8f8f2;">), </span><span style="color:#bd93f9;">do: </span><span style="color:#f1fa8c;">&quot;bg-gray-300&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">animated_status_circle_class</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;progressing&quot;</span><span style="color:#f8f8f2;">), </span><span style="color:#bd93f9;">do: </span><span style="color:#f1fa8c;">&quot;bg-blue-400&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">animated_status_circle_class</span><span style="color:#f8f8f2;">(_other), </span><span style="color:#bd93f9;">do: nil
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Renders an informative box as a placeholder for a list.
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  slot </span><span style="color:#bd93f9;">:inner_block</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">  slot </span><span style="color:#bd93f9;">:actions
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">no_entries</span><span style="color:#f8f8f2;">(assigns) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="font-style:italic;color:#8be9fd;">~H</span><span style="color:#f1fa8c;">&quot;&quot;&quot;
+</span><span style="color:#f1fa8c;">    &lt;div class=&quot;p-5 flex space-x-4 items-center border border-gray-200 rounded-lg&quot;&gt;
+</span><span style="color:#f1fa8c;">      &lt;div&gt;
+</span><span style="color:#f1fa8c;">        &lt;.remix_icon icon=&quot;windy-line&quot; class=&quot;text-gray-400 text-xl&quot; /&gt;
+</span><span style="color:#f1fa8c;">      &lt;/div&gt;
+</span><span style="color:#f1fa8c;">      &lt;div class=&quot;grow flex items-center justify-between&quot;&gt;
+</span><span style="color:#f1fa8c;">        &lt;div class=&quot;text-gray-600&quot;&gt;
+</span><span style="color:#f1fa8c;">          {render_slot(@inner_block)}
+</span><span style="color:#f1fa8c;">        &lt;/div&gt;
+</span><span style="color:#f1fa8c;">        {render_slot(@actions)}
+</span><span style="color:#f1fa8c;">      &lt;/div&gt;
+</span><span style="color:#f1fa8c;">    &lt;/div&gt;
+</span><span style="color:#f1fa8c;">    &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Renders a circular spinner.
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:class</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: nil
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:rest</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:global
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">spinner</span><span style="color:#f8f8f2;">(assigns) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="font-style:italic;color:#8be9fd;">~H</span><span style="color:#f1fa8c;">&quot;&quot;&quot;
+</span><span style="color:#f1fa8c;">    &lt;svg
+</span><span style="color:#f1fa8c;">      aria-hidden=&quot;true&quot;
+</span><span style="color:#f1fa8c;">      class={[&quot;inline w-4 h-4 text-gray-200 animate-spin fill-blue-600&quot;, @class]}
+</span><span style="color:#f1fa8c;">      viewBox=&quot;0 0 100 101&quot;
+</span><span style="color:#f1fa8c;">      fill=&quot;none&quot;
+</span><span style="color:#f1fa8c;">      xmlns=&quot;http://www.w3.org/2000/svg&quot;
+</span><span style="color:#f1fa8c;">      {@rest}
+</span><span style="color:#f1fa8c;">    &gt;
+</span><span style="color:#f1fa8c;">      &lt;path
+</span><span style="color:#f1fa8c;">        d=&quot;M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z&quot;
+</span><span style="color:#f1fa8c;">        fill=&quot;currentColor&quot;
+</span><span style="color:#f1fa8c;">      /&gt;
+</span><span style="color:#f1fa8c;">      &lt;path
+</span><span style="color:#f1fa8c;">        d=&quot;M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z&quot;
+</span><span style="color:#f1fa8c;">        fill=&quot;currentFill&quot;
+</span><span style="color:#f1fa8c;">      /&gt;
+</span><span style="color:#f1fa8c;">    &lt;/svg&gt;
+</span><span style="color:#f1fa8c;">    &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Returns the text in singular or plural depending on the quantity.
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  ## Examples
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">    &lt;.listing items={@packages}&gt;
+</span><span style="color:#6272a4;">      &lt;:item :let={package}&gt;&lt;code&gt;{package.name}&lt;/code&gt;&lt;/:item&gt;
+</span><span style="color:#6272a4;">      &lt;:singular_suffix&gt;package&lt;/:singular_suffix&gt;
+</span><span style="color:#6272a4;">      &lt;:plural_suffix&gt;packages&lt;/:plural_suffix&gt;
+</span><span style="color:#6272a4;">    &lt;/.listing&gt;
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:items</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:list</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  slot </span><span style="color:#bd93f9;">:item</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">  slot </span><span style="color:#bd93f9;">:plural_suffix
+</span><span style="color:#f8f8f2;">  slot </span><span style="color:#bd93f9;">:singular_suffix
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">listing</span><span style="color:#f8f8f2;">(%{</span><span style="color:#bd93f9;">items: </span><span style="color:#f8f8f2;">[_]} </span><span style="color:#ff79c6;">=</span><span style="color:#f8f8f2;"> assigns) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="font-style:italic;color:#8be9fd;">~H</span><span style="color:#f1fa8c;">&quot;&quot;&quot;
+</span><span style="color:#f1fa8c;">    {render_slot(@item, hd(@items))}
+</span><span style="color:#f1fa8c;">    {render_slot(@singular_suffix)}
+</span><span style="color:#f1fa8c;">    &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">listing</span><span style="color:#f8f8f2;">(%{</span><span style="color:#bd93f9;">items: </span><span style="color:#f8f8f2;">[_, _ </span><span style="color:#ff79c6;">|</span><span style="color:#f8f8f2;"> _]} </span><span style="color:#ff79c6;">=</span><span style="color:#f8f8f2;"> assigns) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    {items, assigns} </span><span style="color:#ff79c6;">= </span><span style="text-decoration:underline;color:#8be9fd;">Map</span><span style="color:#f8f8f2;">.pop!(assigns, </span><span style="color:#bd93f9;">:items</span><span style="color:#f8f8f2;">)
+</span><span style="color:#f8f8f2;">    {leading, [second_to_last, last]} </span><span style="color:#ff79c6;">= </span><span style="text-decoration:underline;color:#8be9fd;">Enum</span><span style="color:#f8f8f2;">.split(items, </span><span style="color:#ff79c6;">-</span><span style="color:#bd93f9;">2</span><span style="color:#f8f8f2;">)
+</span><span style="color:#f8f8f2;">    assigns </span><span style="color:#ff79c6;">=</span><span style="color:#f8f8f2;"> assign(assigns, </span><span style="color:#bd93f9;">leading:</span><span style="color:#f8f8f2;"> leading, </span><span style="color:#bd93f9;">second_to_last:</span><span style="color:#f8f8f2;"> second_to_last, </span><span style="color:#bd93f9;">last:</span><span style="color:#f8f8f2;"> last)
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">    </span><span style="font-style:italic;color:#8be9fd;">~H</span><span style="color:#f1fa8c;">&quot;&quot;&quot;
+</span><span style="color:#f1fa8c;">    &lt;%= for item &lt;- @leading do %&gt;
+</span><span style="color:#f1fa8c;">      {render_slot(@item, item)},
+</span><span style="color:#f1fa8c;">    &lt;% end %&gt;
+</span><span style="color:#f1fa8c;">    {render_slot(@item, @second_to_last)} and {render_slot(@item, @last)}
+</span><span style="color:#f1fa8c;">    {render_slot(@plural_suffix)}
+</span><span style="color:#f1fa8c;">    &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Renders a table with generic styling.
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  ## Examples
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">      &lt;.table id=&quot;users&quot; rows={@users}&gt;
+</span><span style="color:#6272a4;">        &lt;:col :let={user} label=&quot;id&quot;&gt;{user.id}&lt;/:col&gt;
+</span><span style="color:#6272a4;">        &lt;:col :let={user} label=&quot;username&quot;&gt;{user.username}&lt;/:col&gt;
+</span><span style="color:#6272a4;">      &lt;/.table&gt;
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:id</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:rows</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:list</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:row_id</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:any</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: nil</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">doc: </span><span style="color:#f1fa8c;">&quot;the function for generating the row id&quot;
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:row_click</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:any</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: nil</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">doc: </span><span style="color:#f1fa8c;">&quot;the function for handling phx-click on each row&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:row_item</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:any</span><span style="color:#f8f8f2;">,
+</span><span style="color:#f8f8f2;">    </span><span style="color:#bd93f9;">default:</span><span style="color:#f8f8f2;"> &amp;</span><span style="text-decoration:underline;color:#8be9fd;">Function</span><span style="color:#f8f8f2;">.identity</span><span style="color:#ff79c6;">/</span><span style="color:#bd93f9;">1</span><span style="color:#f8f8f2;">,
+</span><span style="color:#f8f8f2;">    </span><span style="color:#bd93f9;">doc: </span><span style="color:#f1fa8c;">&quot;the function for mapping each row before calling the :col and :action slots&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  slot </span><span style="color:#bd93f9;">:col</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    attr </span><span style="color:#bd93f9;">:label</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  slot </span><span style="color:#bd93f9;">:action</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">doc: </span><span style="color:#f1fa8c;">&quot;the slot for showing user actions in the last table column&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">table</span><span style="color:#f8f8f2;">(assigns) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    assigns </span><span style="color:#ff79c6;">=
+</span><span style="color:#f8f8f2;">      </span><span style="color:#ff79c6;">with</span><span style="color:#f8f8f2;"> %{</span><span style="color:#bd93f9;">rows:</span><span style="color:#f8f8f2;"> %</span><span style="text-decoration:underline;color:#8be9fd;">Phoenix</span><span style="color:#f8f8f2;">.</span><span style="text-decoration:underline;color:#8be9fd;">LiveView</span><span style="color:#f8f8f2;">.</span><span style="text-decoration:underline;color:#8be9fd;">LiveStream</span><span style="color:#f8f8f2;">{}} </span><span style="color:#ff79c6;">&lt;-</span><span style="color:#f8f8f2;"> assigns </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">        assign(assigns, </span><span style="color:#bd93f9;">row_id:</span><span style="color:#f8f8f2;"> assigns.row_id </span><span style="color:#ff79c6;">|| fn </span><span style="color:#f8f8f2;">{id, _item} </span><span style="color:#ff79c6;">-&gt;</span><span style="color:#f8f8f2;"> id </span><span style="color:#ff79c6;">end</span><span style="color:#f8f8f2;">)
+</span><span style="color:#f8f8f2;">      </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">    </span><span style="font-style:italic;color:#8be9fd;">~H</span><span style="color:#f1fa8c;">&quot;&quot;&quot;
+</span><span style="color:#f1fa8c;">    &lt;table class=&quot;overflow-y-auto px-4 sm:overflow-visible sm:px-0 min-w-full divide-y divide-gray-300&quot;&gt;
+</span><span style="color:#f1fa8c;">      &lt;thead class=&quot;text-sm text-left font-semibold leading-6 text-gray-900&quot;&gt;
+</span><span style="color:#f1fa8c;">        &lt;tr&gt;
+</span><span style="color:#f1fa8c;">          &lt;th :for={col &lt;- @col} class=&quot;py-3.5 pl-4 pr-3 sm:pl-6&quot;&gt;
+</span><span style="color:#f1fa8c;">            {col[:label]}
+</span><span style="color:#f1fa8c;">          &lt;/th&gt;
+</span><span style="color:#f1fa8c;">          &lt;th :if={@action != []} class=&quot;py-3.5 pl-3 pr-5 text-right sm:pr-7&quot;&gt;
+</span><span style="color:#f1fa8c;">            &lt;span&gt;Actions&lt;/span&gt;
+</span><span style="color:#f1fa8c;">          &lt;/th&gt;
+</span><span style="color:#f1fa8c;">        &lt;/tr&gt;
+</span><span style="color:#f1fa8c;">      &lt;/thead&gt;
+</span><span style="color:#f1fa8c;">      &lt;tbody
+</span><span style="color:#f1fa8c;">        id={@id}
+</span><span style="color:#f1fa8c;">        phx-update={match?(%Phoenix.LiveView.LiveStream{}, @rows) &amp;&amp; &quot;stream&quot;}
+</span><span style="color:#f1fa8c;">        class=&quot;relative divide-y divide-gray-200 bg-white text-sm font-medium leading-6 text-gray-900&quot;
+</span><span style="color:#f1fa8c;">      &gt;
+</span><span style="color:#f1fa8c;">        &lt;tr :for={row &lt;- @rows} id={@row_id &amp;&amp; @row_id.(row)} class=&quot;hover:bg-gray-50&quot;&gt;
+</span><span style="color:#f1fa8c;">          &lt;td
+</span><span style="color:#f1fa8c;">            :for={col &lt;- @col}
+</span><span style="color:#f1fa8c;">            phx-click={@row_click &amp;&amp; @row_click.(row)}
+</span><span style="color:#f1fa8c;">            class={[&quot;relative p-0&quot;, @row_click &amp;&amp; &quot;hover:cursor-pointer&quot;]}
+</span><span style="color:#f1fa8c;">          &gt;
+</span><span style="color:#f1fa8c;">            &lt;div class=&quot;relative block p-4 sm:px-6&quot;&gt;
+</span><span style="color:#f1fa8c;">              {render_slot(col, @row_item.(row))}
+</span><span style="color:#f1fa8c;">            &lt;/div&gt;
+</span><span style="color:#f1fa8c;">          &lt;/td&gt;
+</span><span style="color:#f1fa8c;">          &lt;td :if={@action != []} class=&quot;relative p-0&quot;&gt;
+</span><span style="color:#f1fa8c;">            &lt;div class=&quot;relative whitespace-nowrap py-4 pl-3 pr-4 sm:pr-6 flex justify-end items-center&quot;&gt;
+</span><span style="color:#f1fa8c;">              &lt;span :for={action &lt;- @action} class=&quot;ml-4&quot;&gt;
+</span><span style="color:#f1fa8c;">                {render_slot(action, @row_item.(row))}
+</span><span style="color:#f1fa8c;">              &lt;/span&gt;
+</span><span style="color:#f1fa8c;">            &lt;/div&gt;
+</span><span style="color:#f1fa8c;">          &lt;/td&gt;
+</span><span style="color:#f1fa8c;">        &lt;/tr&gt;
+</span><span style="color:#f1fa8c;">      &lt;/tbody&gt;
+</span><span style="color:#f1fa8c;">    &lt;/table&gt;
+</span><span style="color:#f1fa8c;">    &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Renders a button.
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  ## Examples
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">      &lt;.button&gt;Click&lt;/.button&gt;
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">      &lt;.button color=&quot;gray&quot; outlined&gt;Click&lt;/.button&gt;
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">      &lt;.button color=&quot;gray&quot; small&gt;Click&lt;/.button&gt;
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:disabled</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:boolean</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: false
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:color</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: </span><span style="color:#f1fa8c;">&quot;blue&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">values: </span><span style="font-style:italic;color:#8be9fd;">~w</span><span style="color:#f1fa8c;">(blue gray red)
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:outlined</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:boolean</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: false
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:small</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:boolean</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: false
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:class</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: nil
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:rest</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:global</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">include: </span><span style="font-style:italic;color:#8be9fd;">~w</span><span style="color:#f1fa8c;">(href patch navigate download name)
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  slot </span><span style="color:#bd93f9;">:inner_block
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">button</span><span style="color:#f8f8f2;">(assigns)
+</span><span style="color:#f8f8f2;">      </span><span style="color:#ff79c6;">when</span><span style="color:#f8f8f2;"> is_map_key(assigns.rest, </span><span style="color:#bd93f9;">:href</span><span style="color:#f8f8f2;">) </span><span style="color:#ff79c6;">or</span><span style="color:#f8f8f2;"> is_map_key(assigns.rest, </span><span style="color:#bd93f9;">:patch</span><span style="color:#f8f8f2;">) </span><span style="color:#ff79c6;">or
+</span><span style="color:#f8f8f2;">             is_map_key(assigns.rest, </span><span style="color:#bd93f9;">:navigate</span><span style="color:#f8f8f2;">) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="font-style:italic;color:#8be9fd;">~H</span><span style="color:#f1fa8c;">&quot;&quot;&quot;
+</span><span style="color:#f1fa8c;">    &lt;.link class={[button_classes(@small, @disabled, @color, @outlined), @class]} {@rest}&gt;
+</span><span style="color:#f1fa8c;">      {render_slot(@inner_block)}
+</span><span style="color:#f1fa8c;">    &lt;/.link&gt;
+</span><span style="color:#f1fa8c;">    &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">button</span><span style="color:#f8f8f2;">(assigns) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="font-style:italic;color:#8be9fd;">~H</span><span style="color:#f1fa8c;">&quot;&quot;&quot;
+</span><span style="color:#f1fa8c;">    &lt;button
+</span><span style="color:#f1fa8c;">      class={[button_classes(@small, @disabled, @color, @outlined), @class]}
+</span><span style="color:#f1fa8c;">      disabled={@disabled}
+</span><span style="color:#f1fa8c;">      {@rest}
+</span><span style="color:#f1fa8c;">    &gt;
+</span><span style="color:#f1fa8c;">      {render_slot(@inner_block)}
+</span><span style="color:#f1fa8c;">    &lt;/button&gt;
+</span><span style="color:#f1fa8c;">    &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">button_classes</span><span style="color:#f8f8f2;">(small, disabled, color, outlined) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    [
+</span><span style="color:#f8f8f2;">      </span><span style="color:#ff79c6;">if</span><span style="color:#f8f8f2;"> small </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">        </span><span style="color:#f1fa8c;">&quot;px-2 py-1 font-normal text-xs gap-1&quot;
+</span><span style="color:#f8f8f2;">      </span><span style="color:#ff79c6;">else
+</span><span style="color:#f8f8f2;">        </span><span style="color:#f1fa8c;">&quot;px-5 py-2 font-medium text-sm gap-1.5&quot;
+</span><span style="color:#f8f8f2;">      </span><span style="color:#ff79c6;">end</span><span style="color:#f8f8f2;">,
+</span><span style="color:#f8f8f2;">      </span><span style="color:#f1fa8c;">&quot;not-[.hidden]:inline-flex rounded-lg border whitespace-nowrap items-center justify-center focus-visible:outline-none&quot;</span><span style="color:#f8f8f2;">,
+</span><span style="color:#f8f8f2;">      </span><span style="color:#ff79c6;">if</span><span style="color:#f8f8f2;"> disabled </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">        </span><span style="color:#f1fa8c;">&quot;cursor-default pointer-events-none border-transparent bg-gray-100 text-gray-400&quot;
+</span><span style="color:#f8f8f2;">      </span><span style="color:#ff79c6;">else
+</span><span style="color:#f8f8f2;">        </span><span style="color:#ff79c6;">case </span><span style="color:#f8f8f2;">{color, outlined} </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">          {</span><span style="color:#f1fa8c;">&quot;blue&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">false</span><span style="color:#f8f8f2;">} </span><span style="color:#ff79c6;">-&gt;
+</span><span style="color:#f8f8f2;">            </span><span style="color:#f1fa8c;">&quot;border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:bg-blue-700&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">          {</span><span style="color:#f1fa8c;">&quot;red&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">false</span><span style="color:#f8f8f2;">} </span><span style="color:#ff79c6;">-&gt;
+</span><span style="color:#f8f8f2;">            </span><span style="color:#f1fa8c;">&quot;border-transparent bg-red-600 text-white hover:bg-red-700 focus:bg-red-700&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">          {</span><span style="color:#f1fa8c;">&quot;gray&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">false</span><span style="color:#f8f8f2;">} </span><span style="color:#ff79c6;">-&gt;
+</span><span style="color:#f8f8f2;">            </span><span style="color:#f1fa8c;">&quot;border-gray-200 bg-gray-100 text-gray-600 hover:bg-gray-200 focus:bg-gray-200&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">          {</span><span style="color:#f1fa8c;">&quot;blue&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">true</span><span style="color:#f8f8f2;">} </span><span style="color:#ff79c6;">-&gt;
+</span><span style="color:#f8f8f2;">            </span><span style="color:#f1fa8c;">&quot;bg-blue-50 border-blue-600 text-blue-600 hover:bg-blue-100 focus:bg-blue-100&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">          {</span><span style="color:#f1fa8c;">&quot;red&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">true</span><span style="color:#f8f8f2;">} </span><span style="color:#ff79c6;">-&gt;
+</span><span style="color:#f8f8f2;">            </span><span style="color:#f1fa8c;">&quot;bg-red-50 border-red-600 text-red-600 hover:bg-red-100 focus:bg-red-100&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">          {</span><span style="color:#f1fa8c;">&quot;gray&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">true</span><span style="color:#f8f8f2;">} </span><span style="color:#ff79c6;">-&gt;
+</span><span style="color:#f8f8f2;">            </span><span style="color:#f1fa8c;">&quot;bg-transparent border-gray-300 text-gray-600 hover:bg-gray-100 focus:bg-gray-100&quot;
+</span><span style="color:#f8f8f2;">        </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">      </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">    ]
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Renders an icon button.
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  ## Examples
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">      &lt;.icon_button&gt;
+</span><span style="color:#6272a4;">        &lt;.remix_icon icon=&quot;refresh-line&quot; /&gt;
+</span><span style="color:#6272a4;">      &lt;/.icon_button&gt;
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:disabled</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:boolean</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: false
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:small</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:boolean</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: false
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:class</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">default: nil
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:rest</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:global</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">include: </span><span style="font-style:italic;color:#8be9fd;">~w</span><span style="color:#f1fa8c;">(href patch navigate download name)
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  slot </span><span style="color:#bd93f9;">:inner_block
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">icon_button</span><span style="color:#f8f8f2;">(assigns)
+</span><span style="color:#f8f8f2;">      </span><span style="color:#ff79c6;">when</span><span style="color:#f8f8f2;"> is_map_key(assigns.rest, </span><span style="color:#bd93f9;">:href</span><span style="color:#f8f8f2;">) </span><span style="color:#ff79c6;">or</span><span style="color:#f8f8f2;"> is_map_key(assigns.rest, </span><span style="color:#bd93f9;">:patch</span><span style="color:#f8f8f2;">) </span><span style="color:#ff79c6;">or
+</span><span style="color:#f8f8f2;">             is_map_key(assigns.rest, </span><span style="color:#bd93f9;">:navigate</span><span style="color:#f8f8f2;">) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="font-style:italic;color:#8be9fd;">~H</span><span style="color:#f1fa8c;">&quot;&quot;&quot;
+</span><span style="color:#f1fa8c;">    &lt;.link class={[icon_button_classes(@small, @disabled), @class]} {@rest}&gt;
+</span><span style="color:#f1fa8c;">      {render_slot(@inner_block)}
+</span><span style="color:#f1fa8c;">    &lt;/.link&gt;
+</span><span style="color:#f1fa8c;">    &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">icon_button</span><span style="color:#f8f8f2;">(assigns) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="font-style:italic;color:#8be9fd;">~H</span><span style="color:#f1fa8c;">&quot;&quot;&quot;
+</span><span style="color:#f1fa8c;">    &lt;button class={[icon_button_classes(@small, @disabled), @class]} disabled={@disabled} {@rest}&gt;
+</span><span style="color:#f1fa8c;">      {render_slot(@inner_block)}
+</span><span style="color:#f1fa8c;">    &lt;/button&gt;
+</span><span style="color:#f1fa8c;">    &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">defp </span><span style="color:#50fa7b;">icon_button_classes</span><span style="color:#f8f8f2;">(small, disabled) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    [
+</span><span style="color:#f8f8f2;">      </span><span style="color:#ff79c6;">unless</span><span style="color:#f8f8f2;"> small </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">        </span><span style="color:#f1fa8c;">&quot;text-xl&quot;
+</span><span style="color:#f8f8f2;">      </span><span style="color:#ff79c6;">end</span><span style="color:#f8f8f2;">,
+</span><span style="color:#f8f8f2;">      </span><span style="color:#f1fa8c;">&quot;p-1 flex items-center justify-center rounded-full leading-none&quot;</span><span style="color:#f8f8f2;">,
+</span><span style="color:#f8f8f2;">      </span><span style="color:#ff79c6;">if</span><span style="color:#f8f8f2;"> disabled </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">        </span><span style="color:#f1fa8c;">&quot;cursor-default text-gray-300&quot;
+</span><span style="color:#f8f8f2;">      </span><span style="color:#ff79c6;">else
+</span><span style="color:#f8f8f2;">        </span><span style="color:#f1fa8c;">&quot;text-gray-500 hover:text-gray-900 hover:bg-gray-50 focus-visible:bg-gray-100 focus-visible:outline-none&quot;
+</span><span style="color:#f8f8f2;">      </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">    ]
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Renders stateful tabs with content.
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  ## Examples
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">      &lt;.tabs id=&quot;animals&quot; default=&quot;cat&quot;&gt;
+</span><span style="color:#6272a4;">        &lt;:tab id=&quot;cat&quot; label=&quot;Cat&quot;&gt;
+</span><span style="color:#6272a4;">          This is a cat.
+</span><span style="color:#6272a4;">        &lt;/:tab&gt;
+</span><span style="color:#6272a4;">        &lt;:tab id=&quot;dog&quot; label=&quot;Dog&quot;&gt;
+</span><span style="color:#6272a4;">          This is a dog.
+</span><span style="color:#6272a4;">        &lt;/:tab&gt;
+</span><span style="color:#6272a4;">      &lt;/.tabs&gt;
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:id</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">  attr </span><span style="color:#bd93f9;">:default</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  slot </span><span style="color:#bd93f9;">:tab </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    attr </span><span style="color:#bd93f9;">:id</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">    attr </span><span style="color:#bd93f9;">:label</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">:string</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">required: true
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">tabs</span><span style="color:#f8f8f2;">(assigns) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="font-style:italic;color:#8be9fd;">~H</span><span style="color:#f1fa8c;">&quot;&quot;&quot;
+</span><span style="color:#f1fa8c;">    &lt;div id={@id} class=&quot;flex flex-col gap-4&quot;&gt;
+</span><span style="color:#f1fa8c;">      &lt;div class=&quot;tabs&quot;&gt;
+</span><span style="color:#f1fa8c;">        &lt;button
+</span><span style="color:#f1fa8c;">          :for={tab &lt;- @tab}
+</span><span style="color:#f1fa8c;">          class={[&quot;tab&quot;, @default == tab.id &amp;&amp; &quot;active&quot;]}
+</span><span style="color:#f1fa8c;">          phx-click={
+</span><span style="color:#f1fa8c;">            JS.remove_class(&quot;active&quot;, to: &quot;##{@id} .tab.active&quot;)
+</span><span style="color:#f1fa8c;">            |&gt; JS.add_class(&quot;active&quot;)
+</span><span style="color:#f1fa8c;">            |&gt; JS.add_class(&quot;hidden&quot;, to: &quot;##{@id} [data-tab]&quot;)
+</span><span style="color:#f1fa8c;">            |&gt; JS.remove_class(&quot;hidden&quot;, to: &quot;##{@id} [data-tab=&#39;#{tab.id}&#39;]&quot;)
+</span><span style="color:#f1fa8c;">          }
+</span><span style="color:#f1fa8c;">        &gt;
+</span><span style="color:#f1fa8c;">          &lt;span class=&quot;font-medium&quot;&gt;
+</span><span style="color:#f1fa8c;">            {tab.label}
+</span><span style="color:#f1fa8c;">          &lt;/span&gt;
+</span><span style="color:#f1fa8c;">        &lt;/button&gt;
+</span><span style="color:#f1fa8c;">      &lt;/div&gt;
+</span><span style="color:#f1fa8c;">
+</span><span style="color:#f1fa8c;">      &lt;div :for={tab &lt;- @tab} data-tab={tab.id} class={@default == tab.id || &quot;hidden&quot;}&gt;
+</span><span style="color:#f1fa8c;">        {render_slot(tab)}
+</span><span style="color:#f1fa8c;">      &lt;/div&gt;
+</span><span style="color:#f1fa8c;">    &lt;/div&gt;
+</span><span style="color:#f1fa8c;">    &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Updates keys in a map assign.
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">assign_nested</span><span style="color:#f8f8f2;">(socket, key, keyword) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    update(socket, key, </span><span style="color:#ff79c6;">fn</span><span style="color:#f8f8f2;"> map </span><span style="color:#ff79c6;">-&gt;
+</span><span style="color:#f8f8f2;">      </span><span style="text-decoration:underline;color:#8be9fd;">Enum</span><span style="color:#f8f8f2;">.reduce(keyword, map, </span><span style="color:#ff79c6;">fn </span><span style="color:#f8f8f2;">{key, value}, map </span><span style="color:#ff79c6;">-&gt; </span><span style="text-decoration:underline;color:#8be9fd;">Map</span><span style="color:#f8f8f2;">.replace!(map, key, value) </span><span style="color:#ff79c6;">end</span><span style="color:#f8f8f2;">)
+</span><span style="color:#f8f8f2;">    </span><span style="color:#ff79c6;">end</span><span style="color:#f8f8f2;">)
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Sends an event to the given target.
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  Given:
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">    * a LV pid, sends the event as a regular message to the process
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">    * a component `{module, id}` tuple, the event is sent as an update
+</span><span style="color:#6272a4;">      with `:event` assign
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">send_event</span><span style="color:#f8f8f2;">(target, event) </span><span style="color:#ff79c6;">when is_pid</span><span style="color:#f8f8f2;">(target) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    send(target, event)
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">send_event</span><span style="color:#f8f8f2;">({module, id}, event) </span><span style="color:#ff79c6;">when is_atom</span><span style="color:#f8f8f2;">(module) </span><span style="color:#ff79c6;">and is_binary</span><span style="color:#f8f8f2;">(id) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="text-decoration:underline;color:#8be9fd;">Phoenix</span><span style="color:#f8f8f2;">.</span><span style="text-decoration:underline;color:#8be9fd;">LiveView</span><span style="color:#f8f8f2;">.send_update(module, </span><span style="color:#bd93f9;">id:</span><span style="color:#f8f8f2;"> id, </span><span style="color:#bd93f9;">event:</span><span style="color:#f8f8f2;"> event)
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#6272a4;">  # JS commands
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Pushes and executes the given `%Phoenix.LiveView.JS{}` on the client.
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  ## Options
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">    * `:to` - selector for elements to execute against. Defaults to
+</span><span style="color:#6272a4;">      document body
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">exec_js</span><span style="color:#f8f8f2;">(socket, js, opts </span><span style="color:#ff79c6;">\\ </span><span style="color:#f8f8f2;">[]) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    opts </span><span style="color:#ff79c6;">= </span><span style="text-decoration:underline;color:#8be9fd;">Keyword</span><span style="color:#f8f8f2;">.validate!(opts, [</span><span style="color:#bd93f9;">:to</span><span style="color:#f8f8f2;">])
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">    </span><span style="text-decoration:underline;color:#8be9fd;">Phoenix</span><span style="color:#f8f8f2;">.</span><span style="text-decoration:underline;color:#8be9fd;">LiveView</span><span style="color:#f8f8f2;">.push_event(socket, </span><span style="color:#f1fa8c;">&quot;lb:exec_js&quot;</span><span style="color:#f8f8f2;">, %{</span><span style="color:#bd93f9;">js: </span><span style="text-decoration:underline;color:#8be9fd;">JSON</span><span style="color:#f8f8f2;">.encode!(js.ops), </span><span style="color:#bd93f9;">to:</span><span style="color:#f8f8f2;"> opts[</span><span style="color:#bd93f9;">:to</span><span style="color:#f8f8f2;">]})
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#6272a4;">@doc &quot;&quot;&quot;
+</span><span style="color:#6272a4;">  Encodes value for hook prop attribute.
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  ## Examples
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">      &lt;div id=&quot;hook&quot; phx-hook={MyHook} data-p-value={hook_prop(@value)}&gt;
+</span><span style="color:#6272a4;">      &lt;/div&gt;
+</span><span style="color:#6272a4;">
+</span><span style="color:#6272a4;">  &quot;&quot;&quot;
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">hook_prop</span><span style="color:#f8f8f2;">(value)
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">hook_prop</span><span style="color:#f8f8f2;">(%</span><span style="text-decoration:underline;color:#8be9fd;">Phoenix</span><span style="color:#f8f8f2;">.</span><span style="text-decoration:underline;color:#8be9fd;">LiveComponent</span><span style="color:#f8f8f2;">.</span><span style="text-decoration:underline;color:#8be9fd;">CID</span><span style="color:#f8f8f2;">{} </span><span style="color:#ff79c6;">=</span><span style="color:#f8f8f2;"> value) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    hook_prop(to_string(value))
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#f8f8f2;">
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">def </span><span style="color:#50fa7b;">hook_prop</span><span style="color:#f8f8f2;">(value) </span><span style="color:#ff79c6;">do
+</span><span style="color:#f8f8f2;">    </span><span style="text-decoration:underline;color:#8be9fd;">JSON</span><span style="color:#f8f8f2;">.encode!(value)
+</span><span style="color:#f8f8f2;">  </span><span style="color:#ff79c6;">end
+</span><span style="color:#ff79c6;">end
+</span></pre>
+</main>
+  <script>
+    (function () {
+      var at = location.hash.match(/^#at=(\d+),(\d+)$/);
+      if (at) window.scrollTo(Number(at[1]), Number(at[2]));
+      addEventListener("scroll", function () {
+        parent.postMessage({ lumisShowcaseScroll: { x: scrollX, y: scrollY } }, "*");
+      }, { passive: true });
+    })();
+  </script>
+</body>
+</html>

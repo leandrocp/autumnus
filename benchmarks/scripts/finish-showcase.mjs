@@ -39,7 +39,7 @@ const scopeExpectations = {
     ["Rust attribute", '<span style="color: #50fa7b;">derive</span>'],
     ["Rust comment", '<span style="color: #6272a4;">// always required.</span>'],
   ],
-  phoenix: [
+  livebook: [
     ["Elixir keyword", '<span style="color: #ff79c6;">end</span>'],
     ["Elixir module", '<span style="color: #ffb86c;">Phoenix.Component</span>'],
     ["Elixir atom", '<span style="color: #bd93f9;">:string</span>'],

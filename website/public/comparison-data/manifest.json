@@ -15,7 +15,7 @@
     {
       "id": "lumis",
       "label": "Lumis",
-      "version": "Lumis 0.6.1",
+      "version": "Lumis 0.7.0",
       "theme": "Neovim Dracula colorscheme, extracted by this repository"
     },
     {
@@ -77,23 +77,23 @@
       }
     },
     {
-      "id": "phoenix",
-      "label": "Phoenix core components",
+      "id": "livebook",
+      "label": "Livebook core components",
       "language": "elixir",
       "languageLabel": "Elixir",
-      "source": "https://github.com/phoenixframework/phoenix/blob/1562adca2e9b02b4564c519d5cc2a096ae6fc009/installer/templates/phx_web/components/core_components.ex",
-      "lines": 691,
-      "bytes": 22389,
+      "source": "https://github.com/livebook-dev/livebook/blob/5133601d9678fb8ef0c87484e5d52eff193813e5/lib/livebook_web/components/core_components.ex",
+      "lines": 1152,
+      "bytes": 33094,
       "injections": [
         "HEEx",
         "Markdown",
         "Comment"
       ],
       "tokens": {
-        "lumis": 4090,
-        "syntect": 1570,
-        "shiki": 2257,
-        "highlight-js": 500
+        "lumis": 5629,
+        "syntect": 2628,
+        "shiki": 3562,
+        "highlight-js": 709
       }
     },
     {
