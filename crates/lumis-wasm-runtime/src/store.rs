@@ -312,8 +312,8 @@ impl LanguageStore {
 
     /// Download and cache `name` and its parser without loading either.
     ///
-    /// Caching is pure I/O, so it needs no Wasmtime runtime: `lumis languages
-    /// cache` and `mix lumis.languages.cache` both land here.
+    /// Caching is pure I/O, so it needs no Wasmtime runtime: the CLI and host
+    /// cache APIs all land here.
     ///
     /// # Errors
     /// Fails when the name is unknown, or the package or parser cannot be
@@ -1408,9 +1408,9 @@ mod tests {
         );
     }
 
-    /// `lumis languages cache` and `mix lumis.languages.cache` land here. A parser
-    /// already in the store is left alone, so the command is idempotent and
-    /// needs no network once the store holds what was asked for.
+    /// The CLI and host cache APIs land here. A parser already in the store is
+    /// left alone, so preparation is idempotent and needs no network once the
+    /// store holds what was asked for.
     #[test]
     fn caching_a_language_already_in_the_store_needs_no_network() {
         let dir = tempdir();

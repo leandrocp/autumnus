@@ -290,9 +290,8 @@ Lumis.highlight!(&quot;const x = 1&quot;, formatter: {:html_inline, language: &q
 
 Elixir runs the same Wasmtime runtime through a NIF, so it highlights a document
 and everything injected inside it in one pass, downloading what it needs.
-Loading is global to the VM. Use <span class="hljs-code">`Lumis.Languages.load/1`</span> at startup to keep the
-first download off a user&#x27;s request, or <span class="hljs-code">`mix lumis.languages.cache`</span> while
-building a release that has to run without network access.
+Loading is global to the VM. Call <span class="hljs-code">`Lumis.Languages.cache/2`</span> during application
+startup to keep the first download and compile off a user&#x27;s request.
 
 <span class="hljs-section">### [<span class="hljs-string">Java</span>](<span class="hljs-link">https://github.com/roastedroot/lumis4j</span>)</span>
 

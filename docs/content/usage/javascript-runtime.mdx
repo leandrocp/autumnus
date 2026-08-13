@@ -198,42 +198,31 @@ const htmlOutput = hl.highlight(source, htmlInline({ language: html, theme: drac
 
 See [Highlighting loads what a document needs](/advanced/wasm-and-cdn#highlighting-loads-what-a-document-needs).
 
-## Prepare parsers for deployment
+## Prepare parsers during application startup
 
-To keep the download and compile off a first request, populate a project or image-local cache
-before the application starts:
+Call the cache API in your startup lifecycle before the application begins
+accepting requests:
 
-```bash
-npx lumis-languages-cache javascript html css --output ./wasm-cache
-LUMIS_DATA_DIR=./wasm-cache node app.mjs
-```
-
-The equivalent API is available from `@lumis-sh/lumis/cache`:
-
-```ts
+```ts title="bootstrap.ts"
 import { cacheLanguages } from "@lumis-sh/lumis/cache";
 
-await cacheLanguages(["javascript", "html", "css"], {
-  directory: "./wasm-cache",
-});
+await cacheLanguages(["javascript", "html", "css"]);
+await startServer();
 ```
 
-Both accept `bundle-*` names as well, covering the same languages as the
-matching `@lumis-sh/wasm-bundle-*` package:
+The API accepts `bundle-*` names such as `bundle-web`, covering the same
+languages as the matching `@lumis-sh/wasm-bundle-*` package. It resolves the
+runtime's compatible package range, caches the exact manifest, and verifies the
+parser size plus SHA-256 before writing. Pass `force: true` to resolve the range
+again and adopt a newer compatible package.
 
-```bash
-npx lumis-languages-cache bundle-web --output ./wasm-cache
-```
-
-Both paths resolve the runtime's compatible package range, then cache the exact
-manifest and verify its parser size plus SHA-256 before writing. A cached parser
-is served without a network request, so caching every language a deployment
-needs makes it self-contained. Pass `--force` to the command, or `force: true`
-to the API, to resolve the range again and adopt a newer compatible package.
-When the native Node addon is available, both paths also validate each parser
-and its queries and persist the compiled Wasmtime module in the same directory.
-The portable fallback still caches the verified parser bytes, but
+When the native Node addon is available, the API also validates each parser and
+its queries and persists the compiled Wasmtime module in the same directory.
+The portable fallback caches the verified parser bytes, but
 `web-tree-sitter` cannot persist its compilation across processes.
+
+Use `lumis languages cache` when cache preparation belongs in a separate build
+or operations step instead of the application lifecycle.
 
 :::note Edge is not supported yet
 The portable JavaScript runtime uses `web-tree-sitter`, but Edge runtimes are not supported yet because of an upstream Tree-sitter limitation: [tree-sitter/tree-sitter#2160](https://github.com/tree-sitter/tree-sitter/issues/2160).

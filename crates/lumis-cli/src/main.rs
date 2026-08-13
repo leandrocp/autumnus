@@ -695,7 +695,7 @@ fn cache_languages(
 
     // Downloading is the smaller half of a cold parser; the Wasmtime compile is
     // the larger. Compiling each one here writes it into `compiled/`, so a
-    // prepared directory carries both. `mix lumis.languages.cache` does the same.
+    // prepared directory carries both. Host cache APIs write the same layout.
     let mut compile_errors = Vec::new();
     for (name, result) in names.iter().zip(reg.precompile_parsers_detailed(&names)) {
         match result {

@@ -76,16 +76,17 @@ the document. Only the document's own language failing raises.
 Loading is global to the VM. One runtime lives in the NIF, so the first process
 to need a language pays for it and every process after it does not.
 
-### Loading ahead of time
+### Preparing parsers during application startup
 
 A cold parser costs a download and then a Wasmtime compile, and the compile is
-the larger half: seven parsers already on disk take about 8 s to compile and
-1.3 s once the compiled forms are cached. Load at startup so a request never
-pays either:
+the larger half. Cache the languages your application needs before starting its
+supervision tree so a request never pays either:
 
 ```elixir title="lib/my_app/application.ex"
-:ok = Lumis.Languages.load(["markdown", "elixir", "json"])
-:ok = Lumis.Languages.load(:bundle_web)
+def start(_type, _args) do
+  {:ok, _paths} = Lumis.Languages.cache(["markdown", "elixir", "json"])
+  Supervisor.start_link(children(), strategy: :one_for_one, name: MyApp.Supervisor)
+end
 ```
 
 A `:bundle_*` atom names the same languages as the `@lumis-sh/wasm-bundle-*` package
@@ -93,24 +94,15 @@ of that name — `:bundle_web`, `:bundle_web_extra`, `:bundle_system`, `:bundle_
 and `:bundle_full` — so a bundle means the same thing in every runtime.
 `Lumis.Languages.bundles/0` returns the membership.
 
-### Paying for parsers at build time, not on a request
+Parsers land under `config :lumis, data_dir:`, `LUMIS_DATA_DIR`, or Lumis's
+`priv/lumis` directory by default. The result is self-sufficient — parser bytes,
+their metadata, and the compiled modules — so a restart or new pod using the
+same persistent directory reuses them. Pass `force: true` to resolve the
+compatible package range again and replace files that already verify.
 
-```bash
-mix lumis.languages.cache elixir html javascript css
-mix lumis.languages.cache --all
-```
-
-The task prepares the same shared parser and compile cache as the CLI. See
-[Filling the store at build time](/advanced/wasm-and-cdn#filling-the-store-at-build-time)
-for the cross-runtime workflow. An image built this way starts serving without
-paying either cost, and a restart or a new pod does not pay it again.
-
-Parsers land under `LUMIS_DATA_DIR`, which defaults to the user data directory.
-The result is self-sufficient — parser bytes, their metadata, and the compiled
-modules — so pointing a container at it needs nothing else. `--force` resolves
-the compatible package range again and replaces files that already verify. To
-write somewhere other than the default, set `LUMIS_DATA_DIR` or
-`config :lumis, data_dir:`; there is no second way to name that directory.
+Use `Lumis.Languages.load/1` instead when you also want to retain the languages
+in the current VM. Use the standalone `lumis languages cache` CLI when cache
+preparation belongs in an image build or operations step.
 
 ### Where parsers come from
 
@@ -143,14 +135,14 @@ lives in the shared Rust store:
 
 | Removed | Use instead |
 | --- | --- |
-| `config :lumis, :bundled_languages` | name the languages: `mix lumis.languages.cache elixir html`, or `--all` |
+| `config :lumis, :bundled_languages` | call `Lumis.Languages.cache/2` during application startup |
 | `config :lumis, :wasm_resolver` | `config :lumis, data_dir: "/app/lumis"` |
 | `config :lumis, :language_package_resolver` | `config :lumis, data_dir: "/app/lumis"` |
 | release-local `priv/wasm` | `config :lumis, data_dir: "/app/lumis"`, or `LUMIS_DATA_DIR` |
 | `config :lumis, :wasm_path` | one directory now: `config :lumis, data_dir:` |
 
-`mix lumis.languages.cache` takes language names, a `:bundle_*` name, or
-`--all` rather than reading configuration, matching `lumis languages cache`.
+`Lumis.Languages.cache/2` takes language names or a `:bundle_*` name rather than
+reading configuration.
 
 ## Where the precompiled NIF comes from
 

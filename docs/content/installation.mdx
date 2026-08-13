@@ -98,6 +98,6 @@ The installed binary is `lumis`. Rust users can also install from crates.io with
 ## Notes
 
 - Highlighting loads the parsers a document needs, including languages injected inside it, and caches the verified bytes. See [WASM and CDN](/advanced/wasm-and-cdn).
-- `Lumis.Languages.load/1` and `mix lumis.languages.cache` in Elixir, `lumis languages cache` for the CLI, and `npx lumis-languages-cache` for Node all move the download ahead of the first request. They also move native Wasmtime compilation when that runtime is available.
+- Call `Lumis.Languages.cache/2` or JavaScript's `cacheLanguages()` during application startup to move the download and native Wasmtime compilation ahead of the first request. Use `lumis languages cache` when a standalone CLI step is preferable.
 - For local JavaScript parser assets from npm, install per-language packages such as `@lumis-sh/wasm-rust` or bundle packages such as `@lumis-sh/wasm-bundle-web`.
 - The CLI stores verified, content-addressed parsers and custom themes in a local data directory.

@@ -13,8 +13,10 @@ defmodule Lumis.Languages do
 
       :ok = Lumis.Languages.load(["elixir", "html"])
 
-  Or cache parsers at build time, for a release that must start without network
-  access. `mix lumis.languages.cache` is the usual entry point.
+  Or cache parsers during application startup, validating them and persisting
+  their compiled modules without retaining every language in memory:
+
+      {:ok, _paths} = Lumis.Languages.cache(["elixir", "html"])
 
   ## Where parsers come from
 
@@ -219,15 +221,16 @@ defmodule Lumis.Languages do
   end
 
   @doc """
-  Downloads and caches languages without loading them.
+  Downloads, validates and compiles languages without loading them permanently.
 
   Takes the same names `load/1` does, including `:bundle_*`. Returns the paths
-  written. `mix lumis.languages.cache` is the entry point; this is the API
-  behind it.
+  written. Call it during application startup to move parser preparation off
+  the first request. Already verified parser bytes and compiled modules are
+  reused on later starts.
 
-  Names are downloaded concurrently, and every one is attempted: a bundle
-  reports each language it could not obtain rather than stopping at the first,
-  the same way `load/1` does.
+  Names are downloaded and compiled concurrently. Every one is attempted: a
+  bundle reports each language it could not prepare rather than stopping at the
+  first, the same way `load/1` does.
 
       {:ok, paths} = Lumis.Languages.cache(["elixir", "html"])
       {:error, %{"css" => reason}} = Lumis.Languages.cache(["elixir", "css"])
@@ -244,9 +247,12 @@ defmodule Lumis.Languages do
     force? = Keyword.get(options, :force, false)
 
     with {:ok, expanded} <- expand_bundles(names) do
-      expanded
-      |> Enum.reject(&(&1 in @plaintext_names))
-      |> do_cache(force?)
+      names = Enum.reject(expanded, &(&1 in @plaintext_names))
+
+      with {:ok, paths} <- do_cache(names, force?),
+           {:ok, _compiled} <- do_precompile(names) do
+        {:ok, paths}
+      end
     end
   end
 
@@ -255,7 +261,7 @@ defmodule Lumis.Languages do
   defp do_cache(names, force?) do
     names
     |> Native.cache_languages(force?)
-    |> collect(names, fn {:ok, {_download_url, path, _elapsed}}, _name -> path end)
+    |> collect(names, fn {:ok, path}, _name -> path end)
     |> case do
       # A few languages share one grammar, so this is shorter than `names`.
       {:ok, paths} ->
@@ -269,48 +275,12 @@ defmodule Lumis.Languages do
     end
   end
 
-  @doc false
-  def __cache_details__(names, options \\ []) do
-    force? = Keyword.get(options, :force, false)
-
-    with {:ok, expanded} <- expand_bundles(names) do
-      names = Enum.reject(expanded, &(&1 in @plaintext_names))
-
-      names
-      |> Native.cache_languages(force?)
-      |> collect(names, fn {:ok, details}, name -> {name, details} end)
-    end
-  end
-
-  @doc false
-  @spec __precompile__([String.t() | atom()]) ::
-          {:ok, [String.t()]}
-          | {:error, {:unknown_bundle, String.t()} | %{String.t() => String.t()}}
-  def __precompile__(names) when is_list(names) do
-    with {:ok, expanded} <- expand_bundles(names) do
-      expanded
-      |> Enum.reject(&(&1 in @plaintext_names))
-      |> do_precompile()
-    end
-  end
-
   defp do_precompile([]), do: {:ok, []}
 
   defp do_precompile(names) do
     names
     |> Native.precompile_languages()
-    |> collect(names, fn {:ok, _elapsed}, name -> name end)
-  end
-
-  @doc false
-  def __precompile_details__(names) when is_list(names) do
-    with {:ok, expanded} <- expand_bundles(names) do
-      names = Enum.reject(expanded, &(&1 in @plaintext_names))
-
-      names
-      |> Native.precompile_languages()
-      |> collect(names, fn {:ok, elapsed}, name -> {name, elapsed} end)
-    end
+    |> collect(names, fn :ok, name -> name end)
   end
 
   # The batch NIFs answer positionally, one result per name, so a failure is

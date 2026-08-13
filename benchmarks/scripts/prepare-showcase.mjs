@@ -71,7 +71,7 @@ const documents = [
     language: "markdown",
     languageLabel: "Markdown",
     file: "lumis_readme.md",
-    sha256: "335fac77d3a4cbd950a8e34c31a95a984fd3a3c35445bcaa2882f154e33924ac",
+    sha256: "13bef49da13e7d7df130fd7ba0ed8baf2f423d066f1f434091f6fa7727793357",
     source: "https://github.com/leandrocp/lumis/blob/main/README.md",
     injections: ["Bash", "Elixir", "Java", "JavaScript", "Rust"],
     // Every fence names its own language, and a browser cannot fetch a parser

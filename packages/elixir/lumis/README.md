@@ -70,17 +70,20 @@ global to the VM, so only the first process pays.
 Lumis.Languages.load(["elixir", "html", "javascript", "css"])
 ```
 
-## Deployment
+## Application startup
 
-Cache parsers while building a Mix release so production does not download or
-compile them on the first request:
+Prepare parsers before starting your supervision tree so production does not
+download or compile them on the first request:
 
-```sh
-mix lumis.languages.cache elixir html javascript css
+```elixir
+def start(_type, _args) do
+  {:ok, _paths} = Lumis.Languages.cache(~w(elixir html javascript css))
+  Supervisor.start_link(children(), strategy: :one_for_one, name: MyApp.Supervisor)
+end
 ```
 
 See the [deployment guide](https://lumis.hexdocs.pm/deployment.html) for the
-Dockerfile step, bundles, and custom cache directories.
+full lifecycle example, bundles, the standalone CLI, and custom cache directories.
 
 The NIF is precompiled. Set `LUMIS_BUILD=1` to build it from source instead, or
 `LUMIS_USE_LEGACY_ARTIFACTS=1` to take the legacy-CPU variant on a machine

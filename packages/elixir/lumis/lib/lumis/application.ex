@@ -22,9 +22,9 @@ defmodule Lumis.Application do
     end
   end
 
-  # `mix release` copies each application's `priv/` into the release and the
-  # usual Dockerfile copies the release wholesale, so parsers staged here at
-  # build time reach production with nothing to configure and no extra COPY.
+  # Keep the zero-configuration cache inside the application. Releases that use
+  # a read-only filesystem or need persistence across deployments configure an
+  # absolute writable `:data_dir` instead.
   defp priv_dir do
     case :code.priv_dir(:lumis) do
       {:error, _} -> nil

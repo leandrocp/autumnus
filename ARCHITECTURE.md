@@ -242,7 +242,7 @@ cache keys contain the parser name, package version, and digest, so upgrades do
 not overwrite older verified assets. A compatible package already in the
 directory is an exact lock and is never revalidated during highlighting; a
 request therefore never waits on the network for something already on disk.
-`parsers cache --force` and its Elixir and JavaScript equivalents explicitly
+The host cache APIs with `force: true` and `languages cache --force` explicitly
 resolve the range again, fetch and verify the exact parser it names, then replace
 the cached manifest. A failed refresh therefore leaves the previous manifest and
 parser usable. Staging the directory makes deployments reproducible, while a new
@@ -256,20 +256,28 @@ manifest rather than recreating those package-manager responsibilities. Moving
 to a new Tree-sitter minor series changes the range and legitimately requires a
 runtime release. Publishing `@lumis-sh/wasm-rust@0.26.x` does not.
 
-### Filling the store at build time
+### Preparing the persistent store
 
-Keeping both costs off the first request means paying them during the build:
+Applications pay both costs during startup through the host APIs:
 
-```sh
-lumis languages cache rust javascript    # CLI
-mix lumis.languages.cache rust javascript # Elixir
-npx lumis-languages-cache rust javascript # Node
+```elixir
+Lumis.Languages.cache(["rust", "javascript"])
 ```
 
-All three write a self-sufficient directory — parser bytes plus the `lumis.json`
+```javascript
+await cacheLanguages(["rust", "javascript"])
+```
+
+For a separate build or operations step, the CLI remains the one command:
+
+```sh
+lumis languages cache rust javascript
+```
+
+All paths write a self-sufficient directory — parser bytes plus the `lumis.json`
 that names them — so pointing `LUMIS_DATA_DIR` at it is all a deployment needs.
-The CLI and Elixir go through `LanguageStore::cache_languages`; Node writes the
-same verified layout, which the addon then reads through `LanguageStore`.
+The CLI and Elixir go through `LanguageStore::cache_languages`; JavaScript writes
+the same verified layout, which the addon then reads through `LanguageStore`.
 
 The CLI, Elixir, and Node with its native addon then validate each parser and
 its queries in a disposable Tree-sitter store. Validation writes Wasmtime's
@@ -283,7 +291,7 @@ high-core builders.
 **One prepared directory serves every runtime, including the compile.** Wasmtime
 keys its module cache on the compiler and its version, so a release build of the
 CLI, the Elixir NIF and the Node addon all read and write the same
-`compiled/modules/` entries. Preparing a directory with `lumis parsers cache`
+`compiled/modules/` entries. Preparing a directory with `lumis languages cache`
 and pointing Elixir at it costs 128 ms to load a parser against 294 ms with
 `compiled/` removed. What keeps that true is a single wasmtime version across
 the three; `mise run elixir-nif-lock-check` enforces it, because the Elixir NIF

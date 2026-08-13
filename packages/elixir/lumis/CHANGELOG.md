@@ -3,7 +3,8 @@
 Why: parsers now use shared packages.
 
 1. Online deployments need no change.
-2. During the build, cache every root and injected language with `mix lumis.languages.cache <names>`.
+2. Replace `mix lumis.languages.cache <names>` with `Lumis.Languages.cache/2` during application startup.
+3. Use `lumis languages cache` when a standalone build or operations command is preferable.
 
 Why: defaults now match.
 

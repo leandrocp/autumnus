@@ -129,9 +129,8 @@
 </span><span style="color:#f8f8f2;">
 </span><span style="color:#f8f8f2;">Elixir runs the same Wasmtime runtime through a NIF, so it highlights a document
 </span><span style="color:#f8f8f2;">and everything injected inside it in one pass, downloading what it needs.
-</span><span style="color:#f8f8f2;">Loading is global to the VM. Use </span><span style="color:#50fa7b;">`Lumis.Languages.load/1`</span><span style="color:#f8f8f2;"> at startup to keep the
-</span><span style="color:#f8f8f2;">first download off a user&#39;s request, or </span><span style="color:#50fa7b;">`mix lumis.languages.cache`</span><span style="color:#f8f8f2;"> while
-</span><span style="color:#f8f8f2;">building a release that has to run without network access.
+</span><span style="color:#f8f8f2;">Loading is global to the VM. Call </span><span style="color:#50fa7b;">`Lumis.Languages.cache/2`</span><span style="color:#f8f8f2;"> during application
+</span><span style="color:#f8f8f2;">startup to keep the first download and compile off a user&#39;s request.
 </span><span style="color:#f8f8f2;">
 </span><span style="color:#8be9fd;">### [Java](</span><span style="text-decoration:underline;color:#bd93f9;">https://github.com/roastedroot/lumis4j</span><span style="color:#8be9fd;">)
 </span><span style="color:#f8f8f2;">

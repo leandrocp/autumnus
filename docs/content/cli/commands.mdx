@@ -276,7 +276,7 @@ them. Highlighting does both anyway; this moves them off the first run.
 
 A cold parser costs a download and then a Wasmtime compile, and the compile is
 the larger half. See [Filling the store at build time](/advanced/wasm-and-cdn#filling-the-store-at-build-time)
-for how the CLI, Elixir, and Node validate parsers and prepare the shared cache.
+for how the CLI prepares the cache shared by every native runtime.
 
 ```bash title="Selected parsers"
 lumis languages cache rust javascript elixir
@@ -287,8 +287,8 @@ lumis languages cache bundle-web
 ```
 
 The `bundle-*` names cover the same languages as the matching
-`@lumis-sh/wasm-bundle-*` package, and `Lumis.Languages.cache/2` and
-`lumis-languages-cache` accept them too.
+`@lumis-sh/wasm-bundle-*` package. `Lumis.Languages.cache/2` and JavaScript's
+`cacheLanguages()` accept the same names in application code.
 
 ```bash title="All parsers"
 lumis languages cache --all
