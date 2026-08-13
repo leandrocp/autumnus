@@ -1,0 +1,23 @@
+{
+  "name": "@lumis-sh/cli-linux-arm64-gnu",
+  "version": "0.6.0",
+  "description": "Lumis command line syntax highlighter for Linux arm64 glibc",
+  "license": "MIT",
+  "repository": "github:leandrocp/lumis",
+  "files": [
+    "LICENSE",
+    "lumis"
+  ],
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "arm64"
+  ],
+  "libc": [
+    "glibc"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}

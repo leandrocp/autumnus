@@ -71,7 +71,7 @@ For a global install:
 npm install -g @lumis-sh/cli
 ```
 
-The installed binary is `lumis`. Rust users can also install from crates.io with `cargo install lumis-cli`.
+The installed binary is `lumis`. npm resolves it from a platform package, so the install runs no scripts and downloads nothing beyond the registry. Alpine and other musl hosts are covered, and the binary there is statically linked. Rust users can also install from crates.io with `cargo install lumis-cli`.
 
   </TabItem>
   <TabItem value="browser" label="Browsers / CDN">

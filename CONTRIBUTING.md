@@ -132,9 +132,9 @@ none of these. They exist to override that default from the outside.
 
 Most of them matter only while working on the repository. The exceptions are
 `LUMIS_DATA_DIR`, which every runtime reads, and the tool-specific settings a
-user can hit without cloning anything: `LUMIS_CONFIG` for the CLI, `LUMIS_BUILD`,
-`LUMIS_USE_LEGACY_ARTIFACTS` and `LUMIS_ARTIFACT_SOURCE` for the Hex package, and
-`LUMIS_CLI_SKIP_DOWNLOAD` for the npm CLI.
+user can hit without cloning anything: `LUMIS_CONFIG` for the CLI, and
+`LUMIS_BUILD`, `LUMIS_USE_LEGACY_ARTIFACTS` and `LUMIS_ARTIFACT_SOURCE` for the
+Hex package.
 
 `LUMIS_DATA_DIR` names the directory Lumis persists parsers, themes, and
 compiled modules under. An empty value counts as unset, in every runtime.
@@ -155,7 +155,6 @@ drift.
 | `LUMIS_BUILD` | Elixir | Build the NIF from source instead of downloading a precompiled one |
 | `LUMIS_USE_LEGACY_ARTIFACTS` | Elixir | Select the legacy-CPU NIF variant |
 | `LUMIS_ARTIFACT_SOURCE` | Elixir | `github` or `cloudflare`; where to download the precompiled NIF from |
-| `LUMIS_CLI_SKIP_DOWNLOAD` | `@lumis-sh/cli` install | Skip the postinstall binary download |
 | `LUMIS_TEST_RUNTIME` | JavaScript tests | `native` or `wasm`; fails loudly if the requested runtime is unavailable |
 | `LUMIS_QUERY_LANGUAGES` | `test:queries` | Comma-separated languages, so CI can shard parser builds |
 | `LUMIS_QUERY_BATCH_LIMIT` | `test:queries` | Maximum languages per batch, asserted rather than assumed |

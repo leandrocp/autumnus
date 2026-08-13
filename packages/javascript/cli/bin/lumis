@@ -1,12 +1,32 @@
 #!/usr/bin/env node
+"use strict";
+
 const { spawnSync } = require("node:child_process");
-const { existsSync } = require("node:fs");
-const { join } = require("node:path");
+const { dirname, join } = require("node:path");
+const { cliTargetFor, hostLibc } = require("./target.js");
 
-const binary = join(__dirname, "..", "vendor", process.platform === "win32" ? "lumis.exe" : "lumis");
+const target = cliTargetFor(process.platform, process.arch, hostLibc());
 
-if (!existsSync(binary)) {
-  console.error("lumis binary not found. Reinstall @lumis-sh/cli.");
+if (!target) {
+  const host = `${process.platform}-${process.arch}-${hostLibc()}`;
+  console.error(`@lumis-sh/cli ships no binary for ${host}.`);
+  console.error("Build one with: cargo install lumis-cli");
+  process.exit(1);
+}
+
+const packageName = `@lumis-sh/cli-${target}`;
+const binaryName = process.platform === "win32" ? "lumis.exe" : "lumis";
+
+let binary;
+try {
+  binary = join(dirname(require.resolve(`${packageName}/package.json`)), binaryName);
+} catch {
+  console.error(`${packageName} is not installed.`);
+  console.error(
+    "npm installs it as an optionalDependency of @lumis-sh/cli, so --no-optional or a",
+  );
+  console.error("lockfile written on another platform can leave it out.");
+  console.error("Reinstall @lumis-sh/cli.");
   process.exit(1);
 }
 

@@ -1,0 +1,20 @@
+{
+  "name": "@lumis-sh/cli-darwin-arm64",
+  "version": "0.6.0",
+  "description": "Lumis command line syntax highlighter for macOS arm64",
+  "license": "MIT",
+  "repository": "github:leandrocp/lumis",
+  "files": [
+    "LICENSE",
+    "lumis"
+  ],
+  "os": [
+    "darwin"
+  ],
+  "cpu": [
+    "arm64"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}
