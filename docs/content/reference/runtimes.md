@@ -30,8 +30,10 @@ identical input produces identical output; browsers use `web-tree-sitter`.
 
 Every dynamic runtime loads exact, integrity-checked parser WASM per language
 rather than shipping an all-language binary, downloading what a document turns
-out to need and persisting verified assets across process restarts. Build-time
-cache commands move that download ahead of the first request.
+out to need and persisting verified assets across process restarts. Host
+lifecycle APIs or the standalone CLI can
+[warm the parser store](/operations/warm-up)
+ahead of the first request.
 
 ## Themes
 

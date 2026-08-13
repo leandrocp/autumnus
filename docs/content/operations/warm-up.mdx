@@ -1,0 +1,226 @@
+---
+sidebar_position: 1
+slug: /operations/warm-up
+title: Warm up parsers
+description: Move Lumis parser downloads and compilation into application startup or a deployment step across every runtime.
+keywords:
+  - lumis warm up
+  - parser cache
+  - application startup
+  - LUMIS_DATA_DIR
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Warm up parsers
+
+Warm-up moves parser setup ahead of the first request. Prefer the host
+application's startup lifecycle when it owns the process. Use the Lumis CLI
+when a separate image-build or operations step owns the cache instead.
+
+Only the dynamic runtimes download per-language parsers. Rust and Java package
+their parser code with the application, so they do not use the parser store.
+
+| Runtime | Warm-up operation | Persists across restarts |
+| --- | --- | --- |
+| Elixir | `Lumis.Languages.cache/2` during application startup | parser metadata, verified WASM, and compiled Wasmtime modules |
+| Server-side JavaScript | `cacheLanguages()` during application startup | parser metadata and verified WASM; compiled Wasmtime modules when the native addon is available |
+| CLI | `lumis languages cache` | parser metadata, verified WASM, and compiled Wasmtime modules |
+| Browsers / CDN | create and retain a highlighter with eager languages | verified parser bytes, when browser storage is available |
+| Rust | no parser warm-up required | parsers are selected with Cargo features and compiled into the binary |
+| Java | construct `Lumis` during application startup | the Lumis WASM module and languages ship with `lumis4j` |
+
+## Runtime APIs and commands
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+Call `cacheLanguages()` before the server begins accepting requests:
+
+```ts title="bootstrap.ts"
+import { cacheLanguages } from "@lumis-sh/lumis/cache";
+
+await cacheLanguages(["javascript", "html", "css"]);
+await startServer();
+```
+
+The API accepts language names and bundle names such as `bundle-web`. Pass
+`{force: true}` to resolve the compatible package range again and replace valid
+cached files:
+
+```ts
+await cacheLanguages(["bundle-web"], { force: true });
+```
+
+On the native Node addon, warm-up also validates the parser and queries and
+persists the compiled Wasmtime module. Bun and Deno, or a Node installation
+without the addon, can use the same API, but the portable `web-tree-sitter`
+fallback cannot persist compiled modules across processes.
+
+  </TabItem>
+  <TabItem value="elixir" label="Elixir">
+
+Call `Lumis.Languages.cache/2` before starting the supervision tree:
+
+```elixir title="lib/my_app/application.ex"
+def start(_type, _args) do
+  {:ok, _paths} =
+    Lumis.Languages.cache(["markdown", "elixir", "javascript"])
+
+  Supervisor.start_link(children(),
+    strategy: :one_for_one,
+    name: MyApp.Supervisor
+  )
+end
+```
+
+The API accepts language names and `:bundle_*` names such as `:bundle_web`.
+Pass `force: true` to refresh compatible packages already in the cache:
+
+```elixir
+{:ok, _paths} = Lumis.Languages.cache([:bundle_web], force: true)
+```
+
+Use `Lumis.Languages.load/1` instead when the current VM should also retain the
+loaded languages. For release and container details, see the standalone
+[Elixir deployment guide](https://lumis.hexdocs.pm/deployment.html).
+
+  </TabItem>
+  <TabItem value="cli" label="CLI">
+
+Use the CLI when cache preparation belongs outside the application lifecycle:
+
+```bash
+lumis languages cache rust javascript elixir
+lumis languages cache bundle-web
+lumis languages cache --all
+```
+
+Refresh compatible versions already in the store with `--force`:
+
+```bash
+lumis languages cache rust javascript --force
+```
+
+For an image build, name the destination explicitly and copy that same
+directory into the runtime image:
+
+```dockerfile
+RUN lumis --data-dir /app/lumis languages cache markdown elixir javascript
+
+COPY --from=builder --chown=nobody:root /app/lumis /app/lumis
+ENV LUMIS_DATA_DIR=/app/lumis
+```
+
+  </TabItem>
+  <TabItem value="browser" label="Browsers / CDN">
+
+Browsers do not expose the server-side cache API. Create the highlighter before
+rendering the application and keep that instance for later highlights:
+
+```ts
+import { createHighlighter } from "@lumis-sh/lumis";
+import css from "@lumis-sh/lumis/langs/css";
+import html from "@lumis-sh/lumis/langs/html";
+import javascript from "@lumis-sh/lumis/langs/javascript";
+
+const highlighter = await createHighlighter({
+  languages: [html, css, javascript],
+});
+
+await renderApplication({ highlighter });
+```
+
+Pass eager language imports when they must be ready immediately. A bundle
+registers lazy entries; call `highlighter.loadLanguage()` for the bundle members
+the application must warm.
+
+Verified parser bytes persist in CacheStorage, with an IndexedDB fallback for
+WebKit. WebAssembly compilation belongs to the browser process and cannot be
+persisted in Lumis's server-side compiled-module cache. Browsers do not use
+`LUMIS_DATA_DIR`.
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+The Rust crate has no parser download or runtime compilation step. Select the
+languages at build time with Cargo features; their parser code is compiled into
+the application:
+
+```toml title="Cargo.toml"
+[dependencies]
+lumis = { version = "0.1", default-features = false, features = ["bundle-web", "lang-rust"] }
+```
+
+There is no warm-up command, parser data-directory environment variable, or
+runtime parser-cache configuration for the Rust crate.
+
+  </TabItem>
+  <TabItem value="java" label="Java">
+
+`lumis4j` ships its Lumis WebAssembly module and languages with the Java
+artifact. Construct the `Lumis` instance during application startup and retain
+it for the application lifecycle so module initialization happens before the
+first request:
+
+```java
+import io.roastedroot.lumis4j.core.Lumis;
+
+var lumis = Lumis.builder().build();
+startServer(lumis);
+
+// Call lumis.close() from the application's shutdown lifecycle.
+```
+
+There is no parser cache command, `LUMIS_DATA_DIR`, or parser-store
+configuration in `lumis4j`.
+
+  </TabItem>
+</Tabs>
+
+## Store directory and precedence
+
+The CLI, Elixir NIF, and native Node addon use the same store layout. Point them
+at the same writable, persistent directory when one process prepares files for
+another:
+
+```text
+$LUMIS_DATA_DIR/
+  parsers/   # exact package metadata and verified parser WASM
+  compiled/  # native Wasmtime compiled modules
+  themes/
+```
+
+| Host | Explicit setting | Environment fallback | Default |
+| --- | --- | --- | --- |
+| CLI | `--data-dir /app/lumis` | `LUMIS_DATA_DIR` | platform user data directory |
+| JavaScript cache API | `{directory: "/app/lumis"}` | `LUMIS_DATA_DIR` | platform user data directory |
+| Elixir | `config :lumis, data_dir: "/app/lumis"` | `LUMIS_DATA_DIR` | the Lumis application `priv/lumis` directory |
+
+Elixir configuration takes precedence over the environment. The JavaScript
+`directory` option controls where `cacheLanguages()` writes; also set
+`LUMIS_DATA_DIR` for the deployed highlighter when it must read that explicit
+directory.
+
+```elixir title="config/runtime.exs"
+config :lumis, data_dir: "/app/lumis"
+```
+
+```bash title="Environment alternative"
+export LUMIS_DATA_DIR=/app/lumis
+```
+
+## Choose the warm set
+
+Warm root languages and anything they can inject. For example, Markdown may
+need the languages used in fenced code blocks, and HTML may inject CSS and
+JavaScript. Prefer a focused list or bundle over every parser unless the
+application genuinely accepts every supported language.
+
+All cache operations are safe to repeat. A normal run reuses valid files;
+`force: true` or `--force` is an explicit update operation that resolves the
+compatible package range again.
+
+For the store layout, integrity checks, custom resolvers, and offline images,
+continue with [WASM and CDN](/advanced/wasm-and-cdn).
