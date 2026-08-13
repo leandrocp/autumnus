@@ -1,3 +1,10 @@
+## [0.6.1](https://github.com/leandrocp/lumis/compare/npm-cli/v0.6.0...npm-cli/v0.6.1) (2026-08-13)
+
+
+### Bug Fixes
+
+- resolve the npm binary through npm - [#1282](https://github.com/leandrocp/lumis/pull/1282)
+
 ## [0.6.0](https://github.com/leandrocp/lumis/compare/npm-cli/v0.5.0...npm-cli/v0.6.0) (2026-08-13)
 
 ### Bug Fixes
