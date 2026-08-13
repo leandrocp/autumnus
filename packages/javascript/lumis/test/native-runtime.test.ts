@@ -64,6 +64,8 @@ describe("native runtime", () => {
   });
 
   it.runIf(binding)("compiles cached parsers into the selected deployment directory", async () => {
+    // Fixes the process-global engine's cache directory first. Preparing another
+    // one afterwards is the case this pins: it needs an engine of its own.
     new binding!.NativeRuntime().loadLanguage("json");
     const directory = mkdtempSync(join(tmpdir(), "lumis-native-cache-"));
     try {

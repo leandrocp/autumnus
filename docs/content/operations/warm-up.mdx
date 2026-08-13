@@ -107,8 +107,11 @@ For an image build, name the destination explicitly and copy that same
 directory into the runtime image:
 
 ```dockerfile
+FROM debian:bookworm-slim AS builder
+# Install the Lumis CLI here, then fill the directory the runtime image reads.
 RUN lumis --data-dir /app/lumis languages cache markdown elixir javascript
 
+FROM debian:bookworm-slim
 COPY --from=builder --chown=nobody:root /app/lumis /app/lumis
 ENV LUMIS_DATA_DIR=/app/lumis
 ```

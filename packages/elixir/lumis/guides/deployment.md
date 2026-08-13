@@ -32,5 +32,13 @@ If cache preparation belongs in an image build instead of application startup,
 use the standalone CLI and copy the resulting directory into the runtime image:
 
 ```dockerfile
+FROM hexpm/elixir:1.18.4-erlang-27.3.4-debian-bookworm-20250428-slim AS builder
+# Install the Lumis CLI here, then fill the directory the release will read.
 RUN lumis --data-dir /app/lumis languages cache markdown elixir javascript rust css html comment
+
+FROM debian:bookworm-20250428-slim
+COPY --from=builder --chown=nobody:root /app/lumis /app/lumis
 ```
+
+Point the release at that directory with `config :lumis, data_dir: "/app/lumis"`
+or `LUMIS_DATA_DIR=/app/lumis`, and skip the `Lumis.Languages.cache/2` call.

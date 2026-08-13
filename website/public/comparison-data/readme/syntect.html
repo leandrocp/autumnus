@@ -44,10 +44,13 @@
 </span><span style="color:#f8f8f2;">
 </span><span style="color:#ff79c6;">- </span><span style="font-weight:bold;color:#ffb86c;">**110+ Tree-sitter languages**</span><span style="color:#f8f8f2;"> - Fast, accurate, and updated syntax parsing
 </span><span style="color:#ff79c6;">- </span><span style="font-weight:bold;color:#ffb86c;">**250+ built-in Neovim themes**</span><span style="color:#f8f8f2;"> - Updated and curated themes from the Neovim community
-</span><span style="color:#ff79c6;">- </span><span style="font-weight:bold;color:#ffb86c;">**6 runtimes**</span><span style="color:#f8f8f2;"> - CLI, Rust, Elixir, JavaScript, Browsers / CDN, Java
-</span><span style="color:#ff79c6;">- </span><span style="font-weight:bold;color:#ffb86c;">**Multiple outputs**</span><span style="color:#f8f8f2;"> - HTML (inline/linked), Terminal (ANSI), Multi-theme (light/dark), BBCode, and custom formatters
+</span><span style="color:#ff79c6;">- </span><span style="font-weight:bold;color:#ffb86c;">**6 runtimes, one API**</span><span style="color:#f8f8f2;"> - CLI, Rust, Elixir, JavaScript, Browsers / CDN, and Java, aligned in naming, options, and output
+</span><span style="color:#ff79c6;">- </span><span style="font-weight:bold;color:#ffb86c;">**Built-in formatters**</span><span style="color:#f8f8f2;"> - HTML (inline/linked), Terminal (ANSI), Multi-theme (light/dark), BBCode
+</span><span style="color:#ff79c6;">- </span><span style="font-weight:bold;color:#ffb86c;">**Custom formatters**</span><span style="color:#f8f8f2;"> - Build your own output
 </span><span style="color:#ff79c6;">- </span><span style="font-weight:bold;color:#ffb86c;">**Language auto-detection**</span><span style="color:#f8f8f2;"> - File extension, shebang, and emacs-mode support
+</span><span style="color:#ff79c6;">- </span><span style="font-weight:bold;color:#ffb86c;">**Line highlighting**</span><span style="color:#f8f8f2;"> - Mark and style individual lines, with custom HTML wrappers
 </span><span style="color:#ff79c6;">- </span><span style="font-weight:bold;color:#ffb86c;">**Streaming-friendly**</span><span style="color:#f8f8f2;"> - Handles incomplete code
+</span><span style="color:#ff79c6;">- </span><span style="font-weight:bold;color:#ffb86c;">**Load parsers on demand**</span><span style="color:#f8f8f2;"> - Verified and cached, including injected languages
 </span><span style="color:#f8f8f2;">
 </span><span style="color:#f8f8f2;">&lt;</span><span style="color:#ff79c6;">table</span><span style="color:#f8f8f2;">&gt;
 </span><span style="color:#f8f8f2;">&lt;</span><span style="color:#ff79c6;">tr</span><span style="color:#f8f8f2;">&gt;
@@ -101,12 +104,9 @@
 </span><span style="font-style:italic;color:#8be9fd;">const </span><span style="color:#ffffff;">html </span><span style="color:#ff79c6;">= await </span><span style="color:#50fa7b;">highlight</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&#39;const x = 1&#39;</span><span style="color:#f8f8f2;">, </span><span style="color:#50fa7b;">htmlInline</span><span style="color:#f8f8f2;">({ </span><span style="color:#f1fa8c;">language</span><span style="color:#bd93f9;">: </span><span style="color:#ffffff;">javascript</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">theme</span><span style="color:#bd93f9;">: </span><span style="color:#ffffff;">dracula </span><span style="color:#f8f8f2;">}))
 </span><span style="color:#f8f8f2;">```
 </span><span style="color:#f8f8f2;">
-</span><span style="color:#f8f8f2;">On Node, highlighting runs through a native addon over the same Wasmtime runtime
-</span><span style="color:#f8f8f2;">the CLI and Elixir use. It downloads, verifies and loads whatever a document
-</span><span style="color:#f8f8f2;">turns out to need, including languages injected inside it, and caches them for
-</span><span style="color:#f8f8f2;">every later call. Browsers use </span><span style="color:#50fa7b;">`web-tree-sitter`</span><span style="color:#f8f8f2;"> and CacheStorage, where an
-</span><span style="color:#f8f8f2;">injected language has to be loaded first because loading is asynchronous there.
-</span><span style="color:#50fa7b;">`lumis-wasm-cache`</span><span style="color:#f8f8f2;"> prepares deployment-local parser assets ahead of time.
+</span><span style="color:#f8f8f2;">Parsers download on demand, including languages injected inside a document.
+</span><span style="color:#f8f8f2;">Browsers are the exception: loading is asynchronous there, so an injected
+</span><span style="color:#f8f8f2;">language has to be loaded first. See [WASM and CDN](</span><span style="text-decoration:underline;color:#bd93f9;">https://lumis.sh/docs/usage/wasm-and-cdn</span><span style="color:#f8f8f2;">).
 </span><span style="color:#f8f8f2;">
 </span><span style="color:#8be9fd;">### [Browsers / CDN](</span><span style="text-decoration:underline;color:#bd93f9;">https://www.npmjs.com/package/@lumis-sh/lumis</span><span style="color:#8be9fd;">)
 </span><span style="color:#f8f8f2;">
@@ -127,10 +127,10 @@
 </span><span style="color:#f8f8f2;">Lumis.highlight!(&quot;const x = 1&quot;, formatter: {:html_inline, language: &quot;javascript&quot;, theme: &quot;dracula&quot;})
 </span><span style="color:#f8f8f2;">```
 </span><span style="color:#f8f8f2;">
-</span><span style="color:#f8f8f2;">Elixir runs the same Wasmtime runtime through a NIF, so it highlights a document
-</span><span style="color:#f8f8f2;">and everything injected inside it in one pass, downloading what it needs.
-</span><span style="color:#f8f8f2;">Loading is global to the VM. Call </span><span style="color:#50fa7b;">`Lumis.Languages.cache/2`</span><span style="color:#f8f8f2;"> during application
-</span><span style="color:#f8f8f2;">startup to keep the first download and compile off a user&#39;s request.
+</span><span style="color:#f8f8f2;">Parsers download on demand and load once per VM. Call
+</span><span style="color:#50fa7b;">`Lumis.Languages.cache/2`</span><span style="color:#f8f8f2;"> during application startup to move the download and
+</span><span style="color:#f8f8f2;">compile off the first request.
+</span><span style="color:#f8f8f2;">See [Elixir integration](</span><span style="text-decoration:underline;color:#bd93f9;">https://lumis.sh/docs/usage/elixir-integration</span><span style="color:#f8f8f2;">).
 </span><span style="color:#f8f8f2;">
 </span><span style="color:#8be9fd;">### [Java](</span><span style="text-decoration:underline;color:#bd93f9;">https://github.com/roastedroot/lumis4j</span><span style="color:#8be9fd;">)
 </span><span style="color:#f8f8f2;">

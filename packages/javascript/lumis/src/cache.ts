@@ -286,10 +286,12 @@ export async function cacheLanguages(
 
   const binding = loadNativeBinding();
   if (binding) {
-    const names = [...new Set(languages.map((language) => language.id))].filter(
-      (name) => name !== "plaintext",
+    // Every id, not one per parser: languages sharing a grammar have their own
+    // queries, and compiling validates those too.
+    const compilable = [...new Set(languages.map((language) => language.id))].filter(
+      (id) => id !== "plaintext",
     );
-    if (names.length > 0) await binding.precompileLanguages(names, directory);
+    if (compilable.length > 0) await binding.precompileLanguages(compilable, directory);
   }
 
   return cached;

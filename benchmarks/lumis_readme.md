@@ -25,10 +25,13 @@
 
 - **110+ Tree-sitter languages** - Fast, accurate, and updated syntax parsing
 - **250+ built-in Neovim themes** - Updated and curated themes from the Neovim community
-- **6 runtimes** - CLI, Rust, Elixir, JavaScript, Browsers / CDN, Java
-- **Multiple outputs** - HTML (inline/linked), Terminal (ANSI), Multi-theme (light/dark), BBCode, and custom formatters
+- **6 runtimes, one API** - CLI, Rust, Elixir, JavaScript, Browsers / CDN, and Java, aligned in naming, options, and output
+- **Built-in formatters** - HTML (inline/linked), Terminal (ANSI), Multi-theme (light/dark), BBCode
+- **Custom formatters** - Build your own output
 - **Language auto-detection** - File extension, shebang, and emacs-mode support
+- **Line highlighting** - Mark and style individual lines, with custom HTML wrappers
 - **Streaming-friendly** - Handles incomplete code
+- **Load parsers on demand** - Verified and cached, including injected languages
 
 <table>
 <tr>
@@ -82,12 +85,9 @@ import dracula from '@lumis-sh/themes/dracula'
 const html = await highlight('const x = 1', htmlInline({ language: javascript, theme: dracula }))
 ```
 
-On Node, highlighting runs through a native addon over the same Wasmtime runtime
-the CLI and Elixir use. It downloads, verifies and loads whatever a document
-turns out to need, including languages injected inside it, and caches them for
-every later call. Browsers use `web-tree-sitter` and CacheStorage, where an
-injected language has to be loaded first because loading is asynchronous there.
-`lumis-wasm-cache` prepares deployment-local parser assets ahead of time.
+Parsers download on demand, including languages injected inside a document.
+Browsers are the exception: loading is asynchronous there, so an injected
+language has to be loaded first. See [WASM and CDN](https://lumis.sh/docs/usage/wasm-and-cdn).
 
 ### [Browsers / CDN](https://www.npmjs.com/package/@lumis-sh/lumis)
 
@@ -108,10 +108,10 @@ const html = await highlight('const x = 1', htmlInline({ language: javascript, t
 Lumis.highlight!("const x = 1", formatter: {:html_inline, language: "javascript", theme: "dracula"})
 ```
 
-Elixir runs the same Wasmtime runtime through a NIF, so it highlights a document
-and everything injected inside it in one pass, downloading what it needs.
-Loading is global to the VM. Call `Lumis.Languages.cache/2` during application
-startup to keep the first download and compile off a user's request.
+Parsers download on demand and load once per VM. Call
+`Lumis.Languages.cache/2` during application startup to move the download and
+compile off the first request.
+See [Elixir integration](https://lumis.sh/docs/usage/elixir-integration).
 
 ### [Java](https://github.com/roastedroot/lumis4j)
 
