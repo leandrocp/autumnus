@@ -1,23 +1,17 @@
 "use strict";
 
 /**
- * Deliberately narrower than `nativeTargetFor` in `@lumis-sh/lumis`: the CLI
- * publishes no musl build, so a musl host resolves to nothing and gets told to
- * build from source. Returning the glibc target instead would install a binary
- * npm's `libc` field already excluded, and fail at exec with a loader error.
- *
- * `test-shim.js` pins this against the package directories under `npm/`, so a
- * target added here without a package, or the reverse, fails.
+ * The same mapping as `nativeTargetFor` in `@lumis-sh/lumis`, over the same
+ * eight targets. Both packages ship alone, so neither can import the other.
+ * `test-shim.js` pins this against the CLI package directories and against the
+ * addon's, so a target added to one and not the other fails.
  */
 function cliTargetFor(platform, arch, libc) {
   if (platform === "darwin" && ["arm64", "x64"].includes(arch)) {
     return `darwin-${arch}`;
   }
-  if (platform === "linux" && arch === "arm64" && libc === "gnu") {
-    return "linux-arm64-gnu";
-  }
-  if (platform === "linux" && arch === "x64" && libc === "gnu") {
-    return "linux-x64-gnu";
+  if (platform === "linux" && ["arm64", "x64"].includes(arch)) {
+    return `linux-${arch}-${libc}`;
   }
   if (platform === "win32" && ["arm64", "x64"].includes(arch)) {
     return `win32-${arch}-msvc`;

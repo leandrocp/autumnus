@@ -111,9 +111,15 @@ importers:
       '@lumis-sh/cli-linux-arm64-gnu':
         specifier: workspace:*
         version: link:npm/linux-arm64-gnu
+      '@lumis-sh/cli-linux-arm64-musl':
+        specifier: workspace:*
+        version: link:npm/linux-arm64-musl
       '@lumis-sh/cli-linux-x64-gnu':
         specifier: workspace:*
         version: link:npm/linux-x64-gnu
+      '@lumis-sh/cli-linux-x64-musl':
+        specifier: workspace:*
+        version: link:npm/linux-x64-musl
       '@lumis-sh/cli-win32-arm64-msvc':
         specifier: workspace:*
         version: link:npm/win32-arm64-msvc
@@ -127,7 +133,11 @@ importers:
 
   packages/javascript/cli/npm/linux-arm64-gnu: {}
 
+  packages/javascript/cli/npm/linux-arm64-musl: {}
+
   packages/javascript/cli/npm/linux-x64-gnu: {}
+
+  packages/javascript/cli/npm/linux-x64-musl: {}
 
   packages/javascript/cli/npm/win32-arm64-msvc: {}
 

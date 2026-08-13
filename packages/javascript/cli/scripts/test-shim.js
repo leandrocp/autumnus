@@ -29,10 +29,13 @@ const EXPECTED_TARGETS = [
   "darwin-arm64",
   "darwin-x64",
   "linux-arm64-gnu",
+  "linux-arm64-musl",
   "linux-x64-gnu",
+  "linux-x64-musl",
   "win32-arm64-msvc",
   "win32-x64-msvc",
 ];
+const addonNpmDir = join(packageDir, "..", "lumis", "native", "npm");
 
 function reachableTargets() {
   const found = new Set();
@@ -72,9 +75,21 @@ test("each package declares the host it is selected for", () => {
   }
 });
 
-test("musl hosts are told to build from source rather than handed a glibc binary", () => {
-  assert.equal(cliTargetFor("linux", "x64", "musl"), undefined);
-  assert.equal(cliTargetFor("linux", "arm64", "musl"), undefined);
+test("musl and glibc hosts resolve to different packages", () => {
+  assert.equal(cliTargetFor("linux", "x64", "musl"), "linux-x64-musl");
+  assert.equal(cliTargetFor("linux", "x64", "gnu"), "linux-x64-gnu");
+  assert.equal(cliTargetFor("linux", "arm64", "musl"), "linux-arm64-musl");
+  assert.equal(cliTargetFor("linux", "arm64", "gnu"), "linux-arm64-gnu");
+});
+
+// The CLI and the addon cover the same hosts and compute the target the same
+// way, in two copies neither package can import from the other. A target added
+// to the addon alone would leave musl or a new arch without a CLI.
+test("covers the same targets as the @lumis-sh/lumis addon", () => {
+  const addonTargets = readdirSync(addonNpmDir)
+    .filter((entry) => entry !== "meta")
+    .sort();
+  assert.deepEqual(addonTargets, EXPECTED_TARGETS);
 });
 
 test("hostLibc answers gnu off Linux and one of the two flavours on it", () => {

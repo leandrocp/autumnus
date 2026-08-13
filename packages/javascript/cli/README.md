@@ -11,6 +11,6 @@ npm install -g @lumis-sh/cli
 lumis --help
 ```
 
-The `lumis` binary ships in a platform package that npm installs for you, so there is no download step and no install script. Linux musl hosts have no package yet; build the CLI from source there with `cargo install lumis-cli`.
+The `lumis` binary ships in a platform package that npm installs for you, so there is no download step and no install script. macOS, Linux (glibc and musl) and Windows are covered on both arm64 and x64.
 
 See [https://lumis.sh/docs/cli](https://lumis.sh/docs/cli) for commands and options.

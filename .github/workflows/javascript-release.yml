@@ -131,8 +131,14 @@ jobs:
           - package: linux-arm64-gnu
             target: aarch64-unknown-linux-gnu
             os: ubuntu-24.04-arm
+          - package: linux-arm64-musl
+            target: aarch64-unknown-linux-musl
+            os: ubuntu-24.04-arm
           - package: linux-x64-gnu
             target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+          - package: linux-x64-musl
+            target: x86_64-unknown-linux-musl
             os: ubuntu-latest
           - package: win32-arm64-msvc
             target: aarch64-pc-windows-msvc
@@ -147,11 +153,28 @@ jobs:
           ref: ${{ inputs.tag || github.ref_name }}
 
       - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
+        if: ${{ !endsWith(matrix.target, '-musl') }}
         with:
           targets: ${{ matrix.target }}
 
       - name: Build CLI
+        if: ${{ !endsWith(matrix.target, '-musl') }}
         run: cargo build --locked --release --target ${{ matrix.target }} -p lumis-cli
+
+      # Unlike the addon, the CLI keeps musl's default static CRT: it is an
+      # executable, not something Node has to dlopen, so it links libc in and
+      # runs on any musl host without one installed. `tree-sitter` builds
+      # wasmtime's C API through cmake, which `rust:alpine` does not ship. Each
+      # musl target gets a runner of its own architecture, so this compiles
+      # natively rather than under emulation.
+      - name: Build CLI (musl)
+        if: endsWith(matrix.target, '-musl')
+        run: >-
+          docker run --rm --volume "$PWD:/lumis" --workdir /lumis
+          rust:1-alpine3.22
+          sh -c
+          'apk add --no-cache cmake make g++ musl-dev &&
+          cargo build --locked --release --target ${{ matrix.target }} -p lumis-cli'
 
       - name: Stage CLI binary
         shell: bash
@@ -348,8 +371,8 @@ jobs:
             npm publish "$package_dir" --access public --provenance
             published=$((published + 1))
           done
-          if [ "$published" -ne 6 ]; then
-            echo "expected 6 platform packages, published $published" >&2
+          if [ "$published" -ne 8 ]; then
+            echo "expected 8 platform packages, published $published" >&2
             exit 1
           fi
         env:

@@ -34,7 +34,9 @@
     "@lumis-sh/cli-darwin-arm64": "workspace:*",
     "@lumis-sh/cli-darwin-x64": "workspace:*",
     "@lumis-sh/cli-linux-arm64-gnu": "workspace:*",
+    "@lumis-sh/cli-linux-arm64-musl": "workspace:*",
     "@lumis-sh/cli-linux-x64-gnu": "workspace:*",
+    "@lumis-sh/cli-linux-x64-musl": "workspace:*",
     "@lumis-sh/cli-win32-arm64-msvc": "workspace:*",
     "@lumis-sh/cli-win32-x64-msvc": "workspace:*"
   },
