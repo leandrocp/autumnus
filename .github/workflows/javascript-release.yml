@@ -85,15 +85,17 @@ jobs:
       # however `musl-gcc` is wired up. Alpine has one, so the build runs in the
       # distro the artifact targets. Each musl target has a runner of its own
       # architecture, so the container compiles natively in both cases.
+      # `tree-sitter` builds wasmtime's C API through cmake, which every runner
+      # image ships preinstalled and `rust:alpine` does not.
       - name: Build native runtime (musl)
         if: endsWith(matrix.target, '-musl')
         run: >-
           docker run --rm --volume "$PWD:/lumis" --workdir /lumis
           --env RUSTFLAGS=-Ctarget-feature=-crt-static
           rust:1-alpine3.22
-          cargo build --locked --release
-          --target ${{ matrix.target }}
-          -p lumis-js-native
+          sh -c
+          'apk add --no-cache cmake make g++ &&
+          cargo build --locked --release --target ${{ matrix.target }} -p lumis-js-native'
 
       - name: Stage native runtime
         shell: bash
