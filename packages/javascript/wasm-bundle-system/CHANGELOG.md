@@ -1,3 +1,10 @@
+## [0.1.0](https://github.com/leandrocp/lumis/compare/npm-wasm-bundle-system/v0.0.4...npm-wasm-bundle-system/v0.1.0) (2026-08-13)
+
+
+### Features
+
+- unify dynamic WASM language loading - [#1099](https://github.com/leandrocp/lumis/pull/1099)
+
 ## [0.0.4](https://github.com/leandrocp/lumis/compare/wasm-bundle-system@v0.0.3...wasm-bundle-system@v0.0.4) (2026-04-07)
 
 
