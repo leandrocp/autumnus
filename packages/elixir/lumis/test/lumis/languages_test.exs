@@ -1,7 +1,7 @@
 defmodule Lumis.LanguagesTest do
   use ExUnit.Case, async: false
 
-  import ExUnit.CaptureIO
+  import ExUnit.CaptureLog
 
   test "does not load a parser for plaintext aliases" do
     plaintext = Enum.find(Lumis.available_languages(), &(&1.id == "plaintext"))
@@ -246,13 +246,80 @@ defmodule Lumis.LanguagesTest do
     end
   end
 
+  describe "async_load/1" do
+    # Every assertion here is about the caller, not the load: a warm-up able to
+    # block or crash `start/2` is the failure this function exists to prevent.
+    #
+    # `:noproc` rather than `:normal` when the task beat the monitor to it. The
+    # exit reason is therefore not evidence of anything, so no test reads it;
+    # what the warm-up did is asserted through the runtime and the log instead.
+    defp await_warm_up(pid) do
+      ref = Process.monitor(pid)
+      assert_receive {:DOWN, ^ref, :process, ^pid, _reason}, 30_000
+      :ok
+    end
+
+    test "loads in the background" do
+      refute Lumis.Native.has_language("erlang")
+
+      assert {:ok, pid} = Lumis.Languages.async_load(["erlang"])
+      await_warm_up(pid)
+
+      assert Lumis.Native.has_language("erlang")
+    end
+
+    test "returns before the load finishes" do
+      # A whole bundle, so the work is far larger than the budget below however
+      # much of it is already staged. Anything over a millisecond here is
+      # `start/2` waiting on parsers, which is the regression being pinned.
+      {microseconds, {:ok, pid}} =
+        :timer.tc(fn -> Lumis.Languages.async_load([:bundle_web]) end)
+
+      assert microseconds < 1_000
+      await_warm_up(pid)
+    end
+
+    test "logs a failure rather than crashing the task" do
+      log =
+        capture_log(fn ->
+          {:ok, pid} = Lumis.Languages.async_load(["not-a-language"])
+          await_warm_up(pid)
+        end)
+
+      # A crashed task would report the exception instead of this.
+      assert log =~ "could not warm"
+      assert log =~ "not-a-language"
+      assert log =~ "load these on demand"
+    end
+
+    test "leaves the caller and the supervisor alive after a failure" do
+      supervisor = Process.whereis(Lumis.TaskSupervisor)
+
+      capture_log(fn ->
+        {:ok, pid} = Lumis.Languages.async_load(["not-a-language"])
+        await_warm_up(pid)
+      end)
+
+      assert Process.alive?(self())
+      assert Process.whereis(Lumis.TaskSupervisor) == supervisor
+      assert Process.alive?(supervisor)
+    end
+  end
+
   describe "cache/2" do
     @store Application.compile_env!(:lumis, :data_dir)
 
-    test "writes verified parsers into the store" do
+    test "writes verified parsers and compiled modules into the store" do
+      File.rm_rf!(Path.join(@store, "compiled"))
+
       assert {:ok, [path]} = Lumis.Languages.cache(["comment"])
       assert String.starts_with?(Path.basename(path), "tree-sitter-comment-")
       assert File.exists?(path)
+
+      assert @store
+             |> Path.join("compiled/modules/**/*")
+             |> Path.wildcard()
+             |> Enum.any?(&File.regular?/1)
     end
 
     test "collapses languages that share one parser" do
@@ -275,74 +342,9 @@ defmodule Lumis.LanguagesTest do
       assert {:error, failures} = Lumis.Languages.cache(["not-a-language", "also-not", "comment"])
       assert Map.keys(failures) |> Enum.sort() == ["also-not", "not-a-language"]
     end
-  end
-
-  describe "build-time parser validation" do
-    test "returns the languages it compiled" do
-      assert {:ok, _} = Lumis.Languages.cache(["comment"])
-      assert {:ok, ["comment"]} = Lumis.Languages.__precompile__(["comment"])
-    end
 
     test "skips names that have no parser to compile" do
-      assert {:ok, []} = Lumis.Languages.__precompile__(["plaintext"])
-    end
-
-    test "reports failures by name rather than stopping at the first" do
-      assert {:error, %{"not-a-language" => _}} =
-               Lumis.Languages.__precompile__(["not-a-language"])
-    end
-
-    test "rejects an unknown bundle" do
-      assert {:error, {:unknown_bundle, "bundle_nope"}} =
-               Lumis.Languages.__precompile__([:bundle_nope])
-    end
-  end
-
-  describe "mix lumis.languages.cache" do
-    test "summarizes instead of listing every parser" do
-      output =
-        capture_io(fn ->
-          Mix.Task.reenable("lumis.languages.cache")
-          Mix.Task.run("lumis.languages.cache", ["comment"])
-        end)
-
-      assert output =~ ~r/cached 1 parser\(s\) in \d+\.\d{3}s/
-      assert output =~ ~r/compiled 1 language\(s\) in \d+\.\d{3}s/
-      refute output =~ "tree-sitter-comment-"
-    end
-
-    test "skips parserless languages with --verbose" do
-      output =
-        capture_io(fn ->
-          Mix.Task.reenable("lumis.languages.cache")
-          Mix.Task.run("lumis.languages.cache", ["--verbose", "plaintext"])
-        end)
-
-      assert output == ""
-    end
-
-    test "reports per-language details without totals with --verbose" do
-      output =
-        capture_io(fn ->
-          Mix.Task.reenable("lumis.languages.cache")
-          Mix.Task.run("lumis.languages.cache", ["--verbose", "comment"])
-        end)
-
-      assert output =~ "--> comment"
-      assert output =~ "downloaded to "
-      assert output =~ "tree-sitter-comment-"
-      refute output =~ "downloaded to #{File.cwd!()}"
-      assert output =~ ~r/cached in \d+\.\d{3}s/
-      assert output =~ ~r/compiled in \d+\.\d{3}s/
-      refute output =~ ~r/cached \d+ parser/
-      refute output =~ ~r/compiled \d+ language/
-    end
-
-    test "refuses to guess when given neither names nor --all" do
-      assert_raise Mix.Error, ~r/--all/, fn ->
-        Mix.Task.reenable("lumis.languages.cache")
-        Mix.Task.run("lumis.languages.cache", [])
-      end
+      assert {:ok, []} = Lumis.Languages.cache(["plaintext"])
     end
   end
 end

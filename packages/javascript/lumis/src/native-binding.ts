@@ -78,6 +78,7 @@ interface NativeRuntimeInstance {
 export interface NativeBinding {
   NativeRuntime: new () => NativeRuntimeInstance;
   runtimeKind(): string;
+  precompileLanguages(names: string[], directory?: string): Promise<boolean>;
   /** `false` once the runtime has read them, which it does on first use. */
   configureStore(dataDir?: string): boolean;
   /** Where the store lives when `LUMIS_DATA_DIR` names nothing. */

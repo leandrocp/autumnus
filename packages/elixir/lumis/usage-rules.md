@@ -101,24 +101,32 @@ Highlighting loads what a document needs, including languages injected inside
 it, so nothing has to be declared up front. Loading is global to the VM, so the
 cost is paid once.
 
-Load ahead of time to keep the first download off a user's request:
+Load ahead of time to keep the first download off a user's request. A cold
+parser costs a download *and* a Wasmtime compile:
 
 ```elixir
 :ok = Lumis.Languages.load(["markdown", "elixir", "json"])
 ```
 
-Better still, do it at image-build time so no request ever pays. A cold parser
-costs a download *and* a Wasmtime compile — the compile is the larger half, about
-8 s for seven parsers against 1.3 s once cached:
+From an application's `start/2`, use the async variant instead. It returns
+immediately, so a slow or unreachable CDN cannot delay or fail the boot, and it
+is not matched on:
 
-```sh
-mix lumis.languages.cache markdown elixir json
+```elixir
+Lumis.Languages.async_load(["markdown", "elixir", "json"])
 ```
 
-The store checks `:data_dir` and then the CDN. It defaults to `LUMIS_DATA_DIR`,
-and is also where Wasmtime persists compiled modules. A cold cache resolves the
-runtime's compatible package range; the exact package stored in that directory
-is then served without revalidating it.
+The store is checked before the CDN, and is also where Wasmtime persists
+compiled modules. It resolves in that order: `config :lumis, data_dir:` wins,
+`LUMIS_DATA_DIR` is the environment fallback, and Lumis's own `priv/lumis` is
+the zero-configuration default. A cold cache resolves the runtime's compatible
+package range; the exact package stored in that directory is then served
+without revalidating it.
+
+`Lumis.Languages.cache/2` and `lumis languages cache` fill that directory
+without loading anything, for a build or operations step that runs before the
+VM that serves. Inside a running application prefer `async_load/1`, which keeps
+what it loads rather than compiling and discarding it.
 
 ## Formatters
 

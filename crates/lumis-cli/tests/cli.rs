@@ -1299,9 +1299,8 @@ fn cache_languages_skips_plaintext_aliases() {
 }
 
 /// Downloading is the smaller half of a cold parser; the Wasmtime compile is the
-/// larger, and a prepared directory is meant to carry both. `mix
-/// lumis.languages.cache` does the same, so the two cannot prepare different
-/// things.
+/// larger, and a prepared directory is meant to carry both. Host cache APIs do
+/// the same, so they cannot prepare different things.
 #[test]
 fn cache_languages_compiles_what_it_downloads() {
     // Building a runtime at all compiles Tree-sitter's own module, so a

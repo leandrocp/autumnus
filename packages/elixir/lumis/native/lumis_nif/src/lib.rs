@@ -348,7 +348,7 @@ fn on_deep_stack<Output: Send>(work: impl FnOnce() -> Output + Send) -> Result<O
     })
 }
 
-/// Download and cache `names` concurrently, for `mix lumis.languages.cache`.
+/// Download and cache `names` concurrently for `Lumis.Languages.cache/2`.
 ///
 /// One result per name, in order, so the caller reports every language that
 /// could not be obtained instead of stopping at the first. Caching a bundle one
@@ -361,7 +361,7 @@ fn cache_languages<'a>(env: Env<'a>, names: Vec<String>, force: bool) -> Term<'a
     let results = on_deep_stack(|| {
         let _batch = CACHE_BATCH.lock();
         language_store(None)
-            .cache_languages_detailed(&names, force, lumis_wasm_runtime::DOWNLOAD_CONCURRENCY)
+            .cache_languages(&names, force, lumis_wasm_runtime::DOWNLOAD_CONCURRENCY)
             .into_iter()
             .map(|result| result.map_err(|failure| failure.to_string()))
             .collect::<Vec<_>>()
@@ -371,14 +371,7 @@ fn cache_languages<'a>(env: Env<'a>, names: Vec<String>, force: bool) -> Term<'a
         Ok(results) => results
             .into_iter()
             .map(|result| match result {
-                Ok(outcome) => {
-                    let details = (
-                        outcome.download_url,
-                        outcome.path.display().to_string(),
-                        duration_seconds(outcome.elapsed),
-                    );
-                    (ok(), details).encode(env)
-                }
+                Ok(path) => (ok(), path.display().to_string()).encode(env),
                 Err(message) => (error(), message).encode(env),
             })
             .collect::<Vec<_>>()
@@ -403,9 +396,8 @@ fn precompile_languages<'a>(env: Env<'a>, names: Vec<String>) -> Term<'a> {
         let _batch = PRECOMPILE_BATCH.lock();
         executor
             .runtime
-            .precompile_languages_detailed(&names, lumis_wasm_runtime::compile_concurrency())
+            .precompile_languages(&names, lumis_wasm_runtime::compile_concurrency())
             .into_iter()
-            .map(|result| result.map(duration_seconds))
             .map(|result| result.map_err(|failure| failure.to_string()))
             .collect::<Vec<_>>()
     });
@@ -414,17 +406,13 @@ fn precompile_languages<'a>(env: Env<'a>, names: Vec<String>) -> Term<'a> {
         Ok(results) => results
             .into_iter()
             .map(|result| match result {
-                Ok(seconds) => (ok(), seconds).encode(env),
+                Ok(()) => ok().encode(env),
                 Err(message) => (error(), message).encode(env),
             })
             .collect::<Vec<_>>()
             .encode(env),
         Err(error) => repeated_failure(env, &format!("{error:#}"), names.len()),
     }
-}
-
-fn duration_seconds(duration: std::time::Duration) -> f64 {
-    duration.as_secs_f64()
 }
 
 /// One failure per name, for the cases that fail before any name is attempted.

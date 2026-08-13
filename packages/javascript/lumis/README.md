@@ -58,12 +58,24 @@ same pass, so a Markdown file with a fenced Rust block highlights that block
 without Rust being named in your code. Browsers load asynchronously, so name
 injected languages up front or use a bundle.
 
-For a host with no network access, prepare a cache before starting:
+Warm parsers alongside startup, without putting the CDN on the boot path:
 
-```sh
-npx lumis-languages-cache javascript html css --output ./wasm-cache
-LUMIS_DATA_DIR=./wasm-cache node app.mjs
+```typescript
+import { loadLanguages } from '@lumis-sh/lumis'
+
+await startServer()
+
+// Not awaited. The `.catch()` is required: an unhandled rejection would
+// terminate the process.
+loadLanguages(['javascript', 'html', 'css']).catch((error) => {
+  logger.warn({ error }, 'Lumis warm-up failed; languages load on demand')
+})
 ```
+
+`loadLanguages()` warms the runtime `highlight()` uses and keeps the languages
+there. `cacheLanguages()` writes the same files but holds nothing, for a build
+step preparing a directory another process reads; `lumis languages cache` does
+that from the CLI. On native Node both also persist compiled Wasmtime modules.
 
 ## Documentation
 

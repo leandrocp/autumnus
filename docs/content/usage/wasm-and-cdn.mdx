@@ -18,10 +18,15 @@ import TabItem from "@theme/TabItem";
 
 # WASM and CDN
 
-Lumis uses two terms consistently:
+Lumis uses two terms consistently, in every runtime:
 
-- **load** makes a language available in the current runtime
-- **cache** persists verified parser bytes, and their compiled form, so later starts skip both
+- **cache** persists verified parser bytes, and their compiled form, so later
+  starts skip both
+- **load** caches the language *and* keeps it in the current runtime
+
+Load is cache plus keeping it, so a process that will serve wants a load, and
+caching is for preparing a directory some *other* process will read. See
+[Warm up parsers](/operations/warm-up).
 
 ## Highlighting loads what a document needs
 
@@ -46,77 +51,59 @@ this limit: it highlights through a native addon, including when configured
 `configureLanguagePackageResolver()` and `configureWasmResolver()` callbacks
 supply the injected language.
 
-### Loading ahead of time
+### Warming during application startup
 
 A cold parser costs a download and then a Wasmtime compile. The compile is the
-larger half — seven parsers already on disk take about 8 s to compile, and 1.3 s
-once their compiled forms are cached — so load ahead of time rather than letting
-a first request pay for either:
+larger half, so warm at startup rather than letting a first request pay for
+either — beside the boot, not in front of it:
 
 <Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
   <TabItem value="javascript" label="JavaScript">
 
-```js
-import { createHighlighter } from "@lumis-sh/lumis";
-import rust from "@lumis-sh/lumis/langs/rust";
+```js title="bootstrap.mjs"
+import { loadLanguages } from "@lumis-sh/lumis";
 
-const hl = await createHighlighter({ languages: [rust] });
-await hl.loadLanguage(rust);
+await startServer();
+
+loadLanguages(["rust", "javascript", "elixir"]).catch((error) => {
+  logger.warn({ error }, "Lumis warm-up failed; languages load on demand");
+});
 ```
 
   </TabItem>
   <TabItem value="elixir" label="Elixir">
 
 ```elixir title="lib/my_app/application.ex"
-:ok = Lumis.Languages.load(~w(elixir html javascript css))
-```
-
-Loading is global to the VM, so the process that pays for a language pays once
-and every process after it does not.
-
-  </TabItem>
-  <TabItem value="cli" label="CLI">
-
-```bash
-lumis languages cache rust javascript elixir
+def start(_type, _args) do
+  Lumis.Languages.async_load(~w(elixir html javascript css))
+  Supervisor.start_link(children(), strategy: :one_for_one, name: MyApp.Supervisor)
+end
 ```
 
   </TabItem>
 </Tabs>
+
+Neither blocks the boot, and neither can fail one: warm-up is an optimization,
+so a CDN that is slow or down costs the first request rather than the process.
+Both are idempotent and reuse verified parser bytes on later starts. Native
+hosts also reuse their compiled modules.
+
+Both **load**: they write the store and keep the languages in the runtime. To
+**cache** without keeping — a build or operations step preparing a directory the
+serving process reads — await `cacheLanguages()` or call `Lumis.Languages.cache/2`,
+where failing is the point. See [Warm up parsers](/operations/warm-up).
 
 ### Filling the store at build time
 
-<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
-  <TabItem value="javascript" label="JavaScript">
-
 ```bash
-npx lumis-languages-cache rust javascript elixir --output ./wasm-cache
-LUMIS_DATA_DIR=./wasm-cache node app.mjs
+lumis --data-dir ./wasm-cache languages cache rust javascript elixir
 ```
 
-  </TabItem>
-  <TabItem value="elixir" label="Elixir">
-
-```bash
-mix lumis.languages.cache rust javascript elixir
-```
-
-  </TabItem>
-  <TabItem value="cli" label="CLI">
-
-```bash
-lumis languages cache rust javascript elixir
-```
-
-  </TabItem>
-</Tabs>
-
-Each writes a self-sufficient directory — parser bytes plus the metadata naming
-them — so pointing `LUMIS_DATA_DIR` at it is all the deployment needs. Pass
-`--all` to take the whole catalog. The native CLI and Elixir task validate each
-parser and its queries in a disposable Tree-sitter store, so Wasmtime's compiled
-forms travel with the cache without retaining the full catalog in memory. The
-first request therefore pays neither the download nor the compile.
+Use the standalone CLI when preparation belongs outside the application
+lifecycle. It writes the same self-sufficient directory as the host APIs —
+parser bytes, metadata, and validated compiled modules — so any native runtime
+can consume it. Pass `--all` to take the whole catalog or `--force` to refresh
+compatible parser packages.
 
 ## What ships where
 
@@ -188,8 +175,9 @@ revalidated during highlighting. This gives deployments two useful modes:
 
 - stage the cache during a build to make every instance use identical parser
   and query bytes without request-time network access
-- run the cache command with `--force` to resolve the range again and adopt a
-  newer compatible language release without upgrading Lumis
+- call a host cache API with `force: true`, or run the CLI with `--force`, to
+  resolve the range again and adopt a newer compatible language release without
+  upgrading Lumis
 
 Different caches refreshed at different times can hold different compatible
 patch releases. Reproducibility therefore belongs to the prepared cache, while
@@ -203,16 +191,16 @@ Because the runtime only reads this one directory, filling it during a build is
 all that pre-warming requires:
 
 ```dockerfile
-ENV LUMIS_DATA_DIR=/app/lumis
-RUN mix lumis.languages.cache elixir heex markdown json
+FROM node:22-bookworm-slim AS parsers
+RUN npx --yes @lumis-sh/cli --data-dir /app/lumis languages cache elixir heex markdown json
 
-COPY --from=builder --chown=nobody:root /app/lumis /app/lumis
+FROM debian:bookworm-slim
+COPY --from=parsers --chown=nobody:root /app/lumis /app/lumis
 ENV LUMIS_DATA_DIR=/app/lumis
 ```
 
-The CLI writes the same layout with `lumis --data-dir /app/lumis languages cache`.
-There is one directory and one way to name it, so a directory written this way is
-self-sufficient: parser bytes plus the metadata naming them.
+There is one directory and one way to name it, so a directory written this way
+is self-sufficient: parser bytes plus the metadata naming them.
 
 Bytes are checked against the size and SHA-256 their package declares before
 use, wherever they came from, and anything that fails is discarded rather than

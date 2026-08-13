@@ -2,6 +2,7 @@
 
 import { mapBundle } from "./bundle-helpers.js";
 import { createHighlighterModule } from "./core/highlighter.js";
+import { createLoadLanguages } from "./core/load-languages.js";
 import {
   availableLanguages,
   configureLanguagePackageResolver,
@@ -9,12 +10,42 @@ import {
   createRuntime,
   getDefaultRuntime,
   loadedLanguages,
+  loadLanguage as runtimeLoadLanguage,
 } from "./runtime/browser.js";
 
 export { runtimeKind } from "./runtime/browser.js";
 
 export { highlightIter, highlightEvents } from "./core/highlighter.js";
 export { guessLanguage } from "./guess-language.js";
+
+/**
+ * Load languages into the runtime `highlight()` uses, by name.
+ *
+ * This is the JavaScript spelling of `Lumis.Languages.load/1`: it caches — the
+ * verified parser bytes, and on the native addon their compiled Wasmtime module
+ * — and then keeps the languages in the default runtime, so no later call
+ * reloads them. `cacheLanguages()` does only the caching half, for filling a
+ * directory a different process will read.
+ *
+ * Accepts catalog names, aliases, and `bundle-<name>` tokens.
+ *
+ * Highlighting loads on demand regardless, so this is an optimization. At
+ * startup, prefer not blocking on it:
+ *
+ * ```ts
+ * import { loadLanguages } from '@lumis-sh/lumis'
+ *
+ * await startServer()
+ *
+ * loadLanguages(['javascript', 'html', 'css']).catch((error) => {
+ *   logger.warn({ error }, 'Lumis warm-up failed; languages load on demand')
+ * })
+ * ```
+ *
+ * Every name is attempted. If any fail, it rejects with an `AggregateError`
+ * naming each one, after the rest have loaded.
+ */
+export const loadLanguages = createLoadLanguages(runtimeLoadLanguage);
 
 const highlighter = createHighlighterModule({
   createRuntime,
@@ -53,6 +84,7 @@ export function withWasmBundle(
 }
 
 export type { CreateHighlighterOptions, Highlighter } from "./core/highlighter.js";
+export type { LoadLanguages } from "./core/load-languages.js";
 export type {
   HighlightEvent,
   HighlightIterFn,

@@ -80,13 +80,9 @@
     "dist",
     "CHANGELOG.md"
   ],
-  "bin": {
-    "lumis-languages-cache": "./dist/cache-cli.js"
-  },
   "packageManager": "pnpm@11.15.1",
   "scripts": {
     "build:langs": "tsx scripts/build-langs.ts",
-    "cache-languages": "tsx src/cache-cli.ts",
     "build:runtime-wasm": "tsx scripts/build-runtime-wasm.ts",
     "build:generate": "pnpm run build:runtime-wasm && pnpm run build:langs",
     "build:native": "cargo build -p lumis-js-native --release && tsx scripts/copy-native.ts",

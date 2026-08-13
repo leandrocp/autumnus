@@ -7,6 +7,11 @@ const sidebars: SidebarsConfig = {
     "architecture",
     {
       type: "category",
+      label: "Operations",
+      items: ["operations/warm-up"],
+    },
+    {
+      type: "category",
       label: "Usage",
       items: [
         "usage/highlight",
@@ -73,7 +78,6 @@ const sidebars: SidebarsConfig = {
         "recipes/generate-css-from-a-theme-rust",
         "recipes/list-languages-and-themes",
         "recipes/generate-theme-from-neovim-colorscheme",
-        "recipes/cache-parsers-cli",
         "recipes/repeated-highlighting-javascript",
         "recipes/browser-cdn",
         "recipes/local-wasm-bundle",

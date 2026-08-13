@@ -11,9 +11,7 @@ import {
   type LanguagePackageResolver,
   type WasmResolver,
 } from "./core/languages.js";
-import { BUNDLES } from "./generated/bundles-meta.js";
-import { EXACT_LANGUAGE_MAP } from "./generated/language-detection.js";
-import { LANGUAGE_LOADERS } from "./generated/language-loaders.js";
+import { expandBundles, resolveLanguage } from "./core/language-names.js";
 import { LANGUAGE_PACKAGE_VERSION_RANGE } from "./generated/package-version-range.js";
 import {
   readCachedWasm,
@@ -23,10 +21,13 @@ import {
   withWasmCacheLock,
   writeCachedWasm,
 } from "./runtime/node-cache.js";
+import { loadNativeBinding } from "./native-binding.js";
 import type { Language, WasmRef } from "./types.js";
 
+export { expandBundles } from "./core/language-names.js";
+
 export interface CacheLanguagesOptions {
-  /** Destination containing verified, content-addressed parser files. */
+  /** Destination for verified parsers and native compiled modules. */
   directory?: string;
   /** Resolve the compatible package range again and replace verified parser files. */
   force?: boolean;
@@ -48,51 +49,6 @@ function languagePackageName(language: Language): string {
     throw new Error(`Language "${language.id}" does not have a language package`);
   }
   return language.packageName;
-}
-
-async function loadLanguage(name: string): Promise<Language> {
-  const normalized = name.toLowerCase();
-  const id = EXACT_LANGUAGE_MAP[normalized] ?? normalized;
-  const loader = LANGUAGE_LOADERS[id];
-  if (!loader) throw new Error(`Unknown language "${name}"`);
-  return (await loader()).default;
-}
-
-/**
- * Members of `bundle-<name>`, accepting `-` or `_` between words so Elixir's
- * `:bundle_web_extra` and the CLI's `bundle-web-extra` reach the same entry.
- */
-function bundleMembers(name: string): string[] | undefined {
-  const lower = name.toLowerCase();
-  if (!lower.startsWith("bundle-") && !lower.startsWith("bundle_")) return undefined;
-
-  const suffix = lower.slice("bundle-".length).replaceAll("_", "-");
-  return BUNDLES[suffix];
-}
-
-/**
- * Expand every `bundle-<name>` token into its members, leaving other names
- * alone. Mirrors `catalog::expand_bundles` in `lumis-wasm-runtime`.
- */
-export function expandBundles(names: Iterable<string>): string[] {
-  const expanded: string[] = [];
-
-  for (const name of names) {
-    const members = bundleMembers(name);
-    if (members) {
-      expanded.push(...members);
-      continue;
-    }
-
-    const lower = name.toLowerCase();
-    if (lower.startsWith("bundle-") || lower.startsWith("bundle_")) {
-      throw new Error(`Unknown bundle "${name}"`);
-    }
-
-    expanded.push(name);
-  }
-
-  return [...new Set(expanded)];
 }
 
 async function fetchWasm(language: Language, ref: WasmRef, resolver: WasmResolver) {
@@ -180,6 +136,8 @@ async function writeSharedLanguagePackage(
 
 /**
  * Resolve compatible packages and cache exact, integrity-pinned parser WASMs.
+ * When the native Node addon is available, also compile and validate every
+ * selected language and persist its Wasmtime module in the same directory.
  *
  * Accepts language names and `bundle-<name>` tokens, the same set
  * `Lumis.Languages.cache/2` and `lumis languages cache` accept.
@@ -193,7 +151,7 @@ export async function cacheLanguages(
   const directory = options.directory;
   const resolver = options.resolver ?? DEFAULT_RESOLVER;
   const packageResolver = options.languagePackageResolver ?? DEFAULT_LANGUAGE_PACKAGE_RESOLVER;
-  const languages = await Promise.all(expandBundles(names).map(loadLanguage));
+  const languages = await Promise.all(expandBundles(names).map(resolveLanguage));
   const seen = new Set<string>();
   const packages = new Map<string, LanguagePackage>();
   const persisted = new Set<string>();
@@ -279,6 +237,16 @@ export async function cacheLanguages(
     }
 
     cached.push({ language: language.id, wasm: ref, ...result });
+  }
+
+  const binding = loadNativeBinding();
+  if (binding) {
+    // Every id, not one per parser: languages sharing a grammar have their own
+    // queries, and compiling validates those too.
+    const compilable = [...new Set(languages.map((language) => language.id))].filter(
+      (id) => id !== "plaintext",
+    );
+    if (compilable.length > 0) await binding.precompileLanguages(compilable, directory);
   }
 
   return cached;
