@@ -1,3 +1,13 @@
+## [0.3.0](https://github.com/leandrocp/lumis/compare/npm-themes/v0.2.2...npm-themes/v0.3.0) (2026-08-13)
+
+### Bug Fixes
+
+- resolve the theme asset paths the docs document - [#1143](https://github.com/leandrocp/lumis/pull/1143)
+
+### Features
+
+- update generated themes - [#1122](https://github.com/leandrocp/lumis/pull/1122)
+
 ## [0.2.2](https://github.com/leandrocp/lumis/compare/npm-themes/v0.2.1...npm-themes/v0.2.2) (2026-07-08)
 
 
