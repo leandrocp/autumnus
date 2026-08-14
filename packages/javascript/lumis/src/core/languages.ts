@@ -815,6 +815,7 @@ export function compileHighlightConfig(
       highlightScope: resolveHighlightName(captureName),
       isInjectionContent: matchesSpecialCapture(captureName, "injection.content"),
       isInjectionLanguage: matchesSpecialCapture(captureName, "injection.language"),
+      isInjectionFilename: matchesSpecialCapture(captureName, "injection.filename"),
       isLocalScope: matchesSpecialCapture(captureName, "local.scope"),
       isLocalDefinition: matchesSpecialCapture(captureName, "local.definition"),
       isLocalDefinitionValue: matchesSpecialCapture(captureName, "local.definition-value"),

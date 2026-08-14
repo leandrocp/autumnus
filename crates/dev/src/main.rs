@@ -2608,7 +2608,6 @@ fn render_language_catalog(
             .map(|alias| format!("{alias:?}"))
             .collect::<Vec<_>>()
             .join(", ");
-
         lines.extend([
             format!("        {id:?} => {{"),
             format!("            aliases: [{aliases}],"),

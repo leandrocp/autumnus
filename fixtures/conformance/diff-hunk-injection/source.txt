@@ -1,0 +1,11 @@
+diff --git a/lib/varsel.ex b/lib/varsel.ex
+index 5082de0..e0c8c75 100644
+--- a/lib/varsel.ex
++++ b/lib/varsel.ex
+@@ -1,6 +1,6 @@
+ defmodule Varsel do
+   def run(json) do
+-    File.write!(path, Jason.encode!(json))
++    File.write!(path, JSON.encode!(json))
+   end
+ end

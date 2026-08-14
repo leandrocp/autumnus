@@ -46,6 +46,17 @@ macro_rules! define_languages {
             ),* $(,)?
         }
     ) => {
+        /// Every language id and the globs it claims, whatever the feature set.
+        ///
+        /// The same declarations as [`Language::globs`], without the gates.
+        /// Several languages claim one extension, and a table that shrinks with
+        /// the feature set would answer `*.m` with whichever of matlab and objc
+        /// happened to be compiled in.
+        static FILENAME_GLOBS: &[(&str, &[&str])] = &[
+            $(($a_id, &[$($a_glob),*]),)*
+            $(($g_id, &[$($g_glob),*]),)*
+        ];
+
         #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
         pub enum Language {
             $(
@@ -471,12 +482,10 @@ impl Language {
         Self::first_matching_glob(&format!("*.{}", token.to_ascii_lowercase()))
     }
 
-    /// The first language in catalog order whose globs match `candidate`.
+    /// The first language whose globs match `candidate`, of those compiled in.
     fn first_matching_glob(candidate: &str) -> Option<Self> {
-        CATALOG_GLOBS
-            .iter()
-            .find(|(_, patterns)| patterns.iter().any(|pattern| pattern.matches(candidate)))
-            .map(|(language, _)| *language)
+        let id = id_matching_glob(candidate)?;
+        Language::iter().find(|language| language.id_name() == id)
     }
 
     #[allow(dead_code)]
@@ -515,30 +524,113 @@ fn normalize_shebang_command(command: &str) -> String {
     VERSION_RE.replace(&command, "").into_owned()
 }
 
-/// Every catalog glob, lowercased and compiled, in catalog order.
+/// `FILENAME_GLOBS` arranged for lookup rather than for iteration.
 ///
-/// `glob::Pattern::new` dominates detection: compiling the catalog costs about
-/// 93 µs against 13 µs to match it already compiled, and `guess` walks it twice
-/// — once by file name and once by extension. Compiling once takes a miss from
-/// roughly 290 µs to tens.
+/// Asking `glob::Pattern` about all 383 globs costs about 11 µs for a name no
+/// language claims, and `@injection.filename` runs once per changed line. 381 of
+/// them are plain strings, so only two are left to walk.
+struct FilenameIndex {
+    /// Globs naming a whole file, e.g. `Dockerfile`.
+    literals: HashMap<String, &'static str>,
+    /// Globs naming a bare extension, e.g. `*.rs`, keyed by `rs`.
+    extensions: HashMap<String, &'static str>,
+    /// Whatever is left, e.g. `*.blade.php`.
+    patterns: Vec<(&'static str, glob::Pattern)>,
+}
+
+impl FilenameIndex {
+    fn id_for(&self, candidate: &str) -> Option<&'static str> {
+        let mut best = self.literals.get(candidate).copied();
+
+        if let Some((_, extension)) = candidate.rsplit_once('.') {
+            best = lower_id(best, self.extensions.get(extension).copied());
+        }
+
+        for (id, pattern) in &self.patterns {
+            if pattern.matches(candidate) {
+                best = lower_id(best, Some(id));
+            }
+        }
+
+        best
+    }
+}
+
+fn lower_id(left: Option<&'static str>, right: Option<&'static str>) -> Option<&'static str> {
+    match (left, right) {
+        (Some(left), Some(right)) => Some(left.min(right)),
+        (found, None) | (None, found) => found,
+    }
+}
+
+/// Feature gates are deliberately not applied. Several languages claim one
+/// extension, and a table that shrinks with the feature set would answer `*.m`
+/// with whichever of matlab and objc happened to be compiled in.
+/// [`Language::first_matching_glob`] applies the gates afterwards.
 ///
 /// Patterns are lowercased because the name they are matched against is, so a
 /// `CMakeLists.txt` hint and a `cmakelists.txt` hint reach the same language.
-static CATALOG_GLOBS: LazyLock<Vec<(Language, Vec<glob::Pattern>)>> = LazyLock::new(|| {
-    Language::iter()
-        .map(|language| {
-            let patterns = language
-                .globs()
-                .iter()
-                .map(|glob| {
-                    glob::Pattern::new(&glob.to_ascii_lowercase())
-                        .expect("catalog glob is a valid pattern")
-                })
-                .collect();
-            (language, patterns)
-        })
-        .collect()
+static FILENAME_INDEX: LazyLock<FilenameIndex> = LazyLock::new(|| {
+    let mut index = FilenameIndex {
+        literals: HashMap::new(),
+        extensions: HashMap::new(),
+        patterns: Vec::new(),
+    };
+
+    // Sorted because `define_languages!` splits the always-on languages out from
+    // the gated ones, so its order is not `languages.toml`'s. Inserting in id
+    // order makes the first write per key the winner.
+    let mut entries: Vec<_> = FILENAME_GLOBS.iter().collect();
+    entries.sort_by_key(|(id, _)| *id);
+
+    for (id, globs) in entries {
+        for glob in *globs {
+            let glob = glob.to_ascii_lowercase();
+
+            if let Some(extension) = glob.strip_prefix("*.") {
+                if !extension.contains(['*', '?', '[']) {
+                    index.extensions.entry(extension.to_string()).or_insert(id);
+                    continue;
+                }
+            }
+
+            if glob.contains(['*', '?', '[']) {
+                let pattern = glob::Pattern::new(&glob).expect("catalog glob is a valid pattern");
+                index.patterns.push((id, pattern));
+            } else {
+                index.literals.entry(glob).or_insert(id);
+            }
+        }
+    }
+
+    index
 });
+
+/// The id of the first language whose globs match `candidate`.
+///
+/// `candidate` is already lowercased, and may be a file name or a `*.ext` glob,
+/// which resolves through the extension map like the name it stands for.
+fn id_matching_glob(candidate: &str) -> Option<&'static str> {
+    FILENAME_INDEX.id_for(candidate)
+}
+
+/// The id of the language claiming `path`, by file name.
+///
+/// Returns an id rather than a [`Language`] because a caller that loads parsers
+/// at runtime can use a language this build did not compile in;
+/// [`Language::from_str`] is the gated view of the same table.
+///
+/// ```
+/// use lumis_core::languages::language_id_for_filename;
+///
+/// assert_eq!(language_id_for_filename("lib/varsel.ex"), Some("elixir"));
+/// assert_eq!(language_id_for_filename("Dockerfile"), Some("dockerfile"));
+/// assert_eq!(language_id_for_filename("/dev/null"), None);
+/// ```
+pub fn language_id_for_filename(path: &str) -> Option<&'static str> {
+    let path = path.trim().to_ascii_lowercase();
+    id_matching_glob(Utf8WindowsPath::new(&path).file_name()?)
+}
 
 /// Every catalog shebang, normalized, in catalog order.
 ///

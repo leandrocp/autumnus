@@ -1,0 +1,90 @@
+---
+sidebar_position: 11
+slug: /recipes/highlight-diffs
+title: Highlight diffs
+description: Render a unified diff with the code inside each hunk highlighted as its own language.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Highlight diffs
+
+The `diff` language colours added, removed and context lines, and highlights the
+code inside each hunk as whatever language the diff header names. Nothing has to
+be configured: the `+++` path decides, and Lumis loads that language during the
+same pass.
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```js
+import diff from '@lumis-sh/lumis/langs/diff'
+import elixir from '@lumis-sh/lumis/langs/elixir'
+
+const hl = await createHighlighter({languages: [diff, elixir]})
+const output = hl.highlight(source, htmlInline({language: diff, theme: dracula}))
+```
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```rust
+let html = highlight(source, HtmlInlineBuilder::new()
+    .language(Language::Diff)
+    .theme(Some(themes::get("dracula").unwrap()))
+    .build()
+    .unwrap());
+```
+
+  </TabItem>
+  <TabItem value="elixir" label="Elixir">
+
+```elixir
+Lumis.highlight!(source, formatter: {:html_inline, language: "diff", theme: "dracula"})
+```
+
+  </TabItem>
+  <TabItem value="cli" label="CLI">
+
+```sh
+git diff | lumis highlight -l diff
+```
+
+  </TabItem>
+</Tabs>
+
+Given this input:
+
+```diff
+diff --git a/lib/varsel.ex b/lib/varsel.ex
+--- a/lib/varsel.ex
++++ b/lib/varsel.ex
+@@ -1,6 +1,6 @@
+ defmodule Varsel do
+   def run(json) do
+-    File.write!(path, Jason.encode!(json))
++    File.write!(path, JSON.encode!(json))
+   end
+ end
+```
+
+`defmodule`, `def` and `end` are Elixir keywords, `File` and `JSON` are modules,
+and the changed lines keep their `diff.plus` and `diff.minus` colours around
+that.
+
+![A git diff of an Elixir file, rendered with github_dark: the unchanged lines
+carry Elixir keyword, module and atom colours, and the removed and added lines
+keep their red and green backgrounds underneath them.](/img/diff-hunk-injection.png)
+
+## Which language a hunk gets
+
+From the `+++` path, matched against the same file name globs that
+`lumis languages list` reports, so `+++ b/lib/varsel.ex` selects Elixir. A path
+Lumis has no language for, including `/dev/null`, leaves the hunk uncoloured but
+still marks its added and removed lines.
+
+In the browser, load the inner language up front along with `diff`.
+`web-tree-sitter` cannot fetch a parser inside a synchronous walk, so a language
+first named by a diff header has to already be there. Node, the CLI, Elixir and
+Rust load it on demand.

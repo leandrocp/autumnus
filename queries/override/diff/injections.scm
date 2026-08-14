@@ -1,4 +1,3 @@
-; This file is auto-generated. Do not edit.
 ; Keep compatible with published tree-sitter-diff 0.1.0, which has no `special`,
 ; `change`, `unrecognized` or `dissimilarity` node. Upstream's reference queries
 ; name all four, so they cannot be used verbatim here.

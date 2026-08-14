@@ -235,6 +235,7 @@ export interface CaptureMetadata {
   highlightScope?: string;
   isInjectionContent: boolean;
   isInjectionLanguage: boolean;
+  isInjectionFilename: boolean;
   isLocalScope: boolean;
   isLocalDefinition: boolean;
   isLocalDefinitionValue: boolean;
