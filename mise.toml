@@ -113,6 +113,9 @@ echo "Done."
 
 [tasks.'elixir-nif-lock-check']
 description = "Verify the packaged NIF crate resolves standalone with its lockfile"
+usage = '''
+flag "--fix" help="Re-resolve the lockfile against crates.io instead of reporting it stale"
+'''
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
@@ -120,17 +123,31 @@ nif_dir="packages/elixir/lumis/native/lumis_nif"
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT
 
-mkdir "$tmp_dir/lumis_nif"
-cp "$nif_dir/Cargo.toml" "$nif_dir/Cargo.lock" "$tmp_dir/lumis_nif"
-cp -R "$nif_dir/.cargo" "$nif_dir/src" "$tmp_dir/lumis_nif"
-cargo tree --manifest-path "$tmp_dir/lumis_nif/Cargo.toml" --locked --depth 0
-
 locked_wasmtime() {
     awk '/^name = "wasmtime"$/ { getline; gsub(/[version ="]/, ""); print; exit }' "$1"
 }
 workspace_version="$(locked_wasmtime Cargo.lock)"
-nif_version="$(locked_wasmtime "$nif_dir/Cargo.lock")"
 
+mkdir "$tmp_dir/lumis_nif"
+cp "$nif_dir/Cargo.toml" "$nif_dir/Cargo.lock" "$tmp_dir/lumis_nif"
+cp -R "$nif_dir/.cargo" "$nif_dir/src" "$tmp_dir/lumis_nif"
+
+if [ "${usage_fix:-false}" = "true" ]; then
+    cargo tree --manifest-path "$tmp_dir/lumis_nif/Cargo.toml" --depth 0 >/dev/null
+    if [ "$(locked_wasmtime "$tmp_dir/lumis_nif/Cargo.lock")" != "$workspace_version" ]; then
+        cargo update --manifest-path "$tmp_dir/lumis_nif/Cargo.toml" -p wasmtime --precise "$workspace_version"
+    fi
+    cp "$tmp_dir/lumis_nif/Cargo.lock" "$nif_dir/Cargo.lock"
+else
+    if ! cargo tree --manifest-path "$tmp_dir/lumis_nif/Cargo.toml" --locked --depth 0; then
+        echo "The packaged NIF lockfile no longer satisfies its manifest. It resolves the" >&2
+        echo "lumis crates from crates.io, so it can only be refreshed once the versions it" >&2
+        echo "requires are published. Run: mise run elixir-nif-lock-check --fix" >&2
+        exit 1
+    fi
+fi
+
+nif_version="$(locked_wasmtime "$nif_dir/Cargo.lock")"
 if [ -z "$workspace_version" ] || [ "$workspace_version" != "$nif_version" ]; then
     echo "wasmtime differs: workspace $workspace_version, packaged NIF $nif_version" >&2
     echo "Compiled parser caches are keyed by the wasmtime version, so the CLI, the Node" >&2
@@ -1073,6 +1090,7 @@ case "$kind" in
         npm --prefix "$(dirname "$manifest")" version --no-git-tag-version "$version"
         ;;
     hex)
+        mise run elixir-nif-lock-check --fix
         python3 -c 'from pathlib import Path; import re, sys; path = Path(sys.argv[1]); version = sys.argv[2]; content = path.read_text(); content = re.sub(r"@version \"[^\"]+\"", f"@version \"{version}\"", content, count=1); path.write_text(content)' "$manifest" "$version"
         ;;
 esac
