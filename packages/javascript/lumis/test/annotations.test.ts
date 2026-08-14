@@ -78,7 +78,7 @@ describe("annotations", () => {
     const highlighter = await createHighlighter({ languages: [javascript] });
 
     expect(() => highlighter.highlight(source, formatter, { annotations })).toThrow(
-      "is not a UTF-8 boundary",
+      "is not a UTF-8 character boundary",
     );
   }, 30_000);
 
@@ -144,7 +144,7 @@ describe("annotations", () => {
     const highlighter = await createHighlighter({ languages: [javascript] });
 
     expect(() => highlighter.highlight(source, formatter, { annotations })).toThrow(
-      "is not a UTF-8 boundary",
+      "is not a UTF-8 character boundary",
     );
   }, 30_000);
 

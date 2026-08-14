@@ -43,11 +43,11 @@ function validateByteOffset(sourceIndex: SourceIndex, index: number, offset: num
   }
   if (offset > sourceIndex.sourceBytes.length) {
     throw new RangeError(
-      `annotation ${index} offset ${offset} is beyond source length ${sourceIndex.sourceBytes.length}`,
+      `annotation ${index} ends at byte ${offset}, beyond source length ${sourceIndex.sourceBytes.length}`,
     );
   }
   if (!isUtf8Boundary(sourceIndex.sourceBytes, offset)) {
-    throw new RangeError(`annotation ${index} offset ${offset} is not a UTF-8 boundary`);
+    throw new RangeError(`annotation ${index} offset ${offset} is not a UTF-8 character boundary`);
   }
 }
 
