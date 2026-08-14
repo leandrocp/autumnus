@@ -69,7 +69,7 @@ document.getElementById('output').innerHTML = await highlight(
   {
     id: "elixir",
     label: "Elixir",
-    install: { language: "elixir", code: `{:lumis, "~> 0.3"}` },
+    install: { language: "elixir", code: `{:lumis, "~> 0.7"}` },
     usage: {
       language: "elixir",
       code: `Lumis.highlight!(
