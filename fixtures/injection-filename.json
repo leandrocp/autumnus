@@ -1,6 +1,6 @@
 {
  "$description": "Filename-to-language resolution for `@injection.filename`, pinned so the Rust runtime and the browser port cannot drift. Neovim resolves the capture through `vim.filetype.match`; Lumis matches the last path component against the globs in languages.toml, then against the bare extension.",
- "$note": "A diff names paths like `b/lib/varsel.ex`, so directories, git's `a/`/`b/` prefixes, and `/dev/null` all reach this function.",
+ "$note": "A diff names paths like `b/lib/varsel.ex`, so directories, git's `a/`/`b/` prefixes, and `/dev/null` all reach this function. Several languages claim one extension; the lowest id wins, so this agrees with `Language::from_str`, which reads the same globs out of a BTreeMap.",
  "cases": [
   {
    "path": "b/lib/varsel.ex",
@@ -57,6 +57,22 @@
   {
    "path": "",
    "language": null
+  },
+  {
+   "path": "a/src/app.m",
+   "language": "matlab"
+  },
+  {
+   "path": "b/build.d",
+   "language": "d"
+  },
+  {
+   "path": "b/manifests/site.pp",
+   "language": "pascal"
+  },
+  {
+   "path": "b/include/api.h",
+   "language": "cpp"
   }
  ]
 }

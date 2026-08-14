@@ -23,7 +23,7 @@ fn filename_resolution_matches_the_shared_fixture() {
     let raw = include_str!("../../../fixtures/injection-filename.json");
     let fixture: Fixture = serde_json::from_str(raw).expect("fixture is valid JSON");
     assert!(
-        fixture.cases.len() >= 14,
+        fixture.cases.len() >= 18,
         "the fixture must not silently shrink: {} cases",
         fixture.cases.len()
     );

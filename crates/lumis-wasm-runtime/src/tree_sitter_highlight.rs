@@ -237,26 +237,26 @@ fn shift_point(
     let row = add_offset_delta(point.row, row_delta)?;
     let column = add_offset_delta(point.column, column_delta)?;
 
-    // Neovim adds the delta straight to the byte and never clamps to the line, so
-    // a column one past the end addresses that line's newline. `(#offset! @c 0 1 0 1)`
-    // in the diff injection queries depends on it: the marker column is dropped and
-    // the newline is kept, so joined hunk lines still parse as separate lines.
-    // `offset_range` decides whether the result is representable.
-    if row_delta == 0 {
-        let line_start = byte.checked_sub(point.column)?;
-        let byte = line_start.checked_add(column)?;
-        return (byte <= source.len()).then_some((byte, Point::new(row, column)));
-    }
-
-    // Neovim adds the column delta to the endpoint's own column whatever the
-    // row delta is, so the column survives the row shift.
-    let line_start = line_start_byte(source, byte, point, row)?;
+    // A column one past the end addresses that line's newline, which
+    // `(#offset! @c 0 1 0 1)` in the diff injection queries depends on: the marker
+    // column is dropped and the newline is kept, so joined hunk lines still parse
+    // as separate lines. Stopping at the newline rather than at the document end
+    // keeps the byte and the point describing one place. Neovim clamps to neither
+    // and will return a point whose row no longer holds its byte.
+    let same_row = row_delta == 0;
+    let line_start = if same_row {
+        byte.checked_sub(point.column)?
+    } else {
+        // Neovim adds the column delta to the endpoint's own column whatever the
+        // row delta is, so the column survives the row shift.
+        line_start_byte(source, byte, point, row)?
+    };
     let line_length = source
         .get(line_start..)?
         .iter()
         .position(|byte| *byte == b'\n')
         .unwrap_or(source.len() - line_start);
-    if column > line_length {
+    if column > line_length + usize::from(same_row && line_start + line_length < source.len()) {
         return None;
     }
     let byte = line_start.checked_add(column)?;
@@ -1912,7 +1912,7 @@ mod tests {
         let raw = include_str!("../../../fixtures/offset-directive.json");
         let fixture: Fixture = serde_json::from_str(raw).expect("offset fixture is valid JSON");
         assert!(
-            fixture.cases.len() >= 17,
+            fixture.cases.len() >= 18,
             "the fixture must not silently shrink: {} cases",
             fixture.cases.len()
         );

@@ -292,9 +292,11 @@ function resolveInjection(
     } else if (metadata?.isInjectionFilename && !filenameLanguage) {
       // Neovim resolves this capture through `vim.filetype.match`, so the text is
       // a path rather than a language name. A diff names `b/lib/varsel.ex`.
-      const [range] = getCaptureRanges(capture, maps, false, offsets?.[capture.name]);
-      const text = range ? source.slice(range.startIndex, range.endIndex) : capture.node.text;
-      filenameLanguage = languageIdForFilename(text);
+      // The whole capture is one path, so masking named children out of it, as
+      // injection content wants, would resolve a fragment of the filename.
+      // `injection_for_match` reads the same undivided range.
+      const range = applyCaptureOffset(nodeToRange(capture.node), offsets?.[capture.name], maps);
+      filenameLanguage = languageIdForFilename(source.slice(range.startIndex, range.endIndex));
     } else if (metadata?.isInjectionContent) {
       contentCaptures.push(capture);
     }
@@ -459,7 +461,10 @@ function getCaptureRanges(
 
     const maskStart = Math.max(child.startIndex, range.startIndex);
     const maskEnd = Math.min(child.endIndex, range.endIndex);
-    if (maskEnd <= startIndex) continue;
+    // A child wholly outside the adjusted range clips to nothing. Masking it
+    // anyway would push a range out to its unclipped start, past the end the
+    // offset asked for.
+    if (maskStart >= maskEnd || maskEnd <= startIndex) continue;
 
     if (maskStart > startIndex) {
       ranges.push(makeRangeAt(startIndex, maskStart, maps));
@@ -529,12 +534,17 @@ function shiftEndpoint(
 
   const targetByte = targetLineStart + byteColumn;
   const nextLineStart = maps.byteLineStarts[targetRow + 1];
-  // Neovim adds the delta straight to the byte and never clamps to the line, so a
-  // same-row column one past the end addresses that line's newline. The diff
-  // injection queries rely on it to keep joined hunk lines apart. A row shift
-  // still has to land on the row it names.
+  // A same-row column one past the end addresses that line's newline, which the
+  // diff injection queries rely on to keep joined hunk lines apart. Stopping
+  // there rather than at the document end keeps the returned byte and point
+  // describing one place; Neovim clamps neither, and returns a point whose row
+  // no longer holds its byte.
   const limit =
-    rowDelta === 0 || nextLineStart == null ? maps.sourceUtf8ByteLength : nextLineStart - 1;
+    rowDelta === 0
+      ? (nextLineStart ?? maps.sourceUtf8ByteLength)
+      : nextLineStart == null
+        ? maps.sourceUtf8ByteLength
+        : nextLineStart - 1;
   if (!Number.isSafeInteger(targetByte) || targetByte > limit) return undefined;
 
   const targetIndex = maps.utf16Indices[targetByte];

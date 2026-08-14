@@ -2,7 +2,7 @@
   "$description": "Neovim's `#offset!` parsing and representable range semantics, pinned so the Rust runtime and the browser port cannot drift. Ground-truth ranges were produced by running each query through Neovim (`vim.treesitter.get_range`) on the JSON grammar. The explicitly named invalid-range cases instead pin Lumis's safety policy below.",
   "$generatedBy": "nvim --headless, vim.treesitter.get_range on tree-sitter-json",
   "$note": "Neovim raises a Lua error when one of the four slots cannot be coerced to a number, so there is no ground truth for that case and it is not in this corpus. Capture operands are already numeric one-based capture IDs when the directive runs and are covered below.",
-  "$safetyPolicy": "Neovim can return negative, out-of-document, fractional, inverted, or mid-codepoint coordinates that cannot safely become Lumis event byte ranges. Lumis keeps the original capture unless both adjusted endpoints are ordered, in bounds, integral, and UTF-8 boundaries. The Rust and browser ports must make that same choice.",
+  "$safetyPolicy": "Neovim can return negative, out-of-document, fractional, inverted, or mid-codepoint coordinates that cannot safely become Lumis event byte ranges. A same-row offset may reach its own newline but not past it, since Neovim clamps to neither the line nor the document and can return a point whose row no longer holds its byte. Lumis keeps the original capture unless both adjusted endpoints are ordered, in bounds, integral, and UTF-8 boundaries. The Rust and browser ports must make that same choice.",
   "$coercionNote": "Neovim's LuaJIT arithmetic produced each accepted numeric value below. Lumis keeps only finite integral values because Tree-sitter points and byte ranges are integral; Neovim's highlighter also rejects fractional coordinates when it creates an extmark.",
   "operandCoercions": [
     {
@@ -547,6 +547,14 @@
       "offset": ["0", "0", "0", "5"],
       "original": { "endByte": 7, "startRow": 0, "startColumn": 0, "startByte": 0, "endRow": 0, "endColumn": 7 },
       "expected": { "endByte": 7, "startRow": 0, "startColumn": 0, "startByte": 0, "endRow": 0, "endColumn": 7 }
+    },
+    {
+      "name": "same-row end column past its own newline keeps the original",
+      "source": "{\n  \"a\": 1\n}\n",
+      "query": "((pair) @cap (#offset! @cap 0 0 0 2))",
+      "offset": ["0", "0", "0", "2"],
+      "original": { "endByte": 10, "startRow": 1, "startColumn": 2, "startByte": 4, "endRow": 1, "endColumn": 8 },
+      "expected": { "endByte": 10, "startRow": 1, "startColumn": 2, "startByte": 4, "endRow": 1, "endColumn": 8 }
     }
   ]
 }
