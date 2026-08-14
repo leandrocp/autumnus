@@ -294,7 +294,11 @@ run = '''
 set -euo pipefail
 pnpm --filter @lumis-sh/themes run build
 pnpm --filter @lumis-sh/lumis run build:generate
-LUMIS_TEST_RUNTIME=wasm pnpm --filter @lumis-sh/lumis run test:conformance
+data_dir="$(mktemp -d)"
+trap 'rm -rf "$data_dir"' EXIT
+LUMIS_TEST_RUNTIME=wasm \
+    LUMIS_DATA_DIR="$data_dir" \
+    pnpm --filter @lumis-sh/lumis run test:conformance
 '''
 
 [tasks.'test-conformance-browser']

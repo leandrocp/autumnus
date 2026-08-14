@@ -156,6 +156,7 @@ pub struct HighlightConfiguration {
     non_local_variable_patterns: Vec<bool>,
     injection_content_capture_index: Option<u32>,
     injection_language_capture_index: Option<u32>,
+    injection_filename_capture_index: Option<u32>,
     local_scope_capture_index: Option<u32>,
     local_def_capture_index: Option<u32>,
     local_def_value_capture_index: Option<u32>,
@@ -236,13 +237,20 @@ fn shift_point(
     let row = add_offset_delta(point.row, row_delta)?;
     let column = add_offset_delta(point.column, column_delta)?;
 
-    let line_start = if row_delta == 0 {
-        byte.checked_sub(point.column)?
-    } else {
-        // Neovim adds the column delta to the endpoint's own column whatever the
-        // row delta is, so the column survives the row shift.
-        line_start_byte(source, byte, point, row)?
-    };
+    // Neovim adds the delta straight to the byte and never clamps to the line, so
+    // a column one past the end addresses that line's newline. `(#offset! @c 0 1 0 1)`
+    // in the diff injection queries depends on it: the marker column is dropped and
+    // the newline is kept, so joined hunk lines still parse as separate lines.
+    // `offset_range` decides whether the result is representable.
+    if row_delta == 0 {
+        let line_start = byte.checked_sub(point.column)?;
+        let byte = line_start.checked_add(column)?;
+        return (byte <= source.len()).then_some((byte, Point::new(row, column)));
+    }
+
+    // Neovim adds the column delta to the endpoint's own column whatever the
+    // row delta is, so the column survives the row shift.
+    let line_start = line_start_byte(source, byte, point, row)?;
     let line_length = source
         .get(line_start..)?
         .iter()
@@ -807,6 +815,7 @@ impl HighlightConfiguration {
         // Store the numeric ids for all of the special captures.
         let mut injection_content_capture_index = None;
         let mut injection_language_capture_index = None;
+        let mut injection_filename_capture_index = None;
         let mut local_def_capture_index = None;
         let mut local_def_value_capture_index = None;
         let mut local_ref_capture_index = None;
@@ -816,6 +825,7 @@ impl HighlightConfiguration {
             match *name {
                 "injection.content" => injection_content_capture_index = i,
                 "injection.language" => injection_language_capture_index = i,
+                "injection.filename" => injection_filename_capture_index = i,
                 "local.definition" => local_def_capture_index = i,
                 "local.definition-value" => local_def_value_capture_index = i,
                 "local.reference" => local_ref_capture_index = i,
@@ -854,6 +864,7 @@ impl HighlightConfiguration {
             non_local_variable_patterns,
             injection_content_capture_index,
             injection_language_capture_index,
+            injection_filename_capture_index,
             local_def_capture_index,
             local_def_value_capture_index,
             local_ref_capture_index,
@@ -1748,14 +1759,36 @@ fn injection_for_match<'a>(
 ) -> (Option<&'a str>, Option<InjectionContent<'a>>, bool) {
     let content_capture_index = config.injection_content_capture_index;
     let language_capture_index = config.injection_language_capture_index;
+    let filename_capture_index = config.injection_filename_capture_index;
 
-    let mut language_name = None;
+    let mut language_name: Option<&str> = None;
+    let mut filename_language: Option<&'static str> = None;
     let mut content_node = None;
 
     for capture in query_match.captures {
         let index = Some(capture.index);
         if index == language_capture_index {
             language_name = capture.node.utf8_text(source).ok();
+        } else if index == filename_capture_index {
+            // Neovim resolves this capture through `vim.filetype.match`, which
+            // reads the text as a path rather than a language name. A diff names
+            // `b/lib/varsel.ex`, so only the last component and its extension can
+            // decide the language.
+            let text = config
+                .offsets
+                .get(&(query_match.pattern_index, capture.index))
+                .map_or_else(
+                    || capture.node.utf8_text(source).ok(),
+                    |offset| {
+                        let range = apply_range_offset(capture.node, *offset, source);
+                        source
+                            .get(range.start_byte..range.end_byte)
+                            .and_then(|bytes| std::str::from_utf8(bytes).ok())
+                    },
+                );
+            filename_language = text
+                .and_then(crate::catalog::find_by_filename)
+                .map(|entry| entry.id);
         } else if index == content_capture_index {
             // Neovim narrows the injected range with `#offset!` before parsing it, so
             // delimiters such as backticks or `${`/`}` never reach the injected grammar.
@@ -1772,6 +1805,10 @@ fn injection_for_match<'a>(
             });
         }
     }
+
+    // An explicit `@injection.language` capture outranks a filename, which is
+    // only ever an inference about one.
+    let mut language_name = language_name.or(filename_language);
 
     let mut include_children = false;
     for prop in query.property_settings(query_match.pattern_index) {
@@ -1875,7 +1912,7 @@ mod tests {
         let raw = include_str!("../../../fixtures/offset-directive.json");
         let fixture: Fixture = serde_json::from_str(raw).expect("offset fixture is valid JSON");
         assert!(
-            fixture.cases.len() >= 15,
+            fixture.cases.len() >= 17,
             "the fixture must not silently shrink: {} cases",
             fixture.cases.len()
         );
@@ -2104,6 +2141,18 @@ mod tests {
     }
 
     #[test]
+    fn same_row_offsets_may_pass_the_end_of_their_line() {
+        // Neovim adds the delta to the byte without clamping, so one column past
+        // the end addresses the newline. The diff injection queries need it to
+        // keep hunk lines apart once they are joined into one injected document.
+        let source = b"ab\ncd\n";
+        assert_eq!(
+            shift_point(source, 2, Point::new(0, 2), 0, 1).unwrap(),
+            (3, Point::new(0, 3))
+        );
+    }
+
+    #[test]
     fn offsets_that_run_off_the_document_are_rejected() {
         let source = b"ab";
         assert_eq!(shift_point(source, 0, Point::new(0, 0), 0, -1), None);
@@ -2129,7 +2178,10 @@ mod tests {
             offset_range(original, [0, 0, 0, 99_999_999_999], source),
             original
         );
+    }
 
+    #[test]
+    fn a_same_row_offset_reaches_its_own_newline() {
         let source = b"a\nb";
         let original = Range {
             start_byte: 0,
@@ -2137,6 +2189,15 @@ mod tests {
             end_byte: 1,
             end_point: Point::new(0, 1),
         };
-        assert_eq!(offset_range(original, [0, 0, 0, 1], source), original);
+
+        assert_eq!(
+            offset_range(original, [0, 0, 0, 1], source),
+            Range {
+                start_byte: 0,
+                start_point: Point::new(0, 0),
+                end_byte: 2,
+                end_point: Point::new(0, 2),
+            }
+        );
     }
 }

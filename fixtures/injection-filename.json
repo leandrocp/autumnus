@@ -1,0 +1,62 @@
+{
+ "$description": "Filename-to-language resolution for `@injection.filename`, pinned so the Rust runtime and the browser port cannot drift. Neovim resolves the capture through `vim.filetype.match`; Lumis matches the last path component against the globs in languages.toml, then against the bare extension.",
+ "$note": "A diff names paths like `b/lib/varsel.ex`, so directories, git's `a/`/`b/` prefixes, and `/dev/null` all reach this function.",
+ "cases": [
+  {
+   "path": "b/lib/varsel.ex",
+   "language": "elixir"
+  },
+  {
+   "path": "a/src/main.rs",
+   "language": "rust"
+  },
+  {
+   "path": "Dockerfile",
+   "language": "dockerfile"
+  },
+  {
+   "path": "b/Dockerfile",
+   "language": "dockerfile"
+  },
+  {
+   "path": "b/app/page.tsx",
+   "language": "tsx"
+  },
+  {
+   "path": "b/README.md",
+   "language": "markdown"
+  },
+  {
+   "path": "b/UPPER.EX",
+   "language": "elixir"
+  },
+  {
+   "path": "b/.gitignore",
+   "language": "gitignore"
+  },
+  {
+   "path": "b\\win\\path\\main.go",
+   "language": "go"
+  },
+  {
+   "path": "b/lib/deep/nested/mod.exs",
+   "language": "elixir"
+  },
+  {
+   "path": "   b/x.json  ",
+   "language": "json"
+  },
+  {
+   "path": "/dev/null",
+   "language": null
+  },
+  {
+   "path": "b/no-extension-here",
+   "language": null
+  },
+  {
+   "path": "",
+   "language": null
+  }
+ ]
+}

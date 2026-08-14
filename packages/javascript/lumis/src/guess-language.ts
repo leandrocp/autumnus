@@ -21,6 +21,20 @@ function globToRegExp(glob: string): RegExp {
   return new RegExp(`^${escapeRegex(glob).replaceAll("*", ".*")}$`);
 }
 
+/**
+ * The language claiming `path`, by file name, for `@injection.filename`.
+ *
+ * Mirrors `catalog::find_by_filename` in `lumis-wasm-runtime`. Unlike
+ * {@link guessLanguage} this never reads the text as a language name: the
+ * capture holds a path, so only its last component can decide.
+ */
+export function languageIdForFilename(path: string): string | undefined {
+  const name = normalize(path).split(/[/\\]/).pop();
+  if (name == null || name.length === 0) return undefined;
+
+  return GLOB_REGEXES.find((matcher) => matcher.regex.test(name))?.id;
+}
+
 function parseLanguageHint(language?: string): string | undefined {
   if (language == null) return undefined;
 

@@ -5,6 +5,8 @@ import dark from "../../../../fixtures/conformance-themes/dark.json";
 import light from "../../../../fixtures/conformance-themes/light.json";
 import mid from "../../../../fixtures/conformance-themes/mid.json";
 import css from "../langs/css.ts";
+import diff from "../langs/diff.ts";
+import elixir from "../langs/elixir.ts";
 import html from "../langs/html.ts";
 import javascript from "../langs/javascript.ts";
 import json from "../langs/json.ts";
@@ -38,6 +40,8 @@ const themes: Record<string, Theme> = {
 
 const langBundles: Record<string, Language> = {
   json,
+  diff,
+  elixir,
   html,
   javascript,
   css,
@@ -66,6 +70,7 @@ let highlighter: Highlighter;
 beforeAll(async () => {
   configureLocalWasmResolver([
     "diff",
+    "elixir",
     "json",
     "html",
     "javascript",
@@ -81,7 +86,20 @@ beforeAll(async () => {
   // stages freshly built parsers while `ensureLocalWasm` returns the committed
   // fixture, which is a different build of the same grammar.
   highlighter = await createHighlighter({
-    languages: [json, html, javascript, css, lua, markdown, markdownInline, mdx, python, rust],
+    languages: [
+      json,
+      diff,
+      elixir,
+      html,
+      javascript,
+      css,
+      lua,
+      markdown,
+      markdownInline,
+      mdx,
+      python,
+      rust,
+    ],
   });
 }, 120_000);
 

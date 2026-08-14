@@ -1,5 +1,6 @@
 import type { Node, Point, QueryCapture, QueryMatch, Range } from "web-tree-sitter";
 import { LANGUAGES } from "./generated/languages-meta.js";
+import { languageIdForFilename } from "./guess-language.js";
 import type { LoadedLanguage, QueryCaptureOffset } from "./types.js";
 
 interface RuntimeLookup {
@@ -273,22 +274,35 @@ function snapshotCapturesWithMatches(
 }
 
 function resolveInjection(
+  source: string,
   match: QueryMatch,
   language: LoadedLanguage,
   maps: SourceMaps,
   parentLanguageName?: string,
 ): { languageName?: string; ranges: Range[]; combined: boolean } {
   let languageName: string | undefined;
+  let filenameLanguage: string | undefined;
   const contentCaptures: QueryCapture[] = [];
+  const offsets = language.config.captureOffsets[match.patternIndex];
 
   for (const capture of match.captures) {
     const metadata = language.config.captureMetadata[capture.name];
     if (metadata?.isInjectionLanguage && !languageName) {
       languageName = capture.node.text;
+    } else if (metadata?.isInjectionFilename && !filenameLanguage) {
+      // Neovim resolves this capture through `vim.filetype.match`, so the text is
+      // a path rather than a language name. A diff names `b/lib/varsel.ex`.
+      const [range] = getCaptureRanges(capture, maps, false, offsets?.[capture.name]);
+      const text = range ? source.slice(range.startIndex, range.endIndex) : capture.node.text;
+      filenameLanguage = languageIdForFilename(text);
     } else if (metadata?.isInjectionContent) {
       contentCaptures.push(capture);
     }
   }
+
+  // An explicit `@injection.language` capture outranks a filename, which is only
+  // ever an inference about one.
+  languageName ??= filenameLanguage;
 
   const setProperties = match.setProperties ?? {};
   if (!languageName) {
@@ -302,7 +316,6 @@ function resolveInjection(
   }
 
   const includeChildren = "injection.include-children" in setProperties;
-  const offsets = language.config.captureOffsets[match.patternIndex];
   const ranges = contentCaptures.flatMap((capture) =>
     getCaptureRanges(capture, maps, includeChildren, offsets?.[capture.name]),
   );
@@ -386,7 +399,7 @@ function collectHighlightLayers(
         continue;
       }
 
-      const resolved = resolveInjection(match, language, maps, parentLanguageName);
+      const resolved = resolveInjection(source, match, language, maps, parentLanguageName);
       if (!resolved.languageName || resolved.ranges.length === 0) {
         continue;
       }
@@ -433,9 +446,32 @@ function getCaptureRanges(
     return [range];
   }
 
-  return getInjectionRanges(capture.node, false)
-    .map((nodeRange) => intersectRange(nodeRange, range, maps.lineStarts))
-    .filter((range): range is Range => range != null);
+  // Masking has to happen inside the adjusted bounds, not inside the node's own.
+  // `(#offset! @c 0 1 0 1)` on a diff hunk line pushes the end past the node onto
+  // the newline, and intersecting with the unadjusted node would drop it again,
+  // joining every hunk line into one. Mirrors `intersect_ranges` in
+  // lumis-wasm-runtime, which builds the same spans from `content.range`.
+  const ranges: Range[] = [];
+  let startIndex = range.startIndex;
+
+  for (const child of capture.node.children) {
+    if (!child?.isNamed) continue;
+
+    const maskStart = Math.max(child.startIndex, range.startIndex);
+    const maskEnd = Math.min(child.endIndex, range.endIndex);
+    if (maskEnd <= startIndex) continue;
+
+    if (maskStart > startIndex) {
+      ranges.push(makeRangeAt(startIndex, maskStart, maps));
+    }
+    startIndex = maskEnd;
+  }
+
+  if (startIndex < range.endIndex) {
+    ranges.push(makeRangeAt(startIndex, range.endIndex, maps));
+  }
+
+  return ranges;
 }
 
 /**
@@ -493,8 +529,13 @@ function shiftEndpoint(
 
   const targetByte = targetLineStart + byteColumn;
   const nextLineStart = maps.byteLineStarts[targetRow + 1];
-  const lineEnd = nextLineStart == null ? maps.sourceUtf8ByteLength : nextLineStart - 1;
-  if (!Number.isSafeInteger(targetByte) || targetByte > lineEnd) return undefined;
+  // Neovim adds the delta straight to the byte and never clamps to the line, so a
+  // same-row column one past the end addresses that line's newline. The diff
+  // injection queries rely on it to keep joined hunk lines apart. A row shift
+  // still has to land on the row it names.
+  const limit =
+    rowDelta === 0 || nextLineStart == null ? maps.sourceUtf8ByteLength : nextLineStart - 1;
+  if (!Number.isSafeInteger(targetByte) || targetByte > limit) return undefined;
 
   const targetIndex = maps.utf16Indices[targetByte];
   const targetUtf16LineStart = maps.lineStarts[targetRow];
@@ -505,22 +546,6 @@ function shiftEndpoint(
     index: targetIndex,
     position: { row: targetRow, column: targetIndex - targetUtf16LineStart },
   };
-}
-
-function intersectRange(range: Range, bounds: Range, lineStarts: number[]): Range | undefined {
-  const startIndex = Math.max(range.startIndex, bounds.startIndex);
-  const endIndex = Math.min(range.endIndex, bounds.endIndex);
-
-  if (startIndex >= endIndex) {
-    return undefined;
-  }
-
-  return makeRange(
-    startIndex,
-    endIndex,
-    indexToPoint(startIndex, lineStarts),
-    indexToPoint(endIndex, lineStarts),
-  );
 }
 
 function indexToPoint(index: number, lineStarts: number[]): Point {
@@ -573,6 +598,15 @@ export function getInjectionRanges(node: Node, includeChildren: boolean): Range[
   }
 
   return ranges;
+}
+
+function makeRangeAt(startIndex: number, endIndex: number, maps: SourceMaps): Range {
+  return makeRange(
+    startIndex,
+    endIndex,
+    indexToPoint(startIndex, maps.lineStarts),
+    indexToPoint(endIndex, maps.lineStarts),
+  );
 }
 
 function nodeToRange(node: Node): Range {

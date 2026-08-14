@@ -531,6 +531,22 @@
         "endRow": 3,
         "endColumn": 3
       }
+    },
+    {
+      "name": "same-row end column reaches its own newline",
+      "source": "{\n  \"a\": 1\n}\n",
+      "query": "((pair) @cap (#offset! @cap 0 1 0 1))",
+      "offset": ["0", "1", "0", "1"],
+      "original": { "endByte": 10, "startRow": 1, "startColumn": 2, "startByte": 4, "endRow": 1, "endColumn": 8 },
+      "expected": { "endByte": 11, "startRow": 1, "startColumn": 3, "startByte": 5, "endRow": 1, "endColumn": 9 }
+    },
+    {
+      "name": "same-row end column past the document end keeps the original",
+      "source": "{\"a\":1}",
+      "query": "((object) @cap (#offset! @cap 0 0 0 5))",
+      "offset": ["0", "0", "0", "5"],
+      "original": { "endByte": 7, "startRow": 0, "startColumn": 0, "startByte": 0, "endRow": 0, "endColumn": 7 },
+      "expected": { "endByte": 7, "startRow": 0, "startColumn": 0, "startByte": 0, "endRow": 0, "endColumn": 7 }
     }
   ]
 }
