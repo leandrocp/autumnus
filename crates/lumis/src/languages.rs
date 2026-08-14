@@ -86,6 +86,7 @@ use lumis_wasm_runtime::tree_sitter_highlight::HighlightConfiguration;
 use std::sync::LazyLock;
 
 unsafe extern "C" {
+    fn tree_sitter_diff() -> *const ();
     #[cfg(feature = "lang-editorconfig")]
     fn tree_sitter_editorconfig() -> *const ();
     #[cfg(feature = "lang-angular")]
@@ -656,8 +657,9 @@ static CSS_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 });
 
 static DIFF_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_diff) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(tree_sitter_diff::LANGUAGE),
+        tree_sitter::Language::new(language_fn),
         "diff",
         DIFF_HIGHLIGHTS,
         DIFF_INJECTIONS,
@@ -1504,8 +1506,10 @@ static PUPPET_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 });
 
 static PLAIN_TEXT_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    // Plain text has no grammar of its own; it borrows one and asks it nothing.
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_diff) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(tree_sitter_diff::LANGUAGE),
+        tree_sitter::Language::new(language_fn),
         "plaintext",
         "",
         "",

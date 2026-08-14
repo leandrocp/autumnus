@@ -284,7 +284,12 @@ fn vendored_parsers(toml: &LanguagesToml) {
         .parsers
         .iter()
         .filter(|(_, entry)| entry.crate_name.is_none())
-        .filter(|(key, entry)| is_feature_enabled(&feature_for(key, entry)))
+        // `plaintext` has no grammar and borrows diff's, so diff is compiled
+        // whatever the feature set. `lumis-core`'s build script keeps diff out of
+        // its gated block for the same reason.
+        .filter(|(key, entry)| {
+            key.as_str() == "diff" || is_feature_enabled(&feature_for(key, entry))
+        })
         .filter_map(|(key, entry)| {
             let dir_name = find_vendored_dir(&vendored_root, key, entry)?;
             let parser_dir = vendored_root.join(&dir_name);
