@@ -1,0 +1,60 @@
+--- a/grammar.js
++++ b/grammar.js
+@@ -1,6 +1,9 @@
+ const NEWLINE = /\r?\n/;
+ const WHITE_SPACE = /[\t\f\v ]+/;
+ const ANYTHING = /[^\r\n]+/;
++const WORD_DELETION = /\[-(?:[^-\r\n]|-+[^-\]\r\n])*-+\]/;
++const WORD_ADDITION = /\{\+(?:[^+\r\n]|\++[^+}\r\n])*\++\}/;
++const WORD_TEXT = /[^\[{\r\n]+/;
+ const BASE85_LINE = /[A-Za-z][0-9A-Za-z!#$%&()*+\-;<=>?@^_`{|}~]+/;
+ const BASE85 = new RegExp(
+   `${BASE85_LINE.source}(?:${NEWLINE.source}${BASE85_LINE.source})*`
+@@ -146,27 +149,37 @@
+ 
+     addition: ($) =>
+       choice(
+-        iseq("+", optional(ANYTHING)),
+-        iseq("++", optional(ANYTHING)),
++        iseq("+", optional($._words)),
++        iseq("++", optional($._words)),
+         iseq("+++"),
+-        iseq("++++", optional(ANYTHING)),
+-        iseq(">", optional(ANYTHING))
++        iseq("++++", optional($._words)),
++        iseq(">", optional($._words))
+       ),
+     deletion: ($) =>
+       choice(
+-        iseq("-", optional(ANYTHING)),
+-        iseq("--", optional(ANYTHING)),
++        iseq("-", optional($._words)),
++        iseq("--", optional($._words)),
+         iseq("---"),
+-        iseq("----", optional(ANYTHING)),
+-        iseq("<", optional(ANYTHING))
++        iseq("----", optional($._words)),
++        iseq("<", optional($._words))
+       ),
+     change: ($) => iseq("!", optional(ANYTHING)),
+ 
+-    context: ($) => iseq(" ", optional(ANYTHING)),
++    context: ($) => iseq(" ", optional($._words)),
+     comment: ($) => iseq("#", optional(ANYTHING)),
+     special: ($) => iseq("\\", optional(ANYTHING)),
+-    unrecognized: ($) => token(prec(-1, ANYTHING)),
++    unrecognized: ($) => prec(-1, $._words),
+ 
++    _words: ($) =>
++      repeat1(
++        choice($.word_deletion, $.word_addition, $._word_text, $._word_stray)
++      ),
++
++    word_deletion: ($) => token(WORD_DELETION),
++    word_addition: ($) => token(WORD_ADDITION),
++    _word_text: ($) => token(prec(-1, WORD_TEXT)),
++    _word_stray: ($) => token(prec(-2, /[\[{]/)),
++
+     linerange: ($) => /[-\+]\d+(,\d+)?/,
+     filename: ($) => repeat1(/\S+/),
+     commit: ($) => /[a-f0-9]{4,64}/,
