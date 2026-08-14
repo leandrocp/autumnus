@@ -326,8 +326,13 @@ export type LineSpec = number | [number, number];
  */
 export interface HighlightLinesInline {
   lines: LineSpec[];
-  /** `"theme"` uses the theme's highlight background. Any other string is raw CSS. */
-  style?: string;
+  /**
+   * `"theme"` uses the theme's highlight background. Any other string is raw
+   * CSS. `null` emits no inline style at all, for highlighting by class alone.
+   *
+   * Omitting it is the same as `"theme"`.
+   */
+  style?: string | null;
   class?: string;
 }
 
@@ -549,11 +554,25 @@ export interface BBCodeScopedFormatter extends Formatter, BBCodeScopedOptions {}
  *
  * ```ts
  * terminal({ language: javascript, theme: dracula })
+ * terminal({ language: javascript, theme: dracula, background: 'theme', width: 120 })
  * ```
  */
 export interface TerminalOptions {
   language?: LanguageRef;
   theme?: Theme;
+  /**
+   * Fallback background for text the theme gives no background.
+   *
+   * Omit it to inherit the terminal's own background. `"theme"` reuses the
+   * theme's `normal` background. Any other string is used as the color.
+   */
+  background?: string;
+  /**
+   * Pad each rendered line out to this width. Only takes effect alongside
+   * {@link TerminalOptions.background}, since padding is only visible as
+   * background fill.
+   */
+  width?: number;
 }
 
 export interface TerminalFormatter extends Formatter, TerminalOptions {}

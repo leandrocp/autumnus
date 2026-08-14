@@ -76,40 +76,47 @@ the document. Only the document's own language failing raises.
 Loading is global to the VM. One runtime lives in the NIF, so the first process
 to need a language pays for it and every process after it does not.
 
-### Loading ahead of time
+### Warming parsers during application startup
 
 A cold parser costs a download and then a Wasmtime compile, and the compile is
-the larger half: seven parsers already on disk take about 8 s to compile and
-1.3 s once the compiled forms are cached. Load at startup so a request never
-pays either:
+the larger half. Warm the languages your application needs from its `start/2`
+so a request never pays either:
 
 ```elixir title="lib/my_app/application.ex"
-:ok = Lumis.Languages.load(["markdown", "elixir", "json"])
-:ok = Lumis.Languages.load(:bundle_web)
+def start(_type, _args) do
+  Lumis.Languages.async_load(["markdown", "elixir", "json"])
+  Supervisor.start_link(children(), strategy: :one_for_one, name: MyApp.Supervisor)
+end
 ```
+
+`async_load/1` returns before the download starts, so the boot never waits on
+the network, and its result is deliberately not matched. The work runs under a
+`:temporary` child of Lumis's supervisor: a failure is logged, never retried,
+and cannot stop the application from starting. Since highlighting loads on
+demand regardless, the worst case is paying on the first request rather than an
+outage. Use `Lumis.Languages.load/1` when the caller does want the result.
 
 A `:bundle_*` atom names the same languages as the `@lumis-sh/wasm-bundle-*` package
 of that name — `:bundle_web`, `:bundle_web_extra`, `:bundle_system`, `:bundle_backend`
 and `:bundle_full` — so a bundle means the same thing in every runtime.
 `Lumis.Languages.bundles/0` returns the membership.
 
-### Paying for parsers at build time, not on a request
+Parsers land under `config :lumis, data_dir:`, `LUMIS_DATA_DIR`, or Lumis's
+`priv/lumis` directory by default. The result is self-sufficient — parser bytes,
+their metadata, and the compiled modules — so a restart or new pod using the
+same persistent directory reuses them.
 
-```bash
-mix lumis.languages.cache elixir html javascript css
-mix lumis.languages.cache --all
-```
+### Preparing a directory for a process that has not started
 
-Each parser is downloaded *and* loaded once, so Wasmtime writes its compiled
-form beside it. An image built this way starts serving without paying either
-cost, and a restart or a new pod does not pay it again.
+`Lumis.Languages.cache/2` downloads, validates and compiles without loading
+anything, and `lumis languages cache` does the same from the CLI. Both are for
+filling a directory another process will read — an image build, a release task,
+a migration step. Pass `force: true` or `--force` to resolve the compatible
+package range again and replace files that already verify.
 
-Parsers land under `LUMIS_DATA_DIR`, which defaults to the user data directory.
-The result is self-sufficient — parser bytes, their metadata, and the compiled
-modules — so pointing a container at it needs nothing else. `--force` resolves
-the compatible package range again and replaces files that already verify. To
-write somewhere other than the default, set `LUMIS_DATA_DIR` or
-`config :lumis, data_dir:`; there is no second way to name that directory.
+Inside a running application, prefer `async_load/1`. It does the same download
+and compile and keeps the result, where `cache/2` discards it and leaves the
+first request to load the language again.
 
 ### Where parsers come from
 
@@ -142,24 +149,55 @@ lives in the shared Rust store:
 
 | Removed | Use instead |
 | --- | --- |
-| `config :lumis, :bundled_languages` | name the languages: `mix lumis.languages.cache elixir html`, or `--all` |
+| `config :lumis, :bundled_languages` | call `Lumis.Languages.async_load/1` from your `start/2` |
 | `config :lumis, :wasm_resolver` | `config :lumis, data_dir: "/app/lumis"` |
 | `config :lumis, :language_package_resolver` | `config :lumis, data_dir: "/app/lumis"` |
 | release-local `priv/wasm` | `config :lumis, data_dir: "/app/lumis"`, or `LUMIS_DATA_DIR` |
 | `config :lumis, :wasm_path` | one directory now: `config :lumis, data_dir:` |
 
-`mix lumis.languages.cache` takes language names or `--all` rather than reading
-configuration, matching `lumis parsers cache`.
+`async_load/1` takes language names or a `:bundle_*` name rather than reading
+configuration, so the warm set lives beside the code that needs it.
+
+## Where the precompiled NIF comes from
+
+The NIF ships precompiled, and it is downloaded once while the `lumis` dependency
+compiles. GitHub Releases serves it by default. The same artifacts are mirrored
+to Cloudflare R2, which you can opt into when GitHub is unreachable:
+
+```elixir title="config/config.exs"
+config :lumis, artifact_source: :cloudflare
+```
+
+`LUMIS_ARTIFACT_SOURCE=cloudflare` does the same thing, and is easier to reach
+inside a Dockerfile or a CI job than a config file that has already been baked
+into an image. Configuration wins when both are set. Valid values are `:github`
+and `:cloudflare`.
+
+This is a switch, not a fallback. The source you choose is the only one tried, so
+a failed download does not reach for the other one. Both serve byte-identical
+files, and either way the download is checked against the SHA-256 in
+`checksum-Elixir.Lumis.Native.exs` from the Hex package before it is used, so the
+mirror cannot hand you a different NIF.
+
+Two other escape hatches sit alongside it: `LUMIS_BUILD=1` builds the NIF from
+source instead of downloading anything, and `LUMIS_USE_LEGACY_ARTIFACTS=1` takes
+the legacy-CPU variant on a machine without the newer instruction sets.
 
 ## Discover supported languages and themes
 
 ```elixir
 Lumis.available_languages()
 Lumis.available_themes()
+Lumis.loaded_languages()
+
+Lumis.Languages.get("js")
 Lumis.Theme.get("github_light")
 ```
 
-See [`Lumis`](https://hexdocs.pm/lumis/Lumis.html) and [`Lumis.Theme`](https://hexdocs.pm/lumis/Lumis.Theme.html) on HexDocs.
+`Lumis.Languages.get/2` and `Lumis.Theme.get/2` look one up by name, returning
+`nil` (or a default you pass) when there is no such language or theme.
+
+See [`Lumis`](https://hexdocs.pm/lumis/Lumis.html), [`Lumis.Languages`](https://hexdocs.pm/lumis/Lumis.Languages.html) and [`Lumis.Theme`](https://hexdocs.pm/lumis/Lumis.Theme.html) on HexDocs.
 
 ## Phoenix and LiveView
 

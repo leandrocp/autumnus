@@ -1,10 +1,12 @@
 defmodule Lumis.LanguagesTest do
   use ExUnit.Case, async: false
 
-  import ExUnit.CaptureIO
+  import ExUnit.CaptureLog
 
-  test "treats plaintext names as parser-free languages" do
-    for name <- ~w(plaintext text txt plain) do
+  test "does not load a parser for plaintext aliases" do
+    plaintext = Enum.find(Lumis.available_languages(), &(&1.id == "plaintext"))
+
+    for name <- [plaintext.id | plaintext.aliases] do
       assert :ok = Lumis.Languages.load(name)
     end
   end
@@ -42,13 +44,87 @@ defmodule Lumis.LanguagesTest do
 
     assert "json" in loaded
     assert loaded == Enum.sort(loaded)
-    assert length(loaded) < map_size(Lumis.available_languages())
+    assert length(loaded) < length(Lumis.available_languages())
   end
 
   test "every catalog language is nameable" do
-    names = Map.keys(Lumis.available_languages())
+    names = Enum.map(Lumis.available_languages(), & &1.id)
     assert "elixir" in names
     assert length(names) > 100
+  end
+
+  describe "get/2" do
+    test "finds a language by id" do
+      assert %{id: "elixir", name: "Elixir"} = Lumis.Languages.get("elixir")
+    end
+
+    test "resolves aliases the way highlighting does" do
+      assert Lumis.Languages.get("js").id == "javascript"
+      assert Lumis.Languages.get(:js).id == "javascript"
+    end
+
+    test "returns the same record available_languages/0 yields" do
+      from_list = Enum.find(Lumis.available_languages(), &(&1.id == "rust"))
+      assert Lumis.Languages.get("rust") == from_list
+    end
+
+    test "returns every alias in the catalog" do
+      for language <- Lumis.available_languages(), alias_name <- language.aliases do
+        assert Lumis.Languages.get(alias_name).id == language.id,
+               "alias #{alias_name} did not resolve to #{language.id}"
+      end
+    end
+
+    test "returns nil or the given default for an unknown name" do
+      assert Lumis.Languages.get("not-a-language") == nil
+      assert Lumis.Languages.get("not-a-language", :missing) == :missing
+    end
+
+    test "does not grow the atom table on unknown names" do
+      before = :erlang.system_info(:atom_count)
+      for index <- 1..50, do: Lumis.Languages.get("unknown-language-#{index}")
+      assert :erlang.system_info(:atom_count) == before
+    end
+  end
+
+  describe "guess/2" do
+    test "matches the shared language detection cases" do
+      cases =
+        __DIR__
+        |> Path.join("../../../../../fixtures/language-detection.json")
+        |> File.read!()
+        |> Jason.decode!()
+
+      assert length(cases) >= 20, "language detection fixture looks truncated"
+
+      for %{"name" => name, "hint" => hint, "source" => source, "expected" => expected} <- cases do
+        assert Lumis.Languages.guess(hint, source) == expected, name
+      end
+    end
+
+    test "resolves an id, alias, file name and path" do
+      assert Lumis.Languages.guess("elixir") == "elixir"
+      assert Lumis.Languages.guess("sh") == "bash"
+      assert Lumis.Languages.guess("app.ex") == "elixir"
+      assert Lumis.Languages.guess("lib/app.ex") == "elixir"
+    end
+
+    test "falls back to content when the name does not resolve" do
+      assert Lumis.Languages.guess(nil, "#!/usr/bin/env bash\nID=1") == "bash"
+      assert Lumis.Languages.guess(nil, "<!DOCTYPE html>\n<html></html>") == "html"
+    end
+
+    test "falls back to plaintext" do
+      assert Lumis.Languages.guess(nil, "") == "plaintext"
+      assert Lumis.Languages.guess("not-a-language", "") == "plaintext"
+    end
+
+    test "agrees with what highlight/2 picks for the same input" do
+      source = "#!/usr/bin/env bash\nID=1"
+
+      assert {:ok, html} = Lumis.highlight(source, formatter: :html_linked)
+      assert html =~ "language-#{Lumis.Languages.guess(nil, source)}"
+    end
   end
 
   describe "bundles" do
@@ -90,6 +166,41 @@ defmodule Lumis.LanguagesTest do
       assert length(Lumis.Languages.bundles()[:bundle_full]) > 100
 
       assert {:error, :unknown_bundle} = Lumis.Languages.load(:bundle_nope)
+    end
+
+    test "cache/2 takes the same bundle names load/1 does" do
+      assert {:error, {:unknown_bundle, "bundle_nope"}} = Lumis.Languages.cache([:bundle_nope])
+    end
+
+    test "expand_bundles/1 expands a bundle into its members" do
+      assert {:ok, members} = Lumis.Languages.expand_bundles([:bundle_web])
+      assert Enum.sort(members) == Enum.sort(Lumis.Languages.bundles()[:bundle_web])
+    end
+
+    test "expand_bundles/1 accepts hyphens, matching the CLI spelling" do
+      assert Lumis.Languages.expand_bundles(["bundle-web-extra"]) ==
+               Lumis.Languages.expand_bundles([:bundle_web_extra])
+    end
+
+    test "expand_bundles/1 leaves plain language names alone and deduplicates" do
+      assert {:ok, ["rust", "elixir"]} = Lumis.Languages.expand_bundles(["rust", "elixir"])
+
+      assert {:ok, expanded} = Lumis.Languages.expand_bundles([:bundle_web, "css"])
+      assert Enum.count(expanded, &(&1 == "css")) == 1
+    end
+
+    # Atoms are never garbage collected, so a bundle name arriving from a
+    # request must not become one. `bundles/0` interns the five fixed names on
+    # first call, hence the warm-up before the baseline.
+    test "an unknown bundle name creates no atom" do
+      assert :error = Lumis.Languages.bundle_members("bundle_warmup")
+      before = :erlang.system_info(:atom_count)
+
+      for index <- 1..50 do
+        assert :error = Lumis.Languages.bundle_members("bundle_absent_#{index}")
+      end
+
+      assert :erlang.system_info(:atom_count) == before
     end
 
     defp bundle_atom(name), do: String.to_atom("bundle_" <> String.replace(name, "-", "_"))
@@ -135,13 +246,80 @@ defmodule Lumis.LanguagesTest do
     end
   end
 
+  describe "async_load/1" do
+    # Every assertion here is about the caller, not the load: a warm-up able to
+    # block or crash `start/2` is the failure this function exists to prevent.
+    #
+    # `:noproc` rather than `:normal` when the task beat the monitor to it. The
+    # exit reason is therefore not evidence of anything, so no test reads it;
+    # what the warm-up did is asserted through the runtime and the log instead.
+    defp await_warm_up(pid) do
+      ref = Process.monitor(pid)
+      assert_receive {:DOWN, ^ref, :process, ^pid, _reason}, 30_000
+      :ok
+    end
+
+    test "loads in the background" do
+      refute Lumis.Native.has_language("erlang")
+
+      assert {:ok, pid} = Lumis.Languages.async_load(["erlang"])
+      await_warm_up(pid)
+
+      assert Lumis.Native.has_language("erlang")
+    end
+
+    test "returns before the load finishes" do
+      # A whole bundle, so the work is far larger than the budget below however
+      # much of it is already staged. Anything over a millisecond here is
+      # `start/2` waiting on parsers, which is the regression being pinned.
+      {microseconds, {:ok, pid}} =
+        :timer.tc(fn -> Lumis.Languages.async_load([:bundle_web]) end)
+
+      assert microseconds < 1_000
+      await_warm_up(pid)
+    end
+
+    test "logs a failure rather than crashing the task" do
+      log =
+        capture_log(fn ->
+          {:ok, pid} = Lumis.Languages.async_load(["not-a-language"])
+          await_warm_up(pid)
+        end)
+
+      # A crashed task would report the exception instead of this.
+      assert log =~ "could not warm"
+      assert log =~ "not-a-language"
+      assert log =~ "load these on demand"
+    end
+
+    test "leaves the caller and the supervisor alive after a failure" do
+      supervisor = Process.whereis(Lumis.TaskSupervisor)
+
+      capture_log(fn ->
+        {:ok, pid} = Lumis.Languages.async_load(["not-a-language"])
+        await_warm_up(pid)
+      end)
+
+      assert Process.alive?(self())
+      assert Process.whereis(Lumis.TaskSupervisor) == supervisor
+      assert Process.alive?(supervisor)
+    end
+  end
+
   describe "cache/2" do
     @store Application.compile_env!(:lumis, :data_dir)
 
-    test "writes verified parsers into the store" do
+    test "writes verified parsers and compiled modules into the store" do
+      File.rm_rf!(Path.join(@store, "compiled"))
+
       assert {:ok, [path]} = Lumis.Languages.cache(["comment"])
       assert String.starts_with?(Path.basename(path), "tree-sitter-comment-")
       assert File.exists?(path)
+
+      assert @store
+             |> Path.join("compiled/modules/**/*")
+             |> Path.wildcard()
+             |> Enum.any?(&File.regular?/1)
     end
 
     test "collapses languages that share one parser" do
@@ -155,28 +333,18 @@ defmodule Lumis.LanguagesTest do
       assert File.exists?(Path.join([@store, "parsers", "python.lumis.json"]))
     end
 
-    test "reports an unknown language" do
+    test "preserves the single-language error shape" do
       assert {:error, reason} = Lumis.Languages.cache(["not-a-language"])
       assert reason =~ "not-a-language"
     end
-  end
 
-  describe "mix lumis.languages.cache" do
-    test "writes the named parsers and prints their paths" do
-      output =
-        capture_io(fn ->
-          Mix.Task.reenable("lumis.languages.cache")
-          Mix.Task.run("lumis.languages.cache", ["comment"])
-        end)
-
-      assert output =~ "tree-sitter-comment-"
+    test "reports every failure rather than stopping at the first" do
+      assert {:error, failures} = Lumis.Languages.cache(["not-a-language", "also-not", "comment"])
+      assert Map.keys(failures) |> Enum.sort() == ["also-not", "not-a-language"]
     end
 
-    test "refuses to guess when given neither names nor --all" do
-      assert_raise Mix.Error, ~r/--all/, fn ->
-        Mix.Task.reenable("lumis.languages.cache")
-        Mix.Task.run("lumis.languages.cache", [])
-      end
+    test "skips names that have no parser to compile" do
+      assert {:ok, []} = Lumis.Languages.cache(["plaintext"])
     end
   end
 end

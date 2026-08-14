@@ -3,12 +3,12 @@ sidebar_position: 1
 slug: /cli/commands
 title: CLI Commands
 description: >-
-  Highlight files, inspect Tree-sitter output, manage parsers, and generate
+  Highlight files, inspect Tree-sitter output, manage languages, and generate
   themes with the Lumis CLI.
 keywords:
   - lumis cli
   - themes generate
-  - parsers cache
+  - languages cache
   - highlight command
 ---
 
@@ -20,10 +20,11 @@ These flags work with any subcommand:
 
 | Flag | Short | Description |
 | --- | --- | --- |
-| `--verbose` | `-V` | Show extra output: downloads, cache hits, parser paths |
+| `--verbose` | `-v` | Show extra output: downloads, cache hits, parser paths |
 | `--data-dir <path>` | `-d` | Override the data directory (also `LUMIS_DATA_DIR` env var) |
 | `--config <path>` | | Override the config file (also `LUMIS_CONFIG` env var) |
-| `--help` | | Print help for any command |
+| `--help` | `-h` | Print help for any command |
+| `--version` | `-V` | Print the version |
 
 ## Commands
 
@@ -32,10 +33,14 @@ These flags work with any subcommand:
 | `lumis highlight` | Highlight a file or stdin |
 | `lumis dump tree` | Print configurable Tree-sitter syntax trees |
 | `lumis dump events` | Print raw highlight events as JSON |
+| `lumis formatters list` | List output formatters |
+| `lumis formatters show` | List the options one formatter accepts |
 | `lumis languages list` | List supported languages and file patterns |
+| `lumis languages show` | Print what the catalog knows about one language |
+| `lumis languages cache` | Download and compile parsers so later runs skip both |
 | `lumis themes list` | List built-in and local themes |
+| `lumis themes show` | Print one theme's appearance and colors |
 | `lumis themes generate` | Generate a theme from a Neovim colorscheme repo |
-| `lumis parsers cache` | Cache parser WASMs so later runs skip the download |
 
 ## `lumis highlight`
 
@@ -50,15 +55,66 @@ echo 'const x = 1' | lumis highlight -l javascript --formatter html-inline --the
 
 ### Options
 
+Most options belong to a specific formatter. Passing one the selected formatter
+does not accept is an error naming both, rather than being silently ignored:
+
+```bash
+lumis highlight main.rs --pre-class code
+# error: `--pre-class` is not accepted by the `terminal` formatter
+#
+#   HTML options apply to: html-inline, html-linked, html-multi-themes
+#   run `lumis formatters show terminal` to see what it accepts
+```
+
+`lumis highlight --help` prints the same grouping, and
+`lumis formatters show <name>` answers it for one formatter.
+
+Accepted by every formatter:
+
 | Flag | Short | Description |
 | --- | --- | --- |
 | `--language <lang>` | `-l` | Language id (e.g., `rust`, `javascript`). Auto-detects from file if omitted. |
 | `--formatter <fmt>` | `-f` | Output format: `terminal` (default), `html-inline`, `html-linked`, `html-multi-themes`, `bbcode-scoped` |
+| `--rainbow-brackets` | | Render nested brackets using rainbow bracket scopes |
+
+Accepted by `html-inline` and `terminal`:
+
+| Flag | Short | Description |
+| --- | --- | --- |
 | `--theme <name>` | `-t` | Theme name (e.g., `dracula`, `github_dark`) or `auto` |
-| `--themes <key:theme>` | | Theme pair for multi-themes (repeatable, e.g., `--themes light:github_light --themes dark:github_dark`) |
+
+Accepted by `terminal`:
+
+| Flag | Short | Description |
+| --- | --- | --- |
+| `--background <bg>` | `-b` | Fallback background: `theme`, a hex color, or omit to inherit |
+| `--width <n>` | `-w` | Render width for background padding, or `auto` |
+
+Accepted by `html-inline`, `html-linked` and `html-multi-themes`:
+
+| Flag | Short | Description |
+| --- | --- | --- |
+| `--pre-class <class>` | | CSS class appended to the wrapping `<pre>` tag |
+| `--header-open <tag>` | | Opening tag wrapped around the output (requires `--header-close`) |
+| `--header-close <tag>` | | Closing tag wrapped around the output (requires `--header-open`) |
+| `--highlight-lines <lines>` | `-H` | Lines to highlight (e.g., `1,3-5,10`) |
+| `--highlight-lines-class <class>` | | CSS class added to highlighted lines |
+
+Accepted by `html-inline` and `html-multi-themes`:
+
+| Flag | Short | Description |
+| --- | --- | --- |
+| `--italic` | | Apply italic styles from the theme |
+| `--include-highlights` | | Add `data-highlight` attributes naming each scope |
+| `--highlight-lines-style <style>` | | `theme` (default), `none`, or raw CSS |
+
+Accepted by `html-multi-themes`:
+
+| Flag | Short | Description |
+| --- | --- | --- |
+| `--themes <key:theme>` | | Theme pair (repeatable, e.g., `--themes light:github_light --themes dark:github_dark`) |
 | `--default-theme <id>` | | Which `--themes` entry gets inline styles |
-| `--css-variable-prefix <prefix>` | | Prefix for CSS custom properties (default: `--lumis`) |
-| `--highlight-lines <lines>` | `-h` | Lines to highlight (e.g., `1,3-5,10`) |
+| `--css-variable-prefix <prefix>` | | Prefix for CSS custom properties (default: `--lumis`). A value starting with `-` needs the `=` form: `--css-variable-prefix=--shiki` |
 
 ### Examples
 
@@ -84,6 +140,38 @@ lumis highlight main.rs -f bbcode-scoped
 
 ```bash title="Verbose mode — see cache hits and parser paths"
 lumis highlight main.rs -v
+```
+
+## `lumis formatters`
+
+```bash title="List the formatters"
+lumis formatters list
+```
+
+```text
+html-inline        HTML with inline style attributes
+html-linked        HTML with CSS class names (pair with a theme stylesheet)
+html-multi-themes  HTML with CSS custom properties, one set per theme
+terminal           ANSI escape codes (default)
+bbcode-scoped      BBCode using highlight scope names as tags
+```
+
+```bash title="See what one formatter accepts"
+lumis formatters show terminal
+```
+
+```text
+terminal: ANSI escape codes (default)
+
+Accepted options:
+  --language
+  --formatter
+  --rainbow-brackets
+  --theme
+  --background
+  --width
+
+Run `lumis highlight --help` for descriptions.
 ```
 
 ## `lumis dump tree`
@@ -170,6 +258,47 @@ lumis languages list
 
 Prints all supported languages with their file extensions and patterns.
 
+## `lumis languages show`
+
+```bash
+lumis languages show elixir
+lumis languages show js
+```
+
+Prints one language's id, name, aliases, extensions, globs, Emacs modes and
+shebangs. Aliases resolve the way highlighting resolves them, so `js` finds
+JavaScript. Exits non-zero on an unknown name.
+
+## `lumis languages cache`
+
+Download exact, integrity-checked parser WASM files ahead of time, and compile
+them. Highlighting does both anyway; this moves them off the first run.
+
+A cold parser costs a download and then a Wasmtime compile, and the compile is
+the larger half. See [Filling the store at build time](/advanced/wasm-and-cdn#filling-the-store-at-build-time)
+for how the CLI prepares the cache shared by every native runtime.
+
+```bash title="Selected parsers"
+lumis languages cache rust javascript elixir
+```
+
+```bash title="A bundle"
+lumis languages cache bundle-web
+```
+
+The `bundle-*` names cover the same languages as the matching
+`@lumis-sh/wasm-bundle-*` package. `Lumis.Languages.async_load/1`,
+`Lumis.Languages.cache/2` and JavaScript's `cacheLanguages()` accept the same
+names in application code.
+
+```bash title="All parsers"
+lumis languages cache --all
+```
+
+```bash title="Replace valid cached parsers"
+lumis languages cache rust javascript --force
+```
+
 ## `lumis themes list`
 
 ```bash
@@ -177,6 +306,16 @@ lumis themes list
 ```
 
 Lists built-in themes and any custom themes found in the data directory.
+
+## `lumis themes show`
+
+```bash
+lumis themes show dracula
+```
+
+Prints a theme's appearance, foreground, background and how many highlight
+scopes it defines. Finds themes in the data directory as well as built-in ones.
+Exits non-zero on an unknown name.
 
 ## `lumis themes generate`
 
@@ -203,28 +342,6 @@ lumis themes generate \
   -c github_light \
   -a light \
   -o github-light.json
-```
-
-## `lumis parsers cache`
-
-Download exact, integrity-checked parser WASM files ahead of time, and compile
-them. Highlighting does both anyway; this moves them off the first run.
-
-A cold parser costs a download and then a Wasmtime compile, and the compile is
-the larger half, so each parser is loaded once here and its compiled form is
-written beside it. `mix lumis.languages.cache` prepares the identical directory,
-and every runtime reads it: cache with the CLI, and Elixir or Node start warm.
-
-```bash title="Selected parsers"
-lumis parsers cache rust javascript elixir
-```
-
-```bash title="All parsers"
-lumis parsers cache --all
-```
-
-```bash title="Replace valid cached parsers"
-lumis parsers cache rust javascript --force
 ```
 
 ## Configuration

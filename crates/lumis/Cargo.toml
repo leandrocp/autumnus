@@ -1,6 +1,6 @@
 [package]
 name = "lumis"
-version = "0.12.1"
+version = "0.13.0"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
@@ -283,8 +283,8 @@ lang-zig = ["dep:tree-sitter-zig", "lumis-core/lang-zig"]
 lang-zsh = ["dep:tree-sitter-zsh", "lumis-core/lang-zsh"]
 
 [dependencies]
-lumis-core = { path = "../lumis-core", version = "2.3.0", default-features = false }
-lumis-wasm-runtime = { path = "../lumis-wasm-runtime", version = "0.1.0", default-features = false }
+lumis-core = { path = "../lumis-core", version = "2.4.0", default-features = false }
+lumis-wasm-runtime = { path = "../lumis-wasm-runtime", version = "0.2.0", default-features = false }
 anyhow = "1.0"
 derive_builder = "0.20"
 glob = "0.3"
@@ -370,7 +370,7 @@ v_htmlescape = "0.17"
 [build-dependencies]
 cc = "1"
 glob = "0.3"
-lumis-build = { path = "../lumis-build", version = "1.0.0" }
+lumis-build = { path = "../lumis-build", version = "1.1.0" }
 prettyplease = "0.3"
 proc-macro2 = "1"
 quote = "1"
@@ -385,3 +385,4 @@ ansi-to-tui = "8"
 pretty_assertions = "1.4"
 ratatui = "0.30"
 ratatui-core = "0.1"
+syn = { version = "3.0", features = ["full", "parsing"] }

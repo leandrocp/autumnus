@@ -21,11 +21,11 @@ Self-contained HTML with inline styles on each token. No external CSS required.
 
 | Runtime | Options |
 | --- | --- |
-| Rust | `language`, `theme`, `pre_class`, `italic`, `include_highlights`, `highlight_lines`, `header` |
-| Elixir | `language`, `theme`, `pre_class`, `italic`, `include_highlights`, `highlight_lines`, `header` |
-| JavaScript | `language`, `theme`, `preClass`, `italic`, `includeHighlights`, `highlightLines`, `header` |
+| Rust | `language`, `theme`, `pre_class`, `italic`, `include_highlights`, `rainbow_brackets`, `highlight_lines`, `header` |
+| Elixir | `language`, `theme`, `pre_class`, `italic`, `include_highlights`, `rainbow_brackets`, `highlight_lines`, `header` |
+| JavaScript | `language`, `theme`, `preClass`, `italic`, `includeHighlights`, `rainbowBrackets`, `highlightLines`, `header` |
 | Java | `withLang()`, `withTheme()`, `withFormatter(Formatter.HTML_INLINE)` |
-| CLI | `--theme`, `--highlight-lines` |
+| CLI | `--theme`, `--pre-class`, `--italic`, `--include-highlights`, `--rainbow-brackets`, `--highlight-lines`, `--highlight-lines-class`, `--highlight-lines-style`, `--header-open`, `--header-close` |
 
 ## Basic example
 
@@ -144,7 +144,9 @@ Lumis.highlight!(
   </TabItem>
   <TabItem value="cli" label="CLI">
 
-The CLI does not expose `preClass` or `includeHighlights` for HTML Inline output.
+```bash
+lumis highlight app.js -f html-inline -t dracula --pre-class my-code --include-highlights
+```
 
   </TabItem>
 </Tabs>
@@ -206,7 +208,11 @@ Custom HTML wrappers are not currently exposed by `lumis4j`.
   </TabItem>
   <TabItem value="cli" label="CLI">
 
-Custom HTML wrappers are not available in the CLI formatter.
+```bash
+lumis highlight app.js -f html-inline --header-open '<figure>' --header-close '</figure>'
+```
+
+The two go together; clap rejects one without the other.
 
   </TabItem>
 </Tabs>

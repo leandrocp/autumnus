@@ -33,6 +33,42 @@ git push origin cargo-lumis-cli/v0.2.0
 - If one released package depends on another released package, update the dependent manifest in the same commit. See [Crate version requirements](#crate-version-requirements).
 - Push package tags in dependency order.
 - Watch the tag-triggered publish workflows after pushing tags.
+- Keep the commit subject exactly `chore(release): <package> <version>`. See [CI on the release commit](#ci-on-the-release-commit).
+
+## CI on the release commit
+
+A release commit is a version bump and a changelog entry on top of a commit CI
+already passed, so every branch workflow skips itself when the pushed head
+commit's subject starts with `chore(release):`:
+
+```yaml
+    if: >-
+      ${{ github.event_name != 'push' ||
+          !startsWith(github.event.head_commit.message, 'chore(release):') }}
+```
+
+Two consequences worth knowing:
+
+- **The prefix is the contract.** A subject spelled any other way runs the full
+  matrix — Rust, JavaScript, Elixir, the NIF, conformance, queries, lint,
+  benchmarks and the WASM release detector — against a commit whose only content
+  is a version number. That is not just waste: `Standalone packaged NIF lockfile`
+  resolves `lumis_nif` from crates.io with `--locked`, so between the bump and
+  the `cargo publish` that follows it, the version it now requires does not exist
+  yet and the job fails. Nothing in the commit can fix that, and nothing should
+  try.
+- **`[skip ci]` is the wrong tool here.** It would suppress the runs entirely
+  rather than showing them as skipped, but it keys on the same head commit that
+  the package tag points at, so pushing `<package>/v<version>` would skip the
+  publish workflow the release exists to trigger.
+
+Tag-triggered workflows carry no such guard, and must not grow one.
+
+One branch job is exempt: `crate-deps` in `rust.yml`. `mise run check-crate-deps`
+reads manifests rather than the registry, so it passes on the bump commit, and
+the bump commit is the only one that writes new `version` requirements — see
+[Crate version requirements](#crate-version-requirements) for what shipped when
+nothing checked them. Skipping it there would skip it exactly where it applies.
 
 ## Crate version requirements
 
@@ -91,6 +127,17 @@ package's `Cargo.toml` and `CHANGELOG.md`.
 in `mise run lint`, as its own job in Rust CI, and again in `rust-release.yml`
 before `cargo publish`.
 
+`test-packaged-parsers` packages `lumis` and builds the extracted tarball, and
+it resolves the sibling lumis crates to the tarballs built beside it rather than
+to crates.io. Publish order releases `lumis-core`, `lumis-build` and
+`lumis-wasm-runtime` before `lumis`, so a published `lumis` never meets an older
+published `lumis-core`. Resolving from the registry tested that combination
+anyway, which made the job fail for every change that adds core API and passes
+it through `lumis` — a compile error nothing in the pull request could fix.
+Packaging the set together keeps what the job is for, that the tarball builds
+and its parsers work outside the workspace, and leaves requirement staleness to
+`check-crate-deps`, which is the check that can actually see it.
+
 ## Publish order
 
 Publish dependency packages before the packages that consume them.
@@ -129,11 +176,15 @@ If multiple JS packages are part of the same release, use this order:
 
 After `npm-lumis` is published, the plugin packages, CLI package, and WASM bundle packages are independent. Keep the order above as the canonical release order.
 
-The `npm-lumis` workflow also publishes the five platform-specific `@lumis-sh/lumis-native-*` packages and then the `@lumis-sh/lumis-native` selector, before publishing `@lumis-sh/lumis` itself. All of them share the `npm-lumis` version and tag, and `mise run release-prepare npm-lumis <version>` bumps them together.
+The `npm-lumis` workflow also publishes all platform-specific `@lumis-sh/lumis-native-*` packages and then the `@lumis-sh/lumis-native` selector, before publishing `@lumis-sh/lumis` itself. All of them share the `npm-lumis` version and tag, and `mise run release-prepare npm-lumis <version>` bumps them together.
 
 That lockstep is not cosmetic. `@lumis-sh/lumis` depends on the platform packages with `workspace:*`, which pnpm replaces with the workspace version when it packs, so a main package bumped on its own would ship optional dependencies pointing at the previous release — and npm refuses to republish a version that already exists, so the workflow would fail before reaching the main package. `mise run lint` runs `mise run check-native-versions`, which fails if any of them drift.
 
-`npm-cli` must use the same version as `cargo-lumis-cli`, and the matching `cargo-lumis-cli/v<version>` GitHub release must already contain prebuilt CLI archives before publishing `@lumis-sh/cli`.
+The `npm-cli` workflow builds the `lumis` binary for eight targets, publishes the `@lumis-sh/cli-*` platform packages, and then publishes `@lumis-sh/cli` itself. All of them share the `npm-cli` version and tag, and `mise run release-prepare npm-cli <version>` bumps them together, for the same reason the addon packages move in lockstep: `@lumis-sh/cli` pins them with `workspace:*`, which pnpm rewrites at pack time. `mise run lint` runs `mise run check-cli-versions`, which fails if any of them drift.
+
+`npm-cli` no longer has to match `cargo-lumis-cli`. It used to, because the postinstall built its download URL out of its own npm version, so a version the crate had not released answered every install with a 404 — `@lumis-sh/cli` 0.5.0 shipped that way against `cargo-lumis-cli` 0.4.2 and stayed uninstallable for three weeks, then 0.6.0 repeated it against 0.5.0. Nothing in the repository resolves that URL, so nothing could see it. The binary now comes from npm, and the two version lines are independent.
+
+Both musl targets build in a `rust:alpine` container, as the addon's do, because `tree-sitter` compiles wasmtime's C API through cmake and `rust:alpine` ships none. The CLI keeps musl's default static CRT, unlike the addon: it is an executable rather than something Node has to `dlopen`, so it needs neither `-crt-static` nor the `libgcc_s.so.1` that dropping it would pull in. The CLI and the addon therefore cover the same eight targets, and `scripts/test-shim.js` fails if one gains a target the other lacks.
 
 If a JS release also needs new parser WASM packages, publish those first through the WASM workflow. Run `mise run wasm-publish-needed` to see which parser packages still need publishing.
 
@@ -162,6 +213,16 @@ catalog data and JavaScript handles.
 Publish `hex-lumis` after the required `cargo-lumis-wasm-runtime` release.
 Refresh and commit `packages/elixir/lumis/native/lumis_nif/Cargo.lock` against
 that published runtime before creating the Hex tag.
+
+`elixir-release.yml` uploads the precompiled NIFs to a GitHub Release and syncs
+the same files to Cloudflare R2 under `releases/download/<tag>`, served from
+`https://artifacts.lumis.sh`. The R2 step fails the release if any of
+`R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` or `R2_BUCKET` is
+missing, so the mirror cannot silently fall behind the GitHub Release.
+
+Checksums are generated from GitHub, which `Lumis.Native.ArtifactURL` defaults
+to. Changing that default would put checksum generation behind the R2 sync, so
+leave it alone unless the ordering in the workflow changes too.
 
 ## Failed releases
 
@@ -217,4 +278,4 @@ mise run release-prepare cargo-lumis-cli 0.2.0
 
 If a release requires dependent manifests to move in lockstep, update those files separately and commit them with the release prep.
 
-`npm-lumis` is the one exception: it additionally bumps `native/Cargo.toml`, the `@lumis-sh/lumis-native` selector, and all five platform packages, because the release workflow publishes them under the same version before the main package. See [JavaScript packages](#javascript-packages).
+`npm-lumis` is the one exception: it additionally bumps `native/Cargo.toml`, the `@lumis-sh/lumis-native` selector, and all platform packages, because the release workflow publishes them under the same version before the main package. See [JavaScript packages](#javascript-packages).

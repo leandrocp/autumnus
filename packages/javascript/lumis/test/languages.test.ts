@@ -88,8 +88,32 @@ describe("getLoadedLanguageIds", () => {
   });
 });
 
+describe("loadedLanguages", () => {
+  // Loaded here rather than inherited from an earlier test, so this block still
+  // passes when run on its own.
+  beforeAll(async () => {
+    await loadLanguage({
+      definition: { id: json.id, aliases: json.aliases },
+      packageName: json.packageName,
+    });
+  });
+
+  it("is reachable from the package entry point", async () => {
+    const { loadedLanguages } = await import("../src/index.js");
+
+    expect(loadedLanguages()).toEqual(getLoadedLanguageIds());
+    expect(loadedLanguages()).toContain("json");
+  });
+
+  it("lists what is loaded, not the whole catalog", async () => {
+    const { loadedLanguages, availableLanguages } = await import("../src/index.js");
+
+    expect(loadedLanguages().length).toBeLessThan(availableLanguages().length);
+  });
+});
+
 describe("loadPlaintext", () => {
-  it("loads parser-free plaintext", async () => {
+  it("does not load a parser for plaintext", async () => {
     await loadPlaintext();
     const loaded = getLoadedLanguage("plaintext");
     expect(loaded).toBeDefined();

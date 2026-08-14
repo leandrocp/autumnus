@@ -1,6 +1,6 @@
 [package]
 name = "lumis-core"
-version = "2.3.0"
+version = "2.4.0"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
@@ -268,6 +268,7 @@ glob = "0.3"
 regex = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+typed-path = "0.12"
 v_htmlescape = "0.17"
 
 [build-dependencies]

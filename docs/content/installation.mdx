@@ -42,7 +42,7 @@ cargo add lumis
 ```elixir
 def deps do
   [
-    {:lumis, "~> 0.3"}
+    {:lumis, "~> 0.7"}
   ]
 end
 ```
@@ -71,7 +71,7 @@ For a global install:
 npm install -g @lumis-sh/cli
 ```
 
-The installed binary is `lumis`. Rust users can also install from crates.io with `cargo install lumis-cli`.
+The installed binary is `lumis`. npm resolves it from a platform package, so the install runs no scripts and downloads nothing beyond the registry. Alpine and other musl hosts are covered, and the binary there is statically linked. Rust users can also install from crates.io with `cargo install lumis-cli`.
 
   </TabItem>
   <TabItem value="browser" label="Browsers / CDN">
@@ -98,6 +98,6 @@ The installed binary is `lumis`. Rust users can also install from crates.io with
 ## Notes
 
 - Highlighting loads the parsers a document needs, including languages injected inside it, and caches the verified bytes. See [WASM and CDN](/advanced/wasm-and-cdn).
-- `Lumis.Languages.load/1` and `mix lumis.languages.cache` in Elixir, `lumis parsers cache` for the CLI, and `npx lumis-wasm-cache` for Node all move that download ahead of the first request.
+- [Warm up parsers](/operations/warm-up) at startup without blocking it, or use the CLI when a build or operations step owns the cache.
 - For local JavaScript parser assets from npm, install per-language packages such as `@lumis-sh/wasm-rust` or bundle packages such as `@lumis-sh/wasm-bundle-web`.
 - The CLI stores verified, content-addressed parsers and custom themes in a local data directory.

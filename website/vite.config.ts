@@ -8,6 +8,7 @@ export default defineConfig({
       input: {
         main: fileURLToPath(new URL("index.html", import.meta.url)),
         comparison: fileURLToPath(new URL("comparison/index.html", import.meta.url)),
+        showcase: fileURLToPath(new URL("showcase/index.html", import.meta.url)),
       },
     },
   },

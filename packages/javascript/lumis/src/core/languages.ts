@@ -3,6 +3,7 @@ import satisfies from "semver/functions/satisfies.js";
 import minVersion from "semver/ranges/min-version.js";
 import { buildHighlightEvents } from "../events.js";
 import { LANGUAGES } from "../generated/languages-meta.js";
+import { cloneLanguageInfo, normalizeLanguageName } from "../catalog-metadata.js";
 import { LANGUAGE_PACKAGE_VERSION_RANGE } from "../generated/package-version-range.js";
 import { sha256 } from "@noble/hashes/sha2.js";
 import { HIGHLIGHT_NAMES } from "../highlights.js";
@@ -208,7 +209,7 @@ async function fetchFromCdns(primary: string, isDefault: boolean): Promise<Respo
 }
 
 const HIGHLIGHT_NAMES_SET = new Set(HIGHLIGHT_NAMES);
-const PLAINTEXT_ALIASES = ["text", "txt", "plain"];
+const PLAINTEXT_ALIASES = LANGUAGES.find(({ id }) => id === PLAINTEXT_LANG_ID)?.aliases ?? [];
 const MAX_JSON_CONTAINER_DEPTH = 127;
 const JSON_NUMBER = /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/y;
 
@@ -464,9 +465,7 @@ function isValidPackageName(value: string): boolean {
   return segments.every((segment) => /^[a-z0-9][a-z0-9._-]*$/.test(segment));
 }
 
-export function normalizeLanguageName(value: string): string {
-  return value.replace(/[A-Z]/g, (character) => character.toLowerCase());
-}
+export { normalizeLanguageName };
 
 function isSafePackagePathSegment(value: string): boolean {
   const stem = value.split(".", 1)[0]!.replace(/[ .]+$/, "");
@@ -1383,7 +1382,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
       return defaultRuntime.getLoadedLanguageIds();
     },
     availableLanguages() {
-      return LANGUAGES;
+      return LANGUAGES.map(cloneLanguageInfo);
     },
     getDefaultRuntime() {
       return defaultRuntime;

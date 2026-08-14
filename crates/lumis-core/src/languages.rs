@@ -13,6 +13,7 @@ use regex::Regex;
 use std::collections::HashMap;
 use std::path::Path;
 use std::sync::LazyLock;
+use typed_path::Utf8WindowsPath;
 
 /// Declarative macro that generates the `Language` enum, iteration, `FromStr`,
 /// `name()`, `id_name()`, `language_globs()`, `from_emacs_mode_header()`,
@@ -106,6 +107,129 @@ macro_rules! define_languages {
                 }
             }
 
+            /// Alternative names this language answers to, without its id.
+            ///
+            /// ```
+            /// # #[cfg(feature = "lang-bash")] {
+            /// use lumis_core::languages::Language;
+            /// assert!(Language::Bash.aliases().contains(&"sh"));
+            /// # }
+            /// ```
+            pub fn aliases(&self) -> &'static [&'static str] {
+                let all: &'static [&'static str] = match self {
+                    $(
+                        Language::$a_variant => &[$($a_str),*],
+                    )*
+                    $(
+                        #[cfg(feature = $g_feat)]
+                        Language::$g_variant => &[$($g_str),*],
+                    )*
+                };
+
+                // The generated list leads with the id itself.
+                match all.split_first() {
+                    Some((first, rest)) if *first == self.id_name() => rest,
+                    _ => all,
+                }
+            }
+
+            /// File name patterns this language claims, e.g. `*.rs`.
+            ///
+            /// ```
+            /// # #[cfg(feature = "lang-bash")] {
+            /// use lumis_core::languages::Language;
+            /// assert!(Language::Bash.globs().contains(&"PKGBUILD"));
+            /// # }
+            /// ```
+            pub fn globs(&self) -> &'static [&'static str] {
+                match self {
+                    $(
+                        Language::$a_variant => &[$($a_glob),*],
+                    )*
+                    $(
+                        #[cfg(feature = $g_feat)]
+                        Language::$g_variant => &[$($g_glob),*],
+                    )*
+                }
+            }
+
+            /// Emacs `mode:` names that select this language.
+            ///
+            /// ```
+            /// # #[cfg(feature = "lang-bash")] {
+            /// use lumis_core::languages::Language;
+            /// assert!(Language::Bash.emacs_modes().contains(&"sh"));
+            /// # }
+            /// ```
+            pub fn emacs_modes(&self) -> &'static [&'static str] {
+                match self {
+                    $(
+                        Language::$a_variant => &[$($a_emacs),*],
+                    )*
+                    $(
+                        #[cfg(feature = $g_feat)]
+                        Language::$g_variant => &[$($g_emacs),*],
+                    )*
+                }
+            }
+
+            /// Interpreter names in a shebang line that select this language.
+            ///
+            /// ```
+            /// # #[cfg(feature = "lang-bash")] {
+            /// use lumis_core::languages::Language;
+            /// assert!(Language::Bash.shebangs().contains(&"bash"));
+            /// # }
+            /// ```
+            pub fn shebangs(&self) -> &'static [&'static str] {
+                match self {
+                    $(
+                        Language::$a_variant => &[$($a_shebang),*],
+                    )*
+                    $(
+                        #[cfg(feature = $g_feat)]
+                        Language::$g_variant => &[$($g_shebang),*],
+                    )*
+                }
+            }
+
+            /// The globs that name a bare file extension, e.g. `*.rs`.
+            ///
+            /// ```
+            /// # #[cfg(feature = "lang-bash")] {
+            /// use lumis_core::languages::Language;
+            /// // `PKGBUILD` is a glob but not an extension.
+            /// assert!(!Language::Bash.extensions().contains(&"PKGBUILD"));
+            /// # }
+            /// ```
+            pub fn extensions(&self) -> Vec<&'static str> {
+                self.globs()
+                    .iter()
+                    .copied()
+                    .filter(|glob| glob.starts_with("*."))
+                    .collect()
+            }
+
+            /// Everything the catalog knows about this language.
+            ///
+            /// ```
+            /// # #[cfg(feature = "lang-rust")] {
+            /// use lumis_core::languages::Language;
+            /// assert_eq!(Language::Rust.info().name, "Rust");
+            /// # }
+            /// ```
+            pub fn info(&self) -> LanguageInfo {
+                LanguageInfo {
+                    id: self.id_name(),
+                    name: self.name(),
+                    aliases: self.aliases(),
+                    extensions: self.extensions(),
+                    globs: self.globs(),
+                    emacs_modes: self.emacs_modes(),
+                    shebangs: self.shebangs(),
+                }
+            }
+
             pub fn id_name(&self) -> &'static str {
                 match self {
                     $(
@@ -153,27 +277,15 @@ macro_rules! define_languages {
                 static RE: LazyLock<Regex> =
                     LazyLock::new(|| Regex::new(r"#! *(?:/usr/bin/env )?([^ ]+)").unwrap());
 
-                if let Some(first_line) = split_on_newlines(src).next() {
-                    if let Some(cap) = RE.captures(first_line) {
-                        let interpreter_path = Path::new(&cap[1]);
-                        if let Some(name) = interpreter_path.file_name() {
-                            match name.to_string_lossy().as_ref() {
-                                $(
-                                    $($a_shebang => return Some(Language::$a_variant),)*
-                                )*
-                                $(
-                                    $(
-                                        #[cfg(feature = $g_feat)]
-                                        $g_shebang => return Some(Language::$g_variant),
-                                    )*
-                                )*
-                                _ => {}
-                            }
-                        }
-                    }
-                }
+                let first_line = split_on_newlines(src).next()?;
+                let cap = RE.captures(first_line)?;
+                let interpreter_path = Path::new(&cap[1]);
+                let name = normalize_shebang_command(&interpreter_path.file_name()?.to_string_lossy());
 
-                None
+                NORMALIZED_SHEBANGS
+                    .iter()
+                    .find(|(_, candidates)| candidates.iter().any(|candidate| *candidate == name))
+                    .map(|(language, _)| *language)
             }
         }
 
@@ -181,6 +293,8 @@ macro_rules! define_languages {
             type Err = LanguageParseError;
 
             fn from_str(s: &str) -> Result<Self, Self::Err> {
+                let original = s;
+                let s = s.trim();
                 if s.is_empty() {
                     return Ok(Language::PlainText);
                 }
@@ -204,7 +318,7 @@ macro_rules! define_languages {
                     return Ok(lang);
                 }
 
-                let path = Path::new(&s_lower);
+                let path = Utf8WindowsPath::new(&s_lower);
 
                 if let Some(lang) = Language::from_glob(path) {
                     return Ok(lang);
@@ -214,28 +328,71 @@ macro_rules! define_languages {
                     return Ok(lang);
                 }
 
-                Err(LanguageParseError(s.to_string()))
+                Err(LanguageParseError(original.to_string()))
             }
         }
 
-        /// Returns a HashMap containing all supported languages with their details.
-        pub fn available_languages() -> HashMap<String, (String, Vec<String>)> {
-            let mut languages = HashMap::new();
-
-            for language in Language::iter() {
-                let id_name = language.id_name();
-                let friendly_name = language.name().to_string();
-                let extensions: Vec<String> = Language::language_globs(language)
-                    .iter()
-                    .map(|p| p.to_string())
-                    .collect();
-
-                languages.insert(id_name.to_string(), (friendly_name, extensions));
-            }
-
+        /// Every compiled-in language and what the catalog knows about it,
+        /// sorted by id.
+        ///
+        /// Elixir's `Lumis.available_languages/0` and JavaScript's
+        /// `availableLanguages()` return this same record.
+        pub fn available_languages() -> Vec<LanguageInfo> {
+            let mut languages: Vec<LanguageInfo> = Language::iter().map(|l| l.info()).collect();
+            languages.sort_unstable_by_key(|language| language.id);
             languages
         }
+
+        #[deprecated(note = "use `available_languages()`, which carries aliases and detection metadata")]
+        pub fn available_languages_map() -> HashMap<String, (String, Vec<String>)> {
+            Language::iter()
+                .map(|language| {
+                    (
+                        language.id_name().to_string(),
+                        (
+                            language.name().to_string(),
+                            language.globs().iter().map(|g| (*g).to_string()).collect(),
+                        ),
+                    )
+                })
+                .collect()
+        }
     };
+}
+
+/// What Lumis knows about one language.
+///
+/// Every runtime returns this same shape.
+///
+/// # Examples
+///
+/// ```
+/// # #[cfg(feature = "lang-rust")] {
+/// use lumis_core::languages::Language;
+///
+/// let info = Language::Rust.info();
+///
+/// assert_eq!(info.id, "rust");
+/// assert_eq!(info.name, "Rust");
+/// assert!(info.globs.contains(&"*.rs"));
+/// # }
+/// ```
+#[derive(Clone, Debug, PartialEq, Eq, Hash, serde::Serialize)]
+pub struct LanguageInfo {
+    /// Stable identifier, e.g. `rust`.
+    pub id: &'static str,
+    /// Human-readable name, e.g. `Rust`.
+    pub name: &'static str,
+    /// Alternative names this language answers to.
+    pub aliases: &'static [&'static str],
+    /// The subset of [`globs`](Self::globs) that name a bare extension.
+    pub extensions: Vec<&'static str>,
+    /// File name patterns, e.g. `*.rs` and `Cargo.lock`.
+    pub globs: &'static [&'static str],
+    /// Emacs `mode:` names that select this language.
+    pub emacs_modes: &'static [&'static str],
+    /// Interpreter names in a shebang line that select this language.
+    pub shebangs: &'static [&'static str],
 }
 
 include!(concat!(env!("OUT_DIR"), "/languages_data.rs"));
@@ -302,68 +459,36 @@ impl Language {
             return Language::XML;
         }
 
-        #[cfg(feature = "lang-objc")]
-        if Self::looks_like_objc(Path::new(""), src) {
-            return Language::ObjC;
-        }
-
         Language::PlainText
     }
 
-    fn from_glob(path: &Path) -> Option<Self> {
-        match path.file_name() {
-            Some(name) => {
-                let name = name.to_string_lossy().into_owned();
-                for language in Language::iter() {
-                    for glob in Language::language_globs(language) {
-                        if glob.matches(&name) {
-                            return Some(language);
-                        }
-                    }
-                }
-
-                None
-            }
-            None => None,
-        }
+    fn from_glob(path: &Utf8WindowsPath) -> Option<Self> {
+        Self::first_matching_glob(path.file_name()?)
     }
 
     fn from_extension(token: &str) -> Option<Self> {
-        let token_pattern = format!("*.{token}");
-
-        for language in Language::iter() {
-            for glob in Language::language_globs(language) {
-                if glob.matches(&token_pattern) {
-                    return Some(language);
-                }
-            }
-        }
-        None
+        let token = token.strip_prefix('.').unwrap_or(token);
+        Self::first_matching_glob(&format!("*.{}", token.to_ascii_lowercase()))
     }
 
-    #[allow(dead_code)]
-    fn looks_like_objc(path: &Path, src: &str) -> bool {
-        if let Some(extension) = path.extension() {
-            if extension == "h" {
-                return split_on_newlines(src).take(100).any(|line| {
-                    ["#import", "@interface", "@protocol"]
-                        .iter()
-                        .any(|keyword| line.starts_with(keyword))
-                });
-            }
-        }
-
-        false
+    /// The first language in catalog order whose globs match `candidate`.
+    fn first_matching_glob(candidate: &str) -> Option<Self> {
+        CATALOG_GLOBS
+            .iter()
+            .find(|(_, patterns)| patterns.iter().any(|pattern| pattern.matches(candidate)))
+            .map(|(language, _)| *language)
     }
 
     #[allow(dead_code)]
     fn looks_like_xml(src: &str) -> bool {
-        src.to_lowercase().starts_with("<?xml")
+        src.trim_start().to_lowercase().starts_with("<?xml")
     }
 
     #[allow(dead_code)]
     fn looks_like_html(src: &str) -> bool {
-        src.to_lowercase().starts_with("<!doctype html")
+        src.trim_start()
+            .to_lowercase()
+            .starts_with("<!doctype html")
     }
 }
 
@@ -381,4 +506,115 @@ fn split_on_newlines(s: &str) -> impl Iterator<Item = &str> {
             l
         }
     })
+}
+
+fn normalize_shebang_command(command: &str) -> String {
+    static VERSION_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\d+(?:\.\d+)*$").unwrap());
+
+    let command = command.to_ascii_lowercase();
+    VERSION_RE.replace(&command, "").into_owned()
+}
+
+/// Every catalog glob, lowercased and compiled, in catalog order.
+///
+/// `glob::Pattern::new` dominates detection: compiling the catalog costs about
+/// 93 µs against 13 µs to match it already compiled, and `guess` walks it twice
+/// — once by file name and once by extension. Compiling once takes a miss from
+/// roughly 290 µs to tens.
+///
+/// Patterns are lowercased because the name they are matched against is, so a
+/// `CMakeLists.txt` hint and a `cmakelists.txt` hint reach the same language.
+static CATALOG_GLOBS: LazyLock<Vec<(Language, Vec<glob::Pattern>)>> = LazyLock::new(|| {
+    Language::iter()
+        .map(|language| {
+            let patterns = language
+                .globs()
+                .iter()
+                .map(|glob| {
+                    glob::Pattern::new(&glob.to_ascii_lowercase())
+                        .expect("catalog glob is a valid pattern")
+                })
+                .collect();
+            (language, patterns)
+        })
+        .collect()
+});
+
+/// Every catalog shebang, normalized, in catalog order.
+///
+/// The candidates are static, so normalizing them per detection ran the version
+/// regex over the whole catalog on every call.
+static NORMALIZED_SHEBANGS: LazyLock<Vec<(Language, Vec<String>)>> = LazyLock::new(|| {
+    Language::iter()
+        .map(|language| {
+            let commands = language
+                .shebangs()
+                .iter()
+                .map(|shebang| normalize_shebang_command(shebang))
+                .collect();
+            (language, commands)
+        })
+        .collect()
+});
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Stripping a trailing version turns `python3` into `python`, which is the
+    /// point. It would also turn `perl6` into `perl`, and Perl 6 is Raku — a
+    /// different language. Nothing else warns if the catalog grows a shebang
+    /// like that, so the collision is what this asserts.
+    #[test]
+    fn no_two_languages_share_a_normalized_shebang() {
+        let mut owners: HashMap<&str, Vec<&'static str>> = HashMap::new();
+
+        for (language, commands) in NORMALIZED_SHEBANGS.iter() {
+            for command in commands {
+                owners
+                    .entry(command.as_str())
+                    .or_default()
+                    .push(language.id_name());
+            }
+        }
+
+        let collisions: Vec<_> = owners
+            .iter()
+            .filter(|(_, languages)| {
+                languages
+                    .iter()
+                    .collect::<std::collections::BTreeSet<_>>()
+                    .len()
+                    > 1
+            })
+            .collect();
+
+        assert!(
+            collisions.is_empty(),
+            "shebangs normalize onto one another: {collisions:?}"
+        );
+    }
+
+    #[test]
+    fn plaintext_metadata_and_detection_are_consistent() {
+        let plaintext = Language::PlainText.info();
+
+        assert_eq!(plaintext.name, "Plain Text");
+        assert_eq!(plaintext.aliases, ["text", "txt", "plain"]);
+        assert_eq!(plaintext.emacs_modes, ["fundamental", "text"]);
+        assert!(plaintext.extensions.is_empty());
+        assert!(plaintext.globs.is_empty());
+        assert!(plaintext.shebangs.is_empty());
+
+        for name in std::iter::once(plaintext.id).chain(plaintext.aliases.iter().copied()) {
+            assert_eq!(
+                Language::guess(Some(name), "#!/usr/bin/env bash"),
+                Language::PlainText
+            );
+        }
+        assert_eq!(
+            Language::guess(None, "// -*- mode: text -*-\nfn main() {}"),
+            Language::PlainText
+        );
+    }
 }

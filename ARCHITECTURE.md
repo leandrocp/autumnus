@@ -242,7 +242,7 @@ cache keys contain the parser name, package version, and digest, so upgrades do
 not overwrite older verified assets. A compatible package already in the
 directory is an exact lock and is never revalidated during highlighting; a
 request therefore never waits on the network for something already on disk.
-`parsers cache --force` and its Elixir and JavaScript equivalents explicitly
+The host cache APIs with `force: true` and `languages cache --force` explicitly
 resolve the range again, fetch and verify the exact parser it names, then replace
 the cached manifest. A failed refresh therefore leaves the previous manifest and
 parser usable. Staging the directory makes deployments reproducible, while a new
@@ -256,28 +256,58 @@ manifest rather than recreating those package-manager responsibilities. Moving
 to a new Tree-sitter minor series changes the range and legitimately requires a
 runtime release. Publishing `@lumis-sh/wasm-rust@0.26.x` does not.
 
-### Filling the store at build time
+### Preparing the persistent store
 
-Keeping both costs off the first request means paying them during the build:
+Two verbs, the same in every runtime: **cache** puts a language on disk,
+**load** caches it and keeps it in this runtime. Load is the superset, so a
+process that will serve wants a load; caching is for filling a directory some
+other process will read.
 
-```sh
-lumis parsers cache rust javascript      # CLI
-mix lumis.languages.cache rust javascript # Elixir
+An application loads at startup without waiting for it. Elixir runs the load
+under a `:temporary` child of Lumis's supervisor; JavaScript leaves the promise
+unawaited. Neither can delay a boot or fail one, which matters because warm-up
+is an optimization and highlighting loads on demand regardless:
+
+```elixir
+Lumis.Languages.async_load(["rust", "javascript"])
 ```
 
-Both write a self-sufficient directory — parser bytes plus the `lumis.json`
-that names them — so pointing `LUMIS_DATA_DIR` at it is all a deployment needs.
-Both go through `LanguageStore::cache_language`, which needs no Wasmtime
-runtime, so the two commands cannot disagree about what a prepared cache
-contains.
+```javascript
+loadLanguages(["rust", "javascript"]).catch(report)
+```
 
-Both then load each parser once, so Wasmtime writes `compiled/` beside them and
-an image ships the compile as well as the download.
+For a separate build or operations step, the CLI remains the one command:
+
+```sh
+lumis languages cache rust javascript
+```
+
+All paths write a self-sufficient directory — parser bytes plus the `lumis.json`
+that names them — so pointing `LUMIS_DATA_DIR` at it is all a deployment needs.
+The CLI and `Lumis.Languages.cache/2` go through `LanguageStore::cache_languages`;
+JavaScript writes the same verified layout, which the addon then reads through
+`LanguageStore`.
+
+They differ in what they keep, and that is the whole reason both exist. The
+preparation paths validate each parser and its queries in a disposable
+Tree-sitter store and then drop it, because the process that will use the
+directory is not this one. A startup warm-up loads into the runtime and keeps
+it, so no request reloads what the warm-up already paid for. Preparing a
+directory and warming a VM are therefore complementary rather than alternatives:
+a release fills the directory, and the application that reads it still loads
+from disk into memory.
+
+Validation writes Wasmtime's compiled module under `compiled/` and catches link
+and external scanner failures that raw compilation cannot. Each worker drops its
+store after validating one parser, and the compilation limit bounds simultaneous
+stores to four. A full catalog therefore never accumulates in Tree-sitter's
+shared 128 MiB address space, and peak memory stays bounded on high-core
+builders.
 
 **One prepared directory serves every runtime, including the compile.** Wasmtime
 keys its module cache on the compiler and its version, so a release build of the
 CLI, the Elixir NIF and the Node addon all read and write the same
-`compiled/modules/` entries. Preparing a directory with `lumis parsers cache`
+`compiled/modules/` entries. Preparing a directory with `lumis languages cache`
 and pointing Elixir at it costs 128 ms to load a parser against 294 ms with
 `compiled/` removed. What keeps that true is a single wasmtime version across
 the three; `mise run elixir-nif-lock-check` enforces it, because the Elixir NIF

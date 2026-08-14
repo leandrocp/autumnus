@@ -89,6 +89,9 @@ fn resolve_style(theme: Option<&Theme>, scope: &str, language: &str) -> Style {
 static DEFAULT_STYLE: LazyLock<Arc<Style>> = LazyLock::new(|| Arc::new(Style::default()));
 
 /// Options for one highlighting operation.
+///
+/// The counterpart of the `options` argument to JavaScript's `highlight()` and
+/// `highlightEvents()`.
 #[derive(Debug, PartialEq, Eq)]
 #[must_use]
 pub struct HighlightOptions<'a, T = ()> {
@@ -129,7 +132,7 @@ impl HighlightOptions<'static> {
 }
 
 impl<'a, T> HighlightOptions<'a, T> {
-    /// Enables or disables rainbow bracket highlighting for this operation.
+    /// Emit `punctuation.bracket.rainbow.N` scopes around bracket pairs.
     pub const fn rainbow_brackets(mut self, enabled: bool) -> Self {
         self.rainbow_brackets = enabled;
         self
@@ -436,7 +439,33 @@ where
     Ok(())
 }
 
-#[doc(hidden)]
+/// Highlight `source` into nested open/close events.
+///
+/// The lower-level counterpart of [`highlight_iter`]: a `Start` opens a scope,
+/// `Source` events carry byte ranges, and `End` closes it, with parent scopes
+/// staying open across children. Custom formatters that need the nesting rather
+/// than a flat token stream consume these.
+///
+/// [`HighlightEvent::scope`] resolves a `Start` to its scope name, which is
+/// what JavaScript's `highlightEvents()` carries directly.
+///
+/// # Examples
+///
+/// ```rust
+/// # #[cfg(feature = "lang-rust")] {
+/// use lumis::{highlight::highlight_events, languages::Language};
+/// use lumis::events::HighlightEvent;
+///
+/// let events = highlight_events("let x = 1;", Language::Rust).unwrap();
+///
+/// let first_scope = events.iter().find_map(|event| match event {
+///     HighlightEvent::Start { .. } => event.scope(),
+///     _ => None,
+/// });
+///
+/// assert_eq!(first_scope, Some("keyword"));
+/// # }
+/// ```
 pub fn highlight_events(
     source: &str,
     language: Language,
@@ -444,7 +473,9 @@ pub fn highlight_events(
     highlight_events_with_options(source, language, HighlightOptions::new())
 }
 
-#[doc(hidden)]
+/// Highlight `source` into nested open/close events, with options.
+///
+/// See [`highlight_events`].
 pub fn highlight_events_with_options<T>(
     source: &str,
     language: Language,

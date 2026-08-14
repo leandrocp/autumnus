@@ -1,0 +1,27 @@
+{
+  "name": "conformance_mid",
+  "appearance": "dark",
+  "revision": "conformance",
+  "highlights": {
+    "normal": {
+      "fg": "#8a8a8a",
+      "bg": "#5a5a5a"
+    },
+    "highlighted": {
+      "fg": "#9a8877",
+      "bg": "#6b6b6b"
+    },
+    "number": {
+      "fg": "#7c7c7c"
+    },
+    "property": {
+      "fg": "#6d6d6d"
+    },
+    "punctuation.bracket": {
+      "fg": "#9e9e9e"
+    },
+    "punctuation.delimiter": {
+      "fg": "#8f8f8f"
+    }
+  }
+}

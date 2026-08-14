@@ -139,7 +139,11 @@ Custom header wrappers are not currently exposed by `lumis4j`.
   </TabItem>
   <TabItem value="cli" label="CLI">
 
-Custom header wrappers are not available in the CLI formatter.
+```bash
+lumis highlight app.js -f html-inline \
+  --header-open '<figure class="snippet-frame"><figcaption>app.js</figcaption>' \
+  --header-close '</figure>'
+```
 
   </TabItem>
 </Tabs>

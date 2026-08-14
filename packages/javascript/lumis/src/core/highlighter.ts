@@ -71,7 +71,15 @@ export interface CreateHighlighterOptions {
   languagePackageResolver?: LanguagePackageResolver;
 }
 
-async function loadLanguageDefinition(runtime: RuntimeLike, language: Language): Promise<void> {
+/**
+ * Narrowed to the one method it calls so `loadLanguages()` can share it, rather
+ * than growing a second place that decides what a `Language` becomes on the way
+ * into a runtime.
+ */
+export async function loadLanguageDefinition(
+  runtime: Pick<RuntimeLike, "loadLanguage">,
+  language: Language,
+): Promise<void> {
   await runtime.loadLanguage({
     definition: { id: language.id, aliases: language.aliases },
     packageName: language.packageName,

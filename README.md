@@ -59,7 +59,7 @@ lumis highlight app.js
 ### [Rust](https://crates.io/crates/lumis)
 
 ```rust
-use lumis::{highlight, Context, HtmlInlineBuilder, languages::Language, themes};
+use lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
 
 let theme = themes::get("dracula").unwrap();
 
@@ -69,7 +69,7 @@ let formatter = HtmlInlineBuilder::new()
     .build()
     .unwrap();
 
-let html = highlight("const x = 1", formatter, Context::new());
+let html = highlight("const x = 1", formatter);
 ```
 
 ### [JavaScript](https://www.npmjs.com/package/@lumis-sh/lumis)
@@ -108,8 +108,9 @@ const html = await highlight('const x = 1', htmlInline({ language: javascript, t
 Lumis.highlight!("const x = 1", formatter: {:html_inline, language: "javascript", theme: "dracula"})
 ```
 
-Parsers download on demand and load once per VM. `Lumis.Languages.load/1` moves
-that off the first request; `mix lumis.languages.cache` bakes it into a release.
+Parsers download on demand and load once per VM. Call
+`Lumis.Languages.async_load/1` from your application's `start/2` to move the
+download and compile off the first request without holding up the boot.
 See [Elixir integration](https://lumis.sh/docs/usage/elixir-integration).
 
 ### [Java](https://github.com/roastedroot/lumis4j)
@@ -138,7 +139,7 @@ System.out.println(result.string());
 |----------|---------| ------- | -----|
 | **CLI** | `npx @lumis-sh/cli` | [npmjs.com/@lumis-sh/cli](https://www.npmjs.com/package/@lumis-sh/cli) | [README.md](packages/javascript/cli/README.md) |
 | **Rust** | `cargo add lumis` | [crates.io/lumis](https://crates.io/crates/lumis) | [README.md](crates/lumis/README.md) &bull; [docs.rs](https://docs.rs/lumis) |
-| **Elixir** | `{:lumis, "~> 0.3"}` | [hex.pm/lumis](https://hex.pm/packages/lumis) | [README.md](packages/elixir/lumis/README.md) &bull; [hexdocs](https://hexdocs.pm/lumis) |
+| **Elixir** | `{:lumis, "~> 0.7"}` | [hex.pm/lumis](https://hex.pm/packages/lumis) | [README.md](packages/elixir/lumis/README.md) &bull; [hexdocs](https://hexdocs.pm/lumis) |
 | **JavaScript** | `npm install @lumis-sh/lumis` | [npmjs.com/@lumis-sh/lumis](https://www.npmjs.com/package/@lumis-sh/lumis) | [README.md](packages/javascript/lumis/README.md) |
 | **Browsers / CDN** | `npm install @lumis-sh/lumis` | [npmjs.com/@lumis-sh/lumis](https://www.npmjs.com/package/@lumis-sh/lumis) | [README.md](packages/javascript/lumis/README.md) |
 | **Java** | `io.roastedroot:lumis4j:0.0.7` | [io.roastedroot/lumis4j](https://central.sonatype.com/artifact/io.roastedroot/lumis4j) | [README.md](https://github.com/roastedroot/lumis4j/blob/main/README.md) |

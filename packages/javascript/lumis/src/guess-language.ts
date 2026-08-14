@@ -1,3 +1,4 @@
+import { basename } from "pathe";
 import {
   EMACS_MODE_MAP,
   EXACT_LANGUAGE_MAP,
@@ -10,12 +11,6 @@ const GLOB_REGEXES = GLOB_MATCHERS.map(({ id, glob }) => ({ id, regex: globToReg
 
 function normalize(value: string): string {
   return value.trim().toLowerCase();
-}
-
-function basename(value: string): string {
-  const normalized = value.replaceAll("\\", "/");
-  const parts = normalized.split("/");
-  return parts[parts.length - 1] ?? normalized;
 }
 
 function escapeRegex(value: string): string {

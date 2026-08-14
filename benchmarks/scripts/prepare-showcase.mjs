@@ -40,14 +40,14 @@ const documents = [
     unsupported: [],
   },
   {
-    id: "phoenix",
-    label: "Phoenix core components",
+    id: "livebook",
+    label: "Livebook core components",
     language: "elixir",
     languageLabel: "Elixir",
-    file: "phoenix_core_components.ex",
-    sha256: "840129d0b1201a29492ef515c97f017d8a57ca7cd16ef98f5b2789bfa8b00832",
+    file: "livebook_core_components.ex",
+    sha256: "d5cd474afb5f8f87ed135a2d704f772cfd08bb829a708ba7b5f322b5ea77a69a",
     source:
-      "https://github.com/phoenixframework/phoenix/blob/1562adca2e9b02b4564c519d5cc2a096ae6fc009/installer/templates/phx_web/components/core_components.ex",
+      "https://github.com/livebook-dev/livebook/blob/5133601d9678fb8ef0c87484e5d52eff193813e5/lib/livebook_web/components/core_components.ex",
     injections: ["HEEx", "Markdown", "Comment"],
     load: ["elixir", "heex", "comment", "markdown", "markdown_inline"],
     unsupported: [],
@@ -71,7 +71,7 @@ const documents = [
     language: "markdown",
     languageLabel: "Markdown",
     file: "lumis_readme.md",
-    sha256: "335fac77d3a4cbd950a8e34c31a95a984fd3a3c35445bcaa2882f154e33924ac",
+    sha256: "24808cd3b6812e243a5a37319f357baacf7d06c54f389b6aeea1f4406904f340",
     source: "https://github.com/leandrocp/lumis/blob/main/README.md",
     injections: ["Bash", "Elixir", "Java", "JavaScript", "Rust"],
     // Every fence names its own language, and a browser cannot fetch a parser

@@ -16,6 +16,20 @@ const wasmModules = import.meta.glob<string>(
   { eager: true, import: "default", query: "?url" },
 );
 
+const wasmVersions = import.meta.glob<string>(
+  [
+    "../../node_modules/@lumis-sh/wasm-*/package.json",
+    "../../node_modules/.pnpm/@lumis-sh+wasm-*/node_modules/@lumis-sh/wasm-*/package.json",
+    "!../../node_modules/@lumis-sh/wasm-bundle-*/package.json",
+    "!../../node_modules/.pnpm/@lumis-sh+wasm-bundle-*/node_modules/@lumis-sh/wasm-bundle-*/package.json",
+  ],
+  { eager: true, import: "version" },
+);
+
+const versionByDirectory = new Map(
+  Object.entries(wasmVersions).map(([path, version]) => [directoryOf(path), version]),
+);
+
 const wasmUrls = new Map(
   Object.entries(wasmModules).map(([path, url]) => {
     const match = path.match(/(@lumis-sh\/wasm-[^/]+)\/([^/]+\.wasm)$/);
@@ -23,15 +37,28 @@ const wasmUrls = new Map(
       throw new Error(`Could not derive wasm package name and file from ${path}`);
     }
 
-    return [`${match[1]}/${match[2]}`, url];
+    const version = versionByDirectory.get(directoryOf(path));
+    if (!version) {
+      throw new Error(`Could not find the installed version for ${path}`);
+    }
+
+    return [`${match[1]}@${version}/${match[2]}`, url];
   }),
 );
 
-configureWasmResolver((_language, wasm) => {
-  const localUrl = wasmUrls.get(`${wasm.packageName}/${wasm.name}.wasm`);
-  if (localUrl) return localUrl;
+function directoryOf(path: string) {
+  return path.slice(0, path.lastIndexOf("/"));
+}
 
-  return `https://cdn.jsdelivr.net/npm/${wasm.packageName}@${wasm.version}/${wasm.name}.wasm`;
+// The catalog resolves each parser package against the registry, so it can ask
+// for a version newer than the one installed here, and `pnpm` leaves the
+// superseded copy on disk, so a name alone can match either. The bytes are
+// checked against the size and digest the catalog carries, and a near miss
+// fails every language rather than falling back, so only the exact version is
+// served locally.
+configureWasmResolver((_language, wasm) => {
+  const file = `${wasm.packageName}@${wasm.version}/${wasm.name}.wasm`;
+  return wasmUrls.get(file) ?? `https://cdn.jsdelivr.net/npm/${file}`;
 });
 
 const languageCache = new Map<string, Promise<Language>>();

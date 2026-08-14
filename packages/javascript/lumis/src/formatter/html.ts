@@ -11,6 +11,9 @@ import type {
 import { HIGHLIGHT_NAMES } from "../highlights.js";
 import { sanitizeThemeName } from "../themes.js";
 
+// Rust exposes this from `lumis::formatters::html`, so the helper modules line up.
+export { sanitizeThemeName } from "../themes.js";
+
 const _encoder = new TextEncoder();
 const _decoder = new TextDecoder();
 
@@ -695,6 +698,35 @@ function pushThemeCssVars(
   cssVars.push(`${prefix}-${sanitized}-text-decoration:${textDecoration(style)};`);
 }
 
+/**
+ * Theme names in a stable order.
+ *
+ * Rust holds themes in a `HashMap` and sorts before emitting, so this has to
+ * sort rather than follow insertion order for the two to agree byte for byte.
+ *
+ * `Array.prototype.sort` orders by UTF-16 code unit, which puts astral
+ * characters before U+E000..U+FFFF; Rust orders `&str` by UTF-8 byte, which
+ * puts them after. Comparing the encoded bytes is what makes the two agree.
+ *
+ * Exported for the multi-themes formatter next door, not for callers; Rust
+ * keeps its counterpart private.
+ * @internal
+ */
+export function sortedThemeNames(themes: Record<string, unknown>): string[] {
+  const encoder = new TextEncoder();
+
+  return Object.keys(themes).sort((left, right) => {
+    const a = encoder.encode(left);
+    const b = encoder.encode(right);
+
+    for (let i = 0; i < Math.min(a.length, b.length); i += 1) {
+      if (a[i] !== b[i]) return a[i]! - b[i]!;
+    }
+
+    return a.length - b.length;
+  });
+}
+
 export function appendThemeCssVars(
   cssVars: string[],
   prefix: string,
@@ -703,12 +735,12 @@ export function appendThemeCssVars(
   language: LanguageRef,
   excludeTheme?: string,
 ): void {
-  for (const [themeName, theme] of Object.entries(themes)) {
+  for (const themeName of sortedThemeNames(themes)) {
     if (themeName === excludeTheme) {
       continue;
     }
 
-    pushThemeCssVars(cssVars, prefix, themeName, scope, language, theme);
+    pushThemeCssVars(cssVars, prefix, themeName, scope, language, themes[themeName]);
   }
 }
 
@@ -718,13 +750,13 @@ export function buildNormalThemeVars(
   themes: Record<string, Theme>,
   excludeTheme?: string,
 ): void {
-  for (const [themeName, theme] of Object.entries(themes)) {
+  for (const themeName of sortedThemeNames(themes)) {
     if (themeName === excludeTheme) {
       continue;
     }
 
     const sanitized = sanitizeThemeName(themeName);
-    const style = getThemeStyle(theme, "normal");
+    const style = getThemeStyle(themes[themeName], "normal");
     if (style?.fg) styles.push(`${prefix}-${sanitized}:${style.fg};`);
     if (style?.bg) styles.push(`${prefix}-${sanitized}-bg:${style.bg};`);
   }

@@ -164,7 +164,9 @@ mise run test-javascript
 [tasks.'test-elixir']
 description = "Run the Elixir test suite"
 depends = ["stage-test-parsers"]
-run = "cd packages/elixir/lumis && LUMIS_BUILD=1 mix test"
+dir = "{{config_root}}/packages/elixir/lumis"
+env = { LUMIS_BUILD = "1" }
+run = "mix test"
 
 [tasks.'test-javascript']
 description = "Run the JavaScript test suites on both the native and Wasm runtimes"
@@ -257,6 +259,7 @@ mise run test-conformance-javascript-native
 mise run test-conformance-javascript-wasm
 mise run test-conformance-browser
 mise run test-conformance-elixir
+mise run test-conformance-languages
 '''
 
 [tasks.'test-conformance-rust']
@@ -308,9 +311,39 @@ packages/javascript/lumis/node_modules/.bin/playwright "${args[@]}"
 pnpm --filter @lumis-sh/lumis run test:conformance:browser
 '''
 
+[tasks.'test-conformance-languages']
+description = "Check every runtime agrees on the language names cache and load accept"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+cargo test -p lumis-wasm-runtime --test languages_conformance
+pnpm --filter @lumis-sh/lumis exec vitest run test/languages-conformance.test.ts
+mise run test-conformance-languages-elixir
+'''
+
+[tasks.'test-conformance-languages-elixir']
+description = "The Elixir half of the language-name conformance suite"
+dir = "{{config_root}}/packages/elixir/lumis"
+env = { LUMIS_BUILD = "1" }
+run = "mix test test/languages_conformance_test.exs"
+
 [tasks.'test-conformance-elixir']
 description = "Run Elixir conformance tests"
-run = "cd packages/elixir/lumis && LUMIS_BUILD=1 mix test --include conformance test/conformance_test.exs"
+dir = "{{config_root}}/packages/elixir/lumis"
+env = { LUMIS_BUILD = "1" }
+run = "mix test --include conformance test/conformance_test.exs"
+
+[tasks.'lint-elixir']
+description = "Check Elixir formatting, compile warnings, and credo"
+dir = "{{config_root}}/packages/elixir/lumis"
+env = { LUMIS_BUILD = "1" }
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+mix format --check-formatted
+mix compile --warnings-as-errors
+mix credo
+'''
 
 [tasks.'lint-workflows']
 description = "Validate GitHub Actions workflows with actionlint"
@@ -340,13 +373,8 @@ cargo fmt --all -- --check
 cargo fmt --manifest-path crates/dev/Cargo.toml --check
 cargo fmt --manifest-path crates/autumnus/Cargo.toml --check
 echo ""
-echo "Running Elixir format check..."
-(cd packages/elixir/lumis && mix format --check-formatted)
-echo ""
-echo "Running Elixir compile warnings..."
-(cd packages/elixir/lumis && LUMIS_BUILD=1 mix compile --warnings-as-errors)
-echo "Running Elixir credo..."
-(cd packages/elixir/lumis && LUMIS_BUILD=1 mix credo)
+echo "Running Elixir checks..."
+mise run lint-elixir
 echo ""
 echo "Running JS fmt check..."
 mise run fmt-js -- --check
@@ -367,8 +395,19 @@ echo ""
 echo "Checking native package versions..."
 mise run check-native-versions
 echo ""
+echo "Checking CLI platform package versions..."
+mise run check-cli-versions
+echo ""
 echo "Checking crate dependency requirements..."
 mise run check-crate-deps
+'''
+
+[tasks.'check-cli-versions']
+description = "Check the CLI platform packages are versioned in lockstep with @lumis-sh/cli"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+node packages/javascript/scripts/check-cli-versions.mjs
 '''
 
 [tasks.'check-native-versions']
@@ -532,13 +571,19 @@ set -euo pipefail
 cargo run --manifest-path crates/dev/Cargo.toml --features lumis-all-languages -- regen-conformance ${usage_name:-}
 '''
 
+[tasks.'docs-elixir']
+description = "Generate the Elixir package documentation"
+dir = "{{config_root}}/packages/elixir/lumis"
+env = { LUMIS_BUILD = "1" }
+run = "mix docs"
+
 [tasks.'docs']
 description = "Generate documentation for all crates and packages"
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
 cargo doc --all-features --no-deps
-(cd packages/elixir/lumis && LUMIS_BUILD=1 mix docs)
+mise run docs-elixir
 pnpm --filter @lumis-sh/lumis run docs
 echo ""
 echo "Docs generated:"
@@ -1036,6 +1081,12 @@ if [ "$package" = "npm-lumis" ]; then
     cargo set-version --manifest-path packages/javascript/lumis/native/Cargo.toml -p lumis-js-native "$version"
     for native_manifest in packages/javascript/lumis/native/npm/*/package.json; do
         npm --prefix "$(dirname "$native_manifest")" version --no-git-tag-version "$version"
+    done
+fi
+
+if [ "$package" = "npm-cli" ]; then
+    for cli_manifest in packages/javascript/cli/npm/*/package.json; do
+        npm --prefix "$(dirname "$cli_manifest")" version --no-git-tag-version "$version"
     done
 fi
 

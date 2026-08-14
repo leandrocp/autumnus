@@ -39,7 +39,7 @@ const scopeExpectations = {
     ["Rust attribute", '<span style="color: #50fa7b;">derive</span>'],
     ["Rust comment", '<span style="color: #6272a4;">// always required.</span>'],
   ],
-  phoenix: [
+  livebook: [
     ["Elixir keyword", '<span style="color: #ff79c6;">end</span>'],
     ["Elixir module", '<span style="color: #ffb86c;">Phoenix.Component</span>'],
     ["Elixir atom", '<span style="color: #bd93f9;">:string</span>'],
@@ -121,7 +121,7 @@ const provenance = {
 };
 
 const manifest = {
-  schemaVersion: 4,
+  schemaVersion: 5,
   theme: {
     name: "Dracula",
     source:
@@ -196,7 +196,11 @@ for (const document of documents) {
     }
     const page = pageHtml({ fragment, label });
     await writeFile(resolve(generatedDir, document.id, `${id}.html`), page);
-    outputs.push({ id, outputBytes: Buffer.byteLength(fragment) });
+    outputs.push({
+      id,
+      outputBytes: Buffer.byteLength(fragment),
+      tokens: countTokens(fragment, label),
+    });
   }
 
   validateLumisAgreement(lumisFragments, document);
@@ -241,6 +245,24 @@ function run(command, args) {
     throw new Error(`${basename(command)} failed:\n${result.stderr}`);
   }
   return result.stdout;
+}
+
+// A token is a span the highlighter gave a colour to, whether that colour arrives
+// inline or through one of highlight.js's `hljs-` classes. Spans that carry
+// neither are structure rather than a token: Shiki wraps every line in
+// `<span class="line">`, so counting all spans would credit it one per line.
+function countTokens(fragment, implementation) {
+  let tokens = 0;
+  for (const tag of fragment.match(/<span\b[^>]*>/gi) ?? []) {
+    if (
+      /style=(?:"[^"]*|'[^']*)\bcolor\s*:/i.test(tag) ||
+      /class=(?:"[^"]*|'[^']*)\bhljs-/i.test(tag)
+    ) {
+      tokens += 1;
+    }
+  }
+  if (tokens === 0) throw new Error(`${implementation} produced no coloured tokens`);
+  return tokens;
 }
 
 function validateHtml(output, sourceBytes, implementation) {

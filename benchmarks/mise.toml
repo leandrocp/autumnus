@@ -328,6 +328,10 @@ done
 description = "Merge Total results and validate execution metadata"
 run = "node benchmarks/scripts/merge-results.mjs"
 
+[tasks."results-publish"]
+description = "Copy the merged timing report into the website as static assets"
+run = "node benchmarks/scripts/publish-benchmarks.mjs"
+
 [tasks."package-sizes"]
 description = "Measure comparable local release and package artifacts"
 depends = ["install", "build:javascript", "build:rust-sizes", "build:cli", "build:elixir"]

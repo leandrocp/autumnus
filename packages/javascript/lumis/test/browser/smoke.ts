@@ -64,7 +64,8 @@ interface CorpusFixture {
   theme: string;
   htmlMultiThemes?: {
     themes: Record<string, string>;
-    defaultTheme: string;
+    /** Absent means CSS-variables-only mode, which is its own rendering branch. */
+    defaultTheme?: string;
     highlightLines?: number[];
   };
 }
@@ -231,9 +232,14 @@ async function run(): Promise<void> {
     const { source, language, rainbowBrackets } = fixture;
     const theme = getTheme(fixture.theme);
     const config = fixture.htmlMultiThemes;
+    // Reversed on purpose. Rust holds themes in a `HashMap` and sorts before
+    // emitting, so output must not depend on the order the caller inserted
+    // them. Feeding them in already-sorted order would not prove that.
     const formatterThemes = config
       ? Object.fromEntries(
-          Object.entries(config.themes).map(([name, themeId]) => [name, getTheme(themeId)]),
+          Object.entries(config.themes)
+            .reverse()
+            .map(([name, themeId]) => [name, getTheme(themeId)]),
         )
       : { main: theme };
 
@@ -247,7 +253,7 @@ async function run(): Promise<void> {
         htmlMultiThemes({
           language,
           themes: formatterThemes,
-          defaultTheme: config?.defaultTheme ?? "main",
+          defaultTheme: config ? config.defaultTheme : "main",
           highlightLines: config?.highlightLines?.length
             ? { lines: config.highlightLines, style: "theme" }
             : undefined,

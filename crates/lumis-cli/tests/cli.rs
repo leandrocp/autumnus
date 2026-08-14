@@ -125,7 +125,7 @@ fn version_flag() {
 #[test]
 fn short_version_flag() {
     cmd()
-        .arg("-v")
+        .arg("-V")
         .assert()
         .success()
         .stdout(predicate::str::contains(env!("CARGO_PKG_VERSION")));
@@ -174,6 +174,103 @@ fn list_themes_uses_data_dir_from_env() {
         .assert()
         .success()
         .stdout(predicate::str::contains("custom (file)"));
+}
+
+/// The format was unpinned, so nothing would have noticed it changing. One
+/// language and one theme are enough to hold the shape of each.
+#[test]
+fn list_languages_prints_an_id_then_its_globs() {
+    let output = cmd().args(["languages", "list"]).assert().success();
+    let stdout = String::from_utf8(output.get_output().stdout.clone()).unwrap();
+
+    let elixir = stdout
+        .lines()
+        .position(|line| line == "elixir")
+        .expect("elixir is listed on a line of its own");
+    assert_eq!(stdout.lines().nth(elixir + 1).unwrap(), "  *.ex  *.exs");
+}
+
+#[test]
+fn list_themes_prints_one_sorted_name_per_line() {
+    let output = cmd().args(["themes", "list"]).assert().success();
+    let stdout = String::from_utf8(output.get_output().stdout.clone()).unwrap();
+    let names: Vec<&str> = stdout.lines().collect();
+
+    assert!(
+        names.len() > 200,
+        "expected the full corpus, got {}",
+        names.len()
+    );
+    assert!(names.contains(&"dracula"));
+
+    let mut sorted = names.clone();
+    sorted.sort_unstable();
+    assert_eq!(names, sorted);
+}
+
+#[test]
+fn languages_show_prints_what_the_catalog_knows() {
+    cmd()
+        .args(["languages", "show", "elixir"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("elixir: Elixir"))
+        .stdout(predicate::str::contains("extensions: *.ex, *.exs"))
+        .stdout(predicate::str::contains("emacs modes: elixir"));
+}
+
+#[test]
+fn languages_show_resolves_an_alias() {
+    cmd()
+        .args(["languages", "show", "js"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("javascript: JavaScript"))
+        .stdout(predicate::str::contains("aliases: js, jsx"));
+}
+
+#[test]
+fn languages_show_rejects_an_unknown_language() {
+    cmd()
+        .args(["languages", "show", "not-a-language"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("unknown language: not-a-language"));
+}
+
+#[test]
+fn themes_show_prints_appearance_and_colors() {
+    cmd()
+        .args(["themes", "show", "dracula"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("dracula: dark"))
+        .stdout(predicate::str::contains("background: #282a36"));
+}
+
+#[test]
+fn themes_show_finds_a_theme_from_the_data_dir() {
+    let tmp = tempfile::tempdir().unwrap();
+    write_file(
+        &tmp.path().join("themes/custom.json"),
+        r#"{"name":"custom","appearance":"dark","revision":"test","highlights":{}}"#,
+    );
+
+    cmd()
+        .env("LUMIS_DATA_DIR", tmp.path())
+        .args(["themes", "show", "custom"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("custom: dark"));
+}
+
+#[test]
+fn themes_show_rejects_an_unknown_theme() {
+    cmd()
+        .args(["themes", "show", "not-a-theme"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("unknown theme: not-a-theme"));
 }
 
 #[test]
@@ -823,15 +920,79 @@ fn highlight_source_diff_html_inline() {
 }
 
 #[test]
+fn highlight_source_html_inline_routes_parity_options() {
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args([
+            "highlight",
+            "-l",
+            "diff",
+            "-f",
+            "html-inline",
+            "-t",
+            "dracula",
+            "--pre-class",
+            "custom",
+            "--italic",
+            "--include-highlights",
+            "--header-open",
+            "<figure>",
+            "--header-close",
+            "</figure>",
+            "-H",
+            "1",
+            "--highlight-lines-class",
+            "selected",
+            "--highlight-lines-style",
+            "none",
+        ])
+        .write_stdin(DIFF_SNIPPET)
+        .assert()
+        .success()
+        .stdout(predicate::str::starts_with(
+            "<figure><pre class=\"lumis custom\"",
+        ))
+        .stdout(predicate::str::contains(
+            "<div class=\"l-line selected\" data-line=\"1\"><span",
+        ))
+        .stdout(predicate::str::contains("data-highlight=\""))
+        .stdout(predicate::str::contains("font-style: italic;"))
+        .stdout(predicate::str::ends_with("</code></pre></figure>"));
+}
+
+#[test]
 fn highlight_source_diff_html_linked() {
     cmd()
         .arg("--data-dir")
         .arg(fixtures_dir())
-        .args(["highlight", "-l", "diff", "-f", "html-linked"])
+        .args([
+            "highlight",
+            "-l",
+            "diff",
+            "-f",
+            "html-linked",
+            "--pre-class",
+            "custom",
+            "--header-open",
+            "<figure>",
+            "--header-close",
+            "</figure>",
+            "-H",
+            "1",
+            "--highlight-lines-class",
+            "selected",
+        ])
         .write_stdin(DIFF_SNIPPET)
         .assert()
         .success()
-        .stdout(predicate::str::contains("<pre"));
+        .stdout(predicate::str::starts_with(
+            "<figure><pre class=\"lumis custom\"",
+        ))
+        .stdout(predicate::str::contains(
+            "<div class=\"l-line selected\" data-line=\"1\">",
+        ))
+        .stdout(predicate::str::ends_with("</code></pre></figure>"));
 }
 
 #[test]
@@ -885,15 +1046,34 @@ fn highlight_source_diff_html_multi_themes_with_all_options() {
             "--default-theme",
             "main",
             "--css-variable-prefix=--demo",
-            "-h",
+            "--pre-class",
+            "custom",
+            "--italic",
+            "--include-highlights",
+            "--header-open",
+            "<figure>",
+            "--header-close",
+            "</figure>",
+            "-H",
             "2",
+            "--highlight-lines-class",
+            "selected",
+            "--highlight-lines-style",
+            "none",
         ])
         .write_stdin(DIFF_SNIPPET)
         .assert()
         .success()
-        .stdout(predicate::str::contains("class=\"lumis lumis-themes"))
+        .stdout(predicate::str::starts_with(
+            "<figure><pre class=\"lumis lumis-themes custom ",
+        ))
         .stdout(predicate::str::contains("--demo-alt"))
-        .stdout(predicate::str::contains("data-line=\"2\""));
+        .stdout(predicate::str::contains(
+            "<div class=\"l-line selected\" data-line=\"2\"><span",
+        ))
+        .stdout(predicate::str::contains("data-highlight=\""))
+        .stdout(predicate::str::contains("font-style:"))
+        .stdout(predicate::str::ends_with("</code></pre></figure>"));
 }
 
 #[test]
@@ -915,12 +1095,28 @@ fn highlight_rejects_invalid_highlight_line_ranges() {
     cmd()
         .arg("--data-dir")
         .arg(fixtures_dir())
-        .args(["highlight", "-l", "diff", "-h", "3-1"])
+        .args(["highlight", "-l", "diff", "-f", "html-inline", "-H", "3-1"])
         .write_stdin(DIFF_SNIPPET)
         .assert()
         .failure()
         .stderr(predicate::str::contains(
             "Start line (3) must be less than or equal to end line (1)",
+        ));
+}
+
+/// The formatter check runs before the value is parsed, so a flag the formatter
+/// ignores is reported as inapplicable rather than as malformed.
+#[test]
+fn an_inapplicable_flag_is_reported_before_its_value_is_parsed() {
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args(["highlight", "-l", "diff", "-H", "3-1"])
+        .write_stdin(DIFF_SNIPPET)
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "`--highlight-lines` is not accepted by the `terminal` formatter",
         ));
 }
 
@@ -1003,12 +1199,18 @@ fn themes_generate_supports_output_setup_and_appearance_options() {
     assert!(themes_lua.contains("vim.g.test_setup = true"));
 }
 
-// -- parsers cache --
+// -- languages cache --
 
+/// clap prints each env-backed option's current value, so `$LUMIS_DATA_DIR` and
+/// `$LUMIS_CONFIG` land in this output. A checkout under a path containing
+/// "fetch" or "update" would fail the assertions below on the paths rather than
+/// on the wording, so both are cleared.
 #[test]
-fn parsers_help_uses_cache_terminology() {
+fn languages_help_uses_cache_terminology() {
     cmd()
-        .args(["parsers", "--help"])
+        .env("LUMIS_DATA_DIR", "")
+        .env("LUMIS_CONFIG", "")
+        .args(["languages", "--help"])
         .assert()
         .success()
         .stdout(predicate::str::contains("cache"))
@@ -1017,20 +1219,29 @@ fn parsers_help_uses_cache_terminology() {
 }
 
 #[test]
-fn cache_parsers_no_args_fails() {
+fn cache_languages_no_args_fails() {
     cmd()
-        .args(["parsers", "cache"])
+        .args(["languages", "cache"])
         .assert()
         .failure()
         .stderr(predicate::str::contains(
-            "specify language names or use --all",
+            "specify language names, a bundle such as bundle-web, or --all",
         ));
 }
 
 #[test]
-fn cache_parsers_rejects_languages_with_all() {
+fn cache_languages_rejects_an_unknown_bundle() {
     cmd()
-        .args(["parsers", "cache", "rust", "--all"])
+        .args(["languages", "cache", "bundle-nope"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("unknown bundle 'bundle-nope'"));
+}
+
+#[test]
+fn cache_languages_rejects_languages_with_all() {
+    cmd()
+        .args(["languages", "cache", "rust", "--all"])
         .assert()
         .failure()
         .stderr(predicate::str::contains(
@@ -1039,39 +1250,59 @@ fn cache_parsers_rejects_languages_with_all() {
 }
 
 #[test]
-fn cache_parsers_already_cached() {
+fn cache_languages_already_cached() {
     // The fixtures dir already has the diff package cached — silent without -v.
     cmd()
         .arg("--data-dir")
         .arg(fixtures_dir())
-        .args(["parsers", "cache", "diff"])
+        .args(["languages", "cache", "diff"])
         .assert()
-        .success();
+        .success()
+        .stdout("")
+        .stderr("");
 }
 
 #[test]
-fn cache_parsers_already_cached_verbose() {
-    // With -V it shows the cached path
+fn cache_languages_already_cached_verbose() {
     cmd()
         .arg("--data-dir")
         .arg(fixtures_dir())
-        .arg("-V")
-        .args(["parsers", "cache", "diff"])
+        .arg("-v")
+        .args(["languages", "cache", "diff"])
         .assert()
         .success()
-        .stderr(predicate::str::contains("tree-sitter-diff-"));
+        .stderr(predicate::str::contains("--> diff"))
+        .stderr(predicate::str::contains("downloaded to "))
+        .stderr(predicate::str::contains("tree-sitter-diff-"))
+        .stderr(predicate::str::is_match("cached in [0-9]+\\.[0-9]{3}s").unwrap())
+        .stderr(predicate::str::is_match("compiled in [0-9]+\\.[0-9]{3}s").unwrap());
+}
+
+#[test]
+fn cache_languages_skips_plaintext_aliases() {
+    let tmp = tempfile::tempdir().unwrap();
+
+    cmd()
+        .arg("--data-dir")
+        .arg(tmp.path())
+        .arg("-v")
+        .args(["languages", "cache", "plaintext", "text", "txt", "plain"])
+        .assert()
+        .success()
+        .stdout("")
+        .stderr("");
+
+    assert!(fs::read_dir(tmp.path().join("parsers"))
+        .unwrap()
+        .next()
+        .is_none());
 }
 
 /// Downloading is the smaller half of a cold parser; the Wasmtime compile is the
-/// larger, and a prepared directory is meant to carry both. `mix
-/// lumis.languages.cache` does the same, so the two cannot prepare different
-/// things.
-/// Downloading is the smaller half of a cold parser; the Wasmtime compile is the
-/// larger, and a prepared directory is meant to carry both. `mix
-/// lumis.languages.cache` does the same, so the two cannot prepare different
-/// things.
+/// larger, and a prepared directory is meant to carry both. Host cache APIs do
+/// the same, so they cannot prepare different things.
 #[test]
-fn cache_parsers_compiles_what_it_downloads() {
+fn cache_languages_compiles_what_it_downloads() {
     // Building a runtime at all compiles Tree-sitter's own module, so a
     // non-empty cache proves nothing. Each additional parser adds an entry
     // beside it, and only compiling produces that.
@@ -1092,7 +1323,7 @@ fn cache_parsers_compiles_what_it_downloads() {
     cmd()
         .arg("--data-dir")
         .arg(one.path())
-        .args(["parsers", "cache", "json"])
+        .args(["languages", "cache", "json"])
         .assert()
         .success();
 
@@ -1100,7 +1331,7 @@ fn cache_parsers_compiles_what_it_downloads() {
     cmd()
         .arg("--data-dir")
         .arg(two.path())
-        .args(["parsers", "cache", "json", "css"])
+        .args(["languages", "cache", "json", "css"])
         .assert()
         .success();
 
@@ -1112,7 +1343,7 @@ fn cache_parsers_compiles_what_it_downloads() {
     );
 }
 
-/// A store directory holding the committed fixtures, so `parsers cache` can be
+/// A store directory holding the committed fixtures, so `languages cache` can be
 /// exercised without a download. Caching into an empty directory needs the
 /// network by construction; there is no second directory to copy from.
 fn seeded_store() -> tempfile::TempDir {
@@ -1129,12 +1360,12 @@ fn seeded_store() -> tempfile::TempDir {
 }
 
 #[test]
-fn cache_parsers_to_temp_dir() {
+fn cache_languages_to_temp_dir() {
     let tmp = seeded_store();
     cmd()
         .arg("--data-dir")
         .arg(tmp.path())
-        .args(["parsers", "cache", "json"])
+        .args(["languages", "cache", "json"])
         .assert()
         .success();
 
@@ -1149,13 +1380,13 @@ fn cache_parsers_to_temp_dir() {
 }
 
 #[test]
-fn cache_parsers_to_temp_dir_verbose() {
+fn cache_languages_to_temp_dir_verbose() {
     let tmp = seeded_store();
     cmd()
-        .arg("-V")
+        .arg("-v")
         .arg("--data-dir")
         .arg(tmp.path())
-        .args(["parsers", "cache", "json"])
+        .args(["languages", "cache", "json"])
         .assert()
         .success()
         .stderr(predicate::str::contains("tree-sitter-json-"));
@@ -1170,37 +1401,37 @@ fn cache_parsers_to_temp_dir_verbose() {
 }
 
 #[test]
-fn cache_parsers_reuses_an_existing_file() {
+fn cache_languages_reuses_an_existing_file() {
     let tmp = seeded_store();
 
     // Cache once.
     cmd()
         .arg("--data-dir")
         .arg(tmp.path())
-        .args(["parsers", "cache", "json"])
+        .args(["languages", "cache", "json"])
         .assert()
         .success();
 
     // Then reuse it without a network request.
     cmd()
-        .arg("-V")
+        .arg("-v")
         .arg("--data-dir")
         .arg(tmp.path())
-        .args(["parsers", "cache", "json"])
+        .args(["languages", "cache", "json"])
         .assert()
         .success()
         .stderr(predicate::str::contains("tree-sitter-json-"));
 }
 
 #[test]
-fn cache_parsers_then_highlight() {
+fn cache_languages_then_highlight() {
     let tmp = seeded_store();
 
     // Cache the parser first.
     cmd()
         .arg("--data-dir")
         .arg(tmp.path())
-        .args(["parsers", "cache", "json"])
+        .args(["languages", "cache", "json"])
         .assert()
         .success();
 
@@ -1217,7 +1448,7 @@ fn cache_parsers_then_highlight() {
 
 /// Highlighting an HTML document loads JavaScript for its `<script>` block
 /// during the same pass, from a data directory that has never held either
-/// parser. Before this, the block stayed plain until `parsers cache javascript`
+/// parser. Before this, the block stayed plain until `languages cache javascript`
 /// had been run.
 /// One pass: nothing names javascript, so the walk had to discover the `<script>`
 /// injection and load it mid-walk. Whether the parser was already on disk is a
@@ -1248,4 +1479,220 @@ fn an_unloadable_injected_language_does_not_fail_the_document() {
         .assert()
         .success()
         .stdout(predicate::str::contains("\"language\": \"markdown\""));
+}
+
+#[test]
+fn short_h_prints_help_rather_than_asking_for_line_numbers() {
+    cmd()
+        .args(["highlight", "-h"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Highlight source code"));
+}
+
+#[test]
+fn highlight_help_groups_options_by_the_formatters_that_accept_them() {
+    cmd()
+        .args(["highlight", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(
+            "Options for --formatter terminal:",
+        ))
+        .stdout(predicate::str::contains(
+            "Options for --formatter html-inline, html-linked, html-multi-themes:",
+        ))
+        .stdout(predicate::str::contains(
+            "Options for --formatter html-inline, html-multi-themes:",
+        ))
+        .stdout(predicate::str::contains(
+            "Options for --formatter html-multi-themes:",
+        ));
+}
+
+#[test]
+fn highlight_rejects_an_option_the_chosen_formatter_ignores() {
+    cmd()
+        .args(["highlight", "-l", "diff", "--pre-class", "custom"])
+        .write_stdin(DIFF_SNIPPET)
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "`--pre-class` is not accepted by the `terminal` formatter",
+        ))
+        .stderr(predicate::str::contains(
+            "HTML options apply to: html-inline, html-linked, html-multi-themes",
+        ))
+        .stderr(predicate::str::contains("lumis formatters show terminal"));
+}
+
+#[test]
+fn highlight_names_every_rejected_flag_in_one_group_in_one_error() {
+    cmd()
+        .args([
+            "highlight",
+            "-l",
+            "diff",
+            "-f",
+            "html-inline",
+            "-b",
+            "theme",
+            "-w",
+            "120",
+        ])
+        .write_stdin(DIFF_SNIPPET)
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "`--background`, `--width` are not accepted by the `html-inline` formatter",
+        ));
+}
+
+#[test]
+fn highlight_names_rejected_flags_from_every_group_in_one_error() {
+    cmd()
+        .args([
+            "highlight",
+            "-l",
+            "diff",
+            "-f",
+            "html-linked",
+            "-t",
+            "dracula",
+            "--italic",
+        ])
+        .write_stdin(DIFF_SNIPPET)
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "`--theme`, `--italic` are not accepted by the `html-linked` formatter",
+        ))
+        .stderr(predicate::str::contains(
+            "`--theme` applies to: html-inline, terminal",
+        ))
+        .stderr(predicate::str::contains(
+            "inline-style options apply to: html-inline, html-multi-themes",
+        ));
+}
+
+#[test]
+fn highlight_rejects_theme_for_a_formatter_that_cannot_color() {
+    cmd()
+        .args([
+            "highlight",
+            "-l",
+            "diff",
+            "-f",
+            "html-linked",
+            "-t",
+            "dracula",
+        ])
+        .write_stdin(DIFF_SNIPPET)
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "`--theme` is not accepted by the `html-linked` formatter",
+        ))
+        .stderr(predicate::str::contains(
+            "`--theme` applies to: html-inline, terminal",
+        ));
+}
+
+/// `html_linked::HighlightLines` has no `style` field, so the flag is rejected
+/// even though `--highlight-lines` itself is accepted.
+#[test]
+fn highlight_rejects_highlight_lines_style_for_html_linked() {
+    cmd()
+        .args([
+            "highlight",
+            "-l",
+            "diff",
+            "-f",
+            "html-linked",
+            "-H",
+            "1",
+            "--highlight-lines-style",
+            "none",
+        ])
+        .write_stdin(DIFF_SNIPPET)
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "`--highlight-lines-style` is not accepted by the `html-linked` formatter",
+        ));
+}
+
+/// A theme in the config file applies to every command, so it must not turn
+/// `-f html-linked` into an error the user cannot see the cause of.
+#[test]
+fn a_config_theme_does_not_trip_the_formatter_check() {
+    let tmp = tempfile::tempdir().unwrap();
+    let config = tmp.path().join("config.toml");
+    write_file(&config, "[highlight]\ntheme = \"dracula\"\n");
+
+    cmd()
+        .env("LUMIS_CONFIG", &config)
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args(["highlight", "-l", "diff", "-f", "html-linked"])
+        .write_stdin(DIFF_SNIPPET)
+        .assert()
+        .success();
+}
+
+#[test]
+fn css_variable_prefix_accepts_a_leading_dash_value() {
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args([
+            "highlight",
+            "-l",
+            "diff",
+            "-f",
+            "html-multi-themes",
+            "--themes",
+            "main:dracula",
+            "--css-variable-prefix=--shiki",
+        ])
+        .write_stdin(DIFF_SNIPPET)
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("--shiki-"));
+}
+
+#[test]
+fn formatters_list_names_every_formatter() {
+    cmd()
+        .args(["formatters", "list"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("html-inline"))
+        .stdout(predicate::str::contains("html-linked"))
+        .stdout(predicate::str::contains("html-multi-themes"))
+        .stdout(predicate::str::contains("terminal"))
+        .stdout(predicate::str::contains("bbcode-scoped"));
+}
+
+#[test]
+fn formatters_show_lists_only_what_the_formatter_accepts() {
+    cmd()
+        .args(["formatters", "show", "terminal"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("--background"))
+        .stdout(predicate::str::contains("--width"))
+        .stdout(predicate::str::contains("--theme"))
+        .stdout(predicate::str::contains("--formatter").not())
+        .stdout(predicate::str::contains("--pre-class").not())
+        .stdout(predicate::str::contains("--italic").not());
+}
+
+#[test]
+fn formatters_show_rejects_an_unknown_formatter() {
+    cmd()
+        .args(["formatters", "show", "nonsense"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("nonsense"));
 }

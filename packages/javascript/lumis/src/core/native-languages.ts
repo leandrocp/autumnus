@@ -1,4 +1,5 @@
 import { LANGUAGES } from "../generated/languages-meta.js";
+import { cloneLanguageInfo } from "../catalog-metadata.js";
 import { LANGUAGE_LOADERS } from "../generated/language-loaders.js";
 import { LANGUAGE_PACKAGE_VERSION_RANGE } from "../generated/package-version-range.js";
 import type { NativeBinding, NativeFormatter, NativeRuntimeInstance } from "../native-binding.js";
@@ -32,7 +33,7 @@ import type {
   WasmResolver,
 } from "./languages.js";
 
-const PLAINTEXT_ALIASES = ["text", "txt", "plain"];
+const PLAINTEXT_ALIASES = LANGUAGES.find(({ id }) => id === PLAINTEXT_LANG_ID)?.aliases ?? [];
 const CATALOG_LANGUAGE_IDS = new Set(LANGUAGES.map(({ id }) => normalizeLanguageName(id)));
 const encoder = new TextEncoder();
 
@@ -610,7 +611,7 @@ export function createNativeLanguagesModule(
       return defaultRuntime.getLoadedLanguageIds();
     },
     availableLanguages(): LanguageInfo[] {
-      return LANGUAGES.map((language) => ({ ...language }));
+      return LANGUAGES.map(cloneLanguageInfo);
     },
     getDefaultRuntime() {
       return defaultRuntime;

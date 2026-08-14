@@ -27,9 +27,8 @@ defaults:
 jobs:
   test:
     if: >-
-      ${{ github.event_name == 'workflow_dispatch' ||
-          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
-          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
+      ${{ github.event_name != 'push' ||
+          !startsWith(github.event.head_commit.message, 'chore(release):') }}
     uses: leandrocp/github-actions/.github/workflows/elixir-test.yml@main
     with:
       working-directory: packages/elixir/lumis
@@ -42,9 +41,8 @@ jobs:
       pairs: "${{ github.event_name == 'pull_request' && '[{\"name\": \"OTP 29.x, Elixir 1.20.x\", \"elixir\": \"1.20.x\", \"otp\": \"29.x\"}]' || '[{\"name\": \"OTP 25.1, Elixir 1.15.0\", \"elixir\": \"1.15.0\", \"otp\": \"25.1\"}, {\"name\": \"OTP 29.x, Elixir 1.20.x\", \"elixir\": \"1.20.x\", \"otp\": \"29.x\"}, {\"name\": \"OTP 29, Elixir main\", \"elixir\": \"main-otp-29\", \"otp\": \"maint-29\"}]' }}"
   lint:
     if: >-
-      ${{ github.event_name == 'workflow_dispatch' ||
-          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
-          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
+      ${{ github.event_name != 'push' ||
+          !startsWith(github.event.head_commit.message, 'chore(release):') }}
     uses: leandrocp/github-actions/.github/workflows/elixir-lint.yml@main
     with:
       working-directory: packages/elixir/lumis

@@ -22,7 +22,8 @@ export interface ConformanceFixture {
 
 export interface HtmlMultiThemesFixture {
   themes: Record<string, string>;
-  defaultTheme: string;
+  /** Absent means CSS-variables-only mode, which is its own rendering branch. */
+  defaultTheme?: string;
   highlightLines?: number[];
 }
 

@@ -39,10 +39,22 @@ jobs:
             target: aarch64-unknown-linux-gnu
             os: ubuntu-24.04-arm
             library: liblumis_js_native.so
+          - package: linux-arm64-musl
+            target: aarch64-unknown-linux-musl
+            os: ubuntu-24.04-arm
+            library: liblumis_js_native.so
           - package: linux-x64-gnu
             target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
             library: liblumis_js_native.so
+          - package: linux-x64-musl
+            target: x86_64-unknown-linux-musl
+            os: ubuntu-latest
+            library: liblumis_js_native.so
+          - package: win32-arm64-msvc
+            target: aarch64-pc-windows-msvc
+            os: windows-latest
+            library: lumis_js_native.dll
           - package: win32-x64-msvc
             target: x86_64-pc-windows-msvc
             os: windows-latest
@@ -54,14 +66,36 @@ jobs:
           ref: ${{ inputs.tag || github.ref_name }}
 
       - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
+        if: ${{ !endsWith(matrix.target, '-musl') }}
         with:
           targets: ${{ matrix.target }}
 
       - name: Build native runtime
+        if: ${{ !endsWith(matrix.target, '-musl') }}
         run: >-
           cargo build --locked --release
           --target ${{ matrix.target }}
           -p lumis-js-native
+
+      # Rust links musl targets against a static CRT by default, which cannot
+      # produce a loadable cdylib. Node on Alpine dlopens this, so the addon has
+      # to resolve musl's libc at load time like every other shared object.
+      # Dropping `crt-static` then makes std unwind through `libgcc_s.so.1`, and
+      # Ubuntu's musl-tools ships no musl build of it, so the link fails there
+      # however `musl-gcc` is wired up. Alpine has one, so the build runs in the
+      # distro the artifact targets. Each musl target has a runner of its own
+      # architecture, so the container compiles natively in both cases.
+      # `tree-sitter` builds wasmtime's C API through cmake, which every runner
+      # image ships preinstalled and `rust:alpine` does not.
+      - name: Build native runtime (musl)
+        if: endsWith(matrix.target, '-musl')
+        run: >-
+          docker run --rm --volume "$PWD:/lumis" --workdir /lumis
+          --env RUSTFLAGS=-Ctarget-feature=-crt-static
+          rust:1-alpine3.22
+          sh -c
+          'apk add --no-cache cmake make g++ &&
+          cargo build --locked --release --target ${{ matrix.target }} -p lumis-js-native'
 
       - name: Stage native runtime
         shell: bash
@@ -77,8 +111,90 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  # `@lumis-sh/cli` resolves its binary through npm rather than downloading one,
+  # so the CLI is built here from the tagged tree instead of being pulled from a
+  # `cargo-lumis-cli` release. Deriving the download URL from the npm version is
+  # what shipped `@lumis-sh/cli` 0.5.0 and 0.6.0 against releases that did not
+  # exist; nothing resolved that URL until a user installed the package.
+  build-cli:
+    if: ${{ startsWith(inputs.tag || github.ref_name, 'npm-cli/v') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - package: darwin-arm64
+            target: aarch64-apple-darwin
+            os: macos-latest
+          - package: darwin-x64
+            target: x86_64-apple-darwin
+            os: macos-15-intel
+          - package: linux-arm64-gnu
+            target: aarch64-unknown-linux-gnu
+            os: ubuntu-24.04-arm
+          - package: linux-arm64-musl
+            target: aarch64-unknown-linux-musl
+            os: ubuntu-24.04-arm
+          - package: linux-x64-gnu
+            target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+          - package: linux-x64-musl
+            target: x86_64-unknown-linux-musl
+            os: ubuntu-latest
+          - package: win32-arm64-msvc
+            target: aarch64-pc-windows-msvc
+            os: windows-latest
+          - package: win32-x64-msvc
+            target: x86_64-pc-windows-msvc
+            os: windows-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.tag || github.ref_name }}
+
+      - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
+        if: ${{ !endsWith(matrix.target, '-musl') }}
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Build CLI
+        if: ${{ !endsWith(matrix.target, '-musl') }}
+        run: cargo build --locked --release --target ${{ matrix.target }} -p lumis-cli
+
+      # Unlike the addon, the CLI keeps musl's default static CRT: it is an
+      # executable, not something Node has to dlopen, so it links libc in and
+      # runs on any musl host without one installed. `tree-sitter` builds
+      # wasmtime's C API through cmake, which `rust:alpine` does not ship. Each
+      # musl target gets a runner of its own architecture, so this compiles
+      # natively rather than under emulation.
+      - name: Build CLI (musl)
+        if: endsWith(matrix.target, '-musl')
+        run: >-
+          docker run --rm --volume "$PWD:/lumis" --workdir /lumis
+          rust:1-alpine3.22
+          sh -c
+          'apk add --no-cache cmake make g++ musl-dev &&
+          cargo build --locked --release --target ${{ matrix.target }} -p lumis-cli'
+
+      - name: Stage CLI binary
+        shell: bash
+        run: |
+          mkdir cli-artifact
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            cp "target/${{ matrix.target }}/release/lumis.exe" cli-artifact/lumis.exe
+          else
+            cp "target/${{ matrix.target }}/release/lumis" cli-artifact/lumis
+          fi
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: lumis-cli-${{ matrix.package }}
+          path: cli-artifact/*
+          if-no-files-found: error
+          retention-days: 1
+
   publish:
-    needs: build-native
+    needs: [build-native, build-cli]
     if: >-
       ${{
         !cancelled()
@@ -86,6 +202,10 @@ jobs:
         && (
           needs.build-native.result == 'success'
           || needs.build-native.result == 'skipped'
+        )
+        && (
+          needs.build-cli.result == 'success'
+          || needs.build-cli.result == 'skipped'
         )
       }}
     runs-on: ubuntu-latest
@@ -201,8 +321,8 @@ jobs:
             npm publish "$package_dir" --access public --provenance
             published=$((published + 1))
           done
-          if [ "$published" -ne 5 ]; then
-            echo "expected 5 platform packages, published $published" >&2
+          if [ "$published" -ne 8 ]; then
+            echo "expected 8 platform packages, published $published" >&2
             exit 1
           fi
         env:
@@ -216,6 +336,45 @@ jobs:
         run: >-
           pnpm --filter @lumis-sh/lumis-native --fail-if-no-match publish
           --access public --no-git-checks --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Download CLI binaries
+        if: steps.pkg.outputs.filter == '@lumis-sh/cli'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          pattern: lumis-cli-*
+          path: cli-artifacts
+
+      - name: Stage CLI platform packages
+        if: steps.pkg.outputs.filter == '@lumis-sh/cli'
+        run: |
+          for artifact_dir in cli-artifacts/lumis-cli-*; do
+            target="$(basename "$artifact_dir")"
+            target="${target#lumis-cli-}"
+            cp "$artifact_dir"/lumis* "packages/javascript/cli/npm/$target/"
+            chmod +x "packages/javascript/cli/npm/$target"/lumis*
+          done
+
+      # The main package pins these as optionalDependencies and pnpm rewrites
+      # `workspace:*` at pack time, so publishing it against an incomplete or
+      # drifted set ships a tarball whose `lumis` command cannot start.
+      - name: Check CLI platform packages are complete and in lockstep
+        if: steps.pkg.outputs.filter == '@lumis-sh/cli'
+        run: node packages/javascript/scripts/check-cli-versions.mjs
+
+      - name: Publish CLI platform packages
+        if: steps.pkg.outputs.filter == '@lumis-sh/cli'
+        run: |
+          published=0
+          for package_dir in packages/javascript/cli/npm/*; do
+            npm publish "$package_dir" --access public --provenance
+            published=$((published + 1))
+          done
+          if [ "$published" -ne 8 ]; then
+            echo "expected 8 platform packages, published $published" >&2
+            exit 1
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

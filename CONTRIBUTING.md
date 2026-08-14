@@ -8,6 +8,7 @@ See `ARCHITECTURE.md` for how the crates, packages, website, and build pipeline 
 - [Testing](#testing)
 - [Releases](#releases)
 - [Benchmarks](#benchmarks)
+- [Environment variables](#environment-variables)
 - [Configuration files](#configuration-files)
   - [highlights.toml](#highlightstoml)
   - [languages.toml](#languagestoml)
@@ -68,6 +69,32 @@ Node has two of them because it has two runtimes: the Wasmtime addon it uses by
 default, and `web-tree-sitter` where no addon is built. Both must produce the
 same bytes as Rust.
 
+### The formatter option manifest
+
+Conformance pins what the formatters **output**. `fixtures/formatter-options.json`
+pins what they **accept**, which conformance cannot see: a Rust builder can grow
+a field and ship while Elixir, JavaScript and the CLI silently lack it. That is
+how `rainbow_brackets` reached four runtimes and no options table, and how
+JavaScript's `terminal` went without `background` and `width`.
+
+Each implementation in this repository has a test that reads the manifest:
+
+| Runtime | Test | How it checks |
+| --- | --- | --- |
+| Rust | `crates/lumis/tests/formatter_options.rs` | calls every setter by name, so a missing one fails to compile |
+| CLI | `crates/lumis-cli/tests/formatter_options.rs` | reads `lumis highlight --help`, so it sees the flags clap parses |
+| Elixir | `packages/elixir/lumis/test/formatter_options_test.exs` | reads the keys off the NimbleOptions schema |
+| JavaScript | `packages/javascript/lumis/test/formatter-options.test.ts` | `Required<Options>` literals, so a missing field fails type-aware lint |
+
+These are the four implementations in this repository. Java is part of the
+same parity target, but its implementation lives in `lumis4j`; D26 in
+`API_DRIFT.md` tracks making that repository consume this contract too.
+
+Adding a formatter option means adding it to the manifest first and watching
+four runtimes go red. `waived` is the escape hatch for something a runtime
+genuinely cannot offer; the tests fail on a waiver that is no longer needed, so
+it can only shrink. It is currently empty.
+
 The browser task installs the required Chromium, Firefox, and WebKit builds before running. CI runs these six tasks as independent parallel jobs.
 
 ## Releases
@@ -77,7 +104,7 @@ Releases are prepared locally and published from tags.
 - Run `mise run release-needed` to list packages with non-chore path-scoped commits since their latest package tag.
 - Prepare each release with `mise run release-prepare <package> <version>`.
 - `mise run release-prepare` updates only the target package version file and prepends the next changelog entry.
-- If dependent manifests must move together, update them separately in the same release commit. `npm-lumis` is the exception: it also bumps the native crate, the `@lumis-sh/lumis-native` selector and all five platform packages, because the release workflow publishes them under the same version first.
+- If dependent manifests must move together, update them separately in the same release commit. `npm-lumis` is the exception: it also bumps the native crate, the `@lumis-sh/lumis-native` selector and all platform packages, because the release workflow publishes them under the same version first.
 - A `version` requirement on a lumis crate must equal that crate's version in this repository. `mise run release-prepare` keeps them in step, rewriting dependent manifests beyond the package being released, so review and commit every file it touches. `mise run check-crate-deps` reports drift and `--fix` repairs it. Apart from `crates/autumnus`, no build here resolves those requirements, so that check is the only thing that can catch them. See [Crate version requirements](RELEASE.md#crate-version-requirements).
 - Maintainers commit the release prep changes, then push package tags such as `cargo-lumis-cli/v0.2.0`.
 - Pushing a package tag triggers the publish workflows.
@@ -97,6 +124,55 @@ mise run -C benchmarks run
 ```
 
 The root `mise run bench` task runs the same suite. Scenarios and current results are listed in [`benchmarks/README.md`](benchmarks/README.md).
+
+## Environment variables
+
+`mise.toml` sets everything a task needs, so a normal `mise run` invocation needs
+none of these. They exist to override that default from the outside.
+
+Most of them matter only while working on the repository. The exceptions are
+`LUMIS_DATA_DIR`, which every runtime reads, and the tool-specific settings a
+user can hit without cloning anything: `LUMIS_CONFIG` for the CLI, and
+`LUMIS_BUILD`, `LUMIS_USE_LEGACY_ARTIFACTS` and `LUMIS_ARTIFACT_SOURCE` for the
+Hex package.
+
+`LUMIS_DATA_DIR` names the directory Lumis persists parsers, themes, and
+compiled modules under. An empty value counts as unset, in every runtime.
+
+Unset, the CLI and both native addons call
+`lumis_wasm_runtime::store::default_data_dir`, which uses [`etcetera`]'s base
+strategy: `$XDG_DATA_HOME` or `~/.local/share` everywhere except Windows, where
+it is `%APPDATA%`. Node asks the addon for that same value through
+`defaultDataDir()`. A platform with no addon falls back to the
+`platformDataDir()` port in `src/runtime/node-cache.ts`, and
+`test/data-dir-parity.test.ts` pins that port against the addon so the two cannot
+drift.
+
+| Variable | Read by | Purpose |
+| --- | --- | --- |
+| `LUMIS_DATA_DIR` | every runtime | Directory for parsers, themes, and compiled modules |
+| `LUMIS_CONFIG` | CLI | Config file path, same as `--config` |
+| `LUMIS_BUILD` | Elixir | Build the NIF from source instead of downloading a precompiled one |
+| `LUMIS_USE_LEGACY_ARTIFACTS` | Elixir | Select the legacy-CPU NIF variant |
+| `LUMIS_ARTIFACT_SOURCE` | Elixir | `github` or `cloudflare`; where to download the precompiled NIF from |
+| `LUMIS_TEST_RUNTIME` | JavaScript tests | `native` or `wasm`; fails loudly if the requested runtime is unavailable |
+| `LUMIS_QUERY_LANGUAGES` | `test:queries` | Comma-separated languages, so CI can shard parser builds |
+| `LUMIS_QUERY_BATCH_LIMIT` | `test:queries` | Maximum languages per batch, asserted rather than assumed |
+| `LUMIS_QUERY_COVERAGE` | `test:queries` | `complete` requires full coverage and forbids waivers |
+| `LUMIS_QUERY_PARSERS` | `test:queries` | `published` judges only what npm ships |
+| `LUMIS_WASM_REBUILD` | `crates/dev` | `1` rebuilds a parser already present in `tmp/wasm/build` |
+| `LUMIS_FAKE_NVIM_CAPTURE_DIR` | CLI tests | Where the fake `nvim` records the arguments it was given |
+| `LUMIS_FAKE_NVIM_APPEARANCE` | CLI tests | Appearance the fake `nvim` reports, `dark` by default |
+
+`LUMIS_BUILD` and `LUMIS_USE_LEGACY_ARTIFACTS` are
+[`rustler_precompiled`](https://hexdocs.pm/rustler_precompiled/) conventions,
+which is why they are not named `LUMIS_*_NIF_*`.
+
+The benchmark suite has its own `BENCH_*` set, declared in
+[`benchmarks/mise.toml`](benchmarks/mise.toml) rather than here, since nothing
+outside `benchmarks/` reads them.
+
+[`etcetera`]: https://docs.rs/etcetera/
 
 ## Configuration files
 

@@ -1,6 +1,6 @@
 {
   "name": "@lumis-sh/wasm-bundle-system",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "description": "Lumis WASM system language bundle",
   "author": "Leandro Pereira",
   "license": "MIT",

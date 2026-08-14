@@ -1,0 +1,20 @@
+{
+  "name": "@lumis-sh/cli-win32-x64-msvc",
+  "version": "0.6.1",
+  "description": "Lumis command line syntax highlighter for Windows x64",
+  "license": "MIT",
+  "repository": "github:leandrocp/lumis",
+  "files": [
+    "LICENSE",
+    "lumis.exe"
+  ],
+  "os": [
+    "win32"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}
