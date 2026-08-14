@@ -1,0 +1,1374 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>highlight.js · Catppuccin Latte · Lumis visual comparison</title>
+  <meta name="color-scheme" content="light">
+  <style>
+    * { box-sizing: border-box; }
+    html { background: #e6e9ef; color: #4c4f69; font: 14px/1.5 Inter, ui-sans-serif, system-ui, sans-serif; }
+    body { margin: 0; }
+    main { padding: 16px; min-width: max-content; }
+    pre { margin: 0 !important; padding: 20px !important; border: 1px solid #bcc0cc; border-radius: 10px; overflow: visible !important; font: 13px/1.55 "SFMono-Regular", Consolas, "Liberation Mono", monospace !important; tab-size: 4; }
+    /* highlight.js themes paint the panel on the code element and pad it, and
+       @catppuccin/highlightjs paints it without making that element a block, so
+       one panel would be ragged where the other three are solid. */
+    pre code.hljs { display: block; padding: 0 !important; }
+  </style>
+</head>
+<body>
+  <main><style>code.hljs{color:#4c4f69;background:#eff1f5}code .hljs-keyword{color:#8839ef}code .hljs-built_in{color:#d20f39}code .hljs-type{color:#df8e1d}code .hljs-literal{color:#fe640b}code .hljs-number{color:#fe640b}code .hljs-operator{color:#04a5e5}code .hljs-punctuation{color:#5c5f77}code .hljs-property{color:#179299}code .hljs-regexp{color:#ea76cb}code .hljs-string{color:#40a02b}code .hljs-char.escape_{color:#40a02b}code .hljs-subst{color:#6c6f85}code .hljs-symbol{color:#dd7878}code .hljs-variable{color:#8839ef}code .hljs-variable.language_{color:#8839ef}code .hljs-variable.constant_{color:#fe640b}code .hljs-title{color:#1e66f5}code .hljs-title.class_{color:#df8e1d}code .hljs-title.function_{color:#1e66f5}code .hljs-params{color:#4c4f69}code .hljs-comment{color:#7c7f93}code .hljs-doctag{color:#d20f39}code .hljs-meta{color:#fe640b}code .hljs-section{color:#1e66f5}code .hljs-tag{color:#179299}code .hljs-name{color:#8839ef}code .hljs-attr{color:#1e66f5}code .hljs-attribute{color:#40a02b}code .hljs-bullet{color:#179299}code .hljs-code{color:#40a02b}code .hljs-emphasis{color:#d20f39;font-style:italic}code .hljs-strong{color:#d20f39;font-weight:bold}code .hljs-formula{color:#179299}code .hljs-link{color:#209fb5;font-style:italic}code .hljs-quote{color:#40a02b;font-style:italic}code .hljs-selector-tag{color:#df8e1d}code .hljs-selector-id{color:#1e66f5}code .hljs-selector-class{color:#179299}code .hljs-selector-attr{color:#8839ef}code .hljs-selector-pseudo{color:#179299}code .hljs-template-tag{color:#dd7878}code .hljs-template-variable{color:#dd7878}code .hljs-addition{color:#40a02b;background:rgba(64,160,43,.15)}code .hljs-deletion{color:#d20f39;background:rgba(210,15,57,.15)}
+</style><pre><code class="hljs language-go"><span class="hljs-comment">// Copyright 2010 The Go Authors. All rights reserved.</span>
+<span class="hljs-comment">// Use of this source code is governed by a BSD-style</span>
+<span class="hljs-comment">// license that can be found in the LICENSE file.</span>
+
+<span class="hljs-comment">// Package json implements encoding and decoding of JSON as defined in</span>
+<span class="hljs-comment">// RFC 7159. The mapping between JSON and Go values is described</span>
+<span class="hljs-comment">// in the documentation for the Marshal and Unmarshal functions.</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// See &quot;JSON and Go&quot; for an introduction to this package:</span>
+<span class="hljs-comment">// https://golang.org/doc/articles/json_and_go.html</span>
+<span class="hljs-keyword">package</span> json
+
+<span class="hljs-keyword">import</span> (
+	<span class="hljs-string">&quot;bytes&quot;</span>
+	<span class="hljs-string">&quot;cmp&quot;</span>
+	<span class="hljs-string">&quot;encoding&quot;</span>
+	<span class="hljs-string">&quot;encoding/base64&quot;</span>
+	<span class="hljs-string">&quot;fmt&quot;</span>
+	<span class="hljs-string">&quot;math&quot;</span>
+	<span class="hljs-string">&quot;reflect&quot;</span>
+	<span class="hljs-string">&quot;slices&quot;</span>
+	<span class="hljs-string">&quot;strconv&quot;</span>
+	<span class="hljs-string">&quot;strings&quot;</span>
+	<span class="hljs-string">&quot;sync&quot;</span>
+	<span class="hljs-string">&quot;unicode&quot;</span>
+	<span class="hljs-string">&quot;unicode/utf8&quot;</span>
+	_ <span class="hljs-string">&quot;unsafe&quot;</span> <span class="hljs-comment">// for linkname</span>
+)
+
+<span class="hljs-comment">// Marshal returns the JSON encoding of v.</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// Marshal traverses the value v recursively.</span>
+<span class="hljs-comment">// If an encountered value implements [Marshaler]</span>
+<span class="hljs-comment">// and is not a nil pointer, Marshal calls [Marshaler.MarshalJSON]</span>
+<span class="hljs-comment">// to produce JSON. If no [Marshaler.MarshalJSON] method is present but the</span>
+<span class="hljs-comment">// value implements [encoding.TextMarshaler] instead, Marshal calls</span>
+<span class="hljs-comment">// [encoding.TextMarshaler.MarshalText] and encodes the result as a JSON string.</span>
+<span class="hljs-comment">// The nil pointer exception is not strictly necessary</span>
+<span class="hljs-comment">// but mimics a similar, necessary exception in the behavior of</span>
+<span class="hljs-comment">// [Unmarshaler.UnmarshalJSON].</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// Otherwise, Marshal uses the following type-dependent default encodings:</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// Boolean values encode as JSON booleans.</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// Floating point, integer, and [Number] values encode as JSON numbers.</span>
+<span class="hljs-comment">// NaN and +/-Inf values will return an [UnsupportedValueError].</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// String values encode as JSON strings coerced to valid UTF-8,</span>
+<span class="hljs-comment">// replacing invalid bytes with the Unicode replacement rune.</span>
+<span class="hljs-comment">// So that the JSON will be safe to embed inside HTML &lt;script&gt; tags,</span>
+<span class="hljs-comment">// the string is encoded using [HTMLEscape],</span>
+<span class="hljs-comment">// which replaces &quot;&lt;&quot;, &quot;&gt;&quot;, &quot;&amp;&quot;, U+2028, and U+2029 are escaped</span>
+<span class="hljs-comment">// to &quot;\u003c&quot;,&quot;\u003e&quot;, &quot;\u0026&quot;, &quot;\u2028&quot;, and &quot;\u2029&quot;.</span>
+<span class="hljs-comment">// This replacement can be disabled when using an [Encoder],</span>
+<span class="hljs-comment">// by calling [Encoder.SetEscapeHTML](false).</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// Array and slice values encode as JSON arrays, except that</span>
+<span class="hljs-comment">// []byte encodes as a base64-encoded string, and a nil slice</span>
+<span class="hljs-comment">// encodes as the null JSON value.</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// Struct values encode as JSON objects.</span>
+<span class="hljs-comment">// Each exported struct field becomes a member of the object, using the</span>
+<span class="hljs-comment">// field name as the object key, unless the field is omitted for one of the</span>
+<span class="hljs-comment">// reasons given below.</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// The encoding of each struct field can be customized by the format string</span>
+<span class="hljs-comment">// stored under the &quot;json&quot; key in the struct field&#x27;s tag.</span>
+<span class="hljs-comment">// The format string gives the name of the field, possibly followed by a</span>
+<span class="hljs-comment">// comma-separated list of options. The name may be empty in order to</span>
+<span class="hljs-comment">// specify options without overriding the default field name.</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// The &quot;omitempty&quot; option specifies that the field should be omitted</span>
+<span class="hljs-comment">// from the encoding if the field has an empty value, defined as</span>
+<span class="hljs-comment">// false, 0, a nil pointer, a nil interface value, and any array,</span>
+<span class="hljs-comment">// slice, map, or string of length zero.</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// As a special case, if the field tag is &quot;-&quot;, the field is always omitted.</span>
+<span class="hljs-comment">// Note that a field with name &quot;-&quot; can still be generated using the tag &quot;-,&quot;.</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// Examples of struct field tags and their meanings:</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">//	// Field appears in JSON as key &quot;myName&quot;.</span>
+<span class="hljs-comment">//	Field int `json:&quot;myName&quot;`</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">//	// Field appears in JSON as key &quot;myName&quot; and</span>
+<span class="hljs-comment">//	// the field is omitted from the object if its value is empty,</span>
+<span class="hljs-comment">//	// as defined above.</span>
+<span class="hljs-comment">//	Field int `json:&quot;myName,omitempty&quot;`</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">//	// Field appears in JSON as key &quot;Field&quot; (the default), but</span>
+<span class="hljs-comment">//	// the field is skipped if empty.</span>
+<span class="hljs-comment">//	// Note the leading comma.</span>
+<span class="hljs-comment">//	Field int `json:&quot;,omitempty&quot;`</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">//	// Field is ignored by this package.</span>
+<span class="hljs-comment">//	Field int `json:&quot;-&quot;`</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">//	// Field appears in JSON as key &quot;-&quot;.</span>
+<span class="hljs-comment">//	Field int `json:&quot;-,&quot;`</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// The &quot;omitzero&quot; option specifies that the field should be omitted</span>
+<span class="hljs-comment">// from the encoding if the field has a zero value, according to rules:</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// 1) If the field type has an &quot;IsZero() bool&quot; method, that will be used to</span>
+<span class="hljs-comment">// determine whether the value is zero.</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// 2) Otherwise, the value is zero if it is the zero value for its type.</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// If both &quot;omitempty&quot; and &quot;omitzero&quot; are specified, the field will be omitted</span>
+<span class="hljs-comment">// if the value is either empty or zero (or both).</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// The &quot;string&quot; option signals that a field is stored as JSON inside a</span>
+<span class="hljs-comment">// JSON-encoded string. It applies only to fields of string, floating point,</span>
+<span class="hljs-comment">// integer, or boolean types. This extra level of encoding is sometimes used</span>
+<span class="hljs-comment">// when communicating with JavaScript programs:</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">//	Int64String int64 `json:&quot;,string&quot;`</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// The key name will be used if it&#x27;s a non-empty string consisting of</span>
+<span class="hljs-comment">// only Unicode letters, digits, and ASCII punctuation except quotation</span>
+<span class="hljs-comment">// marks, backslash, and comma.</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// Embedded struct fields are usually marshaled as if their inner exported fields</span>
+<span class="hljs-comment">// were fields in the outer struct, subject to the usual Go visibility rules amended</span>
+<span class="hljs-comment">// as described in the next paragraph.</span>
+<span class="hljs-comment">// An anonymous struct field with a name given in its JSON tag is treated as</span>
+<span class="hljs-comment">// having that name, rather than being anonymous.</span>
+<span class="hljs-comment">// An anonymous struct field of interface type is treated the same as having</span>
+<span class="hljs-comment">// that type as its name, rather than being anonymous.</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// The Go visibility rules for struct fields are amended for JSON when</span>
+<span class="hljs-comment">// deciding which field to marshal or unmarshal. If there are</span>
+<span class="hljs-comment">// multiple fields at the same level, and that level is the least</span>
+<span class="hljs-comment">// nested (and would therefore be the nesting level selected by the</span>
+<span class="hljs-comment">// usual Go rules), the following extra rules apply:</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// 1) Of those fields, if any are JSON-tagged, only tagged fields are considered,</span>
+<span class="hljs-comment">// even if there are multiple untagged fields that would otherwise conflict.</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// 2) If there is exactly one field (tagged or not according to the first rule), that is selected.</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// 3) Otherwise there are multiple fields, and all are ignored; no error occurs.</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// Handling of anonymous struct fields is new in Go 1.1.</span>
+<span class="hljs-comment">// Prior to Go 1.1, anonymous struct fields were ignored. To force ignoring of</span>
+<span class="hljs-comment">// an anonymous struct field in both current and earlier versions, give the field</span>
+<span class="hljs-comment">// a JSON tag of &quot;-&quot;.</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// Map values encode as JSON objects. The map&#x27;s key type must either be a</span>
+<span class="hljs-comment">// string, an integer type, or implement [encoding.TextMarshaler]. The map keys</span>
+<span class="hljs-comment">// are sorted and used as JSON object keys by applying the following rules,</span>
+<span class="hljs-comment">// subject to the UTF-8 coercion described for string values above:</span>
+<span class="hljs-comment">//   - keys of any string type are used directly</span>
+<span class="hljs-comment">//   - keys that implement [encoding.TextMarshaler] are marshaled</span>
+<span class="hljs-comment">//   - integer keys are converted to strings</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// Pointer values encode as the value pointed to.</span>
+<span class="hljs-comment">// A nil pointer encodes as the null JSON value.</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// Interface values encode as the value contained in the interface.</span>
+<span class="hljs-comment">// A nil interface value encodes as the null JSON value.</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// Channel, complex, and function values cannot be encoded in JSON.</span>
+<span class="hljs-comment">// Attempting to encode such a value causes Marshal to return</span>
+<span class="hljs-comment">// an [UnsupportedTypeError].</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// JSON cannot represent cyclic data structures and Marshal does not</span>
+<span class="hljs-comment">// handle them. Passing cyclic structures to Marshal will result in</span>
+<span class="hljs-comment">// an error.</span>
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">Marshal</span><span class="hljs-params">(v any)</span></span> ([]<span class="hljs-type">byte</span>, <span class="hljs-type">error</span>) {
+	e := newEncodeState()
+	<span class="hljs-keyword">defer</span> encodeStatePool.Put(e)
+
+	err := e.marshal(v, encOpts{escapeHTML: <span class="hljs-literal">true</span>})
+	<span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+		<span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>, err
+	}
+	buf := <span class="hljs-built_in">append</span>([]<span class="hljs-type">byte</span>(<span class="hljs-literal">nil</span>), e.Bytes()...)
+
+	<span class="hljs-keyword">return</span> buf, <span class="hljs-literal">nil</span>
+}
+
+<span class="hljs-comment">// MarshalIndent is like [Marshal] but applies [Indent] to format the output.</span>
+<span class="hljs-comment">// Each JSON element in the output will begin on a new line beginning with prefix</span>
+<span class="hljs-comment">// followed by one or more copies of indent according to the indentation nesting.</span>
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">MarshalIndent</span><span class="hljs-params">(v any, prefix, indent <span class="hljs-type">string</span>)</span></span> ([]<span class="hljs-type">byte</span>, <span class="hljs-type">error</span>) {
+	b, err := Marshal(v)
+	<span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+		<span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>, err
+	}
+	b2 := <span class="hljs-built_in">make</span>([]<span class="hljs-type">byte</span>, <span class="hljs-number">0</span>, indentGrowthFactor*<span class="hljs-built_in">len</span>(b))
+	b2, err = appendIndent(b2, b, prefix, indent)
+	<span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+		<span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>, err
+	}
+	<span class="hljs-keyword">return</span> b2, <span class="hljs-literal">nil</span>
+}
+
+<span class="hljs-comment">// Marshaler is the interface implemented by types that</span>
+<span class="hljs-comment">// can marshal themselves into valid JSON.</span>
+<span class="hljs-keyword">type</span> Marshaler <span class="hljs-keyword">interface</span> {
+	MarshalJSON() ([]<span class="hljs-type">byte</span>, <span class="hljs-type">error</span>)
+}
+
+<span class="hljs-comment">// An UnsupportedTypeError is returned by [Marshal] when attempting</span>
+<span class="hljs-comment">// to encode an unsupported value type.</span>
+<span class="hljs-keyword">type</span> UnsupportedTypeError <span class="hljs-keyword">struct</span> {
+	Type reflect.Type
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(e *UnsupportedTypeError)</span></span> Error() <span class="hljs-type">string</span> {
+	<span class="hljs-keyword">return</span> <span class="hljs-string">&quot;json: unsupported type: &quot;</span> + e.Type.String()
+}
+
+<span class="hljs-comment">// An UnsupportedValueError is returned by [Marshal] when attempting</span>
+<span class="hljs-comment">// to encode an unsupported value.</span>
+<span class="hljs-keyword">type</span> UnsupportedValueError <span class="hljs-keyword">struct</span> {
+	Value reflect.Value
+	Str   <span class="hljs-type">string</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(e *UnsupportedValueError)</span></span> Error() <span class="hljs-type">string</span> {
+	<span class="hljs-keyword">return</span> <span class="hljs-string">&quot;json: unsupported value: &quot;</span> + e.Str
+}
+
+<span class="hljs-comment">// Before Go 1.2, an InvalidUTF8Error was returned by [Marshal] when</span>
+<span class="hljs-comment">// attempting to encode a string value with invalid UTF-8 sequences.</span>
+<span class="hljs-comment">// As of Go 1.2, [Marshal] instead coerces the string to valid UTF-8 by</span>
+<span class="hljs-comment">// replacing invalid bytes with the Unicode replacement rune U+FFFD.</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// Deprecated: No longer used; kept for compatibility.</span>
+<span class="hljs-keyword">type</span> InvalidUTF8Error <span class="hljs-keyword">struct</span> {
+	S <span class="hljs-type">string</span> <span class="hljs-comment">// the whole string value that caused the error</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(e *InvalidUTF8Error)</span></span> Error() <span class="hljs-type">string</span> {
+	<span class="hljs-keyword">return</span> <span class="hljs-string">&quot;json: invalid UTF-8 in string: &quot;</span> + strconv.Quote(e.S)
+}
+
+<span class="hljs-comment">// A MarshalerError represents an error from calling a</span>
+<span class="hljs-comment">// [Marshaler.MarshalJSON] or [encoding.TextMarshaler.MarshalText] method.</span>
+<span class="hljs-keyword">type</span> MarshalerError <span class="hljs-keyword">struct</span> {
+	Type       reflect.Type
+	Err        <span class="hljs-type">error</span>
+	sourceFunc <span class="hljs-type">string</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(e *MarshalerError)</span></span> Error() <span class="hljs-type">string</span> {
+	srcFunc := e.sourceFunc
+	<span class="hljs-keyword">if</span> srcFunc == <span class="hljs-string">&quot;&quot;</span> {
+		srcFunc = <span class="hljs-string">&quot;MarshalJSON&quot;</span>
+	}
+	<span class="hljs-keyword">return</span> <span class="hljs-string">&quot;json: error calling &quot;</span> + srcFunc +
+		<span class="hljs-string">&quot; for type &quot;</span> + e.Type.String() +
+		<span class="hljs-string">&quot;: &quot;</span> + e.Err.Error()
+}
+
+<span class="hljs-comment">// Unwrap returns the underlying error.</span>
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(e *MarshalerError)</span></span> Unwrap() <span class="hljs-type">error</span> { <span class="hljs-keyword">return</span> e.Err }
+
+<span class="hljs-keyword">const</span> hex = <span class="hljs-string">&quot;0123456789abcdef&quot;</span>
+
+<span class="hljs-comment">// An encodeState encodes JSON into a bytes.Buffer.</span>
+<span class="hljs-keyword">type</span> encodeState <span class="hljs-keyword">struct</span> {
+	bytes.Buffer <span class="hljs-comment">// accumulated output</span>
+
+	<span class="hljs-comment">// Keep track of what pointers we&#x27;ve seen in the current recursive call</span>
+	<span class="hljs-comment">// path, to avoid cycles that could lead to a stack overflow. Only do</span>
+	<span class="hljs-comment">// the relatively expensive map operations if ptrLevel is larger than</span>
+	<span class="hljs-comment">// startDetectingCyclesAfter, so that we skip the work if we&#x27;re within a</span>
+	<span class="hljs-comment">// reasonable amount of nested pointers deep.</span>
+	ptrLevel <span class="hljs-type">uint</span>
+	ptrSeen  <span class="hljs-keyword">map</span>[any]<span class="hljs-keyword">struct</span>{}
+}
+
+<span class="hljs-keyword">const</span> startDetectingCyclesAfter = <span class="hljs-number">1000</span>
+
+<span class="hljs-keyword">var</span> encodeStatePool sync.Pool
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">newEncodeState</span><span class="hljs-params">()</span></span> *encodeState {
+	<span class="hljs-keyword">if</span> v := encodeStatePool.Get(); v != <span class="hljs-literal">nil</span> {
+		e := v.(*encodeState)
+		e.Reset()
+		<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(e.ptrSeen) &gt; <span class="hljs-number">0</span> {
+			<span class="hljs-built_in">panic</span>(<span class="hljs-string">&quot;ptrEncoder.encode should have emptied ptrSeen via defers&quot;</span>)
+		}
+		e.ptrLevel = <span class="hljs-number">0</span>
+		<span class="hljs-keyword">return</span> e
+	}
+	<span class="hljs-keyword">return</span> &amp;encodeState{ptrSeen: <span class="hljs-built_in">make</span>(<span class="hljs-keyword">map</span>[any]<span class="hljs-keyword">struct</span>{})}
+}
+
+<span class="hljs-comment">// jsonError is an error wrapper type for internal use only.</span>
+<span class="hljs-comment">// Panics with errors are wrapped in jsonError so that the top-level recover</span>
+<span class="hljs-comment">// can distinguish intentional panics from this package.</span>
+<span class="hljs-keyword">type</span> jsonError <span class="hljs-keyword">struct</span>{ <span class="hljs-type">error</span> }
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(e *encodeState)</span></span> marshal(v any, opts encOpts) (err <span class="hljs-type">error</span>) {
+	<span class="hljs-keyword">defer</span> <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">()</span></span> {
+		<span class="hljs-keyword">if</span> r := <span class="hljs-built_in">recover</span>(); r != <span class="hljs-literal">nil</span> {
+			<span class="hljs-keyword">if</span> je, ok := r.(jsonError); ok {
+				err = je.<span class="hljs-type">error</span>
+			} <span class="hljs-keyword">else</span> {
+				<span class="hljs-built_in">panic</span>(r)
+			}
+		}
+	}()
+	e.reflectValue(reflect.ValueOf(v), opts)
+	<span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+}
+
+<span class="hljs-comment">// error aborts the encoding by panicking with err wrapped in jsonError.</span>
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(e *encodeState)</span></span> <span class="hljs-type">error</span>(err <span class="hljs-type">error</span>) {
+	<span class="hljs-built_in">panic</span>(jsonError{err})
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">isEmptyValue</span><span class="hljs-params">(v reflect.Value)</span></span> <span class="hljs-type">bool</span> {
+	<span class="hljs-keyword">switch</span> v.Kind() {
+	<span class="hljs-keyword">case</span> reflect.Array, reflect.Map, reflect.Slice, reflect.String:
+		<span class="hljs-keyword">return</span> v.Len() == <span class="hljs-number">0</span>
+	<span class="hljs-keyword">case</span> reflect.Bool,
+		reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr,
+		reflect.Float32, reflect.Float64,
+		reflect.Interface, reflect.Pointer:
+		<span class="hljs-keyword">return</span> v.IsZero()
+	}
+	<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(e *encodeState)</span></span> reflectValue(v reflect.Value, opts encOpts) {
+	valueEncoder(v)(e, v, opts)
+}
+
+<span class="hljs-keyword">type</span> encOpts <span class="hljs-keyword">struct</span> {
+	<span class="hljs-comment">// quoted causes primitive fields to be encoded inside JSON strings.</span>
+	quoted <span class="hljs-type">bool</span>
+	<span class="hljs-comment">// escapeHTML causes &#x27;&lt;&#x27;, &#x27;&gt;&#x27;, and &#x27;&amp;&#x27; to be escaped in JSON strings.</span>
+	escapeHTML <span class="hljs-type">bool</span>
+}
+
+<span class="hljs-keyword">type</span> encoderFunc <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(e *encodeState, v reflect.Value, opts encOpts)</span></span>
+
+<span class="hljs-keyword">var</span> encoderCache sync.Map <span class="hljs-comment">// map[reflect.Type]encoderFunc</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">valueEncoder</span><span class="hljs-params">(v reflect.Value)</span></span> encoderFunc {
+	<span class="hljs-keyword">if</span> !v.IsValid() {
+		<span class="hljs-keyword">return</span> invalidValueEncoder
+	}
+	<span class="hljs-keyword">return</span> typeEncoder(v.Type())
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">typeEncoder</span><span class="hljs-params">(t reflect.Type)</span></span> encoderFunc {
+	<span class="hljs-keyword">if</span> fi, ok := encoderCache.Load(t); ok {
+		<span class="hljs-keyword">return</span> fi.(encoderFunc)
+	}
+
+	<span class="hljs-comment">// To deal with recursive types, populate the map with an</span>
+	<span class="hljs-comment">// indirect func before we build it. This type waits on the</span>
+	<span class="hljs-comment">// real func (f) to be ready and then calls it. This indirect</span>
+	<span class="hljs-comment">// func is only used for recursive types.</span>
+	<span class="hljs-keyword">var</span> (
+		wg sync.WaitGroup
+		f  encoderFunc
+	)
+	wg.Add(<span class="hljs-number">1</span>)
+	fi, loaded := encoderCache.LoadOrStore(t, encoderFunc(<span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(e *encodeState, v reflect.Value, opts encOpts)</span></span> {
+		wg.Wait()
+		f(e, v, opts)
+	}))
+	<span class="hljs-keyword">if</span> loaded {
+		<span class="hljs-keyword">return</span> fi.(encoderFunc)
+	}
+
+	<span class="hljs-comment">// Compute the real encoder and replace the indirect func with it.</span>
+	f = newTypeEncoder(t, <span class="hljs-literal">true</span>)
+	wg.Done()
+	encoderCache.Store(t, f)
+	<span class="hljs-keyword">return</span> f
+}
+
+<span class="hljs-keyword">var</span> (
+	marshalerType     = reflect.TypeFor[Marshaler]()
+	textMarshalerType = reflect.TypeFor[encoding.TextMarshaler]()
+)
+
+<span class="hljs-comment">// newTypeEncoder constructs an encoderFunc for a type.</span>
+<span class="hljs-comment">// The returned encoder only checks CanAddr when allowAddr is true.</span>
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">newTypeEncoder</span><span class="hljs-params">(t reflect.Type, allowAddr <span class="hljs-type">bool</span>)</span></span> encoderFunc {
+	<span class="hljs-comment">// If we have a non-pointer value whose type implements</span>
+	<span class="hljs-comment">// Marshaler with a value receiver, then we&#x27;re better off taking</span>
+	<span class="hljs-comment">// the address of the value - otherwise we end up with an</span>
+	<span class="hljs-comment">// allocation as we cast the value to an interface.</span>
+	<span class="hljs-keyword">if</span> t.Kind() != reflect.Pointer &amp;&amp; allowAddr &amp;&amp; reflect.PointerTo(t).Implements(marshalerType) {
+		<span class="hljs-keyword">return</span> newCondAddrEncoder(addrMarshalerEncoder, newTypeEncoder(t, <span class="hljs-literal">false</span>))
+	}
+	<span class="hljs-keyword">if</span> t.Implements(marshalerType) {
+		<span class="hljs-keyword">return</span> marshalerEncoder
+	}
+	<span class="hljs-keyword">if</span> t.Kind() != reflect.Pointer &amp;&amp; allowAddr &amp;&amp; reflect.PointerTo(t).Implements(textMarshalerType) {
+		<span class="hljs-keyword">return</span> newCondAddrEncoder(addrTextMarshalerEncoder, newTypeEncoder(t, <span class="hljs-literal">false</span>))
+	}
+	<span class="hljs-keyword">if</span> t.Implements(textMarshalerType) {
+		<span class="hljs-keyword">return</span> textMarshalerEncoder
+	}
+
+	<span class="hljs-keyword">switch</span> t.Kind() {
+	<span class="hljs-keyword">case</span> reflect.Bool:
+		<span class="hljs-keyword">return</span> boolEncoder
+	<span class="hljs-keyword">case</span> reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		<span class="hljs-keyword">return</span> intEncoder
+	<span class="hljs-keyword">case</span> reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
+		<span class="hljs-keyword">return</span> uintEncoder
+	<span class="hljs-keyword">case</span> reflect.Float32:
+		<span class="hljs-keyword">return</span> float32Encoder
+	<span class="hljs-keyword">case</span> reflect.Float64:
+		<span class="hljs-keyword">return</span> float64Encoder
+	<span class="hljs-keyword">case</span> reflect.String:
+		<span class="hljs-keyword">return</span> stringEncoder
+	<span class="hljs-keyword">case</span> reflect.Interface:
+		<span class="hljs-keyword">return</span> interfaceEncoder
+	<span class="hljs-keyword">case</span> reflect.Struct:
+		<span class="hljs-keyword">return</span> newStructEncoder(t)
+	<span class="hljs-keyword">case</span> reflect.Map:
+		<span class="hljs-keyword">return</span> newMapEncoder(t)
+	<span class="hljs-keyword">case</span> reflect.Slice:
+		<span class="hljs-keyword">return</span> newSliceEncoder(t)
+	<span class="hljs-keyword">case</span> reflect.Array:
+		<span class="hljs-keyword">return</span> newArrayEncoder(t)
+	<span class="hljs-keyword">case</span> reflect.Pointer:
+		<span class="hljs-keyword">return</span> newPtrEncoder(t)
+	<span class="hljs-keyword">default</span>:
+		<span class="hljs-keyword">return</span> unsupportedTypeEncoder
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">invalidValueEncoder</span><span class="hljs-params">(e *encodeState, v reflect.Value, _ encOpts)</span></span> {
+	e.WriteString(<span class="hljs-string">&quot;null&quot;</span>)
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">marshalerEncoder</span><span class="hljs-params">(e *encodeState, v reflect.Value, opts encOpts)</span></span> {
+	<span class="hljs-keyword">if</span> v.Kind() == reflect.Pointer &amp;&amp; v.IsNil() {
+		e.WriteString(<span class="hljs-string">&quot;null&quot;</span>)
+		<span class="hljs-keyword">return</span>
+	}
+	m, ok := v.Interface().(Marshaler)
+	<span class="hljs-keyword">if</span> !ok {
+		e.WriteString(<span class="hljs-string">&quot;null&quot;</span>)
+		<span class="hljs-keyword">return</span>
+	}
+	b, err := m.MarshalJSON()
+	<span class="hljs-keyword">if</span> err == <span class="hljs-literal">nil</span> {
+		e.Grow(<span class="hljs-built_in">len</span>(b))
+		out := e.AvailableBuffer()
+		out, err = appendCompact(out, b, opts.escapeHTML)
+		e.Buffer.Write(out)
+	}
+	<span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+		e.<span class="hljs-type">error</span>(&amp;MarshalerError{v.Type(), err, <span class="hljs-string">&quot;MarshalJSON&quot;</span>})
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">addrMarshalerEncoder</span><span class="hljs-params">(e *encodeState, v reflect.Value, opts encOpts)</span></span> {
+	va := v.Addr()
+	<span class="hljs-keyword">if</span> va.IsNil() {
+		e.WriteString(<span class="hljs-string">&quot;null&quot;</span>)
+		<span class="hljs-keyword">return</span>
+	}
+	m := va.Interface().(Marshaler)
+	b, err := m.MarshalJSON()
+	<span class="hljs-keyword">if</span> err == <span class="hljs-literal">nil</span> {
+		e.Grow(<span class="hljs-built_in">len</span>(b))
+		out := e.AvailableBuffer()
+		out, err = appendCompact(out, b, opts.escapeHTML)
+		e.Buffer.Write(out)
+	}
+	<span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+		e.<span class="hljs-type">error</span>(&amp;MarshalerError{v.Type(), err, <span class="hljs-string">&quot;MarshalJSON&quot;</span>})
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">textMarshalerEncoder</span><span class="hljs-params">(e *encodeState, v reflect.Value, opts encOpts)</span></span> {
+	<span class="hljs-keyword">if</span> v.Kind() == reflect.Pointer &amp;&amp; v.IsNil() {
+		e.WriteString(<span class="hljs-string">&quot;null&quot;</span>)
+		<span class="hljs-keyword">return</span>
+	}
+	m, ok := v.Interface().(encoding.TextMarshaler)
+	<span class="hljs-keyword">if</span> !ok {
+		e.WriteString(<span class="hljs-string">&quot;null&quot;</span>)
+		<span class="hljs-keyword">return</span>
+	}
+	b, err := m.MarshalText()
+	<span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+		e.<span class="hljs-type">error</span>(&amp;MarshalerError{v.Type(), err, <span class="hljs-string">&quot;MarshalText&quot;</span>})
+	}
+	e.Write(appendString(e.AvailableBuffer(), b, opts.escapeHTML))
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">addrTextMarshalerEncoder</span><span class="hljs-params">(e *encodeState, v reflect.Value, opts encOpts)</span></span> {
+	va := v.Addr()
+	<span class="hljs-keyword">if</span> va.IsNil() {
+		e.WriteString(<span class="hljs-string">&quot;null&quot;</span>)
+		<span class="hljs-keyword">return</span>
+	}
+	m := va.Interface().(encoding.TextMarshaler)
+	b, err := m.MarshalText()
+	<span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+		e.<span class="hljs-type">error</span>(&amp;MarshalerError{v.Type(), err, <span class="hljs-string">&quot;MarshalText&quot;</span>})
+	}
+	e.Write(appendString(e.AvailableBuffer(), b, opts.escapeHTML))
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">boolEncoder</span><span class="hljs-params">(e *encodeState, v reflect.Value, opts encOpts)</span></span> {
+	b := e.AvailableBuffer()
+	b = mayAppendQuote(b, opts.quoted)
+	b = strconv.AppendBool(b, v.Bool())
+	b = mayAppendQuote(b, opts.quoted)
+	e.Write(b)
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">intEncoder</span><span class="hljs-params">(e *encodeState, v reflect.Value, opts encOpts)</span></span> {
+	b := e.AvailableBuffer()
+	b = mayAppendQuote(b, opts.quoted)
+	b = strconv.AppendInt(b, v.Int(), <span class="hljs-number">10</span>)
+	b = mayAppendQuote(b, opts.quoted)
+	e.Write(b)
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">uintEncoder</span><span class="hljs-params">(e *encodeState, v reflect.Value, opts encOpts)</span></span> {
+	b := e.AvailableBuffer()
+	b = mayAppendQuote(b, opts.quoted)
+	b = strconv.AppendUint(b, v.Uint(), <span class="hljs-number">10</span>)
+	b = mayAppendQuote(b, opts.quoted)
+	e.Write(b)
+}
+
+<span class="hljs-keyword">type</span> floatEncoder <span class="hljs-type">int</span> <span class="hljs-comment">// number of bits</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(bits floatEncoder)</span></span> encode(e *encodeState, v reflect.Value, opts encOpts) {
+	f := v.Float()
+	<span class="hljs-keyword">if</span> math.IsInf(f, <span class="hljs-number">0</span>) || math.IsNaN(f) {
+		e.<span class="hljs-type">error</span>(&amp;UnsupportedValueError{v, strconv.FormatFloat(f, <span class="hljs-string">&#x27;g&#x27;</span>, <span class="hljs-number">-1</span>, <span class="hljs-type">int</span>(bits))})
+	}
+
+	<span class="hljs-comment">// Convert as if by ES6 number to string conversion.</span>
+	<span class="hljs-comment">// This matches most other JSON generators.</span>
+	<span class="hljs-comment">// See golang.org/issue/6384 and golang.org/issue/14135.</span>
+	<span class="hljs-comment">// Like fmt %g, but the exponent cutoffs are different</span>
+	<span class="hljs-comment">// and exponents themselves are not padded to two digits.</span>
+	b := e.AvailableBuffer()
+	b = mayAppendQuote(b, opts.quoted)
+	abs := math.Abs(f)
+	fmt := <span class="hljs-type">byte</span>(<span class="hljs-string">&#x27;f&#x27;</span>)
+	<span class="hljs-comment">// Note: Must use float32 comparisons for underlying float32 value to get precise cutoffs right.</span>
+	<span class="hljs-keyword">if</span> abs != <span class="hljs-number">0</span> {
+		<span class="hljs-keyword">if</span> bits == <span class="hljs-number">64</span> &amp;&amp; (abs &lt; <span class="hljs-number">1e-6</span> || abs &gt;= <span class="hljs-number">1e21</span>) || bits == <span class="hljs-number">32</span> &amp;&amp; (<span class="hljs-type">float32</span>(abs) &lt; <span class="hljs-number">1e-6</span> || <span class="hljs-type">float32</span>(abs) &gt;= <span class="hljs-number">1e21</span>) {
+			fmt = <span class="hljs-string">&#x27;e&#x27;</span>
+		}
+	}
+	b = strconv.AppendFloat(b, f, fmt, <span class="hljs-number">-1</span>, <span class="hljs-type">int</span>(bits))
+	<span class="hljs-keyword">if</span> fmt == <span class="hljs-string">&#x27;e&#x27;</span> {
+		<span class="hljs-comment">// clean up e-09 to e-9</span>
+		n := <span class="hljs-built_in">len</span>(b)
+		<span class="hljs-keyword">if</span> n &gt;= <span class="hljs-number">4</span> &amp;&amp; b[n<span class="hljs-number">-4</span>] == <span class="hljs-string">&#x27;e&#x27;</span> &amp;&amp; b[n<span class="hljs-number">-3</span>] == <span class="hljs-string">&#x27;-&#x27;</span> &amp;&amp; b[n<span class="hljs-number">-2</span>] == <span class="hljs-string">&#x27;0&#x27;</span> {
+			b[n<span class="hljs-number">-2</span>] = b[n<span class="hljs-number">-1</span>]
+			b = b[:n<span class="hljs-number">-1</span>]
+		}
+	}
+	b = mayAppendQuote(b, opts.quoted)
+	e.Write(b)
+}
+
+<span class="hljs-keyword">var</span> (
+	float32Encoder = (floatEncoder(<span class="hljs-number">32</span>)).encode
+	float64Encoder = (floatEncoder(<span class="hljs-number">64</span>)).encode
+)
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">stringEncoder</span><span class="hljs-params">(e *encodeState, v reflect.Value, opts encOpts)</span></span> {
+	<span class="hljs-keyword">if</span> v.Type() == numberType {
+		numStr := v.String()
+		<span class="hljs-comment">// In Go1.5 the empty string encodes to &quot;0&quot;, while this is not a valid number literal</span>
+		<span class="hljs-comment">// we keep compatibility so check validity after this.</span>
+		<span class="hljs-keyword">if</span> numStr == <span class="hljs-string">&quot;&quot;</span> {
+			numStr = <span class="hljs-string">&quot;0&quot;</span> <span class="hljs-comment">// Number&#x27;s zero-val</span>
+		}
+		<span class="hljs-keyword">if</span> !isValidNumber(numStr) {
+			e.<span class="hljs-type">error</span>(fmt.Errorf(<span class="hljs-string">&quot;json: invalid number literal %q&quot;</span>, numStr))
+		}
+		b := e.AvailableBuffer()
+		b = mayAppendQuote(b, opts.quoted)
+		b = <span class="hljs-built_in">append</span>(b, numStr...)
+		b = mayAppendQuote(b, opts.quoted)
+		e.Write(b)
+		<span class="hljs-keyword">return</span>
+	}
+	<span class="hljs-keyword">if</span> opts.quoted {
+		b := appendString(<span class="hljs-literal">nil</span>, v.String(), opts.escapeHTML)
+		e.Write(appendString(e.AvailableBuffer(), b, <span class="hljs-literal">false</span>)) <span class="hljs-comment">// no need to escape again since it is already escaped</span>
+	} <span class="hljs-keyword">else</span> {
+		e.Write(appendString(e.AvailableBuffer(), v.String(), opts.escapeHTML))
+	}
+}
+
+<span class="hljs-comment">// isValidNumber reports whether s is a valid JSON number literal.</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// isValidNumber should be an internal detail,</span>
+<span class="hljs-comment">// but widely used packages access it using linkname.</span>
+<span class="hljs-comment">// Notable members of the hall of shame include:</span>
+<span class="hljs-comment">//   - github.com/bytedance/sonic</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// Do not remove or change the type signature.</span>
+<span class="hljs-comment">// See go.dev/issue/67401.</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">//go:linkname isValidNumber</span>
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">isValidNumber</span><span class="hljs-params">(s <span class="hljs-type">string</span>)</span></span> <span class="hljs-type">bool</span> {
+	<span class="hljs-comment">// This function implements the JSON numbers grammar.</span>
+	<span class="hljs-comment">// See https://tools.ietf.org/html/rfc7159#section-6</span>
+	<span class="hljs-comment">// and https://www.json.org/img/number.png</span>
+
+	<span class="hljs-keyword">if</span> s == <span class="hljs-string">&quot;&quot;</span> {
+		<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+	}
+
+	<span class="hljs-comment">// Optional -</span>
+	<span class="hljs-keyword">if</span> s[<span class="hljs-number">0</span>] == <span class="hljs-string">&#x27;-&#x27;</span> {
+		s = s[<span class="hljs-number">1</span>:]
+		<span class="hljs-keyword">if</span> s == <span class="hljs-string">&quot;&quot;</span> {
+			<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+		}
+	}
+
+	<span class="hljs-comment">// Digits</span>
+	<span class="hljs-keyword">switch</span> {
+	<span class="hljs-keyword">default</span>:
+		<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+
+	<span class="hljs-keyword">case</span> s[<span class="hljs-number">0</span>] == <span class="hljs-string">&#x27;0&#x27;</span>:
+		s = s[<span class="hljs-number">1</span>:]
+
+	<span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;1&#x27;</span> &lt;= s[<span class="hljs-number">0</span>] &amp;&amp; s[<span class="hljs-number">0</span>] &lt;= <span class="hljs-string">&#x27;9&#x27;</span>:
+		s = s[<span class="hljs-number">1</span>:]
+		<span class="hljs-keyword">for</span> <span class="hljs-built_in">len</span>(s) &gt; <span class="hljs-number">0</span> &amp;&amp; <span class="hljs-string">&#x27;0&#x27;</span> &lt;= s[<span class="hljs-number">0</span>] &amp;&amp; s[<span class="hljs-number">0</span>] &lt;= <span class="hljs-string">&#x27;9&#x27;</span> {
+			s = s[<span class="hljs-number">1</span>:]
+		}
+	}
+
+	<span class="hljs-comment">// . followed by 1 or more digits.</span>
+	<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(s) &gt;= <span class="hljs-number">2</span> &amp;&amp; s[<span class="hljs-number">0</span>] == <span class="hljs-string">&#x27;.&#x27;</span> &amp;&amp; <span class="hljs-string">&#x27;0&#x27;</span> &lt;= s[<span class="hljs-number">1</span>] &amp;&amp; s[<span class="hljs-number">1</span>] &lt;= <span class="hljs-string">&#x27;9&#x27;</span> {
+		s = s[<span class="hljs-number">2</span>:]
+		<span class="hljs-keyword">for</span> <span class="hljs-built_in">len</span>(s) &gt; <span class="hljs-number">0</span> &amp;&amp; <span class="hljs-string">&#x27;0&#x27;</span> &lt;= s[<span class="hljs-number">0</span>] &amp;&amp; s[<span class="hljs-number">0</span>] &lt;= <span class="hljs-string">&#x27;9&#x27;</span> {
+			s = s[<span class="hljs-number">1</span>:]
+		}
+	}
+
+	<span class="hljs-comment">// e or E followed by an optional - or + and</span>
+	<span class="hljs-comment">// 1 or more digits.</span>
+	<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(s) &gt;= <span class="hljs-number">2</span> &amp;&amp; (s[<span class="hljs-number">0</span>] == <span class="hljs-string">&#x27;e&#x27;</span> || s[<span class="hljs-number">0</span>] == <span class="hljs-string">&#x27;E&#x27;</span>) {
+		s = s[<span class="hljs-number">1</span>:]
+		<span class="hljs-keyword">if</span> s[<span class="hljs-number">0</span>] == <span class="hljs-string">&#x27;+&#x27;</span> || s[<span class="hljs-number">0</span>] == <span class="hljs-string">&#x27;-&#x27;</span> {
+			s = s[<span class="hljs-number">1</span>:]
+			<span class="hljs-keyword">if</span> s == <span class="hljs-string">&quot;&quot;</span> {
+				<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+			}
+		}
+		<span class="hljs-keyword">for</span> <span class="hljs-built_in">len</span>(s) &gt; <span class="hljs-number">0</span> &amp;&amp; <span class="hljs-string">&#x27;0&#x27;</span> &lt;= s[<span class="hljs-number">0</span>] &amp;&amp; s[<span class="hljs-number">0</span>] &lt;= <span class="hljs-string">&#x27;9&#x27;</span> {
+			s = s[<span class="hljs-number">1</span>:]
+		}
+	}
+
+	<span class="hljs-comment">// Make sure we are at the end.</span>
+	<span class="hljs-keyword">return</span> s == <span class="hljs-string">&quot;&quot;</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">interfaceEncoder</span><span class="hljs-params">(e *encodeState, v reflect.Value, opts encOpts)</span></span> {
+	<span class="hljs-keyword">if</span> v.IsNil() {
+		e.WriteString(<span class="hljs-string">&quot;null&quot;</span>)
+		<span class="hljs-keyword">return</span>
+	}
+	e.reflectValue(v.Elem(), opts)
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">unsupportedTypeEncoder</span><span class="hljs-params">(e *encodeState, v reflect.Value, _ encOpts)</span></span> {
+	e.<span class="hljs-type">error</span>(&amp;UnsupportedTypeError{v.Type()})
+}
+
+<span class="hljs-keyword">type</span> structEncoder <span class="hljs-keyword">struct</span> {
+	fields structFields
+}
+
+<span class="hljs-keyword">type</span> structFields <span class="hljs-keyword">struct</span> {
+	list         []field
+	byExactName  <span class="hljs-keyword">map</span>[<span class="hljs-type">string</span>]*field
+	byFoldedName <span class="hljs-keyword">map</span>[<span class="hljs-type">string</span>]*field
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(se structEncoder)</span></span> encode(e *encodeState, v reflect.Value, opts encOpts) {
+	next := <span class="hljs-type">byte</span>(<span class="hljs-string">&#x27;{&#x27;</span>)
+FieldLoop:
+	<span class="hljs-keyword">for</span> i := <span class="hljs-keyword">range</span> se.fields.list {
+		f := &amp;se.fields.list[i]
+
+		<span class="hljs-comment">// Find the nested struct field by following f.index.</span>
+		fv := v
+		<span class="hljs-keyword">for</span> _, i := <span class="hljs-keyword">range</span> f.index {
+			<span class="hljs-keyword">if</span> fv.Kind() == reflect.Pointer {
+				<span class="hljs-keyword">if</span> fv.IsNil() {
+					<span class="hljs-keyword">continue</span> FieldLoop
+				}
+				fv = fv.Elem()
+			}
+			fv = fv.Field(i)
+		}
+
+		<span class="hljs-keyword">if</span> (f.omitEmpty &amp;&amp; isEmptyValue(fv)) ||
+			(f.omitZero &amp;&amp; (f.isZero == <span class="hljs-literal">nil</span> &amp;&amp; fv.IsZero() || (f.isZero != <span class="hljs-literal">nil</span> &amp;&amp; f.isZero(fv)))) {
+			<span class="hljs-keyword">continue</span>
+		}
+		e.WriteByte(next)
+		next = <span class="hljs-string">&#x27;,&#x27;</span>
+		<span class="hljs-keyword">if</span> opts.escapeHTML {
+			e.WriteString(f.nameEscHTML)
+		} <span class="hljs-keyword">else</span> {
+			e.WriteString(f.nameNonEsc)
+		}
+		opts.quoted = f.quoted
+		f.encoder(e, fv, opts)
+	}
+	<span class="hljs-keyword">if</span> next == <span class="hljs-string">&#x27;{&#x27;</span> {
+		e.WriteString(<span class="hljs-string">&quot;{}&quot;</span>)
+	} <span class="hljs-keyword">else</span> {
+		e.WriteByte(<span class="hljs-string">&#x27;}&#x27;</span>)
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">newStructEncoder</span><span class="hljs-params">(t reflect.Type)</span></span> encoderFunc {
+	se := structEncoder{fields: cachedTypeFields(t)}
+	<span class="hljs-keyword">return</span> se.encode
+}
+
+<span class="hljs-keyword">type</span> mapEncoder <span class="hljs-keyword">struct</span> {
+	elemEnc encoderFunc
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(me mapEncoder)</span></span> encode(e *encodeState, v reflect.Value, opts encOpts) {
+	<span class="hljs-keyword">if</span> v.IsNil() {
+		e.WriteString(<span class="hljs-string">&quot;null&quot;</span>)
+		<span class="hljs-keyword">return</span>
+	}
+	<span class="hljs-keyword">if</span> e.ptrLevel++; e.ptrLevel &gt; startDetectingCyclesAfter {
+		<span class="hljs-comment">// We&#x27;re a large number of nested ptrEncoder.encode calls deep;</span>
+		<span class="hljs-comment">// start checking if we&#x27;ve run into a pointer cycle.</span>
+		ptr := v.UnsafePointer()
+		<span class="hljs-keyword">if</span> _, ok := e.ptrSeen[ptr]; ok {
+			e.<span class="hljs-type">error</span>(&amp;UnsupportedValueError{v, fmt.Sprintf(<span class="hljs-string">&quot;encountered a cycle via %s&quot;</span>, v.Type())})
+		}
+		e.ptrSeen[ptr] = <span class="hljs-keyword">struct</span>{}{}
+		<span class="hljs-keyword">defer</span> <span class="hljs-built_in">delete</span>(e.ptrSeen, ptr)
+	}
+	e.WriteByte(<span class="hljs-string">&#x27;{&#x27;</span>)
+
+	<span class="hljs-comment">// Extract and sort the keys.</span>
+	<span class="hljs-keyword">var</span> (
+		sv  = <span class="hljs-built_in">make</span>([]reflectWithString, v.Len())
+		mi  = v.MapRange()
+		err <span class="hljs-type">error</span>
+	)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; mi.Next(); i++ {
+		<span class="hljs-keyword">if</span> sv[i].ks, err = resolveKeyName(mi.Key()); err != <span class="hljs-literal">nil</span> {
+			e.<span class="hljs-type">error</span>(fmt.Errorf(<span class="hljs-string">&quot;json: encoding error for type %q: %q&quot;</span>, v.Type().String(), err.Error()))
+		}
+		sv[i].v = mi.Value()
+	}
+	slices.SortFunc(sv, <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(i, j reflectWithString)</span></span> <span class="hljs-type">int</span> {
+		<span class="hljs-keyword">return</span> strings.Compare(i.ks, j.ks)
+	})
+
+	<span class="hljs-keyword">for</span> i, kv := <span class="hljs-keyword">range</span> sv {
+		<span class="hljs-keyword">if</span> i &gt; <span class="hljs-number">0</span> {
+			e.WriteByte(<span class="hljs-string">&#x27;,&#x27;</span>)
+		}
+		e.Write(appendString(e.AvailableBuffer(), kv.ks, opts.escapeHTML))
+		e.WriteByte(<span class="hljs-string">&#x27;:&#x27;</span>)
+		me.elemEnc(e, kv.v, opts)
+	}
+	e.WriteByte(<span class="hljs-string">&#x27;}&#x27;</span>)
+	e.ptrLevel--
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">newMapEncoder</span><span class="hljs-params">(t reflect.Type)</span></span> encoderFunc {
+	<span class="hljs-keyword">switch</span> t.Key().Kind() {
+	<span class="hljs-keyword">case</span> reflect.String,
+		reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
+	<span class="hljs-keyword">default</span>:
+		<span class="hljs-keyword">if</span> !t.Key().Implements(textMarshalerType) {
+			<span class="hljs-keyword">return</span> unsupportedTypeEncoder
+		}
+	}
+	me := mapEncoder{typeEncoder(t.Elem())}
+	<span class="hljs-keyword">return</span> me.encode
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">encodeByteSlice</span><span class="hljs-params">(e *encodeState, v reflect.Value, _ encOpts)</span></span> {
+	<span class="hljs-keyword">if</span> v.IsNil() {
+		e.WriteString(<span class="hljs-string">&quot;null&quot;</span>)
+		<span class="hljs-keyword">return</span>
+	}
+
+	s := v.Bytes()
+	b := e.AvailableBuffer()
+	b = <span class="hljs-built_in">append</span>(b, <span class="hljs-string">&#x27;&quot;&#x27;</span>)
+	b = base64.StdEncoding.AppendEncode(b, s)
+	b = <span class="hljs-built_in">append</span>(b, <span class="hljs-string">&#x27;&quot;&#x27;</span>)
+	e.Write(b)
+}
+
+<span class="hljs-comment">// sliceEncoder just wraps an arrayEncoder, checking to make sure the value isn&#x27;t nil.</span>
+<span class="hljs-keyword">type</span> sliceEncoder <span class="hljs-keyword">struct</span> {
+	arrayEnc encoderFunc
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(se sliceEncoder)</span></span> encode(e *encodeState, v reflect.Value, opts encOpts) {
+	<span class="hljs-keyword">if</span> v.IsNil() {
+		e.WriteString(<span class="hljs-string">&quot;null&quot;</span>)
+		<span class="hljs-keyword">return</span>
+	}
+	<span class="hljs-keyword">if</span> e.ptrLevel++; e.ptrLevel &gt; startDetectingCyclesAfter {
+		<span class="hljs-comment">// We&#x27;re a large number of nested ptrEncoder.encode calls deep;</span>
+		<span class="hljs-comment">// start checking if we&#x27;ve run into a pointer cycle.</span>
+		<span class="hljs-comment">// Here we use a struct to memorize the pointer to the first element of the slice</span>
+		<span class="hljs-comment">// and its length.</span>
+		ptr := <span class="hljs-keyword">struct</span> {
+			ptr any <span class="hljs-comment">// always an unsafe.Pointer, but avoids a dependency on package unsafe</span>
+			<span class="hljs-built_in">len</span> <span class="hljs-type">int</span>
+		}{v.UnsafePointer(), v.Len()}
+		<span class="hljs-keyword">if</span> _, ok := e.ptrSeen[ptr]; ok {
+			e.<span class="hljs-type">error</span>(&amp;UnsupportedValueError{v, fmt.Sprintf(<span class="hljs-string">&quot;encountered a cycle via %s&quot;</span>, v.Type())})
+		}
+		e.ptrSeen[ptr] = <span class="hljs-keyword">struct</span>{}{}
+		<span class="hljs-keyword">defer</span> <span class="hljs-built_in">delete</span>(e.ptrSeen, ptr)
+	}
+	se.arrayEnc(e, v, opts)
+	e.ptrLevel--
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">newSliceEncoder</span><span class="hljs-params">(t reflect.Type)</span></span> encoderFunc {
+	<span class="hljs-comment">// Byte slices get special treatment; arrays don&#x27;t.</span>
+	<span class="hljs-keyword">if</span> t.Elem().Kind() == reflect.Uint8 {
+		p := reflect.PointerTo(t.Elem())
+		<span class="hljs-keyword">if</span> !p.Implements(marshalerType) &amp;&amp; !p.Implements(textMarshalerType) {
+			<span class="hljs-keyword">return</span> encodeByteSlice
+		}
+	}
+	enc := sliceEncoder{newArrayEncoder(t)}
+	<span class="hljs-keyword">return</span> enc.encode
+}
+
+<span class="hljs-keyword">type</span> arrayEncoder <span class="hljs-keyword">struct</span> {
+	elemEnc encoderFunc
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(ae arrayEncoder)</span></span> encode(e *encodeState, v reflect.Value, opts encOpts) {
+	e.WriteByte(<span class="hljs-string">&#x27;[&#x27;</span>)
+	n := v.Len()
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; n; i++ {
+		<span class="hljs-keyword">if</span> i &gt; <span class="hljs-number">0</span> {
+			e.WriteByte(<span class="hljs-string">&#x27;,&#x27;</span>)
+		}
+		ae.elemEnc(e, v.Index(i), opts)
+	}
+	e.WriteByte(<span class="hljs-string">&#x27;]&#x27;</span>)
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">newArrayEncoder</span><span class="hljs-params">(t reflect.Type)</span></span> encoderFunc {
+	enc := arrayEncoder{typeEncoder(t.Elem())}
+	<span class="hljs-keyword">return</span> enc.encode
+}
+
+<span class="hljs-keyword">type</span> ptrEncoder <span class="hljs-keyword">struct</span> {
+	elemEnc encoderFunc
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(pe ptrEncoder)</span></span> encode(e *encodeState, v reflect.Value, opts encOpts) {
+	<span class="hljs-keyword">if</span> v.IsNil() {
+		e.WriteString(<span class="hljs-string">&quot;null&quot;</span>)
+		<span class="hljs-keyword">return</span>
+	}
+	<span class="hljs-keyword">if</span> e.ptrLevel++; e.ptrLevel &gt; startDetectingCyclesAfter {
+		<span class="hljs-comment">// We&#x27;re a large number of nested ptrEncoder.encode calls deep;</span>
+		<span class="hljs-comment">// start checking if we&#x27;ve run into a pointer cycle.</span>
+		ptr := v.Interface()
+		<span class="hljs-keyword">if</span> _, ok := e.ptrSeen[ptr]; ok {
+			e.<span class="hljs-type">error</span>(&amp;UnsupportedValueError{v, fmt.Sprintf(<span class="hljs-string">&quot;encountered a cycle via %s&quot;</span>, v.Type())})
+		}
+		e.ptrSeen[ptr] = <span class="hljs-keyword">struct</span>{}{}
+		<span class="hljs-keyword">defer</span> <span class="hljs-built_in">delete</span>(e.ptrSeen, ptr)
+	}
+	pe.elemEnc(e, v.Elem(), opts)
+	e.ptrLevel--
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">newPtrEncoder</span><span class="hljs-params">(t reflect.Type)</span></span> encoderFunc {
+	enc := ptrEncoder{typeEncoder(t.Elem())}
+	<span class="hljs-keyword">return</span> enc.encode
+}
+
+<span class="hljs-keyword">type</span> condAddrEncoder <span class="hljs-keyword">struct</span> {
+	canAddrEnc, elseEnc encoderFunc
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(ce condAddrEncoder)</span></span> encode(e *encodeState, v reflect.Value, opts encOpts) {
+	<span class="hljs-keyword">if</span> v.CanAddr() {
+		ce.canAddrEnc(e, v, opts)
+	} <span class="hljs-keyword">else</span> {
+		ce.elseEnc(e, v, opts)
+	}
+}
+
+<span class="hljs-comment">// newCondAddrEncoder returns an encoder that checks whether its value</span>
+<span class="hljs-comment">// CanAddr and delegates to canAddrEnc if so, else to elseEnc.</span>
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">newCondAddrEncoder</span><span class="hljs-params">(canAddrEnc, elseEnc encoderFunc)</span></span> encoderFunc {
+	enc := condAddrEncoder{canAddrEnc: canAddrEnc, elseEnc: elseEnc}
+	<span class="hljs-keyword">return</span> enc.encode
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">isValidTag</span><span class="hljs-params">(s <span class="hljs-type">string</span>)</span></span> <span class="hljs-type">bool</span> {
+	<span class="hljs-keyword">if</span> s == <span class="hljs-string">&quot;&quot;</span> {
+		<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+	}
+	<span class="hljs-keyword">for</span> _, c := <span class="hljs-keyword">range</span> s {
+		<span class="hljs-keyword">switch</span> {
+		<span class="hljs-keyword">case</span> strings.ContainsRune(<span class="hljs-string">&quot;!#$%&amp;()*+-./:;&lt;=&gt;?@[]^_{|}~ &quot;</span>, c):
+			<span class="hljs-comment">// Backslash and quote chars are reserved, but</span>
+			<span class="hljs-comment">// otherwise any punctuation chars are allowed</span>
+			<span class="hljs-comment">// in a tag name.</span>
+		<span class="hljs-keyword">case</span> !unicode.IsLetter(c) &amp;&amp; !unicode.IsDigit(c):
+			<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+		}
+	}
+	<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">typeByIndex</span><span class="hljs-params">(t reflect.Type, index []<span class="hljs-type">int</span>)</span></span> reflect.Type {
+	<span class="hljs-keyword">for</span> _, i := <span class="hljs-keyword">range</span> index {
+		<span class="hljs-keyword">if</span> t.Kind() == reflect.Pointer {
+			t = t.Elem()
+		}
+		t = t.Field(i).Type
+	}
+	<span class="hljs-keyword">return</span> t
+}
+
+<span class="hljs-keyword">type</span> reflectWithString <span class="hljs-keyword">struct</span> {
+	v  reflect.Value
+	ks <span class="hljs-type">string</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">resolveKeyName</span><span class="hljs-params">(k reflect.Value)</span></span> (<span class="hljs-type">string</span>, <span class="hljs-type">error</span>) {
+	<span class="hljs-keyword">if</span> k.Kind() == reflect.String {
+		<span class="hljs-keyword">return</span> k.String(), <span class="hljs-literal">nil</span>
+	}
+	<span class="hljs-keyword">if</span> tm, ok := k.Interface().(encoding.TextMarshaler); ok {
+		<span class="hljs-keyword">if</span> k.Kind() == reflect.Pointer &amp;&amp; k.IsNil() {
+			<span class="hljs-keyword">return</span> <span class="hljs-string">&quot;&quot;</span>, <span class="hljs-literal">nil</span>
+		}
+		buf, err := tm.MarshalText()
+		<span class="hljs-keyword">return</span> <span class="hljs-type">string</span>(buf), err
+	}
+	<span class="hljs-keyword">switch</span> k.Kind() {
+	<span class="hljs-keyword">case</span> reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		<span class="hljs-keyword">return</span> strconv.FormatInt(k.Int(), <span class="hljs-number">10</span>), <span class="hljs-literal">nil</span>
+	<span class="hljs-keyword">case</span> reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
+		<span class="hljs-keyword">return</span> strconv.FormatUint(k.Uint(), <span class="hljs-number">10</span>), <span class="hljs-literal">nil</span>
+	}
+	<span class="hljs-built_in">panic</span>(<span class="hljs-string">&quot;unexpected map key type&quot;</span>)
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">appendString</span>[<span class="hljs-title">Bytes</span> []<span class="hljs-title">byte</span> | <span class="hljs-title">string</span>]<span class="hljs-params">(dst []<span class="hljs-type">byte</span>, src Bytes, escapeHTML <span class="hljs-type">bool</span>)</span></span> []<span class="hljs-type">byte</span> {
+	dst = <span class="hljs-built_in">append</span>(dst, <span class="hljs-string">&#x27;&quot;&#x27;</span>)
+	start := <span class="hljs-number">0</span>
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">len</span>(src); {
+		<span class="hljs-keyword">if</span> b := src[i]; b &lt; utf8.RuneSelf {
+			<span class="hljs-keyword">if</span> htmlSafeSet[b] || (!escapeHTML &amp;&amp; safeSet[b]) {
+				i++
+				<span class="hljs-keyword">continue</span>
+			}
+			dst = <span class="hljs-built_in">append</span>(dst, src[start:i]...)
+			<span class="hljs-keyword">switch</span> b {
+			<span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;\\&#x27;</span>, <span class="hljs-string">&#x27;&quot;&#x27;</span>:
+				dst = <span class="hljs-built_in">append</span>(dst, <span class="hljs-string">&#x27;\\&#x27;</span>, b)
+			<span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;\b&#x27;</span>:
+				dst = <span class="hljs-built_in">append</span>(dst, <span class="hljs-string">&#x27;\\&#x27;</span>, <span class="hljs-string">&#x27;b&#x27;</span>)
+			<span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;\f&#x27;</span>:
+				dst = <span class="hljs-built_in">append</span>(dst, <span class="hljs-string">&#x27;\\&#x27;</span>, <span class="hljs-string">&#x27;f&#x27;</span>)
+			<span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;\n&#x27;</span>:
+				dst = <span class="hljs-built_in">append</span>(dst, <span class="hljs-string">&#x27;\\&#x27;</span>, <span class="hljs-string">&#x27;n&#x27;</span>)
+			<span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;\r&#x27;</span>:
+				dst = <span class="hljs-built_in">append</span>(dst, <span class="hljs-string">&#x27;\\&#x27;</span>, <span class="hljs-string">&#x27;r&#x27;</span>)
+			<span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;\t&#x27;</span>:
+				dst = <span class="hljs-built_in">append</span>(dst, <span class="hljs-string">&#x27;\\&#x27;</span>, <span class="hljs-string">&#x27;t&#x27;</span>)
+			<span class="hljs-keyword">default</span>:
+				<span class="hljs-comment">// This encodes bytes &lt; 0x20 except for \b, \f, \n, \r and \t.</span>
+				<span class="hljs-comment">// If escapeHTML is set, it also escapes &lt;, &gt;, and &amp;</span>
+				<span class="hljs-comment">// because they can lead to security holes when</span>
+				<span class="hljs-comment">// user-controlled strings are rendered into JSON</span>
+				<span class="hljs-comment">// and served to some browsers.</span>
+				dst = <span class="hljs-built_in">append</span>(dst, <span class="hljs-string">&#x27;\\&#x27;</span>, <span class="hljs-string">&#x27;u&#x27;</span>, <span class="hljs-string">&#x27;0&#x27;</span>, <span class="hljs-string">&#x27;0&#x27;</span>, hex[b&gt;&gt;<span class="hljs-number">4</span>], hex[b&amp;<span class="hljs-number">0xF</span>])
+			}
+			i++
+			start = i
+			<span class="hljs-keyword">continue</span>
+		}
+		<span class="hljs-comment">// TODO(https://go.dev/issue/56948): Use generic utf8 functionality.</span>
+		<span class="hljs-comment">// For now, cast only a small portion of byte slices to a string</span>
+		<span class="hljs-comment">// so that it can be stack allocated. This slows down []byte slightly</span>
+		<span class="hljs-comment">// due to the extra copy, but keeps string performance roughly the same.</span>
+		n := <span class="hljs-built_in">len</span>(src) - i
+		<span class="hljs-keyword">if</span> n &gt; utf8.UTFMax {
+			n = utf8.UTFMax
+		}
+		c, size := utf8.DecodeRuneInString(<span class="hljs-type">string</span>(src[i : i+n]))
+		<span class="hljs-keyword">if</span> c == utf8.RuneError &amp;&amp; size == <span class="hljs-number">1</span> {
+			dst = <span class="hljs-built_in">append</span>(dst, src[start:i]...)
+			dst = <span class="hljs-built_in">append</span>(dst, <span class="hljs-string">`\ufffd`</span>...)
+			i += size
+			start = i
+			<span class="hljs-keyword">continue</span>
+		}
+		<span class="hljs-comment">// U+2028 is LINE SEPARATOR.</span>
+		<span class="hljs-comment">// U+2029 is PARAGRAPH SEPARATOR.</span>
+		<span class="hljs-comment">// They are both technically valid characters in JSON strings,</span>
+		<span class="hljs-comment">// but don&#x27;t work in JSONP, which has to be evaluated as JavaScript,</span>
+		<span class="hljs-comment">// and can lead to security holes there. It is valid JSON to</span>
+		<span class="hljs-comment">// escape them, so we do so unconditionally.</span>
+		<span class="hljs-comment">// See https://en.wikipedia.org/wiki/JSON#Safety.</span>
+		<span class="hljs-keyword">if</span> c == <span class="hljs-string">&#x27;\u2028&#x27;</span> || c == <span class="hljs-string">&#x27;\u2029&#x27;</span> {
+			dst = <span class="hljs-built_in">append</span>(dst, src[start:i]...)
+			dst = <span class="hljs-built_in">append</span>(dst, <span class="hljs-string">&#x27;\\&#x27;</span>, <span class="hljs-string">&#x27;u&#x27;</span>, <span class="hljs-string">&#x27;2&#x27;</span>, <span class="hljs-string">&#x27;0&#x27;</span>, <span class="hljs-string">&#x27;2&#x27;</span>, hex[c&amp;<span class="hljs-number">0xF</span>])
+			i += size
+			start = i
+			<span class="hljs-keyword">continue</span>
+		}
+		i += size
+	}
+	dst = <span class="hljs-built_in">append</span>(dst, src[start:]...)
+	dst = <span class="hljs-built_in">append</span>(dst, <span class="hljs-string">&#x27;&quot;&#x27;</span>)
+	<span class="hljs-keyword">return</span> dst
+}
+
+<span class="hljs-comment">// A field represents a single field found in a struct.</span>
+<span class="hljs-keyword">type</span> field <span class="hljs-keyword">struct</span> {
+	name      <span class="hljs-type">string</span>
+	nameBytes []<span class="hljs-type">byte</span> <span class="hljs-comment">// []byte(name)</span>
+
+	nameNonEsc  <span class="hljs-type">string</span> <span class="hljs-comment">// `&quot;` + name + `&quot;:`</span>
+	nameEscHTML <span class="hljs-type">string</span> <span class="hljs-comment">// `&quot;` + HTMLEscape(name) + `&quot;:`</span>
+
+	tag       <span class="hljs-type">bool</span>
+	index     []<span class="hljs-type">int</span>
+	typ       reflect.Type
+	omitEmpty <span class="hljs-type">bool</span>
+	omitZero  <span class="hljs-type">bool</span>
+	isZero    <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(reflect.Value)</span></span> <span class="hljs-type">bool</span>
+	quoted    <span class="hljs-type">bool</span>
+
+	encoder encoderFunc
+}
+
+<span class="hljs-keyword">type</span> isZeroer <span class="hljs-keyword">interface</span> {
+	IsZero() <span class="hljs-type">bool</span>
+}
+
+<span class="hljs-keyword">var</span> isZeroerType = reflect.TypeFor[isZeroer]()
+
+<span class="hljs-comment">// typeFields returns a list of fields that JSON should recognize for the given type.</span>
+<span class="hljs-comment">// The algorithm is breadth-first search over the set of structs to include - the top struct</span>
+<span class="hljs-comment">// and then any reachable anonymous structs.</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// typeFields should be an internal detail,</span>
+<span class="hljs-comment">// but widely used packages access it using linkname.</span>
+<span class="hljs-comment">// Notable members of the hall of shame include:</span>
+<span class="hljs-comment">//   - github.com/bytedance/sonic</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// Do not remove or change the type signature.</span>
+<span class="hljs-comment">// See go.dev/issue/67401.</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">//go:linkname typeFields</span>
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">typeFields</span><span class="hljs-params">(t reflect.Type)</span></span> structFields {
+	<span class="hljs-comment">// Anonymous fields to explore at the current level and the next.</span>
+	current := []field{}
+	next := []field{{typ: t}}
+
+	<span class="hljs-comment">// Count of queued names for current level and the next.</span>
+	<span class="hljs-keyword">var</span> count, nextCount <span class="hljs-keyword">map</span>[reflect.Type]<span class="hljs-type">int</span>
+
+	<span class="hljs-comment">// Types already visited at an earlier level.</span>
+	visited := <span class="hljs-keyword">map</span>[reflect.Type]<span class="hljs-type">bool</span>{}
+
+	<span class="hljs-comment">// Fields found.</span>
+	<span class="hljs-keyword">var</span> fields []field
+
+	<span class="hljs-comment">// Buffer to run appendHTMLEscape on field names.</span>
+	<span class="hljs-keyword">var</span> nameEscBuf []<span class="hljs-type">byte</span>
+
+	<span class="hljs-keyword">for</span> <span class="hljs-built_in">len</span>(next) &gt; <span class="hljs-number">0</span> {
+		current, next = next, current[:<span class="hljs-number">0</span>]
+		count, nextCount = nextCount, <span class="hljs-keyword">map</span>[reflect.Type]<span class="hljs-type">int</span>{}
+
+		<span class="hljs-keyword">for</span> _, f := <span class="hljs-keyword">range</span> current {
+			<span class="hljs-keyword">if</span> visited[f.typ] {
+				<span class="hljs-keyword">continue</span>
+			}
+			visited[f.typ] = <span class="hljs-literal">true</span>
+
+			<span class="hljs-comment">// Scan f.typ for fields to include.</span>
+			<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; f.typ.NumField(); i++ {
+				sf := f.typ.Field(i)
+				<span class="hljs-keyword">if</span> sf.Anonymous {
+					t := sf.Type
+					<span class="hljs-keyword">if</span> t.Kind() == reflect.Pointer {
+						t = t.Elem()
+					}
+					<span class="hljs-keyword">if</span> !sf.IsExported() &amp;&amp; t.Kind() != reflect.Struct {
+						<span class="hljs-comment">// Ignore embedded fields of unexported non-struct types.</span>
+						<span class="hljs-keyword">continue</span>
+					}
+					<span class="hljs-comment">// Do not ignore embedded fields of unexported struct types</span>
+					<span class="hljs-comment">// since they may have exported fields.</span>
+				} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> !sf.IsExported() {
+					<span class="hljs-comment">// Ignore unexported non-embedded fields.</span>
+					<span class="hljs-keyword">continue</span>
+				}
+				tag := sf.Tag.Get(<span class="hljs-string">&quot;json&quot;</span>)
+				<span class="hljs-keyword">if</span> tag == <span class="hljs-string">&quot;-&quot;</span> {
+					<span class="hljs-keyword">continue</span>
+				}
+				name, opts := parseTag(tag)
+				<span class="hljs-keyword">if</span> !isValidTag(name) {
+					name = <span class="hljs-string">&quot;&quot;</span>
+				}
+				index := <span class="hljs-built_in">make</span>([]<span class="hljs-type">int</span>, <span class="hljs-built_in">len</span>(f.index)+<span class="hljs-number">1</span>)
+				<span class="hljs-built_in">copy</span>(index, f.index)
+				index[<span class="hljs-built_in">len</span>(f.index)] = i
+
+				ft := sf.Type
+				<span class="hljs-keyword">if</span> ft.Name() == <span class="hljs-string">&quot;&quot;</span> &amp;&amp; ft.Kind() == reflect.Pointer {
+					<span class="hljs-comment">// Follow pointer.</span>
+					ft = ft.Elem()
+				}
+
+				<span class="hljs-comment">// Only strings, floats, integers, and booleans can be quoted.</span>
+				quoted := <span class="hljs-literal">false</span>
+				<span class="hljs-keyword">if</span> opts.Contains(<span class="hljs-string">&quot;string&quot;</span>) {
+					<span class="hljs-keyword">switch</span> ft.Kind() {
+					<span class="hljs-keyword">case</span> reflect.Bool,
+						reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+						reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr,
+						reflect.Float32, reflect.Float64,
+						reflect.String:
+						quoted = <span class="hljs-literal">true</span>
+					}
+				}
+
+				<span class="hljs-comment">// Record found field and index sequence.</span>
+				<span class="hljs-keyword">if</span> name != <span class="hljs-string">&quot;&quot;</span> || !sf.Anonymous || ft.Kind() != reflect.Struct {
+					tagged := name != <span class="hljs-string">&quot;&quot;</span>
+					<span class="hljs-keyword">if</span> name == <span class="hljs-string">&quot;&quot;</span> {
+						name = sf.Name
+					}
+					field := field{
+						name:      name,
+						tag:       tagged,
+						index:     index,
+						typ:       ft,
+						omitEmpty: opts.Contains(<span class="hljs-string">&quot;omitempty&quot;</span>),
+						omitZero:  opts.Contains(<span class="hljs-string">&quot;omitzero&quot;</span>),
+						quoted:    quoted,
+					}
+					field.nameBytes = []<span class="hljs-type">byte</span>(field.name)
+
+					<span class="hljs-comment">// Build nameEscHTML and nameNonEsc ahead of time.</span>
+					nameEscBuf = appendHTMLEscape(nameEscBuf[:<span class="hljs-number">0</span>], field.nameBytes)
+					field.nameEscHTML = <span class="hljs-string">`&quot;`</span> + <span class="hljs-type">string</span>(nameEscBuf) + <span class="hljs-string">`&quot;:`</span>
+					field.nameNonEsc = <span class="hljs-string">`&quot;`</span> + field.name + <span class="hljs-string">`&quot;:`</span>
+
+					<span class="hljs-keyword">if</span> field.omitZero {
+						t := sf.Type
+						<span class="hljs-comment">// Provide a function that uses a type&#x27;s IsZero method.</span>
+						<span class="hljs-keyword">switch</span> {
+						<span class="hljs-keyword">case</span> t.Kind() == reflect.Interface &amp;&amp; t.Implements(isZeroerType):
+							field.isZero = <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(v reflect.Value)</span></span> <span class="hljs-type">bool</span> {
+								<span class="hljs-comment">// Avoid panics calling IsZero on a nil interface or</span>
+								<span class="hljs-comment">// non-nil interface with nil pointer.</span>
+								<span class="hljs-keyword">return</span> v.IsNil() ||
+									(v.Elem().Kind() == reflect.Pointer &amp;&amp; v.Elem().IsNil()) ||
+									v.Interface().(isZeroer).IsZero()
+							}
+						<span class="hljs-keyword">case</span> t.Kind() == reflect.Pointer &amp;&amp; t.Implements(isZeroerType):
+							field.isZero = <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(v reflect.Value)</span></span> <span class="hljs-type">bool</span> {
+								<span class="hljs-comment">// Avoid panics calling IsZero on nil pointer.</span>
+								<span class="hljs-keyword">return</span> v.IsNil() || v.Interface().(isZeroer).IsZero()
+							}
+						<span class="hljs-keyword">case</span> t.Implements(isZeroerType):
+							field.isZero = <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(v reflect.Value)</span></span> <span class="hljs-type">bool</span> {
+								<span class="hljs-keyword">return</span> v.Interface().(isZeroer).IsZero()
+							}
+						<span class="hljs-keyword">case</span> reflect.PointerTo(t).Implements(isZeroerType):
+							field.isZero = <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(v reflect.Value)</span></span> <span class="hljs-type">bool</span> {
+								<span class="hljs-keyword">if</span> !v.CanAddr() {
+									<span class="hljs-comment">// Temporarily box v so we can take the address.</span>
+									v2 := reflect.New(v.Type()).Elem()
+									v2.Set(v)
+									v = v2
+								}
+								<span class="hljs-keyword">return</span> v.Addr().Interface().(isZeroer).IsZero()
+							}
+						}
+					}
+
+					fields = <span class="hljs-built_in">append</span>(fields, field)
+					<span class="hljs-keyword">if</span> count[f.typ] &gt; <span class="hljs-number">1</span> {
+						<span class="hljs-comment">// If there were multiple instances, add a second,</span>
+						<span class="hljs-comment">// so that the annihilation code will see a duplicate.</span>
+						<span class="hljs-comment">// It only cares about the distinction between 1 and 2,</span>
+						<span class="hljs-comment">// so don&#x27;t bother generating any more copies.</span>
+						fields = <span class="hljs-built_in">append</span>(fields, fields[<span class="hljs-built_in">len</span>(fields)<span class="hljs-number">-1</span>])
+					}
+					<span class="hljs-keyword">continue</span>
+				}
+
+				<span class="hljs-comment">// Record new anonymous struct to explore in next round.</span>
+				nextCount[ft]++
+				<span class="hljs-keyword">if</span> nextCount[ft] == <span class="hljs-number">1</span> {
+					next = <span class="hljs-built_in">append</span>(next, field{name: ft.Name(), index: index, typ: ft})
+				}
+			}
+		}
+	}
+
+	slices.SortFunc(fields, <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(a, b field)</span></span> <span class="hljs-type">int</span> {
+		<span class="hljs-comment">// sort field by name, breaking ties with depth, then</span>
+		<span class="hljs-comment">// breaking ties with &quot;name came from json tag&quot;, then</span>
+		<span class="hljs-comment">// breaking ties with index sequence.</span>
+		<span class="hljs-keyword">if</span> c := strings.Compare(a.name, b.name); c != <span class="hljs-number">0</span> {
+			<span class="hljs-keyword">return</span> c
+		}
+		<span class="hljs-keyword">if</span> c := cmp.Compare(<span class="hljs-built_in">len</span>(a.index), <span class="hljs-built_in">len</span>(b.index)); c != <span class="hljs-number">0</span> {
+			<span class="hljs-keyword">return</span> c
+		}
+		<span class="hljs-keyword">if</span> a.tag != b.tag {
+			<span class="hljs-keyword">if</span> a.tag {
+				<span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>
+			}
+			<span class="hljs-keyword">return</span> +<span class="hljs-number">1</span>
+		}
+		<span class="hljs-keyword">return</span> slices.Compare(a.index, b.index)
+	})
+
+	<span class="hljs-comment">// Delete all fields that are hidden by the Go rules for embedded fields,</span>
+	<span class="hljs-comment">// except that fields with JSON tags are promoted.</span>
+
+	<span class="hljs-comment">// The fields are sorted in primary order of name, secondary order</span>
+	<span class="hljs-comment">// of field index length. Loop over names; for each name, delete</span>
+	<span class="hljs-comment">// hidden fields by choosing the one dominant field that survives.</span>
+	out := fields[:<span class="hljs-number">0</span>]
+	<span class="hljs-keyword">for</span> advance, i := <span class="hljs-number">0</span>, <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">len</span>(fields); i += advance {
+		<span class="hljs-comment">// One iteration per name.</span>
+		<span class="hljs-comment">// Find the sequence of fields with the name of this first field.</span>
+		fi := fields[i]
+		name := fi.name
+		<span class="hljs-keyword">for</span> advance = <span class="hljs-number">1</span>; i+advance &lt; <span class="hljs-built_in">len</span>(fields); advance++ {
+			fj := fields[i+advance]
+			<span class="hljs-keyword">if</span> fj.name != name {
+				<span class="hljs-keyword">break</span>
+			}
+		}
+		<span class="hljs-keyword">if</span> advance == <span class="hljs-number">1</span> { <span class="hljs-comment">// Only one field with this name</span>
+			out = <span class="hljs-built_in">append</span>(out, fi)
+			<span class="hljs-keyword">continue</span>
+		}
+		dominant, ok := dominantField(fields[i : i+advance])
+		<span class="hljs-keyword">if</span> ok {
+			out = <span class="hljs-built_in">append</span>(out, dominant)
+		}
+	}
+
+	fields = out
+	slices.SortFunc(fields, <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(i, j field)</span></span> <span class="hljs-type">int</span> {
+		<span class="hljs-keyword">return</span> slices.Compare(i.index, j.index)
+	})
+
+	<span class="hljs-keyword">for</span> i := <span class="hljs-keyword">range</span> fields {
+		f := &amp;fields[i]
+		f.encoder = typeEncoder(typeByIndex(t, f.index))
+	}
+	exactNameIndex := <span class="hljs-built_in">make</span>(<span class="hljs-keyword">map</span>[<span class="hljs-type">string</span>]*field, <span class="hljs-built_in">len</span>(fields))
+	foldedNameIndex := <span class="hljs-built_in">make</span>(<span class="hljs-keyword">map</span>[<span class="hljs-type">string</span>]*field, <span class="hljs-built_in">len</span>(fields))
+	<span class="hljs-keyword">for</span> i, field := <span class="hljs-keyword">range</span> fields {
+		exactNameIndex[field.name] = &amp;fields[i]
+		<span class="hljs-comment">// For historical reasons, first folded match takes precedence.</span>
+		<span class="hljs-keyword">if</span> _, ok := foldedNameIndex[<span class="hljs-type">string</span>(foldName(field.nameBytes))]; !ok {
+			foldedNameIndex[<span class="hljs-type">string</span>(foldName(field.nameBytes))] = &amp;fields[i]
+		}
+	}
+	<span class="hljs-keyword">return</span> structFields{fields, exactNameIndex, foldedNameIndex}
+}
+
+<span class="hljs-comment">// dominantField looks through the fields, all of which are known to</span>
+<span class="hljs-comment">// have the same name, to find the single field that dominates the</span>
+<span class="hljs-comment">// others using Go&#x27;s embedding rules, modified by the presence of</span>
+<span class="hljs-comment">// JSON tags. If there are multiple top-level fields, the boolean</span>
+<span class="hljs-comment">// will be false: This condition is an error in Go and we skip all</span>
+<span class="hljs-comment">// the fields.</span>
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">dominantField</span><span class="hljs-params">(fields []field)</span></span> (field, <span class="hljs-type">bool</span>) {
+	<span class="hljs-comment">// The fields are sorted in increasing index-length order, then by presence of tag.</span>
+	<span class="hljs-comment">// That means that the first field is the dominant one. We need only check</span>
+	<span class="hljs-comment">// for error cases: two fields at top level, either both tagged or neither tagged.</span>
+	<span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(fields) &gt; <span class="hljs-number">1</span> &amp;&amp; <span class="hljs-built_in">len</span>(fields[<span class="hljs-number">0</span>].index) == <span class="hljs-built_in">len</span>(fields[<span class="hljs-number">1</span>].index) &amp;&amp; fields[<span class="hljs-number">0</span>].tag == fields[<span class="hljs-number">1</span>].tag {
+		<span class="hljs-keyword">return</span> field{}, <span class="hljs-literal">false</span>
+	}
+	<span class="hljs-keyword">return</span> fields[<span class="hljs-number">0</span>], <span class="hljs-literal">true</span>
+}
+
+<span class="hljs-keyword">var</span> fieldCache sync.Map <span class="hljs-comment">// map[reflect.Type]structFields</span>
+
+<span class="hljs-comment">// cachedTypeFields is like typeFields but uses a cache to avoid repeated work.</span>
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">cachedTypeFields</span><span class="hljs-params">(t reflect.Type)</span></span> structFields {
+	<span class="hljs-keyword">if</span> f, ok := fieldCache.Load(t); ok {
+		<span class="hljs-keyword">return</span> f.(structFields)
+	}
+	f, _ := fieldCache.LoadOrStore(t, typeFields(t))
+	<span class="hljs-keyword">return</span> f.(structFields)
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">mayAppendQuote</span><span class="hljs-params">(b []<span class="hljs-type">byte</span>, quoted <span class="hljs-type">bool</span>)</span></span> []<span class="hljs-type">byte</span> {
+	<span class="hljs-keyword">if</span> quoted {
+		b = <span class="hljs-built_in">append</span>(b, <span class="hljs-string">&#x27;&quot;&#x27;</span>)
+	}
+	<span class="hljs-keyword">return</span> b
+}
+</code></pre></main>
+  <script>
+    (function () {
+      var at = location.hash.match(/^#at=(\d+),(\d+)$/);
+      if (at) window.scrollTo(Number(at[1]), Number(at[2]));
+      addEventListener("scroll", function () {
+        parent.postMessage({ lumisShowcaseScroll: { x: scrollX, y: scrollY } }, "*");
+      }, { passive: true });
+    })();
+  </script>
+</body>
+</html>

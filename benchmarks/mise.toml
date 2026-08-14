@@ -184,7 +184,9 @@ sources = [
 outputs = [
   "benchmarks/showcase/generated/assets/webgpu_compute_reduce.html",
   "benchmarks/showcase/generated/assets/ripgrep_searcher.rs",
-  "benchmarks/showcase/generated/assets/Dracula.tmTheme",
+  "benchmarks/showcase/generated/assets/catppuccin-latte.tmTheme",
+  "benchmarks/showcase/generated/assets/catppuccin-frappe.tmTheme",
+  "benchmarks/showcase/generated/assets/themes.json",
 ]
 
 [tasks.showcase]

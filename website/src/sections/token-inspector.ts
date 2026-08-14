@@ -98,7 +98,7 @@ async function initInspector(root: HTMLElement, output: HTMLDivElement) {
     import("@lumis-sh/wasm-html").then((m) => m.default),
     import("@lumis-sh/wasm-javascript").then((m) => m.default),
     loadTheme("catppuccin_latte"),
-    loadTheme("catppuccin_mocha"),
+    loadTheme("catppuccin_frappe"),
   ]);
 
   const hl = await createHighlighter({

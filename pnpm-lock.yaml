@@ -8,6 +8,9 @@ importers:
 
   benchmarks/javascript:
     dependencies:
+      '@catppuccin/highlightjs':
+        specifier: 1.0.1
+        version: 1.0.1
       '@lumis-sh/lumis':
         specifier: workspace:*
         version: link:../../packages/javascript/lumis
@@ -983,6 +986,9 @@ packages:
 
   '@asamuzakjp/nwsapi@2.3.9':
     resolution: {integrity: sha512-n8GuYSrI9bF7FFZ/SjhwevlHc8xaVlb/7HmHelnc/PZXBD2ZR49NnN9sMMuDdEGPeeRQ5d0hqlSlEpgCX3Wl0Q==}
+
+  '@catppuccin/highlightjs@1.0.1':
+    resolution: {integrity: sha512-wnagsNQbJroHQMalkprwRoapfGV1hHRx46d7GXp4kf6rlShImBlgpqPCt9OD471Gq4qpHdfFH/GJFIvY1CLqHA==}
 
   '@csstools/color-helpers@6.0.2':
     resolution: {integrity: sha512-LMGQLS9EuADloEFkcTBR3BwV/CGHV7zyDxVRtVDTwdI2Ca4it0CCVTT9wCkxSgokjE5Ho41hEPgb8OEUwoXr6Q==}
@@ -3618,6 +3624,8 @@ snapshots:
       lru-cache: 11.3.5
 
   '@asamuzakjp/nwsapi@2.3.9': {}
+
+  '@catppuccin/highlightjs@1.0.1': {}
 
   '@csstools/color-helpers@6.0.2': {}
 
