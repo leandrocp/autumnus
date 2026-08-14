@@ -39,14 +39,14 @@ That's it for runtimes that support HTML Multi-Themes output. No JavaScript or m
 import {highlight} from '@lumis-sh/lumis'
 import {htmlMultiThemes} from '@lumis-sh/lumis/formatters'
 import javascript from '@lumis-sh/lumis/langs/javascript'
-import githubLight from '@lumis-sh/themes/github_light'
-import githubDark from '@lumis-sh/themes/github_dark'
+import latte from '@lumis-sh/themes/catppuccin_latte'
+import frappe from '@lumis-sh/themes/catppuccin_frappe'
 
 const html = await highlight(
   'const x = 1',
   htmlMultiThemes({
     language: javascript,
-    themes: {light: githubLight, dark: githubDark},
+    themes: {light: latte, dark: frappe},
     defaultTheme: 'light-dark()',
   })
 )
@@ -60,8 +60,8 @@ use lumis::{highlight, HtmlMultiThemesBuilder, languages::Language, themes};
 use std::collections::HashMap;
 
 let mut theme_map = HashMap::new();
-theme_map.insert("light".to_string(), themes::get("github_light").unwrap());
-theme_map.insert("dark".to_string(), themes::get("github_dark").unwrap());
+theme_map.insert("light".to_string(), themes::get("catppuccin_latte").unwrap());
+theme_map.insert("dark".to_string(), themes::get("catppuccin_frappe").unwrap());
 
 let html = highlight(
     "const x = 1",
@@ -82,7 +82,7 @@ Lumis.highlight!(
   "const x = 1",
   formatter: {:html_multi_themes,
     language: "javascript",
-    themes: [light: "github_light", dark: "github_dark"],
+    themes: [light: "catppuccin_latte", dark: "catppuccin_frappe"],
     default_theme: "light-dark()"
   }
 )
@@ -99,8 +99,8 @@ HTML Multi-Themes is not currently supported in `lumis4j`.
 ```bash
 lumis highlight index.js \
   --formatter html-multi-themes \
-  --themes light:github_light \
-  --themes dark:github_dark \
+  --themes light:catppuccin_latte \
+  --themes dark:catppuccin_frappe \
   --default-theme "light-dark()"
 ```
 
@@ -135,14 +135,14 @@ For runtimes that support HTML Multi-Themes, `default_theme: "light"` makes the 
 import {highlight} from '@lumis-sh/lumis'
 import {htmlMultiThemes} from '@lumis-sh/lumis/formatters'
 import javascript from '@lumis-sh/lumis/langs/javascript'
-import githubLight from '@lumis-sh/themes/github_light'
-import githubDark from '@lumis-sh/themes/github_dark'
+import latte from '@lumis-sh/themes/catppuccin_latte'
+import frappe from '@lumis-sh/themes/catppuccin_frappe'
 
 const html = await highlight(
   code,
   htmlMultiThemes({
     language: javascript,
-    themes: {light: githubLight, dark: githubDark},
+    themes: {light: latte, dark: frappe},
     defaultTheme: 'light',
   })
 )
@@ -156,8 +156,8 @@ use lumis::{highlight, HtmlMultiThemesBuilder, languages::Language, themes};
 use std::collections::HashMap;
 
 let mut theme_map = HashMap::new();
-theme_map.insert("light".to_string(), themes::get("github_light").unwrap());
-theme_map.insert("dark".to_string(), themes::get("github_dark").unwrap());
+theme_map.insert("light".to_string(), themes::get("catppuccin_latte").unwrap());
+theme_map.insert("dark".to_string(), themes::get("catppuccin_frappe").unwrap());
 
 let html = highlight(
     code,
@@ -178,7 +178,7 @@ Lumis.highlight!(
   code,
   formatter: {:html_multi_themes,
     language: "elixir",
-    themes: [light: "github_light", dark: "github_dark"],
+    themes: [light: "catppuccin_latte", dark: "catppuccin_frappe"],
     default_theme: "light"
   }
 )
@@ -195,8 +195,8 @@ HTML Multi-Themes is not currently supported in `lumis4j`.
 ```bash
 lumis highlight index.js \
   --formatter html-multi-themes \
-  --themes light:github_light \
-  --themes dark:github_dark \
+  --themes light:catppuccin_latte \
+  --themes dark:catppuccin_frappe \
   --default-theme light
 ```
 
@@ -241,14 +241,14 @@ This pattern works anywhere you render the generated HTML. In Phoenix LiveView, 
 import {highlight} from '@lumis-sh/lumis'
 import {htmlMultiThemes} from '@lumis-sh/lumis/formatters'
 import javascript from '@lumis-sh/lumis/langs/javascript'
-import githubLight from '@lumis-sh/themes/github_light'
-import githubDark from '@lumis-sh/themes/github_dark'
+import latte from '@lumis-sh/themes/catppuccin_latte'
+import frappe from '@lumis-sh/themes/catppuccin_frappe'
 
 const html = await highlight(
   code,
   htmlMultiThemes({
     language: javascript,
-    themes: {light: githubLight, dark: githubDark},
+    themes: {light: latte, dark: frappe},
     defaultTheme: 'light',
   })
 )
@@ -262,8 +262,8 @@ use lumis::{highlight, HtmlMultiThemesBuilder, languages::Language, themes};
 use std::collections::HashMap;
 
 let mut theme_map = HashMap::new();
-theme_map.insert("light".to_string(), themes::get("github_light").unwrap());
-theme_map.insert("dark".to_string(), themes::get("github_dark").unwrap());
+theme_map.insert("light".to_string(), themes::get("catppuccin_latte").unwrap());
+theme_map.insert("dark".to_string(), themes::get("catppuccin_frappe").unwrap());
 
 let html = highlight(
     code,
@@ -284,7 +284,7 @@ Lumis.highlight!(
   code,
   formatter: {:html_multi_themes,
     language: "elixir",
-    themes: [light: "github_light", dark: "github_dark"],
+    themes: [light: "catppuccin_latte", dark: "catppuccin_frappe"],
     default_theme: "light"
   }
 )
@@ -301,8 +301,8 @@ HTML Multi-Themes is not currently supported in `lumis4j`.
 ```bash
 lumis highlight index.js \
   --formatter html-multi-themes \
-  --themes light:github_light \
-  --themes dark:github_dark \
+  --themes light:catppuccin_latte \
+  --themes dark:catppuccin_frappe \
   --default-theme light
 ```
 

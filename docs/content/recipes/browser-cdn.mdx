@@ -12,11 +12,11 @@ description: Highlight code directly in Browsers with ESM CDN imports.
   import {highlight} from 'https://esm.sh/@lumis-sh/lumis'
   import {htmlInline} from 'https://esm.sh/@lumis-sh/lumis/formatters'
   import javascript from 'https://esm.sh/@lumis-sh/lumis/langs/javascript'
-  import dracula from 'https://esm.sh/@lumis-sh/themes/dracula'
+  import frappe from 'https://esm.sh/@lumis-sh/themes/catppuccin_frappe'
 
   document.getElementById('output').innerHTML = await highlight(
     'const x = 1',
-    htmlInline({language: javascript, theme: dracula})
+    htmlInline({language: javascript, theme: frappe})
   )
 </script>
 <div id="output"></div>

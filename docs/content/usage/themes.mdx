@@ -6,7 +6,7 @@ description: Use built-in Neovim themes, load custom theme JSON, or generate new
 keywords:
   - lumis themes
   - neovim themes
-  - dracula
+  - catppuccin
   - custom themes
 ---
 
@@ -23,10 +23,10 @@ Lumis themes come from the Neovim ecosystem. You can use the built-in collection
   <TabItem value="javascript" label="JavaScript">
 
 ```js
-import dracula from '@lumis-sh/themes/dracula';
+import frappe from '@lumis-sh/themes/catppuccin_frappe';
 
-console.log(dracula.name);
-console.log(dracula.appearance);
+console.log(frappe.name);
+console.log(frappe.appearance);
 ```
 
   </TabItem>
@@ -35,14 +35,14 @@ console.log(dracula.appearance);
 ```rust
 use lumis::themes;
 
-let theme = themes::get("dracula").unwrap();
+let theme = themes::get("catppuccin_frappe").unwrap();
 ```
 
   </TabItem>
   <TabItem value="elixir" label="Elixir">
 
 ```elixir
-theme = Lumis.Theme.get("github_light")
+theme = Lumis.Theme.get("catppuccin_latte")
 theme.name
 ```
 
@@ -52,7 +52,7 @@ theme.name
 ```java
 import io.roastedroot.lumis4j.core.Theme;
 
-var theme = Theme.DRACULA;
+var theme = Theme.CATPPUCCIN_FRAPPE;
 ```
 
   </TabItem>

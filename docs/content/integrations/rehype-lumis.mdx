@@ -28,10 +28,10 @@ import rehypeLumis from '@lumis-sh/rehype-lumis'
 import {htmlInline} from '@lumis-sh/lumis/formatters'
 import javascript from '@lumis-sh/lumis/langs/javascript'
 import plaintext from '@lumis-sh/lumis/langs/plaintext'
-import githubLight from '@lumis-sh/themes/github_light'
+import latte from '@lumis-sh/themes/catppuccin_latte'
 
 processor.use(rehypeLumis, {
-  formatter: (language) => htmlInline({language, theme: githubLight}),
+  formatter: (language) => htmlInline({language, theme: latte}),
   languages: [javascript, plaintext],
 })
 ```
@@ -50,13 +50,13 @@ import {htmlInline} from '@lumis-sh/lumis/formatters'
 import javascript from '@lumis-sh/lumis/langs/javascript'
 import rust from '@lumis-sh/lumis/langs/rust'
 import plaintext from '@lumis-sh/lumis/langs/plaintext'
-import githubLight from '@lumis-sh/themes/github_light'
+import latte from '@lumis-sh/themes/catppuccin_latte'
 
 const file = await unified()
   .use(remarkParse)
   .use(remarkRehype)
   .use(rehypeLumis, {
-    formatter: (language) => htmlInline({language, theme: githubLight}),
+    formatter: (language) => htmlInline({language, theme: latte}),
     languages: [javascript, rust, plaintext],
   })
   .use(rehypeStringify)

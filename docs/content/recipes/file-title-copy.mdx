@@ -48,7 +48,7 @@ Resulting shape for runtimes that support custom header wrappers:
 import {highlight} from '@lumis-sh/lumis'
 import {htmlInline} from '@lumis-sh/lumis/formatters'
 import javascript from '@lumis-sh/lumis/langs/javascript'
-import dracula from '@lumis-sh/themes/dracula'
+import frappe from '@lumis-sh/themes/catppuccin_frappe'
 
 const source = 'console.log("hello")'
 const filename = 'app.js'
@@ -57,7 +57,7 @@ const html = await highlight(
   source,
   htmlInline({
     language: javascript,
-    theme: dracula,
+    theme: frappe,
     header: {
       openTag: `<div class="snippet-frame">
   <div class="snippet-bar">
@@ -83,7 +83,7 @@ let filename = "app.js";
 
 let formatter = HtmlInlineBuilder::new()
     .language(Language::Javascript)
-    .theme(Some(themes::get("dracula").unwrap()))
+    .theme(Some(themes::get("catppuccin_frappe").unwrap()))
     .header(Some(HtmlElement {
         open_tag: format!(
             r#"<div class="snippet-frame">
@@ -114,7 +114,7 @@ html = Lumis.highlight!(
   source,
   formatter: {:html_inline,
     language: "javascript",
-    theme: "dracula",
+    theme: "catppuccin_frappe",
     header: %{
       open_tag: """
       <div class="snippet-frame">

@@ -12,7 +12,7 @@ import {createHighlighter, withWasmBundle} from '@lumis-sh/lumis'
 import {htmlInline} from '@lumis-sh/lumis/formatters'
 import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
 import {bundledWasms} from '@lumis-sh/wasm-bundle-web'
-import githubLight from '@lumis-sh/themes/github_light'
+import latte from '@lumis-sh/themes/catppuccin_latte'
 
 const languages = withWasmBundle(bundledLanguages, bundledWasms)
 const hl = await createHighlighter({languages: [languages]})
@@ -20,8 +20,8 @@ const hl = await createHighlighter({languages: [languages]})
 await hl.loadLanguage(languages.javascript)
 
 const html = hl.highlight(
-  'const theme = "github-light"',
-  htmlInline({language: languages.javascript, theme: githubLight})
+  'const theme = "catppuccin-latte"',
+  htmlInline({language: languages.javascript, theme: latte})
 )
 ```
 

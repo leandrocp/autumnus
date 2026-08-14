@@ -48,11 +48,11 @@ export default withMDX({
 import rehypeLumis from '@lumis-sh/rehype-lumis'
 import {htmlInline} from '@lumis-sh/lumis/formatters'
 import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
-import githubLight from '@lumis-sh/themes/github_light'
+import latte from '@lumis-sh/themes/catppuccin_latte'
 
 export default function configuredRehypeLumis() {
   return rehypeLumis.call(this, {
-    formatter: (language) => htmlInline({language, theme: githubLight}),
+    formatter: (language) => htmlInline({language, theme: latte}),
     languages: [bundledLanguages],
   })
 }

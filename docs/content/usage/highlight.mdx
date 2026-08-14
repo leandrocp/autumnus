@@ -29,11 +29,11 @@ This is the core Lumis workflow: choose a language, choose a formatter, then ren
 import {highlight} from '@lumis-sh/lumis';
 import {htmlInline} from '@lumis-sh/lumis/formatters';
 import javascript from '@lumis-sh/lumis/langs/javascript';
-import dracula from '@lumis-sh/themes/dracula';
+import frappe from '@lumis-sh/themes/catppuccin_frappe';
 
 const html = await highlight(
   'const x = 1',
-  htmlInline({language: javascript, theme: dracula})
+  htmlInline({language: javascript, theme: frappe})
 );
 ```
 
@@ -43,7 +43,7 @@ const html = await highlight(
 ```rust
 use lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
 
-let theme = themes::get("dracula").unwrap();
+let theme = themes::get("catppuccin_frappe").unwrap();
 
 let formatter = HtmlInlineBuilder::new()
     .language(Language::Javascript)
@@ -60,7 +60,7 @@ let html = highlight("const x = 1", formatter);
 ```elixir
 Lumis.highlight!(
   "const x = 1",
-  formatter: {:html_inline, language: "javascript", theme: "dracula"}
+  formatter: {:html_inline, language: "javascript", theme: "catppuccin_frappe"}
 )
 ```
 
@@ -76,7 +76,7 @@ var lumis = Lumis.builder().build();
 
 var highlighter = lumis.highlighter()
     .withLang(Lang.JAVASCRIPT)
-    .withTheme(Theme.DRACULA)
+    .withTheme(Theme.CATPPUCCIN_FRAPPE)
     .build();
 
 var html = highlighter.highlight("const x = 1").string();
@@ -88,7 +88,7 @@ var html = highlighter.highlight("const x = 1").string();
 ```bash
 lumis highlight index.js \
   --language javascript \
-  --theme dracula
+  --theme catppuccin_frappe
 ```
 
   </TabItem>

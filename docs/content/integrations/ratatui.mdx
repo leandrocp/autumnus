@@ -39,7 +39,7 @@ use lumis::{formatters::Formatter, languages::Language, themes, TerminalBuilder}
 use ratatui::widgets::{Block, Paragraph};
 
 fn code_paragraph(source: &str, language: Language) -> Paragraph<'static> {
-    let theme = themes::get("dracula").unwrap();
+    let theme = themes::get("catppuccin_frappe").unwrap();
     let formatter = TerminalBuilder::new()
         .language(language)
         .theme(Some(theme))
@@ -55,4 +55,4 @@ fn code_paragraph(source: &str, language: Language) -> Paragraph<'static> {
 }
 ```
 
-Use a dark theme (like `dracula`) for terminal UIs since they render on a dark background.
+Use a dark theme (like `catppuccin_frappe`) for terminal UIs since they render on a dark background.

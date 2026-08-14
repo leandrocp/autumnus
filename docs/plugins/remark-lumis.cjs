@@ -74,8 +74,8 @@ function loadFormatter() {
     const themesRoot = packageRoot("@lumis-sh/themes");
     formatterPromise = Promise.all([
       dynamicImport(lumisRoot + "/dist/formatters.js"),
-      dynamicImport(themesRoot + "/dist/themes/github_light.js"),
-      dynamicImport(themesRoot + "/dist/themes/github_dark.js"),
+      dynamicImport(themesRoot + "/dist/themes/catppuccin_latte.js"),
+      dynamicImport(themesRoot + "/dist/themes/catppuccin_frappe.js"),
     ]).then(([fmt, light, dark]) => ({
       htmlMultiThemes: fmt.htmlMultiThemes,
       light: light.default,

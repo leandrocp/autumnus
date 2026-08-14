@@ -45,12 +45,12 @@ These flags work with any subcommand:
 ## `lumis highlight`
 
 ```bash title="Terminal output (default formatter)"
-lumis highlight main.rs --theme dracula
+lumis highlight main.rs --theme catppuccin_frappe
 ```
 
 ```bash title="Pipe from stdin"
 cat main.rs | lumis highlight -l rust
-echo 'const x = 1' | lumis highlight -l javascript --formatter html-inline --theme dracula
+echo 'const x = 1' | lumis highlight -l javascript --formatter html-inline --theme catppuccin_frappe
 ```
 
 ### Options
@@ -81,7 +81,7 @@ Accepted by `html-inline` and `terminal`:
 
 | Flag | Short | Description |
 | --- | --- | --- |
-| `--theme <name>` | `-t` | Theme name (e.g., `dracula`, `github_dark`) or `auto` |
+| `--theme <name>` | `-t` | Theme name (e.g., `catppuccin_latte`, `catppuccin_frappe`) or `auto` |
 
 Accepted by `terminal`:
 
@@ -112,14 +112,14 @@ Accepted by `html-multi-themes`:
 
 | Flag | Short | Description |
 | --- | --- | --- |
-| `--themes <key:theme>` | | Theme pair (repeatable, e.g., `--themes light:github_light --themes dark:github_dark`) |
+| `--themes <key:theme>` | | Theme pair (repeatable, e.g., `--themes light:catppuccin_latte --themes dark:catppuccin_frappe`) |
 | `--default-theme <id>` | | Which `--themes` entry gets inline styles |
 | `--css-variable-prefix <prefix>` | | Prefix for CSS custom properties (default: `--lumis`). A value starting with `-` needs the `=` form: `--css-variable-prefix=--shiki` |
 
 ### Examples
 
 ```bash title="HTML inline"
-lumis highlight main.rs -f html-inline -t github_dark
+lumis highlight main.rs -f html-inline -t catppuccin_frappe
 ```
 
 ```bash title="HTML linked"
@@ -129,8 +129,8 @@ lumis highlight main.rs -f html-linked
 ```bash title="HTML multi-themes"
 lumis highlight main.rs \
   -f html-multi-themes \
-  --themes light:github_light \
-  --themes dark:github_dark \
+  --themes light:catppuccin_latte \
+  --themes dark:catppuccin_frappe \
   --default-theme light
 ```
 
@@ -310,7 +310,7 @@ Lists built-in themes and any custom themes found in the data directory.
 ## `lumis themes show`
 
 ```bash
-lumis themes show dracula
+lumis themes show catppuccin_frappe
 ```
 
 Prints a theme's appearance, foreground, background and how many highlight
@@ -339,7 +339,7 @@ lumis themes generate \
 ```bash title="Light theme"
 lumis themes generate \
   -u https://github.com/projekt0n/github-nvim-theme \
-  -c github_light \
+  -c catppuccin_latte \
   -a light \
   -o github-light.json
 ```

@@ -42,4 +42,4 @@ It keeps the same core workflow across runtimes:
 
 ---
 
-Every code block on this site is highlighted by Lumis itself, using the [multi-themes formatter](/formatters/html-multi-themes) with `github_light` and `github_dark` themes for automatic light/dark mode switching.
+Every code block on this site is highlighted by Lumis itself, using the [multi-themes formatter](/formatters/html-multi-themes) with `catppuccin_latte` and `catppuccin_frappe` themes for automatic light/dark mode switching.

@@ -30,11 +30,11 @@ import {htmlInline} from '@lumis-sh/lumis/formatters'
 import javascript from '@lumis-sh/lumis/langs/javascript'
 import rust from '@lumis-sh/lumis/langs/rust'
 import plaintext from '@lumis-sh/lumis/langs/plaintext'
-import githubLight from '@lumis-sh/themes/github_light'
+import latte from '@lumis-sh/themes/catppuccin_latte'
 
 const md = new MarkdownIt()
 const lumis = await markdownItLumis({
-  formatter: (language) => htmlInline({language, theme: githubLight}),
+  formatter: (language) => htmlInline({language, theme: latte}),
   languages: [javascript, rust, plaintext],
 })
 
@@ -63,7 +63,7 @@ import {createHighlighter} from '@lumis-sh/lumis'
 import {fromHighlighter} from '@lumis-sh/markdown-it-lumis'
 import {htmlInline} from '@lumis-sh/lumis/formatters'
 import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
-import githubLight from '@lumis-sh/themes/github_light'
+import latte from '@lumis-sh/themes/catppuccin_latte'
 
 const highlighter = await createHighlighter({languages: [bundledLanguages]})
 await highlighter.loadLanguage(bundledLanguages.javascript)

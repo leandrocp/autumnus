@@ -42,9 +42,9 @@ Token selectors are fixed as `l-*` classes, matching the built-in `htmlLinked` f
 
 ```js
 import {buildCss} from '@lumis-sh/themes'
-import dracula from '@lumis-sh/themes/dracula'
+import frappe from '@lumis-sh/themes/catppuccin_frappe'
 
-const css = buildCss(dracula, {
+const css = buildCss(frappe, {
   scope: '.docs-theme',
   containerSelector: '.code-block',
   containerStyle: [
@@ -62,7 +62,7 @@ const css = buildCss(dracula, {
 ```rust
 use lumis::themes;
 
-let theme = themes::get("dracula").unwrap();
+let theme = themes::get("catppuccin_frappe").unwrap();
 
 let css = themes::CssBuilder::new(&theme)
     .scope(".docs-theme")
@@ -81,7 +81,7 @@ let css = themes::CssBuilder::new(&theme)
 
 ```elixir
 css =
-  Lumis.Theme.build_css!("dracula",
+  Lumis.Theme.build_css!("catppuccin_frappe",
     scope: ".docs-theme",
     container_selector: ".code-block",
     container_style: [
@@ -99,17 +99,17 @@ css =
 The output starts like this:
 
 ```css
-/* dracula
- * revision: ae752c13e95fb7c5f58da4b5123cb804ea7568ee
+/* catppuccin_frappe
+ * revision: e068ab5f8261f23f6f71ffd8791ae40315b77b9c
  */
 .docs-theme .code-block {
-  color: #f8f8f2;
+  color: #c6d0f5;
   background-color: var(--code-background);
   border-radius: 0.5rem;
   padding: 1rem;
 }
 .docs-theme .l-keyword {
-  color: #ff79c6;
+  color: #ca9ee6;
 }
 ```
 
@@ -120,9 +120,9 @@ The output starts like this:
 
 ```js
 import {buildCss} from '@lumis-sh/themes'
-import dracula from '@lumis-sh/themes/dracula'
+import frappe from '@lumis-sh/themes/catppuccin_frappe'
 
-const css = buildCss(dracula)
+const css = buildCss(frappe)
 ```
 
   </TabItem>
@@ -131,7 +131,7 @@ const css = buildCss(dracula)
 ```rust
 use lumis::themes;
 
-let theme = themes::get("dracula").unwrap();
+let theme = themes::get("catppuccin_frappe").unwrap();
 let css = themes::CssBuilder::new(&theme).build();
 ```
 
@@ -139,7 +139,7 @@ let css = themes::CssBuilder::new(&theme).build();
   <TabItem value="elixir" label="Elixir">
 
 ```elixir
-css = Lumis.Theme.build_css!("dracula")
+css = Lumis.Theme.build_css!("catppuccin_frappe")
 ```
 
   </TabItem>
@@ -148,18 +148,18 @@ css = Lumis.Theme.build_css!("dracula")
 The output starts with the theme name and revision, then the container `.lumis` rule, then token rules:
 
 ```css
-/* dracula
- * revision: ae752c13e95fb7c5f58da4b5123cb804ea7568ee
+/* catppuccin_frappe
+ * revision: e068ab5f8261f23f6f71ffd8791ae40315b77b9c
  */
 .lumis {
-  color: #f8f8f2;
-  background-color: #282a36;
+  color: #c6d0f5;
+  background-color: #303446;
 }
 .l-keyword {
-  color: #ff79c6;
+  color: #ca9ee6;
 }
 .l-string {
-  color: #f1fa8c;
+  color: #a6d189;
 }
 ```
 
@@ -172,9 +172,9 @@ Use `scope` when the same page needs more than one theme, or when a code block s
 
 ```js
 import {buildCss} from '@lumis-sh/themes'
-import githubDark from '@lumis-sh/themes/github_dark'
+import frappe from '@lumis-sh/themes/catppuccin_frappe'
 
-const css = buildCss(githubDark, {
+const css = buildCss(frappe, {
   scope: 'html[data-theme="dark"]',
   containerStyle: [
     ['background-color', 'var(--code-background)'],
@@ -190,7 +190,7 @@ const css = buildCss(githubDark, {
 ```rust
 use lumis::themes;
 
-let theme = themes::get("github_dark").unwrap();
+let theme = themes::get("catppuccin_frappe").unwrap();
 
 let css = themes::CssBuilder::new(&theme)
     .scope("html[data-theme=\"dark\"]")
@@ -207,7 +207,7 @@ let css = themes::CssBuilder::new(&theme)
 
 ```elixir
 css =
-  Lumis.Theme.build_css!("github_dark",
+  Lumis.Theme.build_css!("catppuccin_frappe",
     scope: ~s(html[data-theme="dark"]),
     container_style: [
       {"background-color", "var(--code-background)"},
@@ -242,7 +242,7 @@ The container rule uses `.lumis` by default. Change it when your rendered HTML u
   <TabItem value="javascript" label="JavaScript">
 
 ```js
-const css = buildCss(dracula, {
+const css = buildCss(frappe, {
   containerSelector: '.code-block',
 })
 ```
@@ -260,7 +260,7 @@ let css = themes::CssBuilder::new(&theme)
   <TabItem value="elixir" label="Elixir">
 
 ```elixir
-css = Lumis.Theme.build_css!("dracula", container_selector: ".code-block")
+css = Lumis.Theme.build_css!("catppuccin_frappe", container_selector: ".code-block")
 ```
 
   </TabItem>
@@ -270,11 +270,11 @@ That changes only the container rule selector:
 
 ```css
 .code-block {
-  color: #f8f8f2;
-  background-color: #282a36;
+  color: #c6d0f5;
+  background-color: #303446;
 }
 .l-keyword {
-  color: #ff79c6;
+  color: #ca9ee6;
 }
 ```
 
