@@ -1,0 +1,618 @@
+{
+  "$comment": [
+    "Where Lumis's two query engines disagree about text predicates.",
+    "",
+    "Text predicates are not implemented in the Tree-sitter C library; each binding",
+    "evaluates them itself. Lumis runs two: the `tree-sitter` crate in Rust, the CLI,",
+    "Elixir and Node, and `web-tree-sitter` in the browser. They disagree on 24 of",
+    "these 72 cases, so the same query can highlight differently per runtime.",
+    "",
+    "This is a parity guard, not a study. Perfect agreement is not reachable while",
+    "the bindings differ, so `supported` records what is portable *today* and the",
+    "tests fail the moment either engine moves.",
+    "",
+    "Three shapes account for every divergence:",
+    "  - Zero-node captures, from `?` or `*` on a capture. Rust treats them as",
+    "    vacuously true; the browser returns false via an explicit",
+    "    `if (nodes.length === 0)` that its own `#eq?` path lacks. Reachable from",
+    "    shipped queries: cmake/highlights.scm pairs `(argument)? @_selector` with",
+    "    `#any-of? @_selector`, so `list(TRANSFORM x TOUPPER)` highlights",
+    "    differently in the browser. Open upstream as tree-sitter#2375.",
+    "  - `any-*` on a non-empty capture that nothing satisfies. Rust falls through",
+    "    to true, the browser returns false. tree-sitter#2514, which introduced the",
+    "    `any-` prefix, defines it as `at least one node`.",
+    "  - Regex dialect, `regex` crate vs JavaScript `RegExp`: inline `(?i)`, POSIX",
+    "    classes, Unicode-width `\\d`. Pattern portability across those two is",
+    "    already pinned over the whole shipped corpus by",
+    "    crates/lumis-build/tests/processed_queries.rs and",
+    "    packages/javascript/lumis/test/query-patterns.test.ts; this file covers the",
+    "    operator semantics those two do not.",
+    "",
+    "Two tests read this file: crates/lumis/tests/query_predicates.rs and",
+    "packages/javascript/lumis/test/query-predicates.test.ts. Each asserts its own",
+    "column, and both re-derive `supported` from the data and compare it against the",
+    "list here, so the list cannot drift from the measurements."
+  ],
+  "supported": [
+    "eq?",
+    "not-eq?"
+  ],
+  "cases": [
+    {
+      "name": "eq/zero-nodes",
+      "operator": "eq?",
+      "source": "fn beta() {}",
+      "query": "((function_item (visibility_modifier)? @vis) (#eq? @vis \"pub\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "eq/one-node/hit",
+      "operator": "eq?",
+      "source": "pub fn alpha() {}",
+      "query": "((function_item (visibility_modifier) @vis) (#eq? @vis \"pub\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "eq/one-node/miss",
+      "operator": "eq?",
+      "source": "pub fn alpha() {}",
+      "query": "((function_item (visibility_modifier) @vis) (#eq? @vis \"nope\"))",
+      "rust": 0,
+      "browser": 0
+    },
+    {
+      "name": "eq/multi/all-satisfy",
+      "operator": "eq?",
+      "source": "fn f() { x; x; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#eq? @i \"x\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "eq/multi/some-satisfy",
+      "operator": "eq?",
+      "source": "fn f() { x; y; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#eq? @i \"x\"))",
+      "rust": 0,
+      "browser": 0
+    },
+    {
+      "name": "eq/multi/none-satisfy",
+      "operator": "eq?",
+      "source": "fn f() { y; z; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#eq? @i \"x\"))",
+      "rust": 0,
+      "browser": 0
+    },
+    {
+      "name": "not_eq/zero-nodes",
+      "operator": "not-eq?",
+      "source": "fn beta() {}",
+      "query": "((function_item (visibility_modifier)? @vis) (#not-eq? @vis \"pub\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "not_eq/one-node/hit",
+      "operator": "not-eq?",
+      "source": "pub fn alpha() {}",
+      "query": "((function_item (visibility_modifier) @vis) (#not-eq? @vis \"pub\"))",
+      "rust": 0,
+      "browser": 0
+    },
+    {
+      "name": "not_eq/one-node/miss",
+      "operator": "not-eq?",
+      "source": "pub fn alpha() {}",
+      "query": "((function_item (visibility_modifier) @vis) (#not-eq? @vis \"nope\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "not_eq/multi/all-satisfy",
+      "operator": "not-eq?",
+      "source": "fn f() { x; x; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#not-eq? @i \"x\"))",
+      "rust": 0,
+      "browser": 0
+    },
+    {
+      "name": "not_eq/multi/some-satisfy",
+      "operator": "not-eq?",
+      "source": "fn f() { x; y; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#not-eq? @i \"x\"))",
+      "rust": 0,
+      "browser": 0
+    },
+    {
+      "name": "not_eq/multi/none-satisfy",
+      "operator": "not-eq?",
+      "source": "fn f() { y; z; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#not-eq? @i \"x\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "any_eq/zero-nodes",
+      "operator": "any-eq?",
+      "source": "fn beta() {}",
+      "query": "((function_item (visibility_modifier)? @vis) (#any-eq? @vis \"pub\"))",
+      "rust": 1,
+      "browser": 0
+    },
+    {
+      "name": "any_eq/one-node/hit",
+      "operator": "any-eq?",
+      "source": "pub fn alpha() {}",
+      "query": "((function_item (visibility_modifier) @vis) (#any-eq? @vis \"pub\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "any_eq/one-node/miss",
+      "operator": "any-eq?",
+      "source": "pub fn alpha() {}",
+      "query": "((function_item (visibility_modifier) @vis) (#any-eq? @vis \"nope\"))",
+      "rust": 1,
+      "browser": 0
+    },
+    {
+      "name": "any_eq/multi/all-satisfy",
+      "operator": "any-eq?",
+      "source": "fn f() { x; x; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#any-eq? @i \"x\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "any_eq/multi/some-satisfy",
+      "operator": "any-eq?",
+      "source": "fn f() { x; y; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#any-eq? @i \"x\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "any_eq/multi/none-satisfy",
+      "operator": "any-eq?",
+      "source": "fn f() { y; z; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#any-eq? @i \"x\"))",
+      "rust": 1,
+      "browser": 0
+    },
+    {
+      "name": "any_not_eq/zero-nodes",
+      "operator": "any-not-eq?",
+      "source": "fn beta() {}",
+      "query": "((function_item (visibility_modifier)? @vis) (#any-not-eq? @vis \"pub\"))",
+      "rust": 1,
+      "browser": 0
+    },
+    {
+      "name": "any_not_eq/one-node/hit",
+      "operator": "any-not-eq?",
+      "source": "pub fn alpha() {}",
+      "query": "((function_item (visibility_modifier) @vis) (#any-not-eq? @vis \"pub\"))",
+      "rust": 1,
+      "browser": 0
+    },
+    {
+      "name": "any_not_eq/one-node/miss",
+      "operator": "any-not-eq?",
+      "source": "pub fn alpha() {}",
+      "query": "((function_item (visibility_modifier) @vis) (#any-not-eq? @vis \"nope\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "any_not_eq/multi/all-satisfy",
+      "operator": "any-not-eq?",
+      "source": "fn f() { x; x; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#any-not-eq? @i \"x\"))",
+      "rust": 1,
+      "browser": 0
+    },
+    {
+      "name": "any_not_eq/multi/some-satisfy",
+      "operator": "any-not-eq?",
+      "source": "fn f() { x; y; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#any-not-eq? @i \"x\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "any_not_eq/multi/none-satisfy",
+      "operator": "any-not-eq?",
+      "source": "fn f() { y; z; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#any-not-eq? @i \"x\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "any_of/zero-nodes",
+      "operator": "any-of?",
+      "source": "fn beta() {}",
+      "query": "((function_item (visibility_modifier)? @vis) (#any-of? @vis \"pub\" \"crate\"))",
+      "rust": 1,
+      "browser": 0
+    },
+    {
+      "name": "any_of/one-node/hit",
+      "operator": "any-of?",
+      "source": "pub fn alpha() {}",
+      "query": "((function_item (visibility_modifier) @vis) (#any-of? @vis \"pub\" \"crate\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "any_of/one-node/miss",
+      "operator": "any-of?",
+      "source": "pub fn alpha() {}",
+      "query": "((function_item (visibility_modifier) @vis) (#any-of? @vis \"nope\" \"nada\"))",
+      "rust": 0,
+      "browser": 0
+    },
+    {
+      "name": "any_of/multi/all-satisfy",
+      "operator": "any-of?",
+      "source": "fn f() { x; x; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#any-of? @i \"x\" \"unused\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "any_of/multi/some-satisfy",
+      "operator": "any-of?",
+      "source": "fn f() { x; y; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#any-of? @i \"x\" \"unused\"))",
+      "rust": 0,
+      "browser": 0
+    },
+    {
+      "name": "any_of/multi/none-satisfy",
+      "operator": "any-of?",
+      "source": "fn f() { y; z; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#any-of? @i \"x\" \"unused\"))",
+      "rust": 0,
+      "browser": 0
+    },
+    {
+      "name": "not_any_of/zero-nodes",
+      "operator": "not-any-of?",
+      "source": "fn beta() {}",
+      "query": "((function_item (visibility_modifier)? @vis) (#not-any-of? @vis \"pub\" \"crate\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "not_any_of/one-node/hit",
+      "operator": "not-any-of?",
+      "source": "pub fn alpha() {}",
+      "query": "((function_item (visibility_modifier) @vis) (#not-any-of? @vis \"pub\" \"crate\"))",
+      "rust": 0,
+      "browser": 0
+    },
+    {
+      "name": "not_any_of/one-node/miss",
+      "operator": "not-any-of?",
+      "source": "pub fn alpha() {}",
+      "query": "((function_item (visibility_modifier) @vis) (#not-any-of? @vis \"nope\" \"nada\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "not_any_of/multi/all-satisfy",
+      "operator": "not-any-of?",
+      "source": "fn f() { x; x; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#not-any-of? @i \"x\" \"unused\"))",
+      "rust": 0,
+      "browser": 0
+    },
+    {
+      "name": "not_any_of/multi/some-satisfy",
+      "operator": "not-any-of?",
+      "source": "fn f() { x; y; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#not-any-of? @i \"x\" \"unused\"))",
+      "rust": 0,
+      "browser": 1
+    },
+    {
+      "name": "not_any_of/multi/none-satisfy",
+      "operator": "not-any-of?",
+      "source": "fn f() { y; z; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#not-any-of? @i \"x\" \"unused\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "match/zero-nodes",
+      "operator": "match?",
+      "source": "fn beta() {}",
+      "query": "((function_item (visibility_modifier)? @vis) (#match? @vis \"^pub$\"))",
+      "rust": 1,
+      "browser": 0
+    },
+    {
+      "name": "match/one-node/hit",
+      "operator": "match?",
+      "source": "pub fn alpha() {}",
+      "query": "((function_item (visibility_modifier) @vis) (#match? @vis \"^pub$\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "match/one-node/miss",
+      "operator": "match?",
+      "source": "pub fn alpha() {}",
+      "query": "((function_item (visibility_modifier) @vis) (#match? @vis \"^nope$\"))",
+      "rust": 0,
+      "browser": 0
+    },
+    {
+      "name": "match/multi/all-satisfy",
+      "operator": "match?",
+      "source": "fn f() { x; x; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#match? @i \"^x$\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "match/multi/some-satisfy",
+      "operator": "match?",
+      "source": "fn f() { x; y; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#match? @i \"^x$\"))",
+      "rust": 0,
+      "browser": 0
+    },
+    {
+      "name": "match/multi/none-satisfy",
+      "operator": "match?",
+      "source": "fn f() { y; z; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#match? @i \"^x$\"))",
+      "rust": 0,
+      "browser": 0
+    },
+    {
+      "name": "not_match/zero-nodes",
+      "operator": "not-match?",
+      "source": "fn beta() {}",
+      "query": "((function_item (visibility_modifier)? @vis) (#not-match? @vis \"^pub$\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "not_match/one-node/hit",
+      "operator": "not-match?",
+      "source": "pub fn alpha() {}",
+      "query": "((function_item (visibility_modifier) @vis) (#not-match? @vis \"^pub$\"))",
+      "rust": 0,
+      "browser": 0
+    },
+    {
+      "name": "not_match/one-node/miss",
+      "operator": "not-match?",
+      "source": "pub fn alpha() {}",
+      "query": "((function_item (visibility_modifier) @vis) (#not-match? @vis \"^nope$\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "not_match/multi/all-satisfy",
+      "operator": "not-match?",
+      "source": "fn f() { x; x; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#not-match? @i \"^x$\"))",
+      "rust": 0,
+      "browser": 0
+    },
+    {
+      "name": "not_match/multi/some-satisfy",
+      "operator": "not-match?",
+      "source": "fn f() { x; y; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#not-match? @i \"^x$\"))",
+      "rust": 0,
+      "browser": 0
+    },
+    {
+      "name": "not_match/multi/none-satisfy",
+      "operator": "not-match?",
+      "source": "fn f() { y; z; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#not-match? @i \"^x$\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "any_match/zero-nodes",
+      "operator": "any-match?",
+      "source": "fn beta() {}",
+      "query": "((function_item (visibility_modifier)? @vis) (#any-match? @vis \"^pub$\"))",
+      "rust": 1,
+      "browser": 0
+    },
+    {
+      "name": "any_match/one-node/hit",
+      "operator": "any-match?",
+      "source": "pub fn alpha() {}",
+      "query": "((function_item (visibility_modifier) @vis) (#any-match? @vis \"^pub$\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "any_match/one-node/miss",
+      "operator": "any-match?",
+      "source": "pub fn alpha() {}",
+      "query": "((function_item (visibility_modifier) @vis) (#any-match? @vis \"^nope$\"))",
+      "rust": 1,
+      "browser": 0
+    },
+    {
+      "name": "any_match/multi/all-satisfy",
+      "operator": "any-match?",
+      "source": "fn f() { x; x; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#any-match? @i \"^x$\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "any_match/multi/some-satisfy",
+      "operator": "any-match?",
+      "source": "fn f() { x; y; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#any-match? @i \"^x$\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "any_match/multi/none-satisfy",
+      "operator": "any-match?",
+      "source": "fn f() { y; z; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#any-match? @i \"^x$\"))",
+      "rust": 1,
+      "browser": 0
+    },
+    {
+      "name": "any_not_match/zero-nodes",
+      "operator": "any-not-match?",
+      "source": "fn beta() {}",
+      "query": "((function_item (visibility_modifier)? @vis) (#any-not-match? @vis \"^pub$\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "any_not_match/one-node/hit",
+      "operator": "any-not-match?",
+      "source": "pub fn alpha() {}",
+      "query": "((function_item (visibility_modifier) @vis) (#any-not-match? @vis \"^pub$\"))",
+      "rust": 1,
+      "browser": 0
+    },
+    {
+      "name": "any_not_match/one-node/miss",
+      "operator": "any-not-match?",
+      "source": "pub fn alpha() {}",
+      "query": "((function_item (visibility_modifier) @vis) (#any-not-match? @vis \"^nope$\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "any_not_match/multi/all-satisfy",
+      "operator": "any-not-match?",
+      "source": "fn f() { x; x; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#any-not-match? @i \"^x$\"))",
+      "rust": 1,
+      "browser": 0
+    },
+    {
+      "name": "any_not_match/multi/some-satisfy",
+      "operator": "any-not-match?",
+      "source": "fn f() { x; y; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#any-not-match? @i \"^x$\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "any_not_match/multi/none-satisfy",
+      "operator": "any-not-match?",
+      "source": "fn f() { y; z; }",
+      "query": "((block (expression_statement (identifier) @i) (expression_statement (identifier) @i)) (#any-not-match? @i \"^x$\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "match/regex-inline-case-insensitive",
+      "operator": "match?",
+      "source": "fn alpha() {}",
+      "query": "((function_item name: (identifier) @n) (#match? @n \"(?i)ALPHA\"))",
+      "rust": 1,
+      "browser": "error"
+    },
+    {
+      "name": "match/regex-posix-class",
+      "operator": "match?",
+      "source": "fn alpha() {}",
+      "query": "((function_item name: (identifier) @n) (#match? @n \"[[:alpha:]]\"))",
+      "rust": 1,
+      "browser": 0
+    },
+    {
+      "name": "match/regex-unicode-digit-width",
+      "operator": "match?",
+      "source": "fn f() { \"٣\"; }",
+      "query": "((string_literal) @s (#match? @s \"\\\\d\"))",
+      "rust": 1,
+      "browser": 0
+    },
+    {
+      "name": "not_match/regex-inline-case-insensitive",
+      "operator": "not-match?",
+      "source": "fn alpha() {}",
+      "query": "((function_item name: (identifier) @n) (#not-match? @n \"(?i)ALPHA\"))",
+      "rust": 0,
+      "browser": "error"
+    },
+    {
+      "name": "not_match/regex-posix-class",
+      "operator": "not-match?",
+      "source": "fn alpha() {}",
+      "query": "((function_item name: (identifier) @n) (#not-match? @n \"[[:alpha:]]\"))",
+      "rust": 0,
+      "browser": 1
+    },
+    {
+      "name": "not_match/regex-unicode-digit-width",
+      "operator": "not-match?",
+      "source": "fn f() { \"٣\"; }",
+      "query": "((string_literal) @s (#not-match? @s \"\\\\d\"))",
+      "rust": 0,
+      "browser": 1
+    },
+    {
+      "name": "any_match/regex-inline-case-insensitive",
+      "operator": "any-match?",
+      "source": "fn alpha() {}",
+      "query": "((function_item name: (identifier) @n) (#any-match? @n \"(?i)ALPHA\"))",
+      "rust": 1,
+      "browser": "error"
+    },
+    {
+      "name": "any_match/regex-posix-class",
+      "operator": "any-match?",
+      "source": "fn alpha() {}",
+      "query": "((function_item name: (identifier) @n) (#any-match? @n \"[[:alpha:]]\"))",
+      "rust": 1,
+      "browser": 0
+    },
+    {
+      "name": "any_match/regex-unicode-digit-width",
+      "operator": "any-match?",
+      "source": "fn f() { \"٣\"; }",
+      "query": "((string_literal) @s (#any-match? @s \"\\\\d\"))",
+      "rust": 1,
+      "browser": 0
+    },
+    {
+      "name": "any_not_match/regex-inline-case-insensitive",
+      "operator": "any-not-match?",
+      "source": "fn alpha() {}",
+      "query": "((function_item name: (identifier) @n) (#any-not-match? @n \"(?i)ALPHA\"))",
+      "rust": 1,
+      "browser": "error"
+    },
+    {
+      "name": "any_not_match/regex-posix-class",
+      "operator": "any-not-match?",
+      "source": "fn alpha() {}",
+      "query": "((function_item name: (identifier) @n) (#any-not-match? @n \"[[:alpha:]]\"))",
+      "rust": 1,
+      "browser": 1
+    },
+    {
+      "name": "any_not_match/regex-unicode-digit-width",
+      "operator": "any-not-match?",
+      "source": "fn f() { \"٣\"; }",
+      "query": "((string_literal) @s (#any-not-match? @s \"\\\\d\"))",
+      "rust": 1,
+      "browser": 1
+    }
+  ]
+}
