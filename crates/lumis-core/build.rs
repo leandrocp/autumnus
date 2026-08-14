@@ -155,38 +155,7 @@ fn languages() {
         }
     }
 
-    // Every language's globs, whatever the feature set, so a runtime that
-    // resolves names it cannot itself compile still reads one table in one
-    // order. `Language::first_matching_glob` filters this; the dynamic catalog
-    // does not.
-    let mut glob_entries = Vec::new();
-    for (key, entry) in &toml.parsers {
-        let globs = entry.globs.as_deref().unwrap_or(&[]);
-        if globs.is_empty() {
-            continue;
-        }
-        let patterns = globs
-            .iter()
-            .map(|glob| format!("{glob:?}"))
-            .collect::<Vec<_>>()
-            .join(", ");
-        glob_entries.push(format!("    ({key:?}, &[{patterns}]),"));
-    }
-
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
-    let globs_path = out_dir.join("filename_globs.rs");
-    fs::write(
-        &globs_path,
-        format!(
-            "// This file is auto-generated from languages.toml by build.rs\n\
-             // Do not edit.\n\n\
-             /// Every language id and the file name patterns it claims, sorted by id.\n\
-             pub(crate) static FILENAME_GLOBS: &[(&str, &[&str])] = &[\n{}\n];\n",
-            glob_entries.join("\n")
-        ),
-    )
-    .expect("failed to write filename_globs.rs");
-
     let out_path = out_dir.join("languages_data.rs");
     let mut f = fs::File::create(&out_path).expect("failed to create languages_data.rs");
 

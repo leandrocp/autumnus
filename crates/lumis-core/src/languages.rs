@@ -46,6 +46,17 @@ macro_rules! define_languages {
             ),* $(,)?
         }
     ) => {
+        /// Every language id and the globs it claims, whatever the feature set.
+        ///
+        /// The same declarations as [`Language::globs`], without the gates.
+        /// Several languages claim one extension, and a table that shrinks with
+        /// the feature set would answer `*.m` with whichever of matlab and objc
+        /// happened to be compiled in.
+        static FILENAME_GLOBS: &[(&str, &[&str])] = &[
+            $(($a_id, &[$($a_glob),*]),)*
+            $(($g_id, &[$($g_glob),*]),)*
+        ];
+
         #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
         pub enum Language {
             $(
@@ -513,8 +524,6 @@ fn normalize_shebang_command(command: &str) -> String {
     VERSION_RE.replace(&command, "").into_owned()
 }
 
-include!(concat!(env!("OUT_DIR"), "/filename_globs.rs"));
-
 /// Every glob in `languages.toml`, lowercased and compiled, sorted by language id.
 ///
 /// `glob::Pattern::new` dominates detection: compiling the catalog costs about
@@ -531,8 +540,9 @@ include!(concat!(env!("OUT_DIR"), "/filename_globs.rs"));
 /// makes the winner the same everywhere, and [`Language::first_matching_glob`]
 /// applies the gates afterwards.
 static FILENAME_PATTERNS: LazyLock<Vec<(&'static str, Vec<glob::Pattern>)>> = LazyLock::new(|| {
-    FILENAME_GLOBS
+    let mut entries: Vec<_> = FILENAME_GLOBS
         .iter()
+        .filter(|(_, globs)| !globs.is_empty())
         .map(|(id, globs)| {
             let patterns = globs
                 .iter()
@@ -543,7 +553,12 @@ static FILENAME_PATTERNS: LazyLock<Vec<(&'static str, Vec<glob::Pattern>)>> = La
                 .collect();
             (*id, patterns)
         })
-        .collect()
+        .collect();
+
+    // Sorted here rather than trusting the order `define_languages!` was handed,
+    // which splits the always-on languages out from the gated ones.
+    entries.sort_by_key(|(id, _)| *id);
+    entries
 });
 
 /// The id of the first language whose globs match `candidate`.
