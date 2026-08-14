@@ -2189,6 +2189,18 @@ fn apply_text_replacements(content: &str, lang: &str) -> String {
             "\"nil\" @constant.builtin",
         );
     }
+    // Upstream pairs an optional capture with a predicate on it, and the two
+    // query engines disagree about a capture that matched nothing: the Rust
+    // binding treats it as vacuously true, web-tree-sitter as false, so
+    // `list(TRANSFORM x TOUPPER)` highlights differently in the browser. The
+    // pattern immediately above this one in the upstream file already covers
+    // the no-selector case, so requiring the selector here loses nothing.
+    if lang == "cmake" {
+        s = s.replace(
+            "(argument)? @_selector @constant",
+            "(argument) @_selector @constant",
+        );
+    }
     s
 }
 

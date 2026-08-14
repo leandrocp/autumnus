@@ -197,7 +197,7 @@
     .
     (argument) @_action @constant
     .
-    (argument)? @_selector @constant
+    (argument) @_selector @constant
     (#eq? @_transform "TRANSFORM")
     (#any-of? @_action "APPEND" "PREPEND" "TOUPPER" "TOLOWER" "STRIP" "GENEX_STRIP" "REPLACE")
     (#any-of? @_selector "AT" "FOR" "REGEX")))
