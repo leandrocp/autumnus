@@ -93,9 +93,7 @@ fn check_events(fixture: &Fixture) {
     let events = highlight_events_with_options(
         &fixture.source,
         lang,
-        HighlightOptions {
-            rainbow_brackets: fixture.metadata.rainbow_brackets,
-        },
+        HighlightOptions::new().rainbow_brackets(fixture.metadata.rainbow_brackets),
     )
     .expect("events should build");
     let serialized = events
