@@ -1886,9 +1886,7 @@ mod tests {
         reg.cache_test_language(
             "html",
             "html",
-            include_bytes!(
-                "../../../packages/javascript/lumis/test/fixtures/wasm/tree-sitter-html.wasm"
-            ),
+            include_bytes!("../../../fixtures/test-parsers/tree-sitter-html.wasm"),
             include_str!("../../../queries/processed/html/highlights.scm"),
             include_str!("../../../queries/processed/html/injections.scm"),
             "",
@@ -1896,9 +1894,7 @@ mod tests {
         reg.cache_test_language(
             "javascript",
             "javascript",
-            include_bytes!(
-                "../../../packages/javascript/lumis/test/fixtures/wasm/tree-sitter-javascript.wasm"
-            ),
+            include_bytes!("../../../fixtures/test-parsers/tree-sitter-javascript.wasm"),
             include_str!("../../../queries/processed/javascript/highlights.scm"),
             include_str!("../../../queries/processed/javascript/injections.scm"),
             include_str!("../../../queries/processed/javascript/locals.scm"),

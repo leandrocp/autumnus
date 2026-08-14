@@ -710,8 +710,7 @@ mod tests {
     use crate::package::{sha256_hex, PackagedLanguage, ParserMetadata};
     use std::collections::BTreeMap;
 
-    const WASM: &[u8] =
-        include_bytes!("../../lumis-cli/tests/fixtures/parsers/tree-sitter-json.wasm");
+    const WASM: &[u8] = include_bytes!("../../../fixtures/test-parsers/tree-sitter-json.wasm");
     const PACKAGE_VERSION: &str = "0.26.3";
 
     #[test]

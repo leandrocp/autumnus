@@ -425,8 +425,7 @@ fn is_windows_device_name(value: &str) -> bool {
 mod tests {
     use super::*;
 
-    const JSON_WASM: &[u8] =
-        include_bytes!("../../lumis-cli/tests/fixtures/parsers/tree-sitter-json.wasm");
+    const JSON_WASM: &[u8] = include_bytes!("../../../fixtures/test-parsers/tree-sitter-json.wasm");
 
     fn package() -> LanguagePackage {
         LanguagePackage {

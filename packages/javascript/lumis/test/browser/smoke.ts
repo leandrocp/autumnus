@@ -25,7 +25,7 @@ const fixtureThemeModules = import.meta.glob<{ default: Theme }>(
   "../../../../../fixtures/conformance-themes/*.json",
   { eager: true },
 );
-const parserWasms = import.meta.glob<string>("../fixtures/wasm/*.wasm", {
+const parserWasms = import.meta.glob<string>("../../../../../fixtures/test-parsers/*.wasm", {
   eager: true,
   query: "?url",
   import: "default",

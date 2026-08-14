@@ -173,9 +173,7 @@ mod tests {
     use super::*;
     use tempfile::tempdir;
 
-    const RUST_WASM: &[u8] = include_bytes!(
-        "../../../packages/javascript/lumis/test/fixtures/wasm/tree-sitter-rust.wasm"
-    );
+    const RUST_WASM: &[u8] = include_bytes!("../../../fixtures/test-parsers/tree-sitter-rust.wasm");
 
     fn cached_rust_registry() -> (tempfile::TempDir, Registry) {
         let dir = tempdir().unwrap();

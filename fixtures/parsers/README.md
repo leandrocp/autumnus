@@ -28,3 +28,6 @@ as any other pinned artifact.
 
 This list may only shrink. A grammar belongs here only while CI genuinely cannot
 build it; delete the file once it can.
+
+Not to be confused with [`../test-parsers`](../test-parsers/README.md), which
+holds the grammars the test suites load. CI builds those; it cannot build these.

@@ -52,7 +52,7 @@ fn build_language_fixtures() -> PathBuf {
     let queries = repository.join("queries/processed");
     let default_brackets = fs::read_to_string(queries.join("default/brackets.scm")).unwrap();
 
-    for entry in fs::read_dir(source_fixtures_dir().join("parsers")).unwrap() {
+    for entry in fs::read_dir(repository.join("fixtures/test-parsers")).unwrap() {
         let wasm_path = entry.unwrap().path();
         let Some(stem) = wasm_path.file_stem().and_then(|name| name.to_str()) else {
             continue;
