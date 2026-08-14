@@ -23,9 +23,17 @@ function send(req: Omit<WorkerRequest, "id">): Promise<WorkerResponse> {
   });
 }
 
-export async function loadLanguages(languageIds: string[]): Promise<void> {
+/**
+ * Load languages into the runtime the worker highlights with, concurrently.
+ *
+ * Returns every language the runtime now holds, so a caller can tell a warm
+ * language from one that still has to be fetched. Highlighting loads on demand
+ * regardless, so a caller that does not need the answer should not await this.
+ */
+export async function loadLanguages(languageIds: string[]): Promise<string[]> {
   const res = await send({ type: "loadLanguages", languageIds });
   if (res.type === "error") throw new Error(res.message);
+  return (res as Extract<WorkerResponse, { type: "done" }>).loaded;
 }
 
 export async function renderHighlight(

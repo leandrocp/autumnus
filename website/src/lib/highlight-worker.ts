@@ -1,4 +1,10 @@
-import { configureWasmResolver, createHighlighter } from "@lumis-sh/lumis";
+import {
+  configureLanguagePackageResolver,
+  configureWasmResolver,
+  highlight,
+  loadedLanguages,
+  loadLanguages,
+} from "@lumis-sh/lumis";
 import { bundledLanguages } from "@lumis-sh/lumis/bundles/full";
 import { htmlInline, htmlMultiThemes } from "@lumis-sh/lumis/formatters";
 import type { Language, Theme } from "@lumis-sh/lumis";
@@ -26,6 +32,16 @@ const wasmVersions = import.meta.glob<string>(
   { eager: true, import: "version" },
 );
 
+const languagePackages = import.meta.glob<string>(
+  [
+    "../../node_modules/@lumis-sh/wasm-*/lumis.json",
+    "../../node_modules/.pnpm/@lumis-sh+wasm-*/node_modules/@lumis-sh/wasm-*/lumis.json",
+    "!../../node_modules/@lumis-sh/wasm-bundle-*/lumis.json",
+    "!../../node_modules/.pnpm/@lumis-sh+wasm-bundle-*/node_modules/@lumis-sh/wasm-bundle-*/lumis.json",
+  ],
+  { eager: true, import: "default", query: "?url" },
+);
+
 const versionByDirectory = new Map(
   Object.entries(wasmVersions).map(([path, version]) => [directoryOf(path), version]),
 );
@@ -46,6 +62,17 @@ const wasmUrls = new Map(
   }),
 );
 
+const packageUrls = new Map(
+  Object.entries(languagePackages).map(([path, url]) => {
+    const match = path.match(/(@lumis-sh\/wasm-[^/]+)\/lumis\.json$/);
+    if (!match) {
+      throw new Error(`Could not derive the language package name from ${path}`);
+    }
+
+    return [match[1], url];
+  }),
+);
+
 function directoryOf(path: string) {
   return path.slice(0, path.lastIndexOf("/"));
 }
@@ -61,34 +88,24 @@ configureWasmResolver((_language, wasm) => {
   return wasmUrls.get(file) ?? `https://cdn.jsdelivr.net/npm/${file}`;
 });
 
-const languageCache = new Map<string, Promise<Language>>();
-const highlighterPromise = createHighlighter();
-let highlighterQueue = Promise.resolve();
-
-function withHighlighter<T>(fn: () => Promise<T> | T): Promise<T> {
-  const task = highlighterQueue.then(fn, fn);
-  highlighterQueue = task.then(
-    () => undefined,
-    () => undefined,
+// Serving the metadata locally is what keeps the parser local too. The manifest
+// names the exact version and digest the parser is then fetched by, so reading
+// it from the CDN can name a release newer than the one `pnpm` installed, and
+// the resolver above would miss and pull megabytes over the network for a file
+// already in the build. Both come from the same directory, or neither does.
+configureLanguagePackageResolver((packageName, versionRange) => {
+  return (
+    packageUrls.get(packageName) ??
+    `https://cdn.jsdelivr.net/npm/${packageName}@${versionRange}/lumis.json`
   );
-  return task;
-}
+});
 
 async function getLanguage(languageId: string): Promise<Language> {
-  const existing = languageCache.get(languageId);
-  if (existing) return existing;
-
   const handle = bundledLanguages[languageId];
   if (!handle) {
     throw new Error(`Unknown language: ${languageId}`);
   }
-
-  const promise = (async () => {
-    return await handle();
-  })();
-
-  languageCache.set(languageId, promise);
-  return promise;
+  return handle();
 }
 
 export type WorkerRequest =
@@ -113,55 +130,47 @@ export type WorkerRequest =
 
 export type WorkerResponse =
   | { id: number; type: "result"; html: string }
-  | { id: number; type: "done" }
+  | { id: number; type: "done"; loaded: string[] }
   | { id: number; type: "error"; message: string };
 
 async function handleMessage(req: WorkerRequest): Promise<WorkerResponse> {
-  const hl = await highlighterPromise;
-
   switch (req.type) {
     case "highlight": {
-      const html = await withHighlighter(async () => {
-        const lang = await getLanguage(req.languageId);
-        await hl.loadLanguage(lang);
-        return hl.highlight(
-          req.source,
-          htmlInline({
-            language: lang,
-            theme: req.theme,
-            preClass: req.preClass ?? DEFAULT_PRE_CLASS,
-            includeHighlights: true,
-            italic: false,
-          }),
-        );
-      });
+      const language = await getLanguage(req.languageId);
+      const html = await highlight(
+        req.source,
+        htmlInline({
+          language,
+          theme: req.theme,
+          preClass: req.preClass ?? DEFAULT_PRE_CLASS,
+          includeHighlights: true,
+          italic: false,
+        }),
+      );
       return { id: req.id, type: "result", html };
     }
     case "highlightMultiTheme": {
-      const html = await withHighlighter(async () => {
-        const lang = await getLanguage(req.languageId);
-        await hl.loadLanguage(lang);
-        return hl.highlight(
-          req.source,
-          htmlMultiThemes({
-            language: lang,
-            themes: { light: req.lightTheme, dark: req.darkTheme },
-            defaultTheme: "light-dark()",
-            preClass: req.preClass ?? DEFAULT_PRE_CLASS,
-            italic: false,
-          }),
-        );
-      });
+      const language = await getLanguage(req.languageId);
+      const html = await highlight(
+        req.source,
+        htmlMultiThemes({
+          language,
+          themes: { light: req.lightTheme, dark: req.darkTheme },
+          defaultTheme: "light-dark()",
+          preClass: req.preClass ?? DEFAULT_PRE_CLASS,
+          italic: false,
+        }),
+      );
       return { id: req.id, type: "result", html };
     }
     case "loadLanguages": {
-      for (const id of req.languageIds) {
-        await withHighlighter(async () => {
-          const language = await getLanguage(id);
-          await hl.loadLanguage(language);
-        }).catch(() => {});
-      }
-      return { id: req.id, type: "done" };
+      // Warm-up is an optimization, so one unavailable parser reports itself and
+      // leaves the rest loaded rather than failing the batch. `loadLanguages`
+      // attempts every name concurrently and rejects with an AggregateError.
+      await loadLanguages(req.languageIds).catch((error: unknown) => {
+        console.warn("Lumis warm-up did not finish; languages load on demand", error);
+      });
+      return { id: req.id, type: "done", loaded: loadedLanguages() };
     }
   }
 }
