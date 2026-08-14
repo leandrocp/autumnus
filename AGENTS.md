@@ -188,6 +188,33 @@ Two things this cost, both worth recognising elsewhere:
 - **A too-loose requirement disables the tooling that would maintain it.** `cargo set-version -p lumis-core 2.4.0` rewrites dependents whose requirement the new version falls outside. With `lumis-core = "2"` there was nothing to rewrite, so it stayed `"2"` across three minor releases until `lumis` called an API that `2.0.0` did not have ([#1118](https://github.com/leandrocp/lumis/issues/1118)). Spell requirements in full.
 - **A fresh resolve is not a reproduction.** The failure needed an existing `Cargo.lock`; a new project picked the newest match and worked. When a bug report says "fails on Windows" and the code has no target-specific path, reproduce the reporter's *resolution*, not their OS.
 
+### A vendored file records every local change in its own header
+
+`crates/lumis-wasm-runtime/src/tree_sitter_highlight.rs` is upstream
+tree-sitter's `highlight.rs` with Lumis deltas applied in place. Its header
+carries a "Current local deltas" list, and that list is the only thing that makes
+the next upstream sync a review rather than an archaeology exercise: a diff
+against upstream shows *what* changed, never *why*, and cannot distinguish a
+deliberate Lumis behaviour from a merge accident.
+
+- **Editing a vendored file without adding to its header is incomplete work.**
+  Not a follow-up, not a separate commit. Reviewers cannot tell an intentional
+  delta from a mistake, and neither can whoever re-syncs the file.
+- **Say why upstream cannot serve, not what the code does.** "`@injection.filename`
+  resolves an injected language from a path, as Neovim's
+  `LanguageTree:_get_injection` does. Upstream has no equivalent" is the useful
+  entry. "Added a match arm" is not.
+- **A change inside an existing delta extends that entry rather than adding one.**
+  The line-boundary fix to `#offset!` belongs under the `#offset!` bullet,
+  because someone re-syncing needs the whole of that feature in one place.
+- **Note any new dependency the file gains.** Referencing `lumis_core` from a
+  vendored file is a coupling upstream does not have, so the header says so.
+- **Prefer shrinking the delta to growing it.** Reuse a shape the file already
+  has rather than introducing a parallel one; the filename capture reuses the
+  content capture's `#offset!` handling for exactly this reason.
+
+This applies to any file carrying a "Vendored from" header, not just this one.
+
 ### Comments are a last resort
 
 Do not narrate code. A comment is justified only when the code is genuinely hard to follow, or when it does something a reader would not expect and would otherwise "fix". Everything else should be carried by naming and structure.

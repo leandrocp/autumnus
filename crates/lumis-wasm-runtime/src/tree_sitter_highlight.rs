@@ -14,8 +14,18 @@
 //   in both places: `highlighter.lua` -> `get_range`, and `languagetree.lua` ->
 //   `get_node_ranges` -> `get_range`. Note the stale TODO at `languagetree.lua:1087` claiming
 //   injections do not support offsets; the code above it does.
+//   A same-row offset may reach its own newline, which `(#offset! @c 0 1 0 1)` in the diff
+//   injection queries needs to keep joined hunk lines apart, and no further, so the byte and
+//   the point keep describing one place. Neovim clamps to neither.
+// - `@injection.filename` resolves an injected language from a path, as Neovim's
+//   `LanguageTree:_get_injection` does through `vim.filetype.match`. It sits beside the
+//   `injection.language` capture it is an alternative to, and is the only reason this file
+//   references `lumis_core`. Upstream has no equivalent, so the diff hunk injection queries
+//   cannot work without it.
 //
-// When touching this file, prefer minimizing the diff against upstream rather than extending it.
+// When touching this file, prefer minimizing the diff against upstream rather than extending it,
+// and add what you did to the list above in the same change. The list is the only record of why
+// this file differs, so an undocumented edit is what makes the next upstream sync guesswork.
 //
 // Reference:
 // https://github.com/tree-sitter/tree-sitter/blob/master/crates/highlight/src/highlight.rs
@@ -1772,19 +1782,17 @@ fn injection_for_match<'a>(
         } else if index == filename_capture_index {
             // Neovim resolves this capture through `vim.filetype.match`, which
             // reads the text as a path rather than a language name.
-            let text = config
+            let range = config
                 .offsets
                 .get(&(query_match.pattern_index, capture.index))
                 .map_or_else(
-                    || capture.node.utf8_text(source).ok(),
-                    |offset| {
-                        let range = apply_range_offset(capture.node, *offset, source);
-                        source
-                            .get(range.start_byte..range.end_byte)
-                            .and_then(|bytes| std::str::from_utf8(bytes).ok())
-                    },
+                    || capture.node.range(),
+                    |offset| apply_range_offset(capture.node, *offset, source),
                 );
-            filename_language = text.and_then(lumis_core::languages::language_id_for_filename);
+            filename_language = source
+                .get(range.start_byte..range.end_byte)
+                .and_then(|bytes| std::str::from_utf8(bytes).ok())
+                .and_then(lumis_core::languages::language_id_for_filename);
         } else if index == content_capture_index {
             // Neovim narrows the injected range with `#offset!` before parsing it, so
             // delimiters such as backticks or `${`/`}` never reach the injected grammar.

@@ -84,14 +84,3 @@ In the browser, load the inner language up front along with `diff`.
 `web-tree-sitter` cannot fetch a parser inside a synchronous walk, so a language
 first named by a diff header has to already be there. Node, the CLI, Elixir and
 Rust load it on demand.
-
-## What it does not do
-
-A hunk is a fragment of a file, not a file, so the injected parse is expected to
-carry errors. Deleted and added lines are interleaved in one parse, which is what
-keeps a context line from being highlighted twice, and a structural change such
-as replacing a `case` with a `with` can cost a scope or two inside the hunk. It
-never affects the lines around it.
-
-Word diffs (`git diff --word-diff`) are not marked up: the `[-removed-]` and
-`{+added+}` runs render as ordinary text.
