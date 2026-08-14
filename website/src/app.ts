@@ -12,8 +12,16 @@ import { renderRuntimes } from "./sections/runtimes";
 import { renderIntegrations } from "./sections/integrations";
 import { renderFooter } from "./sections/footer";
 import { setupTabs, setupCopyButtons, SECTION_DIVIDER } from "./lib/utils";
+import { FIRST_PAINT_LANGUAGES } from "./data/languages";
+import { loadLanguages } from "./lib/highlighter";
 
 export async function mountApp(root: HTMLDivElement) {
+  // Started before the markup exists, and deliberately not awaited: every
+  // section below still loads what it needs on demand, so this only decides
+  // whether those parsers are already in flight by the time they ask. Awaiting
+  // it would make the whole page wait for the slowest one.
+  void loadLanguages(FIRST_PAINT_LANGUAGES);
+
   root.innerHTML = [
     '<a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:bg-zinc-900 focus:px-4 focus:py-2 focus:font-mono focus:text-sm focus:text-white dark:focus:bg-white dark:focus:text-zinc-900">Skip to content</a>',
     renderNav(),
@@ -47,7 +55,10 @@ export async function mountApp(root: HTMLDivElement) {
   setupTabs(root, ".install-tab", "install", "[data-install-panel]", "installPanel");
   setupCopyButtons(root);
 
-  await setupPlayground(root);
+  // Playground first, so its parser and theme are the first things asked for,
+  // but not awaited: nothing below needs its result, and `main.ts` does not wait
+  // on `mountApp`, so awaiting only held the other four sections back.
+  void setupPlayground(root);
   void setupTokenInspector(root);
   void setupStreaming(root);
   void setupQuickstart(root);
