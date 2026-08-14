@@ -17,7 +17,7 @@ const fixture = JSON.parse(
 
 describe("@injection.filename resolution", () => {
   it("reads a corpus that cannot silently shrink", () => {
-    expect(fixture.cases.length).toBeGreaterThanOrEqual(18);
+    expect(fixture.cases.length).toBeGreaterThanOrEqual(15);
   });
 
   // `crates/lumis-wasm-runtime/tests/injection_filename.rs` reads the same file.

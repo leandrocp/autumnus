@@ -559,26 +559,20 @@ fn id_matching_glob(candidate: &str) -> Option<&'static str> {
 
 /// The id of the language claiming `path`, by file name.
 ///
-/// Only the last path component decides, so `b/lib/varsel.ex` is Elixir and
-/// git's `a/`/`b/` prefixes are ignored. Returns an id rather than a
-/// [`Language`] because a caller that loads parsers at runtime can use a
-/// language this build did not compile in; [`Language::from_str`] is the
-/// gated view of the same table.
+/// Returns an id rather than a [`Language`] because a caller that loads parsers
+/// at runtime can use a language this build did not compile in;
+/// [`Language::from_str`] is the gated view of the same table.
 ///
 /// ```
 /// use lumis_core::languages::language_id_for_filename;
 ///
-/// assert_eq!(language_id_for_filename("b/lib/varsel.ex"), Some("elixir"));
+/// assert_eq!(language_id_for_filename("lib/varsel.ex"), Some("elixir"));
 /// assert_eq!(language_id_for_filename("Dockerfile"), Some("dockerfile"));
 /// assert_eq!(language_id_for_filename("/dev/null"), None);
 /// ```
 pub fn language_id_for_filename(path: &str) -> Option<&'static str> {
-    let name = path.trim().rsplit(['/', '\\']).next()?.to_ascii_lowercase();
-    if name.is_empty() {
-        return None;
-    }
-
-    id_matching_glob(&name)
+    let path = path.trim().to_ascii_lowercase();
+    id_matching_glob(Utf8WindowsPath::new(&path).file_name()?)
 }
 
 /// Every catalog shebang, normalized, in catalog order.

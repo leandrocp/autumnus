@@ -76,10 +76,9 @@ that.
 ## Which language a hunk gets
 
 From the `+++` path, matched against the same file name globs that
-`lumis languages list` reports. `+++ b/lib/varsel.ex` selects Elixir, and git's
-`a/` and `b/` prefixes are ignored. A path Lumis has no language for, including
-`/dev/null`, leaves the hunk uncoloured but still marks its added and removed
-lines.
+`lumis languages list` reports, so `+++ b/lib/varsel.ex` selects Elixir. A path
+Lumis has no language for, including `/dev/null`, leaves the hunk uncoloured but
+still marks its added and removed lines.
 
 In the browser, load the inner language up front along with `diff`.
 `web-tree-sitter` cannot fetch a parser inside a synchronous walk, so a language

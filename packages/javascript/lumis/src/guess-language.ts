@@ -30,7 +30,7 @@ function idMatchingGlob(candidate: string): string | undefined {
  *
  * Ports `lumis_core::languages::language_id_for_filename`. Unlike
  * {@link guessLanguage} it never reads the text as a language name: the capture
- * holds a path, so only its last component can decide.
+ * holds a path.
  */
 export function languageIdForFilename(path: string): string | undefined {
   const name = basename(normalize(path));

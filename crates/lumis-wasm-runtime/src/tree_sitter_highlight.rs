@@ -1771,9 +1771,7 @@ fn injection_for_match<'a>(
             language_name = capture.node.utf8_text(source).ok();
         } else if index == filename_capture_index {
             // Neovim resolves this capture through `vim.filetype.match`, which
-            // reads the text as a path rather than a language name. A diff names
-            // `b/lib/varsel.ex`, so only the last component and its extension can
-            // decide the language.
+            // reads the text as a path rather than a language name.
             let text = config
                 .offsets
                 .get(&(query_match.pattern_index, capture.index))
