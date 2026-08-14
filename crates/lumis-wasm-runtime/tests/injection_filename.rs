@@ -1,8 +1,5 @@
-//! `@injection.filename` resolution, pinned against the browser port.
-//!
-//! Runs from `lumis-wasm-runtime`, which depends on `lumis-core` with no
-//! `lang-*` feature, so it also proves the glob table is not gated: the dynamic
-//! runtimes resolve names for languages they download rather than compile.
+//! Runs from `lumis-wasm-runtime`, which takes `lumis-core` with no `lang-*`
+//! feature, so it also fails if the glob table ever becomes gated.
 
 use lumis_core::languages::language_id_for_filename;
 

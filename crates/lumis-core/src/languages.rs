@@ -526,14 +526,9 @@ fn normalize_shebang_command(command: &str) -> String {
 
 /// `FILENAME_GLOBS` arranged for lookup rather than for iteration.
 ///
-/// Detection used to walk every glob and ask `glob::Pattern` about each one,
-/// which costs about 11 µs for a name no language claims. 381 of the 383 globs
-/// are plain strings, so all but two collapse into two maps and the walk is only
-/// over what is left.
-///
-/// Both maps keep the lowest id per key, and a lookup takes the lowest id across
-/// all three sources, so a name matching both a literal and an extension resolves
-/// the way walking an id-sorted list would.
+/// Asking `glob::Pattern` about all 383 globs costs about 11 µs for a name no
+/// language claims, and `@injection.filename` runs once per changed line. 381 of
+/// them are plain strings, so only two are left to walk.
 struct FilenameIndex {
     /// Globs naming a whole file, e.g. `Dockerfile`.
     literals: HashMap<String, &'static str>,
