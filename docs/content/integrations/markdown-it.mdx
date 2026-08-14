@@ -63,8 +63,6 @@ import {createHighlighter} from '@lumis-sh/lumis'
 import {fromHighlighter} from '@lumis-sh/markdown-it-lumis'
 import {htmlInline} from '@lumis-sh/lumis/formatters'
 import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
-import latte from '@lumis-sh/themes/catppuccin_latte'
-
 const highlighter = await createHighlighter({languages: [bundledLanguages]})
 await highlighter.loadLanguage(bundledLanguages.javascript)
 
