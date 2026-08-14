@@ -1786,9 +1786,7 @@ fn injection_for_match<'a>(
                             .and_then(|bytes| std::str::from_utf8(bytes).ok())
                     },
                 );
-            filename_language = text
-                .and_then(crate::catalog::find_by_filename)
-                .map(|entry| entry.id);
+            filename_language = text.and_then(lumis_core::languages::language_id_for_filename);
         } else if index == content_capture_index {
             // Neovim narrows the injected range with `#offset!` before parsing it, so
             // delimiters such as backticks or `${`/`}` never reach the injected grammar.

@@ -1,9 +1,10 @@
 //! `@injection.filename` resolution, pinned against the browser port.
 //!
-//! Lives outside `src/catalog.rs` because `mise run langs-gen-catalog` rewrites
-//! that file whole.
+//! Runs from `lumis-wasm-runtime`, which depends on `lumis-core` with no
+//! `lang-*` feature, so it also proves the glob table is not gated: the dynamic
+//! runtimes resolve names for languages they download rather than compile.
 
-use lumis_wasm_runtime::catalog;
+use lumis_core::languages::language_id_for_filename;
 
 #[derive(serde::Deserialize)]
 struct Case {
@@ -29,25 +30,11 @@ fn filename_resolution_matches_the_shared_fixture() {
     );
 
     for case in &fixture.cases {
-        let resolved = catalog::find_by_filename(&case.path).map(|entry| entry.id);
         assert_eq!(
-            resolved,
+            language_id_for_filename(&case.path),
             case.language.as_deref(),
             "resolving {:?}",
             case.path
         );
     }
-}
-
-#[test]
-fn every_catalog_entry_carries_its_globs() {
-    let with_globs = catalog::LANGUAGES
-        .iter()
-        .filter(|entry| !entry.globs.is_empty())
-        .count();
-    assert!(
-        with_globs > 100,
-        "languages.toml globs did not reach the catalog: {with_globs} of {}",
-        catalog::LANGUAGES.len()
-    );
 }

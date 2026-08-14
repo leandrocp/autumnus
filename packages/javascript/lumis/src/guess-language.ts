@@ -21,18 +21,22 @@ function globToRegExp(glob: string): RegExp {
   return new RegExp(`^${escapeRegex(glob).replaceAll("*", ".*")}$`);
 }
 
+function idMatchingGlob(candidate: string): string | undefined {
+  return GLOB_REGEXES.find((matcher) => matcher.regex.test(candidate))?.id;
+}
+
 /**
  * The language claiming `path`, by file name, for `@injection.filename`.
  *
- * Mirrors `catalog::find_by_filename` in `lumis-wasm-runtime`. Unlike
- * {@link guessLanguage} this never reads the text as a language name: the
- * capture holds a path, so only its last component can decide.
+ * Ports `lumis_core::languages::language_id_for_filename`. Unlike
+ * {@link guessLanguage} it never reads the text as a language name: the capture
+ * holds a path, so only its last component can decide.
  */
 export function languageIdForFilename(path: string): string | undefined {
-  const name = normalize(path).split(/[/\\]/).pop();
-  if (name == null || name.length === 0) return undefined;
+  const name = basename(normalize(path));
+  if (name.length === 0) return undefined;
 
-  return GLOB_REGEXES.find((matcher) => matcher.regex.test(name))?.id;
+  return idMatchingGlob(name);
 }
 
 function parseLanguageHint(language?: string): string | undefined {
@@ -44,21 +48,13 @@ function parseLanguageHint(language?: string): string | undefined {
   const direct = EXACT_LANGUAGE_MAP[normalized];
   if (direct) return direct;
 
-  const fileName = basename(normalized);
-  for (const matcher of GLOB_REGEXES) {
-    if (matcher.regex.test(fileName)) {
-      return matcher.id;
-    }
-  }
+  const byFileName = languageIdForFilename(normalized);
+  if (byFileName) return byFileName;
 
+  const fileName = basename(normalized);
   const extension = fileName.startsWith(".") ? fileName.slice(1) : fileName;
   if (extension.length > 0) {
-    const extensionPattern = `*.${extension}`;
-    for (const matcher of GLOB_REGEXES) {
-      if (matcher.regex.test(extensionPattern)) {
-        return matcher.id;
-      }
-    }
+    return idMatchingGlob(`*.${extension}`);
   }
 
   return undefined;

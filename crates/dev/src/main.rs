@@ -952,6 +952,7 @@ struct ParserInfo {
     generate: Option<bool>,
     wasm_name: Option<String>,
     feature: Option<String>,
+    #[allow(dead_code)]
     #[serde(default)]
     globs: Vec<String>,
     #[allow(dead_code)]
@@ -2607,17 +2608,9 @@ fn render_language_catalog(
             .map(|alias| format!("{alias:?}"))
             .collect::<Vec<_>>()
             .join(", ");
-        let globs = info
-            .globs
-            .iter()
-            .map(|glob| format!("{glob:?}"))
-            .collect::<Vec<_>>()
-            .join(", ");
-
         lines.extend([
             format!("        {id:?} => {{"),
             format!("            aliases: [{aliases}],"),
-            format!("            globs: [{globs}],"),
             format!("            package_name: {package_name:?}"),
             "        },".to_string(),
         ]);

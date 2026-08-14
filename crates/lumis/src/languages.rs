@@ -77,7 +77,9 @@
 //! # }
 //! ```
 //!
-pub use lumis_core::languages::{available_languages, Language, LanguageInfo, LanguageParseError};
+pub use lumis_core::languages::{
+    available_languages, language_id_for_filename, Language, LanguageInfo, LanguageParseError,
+};
 
 use lumis_core::highlights::HIGHLIGHT_NAMES;
 use lumis_wasm_runtime::tree_sitter_highlight::HighlightConfiguration;

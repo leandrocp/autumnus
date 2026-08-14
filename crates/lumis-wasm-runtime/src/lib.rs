@@ -9,7 +9,6 @@ macro_rules! define_catalog {
             $(
                 $id:literal => {
                     aliases: [$($alias:literal),* $(,)?],
-                    globs: [$($glob:literal),* $(,)?],
                     package_name: $package_name:literal
                 }
             ),* $(,)?
@@ -22,8 +21,6 @@ macro_rules! define_catalog {
         pub struct LanguagePackageRef {
             pub id: &'static str,
             pub aliases: &'static [&'static str],
-            /// File name patterns this language claims, e.g. `*.rs`.
-            pub globs: &'static [&'static str],
             pub package_name: &'static str,
         }
 
@@ -35,7 +32,6 @@ macro_rules! define_catalog {
                 LanguagePackageRef {
                     id: $id,
                     aliases: &[$($alias),*],
-                    globs: &[$($glob),*],
                     package_name: $package_name,
                 },
             )*
@@ -55,45 +51,6 @@ macro_rules! define_catalog {
                         .iter()
                         .any(|alias| alias.eq_ignore_ascii_case(name))
             })
-        }
-
-        /// The language claiming `path`, by file name, for `@injection.filename`.
-        ///
-        /// `path` is whatever a query captured, so it can carry directories and
-        /// git's `a/`/`b/` prefixes. Only the last component is matched, and only
-        /// against the globs: a capture holds a path, never a language name.
-        ///
-        /// Several languages can claim one extension, so the lowest id wins rather
-        /// than whichever entry `LANGUAGES` happens to list first. `lumis-core`
-        /// resolves the same globs out of a `BTreeMap` and therefore picks the same
-        /// language; taking `LANGUAGES` order instead made `*.m` objc here and
-        /// matlab in `Language::from_str`.
-        ///
-        /// ```
-        /// use lumis_wasm_runtime::catalog;
-        ///
-        /// assert_eq!(catalog::find_by_filename("b/lib/varsel.ex").map(|l| l.id), Some("elixir"));
-        /// assert_eq!(catalog::find_by_filename("Dockerfile").map(|l| l.id), Some("dockerfile"));
-        /// assert_eq!(catalog::find_by_filename("/dev/null"), None);
-        /// assert_eq!(catalog::find_by_filename("a/x.m").map(|l| l.id), Some("matlab"));
-        /// ```
-        pub fn find_by_filename(path: &str) -> Option<&'static LanguagePackageRef> {
-            let name = path.trim().rsplit(['/', '\\']).next()?.to_ascii_lowercase();
-            if name.is_empty() {
-                return None;
-            }
-
-            let matches = |entry: &&'static LanguagePackageRef, candidate: &str| {
-                entry.globs.iter().any(|pattern| {
-                    glob::Pattern::new(&pattern.to_ascii_lowercase())
-                        .is_ok_and(|pattern| pattern.matches(candidate))
-                })
-            };
-
-            LANGUAGES
-                .iter()
-                .filter(|entry| matches(entry, &name))
-                .min_by_key(|entry| entry.id)
         }
 
         /// `-` and `_` are interchangeable and case is ignored, so Elixir's
