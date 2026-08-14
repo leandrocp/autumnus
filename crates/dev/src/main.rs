@@ -3292,7 +3292,7 @@ fn stage_wasm(name: &str) -> Result<()> {
 /// so every runtime's tests exercise the real resolve, verify and load path
 /// without a network.
 fn stage_test_parsers(out: &Path) -> Result<()> {
-    const FIXTURES: &str = "packages/javascript/lumis/test/fixtures/wasm";
+    const FIXTURES: &str = "fixtures/test-parsers";
 
     let toml = read_languages_toml()?;
     let fixture_version = lumis_wasm_runtime::lowest_compatible_package_version();

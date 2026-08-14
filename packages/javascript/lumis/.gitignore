@@ -7,8 +7,6 @@ test-results/
 langs/
 themes/
 wasm/
-!test/fixtures/wasm/
-!test/fixtures/wasm/*.wasm
 queries/
 src/generated/
 src/tree-sitter-wasm.ts
