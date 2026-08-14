@@ -6,8 +6,12 @@ used unmodified as a fixture by the benchmark showcase. It is here because its
 Source:
 https://github.com/livebook-dev/livebook/blob/5133601d9678fb8ef0c87484e5d52eff193813e5/lib/livebook_web/components/core_components.ex
 
+Copyright (C) 2021 Dashbit
+
 Livebook is released under the Apache Licence 2.0, which requires a copy of the
-licence to travel with the copy. The upstream repository carries no NOTICE file.
+licence and the attribution notices to travel with the copy. The upstream
+repository carries no NOTICE file and the module has no file header, so the
+copyright above is reproduced from Livebook's README.
 
                                  Apache License
                            Version 2.0, January 2004

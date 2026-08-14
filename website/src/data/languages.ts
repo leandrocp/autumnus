@@ -18,7 +18,7 @@ const CATALOG_NAMES = new Map(availableLanguages().map(({ id, name }) => [id, na
 export const LANGUAGES: LanguageOption[] = Object.entries(bundledLanguages)
   .map(([id, language]) => ({
     id,
-    label: CATALOG_NAMES.get(id) ?? id,
+    label: CATALOG_NAMES.get(id) || id,
     language,
   }))
   .sort((a, b) => a.label.localeCompare(b.label));
