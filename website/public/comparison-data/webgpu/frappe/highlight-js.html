@@ -1,0 +1,1429 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>highlight.js · Catppuccin Frappé · Lumis visual comparison</title>
+  <meta name="color-scheme" content="dark">
+  <style>
+    * { box-sizing: border-box; }
+    html { background: #292c3c; color: #c6d0f5; font: 14px/1.5 Inter, ui-sans-serif, system-ui, sans-serif; }
+    body { margin: 0; }
+    main { padding: 16px; min-width: max-content; }
+    pre { margin: 0 !important; padding: 20px !important; border: 1px solid #51576d; border-radius: 10px; overflow: visible !important; font: 13px/1.55 "SFMono-Regular", Consolas, "Liberation Mono", monospace !important; tab-size: 4; }
+    /* highlight.js themes paint the panel on the code element and pad it, and
+       @catppuccin/highlightjs paints it without making that element a block, so
+       one panel would be ragged where the other three are solid. */
+    pre code.hljs { display: block; padding: 0 !important; }
+  </style>
+</head>
+<body>
+  <main><style>code.hljs{color:#c6d0f5;background:#303446}code .hljs-keyword{color:#ca9ee6}code .hljs-built_in{color:#e78284}code .hljs-type{color:#e5c890}code .hljs-literal{color:#ef9f76}code .hljs-number{color:#ef9f76}code .hljs-operator{color:#99d1db}code .hljs-punctuation{color:#b5bfe2}code .hljs-property{color:#81c8be}code .hljs-regexp{color:#f4b8e4}code .hljs-string{color:#a6d189}code .hljs-char.escape_{color:#a6d189}code .hljs-subst{color:#a5adce}code .hljs-symbol{color:#eebebe}code .hljs-variable{color:#ca9ee6}code .hljs-variable.language_{color:#ca9ee6}code .hljs-variable.constant_{color:#ef9f76}code .hljs-title{color:#8caaee}code .hljs-title.class_{color:#e5c890}code .hljs-title.function_{color:#8caaee}code .hljs-params{color:#c6d0f5}code .hljs-comment{color:#949cbb}code .hljs-doctag{color:#e78284}code .hljs-meta{color:#ef9f76}code .hljs-section{color:#8caaee}code .hljs-tag{color:#81c8be}code .hljs-name{color:#ca9ee6}code .hljs-attr{color:#8caaee}code .hljs-attribute{color:#a6d189}code .hljs-bullet{color:#81c8be}code .hljs-code{color:#a6d189}code .hljs-emphasis{color:#e78284;font-style:italic}code .hljs-strong{color:#e78284;font-weight:bold}code .hljs-formula{color:#81c8be}code .hljs-link{color:#85c1dc;font-style:italic}code .hljs-quote{color:#a6d189;font-style:italic}code .hljs-selector-tag{color:#e5c890}code .hljs-selector-id{color:#8caaee}code .hljs-selector-class{color:#81c8be}code .hljs-selector-attr{color:#ca9ee6}code .hljs-selector-pseudo{color:#81c8be}code .hljs-template-tag{color:#eebebe}code .hljs-template-variable{color:#eebebe}code .hljs-addition{color:#a6d189;background:rgba(166,209,137,.15)}code .hljs-deletion{color:#e78284;background:rgba(231,130,132,.15)}
+</style><pre><code class="hljs language-html"><span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">&quot;en&quot;</span>&gt;</span>
+	<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>three.js webgpu - compute reduction<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">&quot;utf-8&quot;</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;viewport&quot;</span> <span class="hljs-attr">content</span>=<span class="hljs-string">&quot;width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0&quot;</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">property</span>=<span class="hljs-string">&quot;og:title&quot;</span> <span class="hljs-attr">content</span>=<span class="hljs-string">&quot;three.js webgpu - compute reduction&quot;</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">property</span>=<span class="hljs-string">&quot;og:type&quot;</span> <span class="hljs-attr">content</span>=<span class="hljs-string">&quot;website&quot;</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">property</span>=<span class="hljs-string">&quot;og:url&quot;</span> <span class="hljs-attr">content</span>=<span class="hljs-string">&quot;https://threejs.org/examples/webgpu_compute_reduce.html&quot;</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">property</span>=<span class="hljs-string">&quot;og:image&quot;</span> <span class="hljs-attr">content</span>=<span class="hljs-string">&quot;https://threejs.org/examples/screenshots/webgpu_compute_reduce.jpg&quot;</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;text/css&quot;</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;stylesheet&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;main.css&quot;</span>&gt;</span>
+	<span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+	<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+
+	<span class="hljs-tag">&lt;<span class="hljs-name">style</span>&gt;</span><span class="language-css">
+
+		<span class="hljs-selector-id">#reduction-panel</span> {
+			<span class="hljs-attribute">background-color</span>: <span class="hljs-number">#111</span>;
+			<span class="hljs-attribute">width</span>: <span class="hljs-number">100%</span>;
+			<span class="hljs-attribute">display</span>: flex;
+			<span class="hljs-attribute">position</span>: fixed;
+			<span class="hljs-attribute">height</span>: auto;
+			<span class="hljs-attribute">bottom</span>: <span class="hljs-number">0px</span>;
+			<span class="hljs-attribute">z-index</span>: <span class="hljs-number">99</span>;
+			<span class="hljs-attribute">flex-direction</span>: column;
+			<span class="hljs-attribute">justify-content</span>: center;
+			<span class="hljs-attribute">align-items</span>: center;
+			<span class="hljs-attribute">border-left</span>: <span class="hljs-number">2px</span> solid <span class="hljs-number">#222</span>;
+			<span class="hljs-attribute">text-align</span>: center;
+		}
+
+		<span class="hljs-selector-id">#panel-title</span> {
+			<span class="hljs-attribute">width</span>: fit-content;
+		}
+
+		<span class="hljs-selector-class">.thread-row</span> {
+			<span class="hljs-attribute">display</span>: flex;
+			<span class="hljs-attribute">flex-direction</span>: row;
+			<span class="hljs-attribute">align-items</span>: center;
+			<span class="hljs-attribute">margin</span>: <span class="hljs-number">4px</span> <span class="hljs-number">0</span>;
+			<span class="hljs-attribute">position</span>: relative;
+		}
+
+		<span class="hljs-selector-class">.thread</span> {
+			<span class="hljs-attribute">width</span>: <span class="hljs-number">16px</span>;
+			<span class="hljs-attribute">height</span>: <span class="hljs-number">16px</span>;
+			<span class="hljs-attribute">background-color</span>: <span class="hljs-number">#444</span>;
+			<span class="hljs-attribute">margin-right</span>: <span class="hljs-number">2px</span>;
+			<span class="hljs-attribute">transition</span>: background-color <span class="hljs-number">0.5s</span>, transform <span class="hljs-number">0.5s</span>;
+		}
+
+		<span class="hljs-selector-class">.stage-display</span> {
+			<span class="hljs-attribute">display</span>: flex;
+			<span class="hljs-attribute">flex-direction</span>: column;
+			<span class="hljs-attribute">justify-content</span>: center;
+			<span class="hljs-attribute">margin-bottom</span>: <span class="hljs-number">5px</span>;
+		}
+
+		<span class="hljs-selector-class">.stage-label</span> {
+			<span class="hljs-attribute">font-size</span>: <span class="hljs-number">1.2em</span>;
+			<span class="hljs-attribute">color</span>: <span class="hljs-number">#aaa</span>;
+			<span class="hljs-attribute">font-style</span>: bold;
+			<span class="hljs-attribute">margin-top</span>: <span class="hljs-number">6px</span>;
+			<span class="hljs-attribute">margin-bottom</span>: <span class="hljs-number">20px</span>;
+		}
+
+		<span class="hljs-selector-class">.thread</span> {
+			<span class="hljs-attribute">display</span>: flex;
+			<span class="hljs-attribute">justify-content</span>: center;
+			<span class="hljs-attribute">align-items</span>: center;
+			<span class="hljs-attribute">width</span>: <span class="hljs-number">40px</span>;
+			<span class="hljs-attribute">height</span>: <span class="hljs-number">40px</span>;
+			<span class="hljs-attribute">margin</span>: <span class="hljs-number">2px</span>;
+			<span class="hljs-attribute">border</span>: <span class="hljs-number">1px</span> solid <span class="hljs-built_in">rgba</span>(<span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0.2</span>);
+			<span class="hljs-attribute">border-radius</span>: <span class="hljs-number">4px</span>;
+			<span class="hljs-attribute">background</span>: <span class="hljs-built_in">linear-gradient</span>(<span class="hljs-number">180deg</span>, <span class="hljs-built_in">rgba</span>(<span class="hljs-number">255</span>,<span class="hljs-number">255</span>,<span class="hljs-number">255</span>,<span class="hljs-number">0.05</span>), <span class="hljs-built_in">rgba</span>(<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0.2</span>));
+			<span class="hljs-attribute">box-shadow</span>: inset <span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">2px</span> <span class="hljs-built_in">rgba</span>(<span class="hljs-number">255</span>,<span class="hljs-number">255</span>,<span class="hljs-number">255</span>,<span class="hljs-number">0.1</span>);
+			<span class="hljs-attribute">font-family</span>: monospace;
+			<span class="hljs-attribute">color</span>: white;
+		}
+
+		<span class="hljs-selector-class">.thread_data</span> {
+			<span class="hljs-attribute">display</span>: block;
+			<span class="hljs-attribute">max-width</span>: <span class="hljs-number">100%</span>;
+			<span class="hljs-attribute">padding</span>: <span class="hljs-number">0</span> <span class="hljs-number">2px</span>;
+			<span class="hljs-attribute">white-space</span>: nowrap;
+			<span class="hljs-attribute">overflow</span>: hidden;
+			<span class="hljs-attribute">text-overflow</span>: ellipsis;
+			<span class="hljs-attribute">font-size</span>: <span class="hljs-built_in">clamp</span>(<span class="hljs-number">8px</span>, <span class="hljs-number">2vw</span>, <span class="hljs-number">14px</span>);
+			<span class="hljs-attribute">text-align</span>: center;
+		}
+
+		<span class="hljs-selector-class">.subgroup</span> {
+			<span class="hljs-attribute">display</span>: flex;
+			<span class="hljs-attribute">position</span>: relative;
+			<span class="hljs-attribute">margin-left</span>: <span class="hljs-number">10px</span>;
+			<span class="hljs-attribute">margin-right</span>: <span class="hljs-number">10px</span>;
+		}
+
+		<span class="hljs-selector-class">.subgroup</span><span class="hljs-selector-pseudo">::before</span> {
+			<span class="hljs-comment">/* label text for each subgroup label */</span>
+			<span class="hljs-attribute">content</span>: <span class="hljs-string">&quot;subgroupAdd()&quot;</span>;
+			<span class="hljs-attribute">position</span>: absolute;
+			<span class="hljs-attribute">top</span>: -<span class="hljs-number">20px</span>;
+			<span class="hljs-comment">/* Hide until animation is displayed */</span>
+			<span class="hljs-attribute">opacity</span>: <span class="hljs-number">0</span>;
+			<span class="hljs-attribute">z-index</span>: <span class="hljs-number">100</span>;
+			<span class="hljs-attribute">transition</span>: opacity <span class="hljs-number">0.5s</span> ease;
+			<span class="hljs-attribute">font-weight</span>: bold;
+			<span class="hljs-attribute">color</span>: white;
+			<span class="hljs-attribute">width</span>: <span class="hljs-number">100%</span>;
+		}
+
+		<span class="hljs-selector-class">.subgroup</span><span class="hljs-selector-pseudo">::after</span> {
+			<span class="hljs-attribute">content</span>: <span class="hljs-built_in">attr</span>(data-label);
+			<span class="hljs-attribute">position</span>: absolute;
+			<span class="hljs-attribute">bottom</span>: -<span class="hljs-number">20px</span>;
+			<span class="hljs-attribute">opacity</span>: <span class="hljs-number">1</span>;
+			<span class="hljs-attribute">z-index</span>: <span class="hljs-number">100</span>;
+			<span class="hljs-attribute">color</span>: gray;
+			<span class="hljs-attribute">width</span>: <span class="hljs-number">100%</span>;
+		}
+
+		<span class="hljs-selector-class">.reduction-stage</span> {
+			<span class="hljs-attribute">margin-bottom</span>: <span class="hljs-number">20px</span>;
+		}
+
+		<span class="hljs-keyword">@keyframes</span> labelAbsorb {
+			<span class="hljs-number">0%</span> {
+				<span class="hljs-attribute">opacity</span>: <span class="hljs-number">0</span>;
+				<span class="hljs-attribute">transform</span>: <span class="hljs-built_in">translateY</span>(-<span class="hljs-number">50%</span>);
+			}
+			<span class="hljs-number">40%</span> {
+				<span class="hljs-attribute">opacity</span>: <span class="hljs-number">1</span>;
+				<span class="hljs-attribute">transform</span>: <span class="hljs-built_in">translateY</span>(<span class="hljs-number">0%</span>);
+			}
+			<span class="hljs-number">60%</span> {
+				<span class="hljs-attribute">opacity</span>: <span class="hljs-number">1</span>;
+				<span class="hljs-attribute">transform</span>: <span class="hljs-built_in">translateY</span>(<span class="hljs-number">0%</span>);
+			}
+			<span class="hljs-number">80%</span> {
+				<span class="hljs-attribute">opacity</span>: <span class="hljs-number">1</span>;
+				<span class="hljs-attribute">transform</span>: <span class="hljs-built_in">translate</span>(<span class="hljs-number">0%</span>, -<span class="hljs-number">20%</span>);
+			}
+			<span class="hljs-number">100%</span> {
+				<span class="hljs-attribute">opacity</span>: <span class="hljs-number">0</span>;
+				<span class="hljs-attribute">transform</span>: <span class="hljs-built_in">translate</span>(<span class="hljs-number">0%</span>, <span class="hljs-number">100%</span>);
+			}
+		}
+
+		<span class="hljs-selector-class">.subgroup</span><span class="hljs-selector-class">.anim</span><span class="hljs-selector-pseudo">::before</span> {
+			<span class="hljs-attribute">opacity</span>: <span class="hljs-number">0</span>;
+			<span class="hljs-attribute">animation-name</span>: labelAbsorb;
+			<span class="hljs-attribute">animation-duration</span>: <span class="hljs-number">1.5s</span>;
+			<span class="hljs-attribute">transition</span>:
+			transform <span class="hljs-number">0.6s</span> ease-out,
+			opacity <span class="hljs-number">0.3s</span> ease-in <span class="hljs-number">0.3s</span>;
+		}
+
+	</span><span class="hljs-tag">&lt;/<span class="hljs-name">style</span>&gt;</span>
+
+		<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;info&quot;</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;https://threejs.org&quot;</span> <span class="hljs-attr">target</span>=<span class="hljs-string">&quot;_blank&quot;</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;noopener&quot;</span>&gt;</span>three.js<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">br</span> /&gt;</span> This example demonstrates the performance of various simple parallel reduction kernels.
+			<span class="hljs-tag">&lt;<span class="hljs-name">br</span> /&gt;</span> Reference implementations are translated from the CUDA/WGSL code present in the following books/repos:
+			<span class="hljs-tag">&lt;<span class="hljs-name">br</span> /&gt;</span> Impl. 0 - 2: <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;https://www.cambridge.org/core/books/programming-in-parallel-with-cuda/C43652A69033C25AD6933368CDBE084C&quot;</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">i</span>&gt;</span>Programming in Parallel with CUDA<span class="hljs-tag">&lt;/<span class="hljs-name">i</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span> by <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;https://github.com/RichardAns&quot;</span>&gt;</span>Richard Ansorge<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">br</span> /&gt;</span> Impl. 3: <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;https://github.com/frost-beta/betann/blob/main/betann/wgsl/reduce_all.wgsl&quot;</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">i</span>&gt;</span>betann reduce_all kernel<span class="hljs-tag">&lt;/<span class="hljs-name">i</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span> by <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;https://github.com/zcbenz&quot;</span>&gt;</span>zcbenz<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">br</span> /&gt;</span> Impl. 4: <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;https://github.com/b0nes164/GPUPrefixSums/blob/main/GPUPrefixSumsWebGPUapis/SharedShaders/rts.wgsl&quot;</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">i</span>&gt;</span>GPUPrefixSums reduction approach<span class="hljs-tag">&lt;/<span class="hljs-name">i</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span> by <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;https://github.com/b0nes164&quot;</span>&gt;</span>b0nes164<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;left_side_display&quot;</span> <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;position: absolute;top: 150px;left: 0;padding: 10px;background: rgba( 0, 0, 0, 0.5 );color: #fff;font-family: monospace;font-size: 12px;line-height: 1.5;pointer-events: none;text-align: left;&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;right_side_display&quot;</span> <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;position: absolute;top: 150px;right: 0;padding: 10px;background: rgba( 0, 0, 0, 0.5 );color: #fff;font-family: monospace;font-size: 12px;line-height: 1.5;pointer-events: none;text-align: left;&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+		<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+		<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;reduction-panel&quot;</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">h3</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;panel-title&quot;</span> <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;flex: 0 0 auto;&quot;</span>&gt;</span>Subgroup Reduction Explanation<span class="hljs-tag">&lt;/<span class="hljs-name">h3</span>&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;reduction-stage&quot;</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;subgroup-reduction-stage&quot;</span>&gt;</span>
+    		<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;stage-label&quot;</span>&gt;</span>Use subgroupAdd() to capture reduction of each workgroup&#x27;s subgroups (Hover for animation)<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+				<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;stage-display&quot;</span>&gt;</span>
+					<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;workgroup_threads&quot;</span> <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;display: flex; justify-content: center; margin-bottom: 20px;&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+					<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;subgroup_reduction&quot;</span> <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;display: flex; justify-content: center; margin-bottom: 5px;&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+				<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+			<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+		<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;importmap&quot;</span>&gt;</span><span class="language-javascript">
+			{
+				<span class="hljs-string">&quot;imports&quot;</span>: {
+					<span class="hljs-string">&quot;three&quot;</span>: <span class="hljs-string">&quot;../build/three.webgpu.js&quot;</span>,
+					<span class="hljs-string">&quot;three/webgpu&quot;</span>: <span class="hljs-string">&quot;../build/three.webgpu.js&quot;</span>,
+					<span class="hljs-string">&quot;three/tsl&quot;</span>: <span class="hljs-string">&quot;../build/three.tsl.js&quot;</span>,
+					<span class="hljs-string">&quot;three/addons/&quot;</span>: <span class="hljs-string">&quot;./jsm/&quot;</span>
+				}
+			}
+		</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+
+		<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;module&quot;</span>&gt;</span><span class="language-javascript">
+
+			<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> <span class="hljs-variable constant_">THREE</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;three/webgpu&#x27;</span>;
+			<span class="hljs-keyword">import</span> { instancedArray, <span class="hljs-title class_">Loop</span>, <span class="hljs-title class_">If</span>, vec3, dot, clamp, storage, uvec4, subgroupAdd, uniform, uv, uint, float, <span class="hljs-title class_">Fn</span>, vec2, invocationLocalIndex, invocationSubgroupIndex, uvec2, floor, instanceIndex, workgroupId, workgroupBarrier, workgroupArray, subgroupSize, select, countTrailingZeros } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;three/tsl&#x27;</span>;
+
+			<span class="hljs-keyword">import</span> <span class="hljs-title class_">WebGPU</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;three/addons/capabilities/WebGPU.js&#x27;</span>;
+
+			<span class="hljs-keyword">import</span> { <span class="hljs-variable constant_">GUI</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;three/addons/libs/lil-gui.module.min.js&#x27;</span>;
+
+			<span class="hljs-keyword">const</span> timestamps = {
+				<span class="hljs-attr">left_side_display</span>: <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>( <span class="hljs-string">&#x27;left_side_display&#x27;</span> ),
+				<span class="hljs-attr">right_side_display</span>: <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>( <span class="hljs-string">&#x27;right_side_display&#x27;</span> )
+			};
+
+			<span class="hljs-keyword">const</span> <span class="hljs-title function_">divRoundUp</span> = (<span class="hljs-params"> size, part_size </span>) =&gt; {
+
+				<span class="hljs-keyword">return</span> <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">floor</span>( ( size + part_size - <span class="hljs-number">1</span> ) / part_size );
+
+			};
+
+			<span class="hljs-keyword">const</span> cssSubgroupSize = <span class="hljs-number">4</span>;
+			<span class="hljs-keyword">const</span> cssWorkgroupSize = <span class="hljs-number">16</span>;
+
+			<span class="hljs-keyword">const</span> workgroupThreadsContainer = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>( <span class="hljs-string">&#x27;workgroup_threads&#x27;</span> );
+			<span class="hljs-keyword">const</span> subgroupReductionContainer = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>( <span class="hljs-string">&#x27;subgroup_reduction&#x27;</span> );
+
+			<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>( <span class="hljs-string">&#x27;panel-title&#x27;</span> ).<span class="hljs-property">textContent</span> += <span class="hljs-string">` (Subgroup Size: <span class="hljs-subst">${cssSubgroupSize}</span>, Workgroup Size: <span class="hljs-subst">${cssWorkgroupSize}</span>)`</span>;
+
+			<span class="hljs-keyword">const</span> <span class="hljs-title function_">createThreadWithData</span> = (<span class="hljs-params"> data </span>) =&gt; {
+
+				<span class="hljs-keyword">const</span> threadEle = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>( <span class="hljs-string">&#x27;div&#x27;</span> );
+				threadEle.<span class="hljs-property">className</span> = <span class="hljs-string">&#x27;thread&#x27;</span>;
+				<span class="hljs-keyword">const</span> threadData = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>( <span class="hljs-string">&#x27;span&#x27;</span> );
+				threadData.<span class="hljs-property">textContent</span> = data; <span class="hljs-comment">// safer than innerHTML for just text</span>
+				threadData.<span class="hljs-property">className</span> = <span class="hljs-string">&#x27;thread_data&#x27;</span>;
+				threadEle.<span class="hljs-title function_">append</span>( threadData );
+
+				<span class="hljs-keyword">return</span> threadEle;
+
+			};
+
+			<span class="hljs-comment">// Create thread elements</span>
+			<span class="hljs-keyword">const</span> workgroupThreads = [];
+			<span class="hljs-keyword">const</span> initialSubgroups = [];
+			<span class="hljs-keyword">const</span> initialData = [];
+			<span class="hljs-keyword">let</span> currentSubgroupDiv = <span class="hljs-literal">null</span>;
+			<span class="hljs-keyword">for</span> ( <span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; cssWorkgroupSize; i ++ ) {
+
+				<span class="hljs-keyword">if</span> ( i % cssSubgroupSize === <span class="hljs-number">0</span> ) {
+
+					<span class="hljs-keyword">const</span> currentSubgroupIndex = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">floor</span>( i / cssSubgroupSize );
+
+					<span class="hljs-keyword">const</span> subgroupReductionThread = <span class="hljs-title function_">createThreadWithData</span>( <span class="hljs-number">0</span> );
+					subgroupReductionThread.<span class="hljs-property">id</span> = <span class="hljs-string">`subgroup_reduction_element_<span class="hljs-subst">${currentSubgroupIndex}</span>`</span>;
+					subgroupReductionContainer.<span class="hljs-title function_">appendChild</span>( subgroupReductionThread );
+
+					currentSubgroupDiv = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>( <span class="hljs-string">&#x27;div&#x27;</span> );
+					currentSubgroupDiv.<span class="hljs-property">className</span> = <span class="hljs-string">&#x27;subgroup&#x27;</span>;
+					currentSubgroupDiv.<span class="hljs-title function_">setAttribute</span>( <span class="hljs-string">&#x27;data-label&#x27;</span>, <span class="hljs-string">`Threads <span class="hljs-subst">${currentSubgroupIndex * cssSubgroupSize}</span>-<span class="hljs-subst">${( currentSubgroupIndex + <span class="hljs-number">1</span> ) * cssSubgroupSize - <span class="hljs-number">1</span>}</span>`</span> );
+					initialSubgroups.<span class="hljs-title function_">push</span>( currentSubgroupDiv );
+					workgroupThreadsContainer.<span class="hljs-title function_">appendChild</span>( currentSubgroupDiv );
+
+				}
+
+				<span class="hljs-keyword">const</span> data = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">floor</span>( <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>() * <span class="hljs-number">9</span> ) + <span class="hljs-number">1</span>;
+				initialData.<span class="hljs-title function_">push</span>( data );
+
+				<span class="hljs-keyword">const</span> thread = <span class="hljs-title function_">createThreadWithData</span>( data );
+				workgroupThreads.<span class="hljs-title function_">push</span>( thread );
+				currentSubgroupDiv.<span class="hljs-title function_">appendChild</span>( thread );
+
+			}
+
+			<span class="hljs-keyword">const</span> <span class="hljs-title function_">deactivateLabelAnimation</span> = (<span class="hljs-params"> subgroupDiv, idx </span>) =&gt; {
+
+				subgroupDiv.<span class="hljs-property">classList</span>.<span class="hljs-title function_">remove</span>( <span class="hljs-string">&#x27;anim&#x27;</span> );
+
+				<span class="hljs-keyword">const</span> subgroupReductionBufferElement = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>( <span class="hljs-string">`subgroup_reduction_element_<span class="hljs-subst">${idx}</span>`</span> ).<span class="hljs-title function_">querySelector</span>( <span class="hljs-string">&#x27;.thread_data&#x27;</span> );
+
+				subgroupReductionBufferElement.<span class="hljs-property">innerHTML</span> = <span class="hljs-number">0</span>;
+
+			};
+
+			<span class="hljs-keyword">const</span> <span class="hljs-title function_">activateLabelAnimation</span> = (<span class="hljs-params"> subgroupDiv, idx </span>) =&gt; {
+
+				<span class="hljs-keyword">const</span> threads = <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>( subgroupDiv.<span class="hljs-property">children</span> );
+				<span class="hljs-keyword">let</span> total = <span class="hljs-number">0</span>;
+
+				<span class="hljs-keyword">for</span> ( <span class="hljs-keyword">let</span> i = idx * cssSubgroupSize; i &lt; idx * cssSubgroupSize + cssSubgroupSize; i ++ ) {
+
+					total += initialData[ i ];
+
+				}
+
+				subgroupDiv.<span class="hljs-property">classList</span>.<span class="hljs-title function_">add</span>( <span class="hljs-string">&#x27;anim&#x27;</span> );
+
+				<span class="hljs-built_in">setTimeout</span>( <span class="hljs-function">() =&gt;</span> {
+
+					threads.<span class="hljs-title function_">forEach</span>( <span class="hljs-function"><span class="hljs-params">t</span> =&gt;</span> {
+
+						t.<span class="hljs-title function_">querySelector</span>( <span class="hljs-string">&#x27;.thread_data&#x27;</span> ).<span class="hljs-property">textContent</span> = total;
+
+					} );
+
+					<span class="hljs-keyword">const</span> subgroupReductionBufferElement = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>( <span class="hljs-string">`subgroup_reduction_element_<span class="hljs-subst">${idx}</span>`</span> ).<span class="hljs-title function_">querySelector</span>( <span class="hljs-string">&#x27;.thread_data&#x27;</span> );
+
+					subgroupReductionBufferElement.<span class="hljs-property">innerHTML</span> = total;
+
+				}, <span class="hljs-number">1000</span> );
+
+				<span class="hljs-comment">// Remove the class after the animation ends so it can be triggered again</span>
+				<span class="hljs-built_in">setTimeout</span>( <span class="hljs-function">() =&gt;</span> {
+
+					subgroupDiv.<span class="hljs-property">classList</span>.<span class="hljs-title function_">remove</span>( <span class="hljs-string">&#x27;anim&#x27;</span> );
+
+				}, <span class="hljs-number">1500</span> ); <span class="hljs-comment">// matches animation duration in CSS</span>
+
+			};
+
+			<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>( <span class="hljs-string">&#x27;subgroup-reduction-stage&#x27;</span> ).<span class="hljs-title function_">addEventListener</span>( <span class="hljs-string">&#x27;mouseenter&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+
+				initialSubgroups.<span class="hljs-title function_">forEach</span>( <span class="hljs-function">(<span class="hljs-params"> subgroupDiv, idx </span>) =&gt;</span> {
+
+					<span class="hljs-title function_">activateLabelAnimation</span>( subgroupDiv, idx );
+
+				} );
+
+			} );
+
+			<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>( <span class="hljs-string">&#x27;subgroup-reduction-stage&#x27;</span> ).<span class="hljs-title function_">addEventListener</span>( <span class="hljs-string">&#x27;mouseleave&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+
+				initialSubgroups.<span class="hljs-title function_">forEach</span>( <span class="hljs-function">(<span class="hljs-params"> subgroupDiv, idx </span>) =&gt;</span> {
+
+					<span class="hljs-title function_">deactivateLabelAnimation</span>( subgroupDiv, idx );
+
+				} );
+
+				workgroupThreads.<span class="hljs-title function_">forEach</span>( <span class="hljs-function">(<span class="hljs-params"> thread, idx </span>) =&gt;</span> {
+
+					thread.<span class="hljs-title function_">querySelector</span>( <span class="hljs-string">&#x27;.thread_data&#x27;</span> ).<span class="hljs-property">textContent</span> = initialData[ idx ];
+
+				} );
+
+			} );
+
+
+			<span class="hljs-keyword">if</span> ( <span class="hljs-title class_">WebGPU</span>.<span class="hljs-title function_">isAvailable</span>() === <span class="hljs-literal">false</span> ) {
+
+				<span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>.<span class="hljs-title function_">appendChild</span>( <span class="hljs-title class_">WebGPU</span>.<span class="hljs-title function_">getErrorMessage</span>() );
+
+				<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>( <span class="hljs-string">&#x27;No WebGPU support&#x27;</span> );
+
+			}
+
+			<span class="hljs-comment">// Total number of elements and the dimensions of the display grid.</span>
+			<span class="hljs-keyword">const</span> size = <span class="hljs-number">262144</span>;
+			<span class="hljs-keyword">const</span> vecSize = <span class="hljs-title function_">divRoundUp</span>( size, <span class="hljs-number">4</span> );
+			<span class="hljs-comment">// Grid display is gridDim x gridDim</span>
+			<span class="hljs-keyword">const</span> gridDim = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sqrt</span>( size );
+			<span class="hljs-keyword">let</span> maxWorkgroupSize = <span class="hljs-number">64</span>;
+
+			<span class="hljs-comment">// Algorithm speed increase as you iterate through algorithms array</span>
+			<span class="hljs-keyword">const</span> algorithms = [
+				<span class="hljs-string">&#x27;Reduce 0 (N/2)&#x27;</span>,
+				<span class="hljs-string">&#x27;Reduce 1 (Naive Accumulate)&#x27;</span>,
+				<span class="hljs-string">&#x27;Reduce 2 (Workgroup Reduction)&#x27;</span>,
+				<span class="hljs-string">&#x27;Reduce 3 (Subgroup Reduce)&#x27;</span>,
+				<span class="hljs-string">&#x27;Reduce 4 (Subgroup Optimized)&#x27;</span>,
+				<span class="hljs-string">&#x27;Incorrect Baseline&#x27;</span>,
+			];
+
+			<span class="hljs-comment">// Input Grid: Displays input data in a grid format</span>
+			<span class="hljs-comment">// Input Log2: Displays input grid data&#x27;s logarithmic indices horizontally (1, 2, 4, 8, 16, ..., size)</span>
+			<span class="hljs-comment">// Input Element 0: Displays clamped input[0]</span>
+			<span class="hljs-keyword">const</span> displayModes = [ <span class="hljs-string">&#x27;Input Grid&#x27;</span>, <span class="hljs-string">&#x27;Input Log2&#x27;</span>, <span class="hljs-string">&#x27;Input Element 0&#x27;</span>, <span class="hljs-string">&#x27;Workgroup Sum Grid&#x27;</span> ];
+
+			<span class="hljs-comment">// Holds uniforms for both displays as well as debug information</span>
+			<span class="hljs-keyword">const</span> unifiedEffectController = {
+				<span class="hljs-comment">// Number of elements in the grid</span>
+				<span class="hljs-attr">gridElementWidth</span>: <span class="hljs-title function_">uniform</span>( gridDim ),
+				<span class="hljs-attr">gridElementHeight</span>: <span class="hljs-title function_">uniform</span>( gridDim ),
+				<span class="hljs-comment">// Number of elements in the grid being displayed</span>
+				<span class="hljs-attr">gridDisplayWidth</span>: <span class="hljs-title function_">uniform</span>( gridDim ),
+				<span class="hljs-attr">gridDisplayHeight</span>: <span class="hljs-title function_">uniform</span>( gridDim ),
+				<span class="hljs-comment">// How to display end result of reduction.</span>
+				<span class="hljs-comment">// Ideally this is unique to the reduction method being deployed</span>
+				<span class="hljs-string">&#x27;Display Mode&#x27;</span>: <span class="hljs-string">&#x27;Input Log2&#x27;</span>,
+				<span class="hljs-attr">loggedBuffer</span>: <span class="hljs-string">&#x27;Input Buffer&#x27;</span>,
+				<span class="hljs-attr">elementsReduced</span>: size,
+			};
+
+
+			<span class="hljs-keyword">const</span> leftEffectController = {
+				<span class="hljs-comment">// Current reduction algorithm being executed by this side</span>
+				<span class="hljs-attr">algo</span>: <span class="hljs-string">&#x27;Reduce 0 (N/2)&#x27;</span>,
+				<span class="hljs-comment">// Flag indicating whether to highlight element in validation check</span>
+				<span class="hljs-attr">highlight</span>: <span class="hljs-title function_">uniform</span>( <span class="hljs-number">0</span> ),
+				<span class="hljs-comment">// Uniform that corresponds to the index of the current algorithm within the algorithms array</span>
+				<span class="hljs-attr">currentAlgo</span>: <span class="hljs-title function_">uniform</span>( <span class="hljs-number">0</span> ),
+				<span class="hljs-comment">// Current state of reduction (Running, validating, resetting)</span>
+				<span class="hljs-attr">state</span>: <span class="hljs-string">&#x27;Run Algo&#x27;</span>,
+				<span class="hljs-comment">// Current display mode</span>
+				<span class="hljs-attr">displayMode</span>: <span class="hljs-string">&#x27;Input Log2&#x27;</span>,
+				<span class="hljs-comment">// Reduce 0 specific uniform</span>
+				<span class="hljs-attr">numThreadsDispatched</span>: <span class="hljs-title function_">uniform</span>( size / <span class="hljs-number">2</span> ),
+				<span class="hljs-comment">// The subgroup size used by this side&#x27;s device</span>
+			};
+
+			<span class="hljs-keyword">const</span> rightEffectController = {
+				<span class="hljs-attr">algo</span>: <span class="hljs-string">&#x27;Reduce 4 (Subgroup Optimized)&#x27;</span>,
+				<span class="hljs-attr">currentAlgo</span>: <span class="hljs-title function_">uniform</span>( <span class="hljs-number">3</span> ),
+				<span class="hljs-attr">highlight</span>: <span class="hljs-title function_">uniform</span>( <span class="hljs-number">0</span> ),
+				<span class="hljs-attr">displayMode</span>: <span class="hljs-string">&#x27;Input Element 0&#x27;</span>,
+				<span class="hljs-attr">state</span>: <span class="hljs-string">&#x27;Run Algo&#x27;</span>,
+				<span class="hljs-attr">numThreadsDispatched</span>: <span class="hljs-title function_">uniform</span>( size / <span class="hljs-number">2</span> )
+			};
+
+			<span class="hljs-keyword">const</span> leftMaterial = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">MeshBasicNodeMaterial</span>( { <span class="hljs-attr">color</span>: <span class="hljs-number">0x00ff00</span> } );
+			<span class="hljs-keyword">const</span> rightMaterial = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">MeshBasicNodeMaterial</span>( { <span class="hljs-attr">color</span>: <span class="hljs-number">0x00ff00</span> } );
+			<span class="hljs-keyword">const</span> leftDisplayColorNodes = {};
+			<span class="hljs-keyword">const</span> rightDisplayColorNodes = {};
+
+			<span class="hljs-keyword">const</span> gui = <span class="hljs-keyword">new</span> <span class="hljs-title function_">GUI</span>();
+
+			gui.<span class="hljs-title function_">add</span>( leftEffectController, <span class="hljs-string">&#x27;algo&#x27;</span>, algorithms ).<span class="hljs-title function_">onChange</span>( <span class="hljs-function">() =&gt;</span> {
+
+				leftEffectController.<span class="hljs-property">currentAlgo</span>.<span class="hljs-property">value</span> = algorithms.<span class="hljs-title function_">findIndex</span>( <span class="hljs-function"><span class="hljs-params">val</span> =&gt;</span> val === leftEffectController.<span class="hljs-property">algo</span> );
+
+			} );
+
+			gui.<span class="hljs-title function_">add</span>( rightEffectController, <span class="hljs-string">&#x27;algo&#x27;</span>, algorithms ).<span class="hljs-title function_">onChange</span>( <span class="hljs-function">() =&gt;</span> {
+
+				rightEffectController.<span class="hljs-property">currentAlgo</span>.<span class="hljs-property">value</span> = algorithms.<span class="hljs-title function_">findIndex</span>( <span class="hljs-function"><span class="hljs-params">val</span> =&gt;</span> val === rightEffectController.<span class="hljs-property">algo</span> );
+
+			} );
+
+			gui.<span class="hljs-title function_">add</span>( leftEffectController, <span class="hljs-string">&#x27;displayMode&#x27;</span>, displayModes ).<span class="hljs-title function_">name</span>( <span class="hljs-string">&#x27;Left Display Mode&#x27;</span> ).<span class="hljs-title function_">onChange</span>( <span class="hljs-function">() =&gt;</span> {
+
+				leftMaterial.<span class="hljs-property">colorNode</span> = leftDisplayColorNodes[ leftEffectController.<span class="hljs-property">displayMode</span> ];
+				leftMaterial.<span class="hljs-property">needsUpdate</span> = <span class="hljs-literal">true</span>;
+
+			} );
+			gui.<span class="hljs-title function_">add</span>( rightEffectController, <span class="hljs-string">&#x27;displayMode&#x27;</span>, displayModes ).<span class="hljs-title function_">name</span>( <span class="hljs-string">&#x27;Right Display Mode&#x27;</span> ).<span class="hljs-title function_">onChange</span>( <span class="hljs-function">() =&gt;</span> {
+
+				rightMaterial.<span class="hljs-property">colorNode</span> = rightDisplayColorNodes[ rightEffectController.<span class="hljs-property">displayMode</span> ];
+				rightMaterial.<span class="hljs-property">needsUpdate</span> = <span class="hljs-literal">true</span>;
+
+			} );
+
+			<span class="hljs-keyword">const</span> debugFolder = gui.<span class="hljs-title function_">addFolder</span>( <span class="hljs-string">&#x27;Debug&#x27;</span> );
+			<span class="hljs-keyword">const</span> elementsReducedController = debugFolder.<span class="hljs-title function_">add</span>( unifiedEffectController, <span class="hljs-string">&#x27;elementsReduced&#x27;</span> ).<span class="hljs-title function_">name</span>( <span class="hljs-string">&#x27;Elements Reduced&#x27;</span> );
+			elementsReducedController.<span class="hljs-title function_">disable</span>();
+			<span class="hljs-keyword">const</span> stateLeftController = debugFolder.<span class="hljs-title function_">add</span>( leftEffectController, <span class="hljs-string">&#x27;state&#x27;</span> ).<span class="hljs-title function_">name</span>( <span class="hljs-string">&#x27;Left Display State&#x27;</span> );
+			<span class="hljs-keyword">const</span> stateRightController = debugFolder.<span class="hljs-title function_">add</span>( rightEffectController, <span class="hljs-string">&#x27;state&#x27;</span> ).<span class="hljs-title function_">name</span>( <span class="hljs-string">&#x27;Right Display State&#x27;</span> );
+			stateLeftController.<span class="hljs-title function_">disable</span>();
+			stateRightController.<span class="hljs-title function_">disable</span>();
+			debugFolder.<span class="hljs-title function_">add</span>( unifiedEffectController, <span class="hljs-string">&#x27;loggedBuffer&#x27;</span>, [ <span class="hljs-string">&#x27;Input Buffer&#x27;</span>, <span class="hljs-string">&#x27;Input Vectorized Buffer&#x27;</span>, <span class="hljs-string">&#x27;Workgroup Sums Buffer&#x27;</span>, <span class="hljs-string">&#x27;Debug Buffer&#x27;</span> ] ).<span class="hljs-title function_">name</span>( <span class="hljs-string">&#x27;Buffer to Log&#x27;</span> );
+			debugFolder.<span class="hljs-title function_">close</span>();
+
+			<span class="hljs-comment">// HELPER FUNCTIONS</span>
+			<span class="hljs-keyword">const</span> pow2Ceil = <span class="hljs-title class_">Fn</span>( <span class="hljs-function">(<span class="hljs-params"> [ x ] </span>) =&gt;</span> {
+
+				<span class="hljs-title class_">If</span>( x.<span class="hljs-title function_">equal</span>( <span class="hljs-title function_">uint</span>( <span class="hljs-number">0</span> ) ), <span class="hljs-function">() =&gt;</span> {
+
+					<span class="hljs-keyword">return</span> <span class="hljs-title function_">uint</span>( <span class="hljs-number">1</span> );
+
+				} );
+
+				<span class="hljs-keyword">const</span> val = x.<span class="hljs-title function_">sub</span>( <span class="hljs-number">1</span> ).<span class="hljs-title function_">toVar</span>( <span class="hljs-string">&#x27;val&#x27;</span> );
+				val.<span class="hljs-title function_">assign</span>( val.<span class="hljs-title function_">bitOr</span>( val.<span class="hljs-title function_">shiftRight</span>( <span class="hljs-number">1</span> ) ) );
+				val.<span class="hljs-title function_">assign</span>( val.<span class="hljs-title function_">bitOr</span>( val.<span class="hljs-title function_">shiftRight</span>( <span class="hljs-number">2</span> ) ) );
+				val.<span class="hljs-title function_">assign</span>( val.<span class="hljs-title function_">bitOr</span>( val.<span class="hljs-title function_">shiftRight</span>( <span class="hljs-number">4</span> ) ) );
+				val.<span class="hljs-title function_">assign</span>( val.<span class="hljs-title function_">bitOr</span>( val.<span class="hljs-title function_">shiftRight</span>( <span class="hljs-number">8</span> ) ) );
+				val.<span class="hljs-title function_">assign</span>( val.<span class="hljs-title function_">bitOr</span>( val.<span class="hljs-title function_">shiftRight</span>( <span class="hljs-number">16</span> ) ) );
+				<span class="hljs-keyword">return</span> val.<span class="hljs-title function_">add</span>( <span class="hljs-number">1</span> );
+
+			} ).<span class="hljs-title function_">setLayout</span>( {
+				<span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;pow2Ceil&#x27;</span>,
+				<span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;uint&#x27;</span>,
+				<span class="hljs-attr">inputs</span>: [
+					{ <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;x&#x27;</span>, <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;uint&#x27;</span> }
+				]
+			} );
+
+			<span class="hljs-comment">// ALGORITHM CONSTRUCTORS</span>
+
+			<span class="hljs-comment">// REDUCE 1</span>
+
+			<span class="hljs-comment">// Thanks to Sam0oneau of Graphics Programming Discord for the explanation.</span>
+			<span class="hljs-comment">// (Graphics Programming Discord Message Link): https://discord.com/channels/318590007881236480/374061825454768129/1391248956171882597</span>
+
+			<span class="hljs-comment">/* Reduce 1 Example (Assume Workgroup Size 256, numElements: 262144) -&gt; Initial currentBuffer State: | 1, 1, 1, 1, ... |
+				 *
+				 * KERNEL 1:
+				 * Executes 256 threads by 256 workgroups. Each thread loops 4 times and accesses elements
+				 * at the indices below.
+				 *          Thread 1                        Thread 2                         Thread 3
+				 * | 0, 65536, ..., n * 65536 | 1, 65537, .... (n * 65536) + 1 | 1, 65538, .... (n * 65536) + 2 | etc
+				 * Buffer Values: | 4, 4, 4, 4, ...|
+				 *
+				 * KERNEL 2:
+				 * Executes 256 threads by one workgroup. Each thread loops 1024 times
+				 *          Thread 1                     Thread 2                     Thread 3
+				 * | 0, 256, ...., n * 256    | 1, 257, ... (n * 256) + 1 | 2, 258, ... (n * 256) + 3 | etc
+				 * Buffer Values: | 1024, 1024, 1024, 1024, ... |
+				 *
+				 * KERNEL 3:
+				 * Executes 1 thread by one workgroup. Single thread loops 256 times
+				 *          Thread 1
+				 * | 0, 1, 2, 3, 4, 5, 6 ... etc|
+				 * Buffer Values: [262144, 1024, 1024]
+				 */</span>
+
+
+			<span class="hljs-keyword">const</span> <span class="hljs-title function_">createReduce1Fn</span> = (<span class="hljs-params"> createReduce1FnProps </span>) =&gt; {
+
+				<span class="hljs-keyword">const</span> { dispatchSize, numElements, inputBuffer, workgroupSize } = createReduce1FnProps;
+
+				<span class="hljs-keyword">const</span> fnDef = <span class="hljs-title class_">Fn</span>( <span class="hljs-function">() =&gt;</span> {
+
+					<span class="hljs-keyword">const</span> dispatch = <span class="hljs-title function_">uint</span>( dispatchSize ).<span class="hljs-title function_">toVar</span>( <span class="hljs-string">&#x27;dispatchSize&#x27;</span> );
+					<span class="hljs-keyword">const</span> tSum = <span class="hljs-title function_">uint</span>( <span class="hljs-number">0</span> ).<span class="hljs-title function_">toVar</span>();
+					<span class="hljs-keyword">const</span> k = instanceIndex.<span class="hljs-title function_">toVar</span>( <span class="hljs-string">&#x27;k&#x27;</span> );
+
+					<span class="hljs-title class_">Loop</span>( k.<span class="hljs-title function_">lessThan</span>( <span class="hljs-title function_">uint</span>( numElements ) ), <span class="hljs-function">( ) =&gt;</span> {
+
+						tSum.<span class="hljs-title function_">addAssign</span>( inputBuffer.<span class="hljs-title function_">element</span>( k ) );
+						k.<span class="hljs-title function_">addAssign</span>( <span class="hljs-title function_">uint</span>( dispatch ) );
+
+					} );
+
+					inputBuffer.<span class="hljs-title function_">element</span>( instanceIndex ).<span class="hljs-title function_">assign</span>( tSum );
+
+
+				} )().<span class="hljs-title function_">compute</span>( dispatchSize, [ workgroupSize ] );
+
+				<span class="hljs-keyword">return</span> fnDef;
+
+			};
+
+			<span class="hljs-comment">// REDUCE 2</span>
+
+			<span class="hljs-comment">// For non power of 2 # of workgroups</span>
+			<span class="hljs-keyword">const</span> <span class="hljs-title function_">createReduce2Fn</span> = (<span class="hljs-params"> createReduce2FnProps </span>) =&gt; {
+
+				<span class="hljs-keyword">const</span> { workgroupSize, dispatchSize, numElements, inputBuffer } = createReduce2FnProps;
+
+				<span class="hljs-keyword">const</span> fnDef = <span class="hljs-title class_">Fn</span>( <span class="hljs-function">() =&gt;</span> {
+
+					<span class="hljs-keyword">const</span> tSum = <span class="hljs-title function_">workgroupArray</span>( <span class="hljs-string">&#x27;uint&#x27;</span>, workgroupSize );
+
+					<span class="hljs-keyword">const</span> k = instanceIndex.<span class="hljs-title function_">toVar</span>( <span class="hljs-string">&#x27;k&#x27;</span> );
+					tSum.<span class="hljs-title function_">element</span>( invocationLocalIndex ).<span class="hljs-title function_">assign</span>( <span class="hljs-title function_">uint</span>( <span class="hljs-number">0</span> ) );
+
+					<span class="hljs-title class_">Loop</span>( k.<span class="hljs-title function_">lessThan</span>( <span class="hljs-title function_">uint</span>( numElements ) ), <span class="hljs-function">() =&gt;</span> {
+
+						tSum.<span class="hljs-title function_">element</span>( invocationLocalIndex ).<span class="hljs-title function_">addAssign</span>( inputBuffer.<span class="hljs-title function_">element</span>( k ) );
+
+						k.<span class="hljs-title function_">addAssign</span>( <span class="hljs-title function_">uint</span>( dispatchSize ) );
+
+					} );
+
+					<span class="hljs-title function_">workgroupBarrier</span>();
+
+					<span class="hljs-comment">// Reset the loop condition (account for numWorkgroups % 2 != 0)</span>
+					k.<span class="hljs-title function_">assign</span>( <span class="hljs-title function_">pow2Ceil</span>( <span class="hljs-title function_">uint</span>( workgroupSize ) ).<span class="hljs-title function_">div</span>( <span class="hljs-number">2</span> ) );
+
+					<span class="hljs-title class_">Loop</span>( k.<span class="hljs-title function_">greaterThan</span>( <span class="hljs-number">0</span> ), <span class="hljs-function">() =&gt;</span> {
+
+						<span class="hljs-title class_">If</span>( invocationLocalIndex.<span class="hljs-title function_">lessThan</span>( k ).<span class="hljs-title function_">and</span>( invocationLocalIndex.<span class="hljs-title function_">add</span>( k ).<span class="hljs-title function_">lessThan</span>( workgroupSize ) ), <span class="hljs-function">() =&gt;</span> {
+
+							tSum.<span class="hljs-title function_">element</span>( invocationLocalIndex ).<span class="hljs-title function_">addAssign</span>( tSum.<span class="hljs-title function_">element</span>( invocationLocalIndex.<span class="hljs-title function_">add</span>( k ) ) );
+
+						} );
+						<span class="hljs-title function_">workgroupBarrier</span>();
+						k.<span class="hljs-title function_">divAssign</span>( <span class="hljs-number">2</span> );
+
+					} );
+
+					<span class="hljs-title class_">If</span>( invocationLocalIndex.<span class="hljs-title function_">equal</span>( <span class="hljs-title function_">uint</span>( <span class="hljs-number">0</span> ) ), <span class="hljs-function">() =&gt;</span> {
+
+						inputBuffer.<span class="hljs-title function_">element</span>( workgroupId.<span class="hljs-property">x</span> ).<span class="hljs-title function_">assign</span>( tSum.<span class="hljs-title function_">element</span>( <span class="hljs-title function_">uint</span>( <span class="hljs-number">0</span> ) ) );
+
+					} );
+
+				} )().<span class="hljs-title function_">compute</span>( dispatchSize, [ workgroupSize ] );
+
+				<span class="hljs-keyword">return</span> fnDef;
+
+			};
+
+			<span class="hljs-comment">// REDUCE 3</span>
+
+			<span class="hljs-comment">/* Create array with enough indices for worst-case subgroup size */</span>
+			<span class="hljs-keyword">const</span> <span class="hljs-title function_">createSubgroupArray</span> = (<span class="hljs-params"> type, workgroupSize, minSubgroupSize = <span class="hljs-number">4</span> </span>) =&gt; {
+
+				<span class="hljs-keyword">return</span> <span class="hljs-title function_">workgroupArray</span>( <span class="hljs-string">&#x27;uint&#x27;</span>, workgroupSize / minSubgroupSize );
+
+			};
+
+			<span class="hljs-comment">// zcbenz implementation</span>
+			<span class="hljs-comment">// https://github.com/frost-beta/betann/blob/8aa2701caf63fb29bd4cd2454e656973342c1588/betann/wgsl/reduce_ops.wgsl#L71</span>
+			<span class="hljs-keyword">const</span> <span class="hljs-title function_">RowReduce</span> = (<span class="hljs-params"> rowReduceProps </span>) =&gt; {
+
+				<span class="hljs-keyword">const</span> { workgroupSize, inputBuffer, total, rowOffset, currentRowSize, workPerThread, vectorized } = rowReduceProps;
+
+				<span class="hljs-comment">// Number of unvectorized elements each workgroup can ingest</span>
+				<span class="hljs-comment">// At workgroupSize of 256, blockSize will be 1024</span>
+				<span class="hljs-keyword">const</span> blockSize = <span class="hljs-title function_">uint</span>( workgroupSize ).<span class="hljs-title function_">mul</span>( workPerThread );
+				<span class="hljs-keyword">const</span> block = <span class="hljs-title function_">uint</span>( <span class="hljs-number">0</span> ).<span class="hljs-title function_">toVar</span>( <span class="hljs-string">&#x27;block&#x27;</span> );
+
+				<span class="hljs-comment">// At rowSize of 2048, there will be two blocks</span>
+				<span class="hljs-keyword">const</span> blockLimiter = currentRowSize.<span class="hljs-title function_">div</span>( blockSize ).<span class="hljs-title function_">toVar</span>( <span class="hljs-string">&#x27;blockLimiter&#x27;</span> );
+				<span class="hljs-title class_">Loop</span>( block.<span class="hljs-title function_">lessThan</span>( blockLimiter ), <span class="hljs-function">() =&gt;</span> {
+
+					<span class="hljs-keyword">const</span> blockOffset = block.<span class="hljs-title function_">mul</span>( blockSize );
+					<span class="hljs-keyword">const</span> startThread = blockOffset.<span class="hljs-title function_">add</span>( invocationLocalIndex.<span class="hljs-title function_">mul</span>( workPerThread ) );
+					<span class="hljs-keyword">const</span> localThreadOffset = <span class="hljs-title function_">uint</span>( <span class="hljs-number">0</span> ).<span class="hljs-title function_">toVar</span>( <span class="hljs-string">&#x27;localThreadOffset&#x27;</span> );
+					<span class="hljs-title class_">Loop</span>( localThreadOffset.<span class="hljs-title function_">lessThan</span>( workPerThread ), <span class="hljs-function">() =&gt;</span> {
+
+						<span class="hljs-keyword">const</span> inputElement = inputBuffer.<span class="hljs-title function_">element</span>( rowOffset.<span class="hljs-title function_">add</span>( startThread ).<span class="hljs-property">addLocal</span> );
+
+						<span class="hljs-keyword">if</span> ( vectorized ) {
+
+							<span class="hljs-keyword">const</span> value = <span class="hljs-title function_">dot</span>( inputElement, <span class="hljs-title function_">uvec4</span>( <span class="hljs-number">1</span> ) );
+							total.<span class="hljs-title function_">addAssign</span>( value );
+
+						} <span class="hljs-keyword">else</span> {
+
+							<span class="hljs-keyword">const</span> inputElement = inputBuffer.<span class="hljs-title function_">element</span>( rowOffset.<span class="hljs-title function_">add</span>( startThread ).<span class="hljs-title function_">add</span>( localThreadOffset ) );
+							total.<span class="hljs-title function_">addAssign</span>( inputElement );
+
+						}
+
+						<span class="hljs-comment">// Increment up a thread</span>
+						localThreadOffset.<span class="hljs-title function_">addAssign</span>( <span class="hljs-number">1</span> );
+
+					} );
+
+					<span class="hljs-comment">// Increment up a block</span>
+					block.<span class="hljs-title function_">addAssign</span>( <span class="hljs-number">1</span> );
+
+				} );
+
+				<span class="hljs-comment">// Ignoring left over check for this example, since we know ahead of time the value of leftover (2048 % 1024 === 0)</span>
+
+			};
+
+			<span class="hljs-keyword">const</span> <span class="hljs-title function_">WorkgroupReduce</span> = (<span class="hljs-params"> workgroupReduceProps </span>) =&gt; {
+
+				<span class="hljs-keyword">const</span> { total, workgroupSize } = workgroupReduceProps;
+
+				<span class="hljs-keyword">const</span> subgroupSums = <span class="hljs-title function_">createSubgroupArray</span>( <span class="hljs-string">&#x27;uint&#x27;</span>, workgroupSize );
+
+				<span class="hljs-comment">// Assign sum of all values in subgroup to total</span>
+				total.<span class="hljs-title function_">assign</span>( <span class="hljs-title function_">subgroupAdd</span>( total ) );
+
+				<span class="hljs-keyword">const</span> delta = <span class="hljs-title function_">uint</span>( workgroupSize ).<span class="hljs-title function_">div</span>( subgroupSize ).<span class="hljs-title function_">toVar</span>( <span class="hljs-string">&#x27;delta&#x27;</span> );
+
+				<span class="hljs-keyword">const</span> subgroupMetaRank = invocationLocalIndex.<span class="hljs-title function_">div</span>( subgroupSize );
+
+				<span class="hljs-title class_">Loop</span>( <span class="hljs-title function_">float</span>( delta ).<span class="hljs-title function_">greaterThan</span>( <span class="hljs-number">1.0</span> ), <span class="hljs-function">() =&gt;</span> {
+
+					<span class="hljs-title class_">If</span>( invocationSubgroupIndex.<span class="hljs-title function_">equal</span>( <span class="hljs-number">0</span> ), <span class="hljs-function">() =&gt;</span> {
+
+						<span class="hljs-comment">// Each subgroup will populate the subgroupSums array</span>
+						subgroupSums.<span class="hljs-title function_">element</span>( subgroupMetaRank ).<span class="hljs-title function_">assign</span>( total );
+
+					} );
+
+					<span class="hljs-comment">// Ensure that all subgroups in the workgroup have populated the workgroup memory array</span>
+					<span class="hljs-title function_">workgroupBarrier</span>();
+
+					<span class="hljs-comment">// Thread 0 - subgroupsInWorkgroup will assign a value to total</span>
+					total.<span class="hljs-title function_">assign</span>( <span class="hljs-title function_">select</span>( invocationLocalIndex.<span class="hljs-title function_">lessThan</span>( delta ), subgroupSums.<span class="hljs-title function_">element</span>( invocationLocalIndex ), <span class="hljs-number">0</span> ).<span class="hljs-title function_">uniformFlow</span>() );
+					<span class="hljs-comment">// # of subgroups in workgroup is invariably less than # of threads in subgroup, so subgroupAdd will still sync here</span>
+					total.<span class="hljs-title function_">assign</span>( <span class="hljs-title function_">subgroupAdd</span>( total ) );
+
+					delta.<span class="hljs-title function_">divAssign</span>( subgroupSize );
+
+				} );
+
+			};
+
+			<span class="hljs-keyword">const</span> <span class="hljs-title function_">createReduce3Fn</span> = (<span class="hljs-params"> createReduce3FnProps </span>) =&gt; {
+
+				<span class="hljs-keyword">const</span> { workgroupSize, workPerThread, inputBuffer, intermediateBuffer, rowSize } = createReduce3FnProps;
+
+				<span class="hljs-keyword">const</span> fnDef = <span class="hljs-title class_">Fn</span>( <span class="hljs-function">() =&gt;</span> {
+
+					<span class="hljs-keyword">const</span> inputSize = <span class="hljs-title function_">uint</span>( inputBuffer.<span class="hljs-property">bufferCount</span> );
+					<span class="hljs-keyword">const</span> rowOffset = workgroupId.<span class="hljs-property">x</span>.<span class="hljs-title function_">mul</span>( rowSize );
+
+					<span class="hljs-comment">// If the current rows elements exceed the bounds of the input</span>
+					<span class="hljs-comment">// Select either 0 or number of elements left,</span>
+					<span class="hljs-comment">// otherwise, select existing ROW_SIZE</span>
+					<span class="hljs-keyword">const</span> currentRowSize = <span class="hljs-title function_">select</span>(
+						( rowOffset.<span class="hljs-title function_">add</span>( rowSize ) ).<span class="hljs-title function_">greaterThan</span>( inputSize ),
+						<span class="hljs-title function_">select</span>( inputSize.<span class="hljs-title function_">greaterThan</span>( rowOffset ), inputSize.<span class="hljs-title function_">sub</span>( rowOffset ), <span class="hljs-number">0</span> ).<span class="hljs-title function_">uniformFlow</span>(),
+						rowSize,
+					).<span class="hljs-title function_">uniformFlow</span>();
+
+					<span class="hljs-keyword">const</span> total = <span class="hljs-title function_">uint</span>( <span class="hljs-number">0</span> ).<span class="hljs-title function_">toVar</span>( <span class="hljs-string">&#x27;total&#x27;</span> );
+
+					<span class="hljs-title class_">RowReduce</span>( {
+						<span class="hljs-attr">inputBuffer</span>: inputBuffer,
+						<span class="hljs-attr">total</span>: total,
+						<span class="hljs-attr">rowOffset</span>: rowOffset,
+						<span class="hljs-attr">currentRowSize</span>: currentRowSize,
+						<span class="hljs-attr">workPerThread</span>: workPerThread,
+						<span class="hljs-attr">workgroupSize</span>: workgroupSize,
+					} );
+
+					<span class="hljs-title class_">WorkgroupReduce</span>( {
+						<span class="hljs-attr">total</span>: total,
+						<span class="hljs-attr">workgroupSize</span>: workgroupSize,
+					} );
+
+					<span class="hljs-comment">// Populate each workgroup with its reduction</span>
+					<span class="hljs-title class_">If</span>( invocationLocalIndex.<span class="hljs-title function_">equal</span>( <span class="hljs-number">0</span> ), <span class="hljs-function">() =&gt;</span> {
+
+						intermediateBuffer.<span class="hljs-title function_">element</span>( workgroupId.<span class="hljs-property">x</span> ).<span class="hljs-title function_">assign</span>( total );
+
+					} );
+
+				} )();
+
+				<span class="hljs-keyword">return</span> fnDef;
+
+			};
+
+			<span class="hljs-comment">// REDUCE 4</span>
+
+			<span class="hljs-comment">// b0nes164 inspired implementation with vec4</span>
+			<span class="hljs-keyword">const</span> <span class="hljs-title function_">createReduce4Fn</span> = (<span class="hljs-params"> props </span>) =&gt; {
+
+				<span class="hljs-comment">// Can&#x27;t pass in subgroup size since we can&#x27;t always be certain what size is at runtime</span>
+				<span class="hljs-keyword">const</span> { size, workPerThread, workgroupSize, inputBuffer, intermediateBuffer } = props;
+
+				<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">ELEMENTS_PER_VEC4</span> = <span class="hljs-number">4</span>;
+				<span class="hljs-comment">// The number of individual elements a single workgroup will access</span>
+				<span class="hljs-keyword">const</span> partitionSize = workgroupSize * workPerThread * <span class="hljs-variable constant_">ELEMENTS_PER_VEC4</span>;
+				<span class="hljs-keyword">const</span> vecSize = <span class="hljs-title function_">divRoundUp</span>( size, <span class="hljs-variable constant_">ELEMENTS_PER_VEC4</span> );
+				<span class="hljs-comment">// Can also be calculated using divRoundUp( vecSize, workgroupSize * workPerThread );</span>
+				<span class="hljs-keyword">const</span> numWorkgroups = <span class="hljs-title function_">divRoundUp</span>( size, partitionSize );
+				<span class="hljs-comment">// Currently no way to specify dispatch size in increments of workgroups, so we convert to numInvocations</span>
+				<span class="hljs-keyword">const</span> numInvocations = numWorkgroups * workgroupSize;
+
+				<span class="hljs-keyword">const</span> fnDef = <span class="hljs-title class_">Fn</span>( <span class="hljs-function">() =&gt;</span> {
+
+					<span class="hljs-keyword">const</span> perSubgroupReductionArray = <span class="hljs-title function_">createSubgroupArray</span>( <span class="hljs-string">&#x27;uint&#x27;</span>, workgroupSize );
+
+					<span class="hljs-comment">// Get the index of the subgroup within the workgroup</span>
+					<span class="hljs-keyword">const</span> subgroupMetaRank = invocationLocalIndex.<span class="hljs-title function_">div</span>( subgroupSize );
+
+					<span class="hljs-comment">// Each subgroup block scans across 4 subgroups. So when we move into a new subgroup,</span>
+					<span class="hljs-comment">// align that subgroups&#x27; accesses to the next 4 subgroups</span>
+					<span class="hljs-keyword">const</span> subgroupOffset = subgroupMetaRank.<span class="hljs-title function_">mul</span>( subgroupSize ).<span class="hljs-title function_">mul</span>( workPerThread );
+					subgroupOffset.<span class="hljs-title function_">addAssign</span>( invocationSubgroupIndex );
+
+					<span class="hljs-comment">// Per workgroup, offset by number of vectorized elements scanned per workgroup</span>
+					<span class="hljs-keyword">const</span> workgroupOffset = workgroupId.<span class="hljs-property">x</span>.<span class="hljs-title function_">mul</span>( <span class="hljs-title function_">uint</span>( maxWorkgroupSize ).<span class="hljs-title function_">mul</span>( workPerThread ) );
+
+					<span class="hljs-keyword">const</span> startThread = subgroupOffset.<span class="hljs-title function_">add</span>( workgroupOffset );
+
+					<span class="hljs-keyword">const</span> subgroupReduction = <span class="hljs-title function_">uint</span>( <span class="hljs-number">0</span> );
+
+					<span class="hljs-comment">// Each thread will accumulate values from across &#x27;workPerThread&#x27; subgroups</span>
+					<span class="hljs-title class_">If</span>( workgroupId.<span class="hljs-property">x</span>.<span class="hljs-title function_">lessThan</span>( <span class="hljs-title function_">uint</span>( numWorkgroups ).<span class="hljs-title function_">sub</span>( <span class="hljs-number">1</span> ) ), <span class="hljs-function">() =&gt;</span> {
+
+						<span class="hljs-title class_">Loop</span>( {
+							<span class="hljs-attr">start</span>: <span class="hljs-title function_">uint</span>( <span class="hljs-number">0</span> ),
+							<span class="hljs-attr">end</span>: workPerThread,
+							<span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;uint&#x27;</span>,
+							<span class="hljs-attr">condition</span>: <span class="hljs-string">&#x27;&lt;&#x27;</span>,
+							<span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;currentSubgroupInBlock&#x27;</span>
+						}, <span class="hljs-function">() =&gt;</span> {
+
+							<span class="hljs-comment">// Get vectorized element from input array</span>
+							<span class="hljs-keyword">const</span> val = inputBuffer.<span class="hljs-title function_">element</span>( startThread );
+
+							<span class="hljs-comment">// Sum values within vec4 together by using result of dot product</span>
+							subgroupReduction.<span class="hljs-title function_">addAssign</span>( <span class="hljs-title function_">dot</span>( <span class="hljs-title function_">uvec4</span>( <span class="hljs-number">1</span> ), val ) );
+
+							<span class="hljs-comment">// Increment so thread will scan value in next subgroup</span>
+							startThread.<span class="hljs-title function_">addAssign</span>( subgroupSize );
+
+						} );
+
+					} );
+
+					<span class="hljs-comment">// Ensure that the last workgroup does not access out of bounds indices</span>
+					<span class="hljs-title class_">If</span>( workgroupId.<span class="hljs-property">x</span>.<span class="hljs-title function_">equal</span>( <span class="hljs-title function_">uint</span>( numWorkgroups ).<span class="hljs-title function_">sub</span>( <span class="hljs-number">1</span> ) ), <span class="hljs-function">() =&gt;</span> {
+
+						<span class="hljs-title class_">Loop</span>( {
+							<span class="hljs-attr">start</span>: <span class="hljs-title function_">uint</span>( <span class="hljs-number">0</span> ),
+							<span class="hljs-attr">end</span>: workPerThread,
+							<span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;uint&#x27;</span>,
+							<span class="hljs-attr">condition</span>: <span class="hljs-string">&#x27;&lt;&#x27;</span>,
+							<span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;currentSubgroupInBlock&#x27;</span>
+						}, <span class="hljs-function">() =&gt;</span> {
+
+							<span class="hljs-comment">// Ensure index is less than number of available vectors in inputBuffer</span>
+							<span class="hljs-keyword">const</span> val = <span class="hljs-title function_">select</span>( startThread.<span class="hljs-title function_">lessThan</span>( <span class="hljs-title function_">uint</span>( vecSize ) ), inputBuffer.<span class="hljs-title function_">element</span>( startThread ), <span class="hljs-title function_">uvec4</span>( <span class="hljs-number">0</span> ) ).<span class="hljs-title function_">uniformFlow</span>();
+
+							subgroupReduction.<span class="hljs-title function_">addAssign</span>( <span class="hljs-title function_">dot</span>( val, <span class="hljs-title function_">uvec4</span>( <span class="hljs-number">1</span> ) ) );
+							startThread.<span class="hljs-title function_">addAssign</span>( subgroupSize );
+
+						} );
+
+					} );
+
+					subgroupReduction.<span class="hljs-title function_">assign</span>( <span class="hljs-title function_">subgroupAdd</span>( subgroupReduction ) );
+
+					<span class="hljs-comment">// Assuming that each element in the input buffer is 1, we generally expect each invocation&#x27;s subgroupReduction</span>
+					<span class="hljs-comment">// value to be ELEMENTS_PER_VEC4 * workPerThread * subgroupSize</span>
+
+					<span class="hljs-comment">// Delegate one thread per subgroup to assign each subgroup&#x27;s reduction to the workgroup array</span>
+					<span class="hljs-title class_">If</span>( invocationSubgroupIndex.<span class="hljs-title function_">equal</span>( <span class="hljs-title function_">uint</span>( <span class="hljs-number">0</span> ) ), <span class="hljs-function">() =&gt;</span> {
+
+						perSubgroupReductionArray.<span class="hljs-title function_">element</span>( subgroupMetaRank ).<span class="hljs-title function_">assign</span>( subgroupReduction );
+
+					} );
+
+					<span class="hljs-comment">// Ensure that each workgroup has populated the perSubgroupReductionArray with data</span>
+					<span class="hljs-comment">// from each of it&#x27;s subgroups</span>
+					<span class="hljs-title function_">workgroupBarrier</span>();
+
+					<span class="hljs-keyword">if</span> ( props.<span class="hljs-property">debugBuffer</span> ) {
+
+						<span class="hljs-title class_">If</span>( invocationLocalIndex.<span class="hljs-title function_">equal</span>( <span class="hljs-title function_">uint</span>( <span class="hljs-number">0</span> ) ), <span class="hljs-function">() =&gt;</span> {
+
+							props.<span class="hljs-property">debugBuffer</span>.<span class="hljs-title function_">element</span>( workgroupId.<span class="hljs-property">x</span> ).<span class="hljs-title function_">assign</span>( subgroupReduction );
+
+						} );
+
+						<span class="hljs-title function_">workgroupBarrier</span>();
+
+					}
+
+					<span class="hljs-comment">// WORKGROUP LEVEL REDUCE</span>
+
+					<span class="hljs-comment">// Multiple approaches here</span>
+					<span class="hljs-comment">// log2(subgroupSize) -&gt; TSL log2 function</span>
+					<span class="hljs-comment">// countTrailingZeros/findLSB(subgroupSize) -&gt; TSL function that counts trailing zeros in number bit representation</span>
+					<span class="hljs-comment">// Can technically petition GPU for subgroupSize in shader and calculate logs on CPU at cost of shader being generalizable across devices</span>
+					<span class="hljs-comment">// May also break if subgroupSize changes when device is lost or if program is rerun on lower power device</span>
+					<span class="hljs-keyword">const</span> subgroupSizeLog = <span class="hljs-title function_">countTrailingZeros</span>( subgroupSize ).<span class="hljs-title function_">toVar</span>( <span class="hljs-string">&#x27;subgroupSizeLog&#x27;</span> );
+					<span class="hljs-keyword">const</span> spineSize = <span class="hljs-title function_">uint</span>( workgroupSize ).<span class="hljs-title function_">shiftRight</span>( subgroupSizeLog );
+					<span class="hljs-keyword">const</span> spineSizeLog = <span class="hljs-title function_">countTrailingZeros</span>( spineSize ).<span class="hljs-title function_">toVar</span>( <span class="hljs-string">&#x27;spineSizeLog&#x27;</span> );
+
+
+					<span class="hljs-comment">// Align size to powers of subgroupSize</span>
+					<span class="hljs-keyword">const</span> squaredSubgroupLog = ( spineSizeLog.<span class="hljs-title function_">add</span>( subgroupSizeLog ).<span class="hljs-title function_">sub</span>( <span class="hljs-number">1</span> ) );
+					squaredSubgroupLog.<span class="hljs-title function_">divAssign</span>( subgroupSizeLog );
+					squaredSubgroupLog.<span class="hljs-title function_">mulAssign</span>( subgroupSizeLog );
+					<span class="hljs-keyword">const</span> alignedSize = ( <span class="hljs-title function_">uint</span>( <span class="hljs-number">1</span> ).<span class="hljs-title function_">shiftLeft</span>( squaredSubgroupLog ) ).<span class="hljs-title function_">toVar</span>( <span class="hljs-string">&#x27;alignedSize&#x27;</span> );
+
+					<span class="hljs-comment">// aligned size 2 * 4</span>
+
+					<span class="hljs-keyword">const</span> offset = <span class="hljs-title function_">uint</span>( <span class="hljs-number">0</span> );
+
+					<span class="hljs-comment">// In cases where the number of subgroups in a workgroup is greater than the subgroup size itself,</span>
+					<span class="hljs-comment">// we need to iterate over the array again to capture all the data in the workgroup array buffer</span>
+					<span class="hljs-title class_">Loop</span>( { <span class="hljs-attr">start</span>: subgroupSize, <span class="hljs-attr">end</span>: alignedSize, <span class="hljs-attr">condition</span>: <span class="hljs-string">&#x27;&lt;=&#x27;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;j&#x27;</span>, <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;uint&#x27;</span>, <span class="hljs-attr">update</span>: <span class="hljs-string">&#x27;&lt;&lt;= subgroupSizeLog&#x27;</span> }, <span class="hljs-function">() =&gt;</span> {
+
+						<span class="hljs-keyword">const</span> subgroupIndex = ( ( invocationLocalIndex.<span class="hljs-title function_">add</span>( <span class="hljs-number">1</span> ) ).<span class="hljs-title function_">shiftLeft</span>( offset ) ).<span class="hljs-title function_">sub</span>( <span class="hljs-number">1</span> );
+
+						<span class="hljs-keyword">const</span> isValidSubgroupIndex = subgroupIndex.<span class="hljs-title function_">lessThan</span>( spineSize ).<span class="hljs-title function_">toVar</span>( <span class="hljs-string">&#x27;isValidSubgroupIndex&#x27;</span> );
+
+						<span class="hljs-comment">// Reduce values within the local workgroup memory.</span>
+						<span class="hljs-comment">// Set toVar to ensure subgroupAdd executes before (not within) the if statement.</span>
+						<span class="hljs-keyword">const</span> t = <span class="hljs-title function_">subgroupAdd</span>(
+							<span class="hljs-title function_">select</span>(
+								isValidSubgroupIndex,
+								perSubgroupReductionArray.<span class="hljs-title function_">element</span>( subgroupIndex ),
+								<span class="hljs-number">0</span>
+							).<span class="hljs-title function_">uniformFlow</span>()
+						).<span class="hljs-title function_">toVar</span>( <span class="hljs-string">&#x27;t&#x27;</span> );
+
+						<span class="hljs-comment">// Can assign back to workgroupArray since all</span>
+						<span class="hljs-comment">// subgroup threads work in lockstop for subgroupAdd</span>
+						<span class="hljs-title class_">If</span>( isValidSubgroupIndex, <span class="hljs-function">() =&gt;</span> {
+
+							perSubgroupReductionArray.<span class="hljs-title function_">element</span>( subgroupIndex ).<span class="hljs-title function_">assign</span>( t );
+
+						} );
+
+						<span class="hljs-comment">// Ensure all threads have completed work</span>
+
+						<span class="hljs-title function_">workgroupBarrier</span>();
+
+						offset.<span class="hljs-title function_">addAssign</span>( subgroupSizeLog );
+
+					} );
+
+					<span class="hljs-comment">// Assign single thread from workgroup to assign workgroup reduction</span>
+					<span class="hljs-title class_">If</span>( invocationLocalIndex.<span class="hljs-title function_">equal</span>( <span class="hljs-title function_">uint</span>( <span class="hljs-number">0</span> ) ), <span class="hljs-function">() =&gt;</span> {
+
+						<span class="hljs-keyword">const</span> reducedWorkgroupSum = perSubgroupReductionArray.<span class="hljs-title function_">element</span>( <span class="hljs-title function_">uint</span>( spineSize ).<span class="hljs-title function_">sub</span>( <span class="hljs-number">1</span> ) );
+						intermediateBuffer.<span class="hljs-title function_">element</span>( workgroupId.<span class="hljs-property">x</span> ).<span class="hljs-title function_">assign</span>( reducedWorkgroupSum );
+
+					} );
+
+				} )().<span class="hljs-title function_">compute</span>( numInvocations, [ maxWorkgroupSize ] );
+
+				<span class="hljs-keyword">return</span> fnDef;
+
+			};
+
+
+			<span class="hljs-comment">// INCORRECT BASELINE</span>
+
+			<span class="hljs-keyword">const</span> <span class="hljs-title function_">createIncorrectBaselineFn</span> = (<span class="hljs-params"> incorrectBaselineProps </span>) =&gt; {
+
+				<span class="hljs-keyword">const</span> { inputBuffer } = incorrectBaselineProps;
+
+				<span class="hljs-keyword">const</span> fnDef = <span class="hljs-title class_">Fn</span>( <span class="hljs-function">() =&gt;</span> {
+
+					inputBuffer.<span class="hljs-title function_">element</span>( instanceIndex ).<span class="hljs-title function_">assign</span>( <span class="hljs-number">99999</span> );
+
+				} )();
+
+				<span class="hljs-keyword">return</span> fnDef;
+
+			};
+
+
+			<span class="hljs-title function_">init</span>();
+
+			<span class="hljs-title function_">init</span>( <span class="hljs-literal">false</span> );
+
+			<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">init</span>(<span class="hljs-params"> leftSideDisplay = <span class="hljs-literal">true</span> </span>) {
+
+				<span class="hljs-keyword">const</span> effectController = leftSideDisplay ? leftEffectController : rightEffectController;
+
+				<span class="hljs-keyword">const</span> aspect = ( <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerWidth</span> / <span class="hljs-number">2</span> ) / <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerHeight</span>;
+				<span class="hljs-keyword">const</span> camera = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">OrthographicCamera</span>( - aspect, aspect, <span class="hljs-number">1</span>, - <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">2</span> );
+				camera.<span class="hljs-property">position</span>.<span class="hljs-property">z</span> = <span class="hljs-number">1</span>;
+
+				<span class="hljs-keyword">const</span> scene = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Scene</span>();
+
+				<span class="hljs-keyword">const</span> array = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Uint32Array</span>( <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>( { <span class="hljs-attr">length</span>: size }, <span class="hljs-function">() =&gt;</span> {
+
+					<span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
+
+				} ) );
+
+				<span class="hljs-comment">// Represents array of data as uints in compute shader.</span>
+				<span class="hljs-keyword">const</span> inputStorage = <span class="hljs-title function_">instancedArray</span>( array, <span class="hljs-string">&#x27;uint&#x27;</span> ).<span class="hljs-title function_">setPBO</span>( <span class="hljs-literal">true</span> ).<span class="hljs-title function_">setName</span>( <span class="hljs-string">`Current_<span class="hljs-subst">${leftSideDisplay ? <span class="hljs-string">&#x27;Left&#x27;</span> : <span class="hljs-string">&#x27;Right&#x27;</span>}</span>`</span> );
+				<span class="hljs-comment">// Represents array of data as vec4s in compute shader;</span>
+				<span class="hljs-keyword">const</span> inputVec4BufferAttribute = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">StorageInstancedBufferAttribute</span>( array, <span class="hljs-number">4</span> );
+				<span class="hljs-keyword">const</span> inputVectorizedStorage = <span class="hljs-title function_">storage</span>( inputVec4BufferAttribute, <span class="hljs-string">&#x27;uvec4&#x27;</span>, vecSize ).<span class="hljs-title function_">setPBO</span>( <span class="hljs-literal">true</span> ).<span class="hljs-title function_">setName</span>( <span class="hljs-string">`CurrentVectorized_<span class="hljs-subst">${leftSideDisplay ? <span class="hljs-string">&#x27;Left&#x27;</span> : <span class="hljs-string">&#x27;Right&#x27;</span>}</span>`</span> );
+
+				<span class="hljs-comment">// Reduce 3 Calculations</span>
+				<span class="hljs-keyword">const</span> workPerThread = <span class="hljs-number">4</span>;
+				<span class="hljs-keyword">const</span> numRows = workPerThread * <span class="hljs-number">32</span>;
+				<span class="hljs-keyword">const</span> rowSize = <span class="hljs-title function_">divRoundUp</span>( size, numRows );
+
+				<span class="hljs-keyword">const</span> workgroupSumsArray = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Uint32Array</span>( numRows );
+				<span class="hljs-keyword">const</span> workgroupSumsStorage = <span class="hljs-title function_">instancedArray</span>( workgroupSumsArray, <span class="hljs-string">&#x27;uint&#x27;</span> ).<span class="hljs-title function_">setPBO</span>( <span class="hljs-literal">true</span> ).<span class="hljs-title function_">setName</span>( <span class="hljs-string">`WorkgroupSums_<span class="hljs-subst">${leftSideDisplay ? <span class="hljs-string">&#x27;Left&#x27;</span> : <span class="hljs-string">&#x27;Right&#x27;</span>}</span>`</span> );
+				<span class="hljs-keyword">const</span> debugArray = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Uint32Array</span>( <span class="hljs-number">1024</span> );
+				<span class="hljs-keyword">const</span> debugStorage = <span class="hljs-title function_">instancedArray</span>( debugArray, <span class="hljs-string">&#x27;uint&#x27;</span> ).<span class="hljs-title function_">setPBO</span>( <span class="hljs-literal">true</span> ).<span class="hljs-title function_">setName</span>( <span class="hljs-string">`Debug_<span class="hljs-subst">${leftSideDisplay ? <span class="hljs-string">&#x27;Left&#x27;</span> : <span class="hljs-string">&#x27;Right&#x27;</span>}</span>`</span> );
+
+				<span class="hljs-keyword">const</span> buffers = {
+					<span class="hljs-string">&#x27;Input Buffer&#x27;</span>: inputStorage,
+					<span class="hljs-string">&#x27;Input Vectorized Buffer&#x27;</span>: inputVectorizedStorage,
+					<span class="hljs-string">&#x27;Workgroup Sums Buffer&#x27;</span>: workgroupSumsStorage,
+					<span class="hljs-string">&#x27;Debug Buffer&#x27;</span>: debugStorage,
+				};
+
+				<span class="hljs-keyword">const</span> logFunctionName = <span class="hljs-string">`Log <span class="hljs-subst">${leftSideDisplay ? <span class="hljs-string">&#x27;Left&#x27;</span> : <span class="hljs-string">&#x27;Right&#x27;</span>}</span> Side`</span>;
+				<span class="hljs-keyword">const</span> functionObj = {};
+				functionObj[ logFunctionName ] = <span class="hljs-title function_">async</span>() =&gt; {
+
+					<span class="hljs-keyword">const</span> selectedBuffer = buffers[ unifiedEffectController.<span class="hljs-property">loggedBuffer</span> ];
+					<span class="hljs-keyword">const</span> readbackBuffer = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">ReadbackBuffer</span>( selectedBuffer.<span class="hljs-property">value</span> );
+
+					<span class="hljs-keyword">const</span> result = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Uint32Array</span>( <span class="hljs-keyword">await</span> renderer.<span class="hljs-title function_">getArrayBufferAsync</span>( readbackBuffer ) );
+
+					<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>( result );
+
+					<span class="hljs-comment">// Remove GPU/CPU readback buffer from memory</span>
+
+					readbackBuffer.<span class="hljs-title function_">dispose</span>();
+
+				};
+
+				debugFolder.<span class="hljs-title function_">add</span>( functionObj, <span class="hljs-string">`Log <span class="hljs-subst">${leftSideDisplay ? <span class="hljs-string">&#x27;Left&#x27;</span> : <span class="hljs-string">&#x27;Right&#x27;</span>}</span> Side`</span> );
+
+				<span class="hljs-keyword">const</span> computeResetBufferFn = <span class="hljs-title class_">Fn</span>( <span class="hljs-function">() =&gt;</span> {
+
+					inputStorage.<span class="hljs-title function_">element</span>( instanceIndex ).<span class="hljs-title function_">assign</span>( <span class="hljs-number">1</span> );
+
+				} );
+
+				<span class="hljs-keyword">const</span> computeResetWorkgroupSumsFn = <span class="hljs-title class_">Fn</span>( <span class="hljs-function">() =&gt;</span> {
+
+					workgroupSumsStorage.<span class="hljs-title function_">element</span>( instanceIndex ).<span class="hljs-title function_">assign</span>( <span class="hljs-number">0</span> );
+
+				} );
+
+
+				<span class="hljs-comment">// Re-initialize compute buffer</span>
+				<span class="hljs-keyword">const</span> computeResetBuffer = <span class="hljs-title function_">computeResetBufferFn</span>().<span class="hljs-title function_">compute</span>( size );
+				<span class="hljs-keyword">const</span> computeResetWorkgroupSums = <span class="hljs-title function_">computeResetWorkgroupSumsFn</span>().<span class="hljs-title function_">compute</span>( <span class="hljs-number">256</span> );
+
+				<span class="hljs-keyword">const</span> renderer = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">WebGPURenderer</span>( { <span class="hljs-attr">antialias</span>: <span class="hljs-literal">false</span>, <span class="hljs-attr">trackTimestamp</span>: <span class="hljs-literal">true</span> } );
+				renderer.<span class="hljs-title function_">setPixelRatio</span>( <span class="hljs-variable language_">window</span>.<span class="hljs-property">devicePixelRatio</span> );
+				renderer.<span class="hljs-title function_">setSize</span>( <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerWidth</span> / <span class="hljs-number">2</span>, <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerHeight</span> );
+
+				<span class="hljs-keyword">await</span> renderer.<span class="hljs-title function_">init</span>();
+
+				<span class="hljs-comment">// Unfortunately, need to arbitrarily run compute shader to get access to device limits</span>
+				renderer.<span class="hljs-title function_">compute</span>( computeResetBuffer );
+
+
+				<span class="hljs-keyword">if</span> ( renderer.<span class="hljs-property">backend</span>.<span class="hljs-property">device</span> !== <span class="hljs-literal">null</span> ) {
+
+					maxWorkgroupSize = renderer.<span class="hljs-property">backend</span>.<span class="hljs-property">device</span>.<span class="hljs-property">limits</span>.<span class="hljs-property">maxComputeWorkgroupSizeX</span>;
+
+				}
+
+				<span class="hljs-comment">// Create and store dispatches of reduction of certain size. Map each set of dispatches to algorithm name.</span>
+
+				<span class="hljs-keyword">const</span> computeReduce0Fn = <span class="hljs-title class_">Fn</span>( <span class="hljs-function">() =&gt;</span> {
+
+					<span class="hljs-keyword">const</span> { numThreadsDispatched } = effectController;
+
+					inputStorage.<span class="hljs-title function_">element</span>( instanceIndex ).<span class="hljs-title function_">addAssign</span>( inputStorage.<span class="hljs-title function_">element</span>( instanceIndex.<span class="hljs-title function_">add</span>( numThreadsDispatched ) ) );
+
+				} )();
+
+				<span class="hljs-keyword">const</span> reduce0Calls = [];
+
+				<span class="hljs-keyword">for</span> ( <span class="hljs-keyword">let</span> i = size / <span class="hljs-number">2</span>; i &gt;= <span class="hljs-number">1</span>; i /= <span class="hljs-number">2</span> ) {
+
+					<span class="hljs-keyword">const</span> reduce0 = computeReduce0Fn.<span class="hljs-title function_">compute</span>( i, [ maxWorkgroupSize ] );
+					reduce0Calls.<span class="hljs-title function_">push</span>( reduce0 );
+
+				}
+
+				<span class="hljs-keyword">const</span> reduce1Calls = [
+					<span class="hljs-comment">// Accumulation</span>
+					<span class="hljs-title function_">createReduce1Fn</span>( {
+						<span class="hljs-attr">dispatchSize</span>: maxWorkgroupSize * maxWorkgroupSize,
+						<span class="hljs-attr">workgroupSize</span>: maxWorkgroupSize,
+						<span class="hljs-attr">numElements</span>: size,
+						<span class="hljs-attr">inputBuffer</span>: inputStorage,
+					} ),
+					<span class="hljs-comment">// 1 Block accumulation</span>
+					<span class="hljs-title function_">createReduce1Fn</span>( {
+						<span class="hljs-attr">dispatchSize</span>: maxWorkgroupSize,
+						<span class="hljs-attr">numElements</span>: maxWorkgroupSize * maxWorkgroupSize,
+						<span class="hljs-attr">workgroupSize</span>: maxWorkgroupSize,
+						<span class="hljs-attr">inputBuffer</span>: inputStorage,
+					} ),
+					<span class="hljs-comment">// Final result</span>
+					<span class="hljs-title function_">createReduce1Fn</span>( {
+						<span class="hljs-attr">dispatchSize</span>: <span class="hljs-number">1</span>,
+						<span class="hljs-attr">numElements</span>: maxWorkgroupSize,
+						<span class="hljs-attr">workgroupSize</span>: <span class="hljs-number">1</span>,
+						<span class="hljs-attr">inputBuffer</span>: inputStorage
+					} ),
+				];
+
+				<span class="hljs-keyword">const</span> reduce2Calls = [
+					<span class="hljs-comment">// Accumulate within workgroups</span>
+					<span class="hljs-title function_">createReduce2Fn</span>( {
+						<span class="hljs-attr">workgroupSize</span>: maxWorkgroupSize,
+						<span class="hljs-attr">dispatchSize</span>: maxWorkgroupSize * maxWorkgroupSize,
+						<span class="hljs-attr">numElements</span>: size,
+						<span class="hljs-attr">inputBuffer</span>: inputStorage,
+					} ),
+					<span class="hljs-comment">// 1 Block accumulation</span>
+					<span class="hljs-title function_">createReduce2Fn</span>( {
+						<span class="hljs-attr">workgroupSize</span>: maxWorkgroupSize,
+						<span class="hljs-attr">dispatchSize</span>: maxWorkgroupSize,
+						<span class="hljs-attr">numElements</span>: maxWorkgroupSize,
+						<span class="hljs-attr">inputBuffer</span>: inputStorage,
+					} ),
+				];
+
+				<span class="hljs-keyword">const</span> reduce3Calls = [
+					<span class="hljs-title function_">createReduce3Fn</span>( {
+						<span class="hljs-attr">inputBuffer</span>: inputStorage,
+						<span class="hljs-attr">intermediateBuffer</span>: workgroupSumsStorage,
+						<span class="hljs-attr">workgroupSize</span>: maxWorkgroupSize,
+						<span class="hljs-attr">workPerThread</span>: <span class="hljs-number">4</span>,
+						<span class="hljs-attr">rowSize</span>: rowSize,
+						<span class="hljs-attr">vectorized</span>: <span class="hljs-literal">false</span>,
+					} ).<span class="hljs-title function_">compute</span>( maxWorkgroupSize * numRows, [ maxWorkgroupSize ] ),
+					<span class="hljs-title function_">createReduce3Fn</span>( {
+						<span class="hljs-attr">inputBuffer</span>: workgroupSumsStorage,
+						<span class="hljs-attr">intermediateBuffer</span>: inputStorage,
+						<span class="hljs-attr">workgroupSize</span>: <span class="hljs-number">32</span>,
+						<span class="hljs-attr">workPerThread</span>: <span class="hljs-number">4</span>,
+						<span class="hljs-attr">rowSize</span>: rowSize,
+						<span class="hljs-attr">vectorized</span>: <span class="hljs-literal">false</span>
+					} ).<span class="hljs-title function_">compute</span>( <span class="hljs-number">32</span>, [ <span class="hljs-number">32</span> ] )
+				];
+
+				<span class="hljs-keyword">const</span> reduce4Calls = [
+					<span class="hljs-title function_">createReduce4Fn</span>( {
+						<span class="hljs-attr">size</span>: size,
+						<span class="hljs-attr">inputBuffer</span>: inputVectorizedStorage,
+						<span class="hljs-attr">intermediateBuffer</span>: workgroupSumsStorage,
+						<span class="hljs-attr">workgroupSize</span>: maxWorkgroupSize,
+						<span class="hljs-attr">workPerThread</span>: <span class="hljs-number">4</span>,
+					} ),
+					<span class="hljs-title function_">createReduce3Fn</span>( {
+						<span class="hljs-attr">inputBuffer</span>: workgroupSumsStorage,
+						<span class="hljs-attr">intermediateBuffer</span>: inputStorage,
+						<span class="hljs-attr">workgroupSize</span>: <span class="hljs-number">32</span>,
+						<span class="hljs-attr">workPerThread</span>: <span class="hljs-number">4</span>,
+						<span class="hljs-attr">rowSize</span>: rowSize,
+						<span class="hljs-attr">vectorized</span>: <span class="hljs-literal">false</span>
+					} ).<span class="hljs-title function_">compute</span>( <span class="hljs-number">32</span>, [ <span class="hljs-number">32</span> ] )
+				];
+
+				<span class="hljs-keyword">const</span> incorrectBaselineCalls = [
+					<span class="hljs-title function_">createIncorrectBaselineFn</span>( {
+						<span class="hljs-attr">inputBuffer</span>: inputStorage,
+					} ).<span class="hljs-title function_">compute</span>( size ),
+				];
+
+				<span class="hljs-keyword">const</span> calls = {
+					<span class="hljs-string">&#x27;Reduce 0 (N/2)&#x27;</span>: reduce0Calls,
+					<span class="hljs-string">&#x27;Reduce 1 (Naive Accumulate)&#x27;</span>: reduce1Calls,
+					<span class="hljs-string">&#x27;Reduce 2 (Workgroup Reduction)&#x27;</span>: reduce2Calls,
+					<span class="hljs-string">&#x27;Reduce 3 (Subgroup Reduce)&#x27;</span>: reduce3Calls,
+					<span class="hljs-string">&#x27;Reduce 4 (Subgroup Optimized)&#x27;</span>: reduce4Calls,
+					<span class="hljs-string">&#x27;Incorrect Baseline&#x27;</span>: incorrectBaselineCalls
+				};
+
+				<span class="hljs-keyword">const</span> <span class="hljs-title function_">getColor</span> = (<span class="hljs-params"> bufferToCheck, colorChanger, width, height </span>) =&gt; {
+
+					<span class="hljs-keyword">const</span> subtracter = <span class="hljs-title function_">float</span>( colorChanger ).<span class="hljs-title function_">div</span>( width.<span class="hljs-title function_">mul</span>( height ) );
+
+					<span class="hljs-keyword">const</span> color = <span class="hljs-title function_">vec3</span>( subtracter.<span class="hljs-title function_">oneMinus</span>() ).<span class="hljs-title function_">toVar</span>();
+
+					<span class="hljs-keyword">const</span> { highlight } = effectController;
+
+					<span class="hljs-comment">// Validate that element 0 is equal to expected result of reduction</span>
+					<span class="hljs-title class_">If</span>( highlight.<span class="hljs-title function_">equal</span>( <span class="hljs-number">1</span> ), <span class="hljs-function">() =&gt;</span> {
+
+						<span class="hljs-title class_">If</span>( ( bufferToCheck.<span class="hljs-title function_">element</span>( <span class="hljs-number">0</span> ) ).<span class="hljs-title function_">equal</span>( size ), <span class="hljs-function">() =&gt;</span> {
+
+							color.<span class="hljs-title function_">assign</span>( <span class="hljs-title function_">vec3</span>( <span class="hljs-number">0.0</span>, subtracter.<span class="hljs-title function_">oneMinus</span>(), <span class="hljs-number">0.0</span> ) );
+
+						} ).<span class="hljs-title class_">Else</span>( <span class="hljs-function">() =&gt;</span> {
+
+							color.<span class="hljs-title function_">assign</span>( <span class="hljs-title function_">vec3</span>( subtracter.<span class="hljs-title function_">oneMinus</span>(), <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span> ) );
+
+						} );
+
+					} );
+
+					<span class="hljs-keyword">return</span> color;
+
+				};
+
+				<span class="hljs-keyword">const</span> displayNodes = leftSideDisplay ? leftDisplayColorNodes : rightDisplayColorNodes;
+				displayNodes[ <span class="hljs-string">&#x27;Input Grid&#x27;</span> ] = <span class="hljs-title class_">Fn</span>( <span class="hljs-function">() =&gt;</span> {
+
+					<span class="hljs-keyword">const</span> { gridElementWidth, gridElementHeight, gridDisplayWidth, gridDisplayHeight } = unifiedEffectController;
+
+					<span class="hljs-keyword">const</span> newUV = <span class="hljs-title function_">uv</span>().<span class="hljs-title function_">mul</span>( <span class="hljs-title function_">vec2</span>( gridDisplayWidth, gridDisplayHeight ) );
+
+					<span class="hljs-keyword">const</span> pixel = <span class="hljs-title function_">uvec2</span>( <span class="hljs-title function_">uint</span>( <span class="hljs-title function_">floor</span>( newUV.<span class="hljs-property">x</span> ) ), <span class="hljs-title function_">uint</span>( <span class="hljs-title function_">floor</span>( newUV.<span class="hljs-property">y</span> ) ) );
+
+					<span class="hljs-keyword">const</span> elementIndex = <span class="hljs-title function_">uint</span>( gridDisplayWidth ).<span class="hljs-title function_">mul</span>( pixel.<span class="hljs-property">y</span> ).<span class="hljs-title function_">add</span>( pixel.<span class="hljs-property">x</span> );
+
+					<span class="hljs-keyword">const</span> colorChanger = <span class="hljs-title function_">uint</span>( <span class="hljs-number">0</span> ).<span class="hljs-title function_">toVar</span>();
+					<span class="hljs-keyword">const</span> color = <span class="hljs-title function_">vec3</span>( <span class="hljs-number">0</span> ).<span class="hljs-title function_">toVar</span>( <span class="hljs-string">&#x27;color&#x27;</span> );
+
+					colorChanger.<span class="hljs-title function_">assign</span>( inputStorage.<span class="hljs-title function_">element</span>( elementIndex ) );
+					color.<span class="hljs-title function_">assign</span>( <span class="hljs-title function_">getColor</span>( inputStorage, colorChanger, gridElementWidth, gridElementHeight ) );
+
+					<span class="hljs-keyword">return</span> color;
+
+				} )();
+
+				displayNodes[ <span class="hljs-string">&#x27;Input Log2&#x27;</span> ] = <span class="hljs-title class_">Fn</span>( <span class="hljs-function">() =&gt;</span> {
+
+					<span class="hljs-keyword">const</span> { gridElementWidth, gridElementHeight } = unifiedEffectController;
+
+					<span class="hljs-keyword">const</span> newUV = <span class="hljs-title function_">uv</span>().<span class="hljs-title function_">mul</span>( <span class="hljs-title function_">vec2</span>( <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">log2</span>( size ) ), <span class="hljs-number">1</span> );
+
+					<span class="hljs-keyword">const</span> colorChanger = <span class="hljs-title function_">uint</span>( <span class="hljs-number">0</span> ).<span class="hljs-title function_">toVar</span>();
+					<span class="hljs-keyword">const</span> color = <span class="hljs-title function_">vec3</span>( <span class="hljs-number">0</span> ).<span class="hljs-title function_">toVar</span>( <span class="hljs-string">&#x27;color&#x27;</span> );
+
+					colorChanger.<span class="hljs-title function_">assign</span>( inputStorage.<span class="hljs-title function_">element</span>( <span class="hljs-title function_">uint</span>( <span class="hljs-number">1</span> ).<span class="hljs-title function_">shiftLeft</span>( newUV.<span class="hljs-property">x</span> ) ) );
+					color.<span class="hljs-title function_">assign</span>( <span class="hljs-title function_">getColor</span>( inputStorage, colorChanger, gridElementWidth, gridElementHeight ) );
+
+					<span class="hljs-keyword">return</span> color;
+
+				} )();
+
+				displayNodes[ <span class="hljs-string">&#x27;Input Element 0&#x27;</span> ] = <span class="hljs-title class_">Fn</span>( <span class="hljs-function">() =&gt;</span> {
+
+					<span class="hljs-keyword">const</span> { gridElementWidth, gridElementHeight } = unifiedEffectController;
+
+					<span class="hljs-keyword">const</span> colorChanger = <span class="hljs-title function_">uint</span>( <span class="hljs-number">0</span> ).<span class="hljs-title function_">toVar</span>();
+					<span class="hljs-keyword">const</span> color = <span class="hljs-title function_">vec3</span>( <span class="hljs-number">0</span> ).<span class="hljs-title function_">toVar</span>( <span class="hljs-string">&#x27;color&#x27;</span> );
+
+					<span class="hljs-comment">// Clamp display of single element to shade where green is still readable</span>
+					colorChanger.<span class="hljs-title function_">assign</span>( <span class="hljs-title function_">clamp</span>( inputStorage.<span class="hljs-title function_">element</span>( <span class="hljs-number">0</span> ), <span class="hljs-number">0</span>, size / <span class="hljs-number">2</span> ) );
+					color.<span class="hljs-title function_">assign</span>( <span class="hljs-title function_">getColor</span>( inputStorage, colorChanger, gridElementWidth, gridElementHeight ) );
+					<span class="hljs-keyword">return</span> color;
+
+				} )();
+
+				displayNodes[ <span class="hljs-string">&#x27;Workgroup Sum Grid&#x27;</span> ] = <span class="hljs-title class_">Fn</span>( <span class="hljs-function">() =&gt;</span> {
+
+					<span class="hljs-keyword">const</span> width = <span class="hljs-title function_">uint</span>( <span class="hljs-number">8</span> );
+					<span class="hljs-keyword">const</span> height = <span class="hljs-title function_">uint</span>( <span class="hljs-number">16</span> );
+
+					<span class="hljs-keyword">const</span> newUV = <span class="hljs-title function_">uv</span>().<span class="hljs-title function_">mul</span>( <span class="hljs-title function_">vec2</span>( width, height ) );
+
+					<span class="hljs-keyword">const</span> pixel = <span class="hljs-title function_">uvec2</span>( <span class="hljs-title function_">uint</span>( <span class="hljs-title function_">floor</span>( newUV.<span class="hljs-property">x</span> ) ), <span class="hljs-title function_">uint</span>( <span class="hljs-title function_">floor</span>( newUV.<span class="hljs-property">y</span> ) ) );
+
+					<span class="hljs-keyword">const</span> elementIndex = <span class="hljs-title function_">uint</span>( width ).<span class="hljs-title function_">mul</span>( pixel.<span class="hljs-property">y</span> ).<span class="hljs-title function_">add</span>( pixel.<span class="hljs-property">x</span> );
+
+					<span class="hljs-keyword">const</span> colorChanger = <span class="hljs-title function_">uint</span>( <span class="hljs-number">0</span> ).<span class="hljs-title function_">toVar</span>();
+					<span class="hljs-keyword">const</span> color = <span class="hljs-title function_">vec3</span>( <span class="hljs-number">0</span> ).<span class="hljs-title function_">toVar</span>( <span class="hljs-string">&#x27;color&#x27;</span> );
+
+					colorChanger.<span class="hljs-title function_">assign</span>( workgroupSumsStorage.<span class="hljs-title function_">element</span>( elementIndex ) );
+					color.<span class="hljs-title function_">assign</span>( <span class="hljs-title function_">getColor</span>( inputStorage, colorChanger, width, height ) );
+
+					<span class="hljs-keyword">return</span> color;
+
+				} )();
+
+				( leftSideDisplay ? leftMaterial : rightMaterial ).<span class="hljs-property">colorNode</span> = displayNodes[ effectController.<span class="hljs-property">displayMode</span> ];
+				( leftSideDisplay ? leftMaterial : rightMaterial ).<span class="hljs-property">needsUpdate</span> = <span class="hljs-literal">true</span>;
+
+				<span class="hljs-keyword">const</span> plane = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Mesh</span>( <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">PlaneGeometry</span>( <span class="hljs-number">1</span>, <span class="hljs-number">1</span> ), ( leftSideDisplay ? leftMaterial : rightMaterial ) );
+				scene.<span class="hljs-title function_">add</span>( plane );
+
+				<span class="hljs-keyword">const</span> <span class="hljs-title function_">animate</span> = (<span class="hljs-params"></span>) =&gt; {
+
+					renderer.<span class="hljs-title function_">render</span>( scene, camera );
+
+				};
+
+				renderer.<span class="hljs-title function_">setAnimationLoop</span>( animate );
+
+				<span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>.<span class="hljs-title function_">appendChild</span>( renderer.<span class="hljs-property">domElement</span> );
+				renderer.<span class="hljs-property">domElement</span>.<span class="hljs-property">style</span>.<span class="hljs-property">position</span> = <span class="hljs-string">&#x27;absolute&#x27;</span>;
+				renderer.<span class="hljs-property">domElement</span>.<span class="hljs-property">style</span>.<span class="hljs-property">top</span> = <span class="hljs-string">&#x27;0&#x27;</span>;
+				renderer.<span class="hljs-property">domElement</span>.<span class="hljs-property">style</span>.<span class="hljs-property">left</span> = <span class="hljs-string">&#x27;0&#x27;</span>;
+				renderer.<span class="hljs-property">domElement</span>.<span class="hljs-property">style</span>.<span class="hljs-property">width</span> = <span class="hljs-string">&#x27;50%&#x27;</span>;
+				renderer.<span class="hljs-property">domElement</span>.<span class="hljs-property">style</span>.<span class="hljs-property">height</span> = <span class="hljs-string">&#x27;100%&#x27;</span>;
+
+				<span class="hljs-keyword">if</span> ( ! leftSideDisplay ) {
+
+					renderer.<span class="hljs-property">domElement</span>.<span class="hljs-property">style</span>.<span class="hljs-property">left</span> = <span class="hljs-string">&#x27;50%&#x27;</span>;
+
+					scene.<span class="hljs-property">background</span> = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Color</span>( <span class="hljs-number">0x212121</span> );
+
+				} <span class="hljs-keyword">else</span> {
+
+					scene.<span class="hljs-property">background</span> = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Color</span>( <span class="hljs-number">0x313131</span> );
+
+				}
+
+				renderer.<span class="hljs-property">info</span>.<span class="hljs-property">autoReset</span> = <span class="hljs-literal">false</span>;
+
+				<span class="hljs-keyword">const</span> stepAnimation = <span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+
+					<span class="hljs-keyword">const</span> currentAlgorithm = effectController.<span class="hljs-property">algo</span>;
+					<span class="hljs-keyword">const</span> state = effectController.<span class="hljs-property">state</span>;
+					<span class="hljs-keyword">const</span> stateController = leftSideDisplay ? stateLeftController : stateRightController;
+
+					<span class="hljs-keyword">if</span> ( state === <span class="hljs-string">&#x27;Reset&#x27;</span> ) {
+
+						renderer.<span class="hljs-title function_">compute</span>( computeResetBuffer );
+						renderer.<span class="hljs-title function_">compute</span>( computeResetWorkgroupSums );
+
+					} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> ( state === <span class="hljs-string">&#x27;Run Algo&#x27;</span> ) {
+
+						renderer.<span class="hljs-property">info</span>.<span class="hljs-title function_">reset</span>();
+
+						<span class="hljs-keyword">const</span> cpuTime = <span class="hljs-number">0</span>;
+
+						<span class="hljs-keyword">switch</span> ( currentAlgorithm ) {
+
+							<span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;Reduce 0 (N/2)&#x27;</span>: {
+
+								<span class="hljs-keyword">let</span> m = size / <span class="hljs-number">2</span>;
+
+								<span class="hljs-keyword">for</span> ( <span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; reduce0Calls.<span class="hljs-property">length</span>; i ++ ) {
+
+									effectController.<span class="hljs-property">numThreadsDispatched</span>.<span class="hljs-property">value</span> = m;
+
+									<span class="hljs-keyword">const</span> reduce0 = reduce0Calls[ i ];
+									<span class="hljs-comment">// Do a reduction step</span>
+									renderer.<span class="hljs-title function_">compute</span>( reduce0 );
+									renderer.<span class="hljs-title function_">resolveTimestampsAsync</span>( <span class="hljs-variable constant_">THREE</span>.<span class="hljs-property">TimestampQuery</span>.<span class="hljs-property">COMPUTE</span> );
+
+									m /= <span class="hljs-number">2</span>;
+
+								}
+
+
+								<span class="hljs-keyword">break</span>;
+
+							}
+
+							<span class="hljs-attr">default</span>: {
+
+								<span class="hljs-keyword">const</span> currentAlgoCalls = calls[ currentAlgorithm ];
+
+								<span class="hljs-keyword">for</span> ( <span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; currentAlgoCalls.<span class="hljs-property">length</span>; i ++ ) {
+
+									renderer.<span class="hljs-title function_">compute</span>( currentAlgoCalls[ i ] );
+									renderer.<span class="hljs-title function_">resolveTimestampsAsync</span>( <span class="hljs-variable constant_">THREE</span>.<span class="hljs-property">TimestampQuery</span>.<span class="hljs-property">COMPUTE</span> );
+
+								}
+
+								<span class="hljs-keyword">break</span>;
+
+							}
+
+						}
+
+						<span class="hljs-comment">// DE<span class="hljs-doctag">BUG:</span> const reductionResult = new Uint32Array( await renderer.getArrayBufferAsync( currentBuffer ) )[0];</span>
+
+						<span class="hljs-keyword">let</span> passInfoString = <span class="hljs-string">&#x27;&#x27;</span>;
+
+						<span class="hljs-keyword">if</span> ( effectController.<span class="hljs-property">algo</span>.<span class="hljs-title function_">substring</span>( <span class="hljs-number">0</span>, <span class="hljs-number">3</span> ) === <span class="hljs-string">&#x27;CPU&#x27;</span> ) {
+
+							passInfoString = <span class="hljs-string">`Ran in <span class="hljs-subst">${cpuTime}</span>ms&lt;br&gt;`</span>;
+
+						} <span class="hljs-keyword">else</span> {
+
+							passInfoString = <span class="hljs-string">`<span class="hljs-subst">${renderer.info.compute.frameCalls}</span> pass in <span class="hljs-subst">${renderer.info.compute.timestamp.toFixed( <span class="hljs-number">6</span> )}</span>ms&lt;br&gt;`</span>;
+
+						}
+
+
+
+
+						timestamps[ leftSideDisplay ? <span class="hljs-string">&#x27;left_side_display&#x27;</span> : <span class="hljs-string">&#x27;right_side_display&#x27;</span> ].<span class="hljs-property">innerHTML</span> = <span class="hljs-string">`
+
+							Compute <span class="hljs-subst">${effectController.algo}</span>: <span class="hljs-subst">${passInfoString}</span>`</span>;
+
+					}
+
+					renderer.<span class="hljs-title function_">render</span>( scene, camera );
+					renderer.<span class="hljs-title function_">resolveTimestampsAsync</span>( <span class="hljs-variable constant_">THREE</span>.<span class="hljs-property">TimestampQuery</span>.<span class="hljs-property">RENDER</span> );
+
+					<span class="hljs-comment">// Validate next state</span>
+
+					<span class="hljs-keyword">if</span> ( state === <span class="hljs-string">&#x27;Run Algo&#x27;</span> ) {
+
+						stateController.<span class="hljs-title function_">setValue</span>( <span class="hljs-string">&#x27;Validate&#x27;</span> );
+
+						effectController.<span class="hljs-property">highlight</span>.<span class="hljs-property">value</span> = <span class="hljs-number">1</span>;
+
+					} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> ( state === <span class="hljs-string">&#x27;Validate&#x27;</span> ) {
+
+						stateController.<span class="hljs-title function_">setValue</span>( <span class="hljs-string">&#x27;Reset&#x27;</span> );
+
+						effectController.<span class="hljs-property">highlight</span>.<span class="hljs-property">value</span> = <span class="hljs-number">0</span>;
+
+					} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> ( state === <span class="hljs-string">&#x27;Reset&#x27;</span> ) {
+
+						stateController.<span class="hljs-title function_">setValue</span>( <span class="hljs-string">&#x27;Run Algo&#x27;</span> );
+
+					}
+
+					<span class="hljs-built_in">setTimeout</span>( stepAnimation, <span class="hljs-number">1000</span> );
+
+				};
+
+
+				<span class="hljs-variable language_">window</span>.<span class="hljs-title function_">addEventListener</span>( <span class="hljs-string">&#x27;resize&#x27;</span>, onWindowResize );
+
+				<span class="hljs-keyword">function</span> <span class="hljs-title function_">onWindowResize</span>(<span class="hljs-params"></span>) {
+
+					renderer.<span class="hljs-title function_">setSize</span>( <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerWidth</span> / <span class="hljs-number">2</span>, <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerHeight</span> );
+
+					<span class="hljs-keyword">const</span> aspect = ( <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerWidth</span> / <span class="hljs-number">2</span> ) / <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerHeight</span>;
+
+					<span class="hljs-keyword">const</span> frustumHeight = camera.<span class="hljs-property">top</span> - camera.<span class="hljs-property">bottom</span>;
+
+					camera.<span class="hljs-property">left</span> = - frustumHeight * aspect / <span class="hljs-number">2</span>;
+					camera.<span class="hljs-property">right</span> = frustumHeight * aspect / <span class="hljs-number">2</span>;
+
+					camera.<span class="hljs-title function_">updateProjectionMatrix</span>();
+
+					renderer.<span class="hljs-title function_">render</span>( scene, camera );
+
+				}
+
+				<span class="hljs-built_in">setTimeout</span>( stepAnimation, <span class="hljs-number">1000</span> );
+
+			}
+
+		</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+	<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></code></pre></main>
+  <script>
+    (function () {
+      var at = location.hash.match(/^#at=(\d+),(\d+)$/);
+      if (at) window.scrollTo(Number(at[1]), Number(at[2]));
+      addEventListener("scroll", function () {
+        parent.postMessage({ lumisShowcaseScroll: { x: scrollX, y: scrollY } }, "*");
+      }, { passive: true });
+    })();
+  </script>
+</body>
+</html>

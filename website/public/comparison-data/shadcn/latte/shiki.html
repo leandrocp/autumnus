@@ -1,0 +1,758 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shiki · Catppuccin Latte · Lumis visual comparison</title>
+  <meta name="color-scheme" content="light">
+  <style>
+    * { box-sizing: border-box; }
+    html { background: #e6e9ef; color: #4c4f69; font: 14px/1.5 Inter, ui-sans-serif, system-ui, sans-serif; }
+    body { margin: 0; }
+    main { padding: 16px; min-width: max-content; }
+    pre { margin: 0 !important; padding: 20px !important; border: 1px solid #bcc0cc; border-radius: 10px; overflow: visible !important; font: 13px/1.55 "SFMono-Regular", Consolas, "Liberation Mono", monospace !important; tab-size: 4; }
+    /* highlight.js themes paint the panel on the code element and pad it, and
+       @catppuccin/highlightjs paints it without making that element a block, so
+       one panel would be ragged where the other three are solid. */
+    pre code.hljs { display: block; padding: 0 !important; }
+  </style>
+</head>
+<body>
+  <main><pre class="shiki catppuccin-latte" style="background-color:#eff1f5;color:#4c4f69" tabindex="0"><code><span class="line"><span style="color:#40A02B">"use client"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">import</span><span style="color:#D20F39"> *</span><span style="color:#8839EF"> as</span><span style="color:#4C4F69"> React </span><span style="color:#8839EF">from</span><span style="color:#40A02B"> "react"</span></span>
+<span class="line"><span style="color:#8839EF">import</span><span style="color:#7C7F93"> {</span><span style="color:#4C4F69"> cva</span><span style="color:#7C7F93">,</span><span style="color:#8839EF"> type</span><span style="color:#4C4F69"> VariantProps </span><span style="color:#7C7F93">}</span><span style="color:#8839EF"> from</span><span style="color:#40A02B"> "class-variance-authority"</span></span>
+<span class="line"><span style="color:#8839EF">import</span><span style="color:#7C7F93"> {</span><span style="color:#4C4F69"> PanelLeftIcon </span><span style="color:#7C7F93">}</span><span style="color:#8839EF"> from</span><span style="color:#40A02B"> "lucide-react"</span></span>
+<span class="line"><span style="color:#8839EF">import</span><span style="color:#7C7F93"> {</span><span style="color:#4C4F69"> Slot </span><span style="color:#7C7F93">}</span><span style="color:#8839EF"> from</span><span style="color:#40A02B"> "radix-ui"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">import</span><span style="color:#7C7F93"> {</span><span style="color:#4C4F69"> useIsMobile </span><span style="color:#7C7F93">}</span><span style="color:#8839EF"> from</span><span style="color:#40A02B"> "@/registry/new-york-v4/hooks/use-mobile"</span></span>
+<span class="line"><span style="color:#8839EF">import</span><span style="color:#7C7F93"> {</span><span style="color:#4C4F69"> cn </span><span style="color:#7C7F93">}</span><span style="color:#8839EF"> from</span><span style="color:#40A02B"> "@/registry/new-york-v4/lib/utils"</span></span>
+<span class="line"><span style="color:#8839EF">import</span><span style="color:#7C7F93"> {</span><span style="color:#4C4F69"> Button </span><span style="color:#7C7F93">}</span><span style="color:#8839EF"> from</span><span style="color:#40A02B"> "@/registry/new-york-v4/ui/button"</span></span>
+<span class="line"><span style="color:#8839EF">import</span><span style="color:#7C7F93"> {</span><span style="color:#4C4F69"> Input </span><span style="color:#7C7F93">}</span><span style="color:#8839EF"> from</span><span style="color:#40A02B"> "@/registry/new-york-v4/ui/input"</span></span>
+<span class="line"><span style="color:#8839EF">import</span><span style="color:#7C7F93"> {</span><span style="color:#4C4F69"> Separator </span><span style="color:#7C7F93">}</span><span style="color:#8839EF"> from</span><span style="color:#40A02B"> "@/registry/new-york-v4/ui/separator"</span></span>
+<span class="line"><span style="color:#8839EF">import</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#4C4F69">  Sheet</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  SheetContent</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  SheetDescription</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  SheetHeader</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  SheetTitle</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#7C7F93">}</span><span style="color:#8839EF"> from</span><span style="color:#40A02B"> "@/registry/new-york-v4/ui/sheet"</span></span>
+<span class="line"><span style="color:#8839EF">import</span><span style="color:#7C7F93"> {</span><span style="color:#4C4F69"> Skeleton </span><span style="color:#7C7F93">}</span><span style="color:#8839EF"> from</span><span style="color:#40A02B"> "@/registry/new-york-v4/ui/skeleton"</span></span>
+<span class="line"><span style="color:#8839EF">import</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#4C4F69">  Tooltip</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  TooltipContent</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  TooltipProvider</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  TooltipTrigger</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#7C7F93">}</span><span style="color:#8839EF"> from</span><span style="color:#40A02B"> "@/registry/new-york-v4/ui/tooltip"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">const</span><span style="color:#FE640B"> SIDEBAR_COOKIE_NAME</span><span style="color:#179299"> =</span><span style="color:#40A02B"> "sidebar_state"</span></span>
+<span class="line"><span style="color:#8839EF">const</span><span style="color:#FE640B"> SIDEBAR_COOKIE_MAX_AGE</span><span style="color:#179299"> =</span><span style="color:#FE640B"> 60</span><span style="color:#179299"> *</span><span style="color:#FE640B"> 60</span><span style="color:#179299"> *</span><span style="color:#FE640B"> 24</span><span style="color:#179299"> *</span><span style="color:#FE640B"> 7</span></span>
+<span class="line"><span style="color:#8839EF">const</span><span style="color:#FE640B"> SIDEBAR_WIDTH</span><span style="color:#179299"> =</span><span style="color:#40A02B"> "16rem"</span></span>
+<span class="line"><span style="color:#8839EF">const</span><span style="color:#FE640B"> SIDEBAR_WIDTH_MOBILE</span><span style="color:#179299"> =</span><span style="color:#40A02B"> "18rem"</span></span>
+<span class="line"><span style="color:#8839EF">const</span><span style="color:#FE640B"> SIDEBAR_WIDTH_ICON</span><span style="color:#179299"> =</span><span style="color:#40A02B"> "3rem"</span></span>
+<span class="line"><span style="color:#8839EF">const</span><span style="color:#FE640B"> SIDEBAR_KEYBOARD_SHORTCUT</span><span style="color:#179299"> =</span><span style="color:#40A02B"> "b"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">type</span><span style="color:#DF8E1D;font-style:italic"> SidebarContextProps </span><span style="color:#179299">=</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#4C4F69;font-style:italic">  state</span><span style="color:#179299">:</span><span style="color:#40A02B"> "</span><span style="color:#40A02B;font-style:italic">expanded</span><span style="color:#40A02B">"</span><span style="color:#179299"> |</span><span style="color:#40A02B"> "</span><span style="color:#40A02B;font-style:italic">collapsed</span><span style="color:#40A02B">"</span></span>
+<span class="line"><span style="color:#4C4F69;font-style:italic">  open</span><span style="color:#179299">:</span><span style="color:#8839EF"> boolean</span></span>
+<span class="line"><span style="color:#1E66F5;font-style:italic">  setOpen</span><span style="color:#179299">:</span><span style="color:#7C7F93"> (</span><span style="color:#E64553;font-style:italic">open</span><span style="color:#179299">:</span><span style="color:#8839EF"> boolean</span><span style="color:#7C7F93">)</span><span style="color:#8839EF"> =></span><span style="color:#8839EF"> void</span></span>
+<span class="line"><span style="color:#4C4F69;font-style:italic">  openMobile</span><span style="color:#179299">:</span><span style="color:#8839EF"> boolean</span></span>
+<span class="line"><span style="color:#1E66F5;font-style:italic">  setOpenMobile</span><span style="color:#179299">:</span><span style="color:#7C7F93"> (</span><span style="color:#E64553;font-style:italic">open</span><span style="color:#179299">:</span><span style="color:#8839EF"> boolean</span><span style="color:#7C7F93">)</span><span style="color:#8839EF"> =></span><span style="color:#8839EF"> void</span></span>
+<span class="line"><span style="color:#4C4F69;font-style:italic">  isMobile</span><span style="color:#179299">:</span><span style="color:#8839EF"> boolean</span></span>
+<span class="line"><span style="color:#1E66F5;font-style:italic">  toggleSidebar</span><span style="color:#179299">:</span><span style="color:#7C7F93"> ()</span><span style="color:#8839EF"> =></span><span style="color:#8839EF"> void</span></span>
+<span class="line"><span style="color:#7C7F93">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">const</span><span style="color:#FE640B"> SidebarContext</span><span style="color:#179299"> =</span><span style="color:#4C4F69"> React</span><span style="color:#179299">.</span><span style="color:#1E66F5;font-style:italic">createContext</span><span style="color:#04A5E5">&#x3C;</span><span style="color:#DF8E1D;font-style:italic">SidebarContextProps </span><span style="color:#179299">|</span><span style="color:#DF8E1D;font-style:italic"> null</span><span style="color:#04A5E5">></span><span style="color:#4C4F69">(</span><span style="color:#D20F39">null</span><span style="color:#4C4F69">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">function</span><span style="color:#1E66F5;font-style:italic"> useSidebar</span><span style="color:#7C7F93">()</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">  const</span><span style="color:#FE640B"> context</span><span style="color:#179299"> =</span><span style="color:#4C4F69"> React</span><span style="color:#179299">.</span><span style="color:#1E66F5;font-style:italic">useContext</span><span style="color:#4C4F69">(SidebarContext)</span></span>
+<span class="line"><span style="color:#8839EF">  if</span><span style="color:#4C4F69"> (</span><span style="color:#179299">!</span><span style="color:#4C4F69">context) </span><span style="color:#7C7F93">{</span></span>
+<span class="line"><span style="color:#8839EF">    throw</span><span style="color:#8839EF;font-weight:bold"> new</span><span style="color:#1E66F5;font-style:italic"> Error</span><span style="color:#4C4F69">(</span><span style="color:#40A02B">"useSidebar must be used within a SidebarProvider."</span><span style="color:#4C4F69">)</span></span>
+<span class="line"><span style="color:#7C7F93">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">  return</span><span style="color:#4C4F69"> context</span></span>
+<span class="line"><span style="color:#7C7F93">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">function</span><span style="color:#1E66F5;font-style:italic"> SidebarProvider</span><span style="color:#7C7F93">({</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  defaultOpen</span><span style="color:#179299"> =</span><span style="color:#FE640B"> true</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  open</span><span style="color:#7C7F93">:</span><span style="color:#E64553;font-style:italic"> openProp</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  onOpenChange</span><span style="color:#7C7F93">:</span><span style="color:#E64553;font-style:italic"> setOpenProp</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  className</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  style</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  children</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#179299">  ...</span><span style="color:#E64553;font-style:italic">props</span></span>
+<span class="line"><span style="color:#7C7F93">}</span><span style="color:#179299">:</span><span style="color:#DF8E1D;font-style:italic"> React</span><span style="color:#179299">.</span><span style="color:#DF8E1D;font-style:italic">ComponentProps</span><span style="color:#04A5E5">&#x3C;</span><span style="color:#40A02B">"</span><span style="color:#40A02B;font-style:italic">div</span><span style="color:#40A02B">"</span><span style="color:#04A5E5">></span><span style="color:#179299"> &#x26;</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#4C4F69;font-style:italic">  defaultOpen</span><span style="color:#179299">?:</span><span style="color:#8839EF"> boolean</span></span>
+<span class="line"><span style="color:#4C4F69;font-style:italic">  open</span><span style="color:#179299">?:</span><span style="color:#8839EF"> boolean</span></span>
+<span class="line"><span style="color:#1E66F5;font-style:italic">  onOpenChange</span><span style="color:#179299">?:</span><span style="color:#7C7F93"> (</span><span style="color:#E64553;font-style:italic">open</span><span style="color:#179299">:</span><span style="color:#8839EF"> boolean</span><span style="color:#7C7F93">)</span><span style="color:#8839EF"> =></span><span style="color:#8839EF"> void</span></span>
+<span class="line"><span style="color:#7C7F93">})</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">  const</span><span style="color:#FE640B"> isMobile</span><span style="color:#179299"> =</span><span style="color:#1E66F5;font-style:italic"> useIsMobile</span><span style="color:#4C4F69">()</span></span>
+<span class="line"><span style="color:#8839EF">  const</span><span style="color:#7C7F93"> [</span><span style="color:#FE640B">openMobile</span><span style="color:#7C7F93">,</span><span style="color:#FE640B"> setOpenMobile</span><span style="color:#7C7F93">]</span><span style="color:#179299"> =</span><span style="color:#4C4F69"> React</span><span style="color:#179299">.</span><span style="color:#1E66F5;font-style:italic">useState</span><span style="color:#4C4F69">(</span><span style="color:#FE640B">false</span><span style="color:#4C4F69">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7C7F93;font-style:italic">  // This is the internal state of the sidebar.</span></span>
+<span class="line"><span style="color:#7C7F93;font-style:italic">  // We use openProp and setOpenProp for control from outside the component.</span></span>
+<span class="line"><span style="color:#8839EF">  const</span><span style="color:#7C7F93"> [</span><span style="color:#FE640B">_open</span><span style="color:#7C7F93">,</span><span style="color:#FE640B"> _setOpen</span><span style="color:#7C7F93">]</span><span style="color:#179299"> =</span><span style="color:#4C4F69"> React</span><span style="color:#179299">.</span><span style="color:#1E66F5;font-style:italic">useState</span><span style="color:#4C4F69">(defaultOpen)</span></span>
+<span class="line"><span style="color:#8839EF">  const</span><span style="color:#FE640B"> open</span><span style="color:#179299"> =</span><span style="color:#4C4F69"> openProp </span><span style="color:#179299">??</span><span style="color:#4C4F69"> _open</span></span>
+<span class="line"><span style="color:#8839EF">  const</span><span style="color:#FE640B"> setOpen</span><span style="color:#179299"> =</span><span style="color:#4C4F69"> React</span><span style="color:#179299">.</span><span style="color:#1E66F5;font-style:italic">useCallback</span><span style="color:#4C4F69">(</span></span>
+<span class="line"><span style="color:#7C7F93">    (</span><span style="color:#E64553;font-style:italic">value</span><span style="color:#179299">:</span><span style="color:#8839EF"> boolean</span><span style="color:#179299"> |</span><span style="color:#DF8E1D;font-style:italic"> (</span><span style="color:#7C7F93">(</span><span style="color:#E64553;font-style:italic">value</span><span style="color:#179299">:</span><span style="color:#8839EF"> boolean</span><span style="color:#7C7F93">)</span><span style="color:#8839EF"> =></span><span style="color:#8839EF"> boolean</span><span style="color:#DF8E1D;font-style:italic">)</span><span style="color:#7C7F93">)</span><span style="color:#8839EF"> =></span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">      const</span><span style="color:#FE640B"> openState</span><span style="color:#179299"> =</span><span style="color:#179299"> typeof</span><span style="color:#4C4F69"> value </span><span style="color:#179299">===</span><span style="color:#40A02B"> "function"</span><span style="color:#179299"> ?</span><span style="color:#1E66F5;font-style:italic"> value</span><span style="color:#4C4F69">(open) </span><span style="color:#179299">:</span><span style="color:#4C4F69"> value</span></span>
+<span class="line"><span style="color:#8839EF">      if</span><span style="color:#4C4F69"> (setOpenProp) </span><span style="color:#7C7F93">{</span></span>
+<span class="line"><span style="color:#1E66F5;font-style:italic">        setOpenProp</span><span style="color:#4C4F69">(openState)</span></span>
+<span class="line"><span style="color:#7C7F93">      }</span><span style="color:#8839EF"> else</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#1E66F5;font-style:italic">        _setOpen</span><span style="color:#4C4F69">(openState)</span></span>
+<span class="line"><span style="color:#7C7F93">      }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7C7F93;font-style:italic">      // This sets the cookie to keep the sidebar state.</span></span>
+<span class="line"><span style="color:#4C4F69">      document</span><span style="color:#179299">.</span><span style="color:#4C4F69">cookie </span><span style="color:#179299">=</span><span style="color:#40A02B"> `</span><span style="color:#7C7F93">${</span><span style="color:#FE640B">SIDEBAR_COOKIE_NAME</span><span style="color:#7C7F93">}</span><span style="color:#40A02B">=</span><span style="color:#7C7F93">${</span><span style="color:#4C4F69">openState</span><span style="color:#7C7F93">}</span><span style="color:#40A02B">; path=/; max-age=</span><span style="color:#7C7F93">${</span><span style="color:#FE640B">SIDEBAR_COOKIE_MAX_AGE</span><span style="color:#7C7F93">}</span><span style="color:#40A02B">`</span></span>
+<span class="line"><span style="color:#7C7F93">    },</span></span>
+<span class="line"><span style="color:#4C4F69">    [setOpenProp</span><span style="color:#7C7F93">,</span><span style="color:#4C4F69"> open]</span></span>
+<span class="line"><span style="color:#4C4F69">  )</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7C7F93;font-style:italic">  // Helper to toggle the sidebar.</span></span>
+<span class="line"><span style="color:#8839EF">  const</span><span style="color:#FE640B"> toggleSidebar</span><span style="color:#179299"> =</span><span style="color:#4C4F69"> React</span><span style="color:#179299">.</span><span style="color:#1E66F5;font-style:italic">useCallback</span><span style="color:#4C4F69">(</span><span style="color:#7C7F93">()</span><span style="color:#8839EF"> =></span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">    return</span><span style="color:#4C4F69"> isMobile </span><span style="color:#179299">?</span><span style="color:#1E66F5;font-style:italic"> setOpenMobile</span><span style="color:#4C4F69">(</span><span style="color:#7C7F93">(</span><span style="color:#E64553;font-style:italic">open</span><span style="color:#7C7F93">)</span><span style="color:#8839EF"> =></span><span style="color:#179299"> !</span><span style="color:#4C4F69">open) </span><span style="color:#179299">:</span><span style="color:#1E66F5;font-style:italic"> setOpen</span><span style="color:#4C4F69">(</span><span style="color:#7C7F93">(</span><span style="color:#E64553;font-style:italic">open</span><span style="color:#7C7F93">)</span><span style="color:#8839EF"> =></span><span style="color:#179299"> !</span><span style="color:#4C4F69">open)</span></span>
+<span class="line"><span style="color:#7C7F93">  },</span><span style="color:#4C4F69"> [isMobile</span><span style="color:#7C7F93">,</span><span style="color:#4C4F69"> setOpen</span><span style="color:#7C7F93">,</span><span style="color:#4C4F69"> setOpenMobile])</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7C7F93;font-style:italic">  // Adds a keyboard shortcut to toggle the sidebar.</span></span>
+<span class="line"><span style="color:#4C4F69">  React</span><span style="color:#179299">.</span><span style="color:#1E66F5;font-style:italic">useEffect</span><span style="color:#4C4F69">(</span><span style="color:#7C7F93">()</span><span style="color:#8839EF"> =></span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">    const</span><span style="color:#1E66F5;font-style:italic"> handleKeyDown</span><span style="color:#179299"> =</span><span style="color:#7C7F93"> (</span><span style="color:#E64553;font-style:italic">event</span><span style="color:#179299">:</span><span style="color:#DF8E1D;font-style:italic"> KeyboardEvent</span><span style="color:#7C7F93">)</span><span style="color:#8839EF"> =></span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">      if</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#4C4F69">        event</span><span style="color:#179299">.</span><span style="color:#4C4F69">key </span><span style="color:#179299">===</span><span style="color:#FE640B"> SIDEBAR_KEYBOARD_SHORTCUT</span><span style="color:#179299"> &#x26;&#x26;</span></span>
+<span class="line"><span style="color:#4C4F69">        (event</span><span style="color:#179299">.</span><span style="color:#4C4F69">metaKey </span><span style="color:#179299">||</span><span style="color:#4C4F69"> event</span><span style="color:#179299">.</span><span style="color:#4C4F69">ctrlKey)</span></span>
+<span class="line"><span style="color:#4C4F69">      ) </span><span style="color:#7C7F93">{</span></span>
+<span class="line"><span style="color:#4C4F69">        event</span><span style="color:#179299">.</span><span style="color:#1E66F5;font-style:italic">preventDefault</span><span style="color:#4C4F69">()</span></span>
+<span class="line"><span style="color:#1E66F5;font-style:italic">        toggleSidebar</span><span style="color:#4C4F69">()</span></span>
+<span class="line"><span style="color:#7C7F93">      }</span></span>
+<span class="line"><span style="color:#7C7F93">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#4C4F69">    window</span><span style="color:#179299">.</span><span style="color:#1E66F5;font-style:italic">addEventListener</span><span style="color:#4C4F69">(</span><span style="color:#40A02B">"keydown"</span><span style="color:#7C7F93">,</span><span style="color:#4C4F69"> handleKeyDown)</span></span>
+<span class="line"><span style="color:#8839EF">    return</span><span style="color:#7C7F93"> ()</span><span style="color:#8839EF"> =></span><span style="color:#4C4F69"> window</span><span style="color:#179299">.</span><span style="color:#1E66F5;font-style:italic">removeEventListener</span><span style="color:#4C4F69">(</span><span style="color:#40A02B">"keydown"</span><span style="color:#7C7F93">,</span><span style="color:#4C4F69"> handleKeyDown)</span></span>
+<span class="line"><span style="color:#7C7F93">  },</span><span style="color:#4C4F69"> [toggleSidebar])</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7C7F93;font-style:italic">  // We add a state so that we can do data-state="expanded" or "collapsed".</span></span>
+<span class="line"><span style="color:#7C7F93;font-style:italic">  // This makes it easier to style the sidebar with Tailwind classes.</span></span>
+<span class="line"><span style="color:#8839EF">  const</span><span style="color:#FE640B"> state</span><span style="color:#179299"> =</span><span style="color:#4C4F69"> open </span><span style="color:#179299">?</span><span style="color:#40A02B"> "expanded"</span><span style="color:#179299"> :</span><span style="color:#40A02B"> "collapsed"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">  const</span><span style="color:#FE640B"> contextValue</span><span style="color:#179299"> =</span><span style="color:#4C4F69"> React</span><span style="color:#179299">.</span><span style="color:#1E66F5;font-style:italic">useMemo</span><span style="color:#04A5E5">&#x3C;</span><span style="color:#DF8E1D;font-style:italic">SidebarContextProps</span><span style="color:#04A5E5">></span><span style="color:#4C4F69">(</span></span>
+<span class="line"><span style="color:#7C7F93">    ()</span><span style="color:#8839EF"> =></span><span style="color:#4C4F69"> (</span><span style="color:#7C7F93">{</span></span>
+<span class="line"><span style="color:#4C4F69">      state</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">      open</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">      setOpen</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">      isMobile</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">      openMobile</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">      setOpenMobile</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">      toggleSidebar</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#7C7F93">    }</span><span style="color:#4C4F69">)</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">    [state</span><span style="color:#7C7F93">,</span><span style="color:#4C4F69"> open</span><span style="color:#7C7F93">,</span><span style="color:#4C4F69"> setOpen</span><span style="color:#7C7F93">,</span><span style="color:#4C4F69"> isMobile</span><span style="color:#7C7F93">,</span><span style="color:#4C4F69"> openMobile</span><span style="color:#7C7F93">,</span><span style="color:#4C4F69"> setOpenMobile</span><span style="color:#7C7F93">,</span><span style="color:#4C4F69"> toggleSidebar]</span></span>
+<span class="line"><span style="color:#4C4F69">  )</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">  return</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#179299">    &#x3C;</span><span style="color:#EA76CB">SidebarContext.Provider</span><span style="color:#DF8E1D"> value</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#4C4F69">contextValue</span><span style="color:#7C7F93">}</span><span style="color:#179299">></span></span>
+<span class="line"><span style="color:#179299">      &#x3C;</span><span style="color:#EA76CB">TooltipProvider</span><span style="color:#DF8E1D"> delayDuration</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#FE640B">0</span><span style="color:#7C7F93">}</span><span style="color:#179299">></span></span>
+<span class="line"><span style="color:#179299">        &#x3C;</span><span style="color:#1E66F5">div</span></span>
+<span class="line"><span style="color:#DF8E1D">          data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar-wrapper"</span></span>
+<span class="line"><span style="color:#DF8E1D">          style</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span></span>
+<span class="line"><span style="color:#7C7F93">            {</span></span>
+<span class="line"><span style="color:#40A02B">              "--sidebar-width"</span><span style="color:#179299">:</span><span style="color:#FE640B"> SIDEBAR_WIDTH</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#40A02B">              "--sidebar-width-icon"</span><span style="color:#179299">:</span><span style="color:#FE640B"> SIDEBAR_WIDTH_ICON</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#179299">              ...</span><span style="color:#4C4F69">style</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#7C7F93">            }</span><span style="color:#8839EF"> as</span><span style="color:#DF8E1D;font-style:italic"> React</span><span style="color:#179299">.</span><span style="color:#DF8E1D;font-style:italic">CSSProperties</span></span>
+<span class="line"><span style="color:#7C7F93">          }</span></span>
+<span class="line"><span style="color:#DF8E1D">          className</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#1E66F5;font-style:italic">cn</span><span style="color:#4C4F69">(</span></span>
+<span class="line"><span style="color:#40A02B">            "group/sidebar-wrapper flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">            className</span></span>
+<span class="line"><span style="color:#4C4F69">          )</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#7C7F93">          {</span><span style="color:#179299">...</span><span style="color:#4C4F69">props</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">        ></span></span>
+<span class="line"><span style="color:#7C7F93">          {</span><span style="color:#4C4F69">children</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">        &#x3C;/</span><span style="color:#1E66F5">div</span><span style="color:#179299">></span></span>
+<span class="line"><span style="color:#179299">      &#x3C;/</span><span style="color:#EA76CB">TooltipProvider</span><span style="color:#179299">></span></span>
+<span class="line"><span style="color:#179299">    &#x3C;/</span><span style="color:#EA76CB">SidebarContext.Provider</span><span style="color:#179299">></span></span>
+<span class="line"><span style="color:#4C4F69">  )</span></span>
+<span class="line"><span style="color:#7C7F93">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">function</span><span style="color:#1E66F5;font-style:italic"> Sidebar</span><span style="color:#7C7F93">({</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  side</span><span style="color:#179299"> =</span><span style="color:#40A02B"> "left"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  variant</span><span style="color:#179299"> =</span><span style="color:#40A02B"> "sidebar"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  collapsible</span><span style="color:#179299"> =</span><span style="color:#40A02B"> "offcanvas"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  className</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  children</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#179299">  ...</span><span style="color:#E64553;font-style:italic">props</span></span>
+<span class="line"><span style="color:#7C7F93">}</span><span style="color:#179299">:</span><span style="color:#DF8E1D;font-style:italic"> React</span><span style="color:#179299">.</span><span style="color:#DF8E1D;font-style:italic">ComponentProps</span><span style="color:#04A5E5">&#x3C;</span><span style="color:#40A02B">"</span><span style="color:#40A02B;font-style:italic">div</span><span style="color:#40A02B">"</span><span style="color:#04A5E5">></span><span style="color:#179299"> &#x26;</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#4C4F69;font-style:italic">  side</span><span style="color:#179299">?:</span><span style="color:#40A02B"> "</span><span style="color:#40A02B;font-style:italic">left</span><span style="color:#40A02B">"</span><span style="color:#179299"> |</span><span style="color:#40A02B"> "</span><span style="color:#40A02B;font-style:italic">right</span><span style="color:#40A02B">"</span></span>
+<span class="line"><span style="color:#4C4F69;font-style:italic">  variant</span><span style="color:#179299">?:</span><span style="color:#40A02B"> "</span><span style="color:#40A02B;font-style:italic">sidebar</span><span style="color:#40A02B">"</span><span style="color:#179299"> |</span><span style="color:#40A02B"> "</span><span style="color:#40A02B;font-style:italic">floating</span><span style="color:#40A02B">"</span><span style="color:#179299"> |</span><span style="color:#40A02B"> "</span><span style="color:#40A02B;font-style:italic">inset</span><span style="color:#40A02B">"</span></span>
+<span class="line"><span style="color:#4C4F69;font-style:italic">  collapsible</span><span style="color:#179299">?:</span><span style="color:#40A02B"> "</span><span style="color:#40A02B;font-style:italic">offcanvas</span><span style="color:#40A02B">"</span><span style="color:#179299"> |</span><span style="color:#40A02B"> "</span><span style="color:#40A02B;font-style:italic">icon</span><span style="color:#40A02B">"</span><span style="color:#179299"> |</span><span style="color:#40A02B"> "</span><span style="color:#40A02B;font-style:italic">none</span><span style="color:#40A02B">"</span></span>
+<span class="line"><span style="color:#7C7F93">})</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">  const</span><span style="color:#7C7F93"> {</span><span style="color:#FE640B"> isMobile</span><span style="color:#7C7F93">,</span><span style="color:#FE640B"> state</span><span style="color:#7C7F93">,</span><span style="color:#FE640B"> openMobile</span><span style="color:#7C7F93">,</span><span style="color:#FE640B"> setOpenMobile</span><span style="color:#7C7F93"> }</span><span style="color:#179299"> =</span><span style="color:#1E66F5;font-style:italic"> useSidebar</span><span style="color:#4C4F69">()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">  if</span><span style="color:#4C4F69"> (collapsible </span><span style="color:#179299">===</span><span style="color:#40A02B"> "none"</span><span style="color:#4C4F69">) </span><span style="color:#7C7F93">{</span></span>
+<span class="line"><span style="color:#8839EF">    return</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#179299">      &#x3C;</span><span style="color:#1E66F5">div</span></span>
+<span class="line"><span style="color:#DF8E1D">        data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar"</span></span>
+<span class="line"><span style="color:#DF8E1D">        className</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#1E66F5;font-style:italic">cn</span><span style="color:#4C4F69">(</span></span>
+<span class="line"><span style="color:#40A02B">          "flex h-full w-(--sidebar-width) flex-col bg-sidebar text-sidebar-foreground"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">          className</span></span>
+<span class="line"><span style="color:#4C4F69">        )</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#7C7F93">        {</span><span style="color:#179299">...</span><span style="color:#4C4F69">props</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">      ></span></span>
+<span class="line"><span style="color:#7C7F93">        {</span><span style="color:#4C4F69">children</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">      &#x3C;/</span><span style="color:#1E66F5">div</span><span style="color:#179299">></span></span>
+<span class="line"><span style="color:#4C4F69">    )</span></span>
+<span class="line"><span style="color:#7C7F93">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">  if</span><span style="color:#4C4F69"> (isMobile) </span><span style="color:#7C7F93">{</span></span>
+<span class="line"><span style="color:#8839EF">    return</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#179299">      &#x3C;</span><span style="color:#EA76CB">Sheet</span><span style="color:#DF8E1D"> open</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#4C4F69">openMobile</span><span style="color:#7C7F93">}</span><span style="color:#DF8E1D"> onOpenChange</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#4C4F69">setOpenMobile</span><span style="color:#7C7F93">}</span><span style="color:#7C7F93"> {</span><span style="color:#179299">...</span><span style="color:#4C4F69">props</span><span style="color:#7C7F93">}</span><span style="color:#179299">></span></span>
+<span class="line"><span style="color:#179299">        &#x3C;</span><span style="color:#EA76CB">SheetContent</span></span>
+<span class="line"><span style="color:#DF8E1D">          data-sidebar</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar"</span></span>
+<span class="line"><span style="color:#DF8E1D">          data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar"</span></span>
+<span class="line"><span style="color:#DF8E1D">          data-mobile</span><span style="color:#179299">=</span><span style="color:#40A02B">"true"</span></span>
+<span class="line"><span style="color:#DF8E1D">          className</span><span style="color:#179299">=</span><span style="color:#40A02B">"w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&#x26;>button]:hidden"</span></span>
+<span class="line"><span style="color:#DF8E1D">          style</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span></span>
+<span class="line"><span style="color:#7C7F93">            {</span></span>
+<span class="line"><span style="color:#40A02B">              "--sidebar-width"</span><span style="color:#179299">:</span><span style="color:#FE640B"> SIDEBAR_WIDTH_MOBILE</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#7C7F93">            }</span><span style="color:#8839EF"> as</span><span style="color:#DF8E1D;font-style:italic"> React</span><span style="color:#179299">.</span><span style="color:#DF8E1D;font-style:italic">CSSProperties</span></span>
+<span class="line"><span style="color:#7C7F93">          }</span></span>
+<span class="line"><span style="color:#DF8E1D">          side</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#4C4F69">side</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">        ></span></span>
+<span class="line"><span style="color:#179299">          &#x3C;</span><span style="color:#EA76CB">SheetHeader</span><span style="color:#DF8E1D"> className</span><span style="color:#179299">=</span><span style="color:#40A02B">"sr-only"</span><span style="color:#179299">></span></span>
+<span class="line"><span style="color:#179299">            &#x3C;</span><span style="color:#EA76CB">SheetTitle</span><span style="color:#179299">></span><span style="color:#4C4F69">Sidebar</span><span style="color:#179299">&#x3C;/</span><span style="color:#EA76CB">SheetTitle</span><span style="color:#179299">></span></span>
+<span class="line"><span style="color:#179299">            &#x3C;</span><span style="color:#EA76CB">SheetDescription</span><span style="color:#179299">></span><span style="color:#4C4F69">Displays the mobile sidebar.</span><span style="color:#179299">&#x3C;/</span><span style="color:#EA76CB">SheetDescription</span><span style="color:#179299">></span></span>
+<span class="line"><span style="color:#179299">          &#x3C;/</span><span style="color:#EA76CB">SheetHeader</span><span style="color:#179299">></span></span>
+<span class="line"><span style="color:#179299">          &#x3C;</span><span style="color:#1E66F5">div</span><span style="color:#DF8E1D"> className</span><span style="color:#179299">=</span><span style="color:#40A02B">"flex h-full w-full flex-col"</span><span style="color:#179299">></span><span style="color:#7C7F93">{</span><span style="color:#4C4F69">children</span><span style="color:#7C7F93">}</span><span style="color:#179299">&#x3C;/</span><span style="color:#1E66F5">div</span><span style="color:#179299">></span></span>
+<span class="line"><span style="color:#179299">        &#x3C;/</span><span style="color:#EA76CB">SheetContent</span><span style="color:#179299">></span></span>
+<span class="line"><span style="color:#179299">      &#x3C;/</span><span style="color:#EA76CB">Sheet</span><span style="color:#179299">></span></span>
+<span class="line"><span style="color:#4C4F69">    )</span></span>
+<span class="line"><span style="color:#7C7F93">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">  return</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#179299">    &#x3C;</span><span style="color:#1E66F5">div</span></span>
+<span class="line"><span style="color:#DF8E1D">      className</span><span style="color:#179299">=</span><span style="color:#40A02B">"group peer hidden text-sidebar-foreground md:block"</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-state</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#4C4F69">state</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-collapsible</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#4C4F69">state </span><span style="color:#179299">===</span><span style="color:#40A02B"> "collapsed"</span><span style="color:#179299"> ?</span><span style="color:#4C4F69"> collapsible </span><span style="color:#179299">:</span><span style="color:#40A02B"> ""</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-variant</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#4C4F69">variant</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-side</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#4C4F69">side</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar"</span></span>
+<span class="line"><span style="color:#179299">    ></span></span>
+<span class="line"><span style="color:#7C7F93">      {</span><span style="color:#7C7F93;font-style:italic">/* This is what handles the sidebar gap on desktop */</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">      &#x3C;</span><span style="color:#1E66F5">div</span></span>
+<span class="line"><span style="color:#DF8E1D">        data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar-gap"</span></span>
+<span class="line"><span style="color:#DF8E1D">        className</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#1E66F5;font-style:italic">cn</span><span style="color:#4C4F69">(</span></span>
+<span class="line"><span style="color:#40A02B">          "relative w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#40A02B">          "group-data-[collapsible=offcanvas]:w-0"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#40A02B">          "group-data-[side=right]:rotate-180"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">          variant </span><span style="color:#179299">===</span><span style="color:#40A02B"> "floating"</span><span style="color:#179299"> ||</span><span style="color:#4C4F69"> variant </span><span style="color:#179299">===</span><span style="color:#40A02B"> "inset"</span></span>
+<span class="line"><span style="color:#179299">            ?</span><span style="color:#40A02B"> "group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4)))]"</span></span>
+<span class="line"><span style="color:#179299">            :</span><span style="color:#40A02B"> "group-data-[collapsible=icon]:w-(--sidebar-width-icon)"</span></span>
+<span class="line"><span style="color:#4C4F69">        )</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">      /></span></span>
+<span class="line"><span style="color:#179299">      &#x3C;</span><span style="color:#1E66F5">div</span></span>
+<span class="line"><span style="color:#DF8E1D">        data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar-container"</span></span>
+<span class="line"><span style="color:#DF8E1D">        className</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#1E66F5;font-style:italic">cn</span><span style="color:#4C4F69">(</span></span>
+<span class="line"><span style="color:#40A02B">          "fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">          side </span><span style="color:#179299">===</span><span style="color:#40A02B"> "left"</span></span>
+<span class="line"><span style="color:#179299">            ?</span><span style="color:#40A02B"> "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"</span></span>
+<span class="line"><span style="color:#179299">            :</span><span style="color:#40A02B"> "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#7C7F93;font-style:italic">          // Adjust the padding for floating and inset variants.</span></span>
+<span class="line"><span style="color:#4C4F69">          variant </span><span style="color:#179299">===</span><span style="color:#40A02B"> "floating"</span><span style="color:#179299"> ||</span><span style="color:#4C4F69"> variant </span><span style="color:#179299">===</span><span style="color:#40A02B"> "inset"</span></span>
+<span class="line"><span style="color:#179299">            ?</span><span style="color:#40A02B"> "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]"</span></span>
+<span class="line"><span style="color:#179299">            :</span><span style="color:#40A02B"> "group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">          className</span></span>
+<span class="line"><span style="color:#4C4F69">        )</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#7C7F93">        {</span><span style="color:#179299">...</span><span style="color:#4C4F69">props</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">      ></span></span>
+<span class="line"><span style="color:#179299">        &#x3C;</span><span style="color:#1E66F5">div</span></span>
+<span class="line"><span style="color:#DF8E1D">          data-sidebar</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar"</span></span>
+<span class="line"><span style="color:#DF8E1D">          data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar-inner"</span></span>
+<span class="line"><span style="color:#DF8E1D">          className</span><span style="color:#179299">=</span><span style="color:#40A02B">"flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow-sm"</span></span>
+<span class="line"><span style="color:#179299">        ></span></span>
+<span class="line"><span style="color:#7C7F93">          {</span><span style="color:#4C4F69">children</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">        &#x3C;/</span><span style="color:#1E66F5">div</span><span style="color:#179299">></span></span>
+<span class="line"><span style="color:#179299">      &#x3C;/</span><span style="color:#1E66F5">div</span><span style="color:#179299">></span></span>
+<span class="line"><span style="color:#179299">    &#x3C;/</span><span style="color:#1E66F5">div</span><span style="color:#179299">></span></span>
+<span class="line"><span style="color:#4C4F69">  )</span></span>
+<span class="line"><span style="color:#7C7F93">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">function</span><span style="color:#1E66F5;font-style:italic"> SidebarTrigger</span><span style="color:#7C7F93">({</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  className</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  onClick</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#179299">  ...</span><span style="color:#E64553;font-style:italic">props</span></span>
+<span class="line"><span style="color:#7C7F93">}</span><span style="color:#179299">:</span><span style="color:#DF8E1D;font-style:italic"> React</span><span style="color:#179299">.</span><span style="color:#DF8E1D;font-style:italic">ComponentProps</span><span style="color:#04A5E5">&#x3C;</span><span style="color:#179299">typeof</span><span style="color:#4C4F69;font-style:italic"> Button</span><span style="color:#04A5E5">></span><span style="color:#7C7F93">)</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">  const</span><span style="color:#7C7F93"> {</span><span style="color:#FE640B"> toggleSidebar</span><span style="color:#7C7F93"> }</span><span style="color:#179299"> =</span><span style="color:#1E66F5;font-style:italic"> useSidebar</span><span style="color:#4C4F69">()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">  return</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#179299">    &#x3C;</span><span style="color:#EA76CB">Button</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-sidebar</span><span style="color:#179299">=</span><span style="color:#40A02B">"trigger"</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar-trigger"</span></span>
+<span class="line"><span style="color:#DF8E1D">      variant</span><span style="color:#179299">=</span><span style="color:#40A02B">"ghost"</span></span>
+<span class="line"><span style="color:#DF8E1D">      size</span><span style="color:#179299">=</span><span style="color:#40A02B">"icon"</span></span>
+<span class="line"><span style="color:#DF8E1D">      className</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#1E66F5;font-style:italic">cn</span><span style="color:#4C4F69">(</span><span style="color:#40A02B">"size-7"</span><span style="color:#7C7F93">,</span><span style="color:#4C4F69"> className)</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#DF8E1D">      onClick</span><span style="color:#179299">=</span><span style="color:#7C7F93">{(</span><span style="color:#E64553;font-style:italic">event</span><span style="color:#7C7F93">)</span><span style="color:#8839EF"> =></span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#1E66F5;font-style:italic">        onClick</span><span style="color:#179299">?.</span><span style="color:#4C4F69">(event)</span></span>
+<span class="line"><span style="color:#1E66F5;font-style:italic">        toggleSidebar</span><span style="color:#4C4F69">()</span></span>
+<span class="line"><span style="color:#7C7F93">      }}</span></span>
+<span class="line"><span style="color:#7C7F93">      {</span><span style="color:#179299">...</span><span style="color:#4C4F69">props</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">    ></span></span>
+<span class="line"><span style="color:#179299">      &#x3C;</span><span style="color:#EA76CB">PanelLeftIcon</span><span style="color:#179299"> /></span></span>
+<span class="line"><span style="color:#179299">      &#x3C;</span><span style="color:#1E66F5">span</span><span style="color:#DF8E1D"> className</span><span style="color:#179299">=</span><span style="color:#40A02B">"sr-only"</span><span style="color:#179299">></span><span style="color:#4C4F69">Toggle Sidebar</span><span style="color:#179299">&#x3C;/</span><span style="color:#1E66F5">span</span><span style="color:#179299">></span></span>
+<span class="line"><span style="color:#179299">    &#x3C;/</span><span style="color:#EA76CB">Button</span><span style="color:#179299">></span></span>
+<span class="line"><span style="color:#4C4F69">  )</span></span>
+<span class="line"><span style="color:#7C7F93">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">function</span><span style="color:#1E66F5;font-style:italic"> SidebarRail</span><span style="color:#7C7F93">({</span><span style="color:#E64553;font-style:italic"> className</span><span style="color:#7C7F93">,</span><span style="color:#179299"> ...</span><span style="color:#E64553;font-style:italic">props</span><span style="color:#7C7F93"> }</span><span style="color:#179299">:</span><span style="color:#DF8E1D;font-style:italic"> React</span><span style="color:#179299">.</span><span style="color:#DF8E1D;font-style:italic">ComponentProps</span><span style="color:#04A5E5">&#x3C;</span><span style="color:#40A02B">"</span><span style="color:#40A02B;font-style:italic">button</span><span style="color:#40A02B">"</span><span style="color:#04A5E5">></span><span style="color:#7C7F93">)</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">  const</span><span style="color:#7C7F93"> {</span><span style="color:#FE640B"> toggleSidebar</span><span style="color:#7C7F93"> }</span><span style="color:#179299"> =</span><span style="color:#1E66F5;font-style:italic"> useSidebar</span><span style="color:#4C4F69">()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">  return</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#179299">    &#x3C;</span><span style="color:#1E66F5">button</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-sidebar</span><span style="color:#179299">=</span><span style="color:#40A02B">"rail"</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar-rail"</span></span>
+<span class="line"><span style="color:#DF8E1D">      aria-label</span><span style="color:#179299">=</span><span style="color:#40A02B">"Toggle Sidebar"</span></span>
+<span class="line"><span style="color:#DF8E1D">      tabIndex</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#179299">-</span><span style="color:#FE640B">1</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#DF8E1D">      onClick</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#4C4F69">toggleSidebar</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#DF8E1D">      title</span><span style="color:#179299">=</span><span style="color:#40A02B">"Toggle Sidebar"</span></span>
+<span class="line"><span style="color:#DF8E1D">      className</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#1E66F5;font-style:italic">cn</span><span style="color:#4C4F69">(</span></span>
+<span class="line"><span style="color:#40A02B">        "absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-sidebar-border sm:flex"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#40A02B">        "in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#40A02B">        "[[data-side=left][data-state=collapsed]_&#x26;]:cursor-e-resize [[data-side=right][data-state=collapsed]_&#x26;]:cursor-w-resize"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#40A02B">        "group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full hover:group-data-[collapsible=offcanvas]:bg-sidebar"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#40A02B">        "[[data-side=left][data-collapsible=offcanvas]_&#x26;]:-right-2"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#40A02B">        "[[data-side=right][data-collapsible=offcanvas]_&#x26;]:-left-2"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">        className</span></span>
+<span class="line"><span style="color:#4C4F69">      )</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#7C7F93">      {</span><span style="color:#179299">...</span><span style="color:#4C4F69">props</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">    /></span></span>
+<span class="line"><span style="color:#4C4F69">  )</span></span>
+<span class="line"><span style="color:#7C7F93">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">function</span><span style="color:#1E66F5;font-style:italic"> SidebarInset</span><span style="color:#7C7F93">({</span><span style="color:#E64553;font-style:italic"> className</span><span style="color:#7C7F93">,</span><span style="color:#179299"> ...</span><span style="color:#E64553;font-style:italic">props</span><span style="color:#7C7F93"> }</span><span style="color:#179299">:</span><span style="color:#DF8E1D;font-style:italic"> React</span><span style="color:#179299">.</span><span style="color:#DF8E1D;font-style:italic">ComponentProps</span><span style="color:#04A5E5">&#x3C;</span><span style="color:#40A02B">"</span><span style="color:#40A02B;font-style:italic">main</span><span style="color:#40A02B">"</span><span style="color:#04A5E5">></span><span style="color:#7C7F93">)</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">  return</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#179299">    &#x3C;</span><span style="color:#1E66F5">main</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar-inset"</span></span>
+<span class="line"><span style="color:#DF8E1D">      className</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#1E66F5;font-style:italic">cn</span><span style="color:#4C4F69">(</span></span>
+<span class="line"><span style="color:#40A02B">        "relative flex w-full flex-1 flex-col bg-background"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#40A02B">        "md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">        className</span></span>
+<span class="line"><span style="color:#4C4F69">      )</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#7C7F93">      {</span><span style="color:#179299">...</span><span style="color:#4C4F69">props</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">    /></span></span>
+<span class="line"><span style="color:#4C4F69">  )</span></span>
+<span class="line"><span style="color:#7C7F93">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">function</span><span style="color:#1E66F5;font-style:italic"> SidebarInput</span><span style="color:#7C7F93">({</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  className</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#179299">  ...</span><span style="color:#E64553;font-style:italic">props</span></span>
+<span class="line"><span style="color:#7C7F93">}</span><span style="color:#179299">:</span><span style="color:#DF8E1D;font-style:italic"> React</span><span style="color:#179299">.</span><span style="color:#DF8E1D;font-style:italic">ComponentProps</span><span style="color:#04A5E5">&#x3C;</span><span style="color:#179299">typeof</span><span style="color:#4C4F69;font-style:italic"> Input</span><span style="color:#04A5E5">></span><span style="color:#7C7F93">)</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">  return</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#179299">    &#x3C;</span><span style="color:#EA76CB">Input</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar-input"</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-sidebar</span><span style="color:#179299">=</span><span style="color:#40A02B">"input"</span></span>
+<span class="line"><span style="color:#DF8E1D">      className</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#1E66F5;font-style:italic">cn</span><span style="color:#4C4F69">(</span><span style="color:#40A02B">"h-8 w-full bg-background shadow-none"</span><span style="color:#7C7F93">,</span><span style="color:#4C4F69"> className)</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#7C7F93">      {</span><span style="color:#179299">...</span><span style="color:#4C4F69">props</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">    /></span></span>
+<span class="line"><span style="color:#4C4F69">  )</span></span>
+<span class="line"><span style="color:#7C7F93">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">function</span><span style="color:#1E66F5;font-style:italic"> SidebarHeader</span><span style="color:#7C7F93">({</span><span style="color:#E64553;font-style:italic"> className</span><span style="color:#7C7F93">,</span><span style="color:#179299"> ...</span><span style="color:#E64553;font-style:italic">props</span><span style="color:#7C7F93"> }</span><span style="color:#179299">:</span><span style="color:#DF8E1D;font-style:italic"> React</span><span style="color:#179299">.</span><span style="color:#DF8E1D;font-style:italic">ComponentProps</span><span style="color:#04A5E5">&#x3C;</span><span style="color:#40A02B">"</span><span style="color:#40A02B;font-style:italic">div</span><span style="color:#40A02B">"</span><span style="color:#04A5E5">></span><span style="color:#7C7F93">)</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">  return</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#179299">    &#x3C;</span><span style="color:#1E66F5">div</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar-header"</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-sidebar</span><span style="color:#179299">=</span><span style="color:#40A02B">"header"</span></span>
+<span class="line"><span style="color:#DF8E1D">      className</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#1E66F5;font-style:italic">cn</span><span style="color:#4C4F69">(</span><span style="color:#40A02B">"flex flex-col gap-2 p-2"</span><span style="color:#7C7F93">,</span><span style="color:#4C4F69"> className)</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#7C7F93">      {</span><span style="color:#179299">...</span><span style="color:#4C4F69">props</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">    /></span></span>
+<span class="line"><span style="color:#4C4F69">  )</span></span>
+<span class="line"><span style="color:#7C7F93">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">function</span><span style="color:#1E66F5;font-style:italic"> SidebarFooter</span><span style="color:#7C7F93">({</span><span style="color:#E64553;font-style:italic"> className</span><span style="color:#7C7F93">,</span><span style="color:#179299"> ...</span><span style="color:#E64553;font-style:italic">props</span><span style="color:#7C7F93"> }</span><span style="color:#179299">:</span><span style="color:#DF8E1D;font-style:italic"> React</span><span style="color:#179299">.</span><span style="color:#DF8E1D;font-style:italic">ComponentProps</span><span style="color:#04A5E5">&#x3C;</span><span style="color:#40A02B">"</span><span style="color:#40A02B;font-style:italic">div</span><span style="color:#40A02B">"</span><span style="color:#04A5E5">></span><span style="color:#7C7F93">)</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">  return</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#179299">    &#x3C;</span><span style="color:#1E66F5">div</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar-footer"</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-sidebar</span><span style="color:#179299">=</span><span style="color:#40A02B">"footer"</span></span>
+<span class="line"><span style="color:#DF8E1D">      className</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#1E66F5;font-style:italic">cn</span><span style="color:#4C4F69">(</span><span style="color:#40A02B">"flex flex-col gap-2 p-2"</span><span style="color:#7C7F93">,</span><span style="color:#4C4F69"> className)</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#7C7F93">      {</span><span style="color:#179299">...</span><span style="color:#4C4F69">props</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">    /></span></span>
+<span class="line"><span style="color:#4C4F69">  )</span></span>
+<span class="line"><span style="color:#7C7F93">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">function</span><span style="color:#1E66F5;font-style:italic"> SidebarSeparator</span><span style="color:#7C7F93">({</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  className</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#179299">  ...</span><span style="color:#E64553;font-style:italic">props</span></span>
+<span class="line"><span style="color:#7C7F93">}</span><span style="color:#179299">:</span><span style="color:#DF8E1D;font-style:italic"> React</span><span style="color:#179299">.</span><span style="color:#DF8E1D;font-style:italic">ComponentProps</span><span style="color:#04A5E5">&#x3C;</span><span style="color:#179299">typeof</span><span style="color:#4C4F69;font-style:italic"> Separator</span><span style="color:#04A5E5">></span><span style="color:#7C7F93">)</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">  return</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#179299">    &#x3C;</span><span style="color:#EA76CB">Separator</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar-separator"</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-sidebar</span><span style="color:#179299">=</span><span style="color:#40A02B">"separator"</span></span>
+<span class="line"><span style="color:#DF8E1D">      className</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#1E66F5;font-style:italic">cn</span><span style="color:#4C4F69">(</span><span style="color:#40A02B">"mx-2 w-auto bg-sidebar-border"</span><span style="color:#7C7F93">,</span><span style="color:#4C4F69"> className)</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#7C7F93">      {</span><span style="color:#179299">...</span><span style="color:#4C4F69">props</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">    /></span></span>
+<span class="line"><span style="color:#4C4F69">  )</span></span>
+<span class="line"><span style="color:#7C7F93">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">function</span><span style="color:#1E66F5;font-style:italic"> SidebarContent</span><span style="color:#7C7F93">({</span><span style="color:#E64553;font-style:italic"> className</span><span style="color:#7C7F93">,</span><span style="color:#179299"> ...</span><span style="color:#E64553;font-style:italic">props</span><span style="color:#7C7F93"> }</span><span style="color:#179299">:</span><span style="color:#DF8E1D;font-style:italic"> React</span><span style="color:#179299">.</span><span style="color:#DF8E1D;font-style:italic">ComponentProps</span><span style="color:#04A5E5">&#x3C;</span><span style="color:#40A02B">"</span><span style="color:#40A02B;font-style:italic">div</span><span style="color:#40A02B">"</span><span style="color:#04A5E5">></span><span style="color:#7C7F93">)</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">  return</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#179299">    &#x3C;</span><span style="color:#1E66F5">div</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar-content"</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-sidebar</span><span style="color:#179299">=</span><span style="color:#40A02B">"content"</span></span>
+<span class="line"><span style="color:#DF8E1D">      className</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#1E66F5;font-style:italic">cn</span><span style="color:#4C4F69">(</span></span>
+<span class="line"><span style="color:#40A02B">        "flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">        className</span></span>
+<span class="line"><span style="color:#4C4F69">      )</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#7C7F93">      {</span><span style="color:#179299">...</span><span style="color:#4C4F69">props</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">    /></span></span>
+<span class="line"><span style="color:#4C4F69">  )</span></span>
+<span class="line"><span style="color:#7C7F93">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">function</span><span style="color:#1E66F5;font-style:italic"> SidebarGroup</span><span style="color:#7C7F93">({</span><span style="color:#E64553;font-style:italic"> className</span><span style="color:#7C7F93">,</span><span style="color:#179299"> ...</span><span style="color:#E64553;font-style:italic">props</span><span style="color:#7C7F93"> }</span><span style="color:#179299">:</span><span style="color:#DF8E1D;font-style:italic"> React</span><span style="color:#179299">.</span><span style="color:#DF8E1D;font-style:italic">ComponentProps</span><span style="color:#04A5E5">&#x3C;</span><span style="color:#40A02B">"</span><span style="color:#40A02B;font-style:italic">div</span><span style="color:#40A02B">"</span><span style="color:#04A5E5">></span><span style="color:#7C7F93">)</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">  return</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#179299">    &#x3C;</span><span style="color:#1E66F5">div</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar-group"</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-sidebar</span><span style="color:#179299">=</span><span style="color:#40A02B">"group"</span></span>
+<span class="line"><span style="color:#DF8E1D">      className</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#1E66F5;font-style:italic">cn</span><span style="color:#4C4F69">(</span><span style="color:#40A02B">"relative flex w-full min-w-0 flex-col p-2"</span><span style="color:#7C7F93">,</span><span style="color:#4C4F69"> className)</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#7C7F93">      {</span><span style="color:#179299">...</span><span style="color:#4C4F69">props</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">    /></span></span>
+<span class="line"><span style="color:#4C4F69">  )</span></span>
+<span class="line"><span style="color:#7C7F93">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">function</span><span style="color:#1E66F5;font-style:italic"> SidebarGroupLabel</span><span style="color:#7C7F93">({</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  className</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  asChild</span><span style="color:#179299"> =</span><span style="color:#FE640B"> false</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#179299">  ...</span><span style="color:#E64553;font-style:italic">props</span></span>
+<span class="line"><span style="color:#7C7F93">}</span><span style="color:#179299">:</span><span style="color:#DF8E1D;font-style:italic"> React</span><span style="color:#179299">.</span><span style="color:#DF8E1D;font-style:italic">ComponentProps</span><span style="color:#04A5E5">&#x3C;</span><span style="color:#40A02B">"</span><span style="color:#40A02B;font-style:italic">div</span><span style="color:#40A02B">"</span><span style="color:#04A5E5">></span><span style="color:#179299"> &#x26;</span><span style="color:#7C7F93"> {</span><span style="color:#4C4F69;font-style:italic"> asChild</span><span style="color:#179299">?:</span><span style="color:#8839EF"> boolean</span><span style="color:#7C7F93"> })</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">  const</span><span style="color:#FE640B"> Comp</span><span style="color:#179299"> =</span><span style="color:#4C4F69"> asChild </span><span style="color:#179299">?</span><span style="color:#4C4F69"> Slot</span><span style="color:#179299">.</span><span style="color:#4C4F69">Root </span><span style="color:#179299">:</span><span style="color:#40A02B"> "div"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">  return</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#179299">    &#x3C;</span><span style="color:#EA76CB">Comp</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar-group-label"</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-sidebar</span><span style="color:#179299">=</span><span style="color:#40A02B">"group-label"</span></span>
+<span class="line"><span style="color:#DF8E1D">      className</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#1E66F5;font-style:italic">cn</span><span style="color:#4C4F69">(</span></span>
+<span class="line"><span style="color:#40A02B">        "flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 ring-sidebar-ring outline-hidden transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&#x26;>svg]:size-4 [&#x26;>svg]:shrink-0"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#40A02B">        "group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">        className</span></span>
+<span class="line"><span style="color:#4C4F69">      )</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#7C7F93">      {</span><span style="color:#179299">...</span><span style="color:#4C4F69">props</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">    /></span></span>
+<span class="line"><span style="color:#4C4F69">  )</span></span>
+<span class="line"><span style="color:#7C7F93">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">function</span><span style="color:#1E66F5;font-style:italic"> SidebarGroupAction</span><span style="color:#7C7F93">({</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  className</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  asChild</span><span style="color:#179299"> =</span><span style="color:#FE640B"> false</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#179299">  ...</span><span style="color:#E64553;font-style:italic">props</span></span>
+<span class="line"><span style="color:#7C7F93">}</span><span style="color:#179299">:</span><span style="color:#DF8E1D;font-style:italic"> React</span><span style="color:#179299">.</span><span style="color:#DF8E1D;font-style:italic">ComponentProps</span><span style="color:#04A5E5">&#x3C;</span><span style="color:#40A02B">"</span><span style="color:#40A02B;font-style:italic">button</span><span style="color:#40A02B">"</span><span style="color:#04A5E5">></span><span style="color:#179299"> &#x26;</span><span style="color:#7C7F93"> {</span><span style="color:#4C4F69;font-style:italic"> asChild</span><span style="color:#179299">?:</span><span style="color:#8839EF"> boolean</span><span style="color:#7C7F93"> })</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">  const</span><span style="color:#FE640B"> Comp</span><span style="color:#179299"> =</span><span style="color:#4C4F69"> asChild </span><span style="color:#179299">?</span><span style="color:#4C4F69"> Slot</span><span style="color:#179299">.</span><span style="color:#4C4F69">Root </span><span style="color:#179299">:</span><span style="color:#40A02B"> "button"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">  return</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#179299">    &#x3C;</span><span style="color:#EA76CB">Comp</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar-group-action"</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-sidebar</span><span style="color:#179299">=</span><span style="color:#40A02B">"group-action"</span></span>
+<span class="line"><span style="color:#DF8E1D">      className</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#1E66F5;font-style:italic">cn</span><span style="color:#4C4F69">(</span></span>
+<span class="line"><span style="color:#40A02B">        "absolute top-3.5 right-3 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground ring-sidebar-ring outline-hidden transition-transform hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 [&#x26;>svg]:size-4 [&#x26;>svg]:shrink-0"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#7C7F93;font-style:italic">        // Increases the hit area of the button on mobile.</span></span>
+<span class="line"><span style="color:#40A02B">        "after:absolute after:-inset-2 md:after:hidden"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#40A02B">        "group-data-[collapsible=icon]:hidden"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">        className</span></span>
+<span class="line"><span style="color:#4C4F69">      )</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#7C7F93">      {</span><span style="color:#179299">...</span><span style="color:#4C4F69">props</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">    /></span></span>
+<span class="line"><span style="color:#4C4F69">  )</span></span>
+<span class="line"><span style="color:#7C7F93">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">function</span><span style="color:#1E66F5;font-style:italic"> SidebarGroupContent</span><span style="color:#7C7F93">({</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  className</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#179299">  ...</span><span style="color:#E64553;font-style:italic">props</span></span>
+<span class="line"><span style="color:#7C7F93">}</span><span style="color:#179299">:</span><span style="color:#DF8E1D;font-style:italic"> React</span><span style="color:#179299">.</span><span style="color:#DF8E1D;font-style:italic">ComponentProps</span><span style="color:#04A5E5">&#x3C;</span><span style="color:#40A02B">"</span><span style="color:#40A02B;font-style:italic">div</span><span style="color:#40A02B">"</span><span style="color:#04A5E5">></span><span style="color:#7C7F93">)</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">  return</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#179299">    &#x3C;</span><span style="color:#1E66F5">div</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar-group-content"</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-sidebar</span><span style="color:#179299">=</span><span style="color:#40A02B">"group-content"</span></span>
+<span class="line"><span style="color:#DF8E1D">      className</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#1E66F5;font-style:italic">cn</span><span style="color:#4C4F69">(</span><span style="color:#40A02B">"w-full text-sm"</span><span style="color:#7C7F93">,</span><span style="color:#4C4F69"> className)</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#7C7F93">      {</span><span style="color:#179299">...</span><span style="color:#4C4F69">props</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">    /></span></span>
+<span class="line"><span style="color:#4C4F69">  )</span></span>
+<span class="line"><span style="color:#7C7F93">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">function</span><span style="color:#1E66F5;font-style:italic"> SidebarMenu</span><span style="color:#7C7F93">({</span><span style="color:#E64553;font-style:italic"> className</span><span style="color:#7C7F93">,</span><span style="color:#179299"> ...</span><span style="color:#E64553;font-style:italic">props</span><span style="color:#7C7F93"> }</span><span style="color:#179299">:</span><span style="color:#DF8E1D;font-style:italic"> React</span><span style="color:#179299">.</span><span style="color:#DF8E1D;font-style:italic">ComponentProps</span><span style="color:#04A5E5">&#x3C;</span><span style="color:#40A02B">"</span><span style="color:#40A02B;font-style:italic">ul</span><span style="color:#40A02B">"</span><span style="color:#04A5E5">></span><span style="color:#7C7F93">)</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">  return</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#179299">    &#x3C;</span><span style="color:#1E66F5">ul</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar-menu"</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-sidebar</span><span style="color:#179299">=</span><span style="color:#40A02B">"menu"</span></span>
+<span class="line"><span style="color:#DF8E1D">      className</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#1E66F5;font-style:italic">cn</span><span style="color:#4C4F69">(</span><span style="color:#40A02B">"flex w-full min-w-0 flex-col gap-1"</span><span style="color:#7C7F93">,</span><span style="color:#4C4F69"> className)</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#7C7F93">      {</span><span style="color:#179299">...</span><span style="color:#4C4F69">props</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">    /></span></span>
+<span class="line"><span style="color:#4C4F69">  )</span></span>
+<span class="line"><span style="color:#7C7F93">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">function</span><span style="color:#1E66F5;font-style:italic"> SidebarMenuItem</span><span style="color:#7C7F93">({</span><span style="color:#E64553;font-style:italic"> className</span><span style="color:#7C7F93">,</span><span style="color:#179299"> ...</span><span style="color:#E64553;font-style:italic">props</span><span style="color:#7C7F93"> }</span><span style="color:#179299">:</span><span style="color:#DF8E1D;font-style:italic"> React</span><span style="color:#179299">.</span><span style="color:#DF8E1D;font-style:italic">ComponentProps</span><span style="color:#04A5E5">&#x3C;</span><span style="color:#40A02B">"</span><span style="color:#40A02B;font-style:italic">li</span><span style="color:#40A02B">"</span><span style="color:#04A5E5">></span><span style="color:#7C7F93">)</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">  return</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#179299">    &#x3C;</span><span style="color:#1E66F5">li</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar-menu-item"</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-sidebar</span><span style="color:#179299">=</span><span style="color:#40A02B">"menu-item"</span></span>
+<span class="line"><span style="color:#DF8E1D">      className</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#1E66F5;font-style:italic">cn</span><span style="color:#4C4F69">(</span><span style="color:#40A02B">"group/menu-item relative"</span><span style="color:#7C7F93">,</span><span style="color:#4C4F69"> className)</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#7C7F93">      {</span><span style="color:#179299">...</span><span style="color:#4C4F69">props</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">    /></span></span>
+<span class="line"><span style="color:#4C4F69">  )</span></span>
+<span class="line"><span style="color:#7C7F93">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">const</span><span style="color:#FE640B"> sidebarMenuButtonVariants</span><span style="color:#179299"> =</span><span style="color:#1E66F5;font-style:italic"> cva</span><span style="color:#4C4F69">(</span></span>
+<span class="line"><span style="color:#40A02B">  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&#x26;>span:last-child]:truncate [&#x26;>svg]:size-4 [&#x26;>svg]:shrink-0"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#7C7F93">  {</span></span>
+<span class="line"><span style="color:#4C4F69">    variants</span><span style="color:#179299">:</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#4C4F69">      variant</span><span style="color:#179299">:</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#4C4F69">        default</span><span style="color:#179299">:</span><span style="color:#40A02B"> "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">        outline</span><span style="color:#179299">:</span></span>
+<span class="line"><span style="color:#40A02B">          "bg-background shadow-[0_0_0_1px_var(--sidebar-border)] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_var(--sidebar-accent)]"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#7C7F93">      },</span></span>
+<span class="line"><span style="color:#4C4F69">      size</span><span style="color:#179299">:</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#4C4F69">        default</span><span style="color:#179299">:</span><span style="color:#40A02B"> "h-8 text-sm"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">        sm</span><span style="color:#179299">:</span><span style="color:#40A02B"> "h-7 text-xs"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">        lg</span><span style="color:#179299">:</span><span style="color:#40A02B"> "h-12 text-sm group-data-[collapsible=icon]:p-0!"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#7C7F93">      },</span></span>
+<span class="line"><span style="color:#7C7F93">    },</span></span>
+<span class="line"><span style="color:#4C4F69">    defaultVariants</span><span style="color:#179299">:</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#4C4F69">      variant</span><span style="color:#179299">:</span><span style="color:#40A02B"> "default"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">      size</span><span style="color:#179299">:</span><span style="color:#40A02B"> "default"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#7C7F93">    },</span></span>
+<span class="line"><span style="color:#7C7F93">  }</span></span>
+<span class="line"><span style="color:#4C4F69">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">function</span><span style="color:#1E66F5;font-style:italic"> SidebarMenuButton</span><span style="color:#7C7F93">({</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  asChild</span><span style="color:#179299"> =</span><span style="color:#FE640B"> false</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  isActive</span><span style="color:#179299"> =</span><span style="color:#FE640B"> false</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  variant</span><span style="color:#179299"> =</span><span style="color:#40A02B"> "default"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  size</span><span style="color:#179299"> =</span><span style="color:#40A02B"> "default"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  tooltip</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  className</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#179299">  ...</span><span style="color:#E64553;font-style:italic">props</span></span>
+<span class="line"><span style="color:#7C7F93">}</span><span style="color:#179299">:</span><span style="color:#DF8E1D;font-style:italic"> React</span><span style="color:#179299">.</span><span style="color:#DF8E1D;font-style:italic">ComponentProps</span><span style="color:#04A5E5">&#x3C;</span><span style="color:#40A02B">"</span><span style="color:#40A02B;font-style:italic">button</span><span style="color:#40A02B">"</span><span style="color:#04A5E5">></span><span style="color:#179299"> &#x26;</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#4C4F69;font-style:italic">  asChild</span><span style="color:#179299">?:</span><span style="color:#8839EF"> boolean</span></span>
+<span class="line"><span style="color:#4C4F69;font-style:italic">  isActive</span><span style="color:#179299">?:</span><span style="color:#8839EF"> boolean</span></span>
+<span class="line"><span style="color:#4C4F69;font-style:italic">  tooltip</span><span style="color:#179299">?:</span><span style="color:#8839EF"> string</span><span style="color:#179299"> |</span><span style="color:#DF8E1D;font-style:italic"> React</span><span style="color:#179299">.</span><span style="color:#DF8E1D;font-style:italic">ComponentProps</span><span style="color:#04A5E5">&#x3C;</span><span style="color:#179299">typeof</span><span style="color:#4C4F69;font-style:italic"> TooltipContent</span><span style="color:#04A5E5">></span></span>
+<span class="line"><span style="color:#7C7F93">}</span><span style="color:#179299"> &#x26;</span><span style="color:#DF8E1D;font-style:italic"> VariantProps</span><span style="color:#04A5E5">&#x3C;</span><span style="color:#179299">typeof</span><span style="color:#4C4F69;font-style:italic"> sidebarMenuButtonVariants</span><span style="color:#04A5E5">></span><span style="color:#7C7F93">)</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">  const</span><span style="color:#FE640B"> Comp</span><span style="color:#179299"> =</span><span style="color:#4C4F69"> asChild </span><span style="color:#179299">?</span><span style="color:#4C4F69"> Slot</span><span style="color:#179299">.</span><span style="color:#4C4F69">Root </span><span style="color:#179299">:</span><span style="color:#40A02B"> "button"</span></span>
+<span class="line"><span style="color:#8839EF">  const</span><span style="color:#7C7F93"> {</span><span style="color:#FE640B"> isMobile</span><span style="color:#7C7F93">,</span><span style="color:#FE640B"> state</span><span style="color:#7C7F93"> }</span><span style="color:#179299"> =</span><span style="color:#1E66F5;font-style:italic"> useSidebar</span><span style="color:#4C4F69">()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">  const</span><span style="color:#1E66F5;font-style:italic"> button</span><span style="color:#179299"> =</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#179299">    &#x3C;</span><span style="color:#EA76CB">Comp</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar-menu-button"</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-sidebar</span><span style="color:#179299">=</span><span style="color:#40A02B">"menu-button"</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-size</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#4C4F69">size</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-active</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#4C4F69">isActive</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#DF8E1D">      className</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#1E66F5;font-style:italic">cn</span><span style="color:#4C4F69">(</span><span style="color:#1E66F5;font-style:italic">sidebarMenuButtonVariants</span><span style="color:#4C4F69">(</span><span style="color:#7C7F93">{</span><span style="color:#4C4F69"> variant</span><span style="color:#7C7F93">,</span><span style="color:#4C4F69"> size </span><span style="color:#7C7F93">}</span><span style="color:#4C4F69">)</span><span style="color:#7C7F93">,</span><span style="color:#4C4F69"> className)</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#7C7F93">      {</span><span style="color:#179299">...</span><span style="color:#4C4F69">props</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">    /></span></span>
+<span class="line"><span style="color:#4C4F69">  )</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">  if</span><span style="color:#4C4F69"> (</span><span style="color:#179299">!</span><span style="color:#4C4F69">tooltip) </span><span style="color:#7C7F93">{</span></span>
+<span class="line"><span style="color:#8839EF">    return</span><span style="color:#4C4F69"> button</span></span>
+<span class="line"><span style="color:#7C7F93">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">  if</span><span style="color:#4C4F69"> (</span><span style="color:#179299">typeof</span><span style="color:#4C4F69"> tooltip </span><span style="color:#179299">===</span><span style="color:#40A02B"> "string"</span><span style="color:#4C4F69">) </span><span style="color:#7C7F93">{</span></span>
+<span class="line"><span style="color:#4C4F69">    tooltip </span><span style="color:#179299">=</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#4C4F69">      children</span><span style="color:#179299">:</span><span style="color:#4C4F69"> tooltip</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#7C7F93">    }</span></span>
+<span class="line"><span style="color:#7C7F93">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">  return</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#179299">    &#x3C;</span><span style="color:#EA76CB">Tooltip</span><span style="color:#179299">></span></span>
+<span class="line"><span style="color:#179299">      &#x3C;</span><span style="color:#EA76CB">TooltipTrigger</span><span style="color:#DF8E1D"> asChild</span><span style="color:#179299">></span><span style="color:#7C7F93">{</span><span style="color:#4C4F69">button</span><span style="color:#7C7F93">}</span><span style="color:#179299">&#x3C;/</span><span style="color:#EA76CB">TooltipTrigger</span><span style="color:#179299">></span></span>
+<span class="line"><span style="color:#179299">      &#x3C;</span><span style="color:#EA76CB">TooltipContent</span></span>
+<span class="line"><span style="color:#DF8E1D">        side</span><span style="color:#179299">=</span><span style="color:#40A02B">"right"</span></span>
+<span class="line"><span style="color:#DF8E1D">        align</span><span style="color:#179299">=</span><span style="color:#40A02B">"center"</span></span>
+<span class="line"><span style="color:#DF8E1D">        hidden</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#4C4F69">state </span><span style="color:#179299">!==</span><span style="color:#40A02B"> "collapsed"</span><span style="color:#179299"> ||</span><span style="color:#4C4F69"> isMobile</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#7C7F93">        {</span><span style="color:#179299">...</span><span style="color:#4C4F69">tooltip</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">      /></span></span>
+<span class="line"><span style="color:#179299">    &#x3C;/</span><span style="color:#EA76CB">Tooltip</span><span style="color:#179299">></span></span>
+<span class="line"><span style="color:#4C4F69">  )</span></span>
+<span class="line"><span style="color:#7C7F93">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">function</span><span style="color:#1E66F5;font-style:italic"> SidebarMenuAction</span><span style="color:#7C7F93">({</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  className</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  asChild</span><span style="color:#179299"> =</span><span style="color:#FE640B"> false</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  showOnHover</span><span style="color:#179299"> =</span><span style="color:#FE640B"> false</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#179299">  ...</span><span style="color:#E64553;font-style:italic">props</span></span>
+<span class="line"><span style="color:#7C7F93">}</span><span style="color:#179299">:</span><span style="color:#DF8E1D;font-style:italic"> React</span><span style="color:#179299">.</span><span style="color:#DF8E1D;font-style:italic">ComponentProps</span><span style="color:#04A5E5">&#x3C;</span><span style="color:#40A02B">"</span><span style="color:#40A02B;font-style:italic">button</span><span style="color:#40A02B">"</span><span style="color:#04A5E5">></span><span style="color:#179299"> &#x26;</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#4C4F69;font-style:italic">  asChild</span><span style="color:#179299">?:</span><span style="color:#8839EF"> boolean</span></span>
+<span class="line"><span style="color:#4C4F69;font-style:italic">  showOnHover</span><span style="color:#179299">?:</span><span style="color:#8839EF"> boolean</span></span>
+<span class="line"><span style="color:#7C7F93">})</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">  const</span><span style="color:#FE640B"> Comp</span><span style="color:#179299"> =</span><span style="color:#4C4F69"> asChild </span><span style="color:#179299">?</span><span style="color:#4C4F69"> Slot</span><span style="color:#179299">.</span><span style="color:#4C4F69">Root </span><span style="color:#179299">:</span><span style="color:#40A02B"> "button"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">  return</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#179299">    &#x3C;</span><span style="color:#EA76CB">Comp</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar-menu-action"</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-sidebar</span><span style="color:#179299">=</span><span style="color:#40A02B">"menu-action"</span></span>
+<span class="line"><span style="color:#DF8E1D">      className</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#1E66F5;font-style:italic">cn</span><span style="color:#4C4F69">(</span></span>
+<span class="line"><span style="color:#40A02B">        "absolute top-1.5 right-1 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground ring-sidebar-ring outline-hidden transition-transform peer-hover/menu-button:text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 [&#x26;>svg]:size-4 [&#x26;>svg]:shrink-0"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#7C7F93;font-style:italic">        // Increases the hit area of the button on mobile.</span></span>
+<span class="line"><span style="color:#40A02B">        "after:absolute after:-inset-2 md:after:hidden"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#40A02B">        "peer-data-[size=sm]/menu-button:top-1"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#40A02B">        "peer-data-[size=default]/menu-button:top-1.5"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#40A02B">        "peer-data-[size=lg]/menu-button:top-2.5"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#40A02B">        "group-data-[collapsible=icon]:hidden"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">        showOnHover </span><span style="color:#179299">&#x26;&#x26;</span></span>
+<span class="line"><span style="color:#40A02B">          "group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 peer-data-[active=true]/menu-button:text-sidebar-accent-foreground data-[state=open]:opacity-100 md:opacity-0"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">        className</span></span>
+<span class="line"><span style="color:#4C4F69">      )</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#7C7F93">      {</span><span style="color:#179299">...</span><span style="color:#4C4F69">props</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">    /></span></span>
+<span class="line"><span style="color:#4C4F69">  )</span></span>
+<span class="line"><span style="color:#7C7F93">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">function</span><span style="color:#1E66F5;font-style:italic"> SidebarMenuBadge</span><span style="color:#7C7F93">({</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  className</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#179299">  ...</span><span style="color:#E64553;font-style:italic">props</span></span>
+<span class="line"><span style="color:#7C7F93">}</span><span style="color:#179299">:</span><span style="color:#DF8E1D;font-style:italic"> React</span><span style="color:#179299">.</span><span style="color:#DF8E1D;font-style:italic">ComponentProps</span><span style="color:#04A5E5">&#x3C;</span><span style="color:#40A02B">"</span><span style="color:#40A02B;font-style:italic">div</span><span style="color:#40A02B">"</span><span style="color:#04A5E5">></span><span style="color:#7C7F93">)</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">  return</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#179299">    &#x3C;</span><span style="color:#1E66F5">div</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar-menu-badge"</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-sidebar</span><span style="color:#179299">=</span><span style="color:#40A02B">"menu-badge"</span></span>
+<span class="line"><span style="color:#DF8E1D">      className</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#1E66F5;font-style:italic">cn</span><span style="color:#4C4F69">(</span></span>
+<span class="line"><span style="color:#40A02B">        "pointer-events-none absolute right-1 flex h-5 min-w-5 items-center justify-center rounded-md px-1 text-xs font-medium text-sidebar-foreground tabular-nums select-none"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#40A02B">        "peer-hover/menu-button:text-sidebar-accent-foreground peer-data-[active=true]/menu-button:text-sidebar-accent-foreground"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#40A02B">        "peer-data-[size=sm]/menu-button:top-1"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#40A02B">        "peer-data-[size=default]/menu-button:top-1.5"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#40A02B">        "peer-data-[size=lg]/menu-button:top-2.5"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#40A02B">        "group-data-[collapsible=icon]:hidden"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">        className</span></span>
+<span class="line"><span style="color:#4C4F69">      )</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#7C7F93">      {</span><span style="color:#179299">...</span><span style="color:#4C4F69">props</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">    /></span></span>
+<span class="line"><span style="color:#4C4F69">  )</span></span>
+<span class="line"><span style="color:#7C7F93">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">function</span><span style="color:#1E66F5;font-style:italic"> SidebarMenuSkeleton</span><span style="color:#7C7F93">({</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  className</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  showIcon</span><span style="color:#179299"> =</span><span style="color:#FE640B"> false</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#179299">  ...</span><span style="color:#E64553;font-style:italic">props</span></span>
+<span class="line"><span style="color:#7C7F93">}</span><span style="color:#179299">:</span><span style="color:#DF8E1D;font-style:italic"> React</span><span style="color:#179299">.</span><span style="color:#DF8E1D;font-style:italic">ComponentProps</span><span style="color:#04A5E5">&#x3C;</span><span style="color:#40A02B">"</span><span style="color:#40A02B;font-style:italic">div</span><span style="color:#40A02B">"</span><span style="color:#04A5E5">></span><span style="color:#179299"> &#x26;</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#4C4F69;font-style:italic">  showIcon</span><span style="color:#179299">?:</span><span style="color:#8839EF"> boolean</span></span>
+<span class="line"><span style="color:#7C7F93">})</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#7C7F93;font-style:italic">  // Random width between 50 to 90%.</span></span>
+<span class="line"><span style="color:#8839EF">  const</span><span style="color:#FE640B"> width</span><span style="color:#179299"> =</span><span style="color:#4C4F69"> React</span><span style="color:#179299">.</span><span style="color:#1E66F5;font-style:italic">useMemo</span><span style="color:#4C4F69">(</span><span style="color:#7C7F93">()</span><span style="color:#8839EF"> =></span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">    return</span><span style="color:#40A02B"> `</span><span style="color:#7C7F93">${</span><span style="color:#4C4F69">Math</span><span style="color:#179299">.</span><span style="color:#1E66F5;font-style:italic">floor</span><span style="color:#40A02B">(</span><span style="color:#4C4F69">Math</span><span style="color:#179299">.</span><span style="color:#1E66F5;font-style:italic">random</span><span style="color:#40A02B">() </span><span style="color:#179299">*</span><span style="color:#FE640B"> 40</span><span style="color:#40A02B">) </span><span style="color:#179299">+</span><span style="color:#FE640B"> 50</span><span style="color:#7C7F93">}</span><span style="color:#40A02B">%`</span></span>
+<span class="line"><span style="color:#7C7F93">  },</span><span style="color:#4C4F69"> [])</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">  return</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#179299">    &#x3C;</span><span style="color:#1E66F5">div</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar-menu-skeleton"</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-sidebar</span><span style="color:#179299">=</span><span style="color:#40A02B">"menu-skeleton"</span></span>
+<span class="line"><span style="color:#DF8E1D">      className</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#1E66F5;font-style:italic">cn</span><span style="color:#4C4F69">(</span><span style="color:#40A02B">"flex h-8 items-center gap-2 rounded-md px-2"</span><span style="color:#7C7F93">,</span><span style="color:#4C4F69"> className)</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#7C7F93">      {</span><span style="color:#179299">...</span><span style="color:#4C4F69">props</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">    ></span></span>
+<span class="line"><span style="color:#7C7F93">      {</span><span style="color:#4C4F69">showIcon </span><span style="color:#179299">&#x26;&#x26;</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#179299">        &#x3C;</span><span style="color:#EA76CB">Skeleton</span></span>
+<span class="line"><span style="color:#DF8E1D">          className</span><span style="color:#179299">=</span><span style="color:#40A02B">"size-4 rounded-md"</span></span>
+<span class="line"><span style="color:#DF8E1D">          data-sidebar</span><span style="color:#179299">=</span><span style="color:#40A02B">"menu-skeleton-icon"</span></span>
+<span class="line"><span style="color:#179299">        /></span></span>
+<span class="line"><span style="color:#4C4F69">      )</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">      &#x3C;</span><span style="color:#EA76CB">Skeleton</span></span>
+<span class="line"><span style="color:#DF8E1D">        className</span><span style="color:#179299">=</span><span style="color:#40A02B">"h-4 max-w-(--skeleton-width) flex-1"</span></span>
+<span class="line"><span style="color:#DF8E1D">        data-sidebar</span><span style="color:#179299">=</span><span style="color:#40A02B">"menu-skeleton-text"</span></span>
+<span class="line"><span style="color:#DF8E1D">        style</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span></span>
+<span class="line"><span style="color:#7C7F93">          {</span></span>
+<span class="line"><span style="color:#40A02B">            "--skeleton-width"</span><span style="color:#179299">:</span><span style="color:#4C4F69"> width</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#7C7F93">          }</span><span style="color:#8839EF"> as</span><span style="color:#DF8E1D;font-style:italic"> React</span><span style="color:#179299">.</span><span style="color:#DF8E1D;font-style:italic">CSSProperties</span></span>
+<span class="line"><span style="color:#7C7F93">        }</span></span>
+<span class="line"><span style="color:#179299">      /></span></span>
+<span class="line"><span style="color:#179299">    &#x3C;/</span><span style="color:#1E66F5">div</span><span style="color:#179299">></span></span>
+<span class="line"><span style="color:#4C4F69">  )</span></span>
+<span class="line"><span style="color:#7C7F93">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">function</span><span style="color:#1E66F5;font-style:italic"> SidebarMenuSub</span><span style="color:#7C7F93">({</span><span style="color:#E64553;font-style:italic"> className</span><span style="color:#7C7F93">,</span><span style="color:#179299"> ...</span><span style="color:#E64553;font-style:italic">props</span><span style="color:#7C7F93"> }</span><span style="color:#179299">:</span><span style="color:#DF8E1D;font-style:italic"> React</span><span style="color:#179299">.</span><span style="color:#DF8E1D;font-style:italic">ComponentProps</span><span style="color:#04A5E5">&#x3C;</span><span style="color:#40A02B">"</span><span style="color:#40A02B;font-style:italic">ul</span><span style="color:#40A02B">"</span><span style="color:#04A5E5">></span><span style="color:#7C7F93">)</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">  return</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#179299">    &#x3C;</span><span style="color:#1E66F5">ul</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar-menu-sub"</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-sidebar</span><span style="color:#179299">=</span><span style="color:#40A02B">"menu-sub"</span></span>
+<span class="line"><span style="color:#DF8E1D">      className</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#1E66F5;font-style:italic">cn</span><span style="color:#4C4F69">(</span></span>
+<span class="line"><span style="color:#40A02B">        "mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l border-sidebar-border px-2.5 py-0.5"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#40A02B">        "group-data-[collapsible=icon]:hidden"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">        className</span></span>
+<span class="line"><span style="color:#4C4F69">      )</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#7C7F93">      {</span><span style="color:#179299">...</span><span style="color:#4C4F69">props</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">    /></span></span>
+<span class="line"><span style="color:#4C4F69">  )</span></span>
+<span class="line"><span style="color:#7C7F93">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">function</span><span style="color:#1E66F5;font-style:italic"> SidebarMenuSubItem</span><span style="color:#7C7F93">({</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  className</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#179299">  ...</span><span style="color:#E64553;font-style:italic">props</span></span>
+<span class="line"><span style="color:#7C7F93">}</span><span style="color:#179299">:</span><span style="color:#DF8E1D;font-style:italic"> React</span><span style="color:#179299">.</span><span style="color:#DF8E1D;font-style:italic">ComponentProps</span><span style="color:#04A5E5">&#x3C;</span><span style="color:#40A02B">"</span><span style="color:#40A02B;font-style:italic">li</span><span style="color:#40A02B">"</span><span style="color:#04A5E5">></span><span style="color:#7C7F93">)</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">  return</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#179299">    &#x3C;</span><span style="color:#1E66F5">li</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar-menu-sub-item"</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-sidebar</span><span style="color:#179299">=</span><span style="color:#40A02B">"menu-sub-item"</span></span>
+<span class="line"><span style="color:#DF8E1D">      className</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#1E66F5;font-style:italic">cn</span><span style="color:#4C4F69">(</span><span style="color:#40A02B">"group/menu-sub-item relative"</span><span style="color:#7C7F93">,</span><span style="color:#4C4F69"> className)</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#7C7F93">      {</span><span style="color:#179299">...</span><span style="color:#4C4F69">props</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">    /></span></span>
+<span class="line"><span style="color:#4C4F69">  )</span></span>
+<span class="line"><span style="color:#7C7F93">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">function</span><span style="color:#1E66F5;font-style:italic"> SidebarMenuSubButton</span><span style="color:#7C7F93">({</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  asChild</span><span style="color:#179299"> =</span><span style="color:#FE640B"> false</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  size</span><span style="color:#179299"> =</span><span style="color:#40A02B"> "md"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  isActive</span><span style="color:#179299"> =</span><span style="color:#FE640B"> false</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#E64553;font-style:italic">  className</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#179299">  ...</span><span style="color:#E64553;font-style:italic">props</span></span>
+<span class="line"><span style="color:#7C7F93">}</span><span style="color:#179299">:</span><span style="color:#DF8E1D;font-style:italic"> React</span><span style="color:#179299">.</span><span style="color:#DF8E1D;font-style:italic">ComponentProps</span><span style="color:#04A5E5">&#x3C;</span><span style="color:#40A02B">"</span><span style="color:#40A02B;font-style:italic">a</span><span style="color:#40A02B">"</span><span style="color:#04A5E5">></span><span style="color:#179299"> &#x26;</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#4C4F69;font-style:italic">  asChild</span><span style="color:#179299">?:</span><span style="color:#8839EF"> boolean</span></span>
+<span class="line"><span style="color:#4C4F69;font-style:italic">  size</span><span style="color:#179299">?:</span><span style="color:#40A02B"> "</span><span style="color:#40A02B;font-style:italic">sm</span><span style="color:#40A02B">"</span><span style="color:#179299"> |</span><span style="color:#40A02B"> "</span><span style="color:#40A02B;font-style:italic">md</span><span style="color:#40A02B">"</span></span>
+<span class="line"><span style="color:#4C4F69;font-style:italic">  isActive</span><span style="color:#179299">?:</span><span style="color:#8839EF"> boolean</span></span>
+<span class="line"><span style="color:#7C7F93">})</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#8839EF">  const</span><span style="color:#FE640B"> Comp</span><span style="color:#179299"> =</span><span style="color:#4C4F69"> asChild </span><span style="color:#179299">?</span><span style="color:#4C4F69"> Slot</span><span style="color:#179299">.</span><span style="color:#4C4F69">Root </span><span style="color:#179299">:</span><span style="color:#40A02B"> "a"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">  return</span><span style="color:#4C4F69"> (</span></span>
+<span class="line"><span style="color:#179299">    &#x3C;</span><span style="color:#EA76CB">Comp</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-slot</span><span style="color:#179299">=</span><span style="color:#40A02B">"sidebar-menu-sub-button"</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-sidebar</span><span style="color:#179299">=</span><span style="color:#40A02B">"menu-sub-button"</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-size</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#4C4F69">size</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#DF8E1D">      data-active</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#4C4F69">isActive</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#DF8E1D">      className</span><span style="color:#179299">=</span><span style="color:#7C7F93">{</span><span style="color:#1E66F5;font-style:italic">cn</span><span style="color:#4C4F69">(</span></span>
+<span class="line"><span style="color:#40A02B">        "flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 text-sidebar-foreground ring-sidebar-ring outline-hidden hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&#x26;>span:last-child]:truncate [&#x26;>svg]:size-4 [&#x26;>svg]:shrink-0 [&#x26;>svg]:text-sidebar-accent-foreground"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#40A02B">        "data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">        size </span><span style="color:#179299">===</span><span style="color:#40A02B"> "sm"</span><span style="color:#179299"> &#x26;&#x26;</span><span style="color:#40A02B"> "text-xs"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">        size </span><span style="color:#179299">===</span><span style="color:#40A02B"> "md"</span><span style="color:#179299"> &#x26;&#x26;</span><span style="color:#40A02B"> "text-sm"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#40A02B">        "group-data-[collapsible=icon]:hidden"</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">        className</span></span>
+<span class="line"><span style="color:#4C4F69">      )</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#7C7F93">      {</span><span style="color:#179299">...</span><span style="color:#4C4F69">props</span><span style="color:#7C7F93">}</span></span>
+<span class="line"><span style="color:#179299">    /></span></span>
+<span class="line"><span style="color:#4C4F69">  )</span></span>
+<span class="line"><span style="color:#7C7F93">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8839EF">export</span><span style="color:#7C7F93"> {</span></span>
+<span class="line"><span style="color:#4C4F69">  Sidebar</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  SidebarContent</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  SidebarFooter</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  SidebarGroup</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  SidebarGroupAction</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  SidebarGroupContent</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  SidebarGroupLabel</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  SidebarHeader</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  SidebarInput</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  SidebarInset</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  SidebarMenu</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  SidebarMenuAction</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  SidebarMenuBadge</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  SidebarMenuButton</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  SidebarMenuItem</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  SidebarMenuSkeleton</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  SidebarMenuSub</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  SidebarMenuSubButton</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  SidebarMenuSubItem</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  SidebarProvider</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  SidebarRail</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  SidebarSeparator</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  SidebarTrigger</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#4C4F69">  useSidebar</span><span style="color:#7C7F93">,</span></span>
+<span class="line"><span style="color:#7C7F93">}</span></span>
+<span class="line"></span></code></pre></main>
+  <script>
+    (function () {
+      var at = location.hash.match(/^#at=(\d+),(\d+)$/);
+      if (at) window.scrollTo(Number(at[1]), Number(at[2]));
+      addEventListener("scroll", function () {
+        parent.postMessage({ lumisShowcaseScroll: { x: scrollX, y: scrollY } }, "*");
+      }, { passive: true });
+    })();
+  </script>
+</body>
+</html>
