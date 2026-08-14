@@ -27,7 +27,7 @@ npm install @nuxt/content @lumis-sh/rehype-lumis @lumis-sh/lumis @lumis-sh/theme
 ```ts
 import {htmlInline} from '@lumis-sh/lumis/formatters'
 import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
-import githubLight from '@lumis-sh/themes/github_light'
+import latte from '@lumis-sh/themes/catppuccin_latte'
 
 export default defineNuxtConfig({
   modules: ['@nuxt/content'],
@@ -38,7 +38,7 @@ export default defineNuxtConfig({
         rehypePlugins: {
           '@lumis-sh/rehype-lumis': {
             options: {
-              formatter: (language) => htmlInline({language, theme: githubLight}),
+              formatter: (language) => htmlInline({language, theme: latte}),
               languages: [bundledLanguages],
             },
           },

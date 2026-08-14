@@ -32,13 +32,13 @@ import {MarkdownAsync} from 'react-markdown'
 import rehypeLumis from '@lumis-sh/rehype-lumis'
 import {htmlInline} from '@lumis-sh/lumis/formatters'
 import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
-import githubLight from '@lumis-sh/themes/github_light'
+import latte from '@lumis-sh/themes/catppuccin_latte'
 
 export async function Article({source}: {source: string}) {
   return (
     <MarkdownAsync
       rehypePlugins={[[rehypeLumis, {
-        formatter: (language) => htmlInline({language, theme: githubLight}),
+        formatter: (language) => htmlInline({language, theme: latte}),
         languages: [bundledLanguages],
       }]]}
     >
@@ -57,13 +57,13 @@ import {MarkdownHooks} from 'react-markdown'
 import rehypeLumis from '@lumis-sh/rehype-lumis'
 import {htmlInline} from '@lumis-sh/lumis/formatters'
 import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
-import githubLight from '@lumis-sh/themes/github_light'
+import latte from '@lumis-sh/themes/catppuccin_latte'
 
 function Article({source}: {source: string}) {
   return (
     <MarkdownHooks
       rehypePlugins={[[rehypeLumis, {
-        formatter: (language) => htmlInline({language, theme: githubLight}),
+        formatter: (language) => htmlInline({language, theme: latte}),
         languages: [bundledLanguages],
       }]]}
     >

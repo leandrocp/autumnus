@@ -17,9 +17,9 @@ import TabItem from '@theme/TabItem';
 import {highlight} from '@lumis-sh/lumis'
 import {htmlInline} from '@lumis-sh/lumis/formatters'
 import javascript from '@lumis-sh/lumis/langs/javascript'
-import dracula from '@lumis-sh/themes/dracula'
+import frappe from '@lumis-sh/themes/catppuccin_frappe'
 
-const html = await highlight('const x = 1', htmlInline({language: javascript, theme: dracula}))
+const html = await highlight('const x = 1', htmlInline({language: javascript, theme: frappe}))
 ```
 
   </TabItem>
@@ -32,7 +32,7 @@ let html = highlight(
     "const x = 1",
     HtmlInlineBuilder::new()
         .language(Language::Javascript)
-        .theme(Some(themes::get("dracula").unwrap()))
+        .theme(Some(themes::get("catppuccin_frappe").unwrap()))
         .build()
         .unwrap(),
 );
@@ -42,7 +42,7 @@ let html = highlight(
   <TabItem value="elixir" label="Elixir">
 
 ```elixir
-html = Lumis.highlight!("const x = 1", formatter: {:html_inline, language: "javascript", theme: "dracula"})
+html = Lumis.highlight!("const x = 1", formatter: {:html_inline, language: "javascript", theme: "catppuccin_frappe"})
 ```
 
   </TabItem>
@@ -57,7 +57,7 @@ var lumis = Lumis.builder().build();
 
 var highlighter = lumis.highlighter()
     .withLang(Lang.JAVASCRIPT)
-    .withTheme(Theme.DRACULA)
+    .withTheme(Theme.CATPPUCCIN_FRAPPE)
     .build();
 
 var html = highlighter.highlight("const x = 1").string();
@@ -67,7 +67,7 @@ var html = highlighter.highlight("const x = 1").string();
   <TabItem value="cli" label="CLI">
 
 ```bash
-lumis highlight index.js --formatter html-inline --theme dracula
+lumis highlight index.js --formatter html-inline --theme catppuccin_frappe
 ```
 
   </TabItem>

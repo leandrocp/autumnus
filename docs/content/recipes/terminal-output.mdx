@@ -17,9 +17,9 @@ import TabItem from '@theme/TabItem';
 import {highlight} from '@lumis-sh/lumis'
 import {terminal} from '@lumis-sh/lumis/formatters'
 import rust from '@lumis-sh/lumis/langs/rust'
-import dracula from '@lumis-sh/themes/dracula'
+import frappe from '@lumis-sh/themes/catppuccin_frappe'
 
-const ansi = await highlight('fn main() {}', terminal({language: rust, theme: dracula}))
+const ansi = await highlight('fn main() {}', terminal({language: rust, theme: frappe}))
 console.log(ansi)
 ```
 
@@ -33,7 +33,7 @@ let ansi = highlight(
     "fn main() {}",
     TerminalBuilder::new()
         .language(Language::Rust)
-        .theme(Some(themes::get("dracula").unwrap()))
+        .theme(Some(themes::get("catppuccin_frappe").unwrap()))
         .build()
         .unwrap(),
 );
@@ -45,7 +45,7 @@ println!("{}", ansi);
   <TabItem value="cli" label="CLI">
 
 ```bash
-lumis highlight main.rs --theme dracula
+lumis highlight main.rs --theme catppuccin_frappe
 ```
 
   </TabItem>

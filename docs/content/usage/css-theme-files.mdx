@@ -6,7 +6,7 @@ description: Use Lumis CSS theme files with htmlLinked output in JavaScript, Eli
 keywords:
   - lumis css themes
   - html linked
-  - dracula.css
+  - catppuccin_frappe.css
   - themes css
 ---
 
@@ -22,7 +22,7 @@ The `htmlLinked` formatter emits CSS class names instead of inline styles. You p
 Import a stylesheet from `@lumis-sh/themes/css/<theme>.css`.
 
 ```js
-import '@lumis-sh/themes/css/dracula.css'
+import '@lumis-sh/themes/css/catppuccin_frappe.css'
 import {highlight} from '@lumis-sh/lumis'
 import {htmlLinked} from '@lumis-sh/lumis/formatters'
 import javascript from '@lumis-sh/lumis/langs/javascript'
@@ -35,7 +35,7 @@ const html = await highlight('const x = 1', htmlLinked({language: javascript}))
 Load the compiled CSS file directly:
 
 ```html
-<link rel="stylesheet" href="https://unpkg.com/@lumis-sh/themes/dist/css/dracula.css">
+<link rel="stylesheet" href="https://unpkg.com/@lumis-sh/themes/dist/css/catppuccin_frappe.css">
 ```
 
 Available distribution folders:
@@ -51,11 +51,11 @@ Lumis ships CSS files under `priv/static/css/`.
 plug Plug.Static,
   at: "/themes",
   from: {:lumis, "priv/static/css/"},
-  only: ["dracula.css"]
+  only: ["catppuccin_frappe.css"]
 ```
 
 ```heex title="layout"
-<link phx-track-static rel="stylesheet" href={~p"/themes/dracula.css"} />
+<link phx-track-static rel="stylesheet" href={~p"/themes/catppuccin_frappe.css"} />
 ```
 
 ## Repository-generated CSS

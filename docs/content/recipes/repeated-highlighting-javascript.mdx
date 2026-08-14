@@ -11,12 +11,12 @@ description: Reuse a JavaScript highlighter for repeated synchronous highlights.
 import {createHighlighter} from '@lumis-sh/lumis'
 import {htmlInline} from '@lumis-sh/lumis/formatters'
 import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
-import dracula from '@lumis-sh/themes/dracula'
+import frappe from '@lumis-sh/themes/catppuccin_frappe'
 
 const hl = await createHighlighter({languages: [bundledLanguages]})
 await hl.loadLanguage('javascript')
 
-const html = hl.highlight('const x = 1', htmlInline({language: 'javascript', theme: dracula}))
+const html = hl.highlight('const x = 1', htmlInline({language: 'javascript', theme: frappe}))
 ```
 
 See [JavaScript](/usage/javascript) for the reusable highlighter workflow.

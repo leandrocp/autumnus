@@ -36,9 +36,9 @@ Self-contained HTML with inline styles on each token. No external CSS required.
 import {highlight} from '@lumis-sh/lumis'
 import {htmlInline} from '@lumis-sh/lumis/formatters'
 import rust from '@lumis-sh/lumis/langs/rust'
-import dracula from '@lumis-sh/themes/dracula'
+import frappe from '@lumis-sh/themes/catppuccin_frappe'
 
-const html = await highlight('fn main() {}', htmlInline({language: rust, theme: dracula}))
+const html = await highlight('fn main() {}', htmlInline({language: rust, theme: frappe}))
 ```
 
   </TabItem>
@@ -51,7 +51,7 @@ let html = highlight(
     "fn main() {}",
     HtmlInlineBuilder::new()
         .language(Language::Rust)
-        .theme(Some(themes::get("dracula").unwrap()))
+        .theme(Some(themes::get("catppuccin_frappe").unwrap()))
         .build()
         .unwrap(),
 );
@@ -63,7 +63,7 @@ let html = highlight(
 ```elixir
 Lumis.highlight!(
   "fn main() {}",
-  formatter: {:html_inline, language: "rust", theme: "dracula"}
+  formatter: {:html_inline, language: "rust", theme: "catppuccin_frappe"}
 )
 ```
 
@@ -80,7 +80,7 @@ var lumis = Lumis.builder().build();
 
 var highlighter = lumis.highlighter()
     .withLang(Lang.RUST)
-    .withTheme(Theme.DRACULA)
+    .withTheme(Theme.CATPPUCCIN_FRAPPE)
     .withFormatter(Formatter.HTML_INLINE)
     .build();
 
@@ -93,7 +93,7 @@ lumis.close();
   <TabItem value="cli" label="CLI">
 
 ```bash
-lumis highlight main.rs --formatter html-inline --theme dracula
+lumis highlight main.rs --formatter html-inline --theme catppuccin_frappe
 ```
 
   </TabItem>
@@ -107,7 +107,7 @@ lumis highlight main.rs --formatter html-inline --theme dracula
 ```js
 const html = await highlight(
   'const x = 1',
-  htmlInline({language: javascript, theme: dracula, preClass: 'code-block', includeHighlights: true})
+  htmlInline({language: javascript, theme: frappe, preClass: 'code-block', includeHighlights: true})
 )
 ```
 
@@ -117,7 +117,7 @@ const html = await highlight(
 ```rust
 let formatter = HtmlInlineBuilder::new()
     .language(Language::Javascript)
-    .theme(Some(themes::get("dracula").unwrap()))
+    .theme(Some(themes::get("catppuccin_frappe").unwrap()))
     .pre_class(Some("code-block".to_string()))
     .include_highlights(true)
     .build()
@@ -132,7 +132,7 @@ let html = highlight("const x = 1", formatter);
 ```elixir
 Lumis.highlight!(
   "const x = 1",
-  formatter: {:html_inline, language: "javascript", theme: "dracula", pre_class: "code-block", include_highlights: true}
+  formatter: {:html_inline, language: "javascript", theme: "catppuccin_frappe", pre_class: "code-block", include_highlights: true}
 )
 ```
 
@@ -145,7 +145,7 @@ Lumis.highlight!(
   <TabItem value="cli" label="CLI">
 
 ```bash
-lumis highlight app.js -f html-inline -t dracula --pre-class my-code --include-highlights
+lumis highlight app.js -f html-inline -t catppuccin_frappe --pre-class my-code --include-highlights
 ```
 
   </TabItem>
@@ -161,7 +161,7 @@ const html = await highlight(
   'const x = 1',
   htmlInline({
     language: javascript,
-    theme: dracula,
+    theme: frappe,
     header: {openTag: '<figure><figcaption>index.js</figcaption>', closeTag: '</figure>'},
   })
 )
@@ -175,7 +175,7 @@ use lumis::formatters::html::HtmlElement;
 
 let formatter = HtmlInlineBuilder::new()
     .language(Language::Javascript)
-    .theme(Some(themes::get("dracula").unwrap()))
+    .theme(Some(themes::get("catppuccin_frappe").unwrap()))
     .header(Some(HtmlElement {
         open_tag: "<figure><figcaption>index.js</figcaption>".to_string(),
         close_tag: "</figure>".to_string(),
@@ -194,7 +194,7 @@ Lumis.highlight!(
   "const x = 1",
   formatter: {:html_inline,
     language: "javascript",
-    theme: "dracula",
+    theme: "catppuccin_frappe",
     header: %{open_tag: "<figure><figcaption>index.js</figcaption>", close_tag: "</figure>"}
   }
 )
@@ -222,11 +222,11 @@ The two go together; clap rejects one without the other.
 HTML Inline emits the full block structure with inline styles on each token:
 
 ```html
-<pre class="lumis" style="background-color: #282c34; color: #abb2bf;">
+<pre class="lumis" style="background-color: #303446; color: #c6d0f5;">
   <code class="language-rust" translate="no" tabindex="0">
     <div class="l-line" data-line="1">
-      <span style="color: #e5c07b;">fn</span>
-      <span style="color: #61afef;">main</span>
+      <span style="color: #ca9ee6;">fn</span>
+      <span style="color: #8caaee;">main</span>
     </div>
   </code>
 </pre>

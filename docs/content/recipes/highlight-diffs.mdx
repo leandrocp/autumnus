@@ -23,7 +23,7 @@ import diff from '@lumis-sh/lumis/langs/diff'
 import elixir from '@lumis-sh/lumis/langs/elixir'
 
 const hl = await createHighlighter({languages: [diff, elixir]})
-const output = hl.highlight(source, htmlInline({language: diff, theme: dracula}))
+const output = hl.highlight(source, htmlInline({language: diff, theme: frappe}))
 ```
 
   </TabItem>
@@ -32,7 +32,7 @@ const output = hl.highlight(source, htmlInline({language: diff, theme: dracula})
 ```rust
 let html = highlight(source, HtmlInlineBuilder::new()
     .language(Language::Diff)
-    .theme(Some(themes::get("dracula").unwrap()))
+    .theme(Some(themes::get("catppuccin_frappe").unwrap()))
     .build()
     .unwrap());
 ```
@@ -41,7 +41,7 @@ let html = highlight(source, HtmlInlineBuilder::new()
   <TabItem value="elixir" label="Elixir">
 
 ```elixir
-Lumis.highlight!(source, formatter: {:html_inline, language: "diff", theme: "dracula"})
+Lumis.highlight!(source, formatter: {:html_inline, language: "diff", theme: "catppuccin_frappe"})
 ```
 
   </TabItem>
@@ -73,7 +73,7 @@ diff --git a/lib/varsel.ex b/lib/varsel.ex
 and the changed lines keep their `diff.plus` and `diff.minus` colours around
 that.
 
-![A git diff of an Elixir file, rendered with github_dark: the unchanged lines
+![A git diff of an Elixir file, rendered with catppuccin_frappe: the unchanged lines
 carry Elixir keyword, module and atom colours, and the removed and added lines
 keep their red and green backgrounds underneath them.](/img/diff-hunk-injection.png)
 

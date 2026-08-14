@@ -19,7 +19,7 @@ import css from '@lumis-sh/lumis/langs/css'
 import javascript from '@lumis-sh/lumis/langs/javascript'
 
 const hl = await createHighlighter({languages: [html, css, javascript]})
-const output = hl.highlight(source, htmlInline({language: html, theme: dracula}))
+const output = hl.highlight(source, htmlInline({language: html, theme: frappe}))
 ```
 
   </TabItem>
@@ -28,7 +28,7 @@ const output = hl.highlight(source, htmlInline({language: html, theme: dracula})
 ```rust
 let html = highlight(source, HtmlInlineBuilder::new()
     .language(Language::Html)
-    .theme(Some(themes::get("dracula").unwrap()))
+    .theme(Some(themes::get("catppuccin_frappe").unwrap()))
     .build()
     .unwrap());
 ```
@@ -37,7 +37,7 @@ let html = highlight(source, HtmlInlineBuilder::new()
   <TabItem value="elixir" label="Elixir">
 
 ```elixir
-Lumis.highlight!(source, formatter: {:html_inline, language: "html", theme: "dracula"})
+Lumis.highlight!(source, formatter: {:html_inline, language: "html", theme: "catppuccin_frappe"})
 ```
 
   </TabItem>

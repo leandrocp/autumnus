@@ -265,7 +265,7 @@ For multiple languages, install a bundle package such as `@lumis-sh/wasm-bundle-
 import { createHighlighter } from "@lumis-sh/lumis";
 import { htmlInline } from "@lumis-sh/lumis/formatters";
 import elixir from "@lumis-sh/lumis/langs/elixir";
-import githubLight from "@lumis-sh/themes/github_light";
+import latte from "@lumis-sh/themes/catppuccin_latte";
 import "@lumis-sh/wasm-elixir";
 
 const hl = await createHighlighter({
@@ -274,7 +274,7 @@ const hl = await createHighlighter({
 
 const html = hl.highlight(
   "defmodule Demo do\nend",
-  htmlInline({ language: elixir, theme: githubLight }),
+  htmlInline({ language: elixir, theme: latte }),
 );
 ```
 
@@ -289,7 +289,7 @@ See [`packages/javascript/lumis/examples/npm-wasm-node`](https://github.com/lean
 import { createHighlighter } from "@lumis-sh/lumis";
 import { htmlInline } from "@lumis-sh/lumis/formatters";
 import { bundledLanguages } from "@lumis-sh/lumis/bundles/web";
-import githubLight from "@lumis-sh/themes/github_light";
+import latte from "@lumis-sh/themes/catppuccin_latte";
 import "@lumis-sh/wasm-bundle-web";
 
 const hl = await createHighlighter({
@@ -299,8 +299,8 @@ const hl = await createHighlighter({
 await hl.loadLanguage(bundledLanguages.javascript);
 
 const html = hl.highlight(
-  'const theme = "github-light"',
-  htmlInline({ language: bundledLanguages.javascript, theme: githubLight }),
+  'const theme = "catppuccin-latte"',
+  htmlInline({ language: bundledLanguages.javascript, theme: latte }),
 );
 ```
 
@@ -313,7 +313,7 @@ Use this when you want one package in `package.json` to cover a whole preset. Lu
 import { createHighlighter, withWasm } from "@lumis-sh/lumis";
 import { htmlInline } from "@lumis-sh/lumis/formatters";
 import elixir from "@lumis-sh/lumis/langs/elixir";
-import githubLight from "@lumis-sh/themes/github_light";
+import latte from "@lumis-sh/themes/catppuccin_latte";
 import elixirWasm from "@lumis-sh/wasm-elixir";
 
 const elixirFromNpm = withWasm(elixir, elixirWasm);
@@ -324,7 +324,7 @@ const hl = await createHighlighter({
 
 const html = hl.highlight(
   "defmodule Demo do\nend",
-  htmlInline({ language: elixirFromNpm, theme: githubLight }),
+  htmlInline({ language: elixirFromNpm, theme: latte }),
 );
 ```
 
@@ -340,7 +340,7 @@ import { createHighlighter, withWasmBundle } from "@lumis-sh/lumis";
 import { htmlInline } from "@lumis-sh/lumis/formatters";
 import { bundledLanguages } from "@lumis-sh/lumis/bundles/web";
 import { bundledWasms } from "@lumis-sh/wasm-bundle-web";
-import githubLight from "@lumis-sh/themes/github_light";
+import latte from "@lumis-sh/themes/catppuccin_latte";
 
 const languages = withWasmBundle(bundledLanguages, bundledWasms);
 
@@ -351,8 +351,8 @@ const hl = await createHighlighter({
 await hl.loadLanguage(languages.javascript);
 
 const html = hl.highlight(
-  'const theme = "github-light"',
-  htmlInline({ language: languages.javascript, theme: githubLight }),
+  'const theme = "catppuccin-latte"',
+  htmlInline({ language: languages.javascript, theme: latte }),
 );
 ```
 
@@ -445,9 +445,9 @@ preset bundles.
   import { highlight } from "https://esm.sh/@lumis-sh/lumis";
   import { htmlInline } from "https://esm.sh/@lumis-sh/lumis/formatters";
   import javascript from "https://esm.sh/@lumis-sh/lumis/langs/javascript";
-  import dracula from "https://esm.sh/@lumis-sh/themes/dracula";
+  import frappe from "https://esm.sh/@lumis-sh/themes/catppuccin_frappe";
 
-  const html = await highlight("const x = 1", htmlInline({ language: javascript, theme: dracula }));
+  const html = await highlight("const x = 1", htmlInline({ language: javascript, theme: frappe }));
 </script>
 ```
 
