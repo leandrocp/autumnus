@@ -387,9 +387,20 @@ export type HighlightIterFn = (
  * }
  * ```
  */
-export interface Formatter {
-  language?: LanguageRef;
+/**
+ * Options that influence which highlight events are produced.
+ *
+ * The counterpart of Rust's `HighlightOptions`. Every formatter accepts these
+ * alongside its own rendering options, so a new switch is declared here once
+ * rather than in each formatter's option type.
+ */
+export interface HighlightOptions {
+  /** Render nested brackets with rainbow bracket scopes. */
   rainbowBrackets?: boolean;
+}
+
+export interface Formatter extends HighlightOptions {
+  language?: LanguageRef;
   format(source: string): string;
 }
 
@@ -417,7 +428,7 @@ export type HighlightCallback = (
  * htmlInline({ language: javascript, theme: dracula, preClass: 'my-code', italic: true })
  * ```
  */
-export interface HtmlInlineOptions {
+export interface HtmlInlineOptions extends HighlightOptions {
   language?: LanguageRef;
   theme?: Theme;
   preClass?: string;
@@ -425,8 +436,6 @@ export interface HtmlInlineOptions {
   italic?: boolean;
   /** Add `data-highlight` attributes with scope names. */
   includeHighlights?: boolean;
-  /** Render nested brackets with rainbow bracket scopes. */
-  rainbowBrackets?: boolean;
   highlightLines?: HighlightLinesInline;
   header?: HtmlElement;
 }
@@ -440,10 +449,9 @@ export interface HtmlInlineFormatter extends Formatter, HtmlInlineOptions {}
  * htmlLinked({ language: javascript, preClass: 'my-code' })
  * ```
  */
-export interface HtmlLinkedOptions {
+export interface HtmlLinkedOptions extends HighlightOptions {
   language?: LanguageRef;
   preClass?: string;
-  rainbowBrackets?: boolean;
   highlightLines?: HighlightLinesLinked;
   header?: HtmlElement;
 }
@@ -461,7 +469,7 @@ export interface HtmlLinkedFormatter extends Formatter, HtmlLinkedOptions {}
  * })
  * ```
  */
-export interface HtmlMultiThemesOptions {
+export interface HtmlMultiThemesOptions extends HighlightOptions {
   language?: LanguageRef;
   themes: Record<string, Theme>;
   /**
@@ -474,7 +482,6 @@ export interface HtmlMultiThemesOptions {
   preClass?: string;
   italic?: boolean;
   includeHighlights?: boolean;
-  rainbowBrackets?: boolean;
   highlightLines?: HighlightLinesInline;
   header?: HtmlElement;
 }
@@ -488,9 +495,8 @@ export interface HtmlMultiThemesFormatter extends Formatter, HtmlMultiThemesOpti
  * bbcodeScoped({ language: javascript })
  * ```
  */
-export interface BBCodeScopedOptions {
+export interface BBCodeScopedOptions extends HighlightOptions {
   language?: LanguageRef;
-  rainbowBrackets?: boolean;
 }
 
 export interface BBCodeScopedFormatter extends Formatter, BBCodeScopedOptions {}
@@ -503,7 +509,7 @@ export interface BBCodeScopedFormatter extends Formatter, BBCodeScopedOptions {}
  * terminal({ language: javascript, theme: dracula, background: 'theme', width: 120 })
  * ```
  */
-export interface TerminalOptions {
+export interface TerminalOptions extends HighlightOptions {
   language?: LanguageRef;
   theme?: Theme;
   /**
@@ -519,7 +525,6 @@ export interface TerminalOptions {
    * background fill.
    */
   width?: number;
-  rainbowBrackets?: boolean;
 }
 
 export interface TerminalFormatter extends Formatter, TerminalOptions {}

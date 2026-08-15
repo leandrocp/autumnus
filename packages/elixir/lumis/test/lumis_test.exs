@@ -1120,9 +1120,9 @@ defmodule Lumis.LumisTest do
                    {:html_inline,
                     [
                       language: nil,
+                      rainbow_brackets: false,
                       header: nil,
                       highlight_lines: nil,
-                      rainbow_brackets: false,
                       include_highlights: false,
                       italic: false,
                       pre_class: nil,
