@@ -1,7 +1,7 @@
 {
   "name": "modus_operandi",
   "appearance": "light",
-  "revision": "17a64464c27c1be605adca13dbe48f2f402fe107",
+  "revision": "56233f0986ef6c8d0eab97e924e87144e584d970",
   "highlights": {
     "attribute": {
       "fg": "#a0132f"
@@ -234,6 +234,9 @@
     "module.builtin": {
       "fg": "#531ab6"
     },
+    "namespace": {
+      "fg": "#a0132f"
+    },
     "normal": {
       "fg": "#000000",
       "bg": "#ffffff"
@@ -246,6 +249,9 @@
     },
     "operator": {
       "fg": "#000000"
+    },
+    "property": {
+      "fg": "#005e8b"
     },
     "punctuation.bracket": {
       "fg": "#000000"
@@ -287,7 +293,7 @@
       "fg": "#00663f"
     },
     "string.regexp": {
-      "fg": "#7f0000"
+      "fg": "#00663f"
     },
     "string.special": {
       "fg": "#7f0000"
@@ -302,6 +308,9 @@
       "fg": "#005f5f"
     },
     "tag": {
+      "fg": "#005e8b"
+    },
+    "tag.attribute": {
       "fg": "#005e8b"
     },
     "tag.builtin": {
