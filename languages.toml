@@ -300,7 +300,7 @@ emacs = ["go"]
 git = "https://github.com/bkegley/tree-sitter-graphql.git"
 rev = "5e66e961eee421786bdda8495ed1db045e06b5fe"
 crate = "tree-sitter-graphql"
-version = "0.1.0"
+version = "0.2.0"
 variant = "GraphQL"
 
 [parsers.haskell]
