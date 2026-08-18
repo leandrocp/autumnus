@@ -75,7 +75,6 @@
 
 use crate::languages::{bracket_query_for_language, Language, LanguageConfig};
 use crate::themes::Theme;
-use derive_builder::Builder;
 use lumis_core::events::HighlightEvent as CoreHighlightEvent;
 use lumis_core::highlights::HIGHLIGHT_NAMES;
 use lumis_wasm_runtime::tree_sitter_highlight::{HighlightEvent, Highlighter as TSHighlighter};
@@ -104,26 +103,46 @@ static DEFAULT_STYLE: LazyLock<Arc<Style>> = LazyLock::new(|| Arc::new(Style::de
 ///
 /// The counterpart of JavaScript's second argument to `highlightEvents()`.
 ///
-/// ```rust
-/// use lumis::highlight::HighlightOptionsBuilder;
+/// Setters consume and return the options rather than a separate builder,
+/// because nothing here can fail to build. `regex::RegexBuilder::build` returns
+/// `Result` because it compiles a pattern; `ureq`'s returns the config itself;
+/// `wasmtime::Config` has no builder type at all. A `Result` here would only
+/// ever be unwrapped.
 ///
-/// let options = HighlightOptionsBuilder::new()
-///     .rainbow_brackets(true)
-///     .build()
-///     .unwrap();
+/// ```rust
+/// use lumis::highlight::HighlightOptions;
+///
+/// let options = HighlightOptions::new().rainbow_brackets(true);
 /// ```
-#[derive(Builder, Clone, Copy, Debug, Default, PartialEq, Eq)]
-#[builder(default)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[must_use]
 pub struct HighlightOptions {
     /// Emit `punctuation.bracket.rainbow.N` scopes around bracket pairs.
     #[deprecated(
         since = "0.14.0",
-        note = "set it through `HighlightOptionsBuilder`; this field becomes private in 1.0"
+        note = "set it with `HighlightOptions::new().rainbow_brackets(..)`; this field becomes private in 1.0"
     )]
     pub rainbow_brackets: bool,
 }
 
 impl HighlightOptions {
+    /// Options with every switch off.
+    pub const fn new() -> Self {
+        #[allow(deprecated)]
+        Self {
+            rainbow_brackets: false,
+        }
+    }
+
+    /// Emit `punctuation.bracket.rainbow.N` scopes around bracket pairs.
+    pub const fn rainbow_brackets(mut self, enabled: bool) -> Self {
+        #[allow(deprecated)]
+        {
+            self.rainbow_brackets = enabled;
+        }
+        self
+    }
+
     /// Whether rainbow bracket scopes were enabled.
     #[must_use]
     pub const fn rainbow_brackets_enabled(&self) -> bool {
@@ -131,12 +150,6 @@ impl HighlightOptions {
         {
             self.rainbow_brackets
         }
-    }
-}
-
-impl HighlightOptionsBuilder {
-    pub fn new() -> Self {
-        Self::default()
     }
 }
 
@@ -814,10 +827,7 @@ mod tests {
             rainbow_brackets: true,
         };
 
-        let built = HighlightOptionsBuilder::new()
-            .rainbow_brackets(true)
-            .build()
-            .unwrap();
+        let built = HighlightOptions::new().rainbow_brackets(true);
 
         assert_eq!(built, literal);
         assert!(built.rainbow_brackets_enabled());
