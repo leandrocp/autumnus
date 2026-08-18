@@ -94,7 +94,9 @@ impl Formatter for BBCodeScoped {
         let events = highlight::highlight_events_with_options(
             source,
             self.language,
-            highlight::HighlightOptions::new().rainbow_brackets(self.rainbow_brackets),
+            highlight::HighlightOptions {
+                rainbow_brackets: self.rainbow_brackets,
+            },
         )
         .map_err(io::Error::other)?;
 

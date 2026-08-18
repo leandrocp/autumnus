@@ -103,54 +103,22 @@ static DEFAULT_STYLE: LazyLock<Arc<Style>> = LazyLock::new(|| Arc::new(Style::de
 ///
 /// The counterpart of JavaScript's second argument to `highlightEvents()`.
 ///
-/// Setters consume and return the options rather than a separate builder,
-/// because nothing here can fail to build. `regex::RegexBuilder::build` returns
-/// `Result` because it compiles a pattern; `ureq`'s returns the config itself;
-/// `wasmtime::Config` has no builder type at all. A `Result` here would only
-/// ever be unwrapped.
-///
 /// ```rust
 /// use lumis::highlight::HighlightOptions;
 ///
-/// let options = HighlightOptions::new().rainbow_brackets(true);
+/// let options = HighlightOptions {
+///     rainbow_brackets: true,
+/// };
 /// ```
+///
+/// The fields are plain and there is no builder: nothing about building these
+/// can fail, so a builder would only add a type and a `Result` to unwrap. Once
+/// there is more than one switch, start from [`Default`] and set what you need,
+/// which keeps a later addition from breaking callers.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-#[must_use]
 pub struct HighlightOptions {
     /// Emit `punctuation.bracket.rainbow.N` scopes around bracket pairs.
-    #[deprecated(
-        since = "0.14.0",
-        note = "set it with `HighlightOptions::new().rainbow_brackets(..)`; this field becomes private in 1.0"
-    )]
     pub rainbow_brackets: bool,
-}
-
-impl HighlightOptions {
-    /// Options with every switch off.
-    pub const fn new() -> Self {
-        #[allow(deprecated)]
-        Self {
-            rainbow_brackets: false,
-        }
-    }
-
-    /// Emit `punctuation.bracket.rainbow.N` scopes around bracket pairs.
-    pub const fn rainbow_brackets(mut self, enabled: bool) -> Self {
-        #[allow(deprecated)]
-        {
-            self.rainbow_brackets = enabled;
-        }
-        self
-    }
-
-    /// Whether rainbow bracket scopes were enabled.
-    #[must_use]
-    pub const fn rainbow_brackets_enabled(&self) -> bool {
-        #[allow(deprecated)]
-        {
-            self.rainbow_brackets
-        }
-    }
 }
 
 thread_local! {
@@ -597,7 +565,7 @@ where
         })
         .collect::<Result<Vec<_>, _>>()?;
 
-    if options.rainbow_brackets_enabled() {
+    if options.rainbow_brackets {
         Ok(apply_query_rainbow_brackets(source, core_events, language))
     } else {
         Ok(core_events)
@@ -819,19 +787,13 @@ fn rainbow_scope_index(depth: usize) -> usize {
 mod tests {
 
     #[test]
-    fn the_builder_and_the_deprecated_literal_agree() {
-        // The field stays public and functional until 1.0, so code written
-        // against it keeps compiling and only warns.
-        #[allow(deprecated)]
-        let literal = HighlightOptions {
+    fn options_default_to_every_switch_off() {
+        let options = HighlightOptions {
             rainbow_brackets: true,
         };
 
-        let built = HighlightOptions::new().rainbow_brackets(true);
-
-        assert_eq!(built, literal);
-        assert!(built.rainbow_brackets_enabled());
-        assert!(!HighlightOptions::default().rainbow_brackets_enabled());
+        assert!(options.rainbow_brackets);
+        assert!(!HighlightOptions::default().rainbow_brackets);
     }
     use super::*;
     use crate::themes;

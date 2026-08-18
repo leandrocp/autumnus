@@ -426,11 +426,8 @@ fn fixture_outputs(
     rainbow_brackets: bool,
     html_multi_themes: Option<HtmlMultiThemesFixture>,
 ) -> Result<FixtureOutputs> {
-    let events = highlight_events_with_options(
-        source,
-        language,
-        HighlightOptions::new().rainbow_brackets(rainbow_brackets),
-    )?;
+    let events =
+        highlight_events_with_options(source, language, HighlightOptions { rainbow_brackets })?;
     let (multi_themes, multi_default_theme, multi_highlight_lines) = html_multi_themes
         .as_ref()
         .map(|config| {
