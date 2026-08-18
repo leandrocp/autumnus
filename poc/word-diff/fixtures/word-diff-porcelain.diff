@@ -1,0 +1,32 @@
+diff --git a/f.ex b/f.ex
+index 5082de0..e0c8c75 100644
+--- a/f.ex
++++ b/f.ex
+@@ -1,10 +1,11 @@
+ defmodule Varsel.CVE.Cvelint do
+~
+   def run(cve_json
++, opts
+ ) do
+~
+     File.mkdir_p!(tmp_dir)
+~
+     path = Path.join(tmp_dir, "cve.json")
+~
+     File.write!(path, 
+-Jason
++JSON
+ .encode!(cve_json))
+~
+     try do
+~
+       run(path)
+~
+     end
+~
+   end
+~
+ end
+~
++extra line added
+~

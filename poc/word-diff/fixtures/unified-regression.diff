@@ -1,0 +1,4138 @@
+commit 99994fd9105ef39f4c7b2f1dba4ce52e9d83f97e
+Author: Leandro Pereira <leandro@leandro.io>
+Date:   Thu Aug 13 18:23:59 2026 -0400
+
+    chore: fix elixir nif lock
+
+diff --git a/Cargo.lock b/Cargo.lock
+index f027a0fc4..a4b81b2ae 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -17,13 +17,13 @@ version = "2.0.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa"
+ 
+ [[package]]
+ name = "aho-corasick"
+-version = "1.1.4"
++version = "1.1.5"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "ddd31a130427c27518df266943a5308ed92d4b226cc639f5a8f1002816174301"
++checksum = "c982642fa9e8606056828ee9a8505737230110bb1099153c79efe865c59d12ba"
+ dependencies = [
+  "memchr",
+ ]
+ 
+ [[package]]
+@@ -40,11 +40,11 @@ checksum = "e42366bb9d958f042bf58f0a85e1b2d091997c1257ca49bddd7e4827aadc65fd"
+ dependencies = [
+  "nom 8.0.0",
+  "ratatui-core",
+  "simdutf8",
+  "smallvec",
+- "thiserror 2.0.19",
++ "thiserror 2.0.20",
+ ]
+ 
+ [[package]]
+ name = "anstream"
+ version = "1.0.0"
+@@ -140,20 +140,26 @@ dependencies = [
+  "bytemuck",
+ ]
+ 
+ [[package]]
+ name = "autocfg"
+-version = "1.5.0"
++version = "1.5.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "c08606f8c3cbf4ce6ec8e28fb0014a2c086708fe954eaa885384a6165172e7e8"
++checksum = "f2032f911046de80f0a198e0901378627c33f59ea0ac00e363d481118bd70a53"
+ 
+ [[package]]
+ name = "base64"
+ version = "0.22.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
+ 
++[[package]]
++name = "base64"
++version = "0.23.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "ac07cdecf99051d9a5238b80f35af32cdeba5b336e55d957b318b50137e18da5"
++
+ [[package]]
+ name = "bit-set"
+ version = "0.5.3"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "0700ddab506f33b20a03b13996eccd309a48e5ff77d0d95926aa0210fb4e95f1"
+@@ -173,13 +179,13 @@ version = "1.3.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
+ 
+ [[package]]
+ name = "bitflags"
+-version = "2.13.0"
++version = "2.13.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "b4388bee8683e3d04af747c73422af53102d2bd24d9eadb6cbc100baef4b43f8"
++checksum = "b588b76d00fde79687d7646a9b5bdf3cc0f655e0bbd080335a95d7e96f3587da"
+ 
+ [[package]]
+ name = "block-buffer"
+ version = "0.10.4"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -188,43 +194,43 @@ dependencies = [
+  "generic-array",
+ ]
+ 
+ [[package]]
+ name = "block-buffer"
+-version = "0.12.0"
++version = "0.12.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "cdd35008169921d80bc60d3d0ab416eecb028c4cd653352907921d95084790be"
++checksum = "d2f6c7dbe95a6ed67ad9f18e57daf93a2f034c524b99fd2b76d18fdfeb6660aa"
+ dependencies = [
+  "hybrid-array",
+ ]
+ 
+ [[package]]
+ name = "borsh"
+-version = "1.6.1"
++version = "1.8.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "cfd1e3f8955a5d7de9fab72fc8373fade9fb8a703968cb200ae3dc6cf08e185a"
++checksum = "a88b7ea17d208c4193f2c1e6de3c35fe71f98c96982d5ced308bdcc749ff6e1f"
+ dependencies = [
+  "bytes",
+  "cfg_aliases",
+ ]
+ 
+ [[package]]
+ name = "bstr"
+-version = "1.12.1"
++version = "1.13.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "63044e1ae8e69f3b5a92c736ca6269b8d12fa7efe39bf34ddb06d102cf0e2cab"
++checksum = "6bb31b46c14244e20ee9984b11bf5c992b91fb6939fea616e3512c8baecdbe5f"
+ dependencies = [
+  "memchr",
+  "regex-automata",
+- "serde",
++ "serde_core",
+ ]
+ 
+ [[package]]
+ name = "bumpalo"
+-version = "3.20.2"
++version = "3.20.3"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "5d20789868f4b01b2f2caec9f5c4e0213b41e3e5702a50157d699ae31ced2fcb"
++checksum = "72f5acc6cb2ba439de613abc23857ec3d78374d8ed5ac84e9d11336e87da8649"
+ dependencies = [
+  "allocator-api2",
+ ]
+ 
+ [[package]]
+@@ -233,19 +239,19 @@ version = "1.2.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "64fa3c856b712db6612c019f14756e64e4bcea13337a6b33b696333a9eaa2d06"
+ 
+ [[package]]
+ name = "bytemuck"
+-version = "1.25.0"
++version = "1.25.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "c8efb64bd706a16a1bdde310ae86b351e4d21550d98d056f22f8a7f7a2183fec"
++checksum = "95832e849adfb21180ccb6826a99da14e5d266ae5c2e668e1602cf234f153797"
+ 
+ [[package]]
+ name = "bytes"
+-version = "1.11.1"
++version = "1.12.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "1e748733b7cbc798e1434b6ac524f0c1ff2ab456fe201501e6497c8417a4fc33"
++checksum = "fc652a48c352aef3ea3aed32080501cf3ef6ed5da78602a020c991775b0aff04"
+ 
+ [[package]]
+ name = "castaway"
+ version = "0.2.4"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -272,29 +278,29 @@ version = "1.0.4"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
+ 
+ [[package]]
+ name = "cfg_aliases"
+-version = "0.2.1"
++version = "0.2.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724"
++checksum = "f079e83a288787bcd14a6aea84cee5c87a67c5a3e660c30f557a3d24761b3527"
+ 
+ [[package]]
+ name = "clap"
+-version = "4.6.4"
++version = "4.6.6"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "d91e0c145792ef73a6ad36d27c75ac09f1832222a3c209689d90f534685ee5b7"
++checksum = "473c7e07f409a8d772161724aa8db6a765a2532a70f9667eeb7b49d3d02fbdca"
+ dependencies = [
+  "clap_builder",
+  "clap_derive",
+ ]
+ 
+ [[package]]
+ name = "clap_builder"
+-version = "4.6.2"
++version = "4.6.6"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "f09628afdcc538b57f3c6341e9c8e9970f18e4a481690a64974d7023bd33548b"
++checksum = "7b48fea5a88e9ae728a2dcbedbfc0e730f7d60da42e1cb049a83c9fb8b789889"
+ dependencies = [
+  "anstream",
+  "anstyle",
+  "clap_lex",
+  "strsim",
+@@ -322,11 +328,11 @@ checksum = "c8d4a3bb8b1e0c1050499d1815f5ab16d04f0959b233085fb31653fbfc9d98f9"
+ name = "cobs"
+ version = "0.3.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "0fa961b519f0b462e3a3b4a34b64d119eeaca1d59af726fe450bbba07a9fc0a1"
+ dependencies = [
+- "thiserror 2.0.19",
++ "thiserror 2.0.20",
+ ]
+ 
+ [[package]]
+ name = "codebook-tree-sitter-typst"
+ version = "0.12.1"
+@@ -343,13 +349,13 @@ version = "1.0.5"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "1d07550c9036bf2ae0c684c4297d503f838287c83c53686d05370d0e139ae570"
+ 
+ [[package]]
+ name = "compact_str"
+-version = "0.9.0"
++version = "0.9.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "3fdb1325a1cece981e8a296ab8f0f9b63ae357bd0784a9faaf548cc7b480707a"
++checksum = "9dfdd1c2274d9aa354115b09dc9a901d6c5576818cdf70d14cae2bdb47df00ab"
+ dependencies = [
+  "castaway",
+  "cfg-if",
+  "itoa",
+  "rustversion",
+@@ -552,40 +558,40 @@ version = "1.2.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "790eea4361631c5e7d22598ecd5723ff611904e3344ce8720784c93e3d83d40b"
+ 
+ [[package]]
+ name = "crossbeam-deque"
+-version = "0.8.6"
++version = "0.8.7"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "9dd111b7b7f7d55b72c0a6ae361660ee5853c9af73f70c3c2ef6858b950e2e51"
++checksum = "5181e0de7b61eb03a81e347d6dd8797bae9da5146707b51077e2d71a54ec0ceb"
+ dependencies = [
+  "crossbeam-epoch",
+  "crossbeam-utils",
+ ]
+ 
+ [[package]]
+ name = "crossbeam-epoch"
+-version = "0.9.18"
++version = "0.9.20"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "5b82ac4a3c2ca9c3460964f020e1402edd5753411d7737aa39c3714ad1b5420e"
++checksum = "2d6914041f254d6e9176c01941b21115dcfb7089e55135a35411081bd106ef3f"
+ dependencies = [
+  "crossbeam-utils",
+ ]
+ 
+ [[package]]
+ name = "crossbeam-utils"
+-version = "0.8.21"
++version = "0.8.22"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "d0a5c400df2834b80a4c3327b3aad3a4c4cd4de0629063962b03235697506a28"
++checksum = "61803da095bee82a81bb1a452ecc25d3b2f1416d1897eb86430c6159ef717c17"
+ 
+ [[package]]
+ name = "crossterm"
+ version = "0.29.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "d8b9f2e4c67f833b660cdb0a3523065869fb35570177239812ed4c905aeff87b"
+ dependencies = [
+- "bitflags 2.13.0",
++ "bitflags 2.13.1",
+  "crossterm_winapi",
+  "derive_more",
+  "document-features",
+  "mio",
+  "parking_lot",
+@@ -614,13 +620,13 @@ dependencies = [
+  "typenum",
+ ]
+ 
+ [[package]]
+ name = "crypto-common"
+-version = "0.2.1"
++version = "0.2.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "77727bb15fa921304124b128af125e7e3b968275d1b108b379190264f4423710"
++checksum = "ce6e4c961d6cd6c9a86db418387425e8bdeaf05b3c8bc1411e6dca4c252f1453"
+ dependencies = [
+  "hybrid-array",
+ ]
+ 
+ [[package]]
+@@ -633,13 +639,13 @@ dependencies = [
+  "phf",
+ ]
+ 
+ [[package]]
+ name = "ctor"
+-version = "1.0.12"
++version = "1.0.13"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "2d83cb7e7a873830708d6b02a78cd36a592c6fa14bf267b68725103b85c0d77f"
++checksum = "914a755b7c2d4af2bdcff7ce1739e2db9a1b81a9b07123d8015786ae03c0980d"
+ 
+ [[package]]
+ name = "darling"
+ version = "0.20.11"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -649,16 +655,16 @@ dependencies = [
+  "darling_macro 0.20.11",
+ ]
+ 
+ [[package]]
+ name = "darling"
+-version = "0.23.0"
++version = "0.24.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "25ae13da2f202d56bd7f91c25fba009e7717a1e4a1cc98a76d844b65ae912e9d"
++checksum = "88490bf1b990d87eaaa7ac8aa887f629a08e7359765b4911faf63c3763347d23"
+ dependencies = [
+- "darling_core 0.23.0",
+- "darling_macro 0.23.0",
++ "darling_core 0.24.0",
++ "darling_macro 0.24.0",
+ ]
+ 
+ [[package]]
+ name = "darling_core"
+ version = "0.20.11"
+@@ -673,19 +679,19 @@ dependencies = [
+  "syn 2.0.119",
+ ]
+ 
+ [[package]]
+ name = "darling_core"
+-version = "0.23.0"
++version = "0.24.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "9865a50f7c335f53564bb694ef660825eb8610e0a53d3e11bf1b0d3df31e03b0"
++checksum = "084e274f91c482280130e1e34e0b8d6e66776a060d7b6de7b84289ca778868c4"
+ dependencies = [
+  "ident_case",
+  "proc-macro2",
+  "quote",
+  "strsim",
+- "syn 2.0.119",
++ "syn 3.0.3",
+ ]
+ 
+ [[package]]
+ name = "darling_macro"
+ version = "0.20.11"
+@@ -697,17 +703,17 @@ dependencies = [
+  "syn 2.0.119",
+ ]
+ 
+ [[package]]
+ name = "darling_macro"
+-version = "0.23.0"
++version = "0.24.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "ac3984ec7bd6cfa798e62b4a642426a5be0e68f9401cfc2a01e3fa9ea2fcdb8d"
++checksum = "68f5792fa0d41cd2325ce0ffa64f0a340eaebd4971a3a0c5e1ffd2cc488a355e"
+ dependencies = [
+- "darling_core 0.23.0",
++ "darling_core 0.24.0",
+  "quote",
+- "syn 2.0.119",
++ "syn 3.0.3",
+ ]
+ 
+ [[package]]
+ name = "deltae"
+ version = "0.3.2"
+@@ -717,13 +723,10 @@ checksum = "5729f5117e208430e437df2f4843f5e5952997175992d1414f94c57d61e270b4"
+ [[package]]
+ name = "deranged"
+ version = "0.5.8"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "7cd812cc2bc1d69d4764bd80df88b4317eaef9e773c75226407d9bc0876b211c"
+-dependencies = [
+- "powerfmt",
+-]
+ 
+ [[package]]
+ name = "derive_builder"
+ version = "0.20.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -798,17 +801,17 @@ dependencies = [
+  "crypto-common 0.1.7",
+ ]
+ 
+ [[package]]
+ name = "digest"
+-version = "0.11.2"
++version = "0.11.3"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "4850db49bf08e663084f7fb5c87d202ef91a3907271aff24a94eb97ff039153c"
++checksum = "f1dd6dbb5841937940781866fa1281a1ff7bd3bf827091440879f9994983d5c2"
+ dependencies = [
+- "block-buffer 0.12.0",
++ "block-buffer 0.12.1",
+  "const-oid",
+- "crypto-common 0.2.1",
++ "crypto-common 0.2.2",
+ ]
+ 
+ [[package]]
+ name = "directories-next"
+ version = "2.0.0"
+@@ -839,13 +842,13 @@ dependencies = [
+  "litrs",
+ ]
+ 
+ [[package]]
+ name = "either"
+-version = "1.15.0"
++version = "1.17.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "48c757948c5ede0e46177b7add2e67155f70e33c07fea8284df6576da70b3719"
++checksum = "9e5e8f6c15a24b9a3ee5efec809ccd006d3b30e8b3bb63c39af737c7f87daa1d"
+ 
+ [[package]]
+ name = "embedded-io"
+ version = "0.4.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -906,21 +909,15 @@ checksum = "b95f7c0680e4142284cf8b22c14a476e87d61b004a3a0861872b32ef7ead40a2"
+ dependencies = [
+  "bit-set",
+  "regex",
+ ]
+ 
+-[[package]]
+-name = "fast-srgb8"
+-version = "1.0.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "dd2e7510819d6fbf51a5545c8f922716ecfb14df168a3242f7d33e0239efe6a1"
+-
+ [[package]]
+ name = "fastrand"
+-version = "2.3.0"
++version = "2.5.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "37909eebbb50d72f9059c3b6d82c0463f2ff062c9e95845c43a6c9c0355411be"
++checksum = "da7c62ceae207dd37ea5b845da6a0696c799f85e97da1ab5b7910be3c1c80223"
+ 
+ [[package]]
+ name = "filedescriptor"
+ version = "0.8.3"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -931,13 +928,13 @@ dependencies = [
+  "winapi",
+ ]
+ 
+ [[package]]
+ name = "find-msvc-tools"
+-version = "0.1.9"
++version = "0.1.10"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582"
++checksum = "26b73573e6edcd2af0cdf47bd6cb58f0b3839491263c314eaad1ccf24430e1de"
+ 
+ [[package]]
+ name = "finl_unicode"
+ version = "1.4.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -986,13 +983,13 @@ version = "0.2.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "77ce24cb58228fbb8aa041425bb1050850ac19177686ea6e0f41a70416f56fdb"
+ 
+ [[package]]
+ name = "futures"
+-version = "0.3.33"
++version = "0.3.34"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "a88cf1f829d945f548cf8fec32c61b1f202b6d93b45848602fc02af4b12ad218"
++checksum = "9a31d2a3fbaaeb2af2368bbdd904aa8e812d3c04a1ee10d3171f52d556e5d0a3"
+ dependencies = [
+  "futures-channel",
+  "futures-core",
+  "futures-executor",
+  "futures-io",
+@@ -1001,69 +998,69 @@ dependencies = [
+  "futures-util",
+ ]
+ 
+ [[package]]
+ name = "futures-channel"
+-version = "0.3.33"
++version = "0.3.34"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "262590f4fe6afeb0bc83be1daa64e52657fe185690a958af7f3ad0e92085c5ae"
++checksum = "b1f9e3d69d39e4862ffed03ed071a76f9a13ba1d9109d355b0f0aa6b15e393c4"
+ dependencies = [
+  "futures-core",
+  "futures-sink",
+ ]
+ 
+ [[package]]
+ name = "futures-core"
+-version = "0.3.33"
++version = "0.3.34"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "2cd50c473c80f6d7c3670a752354b8e569b1a7cbfdc0419ec88e5edad85e0dc7"
++checksum = "92d699e522242e69e3003b94ecc1f960f3a5e015aa7c5d7486e65ad01dd94f5e"
+ 
+ [[package]]
+ name = "futures-executor"
+-version = "0.3.33"
++version = "0.3.34"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "6754879cc9f2c66f88c6e5c35344bb0bdb0708b0352b1201815667c7eabc7458"
++checksum = "031b47cf1a3c6cc8bc2fc76cd437f521619387907d469316e7c0bc278f1f5432"
+ dependencies = [
+  "futures-core",
+  "futures-task",
+  "futures-util",
+ ]
+ 
+ [[package]]
+ name = "futures-io"
+-version = "0.3.33"
++version = "0.3.34"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "4577ecaa3c4f96589d473f679a71b596316f6641bc350038b962a5daf0085d7a"
++checksum = "53c0fa8157de1303bfffdaa1cc2a673bfffb60102f76b0ef4441659124373fed"
+ 
+ [[package]]
+ name = "futures-macro"
+-version = "0.3.33"
++version = "0.3.34"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "2d6d3cde68c518367be28956066ddfef33813991b77a55005a69dae04bf3b10b"
++checksum = "9fb9654ba8355388abeb8dcb4fc62f511300867002afc858860463bdd9fe0c44"
+ dependencies = [
+  "proc-macro2",
+  "quote",
+- "syn 2.0.119",
++ "syn 3.0.3",
+ ]
+ 
+ [[package]]
+ name = "futures-sink"
+-version = "0.3.33"
++version = "0.3.34"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "e34418ac499d6305c2fb5ad0ed2f6ac998c5f8ca209b4510f7f94242c647e307"
++checksum = "1944426bf7d03f1d14f708785e4b33efd750b36d48a157b836b3efc15ede8e1d"
+ 
+ [[package]]
+ name = "futures-task"
+-version = "0.3.33"
++version = "0.3.34"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "b231ed28831efb4a61a08580c4bc233ec56bc009f4cd8f52da2c3cb97df0c109"
++checksum = "cd417de3d1d015fc3bfd2b1ea46dfc7bab72ef86f1cc7cc9c78e728b34a6d1fd"
+ 
+ [[package]]
+ name = "futures-util"
+-version = "0.3.33"
++version = "0.3.34"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "a77a90a256fce34da66415271e30f94ee91c57b04b8a2c042d9cf3220179deaa"
++checksum = "0d50a92467f8ba5dd6e3ee5d4bd04d73ab2e4e1c44474a0674821dfce14b79bc"
+ dependencies = [
+  "futures-channel",
+  "futures-core",
+  "futures-io",
+  "futures-macro",
+@@ -1107,19 +1104,17 @@ dependencies = [
+  "wasip2",
+ ]
+ 
+ [[package]]
+ name = "getrandom"
+-version = "0.4.2"
++version = "0.4.3"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "0de51e6874e94e7bf76d726fc5d13ba782deca734ff60d5bb2fb2607c7406555"
++checksum = "300e883d756b2e4ec94e02791f39b04b522276138852cfc41d9fb7e904106099"
+ dependencies = [
+  "cfg-if",
+  "libc",
+  "r-efi 6.0.0",
+- "wasip2",
+- "wasip3",
+ ]
+ 
+ [[package]]
+ name = "gimli"
+ version = "0.32.3"
+@@ -1183,13 +1178,13 @@ version = "0.4.3"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
+ 
+ [[package]]
+ name = "http"
+-version = "1.4.0"
++version = "1.5.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "e3ba2a386d7f85a81f119ad7498ebe444d2e22c2af0b86b069416ace48b3311a"
++checksum = "918d3568bebf352712bc2ef3d46a8bcf1a75b373be6539de198e9105cbbf9ce0"
+ dependencies = [
+  "bytes",
+  "itoa",
+ ]
+ 
+@@ -1199,23 +1194,17 @@ version = "1.10.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "6dbf3de79e51f3d586ab4cb9d5c3e2c14aa28ed23d180cf89b4df0454a69cc87"
+ 
+ [[package]]
+ name = "hybrid-array"
+-version = "0.4.10"
++version = "0.4.14"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "3944cf8cf766b40e2a1a333ee5e9b563f854d5fa49d6a8ca2764e97c6eddb214"
++checksum = "707114b52a152fa7bdb290cd7cd5912d9467273b6d74e21b8d81aca1f8533f6b"
+ dependencies = [
+  "typenum",
+ ]
+ 
+-[[package]]
+-name = "id-arena"
+-version = "2.3.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "3d3067d79b975e8844ca9eb072e16b31c3c1c36928edf9c6789548c524d0d954"
+-
+ [[package]]
+ name = "ident_case"
+ version = "1.0.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "b9e0384b61958566e926dc50660321d12159025e767c18e043daf26b70104c39"
+@@ -1241,19 +1230,19 @@ dependencies = [
+  "rustversion",
+ ]
+ 
+ [[package]]
+ name = "instability"
+-version = "0.3.12"
++version = "0.3.13"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "5eb2d60ef19920a3a9193c3e371f726ec1dafc045dac788d0fb3704272458971"
++checksum = "2bf84e73fa6f27f299dec58e13223cf70db80da872eb921d4f6138342a0eabc8"
+ dependencies = [
+- "darling 0.23.0",
++ "darling 0.24.0",
+  "indoc",
+  "proc-macro2",
+  "quote",
+- "syn 2.0.119",
++ "syn 3.0.3",
+ ]
+ 
+ [[package]]
+ name = "inventory"
+ version = "0.3.24"
+@@ -1284,25 +1273,26 @@ version = "1.0.18"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682"
+ 
+ [[package]]
+ name = "jobserver"
+-version = "0.1.34"
++version = "0.1.35"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "9afb3de4395d6b3e67a780b6de64b51c978ecf11cb9a462c66be7d4ca9039d33"
++checksum = "1c00acbd29eabad4a2392fa0e921c874934dbbf4194312ad20f04a0ed67a3cb3"
+ dependencies = [
+- "getrandom 0.3.4",
++ "getrandom 0.4.3",
+  "libc",
+ ]
+ 
+ [[package]]
+ name = "js-sys"
+-version = "0.3.94"
++version = "0.3.104"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "2e04e2ef80ce82e13552136fabeef8a5ed1f985a96805761cbb9a2c34e7664d9"
++checksum = "0e0c1080212aad755ea003d18543e8768dd432c48819efd73a7bf1e39b7a5a3a"
+ dependencies = [
+- "once_cell",
++ "cfg-if",
++ "futures-util",
+  "wasm-bindgen",
+ ]
+ 
+ [[package]]
+ name = "kasuari"
+@@ -1310,11 +1300,11 @@ version = "0.4.12"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "bde5057d6143cc94e861d90f591b9303d6716c6b9602309150bd068853c10899"
+ dependencies = [
+  "hashbrown 0.16.1",
+  "portable-atomic",
+- "thiserror 2.0.19",
++ "thiserror 2.0.20",
+ ]
+ 
+ [[package]]
+ name = "lab"
+ version = "0.11.0"
+@@ -1333,13 +1323,13 @@ version = "0.1.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "09edd9e8b54e49e587e4f6295a7d29c3ea94d469cb40ab8ca70b288248a81db2"
+ 
+ [[package]]
+ name = "libc"
+-version = "0.2.184"
++version = "0.2.189"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "48f5d2a454e16a5ea0f4ced81bd44e4cfc7bd3a507b61887c99fd3538b28e4af"
++checksum = "3eaf3ede3fee6db1a4c2ee091bf8a8b4dccdc6d17f656fb07896ee72867612f2"
+ 
+ [[package]]
+ name = "libloading"
+ version = "0.9.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -1355,24 +1345,24 @@ version = "0.2.16"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "b6d2cec3eae94f9f509c767b45932f1ada8350c4bdb85af2fcab4a3c14807981"
+ 
+ [[package]]
+ name = "libredox"
+-version = "0.1.15"
++version = "0.1.19"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "7ddbf48fd451246b1f8c2610bd3b4ac0cc6e149d89832867093ab69a17194f08"
++checksum = "2026a5056764a10b2bf5d56488cba40da507f5493a6a429340e2004d9ed085fa"
+ dependencies = [
+  "libc",
+ ]
+ 
+ [[package]]
+ name = "line-clipping"
+-version = "0.3.7"
++version = "0.3.8"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "3f50e8f47623268b5407192d26876c4d7f89d686ca130fdc53bced4814cd29f8"
++checksum = "e752191d037c44ad111a8caa762921926658402f01cc1253f7bef2020ece4f5e"
+ dependencies = [
+- "bitflags 2.13.0",
++ "bitflags 2.13.1",
+ ]
+ 
+ [[package]]
+ name = "linux-raw-sys"
+ version = "0.12.1"
+@@ -1394,19 +1384,19 @@ dependencies = [
+  "scopeguard",
+ ]
+ 
+ [[package]]
+ name = "log"
+-version = "0.4.29"
++version = "0.4.33"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "5e5032e24019045c762d3c0f28f5b6b8bbf38563a65908389bf7978758920897"
++checksum = "0ceec5bc11778974d1bcb055b18002eba7f4b3518b6a0081b3af5f21666da9ad"
+ 
+ [[package]]
+ name = "lru"
+-version = "0.18.0"
++version = "0.18.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "8a860605968fce16869fd239cf4237a82f3ac470723415db603b0e8b6c8d4fb9"
++checksum = "5d2f2f9b4ba7e6b24d95e7e899329d35be83bcded72c8540cdd5368932d1d90a"
+ dependencies = [
+  "hashbrown 0.17.1",
+ ]
+ 
+ [[package]]
+@@ -1421,11 +1411,11 @@ dependencies = [
+  "glob",
+  "lumis-build",
+  "lumis-core",
+  "lumis-wasm-runtime",
+  "pretty_assertions",
+- "prettyplease 0.3.0",
++ "prettyplease",
+  "proc-macro2",
+  "quote",
+  "ratatui",
+  "ratatui-core",
+  "rayon",
+@@ -1434,11 +1424,11 @@ dependencies = [
+  "serde_json",
+  "smol_str",
+  "streaming-iterator",
+  "syn 3.0.3",
+  "termcolor",
+- "thiserror 2.0.19",
++ "thiserror 2.0.20",
+  "toml 1.1.4+spec-1.1.0",
+  "tree-sitter",
+  "tree-sitter-arduino",
+  "tree-sitter-asm",
+  "tree-sitter-bicep",
+@@ -1530,11 +1520,11 @@ dependencies = [
+  "serde_json",
+  "streaming-iterator",
+  "tempfile",
+  "terminal-colorsaurus",
+  "terminal_size",
+- "thiserror 2.0.19",
++ "thiserror 2.0.20",
+  "toml 1.1.4+spec-1.1.0",
+  "tree-sitter",
+  "wasmtime",
+ ]
+ 
+@@ -1543,11 +1533,11 @@ name = "lumis-core"
+ version = "2.4.0"
+ dependencies = [
+  "derive_builder",
+  "glob",
+  "pretty_assertions",
+- "prettyplease 0.3.0",
++ "prettyplease",
+  "proc-macro2",
+  "quote",
+  "regex",
+  "serde",
+  "serde_json",
+@@ -1559,11 +1549,11 @@ dependencies = [
+ 
+ [[package]]
+ name = "lumis-js-native"
+ version = "0.7.0"
+ dependencies = [
+- "base64",
++ "base64 0.22.1",
+  "lumis-core",
+  "lumis-wasm-runtime",
+  "napi",
+  "napi-build",
+  "napi-derive",
+@@ -1582,11 +1572,11 @@ dependencies = [
+  "serde",
+  "serde_json",
+  "sha2 0.11.0",
+  "streaming-iterator",
+  "tempfile",
+- "thiserror 2.0.19",
++ "thiserror 2.0.20",
+  "tree-sitter",
+  "tree-sitter-json",
+  "typed-arena",
+  "ureq",
+  "wasmparser 0.255.0",
+@@ -1635,13 +1625,13 @@ dependencies = [
+  "libc",
+ ]
+ 
+ [[package]]
+ name = "memchr"
+-version = "2.8.0"
++version = "2.8.3"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "f8ca58f447f06ed17d5fc4043ce1b10dd205e060fb3ce5b979b8ed8e59ff3f79"
++checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
+ 
+ [[package]]
+ name = "memfd"
+ version = "0.6.5"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -1681,48 +1671,49 @@ dependencies = [
+  "simd-adler32",
+ ]
+ 
+ [[package]]
+ name = "mio"
+-version = "1.2.0"
++version = "1.2.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "50b7e5b27aa02a74bac8c3f23f448f8d87ff11f92d3aac1a6ed369ee08cc56c1"
++checksum = "30d65c71f1ce40ab09135ce117d742b9f8a19ff91a41a8b57ed50bc2de59c427"
+ dependencies = [
+  "libc",
+  "log",
+  "wasi",
+  "windows-sys 0.61.2",
+ ]
+ 
+ [[package]]
+ name = "napi"
+-version = "3.12.0"
++version = "3.12.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "6f71d6bc097c4a6eb853c3f24991ab8c9f50f57d1f719e305175541482217e36"
++checksum = "459197f1592f4c3dbbf9c1b13f5a4599a343e4ef66b96bc340e2a518b36a6662"
+ dependencies = [
+- "bitflags 2.13.0",
++ "bitflags 2.13.1",
+  "ctor",
+  "futures",
++ "libc",
+  "napi-build",
+  "napi-sys",
+  "nohash-hasher",
+  "rustc-hash",
+  "serde",
+  "serde_json",
+ ]
+ 
+ [[package]]
+ name = "napi-build"
+-version = "2.4.0"
++version = "2.4.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "5282704fbe8d49b0cf8b08e3f33233416a528658f205c7e5ace63b582de0b11c"
++checksum = "60fdf9b392c50e7c4170fa633bd909490ed7835cea4c046776d1a4dd8d2ae0ab"
+ 
+ [[package]]
+ name = "napi-derive"
+-version = "3.6.2"
++version = "3.6.3"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "6d9002b2940f0184444754546e0fcd15182f56948e6f381968b019d549387c42"
++checksum = "0fa55ea69990c90b888e9e77044410e304ce7f35de599dc6d0b5c1923d2e59af"
+ dependencies = [
+  "convert_case 0.11.0",
+  "ctor",
+  "napi-derive-backend",
+  "proc-macro2",
+@@ -1730,13 +1721,13 @@ dependencies = [
+  "syn 2.0.119",
+ ]
+ 
+ [[package]]
+ name = "napi-derive-backend"
+-version = "6.1.1"
++version = "6.1.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "d60b5d773ad46c698c8cc2cd9fde0b283d39cbb7f71c04bee633c7bdba4423bd"
++checksum = "df4056ac7c18e4438ccf0edaed4340ca0d269278c8ec19284f7b23cb039fd0ae"
+ dependencies = [
+  "convert_case 0.11.0",
+  "proc-macro2",
+  "quote",
+  "semver",
+@@ -1756,11 +1747,11 @@ dependencies = [
+ name = "nix"
+ version = "0.29.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "71e2746dc3a24dd78b3cfcb7be93368c6de9963d30f43a6a73998a9cf4b17b46"
+ dependencies = [
+- "bitflags 2.13.0",
++ "bitflags 2.13.1",
+  "cfg-if",
+  "cfg_aliases",
+  "libc",
+  "memoffset",
+ ]
+@@ -1796,13 +1787,13 @@ version = "0.3.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "61807f77802ff30975e01f4f071c8ba10c022052f98b3294119f3e615d13e5be"
+ 
+ [[package]]
+ name = "num-conv"
+-version = "0.2.1"
++version = "0.2.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "c6673768db2d862beb9b39a78fdcb1a69439615d5794a1be50caa9bc92c81967"
++checksum = "521739c6d2bac4aa25192232afe6841231376b2b26d4d9fae5ecf8ca5772e441"
+ 
+ [[package]]
+ name = "num-derive"
+ version = "0.4.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -1864,32 +1855,41 @@ dependencies = [
+  "num-traits",
+ ]
+ 
+ [[package]]
+ name = "palette"
+-version = "0.7.6"
++version = "0.7.7"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "4cbf71184cc5ecc2e4e1baccdb21026c20e5fc3dcf63028a086131b3ab00b6e6"
++checksum = "ddeed8580d347d2abf3dcf06a5f0b3dc020258338526b277847cd4248a70fc64"
+ dependencies = [
+  "approx",
+- "fast-srgb8",
+  "libm",
+  "palette_derive",
++ "palette_math",
+ ]
+ 
+ [[package]]
+ name = "palette_derive"
+-version = "0.7.6"
++version = "0.7.7"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "f5030daf005bface118c096f510ffb781fc28f9ab6a32ab224d8631be6851d30"
++checksum = "88537020289b719d81be994ccf1bbf4990f477e2f69ee52fe3e45f43a02e56be"
+ dependencies = [
+  "by_address",
+  "proc-macro2",
+  "quote",
+  "syn 2.0.119",
+ ]
+ 
++[[package]]
++name = "palette_math"
++version = "0.7.7"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "6e6eb142958d64335fb0e345c5b9ead2ecd6fc438c307e9d7d3c4fd428dbaf12"
++dependencies = [
++ "libm",
++]
++
+ [[package]]
+ name = "parking_lot"
+ version = "0.12.5"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "93857453250e3077bd71ff98b6a65ea6621a19bb0f559a85248955ac12c45a1a"
+@@ -1917,49 +1917,48 @@ version = "2.3.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
+ 
+ [[package]]
+ name = "pest"
+-version = "2.8.6"
++version = "2.9.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "e0848c601009d37dfa3430c4666e147e49cdcf1b92ecd3e63657d8a5f19da662"
++checksum = "5a07a60cc7a4d00c91f95c685609d1d2f79050e6804b70ebedd7650f0b839bcf"
+ dependencies = [
+  "memchr",
+  "ucd-trie",
+ ]
+ 
+ [[package]]
+ name = "pest_derive"
+-version = "2.8.6"
++version = "2.9.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "11f486f1ea21e6c10ed15d5a7c77165d0ee443402f0780849d1768e7d9d6fe77"
++checksum = "b3a83744a5c8455b8b3e0dc5031362780a347c878bdd11584d1a8984228cc88d"
+ dependencies = [
+  "pest",
+  "pest_generator",
+ ]
+ 
+ [[package]]
+ name = "pest_generator"
+-version = "2.8.6"
++version = "2.9.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "8040c4647b13b210a963c1ed407c1ff4fdfa01c31d6d2a098218702e6664f94f"
++checksum = "e0cd3451aa3de60d4b9a1e736885e4dea6b31617598026f12256ad566d63304a"
+ dependencies = [
+  "pest",
+  "pest_meta",
+  "proc-macro2",
+  "quote",
+  "syn 2.0.119",
+ ]
+ 
+ [[package]]
+ name = "pest_meta"
+-version = "2.8.6"
++version = "2.9.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "89815c69d36021a140146f26659a81d6c2afa33d216d736dd4be5381a7362220"
++checksum = "e04d3a0849e241d7dfce834c83b1c5edc8622009e8dd51a12ba1927c32f05496"
+ dependencies = [
+  "pest",
+- "sha2 0.10.9",
+ ]
+ 
+ [[package]]
+ name = "phf"
+ version = "0.11.3"
+@@ -2018,19 +2017,19 @@ version = "0.2.17"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd"
+ 
+ [[package]]
+ name = "pkg-config"
+-version = "0.3.32"
++version = "0.3.33"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "7edddbd0b52d732b21ad9a5fab5c704c14cd949e5e9a1ec5929a24fded1b904c"
++checksum = "19f132c84eca552bf34cab8ec81f1c1dcc229b811638f9d283dceabe58c5569e"
+ 
+ [[package]]
+ name = "portable-atomic"
+-version = "1.13.1"
++version = "1.15.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "c33a9471896f1c69cecef8d20cbe2f7accd12527ce60845ff44c153bb2a21b49"
++checksum = "05c8b63e8d9609db387f0324918f81d68fe27748f084ef092fb35954d0539a85"
+ 
+ [[package]]
+ name = "postcard"
+ version = "1.1.3"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -2086,20 +2085,10 @@ checksum = "3ae130e2f271fbc2ac3a40fb1d07180839cdbbe443c7a27e1e3c13c5cac0116d"
+ dependencies = [
+  "diff",
+  "yansi",
+ ]
+ 
+-[[package]]
+-name = "prettyplease"
+-version = "0.2.37"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "479ca8adacdd7ce8f1fb39ce9ecccbfe93a3f1344b3d0d97f20bc0196208f62b"
+-dependencies = [
+- "proc-macro2",
+- "syn 2.0.119",
+-]
+-
+ [[package]]
+ name = "prettyplease"
+ version = "0.3.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "2bfe0f4c752e450fc2faf62654f1c134747922825d5b04ca717b8874f41a40c0"
+@@ -2161,13 +2150,13 @@ version = "6.0.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "f8dcc9c7d52a811697d2151c701e0d08956f92b0e24136cf4cf27b57a6a0d9bf"
+ 
+ [[package]]
+ name = "rand"
+-version = "0.8.5"
++version = "0.8.7"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "34af8d1a0e25924bc5b7c43c079c942339d8f0a8b57c39049bef581b46327404"
++checksum = "22f6172bdec972074665ed81ed53b71da00bfc44b65a753cfde883ec4c702a1a"
+ dependencies = [
+  "rand_core",
+ ]
+ 
+ [[package]]
+@@ -2196,21 +2185,21 @@ dependencies = [
+ name = "ratatui-core"
+ version = "0.1.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "cbb175c433c8e28a809d1f5773a2ae96e68c0ce40db865cbab1020bf33ae479c"
+ dependencies = [
+- "bitflags 2.13.0",
++ "bitflags 2.13.1",
+  "compact_str",
+  "critical-section",
+  "hashbrown 0.17.1",
+  "itertools",
+  "kasuari",
+  "lru",
+  "palette",
+  "serde",
+  "strum",
+- "thiserror 2.0.19",
++ "thiserror 2.0.20",
+  "unicode-segmentation",
+  "unicode-truncate",
+  "unicode-width",
+ ]
+ 
+@@ -2261,11 +2250,11 @@ dependencies = [
+ name = "ratatui-widgets"
+ version = "0.3.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "66e3d19bcc9130ca376277d93b60767ff121ace3be06f5f95f81dd68956407d1"
+ dependencies = [
+- "bitflags 2.13.0",
++ "bitflags 2.13.1",
+  "hashbrown 0.17.1",
+  "indoc",
+  "instability",
+  "itertools",
+  "line-clipping",
+@@ -2301,11 +2290,11 @@ dependencies = [
+ name = "redox_syscall"
+ version = "0.5.18"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "ed2bf2547551a7053d6fdfafda3f938979645c44812fbfcda098faae3f1a362d"
+ dependencies = [
+- "bitflags 2.13.0",
++ "bitflags 2.13.1",
+ ]
+ 
+ [[package]]
+ name = "redox_users"
+ version = "0.4.6"
+@@ -2343,13 +2332,13 @@ dependencies = [
+  "regex-syntax",
+ ]
+ 
+ [[package]]
+ name = "regex-automata"
+-version = "0.4.16"
++version = "0.4.18"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "8fcfdb36bda0c880c5931cdc7a2bcdc8ba4556847b9d912bca70bc94708711ad"
++checksum = "ad8553b9b26413251cbf30e620595c7a41b3887f03da04579c0e6b0d6a06b4b2"
+ dependencies = [
+  "aho-corasick",
+  "memchr",
+  "regex-syntax",
+ ]
+@@ -2380,13 +2369,13 @@ dependencies = [
+  "windows-sys 0.52.0",
+ ]
+ 
+ [[package]]
+ name = "rustc-hash"
+-version = "2.1.2"
++version = "2.1.3"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "94300abf3f1ae2e2b8ffb7b58043de3d399c73fa6f4b73826402a5c457614dbe"
++checksum = "6b1e7f9a428571be2dc5bc0505c13fb6bf936822b894ec87abf8a08a4e51742d"
+ 
+ [[package]]
+ name = "rustc_version"
+ version = "0.4.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -2399,11 +2388,11 @@ dependencies = [
+ name = "rustix"
+ version = "1.1.4"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "b6fe4565b9518b83ef4f91bb47ce29620ca828bd32cb7e408f0062e9930ba190"
+ dependencies = [
+- "bitflags 2.13.0",
++ "bitflags 2.13.1",
+  "errno",
+  "libc",
+  "linux-raw-sys",
+  "windows-sys 0.61.2",
+ ]
+@@ -2434,13 +2423,13 @@ dependencies = [
+  "syn 2.0.119",
+ ]
+ 
+ [[package]]
+ name = "rustls"
+-version = "0.23.37"
++version = "0.23.43"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "758025cb5fccfd3bc2fd74708fd4682be41d99e5dff73c377c0646c6012c73a4"
++checksum = "0283386ce02abc0151e1761d08802dfe86c173b0b494af5cbc086574e453da06"
+ dependencies = [
+  "log",
+  "once_cell",
+  "ring",
+  "rustls-pki-types",
+@@ -2449,33 +2438,33 @@ dependencies = [
+  "zeroize",
+ ]
+ 
+ [[package]]
+ name = "rustls-pki-types"
+-version = "1.14.0"
++version = "1.15.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "be040f8b0a225e40375822a563fa9524378b9d63112f53e19ffff34df5d33fdd"
++checksum = "2f4925028c7eb5d1fcdaf196971378ed9d2c1c4efc7dc5d011256f76c99c0a96"
+ dependencies = [
+  "zeroize",
+ ]
+ 
+ [[package]]
+ name = "rustls-webpki"
+-version = "0.103.10"
++version = "0.103.14"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "df33b2b81ac578cabaf06b89b0631153a3f416b0a886e8a7a1707fb51abbd1ef"
++checksum = "0527518605e68109d875e248ea259b6758801cf165e4b2c2733ae3b51f12535a"
+ dependencies = [
+  "ring",
+  "rustls-pki-types",
+  "untrusted",
+ ]
+ 
+ [[package]]
+ name = "rustversion"
+-version = "1.0.22"
++version = "1.0.23"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d"
++checksum = "cf54715a573b99ac80df0bc206da022bcd442c974952c7b9720069370852e21f"
+ 
+ [[package]]
+ name = "ryu"
+ version = "1.0.23"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -2487,13 +2476,13 @@ version = "1.2.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
+ 
+ [[package]]
+ name = "semver"
+-version = "1.0.27"
++version = "1.0.28"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "d767eb0aabc880b29956c35734170f26ed551a859dbd361d140cdbeca61ab1e2"
++checksum = "8a7852d02fc848982e0c167ef163aaff9cd91dc640ba85e263cb1ce46fae51cd"
+ 
+ [[package]]
+ name = "serde"
+ version = "1.0.229"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -2572,11 +2561,11 @@ version = "0.11.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "446ba717509524cb3f22f17ecc096f10f4822d76ab5c0b9822c5f9c284e825f4"
+ dependencies = [
+  "cfg-if",
+  "cpufeatures 0.3.0",
+- "digest 0.11.2",
++ "digest 0.11.3",
+ ]
+ 
+ [[package]]
+ name = "shlex"
+ version = "2.0.1"
+@@ -2614,37 +2603,37 @@ dependencies = [
+  "libc",
+ ]
+ 
+ [[package]]
+ name = "simd-adler32"
+-version = "0.3.9"
++version = "0.3.10"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "703d5c7ef118737c72f1af64ad2f6f8c5e1921f818cdcb97b8fe6fc69bf66214"
++checksum = "3a219298ac11a56ea9a6d2120044824d6f01aeb034955e7af7bc16858527deea"
+ 
+ [[package]]
+ name = "simdutf8"
+ version = "0.1.5"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "e3a9fe34e3e7a50316060351f37187a3f546bce95496156754b601a5fa71b76e"
+ 
+ [[package]]
+ name = "siphasher"
+-version = "1.0.2"
++version = "1.0.3"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "b2aa850e253778c88a04c3d7323b043aeda9d3e30d5971937c1855769763678e"
++checksum = "8ee5873ec9cce0195efcb7a4e9507a04cd49aec9c83d0389df45b1ef7ba2e649"
+ 
+ [[package]]
+ name = "slab"
+ version = "0.4.12"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "0c790de23124f9ab44544d7ac05d60440adc586479ce501c1d6d7da3cd8c9cf5"
+ 
+ [[package]]
+ name = "smallvec"
+-version = "1.15.1"
++version = "1.15.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
++checksum = "8ed6a63f02c8539c91a8685a86f4099661ba3da017932f6ebbea6de3f0fa7c90"
+ dependencies = [
+  "serde",
+ ]
+ 
+ [[package]]
+@@ -2752,11 +2741,11 @@ name = "tempfile"
+ version = "3.27.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "32497e9a4c7b38532efcdebeef879707aa9f794296a4f0244f6f69e9bc8574bd"
+ dependencies = [
+  "fastrand",
+- "getrandom 0.4.2",
++ "getrandom 0.4.3",
+  "once_cell",
+  "rustix",
+  "windows-sys 0.61.2",
+ ]
+ 
+@@ -2773,11 +2762,11 @@ dependencies = [
+ name = "termina"
+ version = "0.3.3"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "9048a889effe34a5cddee0af7f53285198b16dca3be510858d38dfdb3e62a04e"
+ dependencies = [
+- "bitflags 2.13.0",
++ "bitflags 2.13.1",
+  "parking_lot",
+  "rustix",
+  "signal-hook",
+  "windows-sys 0.61.2",
+ ]
+@@ -2850,12 +2839,12 @@ name = "termwiz"
+ version = "0.23.3"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "4676b37242ccbd1aabf56edb093a4827dc49086c0ffd764a5705899e0f35f8f7"
+ dependencies = [
+  "anyhow",
+- "base64",
+- "bitflags 2.13.0",
++ "base64 0.22.1",
++ "bitflags 2.13.1",
+  "fancy-regex",
+  "filedescriptor",
+  "finl_unicode",
+  "fixedbitset",
+  "hex",
+@@ -2896,15 +2885,15 @@ dependencies = [
+  "thiserror-impl 1.0.69",
+ ]
+ 
+ [[package]]
+ name = "thiserror"
+-version = "2.0.19"
++version = "2.0.20"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "09a43598840e33d5b0331f38c5e30d13bb11c11210a4b58f0d9b18a5a5eefcd9"
++checksum = "ec86235f5fcc2a73650310756d2ac5b138a5780bbbdfae3eeccec992c435ba4f"
+ dependencies = [
+- "thiserror-impl 2.0.19",
++ "thiserror-impl 2.0.20",
+ ]
+ 
+ [[package]]
+ name = "thiserror-impl"
+ version = "1.0.69"
+@@ -2916,24 +2905,24 @@ dependencies = [
+  "syn 2.0.119",
+ ]
+ 
+ [[package]]
+ name = "thiserror-impl"
+-version = "2.0.19"
++version = "2.0.20"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "43cbfe0cf76104d42a574802844187e84a305e531ed54455f11fbde0f10541cd"
++checksum = "bc04cd3e1236dd4a98afca4569f2deb3f120e5422a4023be2cb683f8486292af"
+ dependencies = [
+  "proc-macro2",
+  "quote",
+  "syn 3.0.3",
+ ]
+ 
+ [[package]]
+ name = "time"
+-version = "0.3.47"
++version = "0.3.55"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "743bd48c283afc0388f9b8827b976905fb217ad9e647fae3a379a9283c4def2c"
++checksum = "cdb87b95ec50ddfa440816d227a17b2ccbdda963a316a727fda0fc4334f7d134"
+ dependencies = [
+  "deranged",
+  "libc",
+  "num-conv",
+  "num_threads",
+@@ -2942,13 +2931,13 @@ dependencies = [
+  "time-core",
+ ]
+ 
+ [[package]]
+ name = "time-core"
+-version = "0.1.8"
++version = "0.1.9"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "7694e1cfe791f8d31026952abf09c69ca6f6fa4e1a1229e18988f06a04a12dca"
++checksum = "9e1c906769ad99c88eaa54e728060edef082f8e358ff32030cb7c7d315e81109"
+ 
+ [[package]]
+ name = "toml"
+ version = "0.8.23"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -2970,11 +2959,11 @@ dependencies = [
+  "serde_core",
+  "serde_spanned 1.1.1",
+  "toml_datetime 1.1.1+spec-1.1.0",
+  "toml_parser",
+  "toml_writer",
+- "winnow 1.0.1",
++ "winnow 1.0.4",
+ ]
+ 
+ [[package]]
+ name = "toml_datetime"
+ version = "0.6.11"
+@@ -3011,11 +3000,11 @@ dependencies = [
+ name = "toml_parser"
+ version = "1.1.3+spec-1.1.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "1d38ac1cf9b95face32296c0a3ede1fdc270627c9d9c02a7274dd6d960dc4d56"
+ dependencies = [
+- "winnow 1.0.1",
++ "winnow 1.0.4",
+ ]
+ 
+ [[package]]
+ name = "toml_write"
+ version = "0.1.2"
+@@ -3059,13 +3048,13 @@ dependencies = [
+  "once_cell",
+ ]
+ 
+ [[package]]
+ name = "tree-sitter"
+-version = "0.26.11"
++version = "0.26.12"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "af1c71c1c4cc0920b20d6b0f6572e7682cd07a6a2faec71067a31fa394c586df"
++checksum = "83c567a8e18ae93f20982c90370b16fd24023aeaf52f6052b96957ab253a0fec"
+ dependencies = [
+  "cc",
+  "regex",
+  "regex-syntax",
+  "serde_json",
+@@ -3732,13 +3721,13 @@ version = "0.12.3"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "8e28f89b80c87b8fb0cf04ab448d5dd0dd0ade2f8891bae878de66a75a28600e"
+ 
+ [[package]]
+ name = "typenum"
+-version = "1.19.0"
++version = "1.20.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "562d481066bde0658276a35467c4af00bdc6ee726305698a55b86e61d7ad82bb"
++checksum = "b6f5e870be6c3b371b77fe0ee0bafb859fa4964b4404c27de1d380043c4dda20"
+ 
+ [[package]]
+ name = "ucd-trie"
+ version = "0.1.7"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -3750,13 +3739,13 @@ version = "1.0.24"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
+ 
+ [[package]]
+ name = "unicode-segmentation"
+-version = "1.13.2"
++version = "1.13.3"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "9629274872b2bfaf8d66f5f15725007f635594914870f65218920345aa11aa8c"
++checksum = "c6f5d3c3b1bf09027a88a6bc961fc00497d651009560b5463668dc81b0fa87a8"
+ 
+ [[package]]
+ name = "unicode-truncate"
+ version = "2.0.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -3767,33 +3756,27 @@ dependencies = [
+  "unicode-width",
+ ]
+ 
+ [[package]]
+ name = "unicode-width"
+-version = "0.2.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "1fc81956842c57dac11422a97c3b8195a1ff727f06e85c84ed2e8aa277c9a0fd"
+-
+-[[package]]
+-name = "unicode-xid"
+-version = "0.2.6"
++version = "0.2.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "ebc1c04c71510c7f702b52b7c350734c9ff1295c464a03335b00bb84fc54f853"
++checksum = "b4ac048d71ede7ee76d585517add45da530660ef4390e49b098733c6e897f254"
+ 
+ [[package]]
+ name = "untrusted"
+ version = "0.9.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "8ecb6da28b8a351d773b68d5825ac39017e680750f980f3a1a85cd8dd28a47c1"
+ 
+ [[package]]
+ name = "ureq"
+-version = "3.3.0"
++version = "3.4.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "dea7109cdcd5864d4eeb1b58a1648dc9bf520360d7af16ec26d0a9354bafcfc0"
++checksum = "972d7902c8735f2695410b8aed7df6ed12a47394aa1c8d7af49f0497b731a94d"
+ dependencies = [
+- "base64",
++ "base64 0.23.1",
+  "flate2",
+  "log",
+  "percent-encoding",
+  "rustls",
+  "rustls-pki-types",
+@@ -3802,15 +3785,15 @@ dependencies = [
+  "webpki-roots",
+ ]
+ 
+ [[package]]
+ name = "ureq-proto"
+-version = "0.6.0"
++version = "0.6.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "e994ba84b0bd1b1b0cf92878b7ef898a5c1760108fe7b6010327e274917a808c"
++checksum = "da5f78b09e6941e1a0f2e30e695e4b120377b54d5e0aec11b594bb57b3971613"
+ dependencies = [
+- "base64",
++ "base64 0.23.1",
+  "http",
+  "httparse",
+  "log",
+ ]
+ 
+@@ -3826,16 +3809,16 @@ version = "0.2.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821"
+ 
+ [[package]]
+ name = "uuid"
+-version = "1.23.0"
++version = "1.24.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "5ac8b6f42ead25368cf5b098aeb3dc8a1a2c05a3eee8a9a1a68c640edbfc79d9"
++checksum = "bf3923a6f5c4c6382e0b653c4117f48d631ea17f38ed86e2a828e6f7412f5239"
+ dependencies = [
+  "atomic",
+- "getrandom 0.4.2",
++ "getrandom 0.4.3",
+  "js-sys",
+  "wasm-bindgen",
+ ]
+ 
+ [[package]]
+@@ -3883,67 +3866,58 @@ version = "0.11.1+wasi-snapshot-preview1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "ccf3ec651a847eb01de73ccad15eb7d99f80485de043efb2f370cd654f4ea44b"
+ 
+ [[package]]
+ name = "wasip2"
+-version = "1.0.2+wasi-0.2.9"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "9517f9239f02c069db75e65f174b3da828fe5f5b945c4dd26bd25d89c03ebcf5"
+-dependencies = [
+- "wit-bindgen",
+-]
+-
+-[[package]]
+-name = "wasip3"
+-version = "0.4.0+wasi-0.3.0-rc-2026-01-06"
++version = "1.0.4+wasi-0.2.12"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "5428f8bf88ea5ddc08faddef2ac4a67e390b88186c703ce6dbd955e1c145aca5"
++checksum = "b67efb37e106e55ce722a510d6b5f9c17f083e5fc79afc2badeb12cc313d9487"
+ dependencies = [
+  "wit-bindgen",
+ ]
+ 
+ [[package]]
+ name = "wasm-bindgen"
+-version = "0.2.117"
++version = "0.2.127"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "0551fc1bb415591e3372d0bc4780db7e587d84e2a7e79da121051c5c4b89d0b0"
++checksum = "1b70935747edd64d89de3efa29d73789b806c15798f8e7dca4d8ac356b50ce70"
+ dependencies = [
+  "cfg-if",
+  "once_cell",
+  "rustversion",
+  "wasm-bindgen-macro",
+  "wasm-bindgen-shared",
+ ]
+ 
+ [[package]]
+ name = "wasm-bindgen-macro"
+-version = "0.2.117"
++version = "0.2.127"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "7fbdf9a35adf44786aecd5ff89b4563a90325f9da0923236f6104e603c7e86be"
++checksum = "77775f8f3f7217702089053b94958f8f54061a3f663417df76e19cbdcca29bc1"
+ dependencies = [
+  "quote",
+  "wasm-bindgen-macro-support",
+ ]
+ 
+ [[package]]
+ name = "wasm-bindgen-macro-support"
+-version = "0.2.117"
++version = "0.2.127"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "dca9693ef2bab6d4e6707234500350d8dad079eb508dca05530c85dc3a529ff2"
++checksum = "e11d33f857dc2fb11b8bc75aee111aa9cbeb12cd9f25efd3d4c2a3dd4e235284"
+ dependencies = [
+  "bumpalo",
+  "proc-macro2",
+  "quote",
+  "syn 2.0.119",
+  "wasm-bindgen-shared",
+ ]
+ 
+ [[package]]
+ name = "wasm-bindgen-shared"
+-version = "0.2.117"
++version = "0.2.127"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "39129a682a6d2d841b6c429d0c51e5cb0ed1a03829d8b3d1e69a011e62cb3d3b"
++checksum = "7ef64dbcc55df09c7e5a46182d181c2cfa3e925f3da937ea764728b4bbb9dcbf"
+ dependencies = [
+  "unicode-ident",
+ ]
+ 
+ [[package]]
+@@ -3954,64 +3928,30 @@ checksum = "724fccfd4f3c24b7e589d333fc0429c68042897a7e8a5f8694f31792471841e7"
+ dependencies = [
+  "leb128fmt",
+  "wasmparser 0.236.1",
+ ]
+ 
+-[[package]]
+-name = "wasm-encoder"
+-version = "0.244.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "990065f2fe63003fe337b932cfb5e3b80e0b4d0f5ff650e6985b1048f62c8319"
+-dependencies = [
+- "leb128fmt",
+- "wasmparser 0.244.0",
+-]
+-
+-[[package]]
+-name = "wasm-metadata"
+-version = "0.244.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "bb0e353e6a2fbdc176932bbaab493762eb1255a7900fe0fea1a2f96c296cc909"
+-dependencies = [
+- "anyhow",
+- "indexmap",
+- "wasm-encoder 0.244.0",
+- "wasmparser 0.244.0",
+-]
+-
+ [[package]]
+ name = "wasmparser"
+ version = "0.236.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "a9b1e81f3eb254cf7404a82cee6926a4a3ccc5aad80cc3d43608a070c67aa1d7"
+ dependencies = [
+- "bitflags 2.13.0",
++ "bitflags 2.13.1",
+  "hashbrown 0.15.5",
+  "indexmap",
+  "semver",
+  "serde",
+ ]
+ 
+-[[package]]
+-name = "wasmparser"
+-version = "0.244.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "47b807c72e1bac69382b3a6fb3dbe8ea4c0ed87ff5629b8685ae6b9a611028fe"
+-dependencies = [
+- "bitflags 2.13.0",
+- "hashbrown 0.15.5",
+- "indexmap",
+- "semver",
+-]
+-
+ [[package]]
+ name = "wasmparser"
+ version = "0.255.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "e8e329ef4b5d46e73b91d3ac6924417cad55a8cbbf869c199283383427c3320b"
+ dependencies = [
+- "bitflags 2.13.0",
++ "bitflags 2.13.1",
+  "hashbrown 0.17.1",
+  "indexmap",
+  "semver",
+  "serde",
+ ]
+@@ -4033,11 +3973,11 @@ version = "36.0.13"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "93d881c5dcff5f230368d84fcf110ca25fe47badc694e7d559c3891492159916"
+ dependencies = [
+  "addr2line",
+  "anyhow",
+- "bitflags 2.13.0",
++ "bitflags 2.13.1",
+  "bumpalo",
+  "cc",
+  "cfg-if",
+  "hashbrown 0.15.5",
+  "indexmap",
+@@ -4070,13 +4010,13 @@ dependencies = [
+  "windows-sys 0.60.2",
+ ]
+ 
+ [[package]]
+ name = "wasmtime-c-api-impl"
+-version = "36.0.12"
++version = "36.0.13"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "b2ecbea9b3efb193487c1d2cdd0222e13cfc60eaeab7c41c043a1708e0a079cd"
++checksum = "ae273769c129ee7ca247c3d849dfdda9957fece8c93307a4ef727ca0e35d62c3"
+ dependencies = [
+  "anyhow",
+  "log",
+  "tracing",
+  "wasmtime",
+@@ -4099,11 +4039,11 @@ dependencies = [
+  "postcard",
+  "serde",
+  "serde_derive",
+  "smallvec",
+  "target-lexicon",
+- "wasm-encoder 0.236.1",
++ "wasm-encoder",
+  "wasmparser 0.236.1",
+  "wasmprinter",
+ ]
+ 
+ [[package]]
+@@ -4115,13 +4055,13 @@ dependencies = [
+  "cfg-if",
+ ]
+ 
+ [[package]]
+ name = "wasmtime-internal-c-api-macros"
+-version = "36.0.12"
++version = "36.0.13"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "3873cfb0aaaf9e65c8978eb50990a5d2cb7c0c967a296329902084f867b00373"
++checksum = "8fcd4661fe1146d284b5b82d26d12c4b8056b1f0aa8a3a8f6d33e9597abf147f"
+ dependencies = [
+  "proc-macro2",
+  "quote",
+ ]
+ 
+@@ -4130,11 +4070,11 @@ name = "wasmtime-internal-cache"
+ version = "36.0.13"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "651f8a16b51cde3ee8bd5b775bcedc24b66040d7dca1f13ad855b10c660e1d01"
+ dependencies = [
+  "anyhow",
+- "base64",
++ "base64 0.22.1",
+  "directories-next",
+  "log",
+  "postcard",
+  "rustix",
+  "serde",
+@@ -4163,11 +4103,11 @@ dependencies = [
+  "log",
+  "object",
+  "pulley-interpreter",
+  "smallvec",
+  "target-lexicon",
+- "thiserror 2.0.19",
++ "thiserror 2.0.20",
+  "wasmparser 0.236.1",
+  "wasmtime-environ",
+  "wasmtime-internal-math",
+  "wasmtime-internal-versioned-export-macros",
+ ]
+@@ -4266,13 +4206,13 @@ dependencies = [
+  "winch-codegen",
+ ]
+ 
+ [[package]]
+ name = "webpki-roots"
+-version = "1.0.6"
++version = "1.0.9"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "22cfaf3c063993ff62e73cb4311efde4db1efb31ab78a3e5c457939ad5cc0bed"
++checksum = "7dcd9d09a39985f5344844e66b0c530a33843579125f23e21e9f0f220850f22a"
+ dependencies = [
+  "rustls-pki-types",
+ ]
+ 
+ [[package]]
+@@ -4389,11 +4329,11 @@ dependencies = [
+  "cranelift-codegen",
+  "gimli",
+  "regalloc2",
+  "smallvec",
+  "target-lexicon",
+- "thiserror 2.0.19",
++ "thiserror 2.0.20",
+  "wasmparser 0.236.1",
+  "wasmtime-environ",
+  "wasmtime-internal-cranelift",
+  "wasmtime-internal-math",
+ ]
+@@ -4569,101 +4509,19 @@ dependencies = [
+  "memchr",
+ ]
+ 
+ [[package]]
+ name = "winnow"
+-version = "1.0.1"
++version = "1.0.4"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "09dac053f1cd375980747450bfc7250c264eaae0583872e845c0c7cd578872b5"
++checksum = "23b97319f7b8343df12cc98938e5c3eb436064524c8d2b4e30a1d3a36eecdf81"
+ 
+ [[package]]
+ name = "wit-bindgen"
+-version = "0.51.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "d7249219f66ced02969388cf2bb044a09756a083d0fab1e566056b04d9fbcaa5"
+-dependencies = [
+- "wit-bindgen-rust-macro",
+-]
+-
+-[[package]]
+-name = "wit-bindgen-core"
+-version = "0.51.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "ea61de684c3ea68cb082b7a88508a8b27fcc8b797d738bfc99a82facf1d752dc"
+-dependencies = [
+- "anyhow",
+- "heck",
+- "wit-parser",
+-]
+-
+-[[package]]
+-name = "wit-bindgen-rust"
+-version = "0.51.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "b7c566e0f4b284dd6561c786d9cb0142da491f46a9fbed79ea69cdad5db17f21"
+-dependencies = [
+- "anyhow",
+- "heck",
+- "indexmap",
+- "prettyplease 0.2.37",
+- "syn 2.0.119",
+- "wasm-metadata",
+- "wit-bindgen-core",
+- "wit-component",
+-]
+-
+-[[package]]
+-name = "wit-bindgen-rust-macro"
+-version = "0.51.0"
++version = "0.57.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "0c0f9bfd77e6a48eccf51359e3ae77140a7f50b1e2ebfe62422d8afdaffab17a"
+-dependencies = [
+- "anyhow",
+- "prettyplease 0.2.37",
+- "proc-macro2",
+- "quote",
+- "syn 2.0.119",
+- "wit-bindgen-core",
+- "wit-bindgen-rust",
+-]
+-
+-[[package]]
+-name = "wit-component"
+-version = "0.244.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "9d66ea20e9553b30172b5e831994e35fbde2d165325bec84fc43dbf6f4eb9cb2"
+-dependencies = [
+- "anyhow",
+- "bitflags 2.13.0",
+- "indexmap",
+- "log",
+- "serde",
+- "serde_derive",
+- "serde_json",
+- "wasm-encoder 0.244.0",
+- "wasm-metadata",
+- "wasmparser 0.244.0",
+- "wit-parser",
+-]
+-
+-[[package]]
+-name = "wit-parser"
+-version = "0.244.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "ecc8ac4bc1dc3381b7f59c34f00b67e18f910c2c0f50015669dde7def656a736"
+-dependencies = [
+- "anyhow",
+- "id-arena",
+- "indexmap",
+- "log",
+- "semver",
+- "serde",
+- "serde_derive",
+- "serde_json",
+- "unicode-xid",
+- "wasmparser 0.244.0",
+-]
++checksum = "1ebf944e87a7c253233ad6766e082e3cd714b5d03812acc24c318f549614536e"
+ 
+ [[package]]
+ name = "xterm-color"
+ version = "1.0.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -4684,19 +4542,19 @@ version = "1.0.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "cfe53a6657fd280eaa890a3bc59152892ffa3e30101319d168b781ed6529b049"
+ 
+ [[package]]
+ name = "zeroize"
+-version = "1.8.2"
++version = "1.9.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "b97154e67e32c85465826e8bcc1c59429aaaf107c1e4a9e53c8d8ccd5eff88d0"
++checksum = "e13c156562582aa81c60cb29407084cdb54c4164760106ab78e6c5b0858cf64e"
+ 
+ [[package]]
+ name = "zmij"
+-version = "1.0.21"
++version = "1.0.23"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "b8848ee67ecc8aedbaf3e4122217aff892639231befc6a1b58d29fff4c2cabaa"
++checksum = "29666d0abbfad1e3dc4dcf6144730dd3a3ab225bbbdac83319345b1b44ccfc1b"
+ 
+ [[package]]
+ name = "zstd"
+ version = "0.13.3"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+
+commit 57c5fff292ac059022101bc5e6de51b322c8cee9
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Thu Aug 13 18:17:27 2026 -0400
+
+    build(deps): bump actions/checkout from 7.0.0 to 7.0.1 (#1275)
+    
+    Bumps [actions/checkout](https://github.com/actions/checkout) from 7.0.0 to 7.0.1.
+    - [Release notes](https://github.com/actions/checkout/releases)
+    - [Changelog](https://github.com/actions/checkout/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/actions/checkout/compare/v7...3d3c42e5aac5ba805825da76410c181273ba90b1)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: actions/checkout
+      dependency-version: 7.0.1
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+    Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+
+diff --git a/.github/workflows/benchmarks.yml b/.github/workflows/benchmarks.yml
+index bd4fd60b9..7e58e3b0c 100644
+--- a/.github/workflows/benchmarks.yml
++++ b/.github/workflows/benchmarks.yml
+@@ -35,11 +35,11 @@ jobs:
+             size_task: package-size:elixir
+           - label: CLI and bat
+             task: cli
+             size_task: package-size:cli
+     steps:
+-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
++      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+         with:
+           persist-credentials: false
+       - uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
+         with:
+           # Pinned: mise 2026.7.18 cannot install core:erlang/core:elixir on the
+@@ -87,11 +87,11 @@ jobs:
+       ${{ github.event_name != 'push' ||
+           !startsWith(github.event.head_commit.message, 'chore(release):') }}
+     runs-on: ubuntu-24.04
+     timeout-minutes: 60
+     steps:
+-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
++      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+         with:
+           persist-credentials: false
+       - uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
+         with:
+           # Pinned: mise 2026.7.18 cannot install core:erlang/core:elixir on the
+@@ -128,11 +128,11 @@ jobs:
+            !startsWith(github.event.head_commit.message, 'chore(release):')) }}
+     continue-on-error: true
+     runs-on: ubuntu-24.04
+     timeout-minutes: 10
+     steps:
+-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
++      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+         with:
+           persist-credentials: false
+       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+         with:
+           node-version: 24.18.0
+
+commit 018457df878656a0e94d473f73137b081259c450
+Author: Leandro Pereira <leandro@leandro.io>
+Date:   Thu Aug 13 18:11:21 2026 -0400
+
+    chore(release): npm-cli 0.6.1
+
+diff --git a/packages/javascript/cli/CHANGELOG.md b/packages/javascript/cli/CHANGELOG.md
+index 5b7aeb42f..a4c05ed7d 100644
+--- a/packages/javascript/cli/CHANGELOG.md
++++ b/packages/javascript/cli/CHANGELOG.md
+@@ -1,5 +1,12 @@
++## [0.6.1](https://github.com/leandrocp/lumis/compare/npm-cli/v0.6.0...npm-cli/v0.6.1) (2026-08-13)
++
++
++### Bug Fixes
++
++- resolve the npm binary through npm - [#1282](https://github.com/leandrocp/lumis/pull/1282)
++
+ ## [0.6.0](https://github.com/leandrocp/lumis/compare/npm-cli/v0.5.0...npm-cli/v0.6.0) (2026-08-13)
+ 
+ ### Bug Fixes
+ 
+ - pin lumis crate requirements to the workspace version - [#1140](https://github.com/leandrocp/lumis/pull/1140)
+diff --git a/packages/javascript/cli/npm/darwin-arm64/package.json b/packages/javascript/cli/npm/darwin-arm64/package.json
+index 9941005bb..247f44e96 100644
+--- a/packages/javascript/cli/npm/darwin-arm64/package.json
++++ b/packages/javascript/cli/npm/darwin-arm64/package.json
+@@ -1,8 +1,8 @@
+ {
+   "name": "@lumis-sh/cli-darwin-arm64",
+-  "version": "0.6.0",
++  "version": "0.6.1",
+   "description": "Lumis command line syntax highlighter for macOS arm64",
+   "license": "MIT",
+   "repository": "github:leandrocp/lumis",
+   "files": [
+     "LICENSE",
+diff --git a/packages/javascript/cli/npm/darwin-x64/package.json b/packages/javascript/cli/npm/darwin-x64/package.json
+index a223b8b5d..d9e647c65 100644
+--- a/packages/javascript/cli/npm/darwin-x64/package.json
++++ b/packages/javascript/cli/npm/darwin-x64/package.json
+@@ -1,8 +1,8 @@
+ {
+   "name": "@lumis-sh/cli-darwin-x64",
+-  "version": "0.6.0",
++  "version": "0.6.1",
+   "description": "Lumis command line syntax highlighter for macOS x64",
+   "license": "MIT",
+   "repository": "github:leandrocp/lumis",
+   "files": [
+     "LICENSE",
+diff --git a/packages/javascript/cli/npm/linux-arm64-gnu/package.json b/packages/javascript/cli/npm/linux-arm64-gnu/package.json
+index b89d0cac2..01e316ab2 100644
+--- a/packages/javascript/cli/npm/linux-arm64-gnu/package.json
++++ b/packages/javascript/cli/npm/linux-arm64-gnu/package.json
+@@ -1,8 +1,8 @@
+ {
+   "name": "@lumis-sh/cli-linux-arm64-gnu",
+-  "version": "0.6.0",
++  "version": "0.6.1",
+   "description": "Lumis command line syntax highlighter for Linux arm64 glibc",
+   "license": "MIT",
+   "repository": "github:leandrocp/lumis",
+   "files": [
+     "LICENSE",
+diff --git a/packages/javascript/cli/npm/linux-arm64-musl/package.json b/packages/javascript/cli/npm/linux-arm64-musl/package.json
+index 4e8fa6039..bc22ee9e7 100644
+--- a/packages/javascript/cli/npm/linux-arm64-musl/package.json
++++ b/packages/javascript/cli/npm/linux-arm64-musl/package.json
+@@ -1,8 +1,8 @@
+ {
+   "name": "@lumis-sh/cli-linux-arm64-musl",
+-  "version": "0.6.0",
++  "version": "0.6.1",
+   "description": "Lumis command line syntax highlighter for Linux arm64 musl",
+   "license": "MIT",
+   "repository": "github:leandrocp/lumis",
+   "files": [
+     "LICENSE",
+diff --git a/packages/javascript/cli/npm/linux-x64-gnu/package.json b/packages/javascript/cli/npm/linux-x64-gnu/package.json
+index 75e2b97e0..5695c4f75 100644
+--- a/packages/javascript/cli/npm/linux-x64-gnu/package.json
++++ b/packages/javascript/cli/npm/linux-x64-gnu/package.json
+@@ -1,8 +1,8 @@
+ {
+   "name": "@lumis-sh/cli-linux-x64-gnu",
+-  "version": "0.6.0",
++  "version": "0.6.1",
+   "description": "Lumis command line syntax highlighter for Linux x64 glibc",
+   "license": "MIT",
+   "repository": "github:leandrocp/lumis",
+   "files": [
+     "LICENSE",
+diff --git a/packages/javascript/cli/npm/linux-x64-musl/package.json b/packages/javascript/cli/npm/linux-x64-musl/package.json
+index 37150935b..44821e3fb 100644
+--- a/packages/javascript/cli/npm/linux-x64-musl/package.json
++++ b/packages/javascript/cli/npm/linux-x64-musl/package.json
+@@ -1,8 +1,8 @@
+ {
+   "name": "@lumis-sh/cli-linux-x64-musl",
+-  "version": "0.6.0",
++  "version": "0.6.1",
+   "description": "Lumis command line syntax highlighter for Linux x64 musl",
+   "license": "MIT",
+   "repository": "github:leandrocp/lumis",
+   "files": [
+     "LICENSE",
+diff --git a/packages/javascript/cli/npm/win32-arm64-msvc/package.json b/packages/javascript/cli/npm/win32-arm64-msvc/package.json
+index bd84a821a..23241bed2 100644
+--- a/packages/javascript/cli/npm/win32-arm64-msvc/package.json
++++ b/packages/javascript/cli/npm/win32-arm64-msvc/package.json
+@@ -1,8 +1,8 @@
+ {
+   "name": "@lumis-sh/cli-win32-arm64-msvc",
+-  "version": "0.6.0",
++  "version": "0.6.1",
+   "description": "Lumis command line syntax highlighter for Windows arm64",
+   "license": "MIT",
+   "repository": "github:leandrocp/lumis",
+   "files": [
+     "LICENSE",
+diff --git a/packages/javascript/cli/npm/win32-x64-msvc/package.json b/packages/javascript/cli/npm/win32-x64-msvc/package.json
+index 236c7cc8e..1bd7f052c 100644
+--- a/packages/javascript/cli/npm/win32-x64-msvc/package.json
++++ b/packages/javascript/cli/npm/win32-x64-msvc/package.json
+@@ -1,8 +1,8 @@
+ {
+   "name": "@lumis-sh/cli-win32-x64-msvc",
+-  "version": "0.6.0",
++  "version": "0.6.1",
+   "description": "Lumis command line syntax highlighter for Windows x64",
+   "license": "MIT",
+   "repository": "github:leandrocp/lumis",
+   "files": [
+     "LICENSE",
+diff --git a/packages/javascript/cli/package.json b/packages/javascript/cli/package.json
+index 3e8c07699..849475fdf 100644
+--- a/packages/javascript/cli/package.json
++++ b/packages/javascript/cli/package.json
+@@ -1,8 +1,8 @@
+ {
+   "name": "@lumis-sh/cli",
+-  "version": "0.6.0",
++  "version": "0.6.1",
+   "description": "Command line syntax highlighter powered by Tree-sitter and Neovim themes",
+   "author": "Leandro Pereira",
+   "license": "MIT",
+   "repository": {
+     "type": "git",
+
+commit 33e3e3dfef8ebe8bcca91748a8547a2f6c5fbc98
+Author: Leandro Pereira <leandro@leandro.io>
+Date:   Thu Aug 13 18:08:22 2026 -0400
+
+    fix(cli): resolve the npm binary through npm (#1282)
+
+diff --git a/.github/workflows/javascript-release.yml b/.github/workflows/javascript-release.yml
+index 17e5f7e2f..11358d6ef 100644
+--- a/.github/workflows/javascript-release.yml
++++ b/.github/workflows/javascript-release.yml
+@@ -109,20 +109,106 @@ jobs:
+           name: lumis-native-${{ matrix.package }}
+           path: native-artifact/*.node
+           if-no-files-found: error
+           retention-days: 1
+ 
++  # `@lumis-sh/cli` resolves its binary through npm rather than downloading one,
++  # so the CLI is built here from the tagged tree instead of being pulled from a
++  # `cargo-lumis-cli` release. Deriving the download URL from the npm version is
++  # what shipped `@lumis-sh/cli` 0.5.0 and 0.6.0 against releases that did not
++  # exist; nothing resolved that URL until a user installed the package.
++  build-cli:
++    if: ${{ startsWith(inputs.tag || github.ref_name, 'npm-cli/v') }}
++    strategy:
++      fail-fast: false
++      matrix:
++        include:
++          - package: darwin-arm64
++            target: aarch64-apple-darwin
++            os: macos-latest
++          - package: darwin-x64
++            target: x86_64-apple-darwin
++            os: macos-15-intel
++          - package: linux-arm64-gnu
++            target: aarch64-unknown-linux-gnu
++            os: ubuntu-24.04-arm
++          - package: linux-arm64-musl
++            target: aarch64-unknown-linux-musl
++            os: ubuntu-24.04-arm
++          - package: linux-x64-gnu
++            target: x86_64-unknown-linux-gnu
++            os: ubuntu-latest
++          - package: linux-x64-musl
++            target: x86_64-unknown-linux-musl
++            os: ubuntu-latest
++          - package: win32-arm64-msvc
++            target: aarch64-pc-windows-msvc
++            os: windows-latest
++          - package: win32-x64-msvc
++            target: x86_64-pc-windows-msvc
++            os: windows-latest
++    runs-on: ${{ matrix.os }}
++    steps:
++      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
++        with:
++          ref: ${{ inputs.tag || github.ref_name }}
++
++      - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
++        if: ${{ !endsWith(matrix.target, '-musl') }}
++        with:
++          targets: ${{ matrix.target }}
++
++      - name: Build CLI
++        if: ${{ !endsWith(matrix.target, '-musl') }}
++        run: cargo build --locked --release --target ${{ matrix.target }} -p lumis-cli
++
++      # Unlike the addon, the CLI keeps musl's default static CRT: it is an
++      # executable, not something Node has to dlopen, so it links libc in and
++      # runs on any musl host without one installed. `tree-sitter` builds
++      # wasmtime's C API through cmake, which `rust:alpine` does not ship. Each
++      # musl target gets a runner of its own architecture, so this compiles
++      # natively rather than under emulation.
++      - name: Build CLI (musl)
++        if: endsWith(matrix.target, '-musl')
++        run: >-
++          docker run --rm --volume "$PWD:/lumis" --workdir /lumis
++          rust:1-alpine3.22
++          sh -c
++          'apk add --no-cache cmake make g++ musl-dev &&
++          cargo build --locked --release --target ${{ matrix.target }} -p lumis-cli'
++
++      - name: Stage CLI binary
++        shell: bash
++        run: |
++          mkdir cli-artifact
++          if [ "${{ runner.os }}" = "Windows" ]; then
++            cp "target/${{ matrix.target }}/release/lumis.exe" cli-artifact/lumis.exe
++          else
++            cp "target/${{ matrix.target }}/release/lumis" cli-artifact/lumis
++          fi
++
++      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
++        with:
++          name: lumis-cli-${{ matrix.package }}
++          path: cli-artifact/*
++          if-no-files-found: error
++          retention-days: 1
++
+   publish:
+-    needs: build-native
++    needs: [build-native, build-cli]
+     if: >-
+       ${{
+         !cancelled()
+         && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
+         && (
+           needs.build-native.result == 'success'
+           || needs.build-native.result == 'skipped'
+         )
++        && (
++          needs.build-cli.result == 'success'
++          || needs.build-cli.result == 'skipped'
++        )
+       }}
+     runs-on: ubuntu-latest
+     permissions:
+       contents: read
+       id-token: write
+@@ -251,10 +337,49 @@ jobs:
+           pnpm --filter @lumis-sh/lumis-native --fail-if-no-match publish
+           --access public --no-git-checks --provenance
+         env:
+           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+ 
++      - name: Download CLI binaries
++        if: steps.pkg.outputs.filter == '@lumis-sh/cli'
++        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
++        with:
++          pattern: lumis-cli-*
++          path: cli-artifacts
++
++      - name: Stage CLI platform packages
++        if: steps.pkg.outputs.filter == '@lumis-sh/cli'
++        run: |
++          for artifact_dir in cli-artifacts/lumis-cli-*; do
++            target="$(basename "$artifact_dir")"
++            target="${target#lumis-cli-}"
++            cp "$artifact_dir"/lumis* "packages/javascript/cli/npm/$target/"
++            chmod +x "packages/javascript/cli/npm/$target"/lumis*
++          done
++
++      # The main package pins these as optionalDependencies and pnpm rewrites
++      # `workspace:*` at pack time, so publishing it against an incomplete or
++      # drifted set ships a tarball whose `lumis` command cannot start.
++      - name: Check CLI platform packages are complete and in lockstep
++        if: steps.pkg.outputs.filter == '@lumis-sh/cli'
++        run: node packages/javascript/scripts/check-cli-versions.mjs
++
++      - name: Publish CLI platform packages
++        if: steps.pkg.outputs.filter == '@lumis-sh/cli'
++        run: |
++          published=0
++          for package_dir in packages/javascript/cli/npm/*; do
++            npm publish "$package_dir" --access public --provenance
++            published=$((published + 1))
++          done
++          if [ "$published" -ne 8 ]; then
++            echo "expected 8 platform packages, published $published" >&2
++            exit 1
++          fi
++        env:
++          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
++
+       - name: Publish to npm
+         run: >-
+           pnpm --filter "$PACKAGE_FILTER" --fail-if-no-match publish
+           --access public --no-git-checks --provenance
+         env:
+diff --git a/.github/workflows/javascript.yml b/.github/workflows/javascript.yml
+index 57c0206f7..a7bfba127 100644
+--- a/.github/workflows/javascript.yml
++++ b/.github/workflows/javascript.yml
+@@ -115,10 +115,13 @@ jobs:
+         env:
+           LUMIS_DATA_DIR: ${{ github.workspace }}/target/test-parsers
+       - run: pnpm --filter @lumis-sh/rehype-lumis run test
+         env:
+           LUMIS_DATA_DIR: ${{ github.workspace }}/target/test-parsers
++      # Needs no parser store: it checks that the shim resolves the platform
++      # package npm installed, not that the binary highlights anything.
++      - run: pnpm --filter @lumis-sh/cli run test
+       # Both runtimes, explicitly. vite.config.mjs defaults to Wasm, so leaving
+       # this unset would run the same one twice and leave every native-only
+       # resolver and lifetime behaviour uncovered.
+       - run: |
+           native_runtime_data_dir="$(mktemp -d)"
+diff --git a/.gitignore b/.gitignore
+index 996d05196..ec5d2fb1c 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -17,5 +17,9 @@ benchmarks/elixir/deps/
+ benchmarks/rust/target/
+ 
+ # Built native addon, produced by `pnpm --filter @lumis-sh/lumis build:native`
+ packages/javascript/lumis/native/*.node
+ packages/javascript/lumis/native/npm/*/*.node
++
++# CLI binaries, staged into the platform packages by javascript-release.yml
++packages/javascript/cli/npm/*/lumis
++packages/javascript/cli/npm/*/lumis.exe
+diff --git a/CONTRIBUTING.md b/CONTRIBUTING.md
+index 1d04b876c..2c45f4680 100644
+--- a/CONTRIBUTING.md
++++ b/CONTRIBUTING.md
+@@ -130,13 +130,13 @@ The root `mise run bench` task runs the same suite. Scenarios and current result
+ `mise.toml` sets everything a task needs, so a normal `mise run` invocation needs
+ none of these. They exist to override that default from the outside.
+ 
+ Most of them matter only while working on the repository. The exceptions are
+ `LUMIS_DATA_DIR`, which every runtime reads, and the tool-specific settings a
+-user can hit without cloning anything: `LUMIS_CONFIG` for the CLI, `LUMIS_BUILD`,
+-`LUMIS_USE_LEGACY_ARTIFACTS` and `LUMIS_ARTIFACT_SOURCE` for the Hex package, and
+-`LUMIS_CLI_SKIP_DOWNLOAD` for the npm CLI.
++user can hit without cloning anything: `LUMIS_CONFIG` for the CLI, and
++`LUMIS_BUILD`, `LUMIS_USE_LEGACY_ARTIFACTS` and `LUMIS_ARTIFACT_SOURCE` for the
++Hex package.
+ 
+ `LUMIS_DATA_DIR` names the directory Lumis persists parsers, themes, and
+ compiled modules under. An empty value counts as unset, in every runtime.
+ 
+ Unset, the CLI and both native addons call
+@@ -153,11 +153,10 @@ drift.
+ | `LUMIS_DATA_DIR` | every runtime | Directory for parsers, themes, and compiled modules |
+ | `LUMIS_CONFIG` | CLI | Config file path, same as `--config` |
+ | `LUMIS_BUILD` | Elixir | Build the NIF from source instead of downloading a precompiled one |
+ | `LUMIS_USE_LEGACY_ARTIFACTS` | Elixir | Select the legacy-CPU NIF variant |
+ | `LUMIS_ARTIFACT_SOURCE` | Elixir | `github` or `cloudflare`; where to download the precompiled NIF from |
+-| `LUMIS_CLI_SKIP_DOWNLOAD` | `@lumis-sh/cli` install | Skip the postinstall binary download |
+ | `LUMIS_TEST_RUNTIME` | JavaScript tests | `native` or `wasm`; fails loudly if the requested runtime is unavailable |
+ | `LUMIS_QUERY_LANGUAGES` | `test:queries` | Comma-separated languages, so CI can shard parser builds |
+ | `LUMIS_QUERY_BATCH_LIMIT` | `test:queries` | Maximum languages per batch, asserted rather than assumed |
+ | `LUMIS_QUERY_COVERAGE` | `test:queries` | `complete` requires full coverage and forbids waivers |
+ | `LUMIS_QUERY_PARSERS` | `test:queries` | `published` judges only what npm ships |
+diff --git a/RELEASE.md b/RELEASE.md
+index 9102358f6..87a25bc22 100644
+--- a/RELEASE.md
++++ b/RELEASE.md
+@@ -178,11 +178,15 @@ After `npm-lumis` is published, the plugin packages, CLI package, and WASM bundl
+ 
+ The `npm-lumis` workflow also publishes all platform-specific `@lumis-sh/lumis-native-*` packages and then the `@lumis-sh/lumis-native` selector, before publishing `@lumis-sh/lumis` itself. All of them share the `npm-lumis` version and tag, and `mise run release-prepare npm-lumis <version>` bumps them together.
+ 
+ That lockstep is not cosmetic. `@lumis-sh/lumis` depends on the platform packages with `workspace:*`, which pnpm replaces with the workspace version when it packs, so a main package bumped on its own would ship optional dependencies pointing at the previous release — and npm refuses to republish a version that already exists, so the workflow would fail before reaching the main package. `mise run lint` runs `mise run check-native-versions`, which fails if any of them drift.
+ 
+-`npm-cli` must use the same version as `cargo-lumis-cli`, and the matching `cargo-lumis-cli/v<version>` GitHub release must already contain prebuilt CLI archives before publishing `@lumis-sh/cli`.
++The `npm-cli` workflow builds the `lumis` binary for eight targets, publishes the `@lumis-sh/cli-*` platform packages, and then publishes `@lumis-sh/cli` itself. All of them share the `npm-cli` version and tag, and `mise run release-prepare npm-cli <version>` bumps them together, for the same reason the addon packages move in lockstep: `@lumis-sh/cli` pins them with `workspace:*`, which pnpm rewrites at pack time. `mise run lint` runs `mise run check-cli-versions`, which fails if any of them drift.
++
++`npm-cli` no longer has to match `cargo-lumis-cli`. It used to, because the postinstall built its download URL out of its own npm version, so a version the crate had not released answered every install with a 404 — `@lumis-sh/cli` 0.5.0 shipped that way against `cargo-lumis-cli` 0.4.2 and stayed uninstallable for three weeks, then 0.6.0 repeated it against 0.5.0. Nothing in the repository resolves that URL, so nothing could see it. The binary now comes from npm, and the two version lines are independent.
++
++Both musl targets build in a `rust:alpine` container, as the addon's do, because `tree-sitter` compiles wasmtime's C API through cmake and `rust:alpine` ships none. The CLI keeps musl's default static CRT, unlike the addon: it is an executable rather than something Node has to `dlopen`, so it needs neither `-crt-static` nor the `libgcc_s.so.1` that dropping it would pull in. The CLI and the addon therefore cover the same eight targets, and `scripts/test-shim.js` fails if one gains a target the other lacks.
+ 
+ If a JS release also needs new parser WASM packages, publish those first through the WASM workflow. Run `mise run wasm-publish-needed` to see which parser packages still need publishing.
+ 
+ Each `@lumis-sh/wasm-*` package contains its parser and matching processed
+ queries. During staging, `crates/dev` generates `lumis.json` from
+diff --git a/docs/content/installation.mdx b/docs/content/installation.mdx
+index 9ef283f18..339607def 100644
+--- a/docs/content/installation.mdx
++++ b/docs/content/installation.mdx
+@@ -69,11 +69,11 @@ For a global install:
+ 
+ ```bash
+ npm install -g @lumis-sh/cli
+ ```
+ 
+-The installed binary is `lumis`. Rust users can also install from crates.io with `cargo install lumis-cli`.
++The installed binary is `lumis`. npm resolves it from a platform package, so the install runs no scripts and downloads nothing beyond the registry. Alpine and other musl hosts are covered, and the binary there is statically linked. Rust users can also install from crates.io with `cargo install lumis-cli`.
+ 
+   </TabItem>
+   <TabItem value="browser" label="Browsers / CDN">
+ 
+ ```html
+diff --git a/mise.toml b/mise.toml
+index a2dd7f0fd..6768fe8b7 100644
+--- a/mise.toml
++++ b/mise.toml
+@@ -393,14 +393,25 @@ echo "Running Lua fmt check..."
+ mise run fmt-lua -- --check
+ echo ""
+ echo "Checking native package versions..."
+ mise run check-native-versions
+ echo ""
++echo "Checking CLI platform package versions..."
++mise run check-cli-versions
++echo ""
+ echo "Checking crate dependency requirements..."
+ mise run check-crate-deps
+ '''
+ 
++[tasks.'check-cli-versions']
++description = "Check the CLI platform packages are versioned in lockstep with @lumis-sh/cli"
++run = '''
++#!/usr/bin/env bash
++set -euo pipefail
++node packages/javascript/scripts/check-cli-versions.mjs
++'''
++
+ [tasks.'check-native-versions']
+ description = "Check the native addon packages are versioned in lockstep with @lumis-sh/lumis"
+ run = '''
+ #!/usr/bin/env bash
+ set -euo pipefail
+@@ -1071,8 +1082,14 @@ if [ "$package" = "npm-lumis" ]; then
+     for native_manifest in packages/javascript/lumis/native/npm/*/package.json; do
+         npm --prefix "$(dirname "$native_manifest")" version --no-git-tag-version "$version"
+     done
+ fi
+ 
++if [ "$package" = "npm-cli" ]; then
++    for cli_manifest in packages/javascript/cli/npm/*/package.json; do
++        npm --prefix "$(dirname "$cli_manifest")" version --no-git-tag-version "$version"
++    done
++fi
++
+ git-cliff --config cliff.toml --github-repo leandrocp/lumis --tag-pattern "$package/v[0-9].*" --tag "$tag" --prepend "$changelog" --strip header --unreleased "${include_args[@]}"
+ printf 'Prepared %s %s\n' "$package" "$version"
+ '''
+diff --git a/packages/javascript/cli/README.md b/packages/javascript/cli/README.md
+index 56a00fa02..8079aa884 100644
+--- a/packages/javascript/cli/README.md
++++ b/packages/javascript/cli/README.md
+@@ -9,6 +9,8 @@ npx @lumis-sh/cli --help
+ ```sh
+ npm install -g @lumis-sh/cli
+ lumis --help
+ ```
+ 
+-The package downloads the matching prebuilt `lumis` binary from the `cargo-lumis-cli/v<version>` GitHub release during installation. Set `LUMIS_CLI_SKIP_DOWNLOAD=1` to skip that download and supply the binary yourself.
++The `lumis` binary ships in a platform package that npm installs for you, so there is no download step and no install script. macOS, Linux (glibc and musl) and Windows are covered on both arm64 and x64.
++
++See [https://lumis.sh/docs/cli](https://lumis.sh/docs/cli) for commands and options.
+diff --git a/packages/javascript/cli/bin/lumis b/packages/javascript/cli/bin/lumis
+index e7c1f8b4c..99e565c7f 100755
+--- a/packages/javascript/cli/bin/lumis
++++ b/packages/javascript/cli/bin/lumis
+@@ -1,14 +1,34 @@
+ #!/usr/bin/env node
++"use strict";
++
+ const { spawnSync } = require("node:child_process");
+-const { existsSync } = require("node:fs");
+-const { join } = require("node:path");
++const { dirname, join } = require("node:path");
++const { cliTargetFor, hostLibc } = require("./target.js");
++
++const target = cliTargetFor(process.platform, process.arch, hostLibc());
++
++if (!target) {
++  const host = `${process.platform}-${process.arch}-${hostLibc()}`;
++  console.error(`@lumis-sh/cli ships no binary for ${host}.`);
++  console.error("Build one with: cargo install lumis-cli");
++  process.exit(1);
++}
+ 
+-const binary = join(__dirname, "..", "vendor", process.platform === "win32" ? "lumis.exe" : "lumis");
++const packageName = `@lumis-sh/cli-${target}`;
++const binaryName = process.platform === "win32" ? "lumis.exe" : "lumis";
+ 
+-if (!existsSync(binary)) {
+-  console.error("lumis binary not found. Reinstall @lumis-sh/cli.");
++let binary;
++try {
++  binary = join(dirname(require.resolve(`${packageName}/package.json`)), binaryName);
++} catch {
++  console.error(`${packageName} is not installed.`);
++  console.error(
++    "npm installs it as an optionalDependency of @lumis-sh/cli, so --no-optional or a",
++  );
++  console.error("lockfile written on another platform can leave it out.");
++  console.error("Reinstall @lumis-sh/cli.");
+   process.exit(1);
+ }
+ 
+ const result = spawnSync(binary, process.argv.slice(2), { stdio: "inherit" });
+ 
+diff --git a/packages/javascript/cli/bin/target.js b/packages/javascript/cli/bin/target.js
+new file mode 100644
+index 000000000..5a64078b1
+--- /dev/null
++++ b/packages/javascript/cli/bin/target.js
+@@ -0,0 +1,28 @@
++"use strict";
++
++/**
++ * The same mapping as `nativeTargetFor` in `@lumis-sh/lumis`, over the same
++ * eight targets. Both packages ship alone, so neither can import the other.
++ * `test-shim.js` pins this against the CLI package directories and against the
++ * addon's, so a target added to one and not the other fails.
++ */
++function cliTargetFor(platform, arch, libc) {
++  if (platform === "darwin" && ["arm64", "x64"].includes(arch)) {
++    return `darwin-${arch}`;
++  }
++  if (platform === "linux" && ["arm64", "x64"].includes(arch)) {
++    return `linux-${arch}-${libc}`;
++  }
++  if (platform === "win32" && ["arm64", "x64"].includes(arch)) {
++    return `win32-${arch}-msvc`;
++  }
++  return undefined;
++}
++
++function hostLibc() {
++  if (process.platform !== "linux") return "gnu";
++  const report = process.report?.getReport?.();
++  return report?.header?.glibcVersionRuntime ? "gnu" : "musl";
++}
++
++module.exports = { cliTargetFor, hostLibc };
+diff --git a/packages/javascript/cli/npm/darwin-arm64/LICENSE b/packages/javascript/cli/npm/darwin-arm64/LICENSE
+new file mode 100644
+index 000000000..dea269723
+--- /dev/null
++++ b/packages/javascript/cli/npm/darwin-arm64/LICENSE
+@@ -0,0 +1,21 @@
++MIT License
++
++Copyright (c) 2025 Leandro Pereira
++
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
+diff --git a/packages/javascript/cli/npm/darwin-arm64/package.json b/packages/javascript/cli/npm/darwin-arm64/package.json
+new file mode 100644
+index 000000000..9941005bb
+--- /dev/null
++++ b/packages/javascript/cli/npm/darwin-arm64/package.json
+@@ -0,0 +1,20 @@
++{
++  "name": "@lumis-sh/cli-darwin-arm64",
++  "version": "0.6.0",
++  "description": "Lumis command line syntax highlighter for macOS arm64",
++  "license": "MIT",
++  "repository": "github:leandrocp/lumis",
++  "files": [
++    "LICENSE",
++    "lumis"
++  ],
++  "os": [
++    "darwin"
++  ],
++  "cpu": [
++    "arm64"
++  ],
++  "engines": {
++    "node": ">=18"
++  }
++}
+diff --git a/packages/javascript/cli/npm/darwin-x64/LICENSE b/packages/javascript/cli/npm/darwin-x64/LICENSE
+new file mode 100644
+index 000000000..dea269723
+--- /dev/null
++++ b/packages/javascript/cli/npm/darwin-x64/LICENSE
+@@ -0,0 +1,21 @@
++MIT License
++
++Copyright (c) 2025 Leandro Pereira
++
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
+diff --git a/packages/javascript/cli/npm/darwin-x64/package.json b/packages/javascript/cli/npm/darwin-x64/package.json
+new file mode 100644
+index 000000000..a223b8b5d
+--- /dev/null
++++ b/packages/javascript/cli/npm/darwin-x64/package.json
+@@ -0,0 +1,20 @@
++{
++  "name": "@lumis-sh/cli-darwin-x64",
++  "version": "0.6.0",
++  "description": "Lumis command line syntax highlighter for macOS x64",
++  "license": "MIT",
++  "repository": "github:leandrocp/lumis",
++  "files": [
++    "LICENSE",
++    "lumis"
++  ],
++  "os": [
++    "darwin"
++  ],
++  "cpu": [
++    "x64"
++  ],
++  "engines": {
++    "node": ">=18"
++  }
++}
+diff --git a/packages/javascript/cli/npm/linux-arm64-gnu/LICENSE b/packages/javascript/cli/npm/linux-arm64-gnu/LICENSE
+new file mode 100644
+index 000000000..dea269723
+--- /dev/null
++++ b/packages/javascript/cli/npm/linux-arm64-gnu/LICENSE
+@@ -0,0 +1,21 @@
++MIT License
++
++Copyright (c) 2025 Leandro Pereira
++
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
+diff --git a/packages/javascript/cli/npm/linux-arm64-gnu/package.json b/packages/javascript/cli/npm/linux-arm64-gnu/package.json
+new file mode 100644
+index 000000000..b89d0cac2
+--- /dev/null
++++ b/packages/javascript/cli/npm/linux-arm64-gnu/package.json
+@@ -0,0 +1,23 @@
++{
++  "name": "@lumis-sh/cli-linux-arm64-gnu",
++  "version": "0.6.0",
++  "description": "Lumis command line syntax highlighter for Linux arm64 glibc",
++  "license": "MIT",
++  "repository": "github:leandrocp/lumis",
++  "files": [
++    "LICENSE",
++    "lumis"
++  ],
++  "os": [
++    "linux"
++  ],
++  "cpu": [
++    "arm64"
++  ],
++  "libc": [
++    "glibc"
++  ],
++  "engines": {
++    "node": ">=18"
++  }
++}
+diff --git a/packages/javascript/cli/npm/linux-arm64-musl/LICENSE b/packages/javascript/cli/npm/linux-arm64-musl/LICENSE
+new file mode 100644
+index 000000000..dea269723
+--- /dev/null
++++ b/packages/javascript/cli/npm/linux-arm64-musl/LICENSE
+@@ -0,0 +1,21 @@
++MIT License
++
++Copyright (c) 2025 Leandro Pereira
++
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
+diff --git a/packages/javascript/cli/npm/linux-arm64-musl/package.json b/packages/javascript/cli/npm/linux-arm64-musl/package.json
+new file mode 100644
+index 000000000..4e8fa6039
+--- /dev/null
++++ b/packages/javascript/cli/npm/linux-arm64-musl/package.json
+@@ -0,0 +1,23 @@
++{
++  "name": "@lumis-sh/cli-linux-arm64-musl",
++  "version": "0.6.0",
++  "description": "Lumis command line syntax highlighter for Linux arm64 musl",
++  "license": "MIT",
++  "repository": "github:leandrocp/lumis",
++  "files": [
++    "LICENSE",
++    "lumis"
++  ],
++  "os": [
++    "linux"
++  ],
++  "cpu": [
++    "arm64"
++  ],
++  "libc": [
++    "musl"
++  ],
++  "engines": {
++    "node": ">=18"
++  }
++}
+diff --git a/packages/javascript/cli/npm/linux-x64-gnu/LICENSE b/packages/javascript/cli/npm/linux-x64-gnu/LICENSE
+new file mode 100644
+index 000000000..dea269723
+--- /dev/null
++++ b/packages/javascript/cli/npm/linux-x64-gnu/LICENSE
+@@ -0,0 +1,21 @@
++MIT License
++
++Copyright (c) 2025 Leandro Pereira
++
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
+diff --git a/packages/javascript/cli/npm/linux-x64-gnu/package.json b/packages/javascript/cli/npm/linux-x64-gnu/package.json
+new file mode 100644
+index 000000000..75e2b97e0
+--- /dev/null
++++ b/packages/javascript/cli/npm/linux-x64-gnu/package.json
+@@ -0,0 +1,23 @@
++{
++  "name": "@lumis-sh/cli-linux-x64-gnu",
++  "version": "0.6.0",
++  "description": "Lumis command line syntax highlighter for Linux x64 glibc",
++  "license": "MIT",
++  "repository": "github:leandrocp/lumis",
++  "files": [
++    "LICENSE",
++    "lumis"
++  ],
++  "os": [
++    "linux"
++  ],
++  "cpu": [
++    "x64"
++  ],
++  "libc": [
++    "glibc"
++  ],
++  "engines": {
++    "node": ">=18"
++  }
++}
+diff --git a/packages/javascript/cli/npm/linux-x64-musl/LICENSE b/packages/javascript/cli/npm/linux-x64-musl/LICENSE
+new file mode 100644
+index 000000000..dea269723
+--- /dev/null
++++ b/packages/javascript/cli/npm/linux-x64-musl/LICENSE
+@@ -0,0 +1,21 @@
++MIT License
++
++Copyright (c) 2025 Leandro Pereira
++
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
+diff --git a/packages/javascript/cli/npm/linux-x64-musl/package.json b/packages/javascript/cli/npm/linux-x64-musl/package.json
+new file mode 100644
+index 000000000..37150935b
+--- /dev/null
++++ b/packages/javascript/cli/npm/linux-x64-musl/package.json
+@@ -0,0 +1,23 @@
++{
++  "name": "@lumis-sh/cli-linux-x64-musl",
++  "version": "0.6.0",
++  "description": "Lumis command line syntax highlighter for Linux x64 musl",
++  "license": "MIT",
++  "repository": "github:leandrocp/lumis",
++  "files": [
++    "LICENSE",
++    "lumis"
++  ],
++  "os": [
++    "linux"
++  ],
++  "cpu": [
++    "x64"
++  ],
++  "libc": [
++    "musl"
++  ],
++  "engines": {
++    "node": ">=18"
++  }
++}
+diff --git a/packages/javascript/cli/npm/win32-arm64-msvc/LICENSE b/packages/javascript/cli/npm/win32-arm64-msvc/LICENSE
+new file mode 100644
+index 000000000..dea269723
+--- /dev/null
++++ b/packages/javascript/cli/npm/win32-arm64-msvc/LICENSE
+@@ -0,0 +1,21 @@
++MIT License
++
++Copyright (c) 2025 Leandro Pereira
++
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
+diff --git a/packages/javascript/cli/npm/win32-arm64-msvc/package.json b/packages/javascript/cli/npm/win32-arm64-msvc/package.json
+new file mode 100644
+index 000000000..bd84a821a
+--- /dev/null
++++ b/packages/javascript/cli/npm/win32-arm64-msvc/package.json
+@@ -0,0 +1,20 @@
++{
++  "name": "@lumis-sh/cli-win32-arm64-msvc",
++  "version": "0.6.0",
++  "description": "Lumis command line syntax highlighter for Windows arm64",
++  "license": "MIT",
++  "repository": "github:leandrocp/lumis",
++  "files": [
++    "LICENSE",
++    "lumis.exe"
++  ],
++  "os": [
++    "win32"
++  ],
++  "cpu": [
++    "arm64"
++  ],
++  "engines": {
++    "node": ">=18"
++  }
++}
+diff --git a/packages/javascript/cli/npm/win32-x64-msvc/LICENSE b/packages/javascript/cli/npm/win32-x64-msvc/LICENSE
+new file mode 100644
+index 000000000..dea269723
+--- /dev/null
++++ b/packages/javascript/cli/npm/win32-x64-msvc/LICENSE
+@@ -0,0 +1,21 @@
++MIT License
++
++Copyright (c) 2025 Leandro Pereira
++
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
+diff --git a/packages/javascript/cli/npm/win32-x64-msvc/package.json b/packages/javascript/cli/npm/win32-x64-msvc/package.json
+new file mode 100644
+index 000000000..236c7cc8e
+--- /dev/null
++++ b/packages/javascript/cli/npm/win32-x64-msvc/package.json
+@@ -0,0 +1,20 @@
++{
++  "name": "@lumis-sh/cli-win32-x64-msvc",
++  "version": "0.6.0",
++  "description": "Lumis command line syntax highlighter for Windows x64",
++  "license": "MIT",
++  "repository": "github:leandrocp/lumis",
++  "files": [
++    "LICENSE",
++    "lumis.exe"
++  ],
++  "os": [
++    "win32"
++  ],
++  "cpu": [
++    "x64"
++  ],
++  "engines": {
++    "node": ">=18"
++  }
++}
+diff --git a/packages/javascript/cli/package.json b/packages/javascript/cli/package.json
+index 8b9b41103..3e8c07699 100644
+--- a/packages/javascript/cli/package.json
++++ b/packages/javascript/cli/package.json
+@@ -21,22 +21,26 @@
+   "bin": {
+     "lumis": "./bin/lumis"
+   },
+   "files": [
+     "bin",
+-    "scripts/install.js",
+-    "vendor",
+     "CHANGELOG.md",
+     "README.md"
+   ],
+   "packageManager": "pnpm@11.15.1",
+   "scripts": {
+-    "postinstall": "node scripts/install.js",
+     "test": "node scripts/test-shim.js"
+   },
+-  "dependencies": {
+-    "tar": "^7.5.2"
++  "optionalDependencies": {
++    "@lumis-sh/cli-darwin-arm64": "workspace:*",
++    "@lumis-sh/cli-darwin-x64": "workspace:*",
++    "@lumis-sh/cli-linux-arm64-gnu": "workspace:*",
++    "@lumis-sh/cli-linux-arm64-musl": "workspace:*",
++    "@lumis-sh/cli-linux-x64-gnu": "workspace:*",
++    "@lumis-sh/cli-linux-x64-musl": "workspace:*",
++    "@lumis-sh/cli-win32-arm64-msvc": "workspace:*",
++    "@lumis-sh/cli-win32-x64-msvc": "workspace:*"
+   },
+   "engines": {
+     "node": ">=18"
+   },
+   "publishConfig": {
+diff --git a/packages/javascript/cli/scripts/install.js b/packages/javascript/cli/scripts/install.js
+deleted file mode 100644
+index 5f9a48b3f..000000000
+--- a/packages/javascript/cli/scripts/install.js
++++ /dev/null
+@@ -1,96 +0,0 @@
+-const { createWriteStream, existsSync, mkdirSync, rmSync } = require("node:fs");
+-const { chmod, rename } = require("node:fs/promises");
+-const { get } = require("node:https");
+-const { join } = require("node:path");
+-const { tmpdir } = require("node:os");
+-const { x: extractTar } = require("tar");
+-const pkg = require("../package.json");
+-
+-const repo = "https://github.com/leandrocp/lumis";
+-const vendorDir = join(__dirname, "..", "vendor");
+-const binaryName = process.platform === "win32" ? "lumis.exe" : "lumis";
+-const binaryPath = join(vendorDir, binaryName);
+-
+-if (process.env.LUMIS_CLI_SKIP_DOWNLOAD === "1" || existsSync(binaryPath)) {
+-  process.exit(0);
+-}
+-
+-if (existsSync(join(__dirname, "..", "..", "..", "..", "crates", "lumis-cli", "Cargo.toml"))) {
+-  process.exit(0);
+-}
+-
+-const target = targetTriple();
+-const archiveName = `lumis-${target}.tar.gz`;
+-const url = `${repo}/releases/download/cargo-lumis-cli/v${pkg.version}/${archiveName}`;
+-
+-mkdirSync(vendorDir, { recursive: true });
+-
+-const archivePath = join(tmpdir(), `lumis-${pkg.version}-${target}-${process.pid}.tar.gz`);
+-const extractDir = join(tmpdir(), `lumis-${pkg.version}-${target}-${process.pid}`);
+-
+-download(url, archivePath)
+-  .then(async () => {
+-    rmSync(extractDir, { force: true, recursive: true });
+-    mkdirSync(extractDir, { recursive: true });
+-    await extractTar({ file: archivePath, cwd: extractDir });
+-    await rename(findBinary(extractDir), binaryPath);
+-    if (process.platform !== "win32") {
+-      await chmod(binaryPath, 0o755);
+-    }
+-  })
+-  .catch((error) => {
+-    console.error(`Failed to install lumis from ${url}`);
+-    console.error(error.message);
+-    process.exit(1);
+-  })
+-  .finally(() => {
+-    rmSync(archivePath, { force: true });
+-    rmSync(extractDir, { force: true, recursive: true });
+-  });
+-
+-function targetTriple() {
+-  const platform = process.platform;
+-  const arch = process.arch;
+-
+-  if (platform === "darwin" && arch === "arm64") return "aarch64-apple-darwin";
+-  if (platform === "darwin" && arch === "x64") return "x86_64-apple-darwin";
+-  if (platform === "linux" && arch === "arm64") return "aarch64-unknown-linux-gnu";
+-  if (platform === "linux" && arch === "x64") return "x86_64-unknown-linux-gnu";
+-  if (platform === "win32" && arch === "arm64") return "aarch64-pc-windows-msvc";
+-  if (platform === "win32" && arch === "x64") return "x86_64-pc-windows-msvc";
+-
+-  throw new Error(`Unsupported platform: ${platform} ${arch}`);
+-}
+-
+-function download(url, destination) {
+-  return new Promise((resolve, reject) => {
+-    const request = get(url, (response) => {
+-      if ([301, 302, 303, 307, 308].includes(response.statusCode) && response.headers.location) {
+-        response.resume();
+-        download(response.headers.location, destination).then(resolve, reject);
+-        return;
+-      }
+-
+-      if (response.statusCode !== 200) {
+-        response.resume();
+-        reject(new Error(`HTTP ${response.statusCode}`));
+-        return;
+-      }
+-
+-      const file = createWriteStream(destination);
+-      response.pipe(file);
+-      file.on("finish", () => file.close(resolve));
+-      file.on("error", reject);
+-    });
+-
+-    request.on("error", reject);
+-  });
+-}
+-
+-function findBinary(dir) {
+-  const candidates = [join(dir, binaryName), join(dir, "lumis", binaryName)];
+-  for (const candidate of candidates) {
+-    if (existsSync(candidate)) return candidate;
+-  }
+-  throw new Error(`Archive did not contain ${binaryName}`);
+-}
+diff --git a/packages/javascript/cli/scripts/test-shim.js b/packages/javascript/cli/scripts/test-shim.js
+index 32ebde192..931a6999d 100644
+--- a/packages/javascript/cli/scripts/test-shim.js
++++ b/packages/javascript/cli/scripts/test-shim.js
+@@ -1,23 +1,143 @@
+-const { mkdirSync, rmSync, writeFileSync } = require("node:fs");
+-const { chmodSync } = require("node:fs");
++"use strict";
++
++const {
++  chmodSync,
++  copyFileSync,
++  mkdirSync,
++  mkdtempSync,
++  readdirSync,
++  rmSync,
++  writeFileSync,
++} = require("node:fs");
+ const { spawnSync } = require("node:child_process");
++const { tmpdir } = require("node:os");
+ const { join } = require("node:path");
++const test = require("node:test");
++const assert = require("node:assert/strict");
++
++const { cliTargetFor, hostLibc } = require("../bin/target.js");
++
++const packageDir = join(__dirname, "..");
++const npmDir = join(packageDir, "npm");
++const shim = join(packageDir, "bin", "lumis");
++const version = require("../package.json").version;
+ 
+-const vendorDir = join(__dirname, "..", "vendor");
+-const binary = join(vendorDir, process.platform === "win32" ? "lumis.exe" : "lumis");
++const PLATFORMS = ["darwin", "linux", "win32", "freebsd", "openbsd", "sunos", "aix", "android"];
++const ARCHS = ["arm64", "x64", "ia32", "arm", "riscv64", "ppc64", "s390x", "loong64"];
++const LIBCS = ["gnu", "musl"];
++const EXPECTED_TARGETS = [
++  "darwin-arm64",
++  "darwin-x64",
++  "linux-arm64-gnu",
++  "linux-arm64-musl",
++  "linux-x64-gnu",
++  "linux-x64-musl",
++  "win32-arm64-msvc",
++  "win32-x64-msvc",
++];
++const addonNpmDir = join(packageDir, "..", "lumis", "native", "npm");
+ 
+-mkdirSync(vendorDir, { recursive: true });
+-writeFileSync(binary, '#!/usr/bin/env node\nconsole.log(process.argv.slice(2).join(" "));\n');
+-chmodSync(binary, 0o755);
++function reachableTargets() {
++  const found = new Set();
++  for (const platform of PLATFORMS) {
++    for (const arch of ARCHS) {
++      for (const libc of LIBCS) {
++        const target = cliTargetFor(platform, arch, libc);
++        if (target) found.add(target);
++      }
++    }
++  }
++  return [...found].sort();
++}
+ 
+-const result = spawnSync(process.execPath, [join(__dirname, "..", "bin", "lumis"), "ok"], {
+-  encoding: "utf8",
++test("every reachable target has a published package, and the reverse", () => {
++  assert.deepEqual(reachableTargets(), EXPECTED_TARGETS);
++  assert.deepEqual(readdirSync(npmDir).sort(), EXPECTED_TARGETS);
+ });
+ 
+-rmSync(binary, { force: true });
++test("rejects an incomplete target corpus", () => {
++  const missingWindowsArm64 = EXPECTED_TARGETS.filter((t) => t !== "win32-arm64-msvc");
++  assert.throws(() => assert.deepEqual(missingWindowsArm64, EXPECTED_TARGETS));
++});
+ 
+-if (result.status !== 0 || result.stdout.trim() !== "ok") {
+-  process.stdout.write(result.stdout);
+-  process.stderr.write(result.stderr);
+-  process.exit(result.status || 1);
+-}
++test("each package declares the host it is selected for", () => {
++  for (const target of readdirSync(npmDir)) {
++    const manifest = require(join(npmDir, target, "package.json"));
++    assert.equal(manifest.name, `@lumis-sh/cli-${target}`);
++    assert.equal(manifest.version, version, `${target} is not in lockstep with @lumis-sh/cli`);
++
++    const libc = manifest.libc?.[0] === "musl" ? "musl" : "gnu";
++    assert.equal(
++      cliTargetFor(manifest.os[0], manifest.cpu[0], libc),
++      target,
++      `${manifest.os[0]}-${manifest.cpu[0]}-${libc}`,
++    );
++  }
++});
++
++test("musl and glibc hosts resolve to different packages", () => {
++  assert.equal(cliTargetFor("linux", "x64", "musl"), "linux-x64-musl");
++  assert.equal(cliTargetFor("linux", "x64", "gnu"), "linux-x64-gnu");
++  assert.equal(cliTargetFor("linux", "arm64", "musl"), "linux-arm64-musl");
++  assert.equal(cliTargetFor("linux", "arm64", "gnu"), "linux-arm64-gnu");
++});
++
++// The CLI and the addon cover the same hosts and compute the target the same
++// way, in two copies neither package can import from the other. A target added
++// to the addon alone would leave musl or a new arch without a CLI.
++test("covers the same targets as the @lumis-sh/lumis addon", () => {
++  const addonTargets = readdirSync(addonNpmDir)
++    .filter((entry) => entry !== "meta")
++    .sort();
++  assert.deepEqual(addonTargets, EXPECTED_TARGETS);
++});
++
++test("hostLibc answers gnu off Linux and one of the two flavours on it", () => {
++  if (process.platform === "linux") {
++    assert.ok(LIBCS.includes(hostLibc()));
++  } else {
++    assert.equal(hostLibc(), "gnu");
++  }
++});
++
++test("the shim spawns the resolved binary and forwards arguments", () => {
++  const target = cliTargetFor(process.platform, process.arch, hostLibc());
++  if (!target) {
++    throw new Error(`this host (${process.platform}-${process.arch}) has no CLI package to test`);
++  }
++
++  const binaryName = process.platform === "win32" ? "lumis.exe" : "lumis";
++  const binary = join(npmDir, target, binaryName);
++  mkdirSync(join(npmDir, target), { recursive: true });
++  writeFileSync(binary, '#!/usr/bin/env node\nconsole.log(process.argv.slice(2).join(" "));\n');
++  chmodSync(binary, 0o755);
++
++  try {
++    const result = spawnSync(process.execPath, [shim, "ok"], { encoding: "utf8" });
++    assert.equal(result.stderr, "");
++    assert.equal(result.status, 0);
++    assert.equal(result.stdout.trim(), "ok");
++  } finally {
++    rmSync(binary, { force: true });
++  }
++});
++
++// Run a copy of the shim from a directory with no `node_modules` above it, so
++// `require.resolve` genuinely fails. Asserting the message inside the workspace
++// is impossible: pnpm links every platform package next to the real shim.
++test("a missing platform package fails with an actionable message", () => {
++  const isolated = mkdtempSync(join(tmpdir(), "lumis-cli-shim-"));
++  try {
++    const bin = join(isolated, "bin");
++    mkdirSync(bin);
++    copyFileSync(shim, join(bin, "lumis"));
++    copyFileSync(join(packageDir, "bin", "target.js"), join(bin, "target.js"));
++
++    const result = spawnSync(process.execPath, [join(bin, "lumis")], { encoding: "utf8" });
++    assert.equal(result.status, 1);
++    assert.match(result.stderr, /is not installed/);
++    assert.match(result.stderr, /Reinstall @lumis-sh\/cli/);
++  } finally {
++    rmSync(isolated, { force: true, recursive: true });
++  }
++});
+diff --git a/packages/javascript/scripts/check-cli-versions.mjs b/packages/javascript/scripts/check-cli-versions.mjs
+new file mode 100644
+index 000000000..038eeaff2
+--- /dev/null
++++ b/packages/javascript/scripts/check-cli-versions.mjs
+@@ -0,0 +1,99 @@
++// `@lumis-sh/cli` pins its platform packages as optionalDependencies and pnpm
++// rewrites `workspace:*` to the workspace version at pack time, so a main
++// package bumped on its own would ship dependencies pointing at the previous
++// release. npm refuses to republish an existing version, so the release
++// workflow would fail before reaching the main package.
++//
++// The version the CLI downloaded used to be derived from its own npm version,
++// which drifted from the crate twice and left `@lumis-sh/cli` 0.5.0 and 0.6.0
++// answering every install with a 404. npm resolves the binary now, so the
++// lockstep that matters is this one.
++import { readdirSync, readFileSync } from "node:fs";
++import { dirname, join } from "node:path";
++import { fileURLToPath } from "node:url";
++
++const javascriptDir = dirname(dirname(fileURLToPath(import.meta.url)));
++const cliDir = join(javascriptDir, "cli");
++const npmDir = join(cliDir, "npm");
++
++// Named rather than counted. A directory that disappears has to fail here, not
++// silently shrink the set the release workflow publishes.
++const PLATFORM_DIRS = [
++  "darwin-arm64",
++  "darwin-x64",
++  "linux-arm64-gnu",
++  "linux-arm64-musl",
++  "linux-x64-gnu",
++  "linux-x64-musl",
++  "win32-arm64-msvc",
++  "win32-x64-msvc",
++];
++const EXPECTED_NAMES = PLATFORM_DIRS.map((target) => `@lumis-sh/cli-${target}`);
++const EXPECTED_NAME_SET = new Set(EXPECTED_NAMES);
++
++function readJson(path) {
++  return JSON.parse(readFileSync(path, "utf8"));
++}
++
++const mainPackage = readJson(join(cliDir, "package.json"));
++const expected = mainPackage.version;
++const problems = [];
++
++const present = new Set(readdirSync(npmDir));
++for (const directory of PLATFORM_DIRS) {
++  const relative = `packages/javascript/cli/npm/${directory}`;
++  if (!present.has(directory)) {
++    problems.push(`${relative}: missing`);
++    continue;
++  }
++  present.delete(directory);
++
++  const manifest = readJson(join(npmDir, directory, "package.json"));
++  if (manifest.name !== `@lumis-sh/cli-${directory}`) {
++    problems.push(`${relative}: declares ${manifest.name}, expected @lumis-sh/cli-${directory}`);
++  }
++  if (manifest.version !== expected) {
++    problems.push(`${relative}: ${manifest.version}`);
++  }
++}
++
++for (const extra of present) {
++  problems.push(`packages/javascript/cli/npm/${extra}: not published by javascript-release.yml`);
++}
++
++const dependencies = mainPackage.optionalDependencies ?? {};
++for (const name of EXPECTED_NAMES) {
++  const range = dependencies[name];
++  if (range === undefined) {
++    problems.push(`packages/javascript/cli/package.json: ${name} is not an optionalDependency`);
++  } else if (range !== "workspace:*") {
++    problems.push(
++      `packages/javascript/cli/package.json: ${name} is "${range}", expected "workspace:*"`,
++    );
++  }
++}
++
++for (const name of Object.keys(dependencies)) {
++  if (!EXPECTED_NAME_SET.has(name)) {
++    problems.push(`packages/javascript/cli/package.json: unexpected optionalDependency ${name}`);
++  }
++}
++
++// A postinstall here would mean the binary is being fetched again rather than
++// resolved by npm, which is the failure this layout exists to remove.
++for (const hook of ["preinstall", "install", "postinstall"]) {
++  if (mainPackage.scripts?.[hook]) {
++    problems.push(`packages/javascript/cli/package.json: ${hook} script reintroduces a download`);
++  }
++}
++
++if (problems.length > 0) {
++  console.error(
++    `@lumis-sh/cli is ${expected}; its platform packages must match and be complete:\n` +
++      problems.map((problem) => `  ${problem}`).join("\n") +
++      "\n\n`mise run release-prepare npm-cli <version>` bumps all of them together.",
++  );
++  process.exit(1);
++}
++
++console.log(`${PLATFORM_DIRS.length + 1} CLI manifests are at ${expected}`);
+diff --git a/pnpm-lock.yaml b/pnpm-lock.yaml
+index bb544892d..a8f2b1109 100644
+--- a/pnpm-lock.yaml
++++ b/pnpm-lock.yaml
+@@ -68,17 +68,17 @@ importers:
+       '@lumis-sh/wasm-tsx':
+         specifier: 0.26.1
+         version: 0.26.1
+       highlight.js:
+         specifier: latest
+-        version: 11.11.1
++        version: 11.12.0
+       mitata:
+         specifier: 1.0.34
+         version: 1.0.34
+       shiki:
+         specifier: latest
+-        version: 4.4.2
++        version: 4.4.3
+     devDependencies:
+       oxfmt:
+         specifier: ^0.43.0
+         version: 0.43.0
+       oxlint:
+@@ -99,14 +99,51 @@ importers:
+       tsx:
+         specifier: ^4.23.8
+         version: 4.23.11
+ 
+   packages/javascript/cli:
+-    dependencies:
+-      tar:
+-        specifier: ^7.5.2
+-        version: 7.5.19
++    optionalDependencies:
++      '@lumis-sh/cli-darwin-arm64':
++        specifier: workspace:*
++        version: link:npm/darwin-arm64
++      '@lumis-sh/cli-darwin-x64':
++        specifier: workspace:*
++        version: link:npm/darwin-x64
++      '@lumis-sh/cli-linux-arm64-gnu':
++        specifier: workspace:*
++        version: link:npm/linux-arm64-gnu
++      '@lumis-sh/cli-linux-arm64-musl':
++        specifier: workspace:*
++        version: link:npm/linux-arm64-musl
++      '@lumis-sh/cli-linux-x64-gnu':
++        specifier: workspace:*
++        version: link:npm/linux-x64-gnu
++      '@lumis-sh/cli-linux-x64-musl':
++        specifier: workspace:*
++        version: link:npm/linux-x64-musl
++      '@lumis-sh/cli-win32-arm64-msvc':
++        specifier: workspace:*
++        version: link:npm/win32-arm64-msvc
++      '@lumis-sh/cli-win32-x64-msvc':
++        specifier: workspace:*
++        version: link:npm/win32-x64-msvc
++
++  packages/javascript/cli/npm/darwin-arm64: {}
++
++  packages/javascript/cli/npm/darwin-x64: {}
++
++  packages/javascript/cli/npm/linux-arm64-gnu: {}
++
++  packages/javascript/cli/npm/linux-arm64-musl: {}
++
++  packages/javascript/cli/npm/linux-x64-gnu: {}
++
++  packages/javascript/cli/npm/linux-x64-musl: {}
++
++  packages/javascript/cli/npm/win32-arm64-msvc: {}
++
++  packages/javascript/cli/npm/win32-x64-msvc: {}
+ 
+   packages/javascript/lumis:
+     dependencies:
+       '@noble/hashes':
+         specifier: 2.3.0
+@@ -1314,14 +1351,10 @@ packages:
+         optional: true
+ 
+   '@gerrit0/mini-shiki@3.23.0':
+     resolution: {integrity: sha512-bEMORlG0cqdjVyCEuU0cDQbORWX+kYCeo0kV1lbxF5bt4r7SID2l9bqsxJEM0zndaxpOUT7riCyIVEuqq/Ynxg==}
+ 
+-  '@isaacs/fs-minipass@4.0.1':
+-    resolution: {integrity: sha512-wgm9Ehl2jpeqP3zw/7mo3kRHFp5MEDhqAdwy1fTGkHAwnkGOVsgpvQhL8B5n1qlb01jV3n/bI0ZfZp5lWA1k4w==}
+-    engines: {node: '>=18.0.0'}
+-
+   '@jridgewell/gen-mapping@0.3.13':
+     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
+ 
+   '@jridgewell/resolve-uri@3.1.2':
+     resolution: {integrity: sha512-bRISgCIjP20/tbWSPWMEi54QVPRZExkuD9lJL+UIxUKtwVJA8wW1Trb1jMs1RFXo1CBTNZ/5hpC9QvmKWdopKw==}
+@@ -2313,48 +2346,48 @@ packages:
+     resolution: {integrity: sha512-Vg2n24arSf7JvUNga2DMHYTbxnVq9L5OtVCp4Gfr8YC/kmL/bmdR8FQhGcpMzMYNY9Vdw3+TaimG11Sf+z1Tpw==}
+ 
+   '@rushstack/ts-command-line@5.3.5':
+     resolution: {integrity: sha512-ToJQu3+o6aEdDoApGrwb/RsbwDi/NSC7jIEaAezzWM470TRrsXfSHoYAm1eWkhh34xJ+kZxU1ZzKSHiOMlOFPA==}
+ 
+-  '@shikijs/core@4.4.2':
+-    resolution: {integrity: sha512-StyzbAyxg2/tBGf78gwbBkGyeQ73lf8UiJArFaQhTQIDqQOCKPCQFanvrs4/Yv3Yfyc+ONInJM6K+FMIf+P+kA==}
++  '@shikijs/core@4.4.3':
++    resolution: {integrity: sha512-QCR4q2ZO/ILJEuwiBMel4wdcTDb1JGwfjKTxPDF6x8ixOaluPrVqIn06C99AcRPhmYlBR56d/Fb+GN58GzExpg==}
+     engines: {node: '>=20'}
+ 
+-  '@shikijs/engine-javascript@4.4.2':
+-    resolution: {integrity: sha512-MnIkeqWdVPUWsxlx8gKLVCJFTsqrQJgpTPBPpQwaFeJ56lOnJxj5aN2LUFnfxUEcvOQuNocmbaMnVrCEln6rkw==}
++  '@shikijs/engine-javascript@4.4.3':
++    resolution: {integrity: sha512-FbOjFJp9VLdo1Wevs10BBtVxiTWwNLqZh5Gkhjgda/ioL15YOgeSl9n+6XMa3qRlPQzfhFNe641SrynFHYG0nQ==}
+     engines: {node: '>=20'}
+ 
+   '@shikijs/engine-oniguruma@3.23.0':
+     resolution: {integrity: sha512-1nWINwKXxKKLqPibT5f4pAFLej9oZzQTsby8942OTlsJzOBZ0MWKiwzMsd+jhzu8YPCHAswGnnN1YtQfirL35g==}
+ 
+-  '@shikijs/engine-oniguruma@4.4.2':
+-    resolution: {integrity: sha512-GLhowz1+jixjz+wiZ3wMnOn1jTxiFCGl2PkXufivbnwPHKuyw1AYqu5/hbWhZZ2oAb0NP05WUJhYeigY14drnw==}
++  '@shikijs/engine-oniguruma@4.4.3':
++    resolution: {integrity: sha512-EcOQkxdxGQrc1Row/cC2c96/v1dbZqGnEVu1qTuT/MJmp6+cXCvQussowVmCv5Tqr3KuY3c7IbM6HTW3LJ1k9w==}
+     engines: {node: '>=20'}
+ 
+   '@shikijs/langs@3.23.0':
+     resolution: {integrity: sha512-2Ep4W3Re5aB1/62RSYQInK9mM3HsLeB91cHqznAJMuylqjzNVAVCMnNWRHFtcNHXsoNRayP9z1qj4Sq3nMqYXg==}
+ 
+-  '@shikijs/langs@4.4.2':
+-    resolution: {integrity: sha512-8DfeusD+Zdv/eYIDdXyJTUnSMHt+aAWjAOCXV20HNGAHRlInXpG8wh421v6B91WOm9TFwRLN+b/LG5F2NAIojg==}
++  '@shikijs/langs@4.4.3':
++    resolution: {integrity: sha512-ePic0yfAJGOF83D5wBHK/00EjK65oahBYxFk5epgq33WRv7X9UuxLEV8PtR0szC0z8dl7INIpIodB99JRFlR+A==}
+     engines: {node: '>=20'}
+ 
+-  '@shikijs/primitive@4.4.2':
+-    resolution: {integrity: sha512-l6fQQKsOMlz72n38fztmSgZ76MO6KSWuw8o+GJ+FhmqrpC9pIOJNQNXGgbb5yX2AwpzlEHwsaLPnk/8o4Fm+rA==}
++  '@shikijs/primitive@4.4.3':
++    resolution: {integrity: sha512-m0wBeLDQDeIxRdUmrCPdQqfuUamDwRL5isCfYbguKD6NiaKpVbsv+3J81DyIKgNW5h4WAIIr8T4EkgQrBBxvaQ==}
+     engines: {node: '>=20'}
+ 
+   '@shikijs/themes@3.23.0':
+     resolution: {integrity: sha512-5qySYa1ZgAT18HR/ypENL9cUSGOeI2x+4IvYJu4JgVJdizn6kG4ia5Q1jDEOi7gTbN4RbuYtmHh0W3eccOrjMA==}
+ 
+-  '@shikijs/themes@4.4.2':
+-    resolution: {integrity: sha512-H0CFoL07ddDC2Dd6EdrPYNkRhUR6YCkJlnuYFceYYUJJA5TIm2b5B33qqiDYryBExgbKMndFJPb2u1gTuqO37g==}
++  '@shikijs/themes@4.4.3':
++    resolution: {integrity: sha512-w8UHjeUnIR965KMWJHUPXOc2mNJUnK3vpVLYLvw5IYU2mnTTJ89E24OrJDBNiJDQ0qzb0tc4l7mrIXx5cFeIyw==}
+     engines: {node: '>=20'}
+ 
+   '@shikijs/types@3.23.0':
+     resolution: {integrity: sha512-3JZ5HXOZfYjsYSk0yPwBrkupyYSLpAE26Qc0HLghhZNGTZg/SKxXIIgoxOpmmeQP0RRSDJTk1/vPfw9tbw+jSQ==}
+ 
+-  '@shikijs/types@4.4.2':
+-    resolution: {integrity: sha512-PFYitV4vpDr/iPCIhnHp+Q4ftic5N5VeNJ3KQ1O8gn3h2ar8qgwMAXF7tq4m1CWaMS60fV4VqF6vfnWH4F7vqQ==}
++  '@shikijs/types@4.4.3':
++    resolution: {integrity: sha512-UEJxmRR++MAGR6hugn0vgVS2W/6lWAts84FFSrnlH9sP0LNol7E5+NQ792pH8liWUhyMyjhTgSUH3k7iD7tc5g==}
+     engines: {node: '>=20'}
+ 
+   '@shikijs/vscode-textmate@10.0.2':
+     resolution: {integrity: sha512-83yeghZ2xxin3Nj8z1NMd/NCuca+gsYXswywDy5bHvwlWL8tpTQmzGeUuHd9FC3E/SBEMvzJRwWEOz5gGes9Qg==}
+ 
+@@ -2544,14 +2577,10 @@ packages:
+ 
+   chokidar@4.0.3:
+     resolution: {integrity: sha512-Qgzu8kfBvo+cA4962jnP1KkS6Dop5NS6g7R5LFYJr4b8Ub94PPQXUksCw9PvXoeXPRRddRNC5C1JQUR2SMGtnA==}
+     engines: {node: '>= 14.16.0'}
+ 
+-  chownr@3.0.0:
+-    resolution: {integrity: sha512-+IxzY9BZOQd/XuYPRmrvEVjF/nqj5kgT4kEq7VofrDoM1MxoRjEWkrCC3EtLi59TVawxTAn+orJwFQcrqEN1+g==}
+-    engines: {node: '>=18'}
+-
+   comma-separated-tokens@2.0.3:
+     resolution: {integrity: sha512-Fu4hJdvzeylCfQPp9SGWidpzrMs7tTrlu6Vb8XGaRGck8QSNZJJp538Wrb60Lax4fPwR64ViY468OIUTbRlGZg==}
+ 
+   commander@4.1.1:
+     resolution: {integrity: sha512-NOKm8xhkzAjzFx8B2v5OAHT+u5pRQc2UCa2Vq9jYL/31o2wi9mxBA7LIFs3sV5VSC49z6pEhfbMULvShKj26WA==}
+@@ -2721,12 +2750,12 @@ packages:
+     resolution: {integrity: sha512-88JUN06ipLwsnv+dVn+OIYOvAuvBMy/Qoi6O7mQHxdPXpjy+Cd6xRkWwux7DKO+4sYILtLBRIKgsdpS2gQc7qw==}
+ 
+   hastscript@9.0.1:
+     resolution: {integrity: sha512-g7df9rMFX/SPi34tyGCyUBREQoKkapwdY/T04Qn9TDWfHhAYt4/I0gMVirzK5wEzeUqIjEB+LXC/ypb7Aqno5w==}
+ 
+-  highlight.js@11.11.1:
+-    resolution: {integrity: sha512-Xwwo44whKBVCYoliBQwaPvtd/2tYFkRQtXDWj1nackaV2JPXx3L0+Jvd8/qCJ2p+ML0/XVkJ2q+Mr+UVdpJK5w==}
++  highlight.js@11.12.0:
++    resolution: {integrity: sha512-nbfWpyRMcMrPMmDwJB+dhX/eiaPKtc2RB+0QZskqJ3WjRA/FDS0e9hZrx8EC/lbEv8gXy98FcDbNa/dspAaJMg==}
+     engines: {node: '>=12.0.0'}
+ 
+   html-encoding-sniffer@6.0.0:
+     resolution: {integrity: sha512-CV9TW3Y3f8/wT0BRFc1/KAVQ3TUHiXmaAb6VW9vtiMFf7SLoMd1PdAc4W3KFOFETBJUb90KatHqlsZMWV+R9Gg==}
+     engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
+@@ -3009,18 +3038,10 @@ packages:
+ 
+   minimatch@10.2.5:
+     resolution: {integrity: sha512-MULkVLfKGYDFYejP07QOurDLLQpcjk7Fw+7jXS2R2czRQzR56yHRveU5NDJEOviH+hETZKSkIk5c+T23GjFUMg==}
+     engines: {node: 18 || 20 || >=22}
+ 
+-  minipass@7.1.3:
+-    resolution: {integrity: sha512-tEBHqDnIoM/1rXME1zgka9g6Q2lcoCkxHLuc7ODJ5BxbP5d4c2Z5cGgtXAku59200Cx7diuHTOYfSBD8n6mm8A==}
+-    engines: {node: '>=16 || 14 >=14.17'}
+-
+-  minizlib@3.1.0:
+-    resolution: {integrity: sha512-KZxYo1BUkWD2TVFLr0MQoM8vUUigWD3LlD83a/75BqC+4qE0Hb1Vo5v1FgcfaNXvfXzr+5EhQ6ing/CaBijTlw==}
+-    engines: {node: '>= 18'}
+-
+   mitata@1.0.34:
+     resolution: {integrity: sha512-Mc3zrtNBKIMeHSCQ0XqRLo1vbdIx1wvFV9c8NJAiyho6AjNfMY8bVhbS12bwciUdd1t4rj8099CH3N3NFahaUA==}
+ 
+   mlly@1.8.2:
+     resolution: {integrity: sha512-d+ObxMQFmbt10sretNDytwt85VrbkhhUA/JBGm1MPaWJ65Cl4wOgLaB1NYvJSZ0Ef03MMEU/0xpPMXUIQ29UfA==}
+@@ -3208,12 +3229,12 @@ packages:
+   semver@7.8.5:
+     resolution: {integrity: sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA==}
+     engines: {node: '>=10'}
+     hasBin: true
+ 
+-  shiki@4.4.2:
+-    resolution: {integrity: sha512-P8F/dFhRevaw2uSdeIYlq/5SXZNY85DPtmXQ947gD1Zj2JqO5AkNvVVBar0Me9JkFx3uzVud/qOtP5ek9NEQGA==}
++  shiki@4.4.3:
++    resolution: {integrity: sha512-Mb/GvXPHBAXdgGIcnfU5L3ldpn1XcxrGkPHwqgRx17/I2XRfqlFKk2vGkHWINn1kdXvzJZeuO3is6I9KLPFm0g==}
+     engines: {node: '>=20'}
+ 
+   siginfo@2.0.0:
+     resolution: {integrity: sha512-ybx0WO1/8bSBLEWXZvEd7gMW3Sn3JFlW3TvX1nREbDLRNQNaeNN8WK0meBwPdAaOI7TtRRRJn/Es1zhrrCHu7g==}
+ 
+@@ -3280,14 +3301,10 @@ packages:
+     engines: {node: '>= 0.4'}
+ 
+   symbol-tree@3.2.4:
+     resolution: {integrity: sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==}
+ 
+-  tar@7.5.19:
+-    resolution: {integrity: sha512-4LeEWl96twnS2Q7Bz4MGqgazLqO+hJN63GZxXoIqh1T3VweYD997gbU1ItNsQafqqXTXd5WFyFdReLtwvRBNiw==}
+-    engines: {node: '>=18'}
+-
+   thenify-all@1.6.0:
+     resolution: {integrity: sha512-RNxQH/qI8/t3thXJDwcstUO4zeqo64+Uy/+sNVRBx4Xn2OX+OZ9oP+iJnNFqplFra2ZUVeKCSa2oVWi3T4uVmA==}
+     engines: {node: '>=0.8'}
+ 
+   thenify@3.3.1:
+@@ -3570,14 +3587,10 @@ packages:
+     resolution: {integrity: sha512-JZnDKK8B0RCDw84FNdDAIpZK+JuJw+s7Lz8nksI7SIuU3UXJJslUthsi+uWBUYOwPFwW7W7PRLRfUKpxjtjFCw==}
+ 
+   yallist@4.0.0:
+     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
+ 
+-  yallist@5.0.0:
+-    resolution: {integrity: sha512-YgvUTfwqyc7UXVMrB+SImsVYSmTS8X/tSrtdNZMImM+n7+QTriRXyXim0mBrTXNeqzVF0KWGgHPeiyViFFrNDw==}
+-    engines: {node: '>=18'}
+-
+   yaml@2.8.3:
+     resolution: {integrity: sha512-AvbaCLOO2Otw/lW5bmh9d/WEdcDFdQp2Z2ZUH3pX9U2ihyUY0nvLv7J6TrWowklRGPYbB/IuIMfYgxaCPg5Bpg==}
+     engines: {node: '>= 14.6'}
+     hasBin: true
+ 
+@@ -3812,14 +3825,10 @@ snapshots:
+       '@shikijs/langs': 3.23.0
+       '@shikijs/themes': 3.23.0
+       '@shikijs/types': 3.23.0
+       '@shikijs/vscode-textmate': 10.0.2
+ 
+-  '@isaacs/fs-minipass@4.0.1':
+-    dependencies:
+-      minipass: 7.1.3
+-
+   '@jridgewell/gen-mapping@0.3.13':
+     dependencies:
+       '@jridgewell/sourcemap-codec': 1.5.5
+       '@jridgewell/trace-mapping': 0.3.31
+ 
+@@ -4495,62 +4504,62 @@ snapshots:
+       argparse: 1.0.10
+       string-argv: 0.3.2
+     transitivePeerDependencies:
+       - '@types/node'
+ 
+-  '@shikijs/core@4.4.2':
++  '@shikijs/core@4.4.3':
+     dependencies:
+-      '@shikijs/primitive': 4.4.2
+-      '@shikijs/types': 4.4.2
++      '@shikijs/primitive': 4.4.3
++      '@shikijs/types': 4.4.3
+       '@shikijs/vscode-textmate': 10.0.2
+       '@types/hast': 3.0.5
+       hast-util-to-html: 9.0.5
+ 
+-  '@shikijs/engine-javascript@4.4.2':
++  '@shikijs/engine-javascript@4.4.3':
+     dependencies:
+-      '@shikijs/types': 4.4.2
++      '@shikijs/types': 4.4.3
+       '@shikijs/vscode-textmate': 10.0.2
+       oniguruma-to-es: 4.3.6
+ 
+   '@shikijs/engine-oniguruma@3.23.0':
+     dependencies:
+       '@shikijs/types': 3.23.0
+       '@shikijs/vscode-textmate': 10.0.2
+ 
+-  '@shikijs/engine-oniguruma@4.4.2':
++  '@shikijs/engine-oniguruma@4.4.3':
+     dependencies:
+-      '@shikijs/types': 4.4.2
++      '@shikijs/types': 4.4.3
+       '@shikijs/vscode-textmate': 10.0.2
+ 
+   '@shikijs/langs@3.23.0':
+     dependencies:
+       '@shikijs/types': 3.23.0
+ 
+-  '@shikijs/langs@4.4.2':
++  '@shikijs/langs@4.4.3':
+     dependencies:
+-      '@shikijs/types': 4.4.2
++      '@shikijs/types': 4.4.3
+ 
+-  '@shikijs/primitive@4.4.2':
++  '@shikijs/primitive@4.4.3':
+     dependencies:
+-      '@shikijs/types': 4.4.2
++      '@shikijs/types': 4.4.3
+       '@shikijs/vscode-textmate': 10.0.2
+       '@types/hast': 3.0.5
+ 
+   '@shikijs/themes@3.23.0':
+     dependencies:
+       '@shikijs/types': 3.23.0
+ 
+-  '@shikijs/themes@4.4.2':
++  '@shikijs/themes@4.4.3':
+     dependencies:
+-      '@shikijs/types': 4.4.2
++      '@shikijs/types': 4.4.3
+ 
+   '@shikijs/types@3.23.0':
+     dependencies:
+       '@shikijs/vscode-textmate': 10.0.2
+       '@types/hast': 3.0.5
+ 
+-  '@shikijs/types@4.4.2':
++  '@shikijs/types@4.4.3':
+     dependencies:
+       '@shikijs/vscode-textmate': 10.0.2
+       '@types/hast': 3.0.5
+ 
+   '@shikijs/vscode-textmate@10.0.2': {}
+@@ -4750,12 +4759,10 @@ snapshots:
+ 
+   chokidar@4.0.3:
+     dependencies:
+       readdirp: 4.1.2
+ 
+-  chownr@3.0.0: {}
+-
+   comma-separated-tokens@2.0.3: {}
+ 
+   commander@4.1.1: {}
+ 
+   confbox@0.1.8: {}
+@@ -4993,11 +5000,11 @@ snapshots:
+       comma-separated-tokens: 2.0.3
+       hast-util-parse-selector: 4.0.0
+       property-information: 7.1.0
+       space-separated-tokens: 2.0.2
+ 
+-  highlight.js@11.11.1: {}
++  highlight.js@11.12.0: {}
+ 
+   html-encoding-sniffer@6.0.0(@noble/hashes@2.3.0):
+     dependencies:
+       '@exodus/bytes': 1.15.0(@noble/hashes@2.3.0)
+     transitivePeerDependencies:
+@@ -5401,16 +5408,10 @@ snapshots:
+ 
+   minimatch@10.2.5:
+     dependencies:
+       brace-expansion: 5.0.5
+ 
+-  minipass@7.1.3: {}
+-
+-  minizlib@3.1.0:
+-    dependencies:
+-      minipass: 7.1.3
+-
+   mitata@1.0.34: {}
+ 
+   mlly@1.8.2:
+     dependencies:
+       acorn: 8.16.0
+@@ -5664,18 +5665,18 @@ snapshots:
+ 
+   semver@7.7.4: {}
+ 
+   semver@7.8.5: {}
+ 
+-  shiki@4.4.2:
++  shiki@4.4.3:
+     dependencies:
+-      '@shikijs/core': 4.4.2
+-      '@shikijs/engine-javascript': 4.4.2
+-      '@shikijs/engine-oniguruma': 4.4.2
+-      '@shikijs/langs': 4.4.2
+-      '@shikijs/themes': 4.4.2
+-      '@shikijs/types': 4.4.2
++      '@shikijs/core': 4.4.3
++      '@shikijs/engine-javascript': 4.4.3
++      '@shikijs/engine-oniguruma': 4.4.3
++      '@shikijs/langs': 4.4.3
++      '@shikijs/themes': 4.4.3
++      '@shikijs/types': 4.4.3
+       '@shikijs/vscode-textmate': 10.0.2
+       '@types/hast': 3.0.5
+ 
+   siginfo@2.0.0: {}
+ 
+@@ -5730,18 +5731,10 @@ snapshots:
+ 
+   supports-preserve-symlinks-flag@1.0.0: {}
+ 
+   symbol-tree@3.2.4: {}
+ 
+-  tar@7.5.19:
+-    dependencies:
+-      '@isaacs/fs-minipass': 4.0.1
+-      chownr: 3.0.0
+-      minipass: 7.1.3
+-      minizlib: 3.1.0
+-      yallist: 5.0.0
+-
+   thenify-all@1.6.0:
+     dependencies:
+       thenify: 3.3.1
+ 
+   thenify@3.3.1:
+@@ -6046,10 +6039,8 @@ snapshots:
+ 
+   xmlchars@2.2.0: {}
+ 
+   yallist@4.0.0: {}
+ 
+-  yallist@5.0.0: {}
+-
+   yaml@2.8.3: {}
+ 
+   zwitch@2.0.4: {}
+diff --git a/pnpm-workspace.yaml b/pnpm-workspace.yaml
+index b64016ecd..2d669f813 100644
+--- a/pnpm-workspace.yaml
++++ b/pnpm-workspace.yaml
+@@ -1,12 +1,12 @@
+ packages:
+   - packages/javascript
+   - packages/javascript/*
++  - packages/javascript/cli/npm/*
+   - packages/javascript/lumis/native/npm/*
+   - benchmarks/javascript
+ allowBuilds:
+-  '@lumis-sh/cli': true
+   '@parcel/watcher': true
+   better-sqlite3: true
+   core-js: true
+   core-js-pure: true
+   esbuild: true
+
+commit af1234a37bc578fe0aa5ca549f8d57f320f39fe8
+Author: Leandro Pereira <leandro@leandro.io>
+Date:   Thu Aug 13 14:43:19 2026 -0400
+
+    chore(release): hex-lumis 0.7.0
+
+diff --git a/packages/elixir/lumis/CHANGELOG.md b/packages/elixir/lumis/CHANGELOG.md
+index b15981baf..cbe25d58a 100644
+--- a/packages/elixir/lumis/CHANGELOG.md
++++ b/packages/elixir/lumis/CHANGELOG.md
+@@ -1,30 +1,49 @@
+-## Next release migration
++## [0.7.0](https://github.com/leandrocp/lumis/compare/hex-lumis/v0.6.3...hex-lumis/v0.7.0) (2026-08-13)
+ 
+-Why: parsers now use shared packages.
++### Bug Fixes
+ 
+-1. Online deployments need no change.
+-2. Replace `mix lumis.languages.cache <names>` with `Lumis.Languages.async_load/1` in your application's `start/2`.
+-3. Use `lumis languages cache`, or `Lumis.Languages.cache/2`, when a build or operations step prepares the directory instead.
++- BREAKING: align the default theme on none across runtimes - [#1142](https://github.com/leandrocp/lumis/pull/1142)
++- pin lumis crate requirements to the workspace version - [#1140](https://github.com/leandrocp/lumis/pull/1140)
++- highlight lines in light-dark() mode - [#1260](https://github.com/leandrocp/lumis/pull/1260)
++- resolve compatible WASM package versions - [#1263](https://github.com/leandrocp/lumis/pull/1263)
++- resolve one data directory across every runtime - [#1264](https://github.com/leandrocp/lumis/pull/1264)
++- align the public API across Rust, the CLI, Elixir and JavaScript - [#1266](https://github.com/leandrocp/lumis/pull/1266)
+ 
+-Why: defaults now match.
++### Documentation
+ 
+-1. Add `theme: "onedark"` to `:html_inline` and `:terminal` to keep old colors.
++- add deployment guide - [#1268](https://github.com/leandrocp/lumis/pull/1268)
++- add release migration steps - [#1272](https://github.com/leandrocp/lumis/pull/1272)
+ 
+-Why: catalogs now share one shape.
++### Features
+ 
+-1. Replace `Lumis.available_languages()["elixir"]` with `Lumis.Languages.get("elixir")`.
+-2. Get theme names with `Enum.map(Lumis.available_themes(), & &1.name)`.
++- update generated themes - [#1122](https://github.com/leandrocp/lumis/pull/1122)
++- unify dynamic WASM language loading - [#1099](https://github.com/leandrocp/lumis/pull/1099)
++- BREAKING: one vocabulary for the language and theme catalog, in every runtime - [#1269](https://github.com/leandrocp/lumis/pull/1269)
++- mirror precompiled NIFs to Cloudflare R2 - [#1270](https://github.com/leandrocp/lumis/pull/1270)
++- warm-up parsers - [#1273](https://github.com/leandrocp/lumis/pull/1273)
++
++### Performance
++
++- prepare large parser bundles concurrently - [#1271](https://github.com/leandrocp/lumis/pull/1271)
+ 
+-Why: errors are now explicit.
++### Breaking changes
+ 
+-1. Use `Lumis.highlight!/2` to keep raising.
+-2. Otherwise handle `{:ok, output}` and `{:error, reason}`.
++**Load languages on-demand**
+ 
+-Why: HTML output now matches.
++No changes are required but it's recommended to warm-up parsers to avoid slow first requests.
+ 
+-1. Regenerate exact HTML snapshots.
++See https://lumis.hexdocs.pm/deployment.html
++
++**Removed default `onedark` theme**
++
++Add `theme: "onedark"` to `:html_inline` and `:terminal` to keep old colors.
++
++**Align Theme and Language APIs**
++
++1. Replace `Lumis.available_languages()["elixir"]` with `Lumis.Languages.get("elixir")`.
++2. Get theme names with `Enum.map(Lumis.available_themes(), & &1.name)`.
+ 
+ ## [0.6.3](https://github.com/leandrocp/lumis/compare/hex-lumis/v0.6.2...hex-lumis/v0.6.3) (2026-07-23)
+ 
+ 
+ ### Bug Fixes
+diff --git a/packages/elixir/lumis/mix.exs b/packages/elixir/lumis/mix.exs
+index def96e60a..e7642fd34 100644
+--- a/packages/elixir/lumis/mix.exs
++++ b/packages/elixir/lumis/mix.exs
+@@ -1,10 +1,10 @@
+ defmodule Lumis.MixProject do
+   use Mix.Project
+ 
+   @source_url "https://github.com/leandrocp/lumis"
+-  @version "0.6.3"
++  @version "0.7.0"
+ 
+   def project do
+     [
+       app: :lumis,
+       version: @version,
+
+commit c69b0c3eea4d5ae5677470c46223d383c9864d6b
+Author: Leandro Pereira <leandro@leandro.io>
+Date:   Thu Aug 13 14:34:50 2026 -0400
+
+    chore(release): npm-wasm-bundle-full 0.1.1
+
+diff --git a/packages/javascript/wasm-bundle-full/CHANGELOG.md b/packages/javascript/wasm-bundle-full/CHANGELOG.md
+index 422dd09bc..ac5dc2da3 100644
+--- a/packages/javascript/wasm-bundle-full/CHANGELOG.md
++++ b/packages/javascript/wasm-bundle-full/CHANGELOG.md
+@@ -1,5 +1,12 @@
++## [0.1.1](https://github.com/leandrocp/lumis/compare/npm-wasm-bundle-full/v0.1.0...npm-wasm-bundle-full/v0.1.1) (2026-08-13)
++
++
++### Features
++
++- unify dynamic WASM language loading - [#1099](https://github.com/leandrocp/lumis/pull/1099)
++
+ ## [0.1.0](https://github.com/leandrocp/lumis/compare/npm-wasm-bundle-full/v0.0.7...npm-wasm-bundle-full/v0.1.0) (2026-07-23)
+ 
+ 
+ ### Features
+ 
+diff --git a/packages/javascript/wasm-bundle-full/package.json b/packages/javascript/wasm-bundle-full/package.json
+index cb7f85271..ec7a9010f 100644
+--- a/packages/javascript/wasm-bundle-full/package.json
++++ b/packages/javascript/wasm-bundle-full/package.json
+@@ -1,8 +1,8 @@
+ {
+   "name": "@lumis-sh/wasm-bundle-full",
+-  "version": "0.1.0",
++  "version": "0.1.1",
+   "description": "Lumis WASM full language bundle",
+   "author": "Leandro Pereira",
+   "license": "MIT",
+   "repository": {
+     "type": "git",
+
+commit 66bb22c98c7183fc1d9f718adf2e2f763cd1afa5
+Author: Leandro Pereira <leandro@leandro.io>
+Date:   Thu Aug 13 14:33:05 2026 -0400
+
+    chore(release): npm-wasm-bundle-backend 0.1.0
+
+diff --git a/packages/javascript/wasm-bundle-backend/CHANGELOG.md b/packages/javascript/wasm-bundle-backend/CHANGELOG.md
+index eab188839..724406669 100644
+--- a/packages/javascript/wasm-bundle-backend/CHANGELOG.md
++++ b/packages/javascript/wasm-bundle-backend/CHANGELOG.md
+@@ -1,5 +1,12 @@
++## [0.1.0](https://github.com/leandrocp/lumis/compare/npm-wasm-bundle-backend/v0.0.4...npm-wasm-bundle-backend/v0.1.0) (2026-08-13)
++
++
++### Features
++
++- unify dynamic WASM language loading - [#1099](https://github.com/leandrocp/lumis/pull/1099)
++
+ ## [0.0.4](https://github.com/leandrocp/lumis/compare/wasm-bundle-backend@v0.0.3...wasm-bundle-backend@v0.0.4) (2026-04-07)
+ 
+ 
+ ### Bug Fixes
+ 
+diff --git a/packages/javascript/wasm-bundle-backend/package.json b/packages/javascript/wasm-bundle-backend/package.json
+index 0cae367e1..8f4bb17eb 100644
+--- a/packages/javascript/wasm-bundle-backend/package.json
++++ b/packages/javascript/wasm-bundle-backend/package.json
+@@ -1,8 +1,8 @@
+ {
+   "name": "@lumis-sh/wasm-bundle-backend",
+-  "version": "0.0.4",
++  "version": "0.1.0",
+   "description": "Lumis WASM backend language bundle",
+   "author": "Leandro Pereira",
+   "license": "MIT",
+   "repository": {
+     "type": "git",
+
+commit 68d1cf8a55c8fe8a8317e33463447e4ae463d3f1
+Author: Leandro Pereira <leandro@leandro.io>
+Date:   Thu Aug 13 14:31:36 2026 -0400
+
+    chore(release): npm-wasm-bundle-system 0.1.0
+
+diff --git a/packages/javascript/wasm-bundle-system/CHANGELOG.md b/packages/javascript/wasm-bundle-system/CHANGELOG.md
+index d023683d3..b0b46c3f4 100644
+--- a/packages/javascript/wasm-bundle-system/CHANGELOG.md
++++ b/packages/javascript/wasm-bundle-system/CHANGELOG.md
+@@ -1,5 +1,12 @@
++## [0.1.0](https://github.com/leandrocp/lumis/compare/npm-wasm-bundle-system/v0.0.4...npm-wasm-bundle-system/v0.1.0) (2026-08-13)
++
++
++### Features
++
++- unify dynamic WASM language loading - [#1099](https://github.com/leandrocp/lumis/pull/1099)
++
+ ## [0.0.4](https://github.com/leandrocp/lumis/compare/wasm-bundle-system@v0.0.3...wasm-bundle-system@v0.0.4) (2026-04-07)
+ 
+ 
+ ### Bug Fixes
+ 
+diff --git a/packages/javascript/wasm-bundle-system/package.json b/packages/javascript/wasm-bundle-system/package.json
+index a751bc99a..b0f458468 100644
+--- a/packages/javascript/wasm-bundle-system/package.json
++++ b/packages/javascript/wasm-bundle-system/package.json
+@@ -1,8 +1,8 @@
+ {
+   "name": "@lumis-sh/wasm-bundle-system",
+-  "version": "0.0.4",
++  "version": "0.1.0",
+   "description": "Lumis WASM system language bundle",
+   "author": "Leandro Pereira",
+   "license": "MIT",
+   "repository": {
+     "type": "git",

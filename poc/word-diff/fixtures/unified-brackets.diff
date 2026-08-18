@@ -1,0 +1,15 @@
+diff --git a/a.py b/a.py
+index 1111111..2222222 100644
+--- a/a.py
++++ b/a.py
+@@ -1,6 +1,7 @@
+ def f(arr):
+-    return arr[-1]
++    return arr[-2]
+     data = {
+         "k": [
++            1,
+         ],
+     }
+-    x = {+y+}
++    x = [-y-]
