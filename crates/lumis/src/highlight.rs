@@ -75,6 +75,7 @@
 
 use crate::languages::{bracket_query_for_language, Language, LanguageConfig};
 use crate::themes::Theme;
+use derive_builder::Builder;
 use lumis_core::events::HighlightEvent as CoreHighlightEvent;
 use lumis_core::highlights::HIGHLIGHT_NAMES;
 use lumis_wasm_runtime::tree_sitter_highlight::{HighlightEvent, Highlighter as TSHighlighter};
@@ -104,58 +105,38 @@ static DEFAULT_STYLE: LazyLock<Arc<Style>> = LazyLock::new(|| Arc::new(Style::de
 /// The counterpart of JavaScript's second argument to `highlightEvents()`.
 ///
 /// ```rust
-/// use lumis::highlight::HighlightOptions;
+/// use lumis::highlight::HighlightOptionsBuilder;
 ///
-/// let options = HighlightOptions::new().rainbow_brackets(true);
+/// let options = HighlightOptionsBuilder::new()
+///     .rainbow_brackets(true)
+///     .build()
+///     .unwrap();
 /// ```
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-#[must_use]
+#[derive(Builder, Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[builder(default)]
 pub struct HighlightOptions {
     /// Emit `punctuation.bracket.rainbow.N` scopes around bracket pairs.
     #[deprecated(
         since = "0.14.0",
-        note = "construct with `HighlightOptions::new().rainbow_brackets(..)`; this field becomes private in 1.0"
+        note = "set it through `HighlightOptionsBuilder`; this field becomes private in 1.0"
     )]
     pub rainbow_brackets: bool,
 }
 
-impl Default for HighlightOptions {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl HighlightOptions {
-    /// Creates options with every switch off.
-    pub const fn new() -> Self {
-        #[allow(deprecated)]
-        Self {
-            rainbow_brackets: false,
-        }
-    }
-
-    /// Emit `punctuation.bracket.rainbow.N` scopes around bracket pairs.
-    ///
-    /// ```rust
-    /// use lumis::highlight::HighlightOptions;
-    ///
-    /// let options = HighlightOptions::new().rainbow_brackets(true);
-    /// ```
-    pub const fn rainbow_brackets(mut self, enabled: bool) -> Self {
-        #[allow(deprecated)]
-        {
-            self.rainbow_brackets = enabled;
-        }
-        self
-    }
-
-    /// Whether [`Self::rainbow_brackets`] was enabled.
+    /// Whether rainbow bracket scopes were enabled.
     #[must_use]
     pub const fn rainbow_brackets_enabled(&self) -> bool {
         #[allow(deprecated)]
         {
             self.rainbow_brackets
         }
+    }
+}
+
+impl HighlightOptionsBuilder {
+    pub fn new() -> Self {
+        Self::default()
     }
 }
 
@@ -833,10 +814,14 @@ mod tests {
             rainbow_brackets: true,
         };
 
-        assert_eq!(HighlightOptions::new().rainbow_brackets(true), literal);
-        assert!(literal.rainbow_brackets_enabled());
-        assert!(!HighlightOptions::new().rainbow_brackets_enabled());
-        assert_eq!(HighlightOptions::default(), HighlightOptions::new());
+        let built = HighlightOptionsBuilder::new()
+            .rainbow_brackets(true)
+            .build()
+            .unwrap();
+
+        assert_eq!(built, literal);
+        assert!(built.rainbow_brackets_enabled());
+        assert!(!HighlightOptions::default().rainbow_brackets_enabled());
     }
     use super::*;
     use crate::themes;

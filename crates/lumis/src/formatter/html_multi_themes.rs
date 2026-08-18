@@ -344,7 +344,10 @@ impl Formatter for HtmlMultiThemes {
         let events = highlight::highlight_events_with_options(
             source,
             self.language,
-            highlight::HighlightOptions::new().rainbow_brackets(self.rainbow_brackets),
+            highlight::HighlightOptionsBuilder::new()
+                .rainbow_brackets(self.rainbow_brackets)
+                .build()
+                .expect("every highlight option has a default"),
         )
         .map_err(io::Error::other)?;
 

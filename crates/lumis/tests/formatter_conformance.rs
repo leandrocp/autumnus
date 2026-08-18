@@ -1,6 +1,6 @@
 use lumis::formatters::Formatter as _;
 use lumis::{
-    highlight, highlight::highlight_events_with_options, highlight::HighlightOptions,
+    highlight, highlight::highlight_events_with_options, highlight::HighlightOptionsBuilder,
     languages::Language, themes, BBCodeScopedBuilder, HtmlInlineBuilder, HtmlLinkedBuilder,
     HtmlMultiThemesBuilder, TerminalBuilder,
 };
@@ -93,7 +93,10 @@ fn check_events(fixture: &Fixture) {
     let events = highlight_events_with_options(
         &fixture.source,
         lang,
-        HighlightOptions::new().rainbow_brackets(fixture.metadata.rainbow_brackets),
+        HighlightOptionsBuilder::new()
+            .rainbow_brackets(fixture.metadata.rainbow_brackets)
+            .build()
+            .expect("every highlight option has a default"),
     )
     .expect("events should build");
     let serialized = events

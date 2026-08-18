@@ -2,7 +2,7 @@ use anyhow::{bail, Context, Result};
 use clap::{Parser, Subcommand};
 use lumis::events::HighlightEvent;
 use lumis::formatters::Formatter as _;
-use lumis::highlight::{highlight_events_with_options, HighlightOptions};
+use lumis::highlight::{highlight_events_with_options, HighlightOptions, HighlightOptionsBuilder};
 use lumis::languages::Language;
 use lumis_wasm_runtime::{parser_filename, LanguagePackage, PackagedLanguage, ParserMetadata};
 use serde::{Deserialize, Serialize};
@@ -429,7 +429,9 @@ fn fixture_outputs(
     let events = highlight_events_with_options(
         source,
         language,
-        HighlightOptions::new().rainbow_brackets(rainbow_brackets),
+        HighlightOptionsBuilder::new()
+            .rainbow_brackets(rainbow_brackets)
+            .build()?,
     )?;
     let (multi_themes, multi_default_theme, multi_highlight_lines) = html_multi_themes
         .as_ref()
