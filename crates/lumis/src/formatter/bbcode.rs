@@ -96,6 +96,7 @@ impl Formatter for BBCodeScoped {
             self.language,
             highlight::HighlightOptions {
                 rainbow_brackets: self.rainbow_brackets,
+                ..Default::default()
             },
         )
         .map_err(io::Error::other)?;

@@ -819,8 +819,8 @@
               "type": "CHOICE",
               "members": [
                 {
-                  "type": "PATTERN",
-                  "value": "[^\\r\\n]+"
+                  "type": "SYMBOL",
+                  "name": "_words"
                 },
                 {
                   "type": "BLANK"
@@ -843,8 +843,8 @@
               "type": "CHOICE",
               "members": [
                 {
-                  "type": "PATTERN",
-                  "value": "[^\\r\\n]+"
+                  "type": "SYMBOL",
+                  "name": "_words"
                 },
                 {
                   "type": "BLANK"
@@ -879,8 +879,8 @@
               "type": "CHOICE",
               "members": [
                 {
-                  "type": "PATTERN",
-                  "value": "[^\\r\\n]+"
+                  "type": "SYMBOL",
+                  "name": "_words"
                 },
                 {
                   "type": "BLANK"
@@ -903,8 +903,8 @@
               "type": "CHOICE",
               "members": [
                 {
-                  "type": "PATTERN",
-                  "value": "[^\\r\\n]+"
+                  "type": "SYMBOL",
+                  "name": "_words"
                 },
                 {
                   "type": "BLANK"
@@ -932,8 +932,8 @@
               "type": "CHOICE",
               "members": [
                 {
-                  "type": "PATTERN",
-                  "value": "[^\\r\\n]+"
+                  "type": "SYMBOL",
+                  "name": "_words"
                 },
                 {
                   "type": "BLANK"
@@ -956,8 +956,8 @@
               "type": "CHOICE",
               "members": [
                 {
-                  "type": "PATTERN",
-                  "value": "[^\\r\\n]+"
+                  "type": "SYMBOL",
+                  "name": "_words"
                 },
                 {
                   "type": "BLANK"
@@ -992,8 +992,8 @@
               "type": "CHOICE",
               "members": [
                 {
-                  "type": "PATTERN",
-                  "value": "[^\\r\\n]+"
+                  "type": "SYMBOL",
+                  "name": "_words"
                 },
                 {
                   "type": "BLANK"
@@ -1016,8 +1016,8 @@
               "type": "CHOICE",
               "members": [
                 {
-                  "type": "PATTERN",
-                  "value": "[^\\r\\n]+"
+                  "type": "SYMBOL",
+                  "name": "_words"
                 },
                 {
                   "type": "BLANK"
@@ -1066,8 +1066,8 @@
           "type": "CHOICE",
           "members": [
             {
-              "type": "PATTERN",
-              "value": "[^\\r\\n]+"
+              "type": "SYMBOL",
+              "name": "_words"
             },
             {
               "type": "BLANK"
@@ -1125,13 +1125,70 @@
       ]
     },
     "unrecognized": {
+      "type": "PREC",
+      "value": -1,
+      "content": {
+        "type": "SYMBOL",
+        "name": "_words"
+      }
+    },
+    "_words": {
+      "type": "REPEAT1",
+      "content": {
+        "type": "CHOICE",
+        "members": [
+          {
+            "type": "SYMBOL",
+            "name": "word_deletion"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "word_addition"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "_word_text"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "_word_stray"
+          }
+        ]
+      }
+    },
+    "word_deletion": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PATTERN",
+        "value": "\\[-(?:[^-\\r\\n]|-+[^-\\]\\r\\n])*-+\\]"
+      }
+    },
+    "word_addition": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PATTERN",
+        "value": "\\{\\+(?:[^+\\r\\n]|\\++[^+}\\r\\n])*\\++\\}"
+      }
+    },
+    "_word_text": {
       "type": "TOKEN",
       "content": {
         "type": "PREC",
         "value": -1,
         "content": {
           "type": "PATTERN",
-          "value": "[^\\r\\n]+"
+          "value": "[^\\[{\\r\\n]+"
+        }
+      }
+    },
+    "_word_stray": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": -2,
+        "content": {
+          "type": "PATTERN",
+          "value": "[\\[{]"
         }
       }
     },

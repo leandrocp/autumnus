@@ -106,6 +106,13 @@ static DEFAULT_STYLE: LazyLock<Arc<Style>> = LazyLock::new(|| Arc::new(Style::de
 pub struct HighlightOptions {
     /// Emit `punctuation.bracket.rainbow.N` scopes around bracket pairs.
     pub rainbow_brackets: bool,
+    /// Keep the `diff.minus.word` and `diff.plus.word` scopes that mark the
+    /// `[-removed-]` and `{+added+}` runs in `git diff --word-diff` output.
+    ///
+    /// Off by default because those markers are ordinary text to every other
+    /// producer: a unified diff of a file that happens to contain `{+x+}` would
+    /// otherwise be highlighted as though it had changed there.
+    pub word_diff: bool,
 }
 
 thread_local! {
@@ -552,11 +559,64 @@ where
         })
         .collect::<Result<Vec<_>, _>>()?;
 
+    let core_events = if options.word_diff {
+        core_events
+    } else {
+        strip_word_diff_scopes(core_events)
+    };
+
     if options.rainbow_brackets {
         Ok(apply_query_rainbow_brackets(source, core_events, language))
     } else {
         Ok(core_events)
     }
+}
+
+/// The scopes marking a word-diff run, which only `HighlightOptions::word_diff`
+/// keeps.
+///
+/// They resolve through the theme's `.` fallback, so `diff.minus.word` takes
+/// `diff.minus`'s colour without any theme declaring it.
+static WORD_DIFF_SCOPE_INDICES: LazyLock<[usize; 2]> = LazyLock::new(|| {
+    ["diff.minus.word", "diff.plus.word"].map(|scope| {
+        HIGHLIGHT_NAMES
+            .iter()
+            .position(|candidate| *candidate == scope)
+            .expect("word diff scopes are declared in highlights.toml")
+    })
+});
+
+/// Drops the word-diff scopes, keeping the text they wrapped.
+///
+/// `[-` and `{+` are ordinary characters to every producer other than
+/// `git diff --word-diff`, so a document that has not opted in must render
+/// exactly as it did before those patterns existed.
+fn strip_word_diff_scopes(events: Vec<CoreHighlightEvent>) -> Vec<CoreHighlightEvent> {
+    let indices = &*WORD_DIFF_SCOPE_INDICES;
+    // Events nest, so remembering whether each open scope was emitted is enough
+    // to drop the right `End` without counting depth.
+    let mut emitted = Vec::new();
+    let mut output = Vec::with_capacity(events.len());
+
+    for event in events {
+        match event {
+            CoreHighlightEvent::Start { scope_index, .. } if indices.contains(&scope_index) => {
+                emitted.push(false);
+            }
+            CoreHighlightEvent::Start { .. } => {
+                emitted.push(true);
+                output.push(event);
+            }
+            CoreHighlightEvent::End => {
+                if emitted.pop().unwrap_or(true) {
+                    output.push(event);
+                }
+            }
+            CoreHighlightEvent::Source { .. } => output.push(event),
+        }
+    }
+
+    output
 }
 
 fn apply_query_rainbow_brackets(

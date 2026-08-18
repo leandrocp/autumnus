@@ -1,0 +1,78 @@
+Recognise `git diff --word-diff` runs as nodes.
+
+Upstream parses a diff line as one `ANYTHING` token, so nothing inside a line can
+be captured. This splits line content into segments and adds `word_deletion` and
+`word_addition` for the `[-removed-]` and `{+added+}` runs that
+`git diff --word-diff=plain` emits.
+
+Each marker is a single token. That is what keeps `arr[-1]` in an ordinary diff
+falling back to plain text instead of opening a construct it can never close;
+splitting the delimiters into their own tokens gives that case an ERROR node and
+would need an external scanner to avoid. The text segments stay hidden, so a diff
+without markers parses to the tree it parsed to before.
+
+Measured against the unpatched grammar: no output change over a 4138-line unified
+diff, parse time 3.7-3.8 ms against 4.0-4.8 ms, parser 49,190 -> 52,843 bytes.
+
+Not upstreamed yet. See https://github.com/leandrocp/lumis/issues/1088.
+
+--- a/grammar.js
++++ b/grammar.js
+@@ -1,6 +1,9 @@
+ const NEWLINE = /\r?\n/;
+ const WHITE_SPACE = /[\t\f\v ]+/;
+ const ANYTHING = /[^\r\n]+/;
++const WORD_DELETION = /\[-(?:[^-\r\n]|-+[^-\]\r\n])*-+\]/;
++const WORD_ADDITION = /\{\+(?:[^+\r\n]|\++[^+}\r\n])*\++\}/;
++const WORD_TEXT = /[^\[{\r\n]+/;
+ const BASE85_LINE = /[A-Za-z][0-9A-Za-z!#$%&()*+\-;<=>?@^_`{|}~]+/;
+ const BASE85 = new RegExp(
+   `${BASE85_LINE.source}(?:${NEWLINE.source}${BASE85_LINE.source})*`
+@@ -146,27 +149,37 @@
+ 
+     addition: ($) =>
+       choice(
+-        iseq("+", optional(ANYTHING)),
+-        iseq("++", optional(ANYTHING)),
++        iseq("+", optional($._words)),
++        iseq("++", optional($._words)),
+         iseq("+++"),
+-        iseq("++++", optional(ANYTHING)),
+-        iseq(">", optional(ANYTHING))
++        iseq("++++", optional($._words)),
++        iseq(">", optional($._words))
+       ),
+     deletion: ($) =>
+       choice(
+-        iseq("-", optional(ANYTHING)),
+-        iseq("--", optional(ANYTHING)),
++        iseq("-", optional($._words)),
++        iseq("--", optional($._words)),
+         iseq("---"),
+-        iseq("----", optional(ANYTHING)),
+-        iseq("<", optional(ANYTHING))
++        iseq("----", optional($._words)),
++        iseq("<", optional($._words))
+       ),
+     change: ($) => iseq("!", optional(ANYTHING)),
+ 
+-    context: ($) => iseq(" ", optional(ANYTHING)),
++    context: ($) => iseq(" ", optional($._words)),
+     comment: ($) => iseq("#", optional(ANYTHING)),
+     special: ($) => iseq("\\", optional(ANYTHING)),
+-    unrecognized: ($) => token(prec(-1, ANYTHING)),
++    unrecognized: ($) => prec(-1, $._words),
+ 
++    _words: ($) =>
++      repeat1(
++        choice($.word_deletion, $.word_addition, $._word_text, $._word_stray)
++      ),
++
++    word_deletion: ($) => token(WORD_DELETION),
++    word_addition: ($) => token(WORD_ADDITION),
++    _word_text: ($) => token(prec(-1, WORD_TEXT)),
++    _word_stray: ($) => token(prec(-2, /[\[{]/)),
++
+     linerange: ($) => /[-\+]\d+(,\d+)?/,
+     filename: ($) => repeat1(/\S+/),
+     commit: ($) => /[a-f0-9]{4,64}/,

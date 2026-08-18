@@ -3,7 +3,7 @@
 // Do not edit.
 
 /// Tree-sitter highlight scope names.
-pub const HIGHLIGHT_NAMES: [&str; 293] = [
+pub const HIGHLIGHT_NAMES: [&str; 295] = [
     "attribute",
     "attribute.builtin",
     "attribute.c_sharp",
@@ -49,7 +49,9 @@ pub const HIGHLIGHT_NAMES: [&str; 293] = [
     "constructor.tsx",
     "diff.delta",
     "diff.minus",
+    "diff.minus.word",
     "diff.plus",
+    "diff.plus.word",
     "error",
     "function",
     "function.builtin",
@@ -302,7 +304,7 @@ pub const HIGHLIGHT_NAMES: [&str; 293] = [
 /// CSS class names for syntax highlighting.
 ///
 /// Each class name corresponds to a scope name in [`HIGHLIGHT_NAMES`] at the same index.
-pub const CLASSES: [&str; 293] = [
+pub const CLASSES: [&str; 295] = [
     "attribute",
     "attribute-builtin",
     "attribute-c_sharp",
@@ -348,7 +350,9 @@ pub const CLASSES: [&str; 293] = [
     "constructor-tsx",
     "diff-delta",
     "diff-minus",
+    "diff-minus-word",
     "diff-plus",
+    "diff-plus-word",
     "error",
     "function",
     "function-builtin",

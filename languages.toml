@@ -190,6 +190,8 @@ globs = ["*.dart"]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-diff.git"
 rev = "ada384ac7bfc1307f32de474620120add29998fb"
 version = "0.2.0"
+generate = true
+patch = "patches/tree-sitter-diff-word-diff.patch"
 globs = ["*.diff"]
 
 [parsers.dockerfile]

@@ -95,6 +95,7 @@ fn check_events(fixture: &Fixture) {
         lang,
         HighlightOptions {
             rainbow_brackets: fixture.metadata.rainbow_brackets,
+            ..Default::default()
         },
     )
     .expect("events should build");

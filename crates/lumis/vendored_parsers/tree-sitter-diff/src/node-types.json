@@ -2,7 +2,21 @@
   {
     "type": "addition",
     "named": true,
-    "fields": {}
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "word_addition",
+          "named": true
+        },
+        {
+          "type": "word_deletion",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "binary_change",
@@ -182,12 +196,40 @@
   {
     "type": "context",
     "named": true,
-    "fields": {}
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "word_addition",
+          "named": true
+        },
+        {
+          "type": "word_deletion",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "deletion",
     "named": true,
-    "fields": {}
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "word_addition",
+          "named": true
+        },
+        {
+          "type": "word_deletion",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "dissimilarity",
@@ -435,6 +477,25 @@
     "fields": {}
   },
   {
+    "type": "unrecognized",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "word_addition",
+          "named": true
+        },
+        {
+          "type": "word_deletion",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": " ",
     "named": false
   },
@@ -615,7 +676,11 @@
     "named": false
   },
   {
-    "type": "unrecognized",
+    "type": "word_addition",
+    "named": true
+  },
+  {
+    "type": "word_deletion",
     "named": true
   }
 ]

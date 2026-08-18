@@ -426,8 +426,14 @@ fn fixture_outputs(
     rainbow_brackets: bool,
     html_multi_themes: Option<HtmlMultiThemesFixture>,
 ) -> Result<FixtureOutputs> {
-    let events =
-        highlight_events_with_options(source, language, HighlightOptions { rainbow_brackets })?;
+    let events = highlight_events_with_options(
+        source,
+        language,
+        HighlightOptions {
+            rainbow_brackets,
+            ..Default::default()
+        },
+    )?;
     let (multi_themes, multi_default_theme, multi_highlight_lines) = html_multi_themes
         .as_ref()
         .map(|config| {
@@ -950,6 +956,8 @@ struct ParserInfo {
     location: Option<String>,
     query_name: Option<String>,
     generate: Option<bool>,
+    /// A patch applied to the checked-out grammar before it is generated.
+    patch: Option<String>,
     wasm_name: Option<String>,
     feature: Option<String>,
     #[allow(dead_code)]
@@ -1432,6 +1440,7 @@ fn fetch_parsers(name: &str) -> Result<()> {
 
         run_cmd_ok(&format!("git clone {git} {clone_dir} 2>/dev/null"))?;
         run_cmd_ok(&format!("cd {clone_dir} && git checkout {rev} 2>/dev/null"))?;
+        apply_parser_patch(&clone_dir, info.patch.as_ref())?;
 
         let dest = format!("crates/lumis/vendored_parsers/{parser_dir}");
 
@@ -2678,6 +2687,7 @@ fn build_wasm(name: &str) -> Result<()> {
             info.location.as_deref(),
             info.generate.unwrap_or(false),
             &toolchain,
+            &parser_patch_digest(info.patch.as_ref()),
         );
 
         if !rebuild && cached_parser_is_current(&wasm_file, &build_id_file, &build_id) {
@@ -2702,6 +2712,7 @@ fn build_wasm(name: &str) -> Result<()> {
         let _ = run_cmd_ok(&format!(
             "cd {clone_dir} && git fetch --depth 1 origin {rev} && git checkout {rev}"
         ));
+        apply_parser_patch(&clone_dir, info.patch.as_ref())?;
 
         let repo_dir = if let Some(ref location) = info.location {
             format!("{clone_dir}/{location}")
@@ -2788,15 +2799,50 @@ fn wasm_toolchain_id() -> String {
     run_cmd("tree-sitter --version").unwrap_or_default()
 }
 
+/// Applies a parser's patch to a fresh checkout.
+///
+/// Vendoring upstream and carrying the delta as a file keeps it reviewable in
+/// this repository, the way `queries/override/` does for queries. A patch that
+/// no longer applies is a hard error at the next `rev` bump rather than a fork
+/// that quietly stops tracking upstream.
+fn apply_parser_patch(clone_dir: &str, patch: Option<&String>) -> Result<()> {
+    let Some(patch) = patch else { return Ok(()) };
+    let patch = std::env::current_dir()?.join(patch);
+    if !patch.exists() {
+        bail!("missing parser patch at {}", patch.display());
+    }
+    println!("* applying {}", patch.display());
+    run_cmd_ok(&format!(
+        "cd {clone_dir} && git apply --verbose {}",
+        patch.display()
+    ))
+    .with_context(|| format!("patch no longer applies: {}", patch.display()))?;
+    Ok(())
+}
+
+fn parser_patch_digest(patch: Option<&String>) -> String {
+    patch.map_or_else(String::new, |patch| {
+        fs::read(patch).map_or_else(
+            |_| "missing".to_string(),
+            |bytes| {
+                use sha2::Digest as _;
+                let digest = sha2::Sha256::digest(&bytes);
+                digest.iter().map(|byte| format!("{byte:02x}")).collect()
+            },
+        )
+    })
+}
+
 fn wasm_build_id(
     git: &str,
     rev: &str,
     location: Option<&str>,
     generate: bool,
     toolchain: &str,
+    patch_digest: &str,
 ) -> String {
     format!(
-        "{git}\n{rev}\n{}\n{generate}\n{toolchain}\n",
+        "{git}\n{rev}\n{}\n{generate}\n{toolchain}\n{patch_digest}\n",
         location.unwrap_or("")
     )
 }
@@ -3292,7 +3338,7 @@ fn stage_wasm(name: &str) -> Result<()> {
 /// so every runtime's tests exercise the real resolve, verify and load path
 /// without a network.
 fn stage_test_parsers(out: &Path) -> Result<()> {
-    const FIXTURES: &str = "fixtures/test-parsers";
+    const FIXTURES: &str = "packages/javascript/lumis/test/fixtures/wasm";
 
     let toml = read_languages_toml()?;
     let fixture_version = lumis_wasm_runtime::lowest_compatible_package_version();
