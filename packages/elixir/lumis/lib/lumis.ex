@@ -285,6 +285,10 @@ defmodule Lumis do
           | :bbcode_scoped
           | {:bbcode_scoped, [language: language(), rainbow_brackets: boolean()]}
 
+  @highlight_options [
+    rainbow_brackets: [type: :boolean, default: false]
+  ]
+
   @formatter_schema [
     type: {:custom, Lumis, :formatter_type, []},
     type_spec: quote(do: Lumis.formatter()),
@@ -335,39 +339,39 @@ defmodule Lumis do
   end
 
   def formatter_type({:html_inline, options}) when is_list(options) do
-    schema = [
-      language: [type: {:or, [:string, nil]}, default: nil],
-      theme: [type: {:or, [{:struct, Lumis.Theme}, :string, nil]}, default: nil],
-      pre_class: [type: {:or, [:string, nil]}, default: nil],
-      italic: [type: :boolean, default: false],
-      include_highlights: [type: :boolean, default: false],
-      rainbow_brackets: [type: :boolean, default: false],
-      highlight_lines: [
-        type:
-          {:or,
-           [
-             nil,
-             map: [
-               lines: [type: {:list, {:custom, Lumis, :highlight_lines_type, []}}],
-               style: [type: {:or, [:string, {:in, [:theme]}, nil]}, default: :theme],
-               class: [type: {:or, [:string, nil]}, default: nil]
-             ]
-           ]},
-        default: nil
-      ],
-      header: [
-        type:
-          {:or,
-           [
-             nil,
-             map: [
-               open_tag: [type: :string],
-               close_tag: [type: :string]
-             ]
-           ]},
-        default: nil
-      ]
-    ]
+    schema =
+      [
+        language: [type: {:or, [:string, nil]}, default: nil],
+        theme: [type: {:or, [{:struct, Lumis.Theme}, :string, nil]}, default: nil],
+        pre_class: [type: {:or, [:string, nil]}, default: nil],
+        italic: [type: :boolean, default: false],
+        include_highlights: [type: :boolean, default: false],
+        highlight_lines: [
+          type:
+            {:or,
+             [
+               nil,
+               map: [
+                 lines: [type: {:list, {:custom, Lumis, :highlight_lines_type, []}}],
+                 style: [type: {:or, [:string, {:in, [:theme]}, nil]}, default: :theme],
+                 class: [type: {:or, [:string, nil]}, default: nil]
+               ]
+             ]},
+          default: nil
+        ],
+        header: [
+          type:
+            {:or,
+             [
+               nil,
+               map: [
+                 open_tag: [type: :string],
+                 close_tag: [type: :string]
+               ]
+             ]},
+          default: nil
+        ]
+      ] ++ @highlight_options
 
     case NimbleOptions.validate(options, schema) do
       {:ok, validated_opts} ->
@@ -385,35 +389,35 @@ defmodule Lumis do
   end
 
   def formatter_type({:html_linked, options}) when is_list(options) do
-    schema = [
-      language: [type: {:or, [:string, nil]}, default: nil],
-      pre_class: [type: {:or, [:string, nil]}, default: nil],
-      rainbow_brackets: [type: :boolean, default: false],
-      highlight_lines: [
-        type:
-          {:or,
-           [
-             nil,
-             map: [
-               lines: [type: {:list, {:custom, Lumis, :highlight_lines_type, []}}],
-               class: [type: :string, default: "l-highlighted"]
-             ]
-           ]},
-        default: nil
-      ],
-      header: [
-        type:
-          {:or,
-           [
-             nil,
-             map: [
-               open_tag: [type: :string],
-               close_tag: [type: :string]
-             ]
-           ]},
-        default: nil
-      ]
-    ]
+    schema =
+      [
+        language: [type: {:or, [:string, nil]}, default: nil],
+        pre_class: [type: {:or, [:string, nil]}, default: nil],
+        highlight_lines: [
+          type:
+            {:or,
+             [
+               nil,
+               map: [
+                 lines: [type: {:list, {:custom, Lumis, :highlight_lines_type, []}}],
+                 class: [type: :string, default: "l-highlighted"]
+               ]
+             ]},
+          default: nil
+        ],
+        header: [
+          type:
+            {:or,
+             [
+               nil,
+               map: [
+                 open_tag: [type: :string],
+                 close_tag: [type: :string]
+               ]
+             ]},
+          default: nil
+        ]
+      ] ++ @highlight_options
 
     case NimbleOptions.validate(options, schema) do
       {:ok, validated_opts} ->
@@ -431,55 +435,55 @@ defmodule Lumis do
   end
 
   def formatter_type({:html_multi_themes, options}) when is_list(options) do
-    schema = [
-      language: [type: {:or, [:string, nil]}, default: nil],
-      themes: [
-        type: :keyword_list,
-        required: true,
-        doc:
-          "Keyword list of theme identifiers to theme names/structs, e.g., [light: \"github_light\", dark: \"github_dark\"]"
-      ],
-      default_theme: [
-        type: {:or, [:string, nil]},
-        default: nil,
-        doc:
-          "Default theme rendering mode: theme name, \"light-dark()\", or nil for CSS variables only"
-      ],
-      css_variable_prefix: [
-        type: {:or, [:string, nil]},
-        default: nil,
-        doc: "CSS variable prefix (defaults to \"--lumis\" if nil)"
-      ],
-      pre_class: [type: {:or, [:string, nil]}, default: nil],
-      italic: [type: :boolean, default: false],
-      include_highlights: [type: :boolean, default: false],
-      rainbow_brackets: [type: :boolean, default: false],
-      highlight_lines: [
-        type:
-          {:or,
-           [
-             nil,
-             map: [
-               lines: [type: {:list, {:custom, Lumis, :highlight_lines_type, []}}],
-               style: [type: {:or, [:string, {:in, [:theme]}, nil]}, default: :theme],
-               class: [type: {:or, [:string, nil]}, default: nil]
-             ]
-           ]},
-        default: nil
-      ],
-      header: [
-        type:
-          {:or,
-           [
-             nil,
-             map: [
-               open_tag: [type: :string],
-               close_tag: [type: :string]
-             ]
-           ]},
-        default: nil
-      ]
-    ]
+    schema =
+      [
+        language: [type: {:or, [:string, nil]}, default: nil],
+        themes: [
+          type: :keyword_list,
+          required: true,
+          doc:
+            "Keyword list of theme identifiers to theme names/structs, e.g., [light: \"github_light\", dark: \"github_dark\"]"
+        ],
+        default_theme: [
+          type: {:or, [:string, nil]},
+          default: nil,
+          doc:
+            "Default theme rendering mode: theme name, \"light-dark()\", or nil for CSS variables only"
+        ],
+        css_variable_prefix: [
+          type: {:or, [:string, nil]},
+          default: nil,
+          doc: "CSS variable prefix (defaults to \"--lumis\" if nil)"
+        ],
+        pre_class: [type: {:or, [:string, nil]}, default: nil],
+        italic: [type: :boolean, default: false],
+        include_highlights: [type: :boolean, default: false],
+        highlight_lines: [
+          type:
+            {:or,
+             [
+               nil,
+               map: [
+                 lines: [type: {:list, {:custom, Lumis, :highlight_lines_type, []}}],
+                 style: [type: {:or, [:string, {:in, [:theme]}, nil]}, default: :theme],
+                 class: [type: {:or, [:string, nil]}, default: nil]
+               ]
+             ]},
+          default: nil
+        ],
+        header: [
+          type:
+            {:or,
+             [
+               nil,
+               map: [
+                 open_tag: [type: :string],
+                 close_tag: [type: :string]
+               ]
+             ]},
+          default: nil
+        ]
+      ] ++ @highlight_options
 
     case NimbleOptions.validate(options, schema) do
       {:ok, validated_opts} ->
@@ -497,13 +501,13 @@ defmodule Lumis do
   end
 
   def formatter_type({:terminal, options}) when is_list(options) do
-    schema = [
-      language: [type: {:or, [:string, nil]}, default: nil],
-      theme: [type: {:or, [{:struct, Lumis.Theme}, :string, nil]}, default: nil],
-      background: [type: {:or, [:string, {:in, [:theme]}, nil]}, default: nil],
-      width: [type: {:or, [:pos_integer, nil]}, default: nil],
-      rainbow_brackets: [type: :boolean, default: false]
-    ]
+    schema =
+      [
+        language: [type: {:or, [:string, nil]}, default: nil],
+        theme: [type: {:or, [{:struct, Lumis.Theme}, :string, nil]}, default: nil],
+        background: [type: {:or, [:string, {:in, [:theme]}, nil]}, default: nil],
+        width: [type: {:or, [:pos_integer, nil]}, default: nil]
+      ] ++ @highlight_options
 
     case NimbleOptions.validate(options, schema) do
       {:ok, validated_opts} ->

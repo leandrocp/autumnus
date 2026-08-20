@@ -9,6 +9,7 @@ import type {
   LanguageRef,
   LazyLanguage,
   Formatter,
+  HighlightOptions,
   Theme,
 } from "../types.js";
 import { PLAINTEXT_LANG_ID } from "../types.js";
@@ -218,7 +219,7 @@ function runHighlightEvents(
   runtime: RuntimeLike,
   source: string,
   language: LanguageRef | undefined,
-  options: { rainbowBrackets?: boolean } = {},
+  options: HighlightOptions = {},
 ): HighlightEvent[] {
   const loaded = resolveLoadedLanguage(runtime, language);
   return runtime.highlightEvents(source, loaded, options);
@@ -267,7 +268,7 @@ export function highlightIter(
 export function highlightEvents(
   source: string,
   language: LanguageRef | undefined,
-  options: { rainbowBrackets?: boolean } = {},
+  options: HighlightOptions = {},
 ): HighlightEvent[] {
   const runtime = requireCurrentRuntime("highlightEvents");
   return runHighlightEvents(runtime, source, detectLanguageRef(source, language), options);
