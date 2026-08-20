@@ -389,10 +389,6 @@ export type HighlightIterFn = (
  */
 /**
  * Options that influence which highlight events are produced.
- *
- * The counterpart of Rust's `HighlightOptions`. Every formatter accepts these
- * alongside its own rendering options, so a new switch is declared here once
- * rather than in each formatter's option type.
  */
 export interface HighlightOptions {
   /** Render nested brackets with rainbow bracket scopes. */

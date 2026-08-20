@@ -285,9 +285,6 @@ defmodule Lumis do
           | :bbcode_scoped
           | {:bbcode_scoped, [language: language(), rainbow_brackets: boolean()]}
 
-  # The counterpart of Rust's `HighlightOptions`: what every formatter accepts
-  # beyond its own rendering options. Declared once so a new switch reaches every
-  # formatter rather than being repeated into each schema.
   @highlight_options [
     rainbow_brackets: [type: :boolean, default: false]
   ]
