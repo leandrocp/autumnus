@@ -1550,7 +1550,7 @@ dependencies = [
 name = "lumis-js-native"
 version = "0.7.0"
 dependencies = [
- "base64 0.22.1",
+ "base64 0.23.1",
  "lumis-core",
  "lumis-wasm-runtime",
  "napi",
