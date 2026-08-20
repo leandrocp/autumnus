@@ -8,7 +8,7 @@
   },
   "devDependencies": {
     "@microsoft/api-extractor": "^7.58.12",
-    "oxfmt": "^0.43.0",
+    "oxfmt": "^0.63.0",
     "smol-toml": "^1.7.1",
     "tsx": "^4.23.8"
   }
