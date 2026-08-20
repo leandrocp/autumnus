@@ -110,11 +110,6 @@ static DEFAULT_STYLE: LazyLock<Arc<Style>> = LazyLock::new(|| Arc::new(Style::de
 ///     rainbow_brackets: true,
 /// };
 /// ```
-///
-/// The fields are plain and there is no builder: nothing about building these
-/// can fail, so a builder would only add a type and a `Result` to unwrap. Once
-/// there is more than one switch, start from [`Default`] and set what you need,
-/// which keeps a later addition from breaking callers.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct HighlightOptions {
     /// Emit `punctuation.bracket.rainbow.N` scopes around bracket pairs.
