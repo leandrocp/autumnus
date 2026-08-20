@@ -79,7 +79,7 @@ Use this when you need byte ranges, scopes, and per-token callbacks.
 ```rust
 use lumis::{highlight::highlight_iter, languages::Language, themes};
 
-highlight_iter(source, Language::Rust, themes::get("github_light").ok(), |text, language, range, scope, style| {
+highlight_iter(source, Language::Rust, themes::get("catppuccin_latte").ok(), |text, language, range, scope, style| {
     println!("{:?} {:?} {} {:?}", text, language, scope, range);
     println!("fg={:?} bold={} italic={}", style.fg, style.bold, style.italic);
     Ok::<_, std::io::Error>(())
@@ -95,7 +95,7 @@ Rust can generate linked CSS directly.
 ```rust
 use lumis::themes;
 
-let theme = themes::get("github_light").unwrap();
+let theme = themes::get("catppuccin_latte").unwrap();
 let css = theme.css(true);
 ```
 

@@ -1,9 +1,19 @@
 {
-  "schemaVersion": 2,
-  "theme": {
-    "name": "Dracula",
-    "source": "https://github.com/dracula/sublime/blob/d490b57c08f3d110ff61a07ec6edcc1ed9e24a63/Dracula.tmTheme"
-  },
+  "schemaVersion": 3,
+  "themes": [
+    {
+      "id": "latte",
+      "name": "Catppuccin Latte",
+      "appearance": "light",
+      "source": "https://github.com/catppuccin/bat/blob/6810349b28055dce54076712fc05fc68da4b8ec0/themes/Catppuccin%20Latte.tmTheme"
+    },
+    {
+      "id": "frappe",
+      "name": "Catppuccin Frappé",
+      "appearance": "dark",
+      "source": "https://github.com/catppuccin/bat/blob/6810349b28055dce54076712fc05fc68da4b8ec0/themes/Catppuccin%20Frappe.tmTheme"
+    }
+  ],
   "lumisRuntimes": [
     "Lumis Rust",
     "Lumis JavaScript (Node, Wasmtime)",
@@ -16,25 +26,25 @@
       "id": "lumis",
       "label": "Lumis",
       "version": "Lumis 0.7.0",
-      "theme": "Neovim Dracula colorscheme, extracted by this repository"
+      "theme": "Neovim Catppuccin colorschemes, extracted by this repository"
     },
     {
       "id": "syntect",
       "label": "syntect",
       "version": "syntect 5.3 with two-face 0.5.1",
-      "theme": "dracula/sublime Dracula.tmTheme, pinned by SHA-256"
+      "theme": "catppuccin/bat tmTheme files, pinned by SHA-256"
     },
     {
       "id": "shiki",
       "label": "Shiki",
-      "version": "shiki 4.4.2",
-      "theme": "Shiki's bundled dracula theme"
+      "version": "shiki 4.4.3",
+      "theme": "Shiki's bundled catppuccin themes"
     },
     {
       "id": "highlight-js",
       "label": "highlight.js",
-      "version": "highlight.js 11.11.1",
-      "theme": "highlight.js styles/base16/dracula.css"
+      "version": "highlight.js 11.12.0",
+      "theme": "@catppuccin/highlightjs 1.0.1 stylesheets"
     }
   ],
   "documents": [
@@ -52,9 +62,9 @@
         "JavaScript"
       ],
       "tokens": {
-        "lumis": 6701,
-        "syntect": 7079,
-        "shiki": 4812,
+        "lumis": 6704,
+        "syntect": 6718,
+        "shiki": 5887,
         "highlight-js": 2019
       }
     },
@@ -71,9 +81,9 @@
       ],
       "tokens": {
         "lumis": 5070,
-        "syntect": 3802,
-        "shiki": 3260,
-        "highlight-js": 1302
+        "syntect": 4157,
+        "shiki": 3734,
+        "highlight-js": 1304
       }
     },
     {
@@ -91,8 +101,8 @@
       ],
       "tokens": {
         "lumis": 5629,
-        "syntect": 2628,
-        "shiki": 3562,
+        "syntect": 3242,
+        "shiki": 3668,
         "highlight-js": 709
       }
     },
@@ -109,8 +119,8 @@
       ],
       "tokens": {
         "lumis": 6594,
-        "syntect": 6860,
-        "shiki": 4645,
+        "syntect": 6824,
+        "shiki": 6189,
         "highlight-js": 1336
       }
     },
@@ -130,9 +140,9 @@
         "Rust"
       ],
       "tokens": {
-        "lumis": 943,
-        "syntect": 666,
-        "shiki": 433,
+        "lumis": 939,
+        "syntect": 839,
+        "shiki": 571,
         "highlight-js": 263
       }
     },
@@ -149,8 +159,8 @@
       ],
       "tokens": {
         "lumis": 2529,
-        "syntect": 2684,
-        "shiki": 2501,
+        "syntect": 2946,
+        "shiki": 2474,
         "highlight-js": 1259
       }
     }

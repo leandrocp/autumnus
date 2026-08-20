@@ -81,11 +81,11 @@ The installed binary is `lumis`. npm resolves it from a platform package, so the
   import {highlight} from 'https://esm.sh/@lumis-sh/lumis';
   import {htmlInline} from 'https://esm.sh/@lumis-sh/lumis/formatters';
   import javascript from 'https://esm.sh/@lumis-sh/lumis/langs/javascript';
-  import dracula from 'https://esm.sh/@lumis-sh/themes/dracula';
+  import frappe from 'https://esm.sh/@lumis-sh/themes/catppuccin_frappe';
 
   const html = await highlight(
     'const x = 1',
-    htmlInline({language: javascript, theme: dracula})
+    htmlInline({language: javascript, theme: frappe})
   );
 
   document.getElementById('output').innerHTML = html;

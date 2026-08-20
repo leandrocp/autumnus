@@ -174,7 +174,7 @@ export async function setupQuickstart(root: HTMLElement) {
 
   const [quickstartLightTheme, quickstartDarkTheme] = await Promise.all([
     loadTheme("catppuccin_latte"),
-    loadTheme("catppuccin_mocha"),
+    loadTheme("catppuccin_frappe"),
   ]);
   root
     .querySelectorAll<HTMLDivElement>(".quickstart-install, .quickstart-usage")

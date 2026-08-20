@@ -94,7 +94,7 @@ getLanguage('nope')  // undefined
 Themes are separate modules, so import the one you want:
 
 ```js
-import dracula from '@lumis-sh/themes/dracula'
+import frappe from '@lumis-sh/themes/catppuccin_frappe'
 ```
 
   </TabItem>
@@ -106,7 +106,7 @@ use lumis::{languages::Language, themes};
 let language: Language = "js".parse()?;
 println!("{:?}", language.info().extensions);
 
-let theme = themes::get("dracula")?;
+let theme = themes::get("catppuccin_frappe")?;
 println!("{} {}", theme.name, theme.appearance);
 ```
 
@@ -120,8 +120,8 @@ Lumis.Languages.get("js")
 Lumis.Languages.get("nope")
 # nil
 
-Lumis.Theme.get("dracula")
-# %Lumis.Theme{name: "dracula", appearance: "dark", ...}
+Lumis.Theme.get("catppuccin_frappe")
+# %Lumis.Theme{name: "catppuccin_frappe", appearance: "dark", ...}
 ```
 
   </TabItem>
@@ -129,7 +129,7 @@ Lumis.Theme.get("dracula")
 
 ```bash
 lumis languages show js
-lumis themes show dracula
+lumis themes show catppuccin_frappe
 ```
 
   </TabItem>

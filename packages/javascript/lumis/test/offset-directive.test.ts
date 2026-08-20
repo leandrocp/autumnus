@@ -168,7 +168,7 @@ describe("#offset! matches Neovim", () => {
     },
   );
 
-  it("does not carry a column offset into the next row", () => {
+  it("reaches its own newline on a same-row offset", () => {
     const source = "a\nb";
     const original = {
       startIndex: 0,
@@ -183,7 +183,12 @@ describe("#offset! matches Neovim", () => {
         { startRow: 0, startColumn: 0, endRow: 0, endColumn: 1 },
         buildSourceMaps(source),
       ),
-    ).toEqual(original);
+    ).toEqual({
+      startIndex: 0,
+      endIndex: 2,
+      startPosition: { row: 0, column: 0 },
+      endPosition: { row: 0, column: 2 },
+    });
   });
 
   // Neovim raises a Lua error rather than defining a behaviour for a literal

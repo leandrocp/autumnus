@@ -20,8 +20,15 @@ interface ComparisonDocument {
   tokens?: Record<string, number>;
 }
 
+interface ComparisonTheme {
+  id: string;
+  name: string;
+  appearance: "light" | "dark";
+  source: string;
+}
+
 interface Manifest {
-  theme: { name: string; source: string };
+  themes: ComparisonTheme[];
   lumisRuntimes: string[];
   implementations: Array<{ id: string; label: string; version: string; theme: string }>;
   documents: ComparisonDocument[];
@@ -44,7 +51,7 @@ export function renderComparison() {
             <div class="comparison-implementations flex min-w-max gap-6" role="tablist" aria-label="Implementation"></div>
           </div>
           <p class="comparison-metrics flex flex-wrap gap-x-5 gap-y-1 border-b border-zinc-200 px-5 py-2.5 font-mono text-[11px] tracking-wider text-zinc-500 dark:border-zinc-800 dark:text-zinc-400"></p>
-          <div class="comparison-viewport h-[70vh] min-h-[420px] bg-[#171821]">
+          <div class="comparison-viewport h-[70vh] min-h-[420px] bg-[#e6e9ef] dark:bg-[#292c3c]">
             <iframe class="comparison-frame block h-full w-full border-0" title="Highlighted output" loading="eager"></iframe>
           </div>
         </div>
@@ -57,8 +64,9 @@ export function renderComparison() {
           </p>
           <p class="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
             Each library renders the same file at its current release, through its own public API,
-            with the closest Dracula it ships. Those Draculas are different files, so some colour
-            differences are the theme rather than the parse.
+            with the closest Catppuccin it ships. Those ports are different files, so some colour
+            differences are the theme rather than the parse. Every file is rendered in Latte and
+            Frappé, and the panel above follows your system's light or dark setting.
           </p>
           <p class="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
             A token is a span the highlighter gave a colour to, counted in the output above.
@@ -118,6 +126,21 @@ export async function setupComparison(root: HTMLElement) {
   let currentDocument = manifest.documents[0]!;
   let currentImplementation = manifest.implementations[0]!;
 
+  // The outputs are files rendered ahead of time, so the page cannot restyle one
+  // the way the live showcase restyles its own. Both flavours are published and
+  // the reader's setting picks between them, which is also why this listens:
+  // switching appearance mid-visit would otherwise leave a light page around a
+  // dark panel until the next reload.
+  const prefersDark = matchMedia("(prefers-color-scheme: dark)");
+  const themeFor = (dark: boolean) =>
+    manifest.themes.find((theme) => theme.appearance === (dark ? "dark" : "light")) ??
+    manifest.themes[0]!;
+  let currentTheme = themeFor(prefersDark.matches);
+  prefersDark.addEventListener("change", (event) => {
+    currentTheme = themeFor(event.matches);
+    show();
+  });
+
   addEventListener("message", (event: MessageEvent) => {
     const scroll = (event.data as { lumisShowcaseScroll?: { x: number; y: number } } | null)
       ?.lumisShowcaseScroll;
@@ -129,7 +152,7 @@ export async function setupComparison(root: HTMLElement) {
       ? ` + ${currentDocument.injections.join(" + ")}`
       : "";
     summary.replaceChildren(
-      `${manifest.theme.name} · ${currentDocument.languageLabel}${injections} · ` +
+      `${currentTheme.name} · ${currentDocument.languageLabel}${injections} · ` +
         `${currentDocument.lines.toLocaleString()} lines · ${currentDocument.label} · `,
     );
     const link = document.createElement("a");
@@ -143,8 +166,12 @@ export async function setupComparison(root: HTMLElement) {
 
   function show() {
     const at = positions.get(currentDocument.id) ?? { x: 0, y: 0 };
-    frame.src = `${DATA}/${currentDocument.id}/${currentImplementation.id}.html#at=${at.x},${at.y}`;
-    frame.title = `${currentImplementation.label} highlighting ${currentDocument.label}`;
+    frame.src =
+      `${DATA}/${currentDocument.id}/${currentTheme.id}/${currentImplementation.id}.html` +
+      `#at=${at.x},${at.y}`;
+    frame.title =
+      `${currentImplementation.label} highlighting ${currentDocument.label} ` +
+      `in ${currentTheme.name}`;
     describe();
     describeMetrics();
   }

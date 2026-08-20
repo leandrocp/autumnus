@@ -1,4 +1,9 @@
-import { LANGUAGES, LANGUAGES_BY_ID, getSample } from "../data/languages";
+import {
+  LANGUAGES,
+  LANGUAGES_BY_ID,
+  PLAYGROUND_DEFAULT_LANGUAGE,
+  getSample,
+} from "../data/languages";
 import { loadTheme, THEMES, THEMES_BY_ID } from "../data/themes";
 import { renderHighlight } from "../lib/highlighter";
 
@@ -50,7 +55,10 @@ export async function setupPlayground(root: HTMLElement) {
   const preview = root.querySelector<HTMLDivElement>(".preview-content")!;
   const randomizeButton = root.querySelector<HTMLButtonElement>(".randomize")!;
 
-  languageSelect.value = pickRandom(LANGUAGES).id;
+  // The first render is the one the warm-up in `mountApp` has been fetching, so
+  // it has to name the same language every time. Randomizing is what the button
+  // is for.
+  languageSelect.value = PLAYGROUND_DEFAULT_LANGUAGE;
   themeSelect.value = pickRandom(THEMES).id;
 
   let renderToken = 0;

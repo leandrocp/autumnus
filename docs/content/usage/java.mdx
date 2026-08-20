@@ -35,7 +35,7 @@ var lumis = Lumis.builder().build();
 
 var highlighter = lumis.highlighter()
     .withLang(Lang.JAVASCRIPT)
-    .withTheme(Theme.DRACULA)
+    .withTheme(Theme.CATPPUCCIN_FRAPPE)
     .build();
 
 var html = highlighter.highlight("const x = 1").string();
@@ -51,7 +51,7 @@ Lang.JAVASCRIPT
 Lang.ELIXIR
 Lang.PYTHON
 
-Theme.DRACULA
+Theme.CATPPUCCIN_FRAPPE
 Theme.GITHUB_DARK
 Theme.CATPPUCCIN_MOCHA
 Theme.ONEDARK

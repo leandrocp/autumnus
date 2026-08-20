@@ -56,7 +56,8 @@ Two consequences worth knowing:
   resolves `lumis_nif` from crates.io with `--locked`, so between the bump and
   the `cargo publish` that follows it, the version it now requires does not exist
   yet and the job fails. Nothing in the commit can fix that, and nothing should
-  try.
+  try. The publish is what makes the fix possible, and `rust-release.yml` runs it
+  from there — see [Elixir package](#elixir-package).
 - **`[skip ci]` is the wrong tool here.** It would suppress the runs entirely
   rather than showing them as skipped, but it keys on the same head commit that
   the package tag points at, so pushing `<package>/v<version>` would skip the
@@ -210,9 +211,31 @@ catalog data and JavaScript handles.
 
 ### Elixir package
 
-Publish `hex-lumis` after the required `cargo-lumis-wasm-runtime` release.
-Refresh and commit `packages/elixir/lumis/native/lumis_nif/Cargo.lock` against
-that published runtime before creating the Hex tag.
+Publish `hex-lumis` after the `cargo-lumis-core` and `cargo-lumis-wasm-runtime`
+releases it requires. `packages/elixir/lumis/native/lumis_nif/Cargo.toml` reaches
+both through the registry rather than through `path`, so
+`packages/elixir/lumis/native/lumis_nif/Cargo.lock` can only be re-resolved once
+those versions are on crates.io. Until it is, the packaged crate names versions
+its lockfile does not pin, and a hex consumer building from source resolves
+something nobody tested.
+
+Nothing there is a step to remember. `mise run elixir-nif-lock-check --fix`
+re-resolves the lockfile, and three places run it or check it:
+
+- `rust-release.yml` runs the fix after each `cargo publish` and opens the
+  `refresh-nif-lock` pull request. A release batch publishes one crate per tag,
+  so the earlier tags run it while a crate the NIF also requires is still
+  unpublished; the last tag in the batch is the one whose re-resolve succeeds.
+  Merge that pull request before tagging `hex-lumis`.
+- `mise run release-prepare hex-lumis` runs the same fix locally, so preparing
+  the Hex release out of order fails on the missing crates.io version rather
+  than shipping a stale lockfile.
+- `elixir-release.yml` verifies it before the NIF build and the Hex publish. That
+  runs on the tag, where no `chore(release):` guard can skip it, so a stale
+  lockfile cannot reach Hex.
+
+A red `Standalone packaged NIF lockfile` job on `main` means the refresh has not
+landed yet. Merge the pull request, or run the fix locally and commit the result.
 
 `elixir-release.yml` uploads the precompiled NIFs to a GitHub Release and syncs
 the same files to Cloudflare R2 under `releases/download/<tag>`, served from

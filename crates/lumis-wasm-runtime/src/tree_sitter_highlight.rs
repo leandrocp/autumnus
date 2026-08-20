@@ -14,8 +14,18 @@
 //   in both places: `highlighter.lua` -> `get_range`, and `languagetree.lua` ->
 //   `get_node_ranges` -> `get_range`. Note the stale TODO at `languagetree.lua:1087` claiming
 //   injections do not support offsets; the code above it does.
+//   A same-row offset may reach its own newline, which `(#offset! @c 0 1 0 1)` in the diff
+//   injection queries needs to keep joined hunk lines apart, and no further, so the byte and
+//   the point keep describing one place. Neovim clamps to neither.
+// - `@injection.filename` resolves an injected language from a path, as Neovim's
+//   `LanguageTree:_get_injection` does through `vim.filetype.match`. It sits beside the
+//   `injection.language` capture it is an alternative to, and is the only reason this file
+//   references `lumis_core`. Upstream has no equivalent, so the diff hunk injection queries
+//   cannot work without it.
 //
-// When touching this file, prefer minimizing the diff against upstream rather than extending it.
+// When touching this file, prefer minimizing the diff against upstream rather than extending it,
+// and add what you did to the list above in the same change. The list is the only record of why
+// this file differs, so an undocumented edit is what makes the next upstream sync guesswork.
 //
 // Reference:
 // https://github.com/tree-sitter/tree-sitter/blob/master/crates/highlight/src/highlight.rs
@@ -156,6 +166,7 @@ pub struct HighlightConfiguration {
     non_local_variable_patterns: Vec<bool>,
     injection_content_capture_index: Option<u32>,
     injection_language_capture_index: Option<u32>,
+    injection_filename_capture_index: Option<u32>,
     local_scope_capture_index: Option<u32>,
     local_def_capture_index: Option<u32>,
     local_def_value_capture_index: Option<u32>,
@@ -236,7 +247,14 @@ fn shift_point(
     let row = add_offset_delta(point.row, row_delta)?;
     let column = add_offset_delta(point.column, column_delta)?;
 
-    let line_start = if row_delta == 0 {
+    // A column one past the end addresses that line's newline, which
+    // `(#offset! @c 0 1 0 1)` in the diff injection queries depends on: the marker
+    // column is dropped and the newline is kept, so joined hunk lines still parse
+    // as separate lines. Stopping at the newline rather than at the document end
+    // keeps the byte and the point describing one place. Neovim clamps to neither
+    // and will return a point whose row no longer holds its byte.
+    let same_row = row_delta == 0;
+    let line_start = if same_row {
         byte.checked_sub(point.column)?
     } else {
         // Neovim adds the column delta to the endpoint's own column whatever the
@@ -248,7 +266,7 @@ fn shift_point(
         .iter()
         .position(|byte| *byte == b'\n')
         .unwrap_or(source.len() - line_start);
-    if column > line_length {
+    if column > line_length + usize::from(same_row && line_start + line_length < source.len()) {
         return None;
     }
     let byte = line_start.checked_add(column)?;
@@ -807,6 +825,7 @@ impl HighlightConfiguration {
         // Store the numeric ids for all of the special captures.
         let mut injection_content_capture_index = None;
         let mut injection_language_capture_index = None;
+        let mut injection_filename_capture_index = None;
         let mut local_def_capture_index = None;
         let mut local_def_value_capture_index = None;
         let mut local_ref_capture_index = None;
@@ -816,6 +835,7 @@ impl HighlightConfiguration {
             match *name {
                 "injection.content" => injection_content_capture_index = i,
                 "injection.language" => injection_language_capture_index = i,
+                "injection.filename" => injection_filename_capture_index = i,
                 "local.definition" => local_def_capture_index = i,
                 "local.definition-value" => local_def_value_capture_index = i,
                 "local.reference" => local_ref_capture_index = i,
@@ -854,6 +874,7 @@ impl HighlightConfiguration {
             non_local_variable_patterns,
             injection_content_capture_index,
             injection_language_capture_index,
+            injection_filename_capture_index,
             local_def_capture_index,
             local_def_value_capture_index,
             local_ref_capture_index,
@@ -1748,14 +1769,30 @@ fn injection_for_match<'a>(
 ) -> (Option<&'a str>, Option<InjectionContent<'a>>, bool) {
     let content_capture_index = config.injection_content_capture_index;
     let language_capture_index = config.injection_language_capture_index;
+    let filename_capture_index = config.injection_filename_capture_index;
 
-    let mut language_name = None;
+    let mut language_name: Option<&str> = None;
+    let mut filename_language: Option<&'static str> = None;
     let mut content_node = None;
 
     for capture in query_match.captures {
         let index = Some(capture.index);
         if index == language_capture_index {
             language_name = capture.node.utf8_text(source).ok();
+        } else if index == filename_capture_index {
+            // Neovim resolves this capture through `vim.filetype.match`, which
+            // reads the text as a path rather than a language name.
+            let range = config
+                .offsets
+                .get(&(query_match.pattern_index, capture.index))
+                .map_or_else(
+                    || capture.node.range(),
+                    |offset| apply_range_offset(capture.node, *offset, source),
+                );
+            filename_language = source
+                .get(range.start_byte..range.end_byte)
+                .and_then(|bytes| std::str::from_utf8(bytes).ok())
+                .and_then(lumis_core::languages::language_id_for_filename);
         } else if index == content_capture_index {
             // Neovim narrows the injected range with `#offset!` before parsing it, so
             // delimiters such as backticks or `${`/`}` never reach the injected grammar.
@@ -1772,6 +1809,10 @@ fn injection_for_match<'a>(
             });
         }
     }
+
+    // An explicit `@injection.language` capture outranks a filename, which is
+    // only ever an inference about one.
+    let mut language_name = language_name.or(filename_language);
 
     let mut include_children = false;
     for prop in query.property_settings(query_match.pattern_index) {
@@ -1875,7 +1916,7 @@ mod tests {
         let raw = include_str!("../../../fixtures/offset-directive.json");
         let fixture: Fixture = serde_json::from_str(raw).expect("offset fixture is valid JSON");
         assert!(
-            fixture.cases.len() >= 15,
+            fixture.cases.len() >= 18,
             "the fixture must not silently shrink: {} cases",
             fixture.cases.len()
         );
@@ -2104,6 +2145,18 @@ mod tests {
     }
 
     #[test]
+    fn same_row_offsets_may_pass_the_end_of_their_line() {
+        // Neovim adds the delta to the byte without clamping, so one column past
+        // the end addresses the newline. The diff injection queries need it to
+        // keep hunk lines apart once they are joined into one injected document.
+        let source = b"ab\ncd\n";
+        assert_eq!(
+            shift_point(source, 2, Point::new(0, 2), 0, 1).unwrap(),
+            (3, Point::new(0, 3))
+        );
+    }
+
+    #[test]
     fn offsets_that_run_off_the_document_are_rejected() {
         let source = b"ab";
         assert_eq!(shift_point(source, 0, Point::new(0, 0), 0, -1), None);
@@ -2129,7 +2182,10 @@ mod tests {
             offset_range(original, [0, 0, 0, 99_999_999_999], source),
             original
         );
+    }
 
+    #[test]
+    fn a_same_row_offset_reaches_its_own_newline() {
         let source = b"a\nb";
         let original = Range {
             start_byte: 0,
@@ -2137,6 +2193,15 @@ mod tests {
             end_byte: 1,
             end_point: Point::new(0, 1),
         };
-        assert_eq!(offset_range(original, [0, 0, 0, 1], source), original);
+
+        assert_eq!(
+            offset_range(original, [0, 0, 0, 1], source),
+            Range {
+                start_byte: 0,
+                start_point: Point::new(0, 0),
+                end_byte: 2,
+                end_point: Point::new(0, 2),
+            }
+        );
     }
 }

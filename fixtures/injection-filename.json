@@ -1,0 +1,66 @@
+{
+ "$description": "Filename-to-language resolution for `@injection.filename`, pinned so the Rust runtime and the browser port cannot drift. Neovim resolves the capture through `vim.filetype.match`; Lumis matches the last path component against the globs in languages.toml, then against the bare extension.",
+ "$note": "A diff names paths like `b/lib/varsel.ex`, so directories and `/dev/null` both reach this function. Several languages claim one extension; the lowest id wins, so this agrees with `Language::from_str`, which reads the same globs.",
+ "cases": [
+  {
+   "path": "b/lib/varsel.ex",
+   "language": "elixir"
+  },
+  {
+   "path": "Dockerfile",
+   "language": "dockerfile"
+  },
+  {
+   "path": "b/app/page.tsx",
+   "language": "tsx"
+  },
+  {
+   "path": "b/README.md",
+   "language": "markdown"
+  },
+  {
+   "path": "b/UPPER.EX",
+   "language": "elixir"
+  },
+  {
+   "path": "b/.gitignore",
+   "language": "gitignore"
+  },
+  {
+   "path": "b\\win\\path\\main.go",
+   "language": "go"
+  },
+  {
+   "path": "   b/x.json  ",
+   "language": "json"
+  },
+  {
+   "path": "/dev/null",
+   "language": null
+  },
+  {
+   "path": "b/no-extension-here",
+   "language": null
+  },
+  {
+   "path": "",
+   "language": null
+  },
+  {
+   "path": "a/src/app.m",
+   "language": "matlab"
+  },
+  {
+   "path": "b/build.d",
+   "language": "d"
+  },
+  {
+   "path": "b/manifests/site.pp",
+   "language": "pascal"
+  },
+  {
+   "path": "b/include/api.h",
+   "language": "cpp"
+  }
+ ]
+}

@@ -256,6 +256,7 @@ export interface CaptureMetadata {
   highlightScope?: string;
   isInjectionContent: boolean;
   isInjectionLanguage: boolean;
+  isInjectionFilename: boolean;
   isLocalScope: boolean;
   isLocalDefinition: boolean;
   isLocalDefinitionValue: boolean;
@@ -382,7 +383,9 @@ export interface ResolvedAnnotation<T = unknown> {
 
 /** Options for one highlighting operation. */
 export interface HighlightOptions<T = unknown> {
+  /** Caller-provided semantic ranges composed into the formatter event stream. */
   annotations?: readonly Annotation<T>[];
+  /** Render nested brackets with rainbow bracket scopes. */
   rainbowBrackets?: boolean;
 }
 

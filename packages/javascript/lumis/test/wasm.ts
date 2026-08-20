@@ -16,9 +16,7 @@ import type {
 } from "../src/core/languages.js";
 
 const repositoryRoot = resolve(process.cwd(), "../../..");
-const fixturesRoot = pathToFileURL(
-  join(repositoryRoot, "packages/javascript/lumis/test/fixtures/wasm") + sep,
-);
+const fixturesRoot = pathToFileURL(join(repositoryRoot, "fixtures/test-parsers") + sep);
 const packageDataUrls = new Map<string, string>();
 const packageMetadataCache = new Map<string, LanguagePackage>();
 const parserDefinitions = (

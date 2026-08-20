@@ -6,7 +6,7 @@
 
 [queries.default]
 git = "https://github.com/nvim-treesitter/nvim-treesitter.git"
-rev = "c9f9ed6c1892f629ea399f4ee7905f2686fa13f2"
+rev = "074aa4422bf029908338e855d0c0f71470a971bb"
 path = "runtime/queries"
 
 [queries.iex]
@@ -31,7 +31,7 @@ path = "queries"
 
 [queries.nu]
 git = "https://github.com/nushell/tree-sitter-nu.git"
-rev = "9467420d184bd2c510378f4cda624eca35dd4590"
+rev = "64613ef22f4116862d7997939c8d1794ceb1f856"
 path = "queries"
 
 [queries.python]
@@ -188,9 +188,8 @@ globs = ["*.dart"]
 
 [parsers.diff]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-diff.git"
-rev = "2520c3f934b3179bb540d23e0ef45f75304b5fed"
-crate = "tree-sitter-diff"
-version = "0.1.0"
+rev = "ada384ac7bfc1307f32de474620120add29998fb"
+version = "0.2.0"
 globs = ["*.diff"]
 
 [parsers.dockerfile]
@@ -301,7 +300,7 @@ emacs = ["go"]
 git = "https://github.com/bkegley/tree-sitter-graphql.git"
 rev = "5e66e961eee421786bdda8495ed1db045e06b5fe"
 crate = "tree-sitter-graphql"
-version = "0.1.0"
+version = "0.2.0"
 variant = "GraphQL"
 
 [parsers.haskell]
@@ -491,7 +490,7 @@ emacs = ["nix"]
 
 [parsers.nushell]
 git = "https://github.com/nushell/tree-sitter-nu.git"
-rev = "9467420d184bd2c510378f4cda624eca35dd4590"
+rev = "64613ef22f4116862d7997939c8d1794ceb1f856"
 version = "0.0.1"
 aliases = ["nu"]
 query_name = "nu"

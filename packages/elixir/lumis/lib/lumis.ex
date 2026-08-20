@@ -291,35 +291,7 @@ defmodule Lumis do
           | module()
           | {module(), keyword()}
 
-  @formatter_schema [
-    type: {:custom, Lumis, :formatter_type, []},
-    type_spec: quote(do: Lumis.formatter()),
-    type_doc: "`t:Lumis.formatter/0`",
-    default: {:html_inline, []},
-    doc: "Formatter to apply on the highlighted source code. See the type doc for more info."
-  ]
-
-  @options_schema [
-    language: [
-      type: {:or, [:string, nil]},
-      type_spec: quote(do: Lumis.language()),
-      type_doc: "`t:Lumis.language/0`",
-      deprecated:
-        "Use the :language option inside the formatter tuple instead, eg: {:html_inline, language: \"elixir\"}"
-    ],
-    formatter: @formatter_schema,
-    theme: [
-      type: {:or, [{:struct, Lumis.Theme}, :string, nil]},
-      deprecated: "Use :formatter instead."
-    ],
-    inline_style: [
-      type: :boolean,
-      deprecated: "Use :formatter instead."
-    ],
-    pre_class: [
-      type: {:or, [:string, nil]},
-      deprecated: "Use :formatter instead."
-    ],
+  @highlight_options [
     annotations: [
       type: {:custom, Lumis, :annotations_type, []},
       type_spec: quote(do: [Lumis.Annotation.t(term())]),
@@ -333,6 +305,37 @@ defmodule Lumis do
       doc: "Render nested brackets with rainbow bracket scopes."
     ]
   ]
+
+  @formatter_schema [
+    type: {:custom, Lumis, :formatter_type, []},
+    type_spec: quote(do: Lumis.formatter()),
+    type_doc: "`t:Lumis.formatter/0`",
+    default: {:html_inline, []},
+    doc: "Formatter to apply on the highlighted source code. See the type doc for more info."
+  ]
+
+  @options_schema [
+                    language: [
+                      type: {:or, [:string, nil]},
+                      type_spec: quote(do: Lumis.language()),
+                      type_doc: "`t:Lumis.language/0`",
+                      deprecated:
+                        "Use the :language option inside the formatter tuple instead, eg: {:html_inline, language: \"elixir\"}"
+                    ],
+                    formatter: @formatter_schema,
+                    theme: [
+                      type: {:or, [{:struct, Lumis.Theme}, :string, nil]},
+                      deprecated: "Use :formatter instead."
+                    ],
+                    inline_style: [
+                      type: :boolean,
+                      deprecated: "Use :formatter instead."
+                    ],
+                    pre_class: [
+                      type: {:or, [:string, nil]},
+                      deprecated: "Use :formatter instead."
+                    ]
+                  ] ++ @highlight_options
 
   @doc false
   def formatter_schema, do: @formatter_schema

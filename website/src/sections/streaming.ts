@@ -57,7 +57,7 @@ async function initStreaming(container: HTMLDivElement) {
 
   const [lightTheme, darkTheme] = await Promise.all([
     loadTheme("catppuccin_latte"),
-    loadTheme("catppuccin_mocha"),
+    loadTheme("catppuccin_frappe"),
   ]);
 
   const highlighted = await renderHighlightMultiTheme(

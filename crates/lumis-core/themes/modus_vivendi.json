@@ -1,7 +1,7 @@
 {
   "name": "modus_vivendi",
   "appearance": "dark",
-  "revision": "17a64464c27c1be605adca13dbe48f2f402fe107",
+  "revision": "56233f0986ef6c8d0eab97e924e87144e584d970",
   "highlights": {
     "attribute": {
       "fg": "#ff7f9f"
@@ -234,6 +234,9 @@
     "module.builtin": {
       "fg": "#b6a0ff"
     },
+    "namespace": {
+      "fg": "#ff7f9f"
+    },
     "normal": {
       "fg": "#ffffff",
       "bg": "#000000"
@@ -246,6 +249,9 @@
     },
     "operator": {
       "fg": "#ffffff"
+    },
+    "property": {
+      "fg": "#00d3d0"
     },
     "punctuation.bracket": {
       "fg": "#ffffff"
@@ -287,7 +293,7 @@
       "fg": "#00c06f"
     },
     "string.regexp": {
-      "fg": "#ff9580"
+      "fg": "#00c06f"
     },
     "string.special": {
       "fg": "#ff9580"
@@ -302,6 +308,9 @@
       "fg": "#6ae4b9"
     },
     "tag": {
+      "fg": "#00d3d0"
+    },
+    "tag.attribute": {
       "fg": "#00d3d0"
     },
     "tag.builtin": {

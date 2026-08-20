@@ -17,14 +17,14 @@ import TabItem from '@theme/TabItem';
 import {highlight} from '@lumis-sh/lumis'
 import {htmlMultiThemes} from '@lumis-sh/lumis/formatters'
 import javascript from '@lumis-sh/lumis/langs/javascript'
-import githubLight from '@lumis-sh/themes/github_light'
-import githubDark from '@lumis-sh/themes/github_dark'
+import latte from '@lumis-sh/themes/catppuccin_latte'
+import frappe from '@lumis-sh/themes/catppuccin_frappe'
 
 const html = await highlight(
   'const x = 1',
   htmlMultiThemes({
     language: javascript,
-    themes: {light: githubLight, dark: githubDark},
+    themes: {light: latte, dark: frappe},
     defaultTheme: 'light-dark()',
   })
 )
@@ -36,8 +36,8 @@ const html = await highlight(
 ```bash
 lumis highlight index.js \
   --formatter html-multi-themes \
-  --themes light:github_light \
-  --themes dark:github_dark \
+  --themes light:catppuccin_latte \
+  --themes dark:catppuccin_frappe \
   --default-theme "light-dark()"
 ```
 

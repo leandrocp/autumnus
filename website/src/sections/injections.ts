@@ -71,7 +71,7 @@ export async function setupInjections(_root: HTMLElement) {
 
   const [lightTheme, darkTheme] = await Promise.all([
     loadTheme("catppuccin_latte"),
-    loadTheme("catppuccin_mocha"),
+    loadTheme("catppuccin_frappe"),
   ]);
 
   const preClass =

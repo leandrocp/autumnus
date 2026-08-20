@@ -34,7 +34,7 @@ Use `CodeBlock` when you want a drop-in React component.
 ```tsx
 import {CodeBlock} from '@lumis-sh/react'
 import {htmlInline} from '@lumis-sh/lumis/formatters'
-import githubLight from '@lumis-sh/themes/github_light'
+import latte from '@lumis-sh/themes/catppuccin_latte'
 
 const codeString = `export function Hello() {
   return <h1>Hello</h1>
@@ -42,7 +42,7 @@ const codeString = `export function Hello() {
 
 export function Example() {
   return (
-    <CodeBlock formatter={htmlInline({language: 'tsx', theme: githubLight})}>
+    <CodeBlock formatter={htmlInline({language: 'tsx', theme: latte})}>
       {codeString}
     </CodeBlock>
   )
@@ -56,7 +56,7 @@ import {CodeBlock} from '@lumis-sh/react'
 import {createHighlighter} from '@lumis-sh/lumis'
 import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
 import {htmlInline} from '@lumis-sh/lumis/formatters'
-import githubLight from '@lumis-sh/themes/github_light'
+import latte from '@lumis-sh/themes/catppuccin_latte'
 
 const highlighter = createHighlighter({languages: [bundledLanguages]})
 
@@ -68,7 +68,7 @@ export function Example() {
   return (
     <CodeBlock
       highlighter={highlighter}
-      formatter={htmlInline({language: bundledLanguages.tsx, theme: githubLight})}
+      formatter={htmlInline({language: bundledLanguages.tsx, theme: latte})}
     >
       {codeString}
     </CodeBlock>
@@ -87,14 +87,14 @@ import {useLumis} from '@lumis-sh/react'
 import {createHighlighter} from '@lumis-sh/lumis'
 import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
 import {htmlInline} from '@lumis-sh/lumis/formatters'
-import githubLight from '@lumis-sh/themes/github_light'
+import latte from '@lumis-sh/themes/catppuccin_latte'
 
 const highlighter = createHighlighter({languages: [bundledLanguages]})
 
 export function Example() {
   const {content, error, isLoading} = useLumis({
     children: 'export const answer = 42',
-    formatter: htmlInline({language: 'typescript', theme: githubLight}),
+    formatter: htmlInline({language: 'typescript', theme: latte}),
     highlighter,
   })
 
@@ -116,7 +116,7 @@ This is a good fit for React Server Components and Next.js App Router pages.
 import {renderCodeBlock} from '@lumis-sh/react/server'
 import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
 import {htmlInline} from '@lumis-sh/lumis/formatters'
-import githubLight from '@lumis-sh/themes/github_light'
+import latte from '@lumis-sh/themes/catppuccin_latte'
 
 const codeString = `export function Hello() {
   return <h1>Hello</h1>
@@ -125,7 +125,7 @@ const codeString = `export function Hello() {
 export async function Article() {
   const block = await renderCodeBlock({
     children: codeString,
-    formatter: htmlInline({language: bundledLanguages.tsx, theme: githubLight}),
+    formatter: htmlInline({language: bundledLanguages.tsx, theme: latte}),
   })
 
   return <article>{block}</article>
@@ -141,7 +141,7 @@ import {createHighlighter} from '@lumis-sh/lumis'
 import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
 import {CodeBlock} from '@lumis-sh/react'
 import {htmlInline} from '@lumis-sh/lumis/formatters'
-import githubLight from '@lumis-sh/themes/github_light'
+import latte from '@lumis-sh/themes/catppuccin_latte'
 
 const codeString = `export const answer = 42`
 
@@ -151,7 +151,7 @@ export function Example() {
   return (
     <CodeBlock
       highlighter={highlighter}
-      formatter={htmlInline({language: 'tsx', theme: githubLight})}
+      formatter={htmlInline({language: 'tsx', theme: latte})}
     >
       {codeString}
     </CodeBlock>

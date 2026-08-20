@@ -18,7 +18,7 @@ const html = await highlight(
   'const x = 1',
   htmlInline({
     language: javascript,
-    theme: dracula,
+    theme: frappe,
     header: {openTag: '<figure><figcaption>index.js</figcaption>', closeTag: '</figure>'},
   })
 )
@@ -34,7 +34,7 @@ let html = highlight(
     "fn main() {}",
     HtmlInlineBuilder::new()
         .language(Language::Rust)
-        .theme(Some(themes::get("dracula").unwrap()))
+        .theme(Some(themes::get("catppuccin_frappe").unwrap()))
         .header(Some(HtmlElement {
             open_tag: "<figure><figcaption>main.rs</figcaption>".to_string(),
             close_tag: "</figure>".to_string(),
@@ -52,7 +52,7 @@ Lumis.highlight!(
   "const x = 1",
   formatter: {:html_inline,
     language: "javascript",
-    theme: "dracula",
+    theme: "catppuccin_frappe",
     header: %{open_tag: "<figure><figcaption>index.js</figcaption>", close_tag: "</figure>"}
   }
 )

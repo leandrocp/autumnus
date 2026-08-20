@@ -831,10 +831,9 @@ mod tests {
 
     #[test]
     fn test_elixir_wasm_with_generated_queries() {
-        let wasm = include_bytes!(
-            "../../../../../javascript/lumis/test/fixtures/wasm/tree-sitter-elixir.wasm"
-        )
-        .to_vec();
+        let wasm =
+            include_bytes!("../../../../../../fixtures/test-parsers/tree-sitter-elixir.wasm")
+                .to_vec();
         let package = LanguagePackage {
             package_name: "@lumis-sh/wasm-elixir".into(),
             version: "test".into(),

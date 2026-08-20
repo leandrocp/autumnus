@@ -103,17 +103,53 @@ const documents = [
   },
 ];
 
+// The website renders Catppuccin Latte in light and Frappé in dark, and the
+// comparison is a page of pre-rendered files that cannot follow the reader the
+// way a live highlighter does. Rendering both is what lets it try: the page
+// picks a flavour from `prefers-color-scheme` and loads that copy.
+const catppuccinBat = "6810349b28055dce54076712fc05fc68da4b8ec0";
+const themes = [
+  {
+    id: "latte",
+    name: "Catppuccin Latte",
+    appearance: "light",
+    lumis: "catppuccin_latte",
+    shiki: "catppuccin-latte",
+    highlightJs: "@catppuccin/highlightjs/css/catppuccin-latte.css",
+    tmTheme: "catppuccin-latte.tmTheme",
+    tmThemeUrl: `https://raw.githubusercontent.com/catppuccin/bat/${catppuccinBat}/themes/Catppuccin%20Latte.tmTheme`,
+    tmThemeSha256: "a2ddb65bfcf7328802ee4770d1e34ef4093a20fd5c300be3138c99f8a45ed5cb",
+    source: `https://github.com/catppuccin/bat/blob/${catppuccinBat}/themes/Catppuccin%20Latte.tmTheme`,
+    // Every flavour names its surfaces the same way, so the page around the
+    // output is `mantle`, `text` and `surface1` in both.
+    chrome: { background: "#e6e9ef", foreground: "#4c4f69", border: "#bcc0cc" },
+  },
+  {
+    id: "frappe",
+    name: "Catppuccin Frappé",
+    appearance: "dark",
+    lumis: "catppuccin_frappe",
+    shiki: "catppuccin-frappe",
+    highlightJs: "@catppuccin/highlightjs/css/catppuccin-frappe.css",
+    tmTheme: "catppuccin-frappe.tmTheme",
+    tmThemeUrl: `https://raw.githubusercontent.com/catppuccin/bat/${catppuccinBat}/themes/Catppuccin%20Frappe.tmTheme`,
+    tmThemeSha256: "3446d8a3cfb9eb559bc65a3894e6ae8f3579030fac6130c4f96ff524f3e2784f",
+    source: `https://github.com/catppuccin/bat/blob/${catppuccinBat}/themes/Catppuccin%20Frappe.tmTheme`,
+    chrome: { background: "#292c3c", foreground: "#c6d0f5", border: "#51576d" },
+  },
+];
+
 const assets = [
   ...documents.map((document) => ({
     name: document.file,
     source: resolve(benchmarksDir, document.file),
     sha256: document.sha256,
   })),
-  {
-    name: "Dracula.tmTheme",
-    url: "https://raw.githubusercontent.com/dracula/sublime/d490b57c08f3d110ff61a07ec6edcc1ed9e24a63/Dracula.tmTheme",
-    sha256: "6767fe7cf5a2759d108207156f500c189a3dec216bd6f4f60b9b4bc09fbf8a5a",
-  },
+  ...themes.map((theme) => ({
+    name: theme.tmTheme,
+    url: theme.tmThemeUrl,
+    sha256: theme.tmThemeSha256,
+  })),
 ];
 
 await mkdir(assetsDir, { recursive: true });
@@ -144,6 +180,7 @@ for (const asset of assets) {
 }
 
 await writeFile(resolve(assetsDir, "documents.json"), `${JSON.stringify(documents, null, 2)}\n`);
+await writeFile(resolve(assetsDir, "themes.json"), `${JSON.stringify(themes, null, 2)}\n`);
 
 console.log(generatedDir);
 

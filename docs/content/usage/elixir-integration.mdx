@@ -18,7 +18,7 @@ keywords:
 Use [`highlight/2`](https://hexdocs.pm/lumis/Lumis.html#highlight/2) when invalid user input, formatter options, or language detection should stay in the normal control flow.
 
 ```elixir
-case Lumis.highlight(source, formatter: {:html_inline, language: "elixir", theme: "github_light"}) do
+case Lumis.highlight(source, formatter: {:html_inline, language: "elixir", theme: "catppuccin_latte"}) do
   {:ok, html} -> html
   {:error, reason} -> handle_error(reason)
 end
@@ -34,7 +34,7 @@ uncolored output.
 Use [`highlight!/2`](https://hexdocs.pm/lumis/Lumis.html#highlight!/2) when failures should raise immediately, such as in scripts, trusted internal code, or examples.
 
 ```elixir
-html = Lumis.highlight!(source, formatter: {:html_inline, language: "elixir", theme: "github_light"})
+html = Lumis.highlight!(source, formatter: {:html_inline, language: "elixir", theme: "catppuccin_latte"})
 ```
 
 `highlight!/2` returns the highlighted output or raises.
@@ -67,7 +67,7 @@ Lumis.highlight!("""
 defmodule Demo do
 end
 ```
-""", formatter: {:html_inline, language: "markdown", theme: "github_light"})
+""", formatter: {:html_inline, language: "markdown", theme: "catppuccin_latte"})
 ````
 
 A language that cannot be fetched leaves its own block plain rather than failing
@@ -191,7 +191,7 @@ Lumis.available_themes()
 Lumis.loaded_languages()
 
 Lumis.Languages.get("js")
-Lumis.Theme.get("github_light")
+Lumis.Theme.get("catppuccin_latte")
 ```
 
 `Lumis.Languages.get/2` and `Lumis.Theme.get/2` look one up by name, returning
@@ -204,7 +204,7 @@ See [`Lumis`](https://hexdocs.pm/lumis/Lumis.html), [`Lumis.Languages`](https://
 Highlighted HTML must be rendered as raw HTML in templates.
 
 ```elixir
-code = Lumis.highlight!(source, formatter: {:html_inline, language: "elixir", theme: "github_light"})
+code = Lumis.highlight!(source, formatter: {:html_inline, language: "elixir", theme: "catppuccin_latte"})
 ```
 
 ```heex
@@ -230,7 +230,7 @@ Then pass the resulting theme struct into the formatter options.
 
 ```elixir
 # validate options before passing to highlight
-Lumis.validate_options!(formatter: {:html_inline, language: "elixir", theme: "dracula"})
+Lumis.validate_options!(formatter: {:html_inline, language: "elixir", theme: "catppuccin_frappe"})
 
 # inspect defaults
 Lumis.default_options()

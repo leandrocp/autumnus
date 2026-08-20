@@ -965,8 +965,7 @@ mod tests {
     use std::thread;
     use std::time::Duration;
 
-    const JSON_WASM: &[u8] =
-        include_bytes!("../../lumis-cli/tests/fixtures/parsers/tree-sitter-json.wasm");
+    const JSON_WASM: &[u8] = include_bytes!("../../../fixtures/test-parsers/tree-sitter-json.wasm");
     const INVALID_TREE_SITTER_WASM: &[u8] = &[
         0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, 0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7f,
         0x03, 0x02, 0x01, 0x00, 0x07, 0x16, 0x01, 0x12, 0x74, 0x72, 0x65, 0x65, 0x5f, 0x73, 0x69,
@@ -1481,10 +1480,8 @@ mod tests {
                 id: "diff".into(),
                 aliases: Vec::new(),
                 grammar_name: "diff".into(),
-                wasm: include_bytes!(
-                    "../../lumis-cli/tests/fixtures/parsers/tree-sitter-diff.wasm"
-                )
-                .to_vec(),
+                wasm: include_bytes!("../../../fixtures/test-parsers/tree-sitter-diff.wasm")
+                    .to_vec(),
                 highlights: "(addition) @diff.plus\n(deletion) @diff.minus".into(),
                 injections: String::new(),
                 locals: String::new(),
@@ -1508,10 +1505,8 @@ mod tests {
                 id: "elixir".into(),
                 aliases: Vec::new(),
                 grammar_name: "elixir".into(),
-                wasm: include_bytes!(
-                    "../../../packages/javascript/lumis/test/fixtures/wasm/tree-sitter-elixir.wasm"
-                )
-                .to_vec(),
+                wasm: include_bytes!("../../../fixtures/test-parsers/tree-sitter-elixir.wasm")
+                    .to_vec(),
                 highlights: "(identifier) @variable\n(alias) @module".into(),
                 injections: String::new(),
                 locals: String::new(),

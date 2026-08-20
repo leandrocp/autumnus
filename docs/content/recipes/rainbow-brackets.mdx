@@ -21,11 +21,11 @@ Turn it on when you build the formatter:
 import {highlight} from '@lumis-sh/lumis'
 import {htmlInline} from '@lumis-sh/lumis/formatters'
 import javascript from '@lumis-sh/lumis/langs/javascript'
-import dracula from '@lumis-sh/themes/dracula'
+import frappe from '@lumis-sh/themes/catppuccin_frappe'
 
 const html = await highlight(
   'foo(bar([1, 2], {a: 3}))',
-  htmlInline({language: javascript, theme: dracula, rainbowBrackets: true})
+  htmlInline({language: javascript, theme: frappe, rainbowBrackets: true})
 )
 ```
 
@@ -39,7 +39,7 @@ let html = highlight(
     "foo(bar([1, 2], {a: 3}))",
     HtmlInlineBuilder::new()
         .language(Language::JavaScript)
-        .theme(Some(themes::get("dracula").unwrap()))
+        .theme(Some(themes::get("catppuccin_frappe").unwrap()))
         .rainbow_brackets(true)
         .build()
         .unwrap(),
@@ -52,7 +52,7 @@ let html = highlight(
 ```elixir
 Lumis.highlight!(
   "foo(bar([1, 2], {a: 3}))",
-  formatter: {:html_inline, language: "javascript", theme: "dracula", rainbow_brackets: true}
+  formatter: {:html_inline, language: "javascript", theme: "catppuccin_frappe", rainbow_brackets: true}
 )
 ```
 

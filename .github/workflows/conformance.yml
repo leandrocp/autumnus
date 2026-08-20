@@ -162,7 +162,7 @@ jobs:
           # expected output was generated with. Deriving it from the fixtures'
           # events instead would miss languages a document only attempts, such
           # as the comment parser every Lua comment injects.
-          parsers=$(find packages/javascript/lumis/test/fixtures/wasm -name '*.wasm' \
+          parsers=$(find fixtures/test-parsers -name '*.wasm' \
             -exec basename {} .wasm \; | sed 's/^tree-sitter-//' | sort)
           echo "building: $(echo "$parsers" | tr '\n' ' ')"
           for parser in $parsers; do

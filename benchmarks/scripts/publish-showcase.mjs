@@ -17,19 +17,23 @@ const others = manifest.implementations.filter((entry) => !entry.id.startsWith("
 // again. Publishing asserts that rather than trusting it: if they ever diverge,
 // the page must not quietly present one of them as the answer.
 for (const document of manifest.documents) {
-  const fragments = await Promise.all(
-    lumis.map(async (entry) => ({
-      label: entry.label,
-      bytes: await readFile(resolve(generatedDir, "fragments", document.id, `${entry.id}.html`)),
-    })),
-  );
-  const [reference, ...rest] = fragments;
-  for (const other of rest) {
-    if (!other.bytes.equals(reference.bytes)) {
-      throw new Error(
-        `${other.label} and ${reference.label} disagree on ${document.id}; ` +
-          "the comparison cannot be published as a single Lumis output",
-      );
+  for (const theme of manifest.themes) {
+    const fragments = await Promise.all(
+      lumis.map(async (entry) => ({
+        label: entry.label,
+        bytes: await readFile(
+          resolve(generatedDir, "fragments", document.id, theme.id, `${entry.id}.html`),
+        ),
+      })),
+    );
+    const [reference, ...rest] = fragments;
+    for (const other of rest) {
+      if (!other.bytes.equals(reference.bytes)) {
+        throw new Error(
+          `${other.label} and ${reference.label} disagree on ${document.id} in ${theme.name}; ` +
+            "the comparison cannot be published as a single Lumis output",
+        );
+      }
     }
   }
 }
@@ -40,8 +44,8 @@ const implementations = [
 ];
 
 const published = {
-  schemaVersion: 2,
-  theme: manifest.theme,
+  schemaVersion: 3,
+  themes: manifest.themes,
   lumisRuntimes: lumis.map((entry) => entry.label),
   implementations,
   documents: manifest.documents.map((document) => ({
@@ -65,23 +69,25 @@ await mkdir(target, { recursive: true });
 await writeFile(resolve(target, "manifest.json"), `${JSON.stringify(published, null, 2)}\n`);
 
 for (const document of manifest.documents) {
-  await mkdir(resolve(target, document.id), { recursive: true });
-  await cp(
-    resolve(generatedDir, document.id, `${lumis[0].id}.html`),
-    resolve(target, document.id, "lumis.html"),
-  );
-  for (const entry of others) {
+  for (const theme of manifest.themes) {
+    await mkdir(resolve(target, document.id, theme.id), { recursive: true });
     await cp(
-      resolve(generatedDir, document.id, `${entry.id}.html`),
-      resolve(target, document.id, `${entry.id}.html`),
+      resolve(generatedDir, document.id, theme.id, `${lumis[0].id}.html`),
+      resolve(target, document.id, theme.id, "lumis.html"),
     );
+    for (const entry of others) {
+      await cp(
+        resolve(generatedDir, document.id, theme.id, `${entry.id}.html`),
+        resolve(target, document.id, theme.id, `${entry.id}.html`),
+      );
+    }
   }
 }
 
 console.log(
   `Published ${published.documents.length} documents × ${published.implementations.length} ` +
-    `implementations (${lumis.length} Lumis runtimes verified identical) to ` +
-    "website/public/comparison-data.",
+    `implementations × ${published.themes.length} flavours ` +
+    `(${lumis.length} Lumis runtimes verified identical) to website/public/comparison-data.`,
 );
 
 // The Lumis runtimes were just proven byte-identical, so one of their counts

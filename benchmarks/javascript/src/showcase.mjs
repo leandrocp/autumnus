@@ -20,7 +20,6 @@ import markdownInline from "@lumis-sh/lumis/langs/markdown_inline";
 import java from "@lumis-sh/lumis/langs/java";
 import rust from "@lumis-sh/lumis/langs/rust";
 import tsx from "@lumis-sh/lumis/langs/tsx";
-import theme from "@lumis-sh/themes/dracula";
 import bashWasm from "@lumis-sh/wasm-bash";
 import commentWasm from "@lumis-sh/wasm-comment";
 import cssWasm from "@lumis-sh/wasm-css";
@@ -40,6 +39,7 @@ const benchmarksDir = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const generatedDir = resolve(benchmarksDir, "showcase/generated");
 const assetsDir = resolve(generatedDir, "assets");
 const documents = JSON.parse(await readFile(resolve(assetsDir, "documents.json"), "utf8"));
+const themes = JSON.parse(await readFile(resolve(assetsDir, "themes.json"), "utf8"));
 const localPackages = JSON.parse(
   await readFile(
     resolve(benchmarksDir, "../target/benchmarks/language-packages/index.json"),
@@ -76,40 +76,59 @@ const shiki =
     ? undefined
     : await createShikiHighlighter({
         langs: [...new Set(documents.map((document) => document.language))],
-        themes: ["dracula"],
+        themes: themes.map((theme) => theme.shiki),
         engine: createOnigurumaEngine(import("shiki/wasm")),
       });
-const highlightJsTheme = await readFile(
-  fileURLToPath(import.meta.resolve("highlight.js/styles/base16/dracula.css")),
-  "utf8",
+const lumisThemes = new Map(
+  await Promise.all(
+    themes.map(async (theme) => [
+      theme.id,
+      (await import(`@lumis-sh/themes/${theme.lumis}`)).default,
+    ]),
+  ),
+);
+const highlightJsThemes = new Map(
+  await Promise.all(
+    themes.map(async (theme) => [
+      theme.id,
+      await readFile(fileURLToPath(import.meta.resolve(theme.highlightJs)), "utf8"),
+    ]),
+  ),
 );
 
 for (const document of documents) {
-  const fragmentsDir = resolve(generatedDir, "fragments", document.id);
-  await mkdir(fragmentsDir, { recursive: true });
   const source = await readFile(resolve(assetsDir, document.file), "utf8");
   const language = byId.get(document.language);
   if (!language)
     throw new Error(`showcase document names an unloaded language: ${document.language}`);
 
-  const lumisOutput = lumis.highlight(source, htmlInline({ language, theme }));
-  validate(lumisOutput, source, lumisId);
-  await writeFile(resolve(fragmentsDir, `${lumisId}.html`), lumisOutput);
+  for (const theme of themes) {
+    const fragmentsDir = resolve(generatedDir, "fragments", document.id, theme.id);
+    await mkdir(fragmentsDir, { recursive: true });
 
-  // The runtime is chosen once per process, so the showcase runs this script twice
-  // to render both. Shiki and highlight.js do not vary with it, and rebuilding the
-  // Oniguruma engine for a second identical result is the slowest step here.
-  if (!shiki) continue;
+    const lumisOutput = lumis.highlight(
+      source,
+      htmlInline({ language, theme: lumisThemes.get(theme.id) }),
+    );
+    validate(lumisOutput, source, lumisId);
+    await writeFile(resolve(fragmentsDir, `${lumisId}.html`), lumisOutput);
 
-  const shikiOutput = shiki.codeToHtml(source, { lang: document.language, theme: "dracula" });
-  validate(shikiOutput, source, "Shiki");
-  await writeFile(resolve(fragmentsDir, "shiki.html"), shikiOutput);
+    // The runtime is chosen once per process, so the showcase runs this script twice
+    // to render both. Shiki and highlight.js do not vary with it, and rebuilding the
+    // Oniguruma engine for a second identical result is the slowest step here.
+    if (!shiki) continue;
 
-  const highlightJsOutput =
-    `<style>${highlightJsTheme}</style><pre><code class="hljs language-${document.language}">` +
-    `${highlightJs.highlight(source, { language: document.language }).value}</code></pre>`;
-  validate(highlightJsOutput, source, "highlight.js");
-  await writeFile(resolve(fragmentsDir, "highlight-js.html"), highlightJsOutput);
+    const shikiOutput = shiki.codeToHtml(source, { lang: document.language, theme: theme.shiki });
+    validate(shikiOutput, source, "Shiki");
+    await writeFile(resolve(fragmentsDir, "shiki.html"), shikiOutput);
+
+    const highlightJsOutput =
+      `<style>${highlightJsThemes.get(theme.id)}</style>` +
+      `<pre><code class="hljs language-${document.language}">` +
+      `${highlightJs.highlight(source, { language: document.language }).value}</code></pre>`;
+    validate(highlightJsOutput, source, "highlight.js");
+    await writeFile(resolve(fragmentsDir, "highlight-js.html"), highlightJsOutput);
+  }
 }
 
 shiki?.dispose();

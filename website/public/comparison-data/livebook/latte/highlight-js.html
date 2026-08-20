@@ -1,0 +1,1184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>highlight.js · Catppuccin Latte · Lumis visual comparison</title>
+  <meta name="color-scheme" content="light">
+  <style>
+    * { box-sizing: border-box; }
+    html { background: #e6e9ef; color: #4c4f69; font: 14px/1.5 Inter, ui-sans-serif, system-ui, sans-serif; }
+    body { margin: 0; }
+    main { padding: 16px; min-width: max-content; }
+    pre { margin: 0 !important; padding: 20px !important; border: 1px solid #bcc0cc; border-radius: 10px; overflow: visible !important; font: 13px/1.55 "SFMono-Regular", Consolas, "Liberation Mono", monospace !important; tab-size: 4; }
+    /* highlight.js themes paint the panel on the code element and pad it, and
+       @catppuccin/highlightjs paints it without making that element a block, so
+       one panel would be ragged where the other three are solid. */
+    pre code.hljs { display: block; padding: 0 !important; }
+  </style>
+</head>
+<body>
+  <main><style>code.hljs{color:#4c4f69;background:#eff1f5}code .hljs-keyword{color:#8839ef}code .hljs-built_in{color:#d20f39}code .hljs-type{color:#df8e1d}code .hljs-literal{color:#fe640b}code .hljs-number{color:#fe640b}code .hljs-operator{color:#04a5e5}code .hljs-punctuation{color:#5c5f77}code .hljs-property{color:#179299}code .hljs-regexp{color:#ea76cb}code .hljs-string{color:#40a02b}code .hljs-char.escape_{color:#40a02b}code .hljs-subst{color:#6c6f85}code .hljs-symbol{color:#dd7878}code .hljs-variable{color:#8839ef}code .hljs-variable.language_{color:#8839ef}code .hljs-variable.constant_{color:#fe640b}code .hljs-title{color:#1e66f5}code .hljs-title.class_{color:#df8e1d}code .hljs-title.function_{color:#1e66f5}code .hljs-params{color:#4c4f69}code .hljs-comment{color:#7c7f93}code .hljs-doctag{color:#d20f39}code .hljs-meta{color:#fe640b}code .hljs-section{color:#1e66f5}code .hljs-tag{color:#179299}code .hljs-name{color:#8839ef}code .hljs-attr{color:#1e66f5}code .hljs-attribute{color:#40a02b}code .hljs-bullet{color:#179299}code .hljs-code{color:#40a02b}code .hljs-emphasis{color:#d20f39;font-style:italic}code .hljs-strong{color:#d20f39;font-weight:bold}code .hljs-formula{color:#179299}code .hljs-link{color:#209fb5;font-style:italic}code .hljs-quote{color:#40a02b;font-style:italic}code .hljs-selector-tag{color:#df8e1d}code .hljs-selector-id{color:#1e66f5}code .hljs-selector-class{color:#179299}code .hljs-selector-attr{color:#8839ef}code .hljs-selector-pseudo{color:#179299}code .hljs-template-tag{color:#dd7878}code .hljs-template-variable{color:#dd7878}code .hljs-addition{color:#40a02b;background:rgba(64,160,43,.15)}code .hljs-deletion{color:#d20f39;background:rgba(210,15,57,.15)}
+</style><pre><code class="hljs language-elixir"><span class="hljs-class"><span class="hljs-keyword">defmodule</span> <span class="hljs-title">LivebookWeb.CoreComponents</span></span> <span class="hljs-keyword">do</span>
+  <span class="hljs-keyword">use</span> <span class="hljs-title class_">Phoenix</span>.<span class="hljs-title class_">Component</span>
+
+  <span class="hljs-keyword">alias</span> <span class="hljs-title class_">Phoenix</span>.<span class="hljs-title class_">LiveView</span>.<span class="hljs-title class_">JS</span>
+
+  <span class="hljs-variable">@doc</span> <span class="hljs-string">&quot;&quot;&quot;
+  Renders [Remix](https://remixicon.com) icon.
+
+  ## Examples
+
+      &lt;.remix_icon icon=&quot;cpu-line&quot; /&gt;
+
+      &lt;.remix_icon icon=&quot;cpu-line&quot; class=&quot;align-middle mr-1&quot; /&gt;
+
+  &quot;&quot;&quot;</span>
+  attr <span class="hljs-symbol">:icon</span>, <span class="hljs-symbol">:string</span>, <span class="hljs-symbol">required:</span> <span class="hljs-literal">true</span>
+  attr <span class="hljs-symbol">:class</span>, <span class="hljs-symbol">:any</span>, <span class="hljs-symbol">default:</span> <span class="hljs-literal">nil</span>
+  attr <span class="hljs-symbol">:rest</span>, <span class="hljs-symbol">:global</span>
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">remix_icon</span></span>(assigns) <span class="hljs-keyword">do</span>
+    <span class="hljs-string">~H&quot;&quot;&quot;
+    &lt;i class={[&quot;</span>ri-<span class="hljs-comment">#{@icon}&quot;, @class]} aria-hidden=&quot;true&quot; {@rest}&gt;&lt;/i&gt;</span>
+    <span class="hljs-string">&quot;&quot;&quot;
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Renders</span> flash notices.
+
+  <span class="hljs-comment">## Examples</span>
+
+      &lt;.flash kind=<span class="hljs-string">&quot;info&quot;</span> flash={<span class="hljs-variable">@flash</span>} /&gt;
+
+  <span class="hljs-string">&quot;&quot;&quot;
+  attr :flash, :map, default: %{}, doc: &quot;the map of flash messages to display&quot;
+
+  attr :kind, :string,
+    values: ~w(info success warning error),
+    doc: &quot;used for styling and flash lookup&quot;
+
+  attr :rest, :global, doc: &quot;the arbitrary HTML attributes to add to the flash container&quot;
+
+  def flash(assigns) do
+    ~H&quot;&quot;&quot;</span>
+    &lt;div
+      <span class="hljs-symbol">:if=</span>{message = <span class="hljs-title class_">Phoenix</span>.<span class="hljs-title class_">Flash</span>.get(<span class="hljs-variable">@flash</span>, <span class="hljs-variable">@kind</span>)}
+      class=<span class="hljs-string">&quot;relative group shadow-lg max-w-xl px-3 py-2 flex items-center gap-2 rounded-lg bg-gray-900 text-gray-200 text-sm&quot;</span>
+      role=<span class="hljs-string">&quot;alert&quot;</span>
+      {<span class="hljs-variable">@rest</span>}
+    &gt;
+      &lt;div
+        class=<span class="hljs-string">&quot;opacity-0 group-hover:opacity-100 absolute -left-2 -top-2 bg-gray-900 border border-gray-600 rounded-full p-0.5 flex leading-none text-gray-200 hover:text-gray-100 hover:bg-gray-700 text-sm cursor-pointer&quot;</span>
+        phx-click=<span class="hljs-string">&quot;lv:clear-flash&quot;</span>
+        phx-value-key={<span class="hljs-variable">@kind</span>}
+      &gt;
+        &lt;.remix_icon icon=<span class="hljs-string">&quot;close-line&quot;</span> /&gt;
+      &lt;/div&gt;
+      &lt;.remix_icon <span class="hljs-symbol">:if=</span>{<span class="hljs-variable">@kind</span> == <span class="hljs-string">&quot;info&quot;</span>} icon=<span class="hljs-string">&quot;information-fill&quot;</span> class=<span class="hljs-string">&quot;text-xl text-blue-500&quot;</span> /&gt;
+      &lt;.remix_icon
+        <span class="hljs-symbol">:if=</span>{<span class="hljs-variable">@kind</span> == <span class="hljs-string">&quot;success&quot;</span>}
+        icon=<span class="hljs-string">&quot;checkbox-circle-fill&quot;</span>
+        class=<span class="hljs-string">&quot;text-xl text-green-bright-400&quot;</span>
+      /&gt;
+      &lt;.remix_icon <span class="hljs-symbol">:if=</span>{<span class="hljs-variable">@kind</span> == <span class="hljs-string">&quot;warning&quot;</span>} icon=<span class="hljs-string">&quot;alert-fill&quot;</span> class=<span class="hljs-string">&quot;text-xl text-yellow-500&quot;</span> /&gt;
+      &lt;.remix_icon <span class="hljs-symbol">:if=</span>{<span class="hljs-variable">@kind</span> == <span class="hljs-string">&quot;error&quot;</span>} icon=<span class="hljs-string">&quot;error-warning-fill&quot;</span> class=<span class="hljs-string">&quot;text-xl text-red-500&quot;</span> /&gt;
+      &lt;span class=<span class="hljs-string">&quot;whitespace-pre-wrap pr-2 max-h-52 overflow-y-auto tiny-scrollbar&quot;</span> phx-no-format&gt;{message}&lt;/span&gt;
+    &lt;/div&gt;
+    <span class="hljs-string">&quot;&quot;&quot;
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Shows</span> the flash group <span class="hljs-keyword">with</span> standard titles <span class="hljs-keyword">and</span> content.
+
+  <span class="hljs-comment">## Examples</span>
+
+      &lt;.flash_group flash={<span class="hljs-variable">@flash</span>} /&gt;
+
+  <span class="hljs-string">&quot;&quot;&quot;
+  attr :flash, :map, required: true, doc: &quot;the map of flash messages&quot;
+
+  def flash_group(assigns) do
+    ~H&quot;&quot;&quot;</span>
+    &lt;div class=<span class="hljs-string">&quot;fixed right-8 top-5 z-1000 flex flex-col space-y-3&quot;</span>&gt;
+      &lt;.flash kind=<span class="hljs-string">&quot;info&quot;</span> flash={<span class="hljs-variable">@flash</span>} /&gt;
+      &lt;.flash kind=<span class="hljs-string">&quot;success&quot;</span> flash={<span class="hljs-variable">@flash</span>} /&gt;
+      &lt;.flash kind=<span class="hljs-string">&quot;warning&quot;</span> flash={<span class="hljs-variable">@flash</span>} /&gt;
+      &lt;.flash kind=<span class="hljs-string">&quot;error&quot;</span> flash={<span class="hljs-variable">@flash</span>} /&gt;
+    &lt;/div&gt;
+    <span class="hljs-string">&quot;&quot;&quot;
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Renders</span> page title.
+
+  <span class="hljs-comment">## Examples</span>
+
+      &lt;.title text=<span class="hljs-string">&quot;Learn&quot;</span> /&gt;
+
+  <span class="hljs-string">&quot;&quot;&quot;
+  attr :text, :string, default: nil
+  attr :back_navigate, :string, default: nil
+
+  slot :inner_block
+
+  def title(assigns) do
+    if assigns.text == nil and assigns.inner_block == [] do
+      raise ArgumentError, &quot;should pass at least text attribute or an inner block&quot;
+    end
+
+    ~H&quot;&quot;&quot;</span>
+    &lt;div class=<span class="hljs-string">&quot;relative&quot;</span>&gt;
+      &lt;div
+        <span class="hljs-symbol">:if=</span>{<span class="hljs-variable">@back_navigate</span>}
+        class=<span class="hljs-string">&quot;hidden md:flex absolute top-0 bottom-0 left-0 transform -translate-x-full&quot;</span>
+      &gt;
+        &lt;.link navigate={<span class="hljs-variable">@back_navigate</span>}&gt;
+          &lt;.remix_icon icon=<span class="hljs-string">&quot;arrow-left-line&quot;</span> class=<span class="hljs-string">&quot;align-middle mr-2 text-2xl text-gray-800&quot;</span> /&gt;
+        &lt;/.link&gt;
+      &lt;/div&gt;
+      &lt;h1 class=<span class="hljs-string">&quot;text-2xl text-gray-800 font-medium&quot;</span>&gt;
+        &lt;%= <span class="hljs-keyword">if</span> <span class="hljs-variable">@inner_block</span> != [] <span class="hljs-keyword">do</span> %&gt;
+          {render_slot(<span class="hljs-variable">@inner_block</span>)}
+        &lt;% <span class="hljs-keyword">else</span> %&gt;
+          {<span class="hljs-variable">@text</span>}
+        &lt;% <span class="hljs-keyword">end</span> %&gt;
+      &lt;/h1&gt;
+    &lt;/div&gt;
+    <span class="hljs-string">&quot;&quot;&quot;
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Renders</span> a message notice.
+
+  <span class="hljs-title class_">Similar</span> to `flash/<span class="hljs-number">1</span>`, but <span class="hljs-keyword">for</span> permanent messages on the page.
+
+  <span class="hljs-comment">## Examples</span>
+
+      &lt;.message_box kind=<span class="hljs-string">&quot;info&quot;</span> message=<span class="hljs-string">&quot;🦊 in a 📦&quot;</span> /&gt;
+
+      &lt;.message_box kind=<span class="hljs-string">&quot;info&quot;</span>&gt;
+        &lt;span&gt;🦊&lt;/span&gt; <span class="hljs-keyword">in</span> a &lt;span&gt;📦&lt;/span&gt;
+      &lt;/.message_box&gt;
+
+  <span class="hljs-string">&quot;&quot;&quot;
+
+  attr :message, :string, default: nil
+  attr :kind, :string, values: ~w(info success warning error)
+
+  slot :inner_block
+
+  def message_box(assigns) do
+    if assigns.message &amp;&amp; assigns.inner_block != [] do
+      raise ArgumentError, &quot;expected either message or inner_block, got both.&quot;
+    end
+
+    ~H&quot;&quot;&quot;</span>
+    &lt;div class={[
+      <span class="hljs-string">&quot;shadow text-sm rounded-lg px-4 py-2 border-l-4 rounded-l-none bg-white text-gray-700&quot;</span>,
+      <span class="hljs-variable">@kind</span> == <span class="hljs-string">&quot;info&quot;</span> &amp;&amp; <span class="hljs-string">&quot;border-blue-500&quot;</span>,
+      <span class="hljs-variable">@kind</span> == <span class="hljs-string">&quot;success&quot;</span> &amp;&amp; <span class="hljs-string">&quot;border-green-bright-400&quot;</span>,
+      <span class="hljs-variable">@kind</span> == <span class="hljs-string">&quot;warning&quot;</span> &amp;&amp; <span class="hljs-string">&quot;border-yellow-300&quot;</span>,
+      <span class="hljs-variable">@kind</span> == <span class="hljs-string">&quot;error&quot;</span> &amp;&amp; <span class="hljs-string">&quot;border-red-500&quot;</span>
+    ]}&gt;
+      &lt;div
+        <span class="hljs-symbol">:if=</span>{<span class="hljs-variable">@message</span>}
+        class=<span class="hljs-string">&quot;whitespace-pre-wrap pr-2 max-h-52 overflow-y-auto tiny-scrollbar&quot;</span>
+        phx-no-format
+      &gt;{<span class="hljs-variable">@message</span>}&lt;/div&gt;
+      &lt;%= <span class="hljs-keyword">if</span> <span class="hljs-variable">@inner_block</span> != [] <span class="hljs-keyword">do</span> %&gt;
+        {render_slot(<span class="hljs-variable">@inner_block</span>)}
+      &lt;% <span class="hljs-keyword">end</span> %&gt;
+    &lt;/div&gt;
+    <span class="hljs-string">&quot;&quot;&quot;
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Creates</span> a live region <span class="hljs-keyword">with</span> the given role.
+
+  <span class="hljs-comment">## Examples</span>
+
+      &lt;.live_region role=<span class="hljs-string">&quot;alert&quot;</span> /&gt;
+      &lt;.live_region role=<span class="hljs-string">&quot;status&quot;</span> /&gt;
+
+  <span class="hljs-string">&quot;&quot;&quot;
+  def live_region(assigns) do
+    ~H&quot;&quot;&quot;</span>
+    &lt;div class=<span class="hljs-string">&quot;sr-only&quot;</span> role={<span class="hljs-variable">@role</span>} id=<span class="hljs-string">&quot;live-region&quot;</span>&gt;&lt;/div&gt;
+    <span class="hljs-string">&quot;&quot;&quot;
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Sends</span> a message to be read by the screen reader by changing the text content of the live region
+  <span class="hljs-string">&quot;&quot;&quot;
+  def sr_message(js \\ %JS{}, message) do
+    JS.dispatch(js, &quot;lb:set_text&quot;, to: &quot;#live-region&quot;, detail: %{value: message})
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Wraps</span> the given content <span class="hljs-keyword">in</span> a modal dialog.
+
+  <span class="hljs-comment">## Example</span>
+
+      &lt;.modal id=<span class="hljs-string">&quot;edit-modal&quot;</span> patch={...}&gt;
+        &lt;.live_component module={<span class="hljs-title class_">MyComponent</span>}  /&gt;
+      &lt;/.modal&gt;
+
+  <span class="hljs-string">&quot;&quot;&quot;
+  attr :id, :string, required: true
+  attr :show, :boolean, default: false
+  attr :patch, :string, default: nil
+  attr :navigate, :string, default: nil
+  attr :class, :string, default: nil
+  attr :width, :string, values: ~w(small medium big large), required: true
+  attr :rest, :global
+
+  slot :inner_block, required: true
+
+  def modal(assigns) do
+    ~H&quot;&quot;&quot;</span>
+    &lt;div
+      id={<span class="hljs-variable">@id</span>}
+      class=<span class="hljs-string">&quot;fixed z-10000 inset-0 hidden&quot;</span>
+      phx-mounted={<span class="hljs-variable">@show</span> &amp;&amp; show_modal(<span class="hljs-variable">@id</span>)}
+      phx-remove={hide_modal(<span class="hljs-variable">@id</span>)}
+      data-cancel={modal_on_cancel(<span class="hljs-variable">@patch</span>, <span class="hljs-variable">@navigate</span>)}
+      {<span class="hljs-variable">@rest</span>}
+    &gt;
+      &lt;!-- <span class="hljs-title class_">Modal</span> container --&gt;
+      &lt;div id={<span class="hljs-string">&quot;<span class="hljs-subst">#{<span class="hljs-variable">@id</span>}</span>-container&quot;</span>} class=<span class="hljs-string">&quot;h-screen flex items-center justify-center p-4&quot;</span>&gt;
+        &lt;!-- <span class="hljs-title class_">Overlay</span> --&gt;
+        &lt;div class=<span class="hljs-string">&quot;absolute z-0 inset-0 bg-gray-500 opacity-75&quot;</span> aria-hidden=<span class="hljs-string">&quot;true&quot;</span>&gt;&lt;/div&gt;
+        &lt;!-- <span class="hljs-title class_">Modal</span> box --&gt;
+        &lt;.focus_wrap
+          id={<span class="hljs-string">&quot;<span class="hljs-subst">#{<span class="hljs-variable">@id</span>}</span>-content&quot;</span>}
+          class={[
+            <span class="hljs-string">&quot;relative max-h-full overflow-y-auto bg-white rounded-lg shadow-xl focus-visible:outline-none&quot;</span>,
+            <span class="hljs-string">&quot;w-full p-6&quot;</span>,
+            modal_width_class(<span class="hljs-variable">@width</span>)
+          ]}
+          role=<span class="hljs-string">&quot;dialog&quot;</span>
+          aria-modal=<span class="hljs-string">&quot;true&quot;</span>
+          tabindex=<span class="hljs-string">&quot;0&quot;</span>
+          phx-window-keydown={<span class="hljs-title class_">JS</span>.exec(<span class="hljs-string">&quot;data-cancel&quot;</span>, <span class="hljs-symbol">to:</span> <span class="hljs-string">&quot;#<span class="hljs-subst">#{<span class="hljs-variable">@id</span>}</span>&quot;</span>)}
+          phx-click-away={<span class="hljs-title class_">JS</span>.exec(<span class="hljs-string">&quot;data-cancel&quot;</span>, <span class="hljs-symbol">to:</span> <span class="hljs-string">&quot;#<span class="hljs-subst">#{<span class="hljs-variable">@id</span>}</span>&quot;</span>)}
+          phx-key=<span class="hljs-string">&quot;escape&quot;</span>
+        &gt;
+          &lt;button
+            type=<span class="hljs-string">&quot;button&quot;</span>
+            class=<span class="hljs-string">&quot;absolute top-6 right-6 text-gray-400 flex space-x-1 items-center&quot;</span>
+            aria_label=<span class="hljs-string">&quot;close modal&quot;</span>
+            phx-click={<span class="hljs-title class_">JS</span>.exec(<span class="hljs-string">&quot;data-cancel&quot;</span>, <span class="hljs-symbol">to:</span> <span class="hljs-string">&quot;#<span class="hljs-subst">#{<span class="hljs-variable">@id</span>}</span>&quot;</span>)}
+          &gt;
+            &lt;span class=<span class="hljs-string">&quot;text-sm&quot;</span>&gt;(esc)&lt;/span&gt;
+            &lt;.remix_icon icon=<span class="hljs-string">&quot;close-line&quot;</span> class=<span class="hljs-string">&quot;text-2xl&quot;</span> /&gt;
+          &lt;/button&gt;
+          {render_slot(<span class="hljs-variable">@inner_block</span>)}
+        &lt;/.focus_wrap&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    <span class="hljs-string">&quot;&quot;&quot;
+  end
+
+  defp modal_width_class(&quot;small&quot;), do: &quot;max-w-sm&quot;
+  defp modal_width_class(&quot;medium&quot;), do: &quot;max-w-xl&quot;
+  defp modal_width_class(&quot;big&quot;), do: &quot;max-w-4xl&quot;
+  defp modal_width_class(&quot;large&quot;), do: &quot;max-w-6xl&quot;
+
+  defp modal_on_cancel(nil, nil), do: JS.exec(&quot;phx-remove&quot;)
+  defp modal_on_cancel(nil, navigate), do: JS.patch(navigate)
+  defp modal_on_cancel(patch, nil), do: JS.patch(patch)
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Shows</span> a modal rendered <span class="hljs-keyword">with</span> `modal/<span class="hljs-number">1</span>`.
+  <span class="hljs-string">&quot;&quot;&quot;
+  def show_modal(js \\ %JS{}, id) do
+    js
+    |&gt; JS.show(to: &quot;#<span class="hljs-subst">#{id}</span>&quot;)
+    |&gt; JS.dispatch(&quot;lb:focus&quot;, to: &quot;#<span class="hljs-subst">#{id}</span>-content&quot;)
+    |&gt; JS.transition(
+      {&quot;ease-out duration-200&quot;, &quot;opacity-0&quot;, &quot;opacity-100&quot;},
+      to: &quot;#<span class="hljs-subst">#{id}</span>-container&quot;
+    )
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Hides</span> a modal rendered <span class="hljs-keyword">with</span> `modal/<span class="hljs-number">1</span>`.
+  <span class="hljs-string">&quot;&quot;&quot;
+  def hide_modal(js \\ %JS{}, id) do
+    js
+    |&gt; JS.transition(
+      {&quot;ease-in duration-200&quot;, &quot;opacity-100&quot;, &quot;opacity-0&quot;},
+      to: &quot;#<span class="hljs-subst">#{id}</span>-container&quot;
+    )
+    |&gt; JS.hide(to: &quot;#<span class="hljs-subst">#{id}</span>&quot;, transition: {&quot;block&quot;, &quot;block&quot;, &quot;hidden&quot;})
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Renders</span> a popup menu that shows up on toggle click.
+
+  <span class="hljs-comment">## Examples</span>
+
+      &lt;.menu id=<span class="hljs-string">&quot;my-menu&quot;</span>&gt;
+        &lt;<span class="hljs-symbol">:toggle&gt;</span>
+          &lt;button&gt;<span class="hljs-title class_">Open</span>&lt;/button&gt;
+        &lt;/<span class="hljs-symbol">:toggle&gt;</span>
+        &lt;.menu_item&gt;
+          &lt;button role=<span class="hljs-string">&quot;menuitem&quot;</span>&gt;<span class="hljs-title class_">Option</span> <span class="hljs-number">1</span>&lt;/button&gt;
+        &lt;/.menu_item&gt;
+        &lt;.menu_item&gt;
+          &lt;button role=<span class="hljs-string">&quot;menuitem&quot;</span>&gt;<span class="hljs-title class_">Option</span> <span class="hljs-number">2</span>&lt;/button&gt;
+        &lt;/.menu_item&gt;
+      &lt;/.menu&gt;
+
+  <span class="hljs-string">&quot;&quot;&quot;
+  attr :id, :string, required: true
+  attr :disabled, :boolean, default: false, doc: &quot;whether the menu is active&quot;
+
+  attr :position, :string,
+    default: &quot;bottom-right&quot;,
+    values: ~w(top-left top-right bottom-left bottom-right)
+
+  attr :sm_position, :string,
+    default: nil,
+    values: [nil, &quot;top-left&quot;, &quot;top-right&quot;, &quot;bottom-left&quot;, &quot;bottom-right&quot;]
+
+  attr :md_position, :string,
+    default: nil,
+    values: [nil, &quot;top-left&quot;, &quot;top-right&quot;, &quot;bottom-left&quot;, &quot;bottom-right&quot;]
+
+  attr :distant, :boolean,
+    default: false,
+    doc: &quot;whether the menu should be further from the anchor element&quot;
+
+  attr :secondary_click, :boolean,
+    default: false,
+    doc: &quot;whether secondary click (usually right mouse click) should open the menu&quot;
+
+  slot :toggle, required: true
+
+  slot :inner_block, required: true
+
+  def menu(assigns) do
+    ~H&quot;&quot;&quot;</span>
+    &lt;div class=<span class="hljs-string">&quot;relative&quot;</span> id={<span class="hljs-variable">@id</span>}&gt;
+      &lt;div
+        phx-click={<span class="hljs-keyword">not</span> <span class="hljs-variable">@disabled</span> &amp;&amp; show_menu(<span class="hljs-variable">@id</span>)}
+        data-contextmenu-trigger-click={<span class="hljs-variable">@secondary_click</span>}
+        phx-window-keydown={hide_menu(<span class="hljs-variable">@id</span>)}
+        phx-key=<span class="hljs-string">&quot;escape&quot;</span>
+      &gt;
+        {render_slot(<span class="hljs-variable">@toggle</span>)}
+      &lt;/div&gt;
+      &lt;div id={<span class="hljs-string">&quot;<span class="hljs-subst">#{<span class="hljs-variable">@id</span>}</span>-overlay&quot;</span>} class=<span class="hljs-string">&quot;fixed z-90 inset-0 hidden&quot;</span> phx-click-away={hide_menu(<span class="hljs-variable">@id</span>)}&gt;
+      &lt;/div&gt;
+      &lt;menu
+        id={<span class="hljs-string">&quot;<span class="hljs-subst">#{<span class="hljs-variable">@id</span>}</span>-content&quot;</span>}
+        class={[
+          <span class="hljs-string">&quot;absolute z-100 hidden&quot;</span>,
+          menu_position_class(<span class="hljs-variable">@position</span>),
+          <span class="hljs-variable">@md_position</span> &amp;&amp; menu_md_position_class(<span class="hljs-variable">@md_position</span>),
+          <span class="hljs-variable">@sm_position</span> &amp;&amp; menu_sm_position_class(<span class="hljs-variable">@sm_position</span>),
+          <span class="hljs-variable">@distant</span> &amp;&amp; menu_distant_class(<span class="hljs-variable">@position</span>)
+        ]}
+        role=<span class="hljs-string">&quot;menu&quot;</span>
+        phx-click-away={hide_menu(<span class="hljs-variable">@id</span>)}
+      &gt;
+        &lt;div
+          id={<span class="hljs-string">&quot;<span class="hljs-subst">#{<span class="hljs-variable">@id</span>}</span>-content-inner&quot;</span>}
+          class=<span class="hljs-string">&quot;rounded-lg bg-white flex flex-col py-2 shadow-[0_15px_99px_-0px_rgba(12,24,41,0.15)]&quot;</span>
+        &gt;
+          {render_slot(<span class="hljs-variable">@inner_block</span>)}
+        &lt;/div&gt;
+      &lt;/menu&gt;
+    &lt;/div&gt;
+    <span class="hljs-string">&quot;&quot;&quot;
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Shows</span> a menu rendered <span class="hljs-keyword">with</span> `menu/<span class="hljs-number">1</span>`.
+
+  <span class="hljs-comment">## Options</span>
+
+    * `<span class="hljs-symbol">:animate`</span> - whether to play an animation <span class="hljs-keyword">when</span> the menu is opened.
+      <span class="hljs-title class_">Defaults</span> to `<span class="hljs-literal">false</span>`
+
+  <span class="hljs-string">&quot;&quot;&quot;
+  def show_menu(js \\ %JS{}, id, opts \\ []) do
+    opts = Keyword.validate!(opts, animate: false)
+
+    js =
+      js
+      |&gt; JS.show(to: &quot;#<span class="hljs-subst">#{id}</span>-overlay&quot;)
+      |&gt; JS.show(to: &quot;#<span class="hljs-subst">#{id}</span>-content&quot;, display: &quot;flex&quot;)
+      |&gt; JS.dispatch(&quot;lb:scroll_into_view&quot;, to: &quot;#<span class="hljs-subst">#{id}</span>-content&quot;)
+
+    if opts[:animate] do
+      JS.add_class(js, &quot;animate-shake&quot;, to: &quot;#<span class="hljs-subst">#{id}</span>-content-inner&quot;)
+    else
+      js
+    end
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Hides</span> a menu rendered <span class="hljs-keyword">with</span> `menu/<span class="hljs-number">1</span>`.
+  <span class="hljs-string">&quot;&quot;&quot;
+  def hide_menu(js \\ %JS{}, id) do
+    js
+    |&gt; JS.hide(to: &quot;#<span class="hljs-subst">#{id}</span>-overlay&quot;)
+    |&gt; JS.hide(to: &quot;#<span class="hljs-subst">#{id}</span>-content&quot;)
+    |&gt; JS.remove_class(&quot;animate-shake&quot;, to: &quot;#<span class="hljs-subst">#{id}</span>-content-inner&quot;)
+  end
+
+  defp menu_position_class(&quot;top-left&quot;), do: &quot;top-0 left-0 transform -translate-y-full -mt-1&quot;
+  defp menu_position_class(&quot;top-right&quot;), do: &quot;top-0 right-0 transform -translate-y-full -mt-1&quot;
+  defp menu_position_class(&quot;bottom-left&quot;), do: &quot;bottom-0 left-0 transform translate-y-full -mb-1&quot;
+
+  defp menu_position_class(&quot;bottom-right&quot;),
+    do: &quot;bottom-0 right-0 transform translate-y-full -mb-1&quot;
+
+  defp menu_md_position_class(&quot;top-left&quot;) do
+    &quot;md:top-0 md:left-0 md:bottom-auto md:right-auto md:transform md:-translate-y-full md:-mt-1 md:mb-0&quot;
+  end
+
+  defp menu_md_position_class(&quot;top-right&quot;) do
+    &quot;md:top-0 md:right-0 md:bottom-auto md:left-auto md:transform md:-translate-y-full md:-mt-1 md:mb-0&quot;
+  end
+
+  defp menu_md_position_class(&quot;bottom-left&quot;) do
+    &quot;md:bottom-0 md:left-0 md:top-auto md:right-auto md:transform md:translate-y-full md:-mb-1 md:mt-0&quot;
+  end
+
+  defp menu_md_position_class(&quot;bottom-right&quot;) do
+    &quot;md:bottom-0 md:right-0 md:top-auto md:left-auto md:transform md:translate-y-full md:-mb-1 md:mt-0&quot;
+  end
+
+  defp menu_sm_position_class(&quot;top-left&quot;) do
+    &quot;sm:top-0 sm:left-0 sm:bottom-auto sm:right-auto sm:transform sm:-translate-y-full sm:-mt-1 sm:mb-0&quot;
+  end
+
+  defp menu_sm_position_class(&quot;top-right&quot;) do
+    &quot;sm:top-0 sm:right-0 sm:bottom-auto sm:left-auto sm:transform sm:-translate-y-full sm:-mt-1 sm:mb-0&quot;
+  end
+
+  defp menu_sm_position_class(&quot;bottom-left&quot;) do
+    &quot;sm:bottom-0 sm:left-0 sm:top-auto sm:right-auto sm:transform sm:translate-y-full sm:-mb-1 sm:mt-0&quot;
+  end
+
+  defp menu_sm_position_class(&quot;bottom-right&quot;) do
+    &quot;sm:bottom-0 sm:right-0 sm:top-auto sm:left-auto sm:transform sm:translate-y-full sm:-mb-1 sm:mt-0&quot;
+  end
+
+  defp menu_distant_class(position) when position in [&quot;top-left&quot;, &quot;top-right&quot;], do: &quot;-mt-2&quot;
+  defp menu_distant_class(position) when position in [&quot;bottom-left&quot;, &quot;bottom-right&quot;], do: &quot;-mb-2&quot;
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Wraps</span> a menu item that shows a submenu on hover.
+
+  <span class="hljs-title class_">This</span> component should be used within `menu/<span class="hljs-number">1</span>` content.
+
+  <span class="hljs-comment">## Example</span>
+
+      &lt;.submenu&gt;
+        &lt;<span class="hljs-symbol">:primary&gt;</span>
+          &lt;button class<span class="hljs-string">&quot;menu-item&quot;</span> role=<span class="hljs-string">&quot;menuitem&quot;</span>&gt;<span class="hljs-title class_">Submenu</span>&lt;/button&gt;
+        &lt;/<span class="hljs-symbol">:primary&gt;</span>
+        &lt;.menu_item&gt;
+          &lt;button class<span class="hljs-string">&quot;menu-item&quot;</span> role=<span class="hljs-string">&quot;menuitem&quot;</span>&gt;<span class="hljs-title class_">Option</span> <span class="hljs-number">1</span>&lt;/button&gt;
+        &lt;/.menu_item&gt;
+      &lt;/.submenu&gt;
+
+  <span class="hljs-string">&quot;&quot;&quot;
+  slot :primary, required: true
+  slot :inner_block, required: true
+
+  def submenu(assigns) do
+    ~H&quot;&quot;&quot;</span>
+    &lt;div class=<span class="hljs-string">&quot;group relative&quot;</span>&gt;
+      {render_slot(<span class="hljs-variable">@primary</span>)}
+      &lt;div class=<span class="hljs-string">&quot;absolute -top-2 right-0 translate-x-full pl-2 hidden group-hover:flex group-focus-within:flex&quot;</span>&gt;
+        &lt;menu class=<span class="hljs-string">&quot;relative mt-0 z-100 rounded-lg bg-white flex flex-col py-2 shadow-[0_15px_99px_-0px_rgba(12,24,41,0.15)]&quot;</span>&gt;
+          {render_slot(<span class="hljs-variable">@inner_block</span>)}
+        &lt;/menu&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    <span class="hljs-string">&quot;&quot;&quot;
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Renders</span> a menu item used <span class="hljs-keyword">in</span> `menu/<span class="hljs-number">1</span>` <span class="hljs-keyword">and</span> `submenu/<span class="hljs-number">1</span>`.
+  <span class="hljs-string">&quot;&quot;&quot;
+  attr :disabled, :boolean, default: false
+  attr :variant, :string, default: &quot;default&quot;, values: ~w(default selected danger)
+
+  slot :inner_block, required: true
+
+  def menu_item(assigns) do
+    ~H&quot;&quot;&quot;</span>
+    &lt;li class={[
+      <span class="hljs-string">&quot;w-full&quot;</span>,
+      <span class="hljs-string">&quot;*:first:w-full *:first:flex *:first:space-x-3 *:first:px-5 *:first:py-2 *:first:items-center [&amp;&gt;:first-child:hover]:bg-gray-100 [&amp;&gt;:first-child:focus-visible]:bg-gray-100 [&amp;&gt;:first-child:focus-visible]:outline-none *:first:whitespace-nowrap font-medium&quot;</span>,
+      menu_item_class(<span class="hljs-variable">@variant</span>),
+      <span class="hljs-variable">@disabled</span> &amp;&amp; <span class="hljs-string">&quot;pointer-events-none opacity-50&quot;</span>
+    ]}&gt;
+      {render_slot(<span class="hljs-variable">@inner_block</span>)}
+    &lt;/li&gt;
+    <span class="hljs-string">&quot;&quot;&quot;
+  end
+
+  defp menu_item_class(&quot;default&quot;), do: &quot;text-gray-500&quot;
+  defp menu_item_class(&quot;selected&quot;), do: &quot;text-gray-900&quot;
+  defp menu_item_class(&quot;danger&quot;), do: &quot;text-red-600&quot;
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Renders</span> a text content skeleton.
+  <span class="hljs-string">&quot;&quot;&quot;
+  attr :empty, :boolean, default: false, doc: &quot;if the source is empty&quot;
+  attr :bg_class, :string, default: &quot;bg-gray-200&quot;, doc: &quot;the skeleton background color&quot;
+
+  def content_skeleton(assigns) do
+    ~H&quot;&quot;&quot;</span>
+    &lt;%= <span class="hljs-keyword">if</span> <span class="hljs-variable">@empty</span> <span class="hljs-keyword">do</span> %&gt;
+      &lt;div class=<span class="hljs-string">&quot;h-4&quot;</span>&gt;&lt;/div&gt;
+    &lt;% <span class="hljs-keyword">else</span> %&gt;
+      &lt;div class=<span class="hljs-string">&quot;max-w-2xl w-full animate-pulse&quot;</span>&gt;
+        &lt;div class=<span class="hljs-string">&quot;flex-1 space-y-4&quot;</span>&gt;
+          &lt;div class={[<span class="hljs-variable">@bg_class</span>, <span class="hljs-string">&quot;h-4 rounded-lg w-3/4&quot;</span>]}&gt;&lt;/div&gt;
+          &lt;div class={[<span class="hljs-variable">@bg_class</span>, <span class="hljs-string">&quot;h-4 rounded-lg&quot;</span>]}&gt;&lt;/div&gt;
+          &lt;div class={[<span class="hljs-variable">@bg_class</span>, <span class="hljs-string">&quot;h-4 rounded-lg w-5/6&quot;</span>]}&gt;&lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;% <span class="hljs-keyword">end</span> %&gt;
+    <span class="hljs-string">&quot;&quot;&quot;
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Renders</span> a file content skeleton.
+  <span class="hljs-string">&quot;&quot;&quot;
+  attr :empty, :boolean, default: false, doc: &quot;if the source is empty&quot;
+  attr :bg_class, :string, default: &quot;bg-gray-200&quot;, doc: &quot;the skeleton background color&quot;
+
+  def file_skeleton(assigns) do
+    ~H&quot;&quot;&quot;</span>
+    &lt;%= <span class="hljs-keyword">if</span> <span class="hljs-variable">@empty</span> <span class="hljs-keyword">do</span> %&gt;
+      &lt;div class=<span class="hljs-string">&quot;h-4&quot;</span>&gt;&lt;/div&gt;
+    &lt;% <span class="hljs-keyword">else</span> %&gt;
+      &lt;div class=<span class="hljs-string">&quot;max-w-2xl w-full animate-pulse&quot;</span>&gt;
+        &lt;div class=<span class="hljs-string">&quot;flex-1 space-y-4&quot;</span>&gt;
+          &lt;div class=<span class="hljs-string">&quot;w-full flex space-x-2 items-center p-2&quot;</span>&gt;
+            &lt;div class={[<span class="hljs-variable">@bg_class</span>, <span class="hljs-string">&quot;h-6 rounded-md w-5&quot;</span>]} /&gt;
+            &lt;div class={[
+              <span class="hljs-variable">@bg_class</span>,
+              <span class="hljs-string">&quot;h-4 rounded-lg&quot;</span>,
+              <span class="hljs-title class_">Enum</span>.random([<span class="hljs-string">&quot;w-1/2&quot;</span>, <span class="hljs-string">&quot;w-2/3&quot;</span>, <span class="hljs-string">&quot;w-3/4&quot;</span>, <span class="hljs-string">&quot;w-4/5&quot;</span>, <span class="hljs-string">&quot;w-full&quot;</span>])
+            ]} /&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;% <span class="hljs-keyword">end</span> %&gt;
+    <span class="hljs-string">&quot;&quot;&quot;
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Renders</span> a highlighted code snippet.
+
+  <span class="hljs-comment">## Examples</span>
+
+      &lt;.code_preview
+        source_id=<span class="hljs-string">&quot;my-snippet&quot;</span>
+        language=<span class="hljs-string">&quot;elixir&quot;</span>
+        source=<span class="hljs-string">&quot;System.version()&quot;</span> /&gt;
+
+  <span class="hljs-string">&quot;&quot;&quot;
+  attr :source_id, :string, required: true
+  attr :language, :string, required: true
+  attr :source, :string, required: true
+  attr :wrap, :boolean, default: false
+
+  def code_preview(assigns) do
+    ~H&quot;&quot;&quot;</span>
+    &lt;div class=<span class="hljs-string">&quot;markdown&quot;</span>&gt;
+      &lt;pre&gt;&lt;code
+      class={<span class="hljs-keyword">if</span>(<span class="hljs-variable">@wrap</span>, <span class="hljs-symbol">do:</span> <span class="hljs-string">&quot;break-all whitespace-pre-wrap&quot;</span>, <span class="hljs-symbol">else:</span> <span class="hljs-string">&quot;tiny-scrollbar&quot;</span>)}
+      id={<span class="hljs-string">&quot;<span class="hljs-subst">#{<span class="hljs-variable">@source_id</span>}</span>-highlight&quot;</span>}
+      phx-hook=<span class="hljs-string">&quot;Highlight&quot;</span>
+      data-p-language={hook_prop(<span class="hljs-variable">@language</span>)}
+    &gt;&lt;div id={<span class="hljs-variable">@source_id</span>} data-source&gt;{<span class="hljs-variable">@source</span>}&lt;/div&gt;&lt;div data-target&gt;&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;
+    &lt;/div&gt;
+    <span class="hljs-string">&quot;&quot;&quot;
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Renders</span> a highlighted code snippet <span class="hljs-keyword">with</span> a title <span class="hljs-keyword">and</span> a copy button.
+
+  <span class="hljs-comment">## Examples</span>
+
+      &lt;.code_preview_with_title_and_copy
+        title=<span class="hljs-string">&quot;
+        source_id=&quot;</span>my-snippet<span class="hljs-string">&quot;
+        language=&quot;</span>elixir<span class="hljs-string">&quot;
+        source=&quot;</span><span class="hljs-title class_">System</span>.version()<span class="hljs-string">&quot; /&gt;
+
+  &quot;</span><span class="hljs-string">&quot;&quot;</span>
+  attr <span class="hljs-symbol">:title</span>, <span class="hljs-symbol">:string</span>, <span class="hljs-symbol">required:</span> <span class="hljs-literal">true</span>
+  attr <span class="hljs-symbol">:source_id</span>, <span class="hljs-symbol">:string</span>, <span class="hljs-symbol">required:</span> <span class="hljs-literal">true</span>
+  attr <span class="hljs-symbol">:language</span>, <span class="hljs-symbol">:string</span>, <span class="hljs-symbol">required:</span> <span class="hljs-literal">true</span>
+  attr <span class="hljs-symbol">:source</span>, <span class="hljs-symbol">:string</span>, <span class="hljs-symbol">required:</span> <span class="hljs-literal">true</span>
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">code_preview_with_title_and_copy</span></span>(assigns) <span class="hljs-keyword">do</span>
+    <span class="hljs-string">~H&quot;&quot;&quot;
+    &lt;div&gt;
+      &lt;div class=&quot;</span>flex justify-between items-center<span class="hljs-string">&quot;&gt;
+        &lt;span class=&quot;</span>text-sm text-gray<span class="hljs-number">-700</span> font-semibold<span class="hljs-string">&quot;&gt;{@title}&lt;/span&gt;
+        &lt;div class=&quot;</span>flex justify-<span class="hljs-keyword">end</span> space-x<span class="hljs-number">-2</span><span class="hljs-string">&quot;&gt;
+          &lt;span class=&quot;</span>tooltip left<span class="hljs-string">&quot; data-tooltip=&quot;</span><span class="hljs-title class_">Copy</span> source<span class="hljs-string">&quot;&gt;
+            &lt;.icon_button
+              aria-label=&quot;</span>copy source<span class="hljs-string">&quot;
+              phx-click={JS.dispatch(&quot;</span><span class="hljs-symbol">lb:</span>clipcopy<span class="hljs-string">&quot;, to: &quot;</span><span class="hljs-comment">##{@source_id}&quot;)}</span>
+            &gt;
+              &lt;.remix_icon icon=<span class="hljs-string">&quot;clipboard-line&quot;</span> /&gt;
+            &lt;/.icon_button&gt;
+          &lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;div class=<span class="hljs-string">&quot;markdown&quot;</span>&gt;
+        &lt;.code_preview source_id={<span class="hljs-variable">@source_id</span>} language={<span class="hljs-variable">@language</span>} source={<span class="hljs-variable">@source</span>} /&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    <span class="hljs-string">&quot;&quot;&quot;
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Renders</span> text <span class="hljs-keyword">with</span> a tiny label.
+
+  <span class="hljs-comment">## Examples</span>
+
+      &lt;.labeled_text label=<span class="hljs-string">&quot;Name&quot;</span>&gt;<span class="hljs-title class_">Sherlock</span> <span class="hljs-title class_">Holmes</span>&lt;/.labeled_text&gt;
+
+  <span class="hljs-string">&quot;&quot;&quot;
+  attr :label, :string, required: true
+
+  attr :one_line, :boolean,
+    default: false,
+    doc: &quot;whether to force the text into a single scrollable line&quot;
+
+  attr :class, :string, default: nil
+
+  slot :inner_block, required: true
+
+  def labeled_text(assigns) do
+    ~H&quot;&quot;&quot;</span>
+    &lt;div class={[<span class="hljs-string">&quot;flex flex-col space-y-1&quot;</span>, <span class="hljs-variable">@class</span>]}&gt;
+      &lt;span class=<span class="hljs-string">&quot;text-sm text-gray-500&quot;</span>&gt;
+        {<span class="hljs-variable">@label</span>}
+      &lt;/span&gt;
+      &lt;span class={[
+        <span class="hljs-string">&quot;text-gray-800 text-sm font-semibold&quot;</span>,
+        <span class="hljs-variable">@one_line</span> &amp;&amp;
+          <span class="hljs-string">&quot;whitespace-nowrap overflow-hidden text-ellipsis hover:text-clip hover:overflow-auto hover:tiny-scrollbar&quot;</span>
+      ]}&gt;
+        {render_slot(<span class="hljs-variable">@inner_block</span>)}
+      &lt;/span&gt;
+    &lt;/div&gt;
+    <span class="hljs-string">&quot;&quot;&quot;
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Renders</span> a choice button that is either active <span class="hljs-keyword">or</span> not.
+
+  <span class="hljs-comment">## Examples</span>
+
+      &lt;.choice_button active={<span class="hljs-variable">@tab</span> == <span class="hljs-string">&quot;my_tab&quot;</span>} phx-click=<span class="hljs-string">&quot;set_my_tab&quot;</span>&gt;
+        <span class="hljs-title class_">My</span> tab
+      &lt;/.choice_button&gt;
+
+  <span class="hljs-string">&quot;&quot;&quot;
+  attr :active, :boolean, required: true
+  attr :disabled, :boolean
+  attr :class, :string, default: nil
+  attr :rest, :global
+
+  slot :inner_block, required: true
+
+  def choice_button(assigns) do
+    assigns =
+      assigns
+      |&gt; assign_new(:disabled, fn -&gt; assigns.active end)
+
+    ~H&quot;&quot;&quot;</span>
+    &lt;button
+      class={[
+        <span class="hljs-string">&quot;px-5 py-2 rounded-lg text-gray-700 border&quot;</span>,
+        <span class="hljs-keyword">if</span>(<span class="hljs-variable">@active</span>, <span class="hljs-symbol">do:</span> <span class="hljs-string">&quot;bg-blue-100 border-blue-600&quot;</span>, <span class="hljs-symbol">else:</span> <span class="hljs-string">&quot;bg-white border-gray-200&quot;</span>),
+        <span class="hljs-variable">@class</span>
+      ]}
+      disabled={<span class="hljs-variable">@disabled</span>}
+      {<span class="hljs-variable">@rest</span>}
+    &gt;
+      {render_slot(<span class="hljs-variable">@inner_block</span>)}
+    &lt;/button&gt;
+    <span class="hljs-string">&quot;&quot;&quot;
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Renders</span> an status indicator circle.
+  <span class="hljs-string">&quot;&quot;&quot;
+  attr :variant, :string,
+    required: true,
+    values: ~w(success warning error inactive waiting progressing)
+
+  def status_indicator(assigns) do
+    ~H&quot;&quot;&quot;</span>
+    &lt;span class=<span class="hljs-string">&quot;relative flex h-2.5 w-2.5&quot;</span>&gt;
+      &lt;span
+        <span class="hljs-symbol">:if=</span>{animated_status_circle_class(<span class="hljs-variable">@variant</span>)}
+        class={[
+          animated_status_circle_class(<span class="hljs-variable">@variant</span>),
+          <span class="hljs-string">&quot;animate-ping absolute inline-flex h-full w-full rounded-full opacity-75&quot;</span>
+        ]}
+      &gt;
+      &lt;/span&gt;
+      &lt;span class={[status_circle_class(<span class="hljs-variable">@variant</span>), <span class="hljs-string">&quot;relative inline-flex rounded-full h-2.5 w-2.5&quot;</span>]}&gt;
+      &lt;/span&gt;
+    &lt;/span&gt;
+    <span class="hljs-string">&quot;&quot;&quot;
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Returns</span> background class based on the given variant.
+
+  <span class="hljs-title class_">See</span> `status_indicator/<span class="hljs-number">1</span>` <span class="hljs-keyword">for</span> available variants.
+  <span class="hljs-string">&quot;&quot;&quot;
+  def status_circle_class(variant)
+
+  def status_circle_class(&quot;success&quot;), do: &quot;bg-green-bright-400&quot;
+  def status_circle_class(&quot;warning&quot;), do: &quot;bg-yellow-bright-200&quot;
+  def status_circle_class(&quot;error&quot;), do: &quot;bg-red-400&quot;
+  def status_circle_class(&quot;inactive&quot;), do: &quot;bg-gray-500&quot;
+  def status_circle_class(&quot;waiting&quot;), do: &quot;bg-gray-400&quot;
+  def status_circle_class(&quot;progressing&quot;), do: &quot;bg-blue-500&quot;
+
+  defp animated_status_circle_class(&quot;waiting&quot;), do: &quot;bg-gray-300&quot;
+  defp animated_status_circle_class(&quot;progressing&quot;), do: &quot;bg-blue-400&quot;
+  defp animated_status_circle_class(_other), do: nil
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Renders</span> an informative box as a placeholder <span class="hljs-keyword">for</span> a list.
+  <span class="hljs-string">&quot;&quot;&quot;
+
+  slot :inner_block, required: true
+  slot :actions
+
+  def no_entries(assigns) do
+    ~H&quot;&quot;&quot;</span>
+    &lt;div class=<span class="hljs-string">&quot;p-5 flex space-x-4 items-center border border-gray-200 rounded-lg&quot;</span>&gt;
+      &lt;div&gt;
+        &lt;.remix_icon icon=<span class="hljs-string">&quot;windy-line&quot;</span> class=<span class="hljs-string">&quot;text-gray-400 text-xl&quot;</span> /&gt;
+      &lt;/div&gt;
+      &lt;div class=<span class="hljs-string">&quot;grow flex items-center justify-between&quot;</span>&gt;
+        &lt;div class=<span class="hljs-string">&quot;text-gray-600&quot;</span>&gt;
+          {render_slot(<span class="hljs-variable">@inner_block</span>)}
+        &lt;/div&gt;
+        {render_slot(<span class="hljs-variable">@actions</span>)}
+      &lt;/div&gt;
+    &lt;/div&gt;
+    <span class="hljs-string">&quot;&quot;&quot;
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Renders</span> a circular spinner.
+  <span class="hljs-string">&quot;&quot;&quot;
+
+  attr :class, :string, default: nil
+  attr :rest, :global
+
+  def spinner(assigns) do
+    ~H&quot;&quot;&quot;</span>
+    &lt;svg
+      aria-hidden=<span class="hljs-string">&quot;true&quot;</span>
+      class={[<span class="hljs-string">&quot;inline w-4 h-4 text-gray-200 animate-spin fill-blue-600&quot;</span>, <span class="hljs-variable">@class</span>]}
+      viewBox=<span class="hljs-string">&quot;0 0 100 101&quot;</span>
+      fill=<span class="hljs-string">&quot;none&quot;</span>
+      xmlns=<span class="hljs-string">&quot;http://www.w3.org/2000/svg&quot;</span>
+      {<span class="hljs-variable">@rest</span>}
+    &gt;
+      &lt;path
+        d=<span class="hljs-string">&quot;M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z&quot;</span>
+        fill=<span class="hljs-string">&quot;currentColor&quot;</span>
+      /&gt;
+      &lt;path
+        d=<span class="hljs-string">&quot;M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z&quot;</span>
+        fill=<span class="hljs-string">&quot;currentFill&quot;</span>
+      /&gt;
+    &lt;/svg&gt;
+    <span class="hljs-string">&quot;&quot;&quot;
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Returns</span> the text <span class="hljs-keyword">in</span> singular <span class="hljs-keyword">or</span> plural depending on the quantity.
+
+  <span class="hljs-comment">## Examples</span>
+
+    &lt;.listing items={<span class="hljs-variable">@packages</span>}&gt;
+      &lt;<span class="hljs-symbol">:item</span> <span class="hljs-symbol">:let=</span>{package}&gt;&lt;code&gt;{package.name}&lt;/code&gt;&lt;/<span class="hljs-symbol">:item&gt;</span>
+      &lt;<span class="hljs-symbol">:singular_suffix&gt;package&lt;/</span><span class="hljs-symbol">:singular_suffix&gt;</span>
+      &lt;<span class="hljs-symbol">:plural_suffix&gt;packages&lt;/</span><span class="hljs-symbol">:plural_suffix&gt;</span>
+    &lt;/.listing&gt;
+
+  <span class="hljs-string">&quot;&quot;&quot;
+
+  attr :items, :list, required: true
+
+  slot :item, required: true
+  slot :plural_suffix
+  slot :singular_suffix
+
+  def listing(%{items: [_]} = assigns) do
+    ~H&quot;&quot;&quot;</span>
+    {render_slot(<span class="hljs-variable">@item</span>, hd(<span class="hljs-variable">@items</span>))}
+    {render_slot(<span class="hljs-variable">@singular_suffix</span>)}
+    <span class="hljs-string">&quot;&quot;&quot;
+  end
+
+  def listing(%{items: [_, _ | _]} = assigns) do
+    {items, assigns} = Map.pop!(assigns, :items)
+    {leading, [second_to_last, last]} = Enum.split(items, -2)
+    assigns = assign(assigns, leading: leading, second_to_last: second_to_last, last: last)
+
+    ~H&quot;&quot;&quot;</span>
+    &lt;%= <span class="hljs-keyword">for</span> item &lt;- <span class="hljs-variable">@leading</span> <span class="hljs-keyword">do</span> %&gt;
+      {render_slot(<span class="hljs-variable">@item</span>, item)},
+    &lt;% <span class="hljs-keyword">end</span> %&gt;
+    {render_slot(<span class="hljs-variable">@item</span>, <span class="hljs-variable">@second_to_last</span>)} <span class="hljs-keyword">and</span> {render_slot(<span class="hljs-variable">@item</span>, <span class="hljs-variable">@last</span>)}
+    {render_slot(<span class="hljs-variable">@plural_suffix</span>)}
+    <span class="hljs-string">&quot;&quot;&quot;
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Renders</span> a table <span class="hljs-keyword">with</span> generic styling.
+
+  <span class="hljs-comment">## Examples</span>
+
+      &lt;.table id=<span class="hljs-string">&quot;users&quot;</span> rows={<span class="hljs-variable">@users</span>}&gt;
+        &lt;<span class="hljs-symbol">:col</span> <span class="hljs-symbol">:let=</span>{user} label=<span class="hljs-string">&quot;id&quot;</span>&gt;{user.id}&lt;/<span class="hljs-symbol">:col&gt;</span>
+        &lt;<span class="hljs-symbol">:col</span> <span class="hljs-symbol">:let=</span>{user} label=<span class="hljs-string">&quot;username&quot;</span>&gt;{user.username}&lt;/<span class="hljs-symbol">:col&gt;</span>
+      &lt;/.table&gt;
+
+  <span class="hljs-string">&quot;&quot;&quot;
+  attr :id, :string, required: true
+  attr :rows, :list, required: true
+  attr :row_id, :any, default: nil, doc: &quot;the function for generating the row id&quot;
+  attr :row_click, :any, default: nil, doc: &quot;the function for handling phx-click on each row&quot;
+
+  attr :row_item, :any,
+    default: &amp;Function.identity/1,
+    doc: &quot;the function for mapping each row before calling the :col and :action slots&quot;
+
+  slot :col, required: true do
+    attr :label, :string
+  end
+
+  slot :action, doc: &quot;the slot for showing user actions in the last table column&quot;
+
+  def table(assigns) do
+    assigns =
+      with %{rows: %Phoenix.LiveView.LiveStream{}} &lt;- assigns do
+        assign(assigns, row_id: assigns.row_id || fn {id, _item} -&gt; id end)
+      end
+
+    ~H&quot;&quot;&quot;</span>
+    &lt;table class=<span class="hljs-string">&quot;overflow-y-auto px-4 sm:overflow-visible sm:px-0 min-w-full divide-y divide-gray-300&quot;</span>&gt;
+      &lt;thead class=<span class="hljs-string">&quot;text-sm text-left font-semibold leading-6 text-gray-900&quot;</span>&gt;
+        &lt;tr&gt;
+          &lt;th <span class="hljs-symbol">:for=</span>{col &lt;- <span class="hljs-variable">@col</span>} class=<span class="hljs-string">&quot;py-3.5 pl-4 pr-3 sm:pl-6&quot;</span>&gt;
+            {col[<span class="hljs-symbol">:label</span>]}
+          &lt;/th&gt;
+          &lt;th <span class="hljs-symbol">:if=</span>{<span class="hljs-variable">@action</span> != []} class=<span class="hljs-string">&quot;py-3.5 pl-3 pr-5 text-right sm:pr-7&quot;</span>&gt;
+            &lt;span&gt;<span class="hljs-title class_">Actions</span>&lt;/span&gt;
+          &lt;/th&gt;
+        &lt;/tr&gt;
+      &lt;/thead&gt;
+      &lt;tbody
+        id={<span class="hljs-variable">@id</span>}
+        phx-update={match?(%<span class="hljs-title class_">Phoenix</span>.<span class="hljs-title class_">LiveView</span>.<span class="hljs-title class_">LiveStream</span>{}, <span class="hljs-variable">@rows</span>) &amp;&amp; <span class="hljs-string">&quot;stream&quot;</span>}
+        class=<span class="hljs-string">&quot;relative divide-y divide-gray-200 bg-white text-sm font-medium leading-6 text-gray-900&quot;</span>
+      &gt;
+        &lt;tr <span class="hljs-symbol">:for=</span>{row &lt;- <span class="hljs-variable">@rows</span>} id={<span class="hljs-variable">@row_id</span> &amp;&amp; <span class="hljs-variable">@row_id</span>.(row)} class=<span class="hljs-string">&quot;hover:bg-gray-50&quot;</span>&gt;
+          &lt;td
+            <span class="hljs-symbol">:for=</span>{col &lt;- <span class="hljs-variable">@col</span>}
+            phx-click={<span class="hljs-variable">@row_click</span> &amp;&amp; <span class="hljs-variable">@row_click</span>.(row)}
+            class={[<span class="hljs-string">&quot;relative p-0&quot;</span>, <span class="hljs-variable">@row_click</span> &amp;&amp; <span class="hljs-string">&quot;hover:cursor-pointer&quot;</span>]}
+          &gt;
+            &lt;div class=<span class="hljs-string">&quot;relative block p-4 sm:px-6&quot;</span>&gt;
+              {render_slot(col, <span class="hljs-variable">@row_item</span>.(row))}
+            &lt;/div&gt;
+          &lt;/td&gt;
+          &lt;td <span class="hljs-symbol">:if=</span>{<span class="hljs-variable">@action</span> != []} class=<span class="hljs-string">&quot;relative p-0&quot;</span>&gt;
+            &lt;div class=<span class="hljs-string">&quot;relative whitespace-nowrap py-4 pl-3 pr-4 sm:pr-6 flex justify-end items-center&quot;</span>&gt;
+              &lt;span <span class="hljs-symbol">:for=</span>{action &lt;- <span class="hljs-variable">@action</span>} class=<span class="hljs-string">&quot;ml-4&quot;</span>&gt;
+                {render_slot(action, <span class="hljs-variable">@row_item</span>.(row))}
+              &lt;/span&gt;
+            &lt;/div&gt;
+          &lt;/td&gt;
+        &lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+    <span class="hljs-string">&quot;&quot;&quot;
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Renders</span> a button.
+
+  <span class="hljs-comment">## Examples</span>
+
+      &lt;.button&gt;<span class="hljs-title class_">Click</span>&lt;/.button&gt;
+
+      &lt;.button color=<span class="hljs-string">&quot;gray&quot;</span> outlined&gt;<span class="hljs-title class_">Click</span>&lt;/.button&gt;
+
+      &lt;.button color=<span class="hljs-string">&quot;gray&quot;</span> small&gt;<span class="hljs-title class_">Click</span>&lt;/.button&gt;
+
+  <span class="hljs-string">&quot;&quot;&quot;
+  attr :disabled, :boolean, default: false
+  attr :color, :string, default: &quot;blue&quot;, values: ~w(blue gray red)
+  attr :outlined, :boolean, default: false
+  attr :small, :boolean, default: false
+  attr :class, :string, default: nil
+
+  attr :rest, :global, include: ~w(href patch navigate download name)
+
+  slot :inner_block
+
+  def button(assigns)
+      when is_map_key(assigns.rest, :href) or is_map_key(assigns.rest, :patch) or
+             is_map_key(assigns.rest, :navigate) do
+    ~H&quot;&quot;&quot;</span>
+    &lt;.link class={[button_classes(<span class="hljs-variable">@small</span>, <span class="hljs-variable">@disabled</span>, <span class="hljs-variable">@color</span>, <span class="hljs-variable">@outlined</span>), <span class="hljs-variable">@class</span>]} {<span class="hljs-variable">@rest</span>}&gt;
+      {render_slot(<span class="hljs-variable">@inner_block</span>)}
+    &lt;/.link&gt;
+    <span class="hljs-string">&quot;&quot;&quot;
+  end
+
+  def button(assigns) do
+    ~H&quot;&quot;&quot;</span>
+    &lt;button
+      class={[button_classes(<span class="hljs-variable">@small</span>, <span class="hljs-variable">@disabled</span>, <span class="hljs-variable">@color</span>, <span class="hljs-variable">@outlined</span>), <span class="hljs-variable">@class</span>]}
+      disabled={<span class="hljs-variable">@disabled</span>}
+      {<span class="hljs-variable">@rest</span>}
+    &gt;
+      {render_slot(<span class="hljs-variable">@inner_block</span>)}
+    &lt;/button&gt;
+    <span class="hljs-string">&quot;&quot;&quot;
+  end
+
+  defp button_classes(small, disabled, color, outlined) do
+    [
+      if small do
+        &quot;px-2 py-1 font-normal text-xs gap-1&quot;
+      else
+        &quot;px-5 py-2 font-medium text-sm gap-1.5&quot;
+      end,
+      &quot;not-[.hidden]:inline-flex rounded-lg border whitespace-nowrap items-center justify-center focus-visible:outline-none&quot;,
+      if disabled do
+        &quot;cursor-default pointer-events-none border-transparent bg-gray-100 text-gray-400&quot;
+      else
+        case {color, outlined} do
+          {&quot;blue&quot;, false} -&gt;
+            &quot;border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:bg-blue-700&quot;
+
+          {&quot;red&quot;, false} -&gt;
+            &quot;border-transparent bg-red-600 text-white hover:bg-red-700 focus:bg-red-700&quot;
+
+          {&quot;gray&quot;, false} -&gt;
+            &quot;border-gray-200 bg-gray-100 text-gray-600 hover:bg-gray-200 focus:bg-gray-200&quot;
+
+          {&quot;blue&quot;, true} -&gt;
+            &quot;bg-blue-50 border-blue-600 text-blue-600 hover:bg-blue-100 focus:bg-blue-100&quot;
+
+          {&quot;red&quot;, true} -&gt;
+            &quot;bg-red-50 border-red-600 text-red-600 hover:bg-red-100 focus:bg-red-100&quot;
+
+          {&quot;gray&quot;, true} -&gt;
+            &quot;bg-transparent border-gray-300 text-gray-600 hover:bg-gray-100 focus:bg-gray-100&quot;
+        end
+      end
+    ]
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Renders</span> an icon button.
+
+  <span class="hljs-comment">## Examples</span>
+
+      &lt;.icon_button&gt;
+        &lt;.remix_icon icon=<span class="hljs-string">&quot;refresh-line&quot;</span> /&gt;
+      &lt;/.icon_button&gt;
+
+  <span class="hljs-string">&quot;&quot;&quot;
+  attr :disabled, :boolean, default: false
+  attr :small, :boolean, default: false
+  attr :class, :string, default: nil
+
+  attr :rest, :global, include: ~w(href patch navigate download name)
+
+  slot :inner_block
+
+  def icon_button(assigns)
+      when is_map_key(assigns.rest, :href) or is_map_key(assigns.rest, :patch) or
+             is_map_key(assigns.rest, :navigate) do
+    ~H&quot;&quot;&quot;</span>
+    &lt;.link class={[icon_button_classes(<span class="hljs-variable">@small</span>, <span class="hljs-variable">@disabled</span>), <span class="hljs-variable">@class</span>]} {<span class="hljs-variable">@rest</span>}&gt;
+      {render_slot(<span class="hljs-variable">@inner_block</span>)}
+    &lt;/.link&gt;
+    <span class="hljs-string">&quot;&quot;&quot;
+  end
+
+  def icon_button(assigns) do
+    ~H&quot;&quot;&quot;</span>
+    &lt;button class={[icon_button_classes(<span class="hljs-variable">@small</span>, <span class="hljs-variable">@disabled</span>), <span class="hljs-variable">@class</span>]} disabled={<span class="hljs-variable">@disabled</span>} {<span class="hljs-variable">@rest</span>}&gt;
+      {render_slot(<span class="hljs-variable">@inner_block</span>)}
+    &lt;/button&gt;
+    <span class="hljs-string">&quot;&quot;&quot;
+  end
+
+  defp icon_button_classes(small, disabled) do
+    [
+      unless small do
+        &quot;text-xl&quot;
+      end,
+      &quot;p-1 flex items-center justify-center rounded-full leading-none&quot;,
+      if disabled do
+        &quot;cursor-default text-gray-300&quot;
+      else
+        &quot;text-gray-500 hover:text-gray-900 hover:bg-gray-50 focus-visible:bg-gray-100 focus-visible:outline-none&quot;
+      end
+    ]
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Renders</span> stateful tabs <span class="hljs-keyword">with</span> content.
+
+  <span class="hljs-comment">## Examples</span>
+
+      &lt;.tabs id=<span class="hljs-string">&quot;animals&quot;</span> default=<span class="hljs-string">&quot;cat&quot;</span>&gt;
+        &lt;<span class="hljs-symbol">:tab</span> id=<span class="hljs-string">&quot;cat&quot;</span> label=<span class="hljs-string">&quot;Cat&quot;</span>&gt;
+          <span class="hljs-title class_">This</span> is a cat.
+        &lt;/<span class="hljs-symbol">:tab&gt;</span>
+        &lt;<span class="hljs-symbol">:tab</span> id=<span class="hljs-string">&quot;dog&quot;</span> label=<span class="hljs-string">&quot;Dog&quot;</span>&gt;
+          <span class="hljs-title class_">This</span> is a dog.
+        &lt;/<span class="hljs-symbol">:tab&gt;</span>
+      &lt;/.tabs&gt;
+
+  <span class="hljs-string">&quot;&quot;&quot;
+
+  attr :id, :string, required: true
+  attr :default, :string, required: true
+
+  slot :tab do
+    attr :id, :string, required: true
+    attr :label, :string, required: true
+  end
+
+  def tabs(assigns) do
+    ~H&quot;&quot;&quot;</span>
+    &lt;div id={<span class="hljs-variable">@id</span>} class=<span class="hljs-string">&quot;flex flex-col gap-4&quot;</span>&gt;
+      &lt;div class=<span class="hljs-string">&quot;tabs&quot;</span>&gt;
+        &lt;button
+          <span class="hljs-symbol">:for=</span>{tab &lt;- <span class="hljs-variable">@tab</span>}
+          class={[<span class="hljs-string">&quot;tab&quot;</span>, <span class="hljs-variable">@default</span> == tab.id &amp;&amp; <span class="hljs-string">&quot;active&quot;</span>]}
+          phx-click={
+            <span class="hljs-title class_">JS</span>.remove_class(<span class="hljs-string">&quot;active&quot;</span>, <span class="hljs-symbol">to:</span> <span class="hljs-string">&quot;#<span class="hljs-subst">#{<span class="hljs-variable">@id</span>}</span> .tab.active&quot;</span>)
+            |&gt; <span class="hljs-title class_">JS</span>.add_class(<span class="hljs-string">&quot;active&quot;</span>)
+            |&gt; <span class="hljs-title class_">JS</span>.add_class(<span class="hljs-string">&quot;hidden&quot;</span>, <span class="hljs-symbol">to:</span> <span class="hljs-string">&quot;#<span class="hljs-subst">#{<span class="hljs-variable">@id</span>}</span> [data-tab]&quot;</span>)
+            |&gt; <span class="hljs-title class_">JS</span>.remove_class(<span class="hljs-string">&quot;hidden&quot;</span>, <span class="hljs-symbol">to:</span> <span class="hljs-string">&quot;#<span class="hljs-subst">#{<span class="hljs-variable">@id</span>}</span> [data-tab=&#x27;<span class="hljs-subst">#{tab.id}</span>&#x27;]&quot;</span>)
+          }
+        &gt;
+          &lt;span class=<span class="hljs-string">&quot;font-medium&quot;</span>&gt;
+            {tab.label}
+          &lt;/span&gt;
+        &lt;/button&gt;
+      &lt;/div&gt;
+
+      &lt;div <span class="hljs-symbol">:for=</span>{tab &lt;- <span class="hljs-variable">@tab</span>} data-tab={tab.id} class={<span class="hljs-variable">@default</span> == tab.id || <span class="hljs-string">&quot;hidden&quot;</span>}&gt;
+        {render_slot(tab)}
+      &lt;/div&gt;
+    &lt;/div&gt;
+    <span class="hljs-string">&quot;&quot;&quot;
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Updates</span> keys <span class="hljs-keyword">in</span> a map assign.
+  <span class="hljs-string">&quot;&quot;&quot;
+  def assign_nested(socket, key, keyword) do
+    update(socket, key, fn map -&gt;
+      Enum.reduce(keyword, map, fn {key, value}, map -&gt; Map.replace!(map, key, value) end)
+    end)
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Sends</span> an event to the given target.
+
+  <span class="hljs-symbol">Given:</span>
+
+    * a <span class="hljs-title class_">LV</span> pid, sends the event as a regular message to the process
+
+    * a component `{module, id}` tuple, the event is sent as an update
+      <span class="hljs-keyword">with</span> `<span class="hljs-symbol">:event`</span> assign
+
+  <span class="hljs-string">&quot;&quot;&quot;
+  def send_event(target, event) when is_pid(target) do
+    send(target, event)
+  end
+
+  def send_event({module, id}, event) when is_atom(module) and is_binary(id) do
+    Phoenix.LiveView.send_update(module, id: id, event: event)
+  end
+
+  # JS commands
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Pushes</span> <span class="hljs-keyword">and</span> executes the given `%<span class="hljs-title class_">Phoenix</span>.<span class="hljs-title class_">LiveView</span>.<span class="hljs-title class_">JS</span>{}` on the client.
+
+  <span class="hljs-comment">## Options</span>
+
+    * `<span class="hljs-symbol">:to`</span> - selector <span class="hljs-keyword">for</span> elements to execute against. <span class="hljs-title class_">Defaults</span> to
+      document body
+
+  <span class="hljs-string">&quot;&quot;&quot;
+  def exec_js(socket, js, opts \\ []) do
+    opts = Keyword.validate!(opts, [:to])
+
+    Phoenix.LiveView.push_event(socket, &quot;lb:exec_js&quot;, %{js: JSON.encode!(js.ops), to: opts[:to]})
+  end
+
+  @doc &quot;&quot;&quot;</span>
+  <span class="hljs-title class_">Encodes</span> value <span class="hljs-keyword">for</span> hook prop attribute.
+
+  <span class="hljs-comment">## Examples</span>
+
+      &lt;div id=<span class="hljs-string">&quot;hook&quot;</span> phx-hook={<span class="hljs-title class_">MyHook</span>} data-p-value={hook_prop(<span class="hljs-variable">@value</span>)}&gt;
+      &lt;/div&gt;
+
+  <span class="hljs-string">&quot;&quot;&quot;
+  def hook_prop(value)
+
+  def hook_prop(%Phoenix.LiveComponent.CID{} = value) do
+    hook_prop(to_string(value))
+  end
+
+  def hook_prop(value) do
+    JSON.encode!(value)
+  end
+end
+</span></code></pre></main>
+  <script>
+    (function () {
+      var at = location.hash.match(/^#at=(\d+),(\d+)$/);
+      if (at) window.scrollTo(Number(at[1]), Number(at[2]));
+      addEventListener("scroll", function () {
+        parent.postMessage({ lumisShowcaseScroll: { x: scrollX, y: scrollY } }, "*");
+      }, { passive: true });
+    })();
+  </script>
+</body>
+</html>

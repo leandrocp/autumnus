@@ -12,6 +12,7 @@
     "lint": "cd ../.. && oxlint benchmarks/javascript/src/ benchmarks/scripts/"
   },
   "dependencies": {
+    "@catppuccin/highlightjs": "1.0.1",
     "@lumis-sh/lumis": "workspace:*",
     "@lumis-sh/themes": "workspace:*",
     "@lumis-sh/wasm-bash": "0.26.3",

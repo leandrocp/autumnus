@@ -119,7 +119,9 @@ async function selectorNativeTargetFor(): Promise<typeof nativeTargetFor> {
   await Parser.init();
   const language = await TSLanguage.load(
     new Uint8Array(
-      readFileSync(new URL("./fixtures/wasm/tree-sitter-javascript.wasm", import.meta.url)),
+      readFileSync(
+        new URL("../../../../fixtures/test-parsers/tree-sitter-javascript.wasm", import.meta.url),
+      ),
     ),
   );
   const parser = new Parser();

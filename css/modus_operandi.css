@@ -1,5 +1,5 @@
 /* modus_operandi
- * revision: 17a64464c27c1be605adca13dbe48f2f402fe107
+ * revision: 56233f0986ef6c8d0eab97e924e87144e584d970
  */
 .lumis {
   color: #000000;
@@ -236,6 +236,9 @@
 .l-module-builtin {
   color: #531ab6;
 }
+.l-namespace {
+  color: #a0132f;
+}
 .l-number {
   color: #003497;
 }
@@ -244,6 +247,9 @@
 }
 .l-operator {
   color: #000000;
+}
+.l-property {
+  color: #005e8b;
 }
 .l-punctuation-bracket {
   color: #000000;
@@ -285,7 +291,7 @@
   color: #00663f;
 }
 .l-string-regexp {
-  color: #7f0000;
+  color: #00663f;
 }
 .l-string-special {
   color: #7f0000;
@@ -300,6 +306,9 @@
   color: #005f5f;
 }
 .l-tag {
+  color: #005e8b;
+}
+.l-tag-attribute {
   color: #005e8b;
 }
 .l-tag-builtin {

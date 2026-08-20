@@ -92,6 +92,12 @@ static DEFAULT_STYLE: LazyLock<Arc<Style>> = LazyLock::new(|| Arc::new(Style::de
 ///
 /// The counterpart of the `options` argument to JavaScript's `highlight()` and
 /// `highlightEvents()`.
+///
+/// ```rust
+/// use lumis::highlight::HighlightOptions;
+///
+/// let options = HighlightOptions::new().rainbow_brackets(true);
+/// ```
 #[derive(Debug, PartialEq, Eq)]
 #[must_use]
 pub struct HighlightOptions<'a, T = ()> {
@@ -811,8 +817,18 @@ fn rainbow_scope_index(depth: usize) -> usize {
 
 #[cfg(test)]
 mod tests {
+
     use super::*;
     use crate::themes;
+
+    #[test]
+    fn options_default_to_every_switch_off() {
+        let options = HighlightOptions::new().rainbow_brackets(true);
+
+        assert!(options.rainbow_brackets_enabled());
+        assert!(!HighlightOptions::default().rainbow_brackets_enabled());
+        assert!(HighlightOptions::default().annotation_items().is_empty());
+    }
 
     #[test]
     fn test_highlighter_without_theme() {
