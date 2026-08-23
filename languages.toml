@@ -1000,9 +1000,9 @@ globs = ["*.qml", "*.qmljs", "*.qmltypes"]
 
 [parsers.racket]
 git = "https://github.com/6cdh/tree-sitter-racket.git"
-rev = "6d63a202602eb350e726b5e7814127ba22ed25fc"
+rev = "b3cbbde75ce2de3079e33c7fe90bd41b1d45be48"
 crate = "tree-sitter-racket"
-version = "0.24.7"
+version = "0.25.0"
 globs = ["*.rkt", "*.rktd", "*.rktl"]
 shebang = ["racket"]
 
