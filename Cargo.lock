@@ -1550,7 +1550,7 @@ dependencies = [
 name = "lumis-js-native"
 version = "0.7.0"
 dependencies = [
- "base64 0.22.1",
+ "base64 0.23.1",
  "lumis-core",
  "lumis-wasm-runtime",
  "napi",
@@ -1578,7 +1578,7 @@ dependencies = [
  "tree-sitter-json",
  "typed-arena",
  "ureq",
- "wasmparser 0.255.0",
+ "wasmparser 0.257.1",
  "wasmtime",
 ]
 
@@ -3550,9 +3550,9 @@ dependencies = [
 
 [[package]]
 name = "tree-sitter-racket"
-version = "0.24.7"
+version = "0.25.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f8395b6a054e6264c67e1ef915f239c4f86575b7d7c69638bdbf3c336c58f128"
+checksum = "066bd54f4513d35a21b44f733da74bb065bb6734e565db96b516a79dd7c29e5f"
 dependencies = [
  "cc",
  "tree-sitter-language",
@@ -3934,9 +3934,9 @@ dependencies = [
 
 [[package]]
 name = "wasmparser"
-version = "0.255.0"
+version = "0.257.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e8e329ef4b5d46e73b91d3ac6924417cad55a8cbbf869c199283383427c3320b"
+checksum = "d92fc335fb6d48f46bda1d8b26b69e28320c15ac3272208333833d6e217e2b4a"
 dependencies = [
  "bitflags 2.13.1",
  "hashbrown 0.17.1",
