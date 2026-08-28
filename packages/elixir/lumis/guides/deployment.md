@@ -5,7 +5,7 @@ languages your application needs at startup so no request pays that cost.
 
 Call `Lumis.Languages.async_load/1` from your application's `start/2`:
 
-```elixir title="lib/my_app/application.ex"
+```elixir
 def start(_type, _args) do
   Lumis.Languages.async_load(~w(markdown elixir javascript rust css html comment))
 
@@ -54,3 +54,65 @@ the half a prepared directory cannot do for you.
 CLI, for a release task or a migration step that runs before the VM that serves.
 Inside a running application prefer `async_load/1`, which keeps what it loads
 instead of compiling and discarding it.
+
+## Build with Nix
+
+A sandboxed Nix build cannot download the precompiled Lumis NIF while
+`mixRelease` compiles dependencies. The failure may be reported as
+`Error while downloading precompiled NIF: erofs` or `eacces` because
+`rustler_precompiled` cannot create its cache under the builder's home
+directory.
+
+Download the NIF while `fetchMixDeps` has fixed-output network access, keep the
+archive in that derivation, and point the release build at the cached copy:
+
+```nix
+let
+  pname = "my_app";
+  version = "0.1.0";
+  src = ./.;
+
+  mixDeps = beamPackages.fetchMixDeps {
+    pname = "mix-deps-${pname}";
+    inherit src version;
+    hash = "sha256-...";
+    mixEnv = "prod";
+
+    postInstall = ''
+      export RUSTLER_PRECOMPILED_GLOBAL_CACHE_PATH="$out/.rustler-precompiled"
+      mix deps.compile nimble_options --no-deps-check
+      mix deps.compile rustler_precompiled --no-deps-check
+      mix deps.compile lumis --no-deps-check
+      rm -f "$RUSTLER_PRECOMPILED_GLOBAL_CACHE_PATH"/metadata-*.exs
+    '';
+  };
+in
+beamPackages.mixRelease {
+  inherit pname src version;
+  mixFodDeps = mixDeps;
+  mixEnv = "prod";
+
+  preConfigure = ''
+    export RUSTLER_PRECOMPILED_GLOBAL_CACHE_PATH="$MIX_DEPS_PATH/.rustler-precompiled"
+  '';
+}
+```
+
+The NIF archive becomes part of the `mixFodDeps` hash. That hash is now specific
+to the Nix system, so provide one per system and update it when the dependency
+set, Lumis version, or artifact-selection settings such as
+`LUMIS_USE_LEGACY_ARTIFACTS` change. Use `preConfigure`, not `preBuild`:
+`mixRelease` compiles dependencies during its configure phase.
+
+For a portable Linux x86_64 release, export
+`LUMIS_USE_LEGACY_ARTIFACTS=true` in both phases so the NIF does not require
+AVX/FMA support from the runtime host.
+
+Building the NIF from source is also possible with
+`config :rustler_precompiled, :force_build, lumis: true`, but the Nix build must
+then provide Rustler, a Rust toolchain, and an offline Cargo dependency source.
+Prefetching the released NIF is usually simpler.
+
+This NIF build cache is separate from the parser data directory described
+above. The release contains the NIF; parsers still need an absolute writable
+`data_dir` at runtime.
