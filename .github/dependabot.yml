@@ -5,18 +5,39 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
+    groups:
+      dependencies:
+        patterns:
+          - "*"
     ignore:
       - dependency-name: "tree-sitter-*"
+      - dependency-name: "wasmtime"
+        update-types:
+          - "version-update:semver-major"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
+    groups:
+      dependencies:
+        patterns:
+          - "*"
 
   - package-ecosystem: "mix"
     directory: "/packages/elixir/lumis"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
+    groups:
+      dependencies:
+        patterns:
+          - "*"
     ignore:
       - dependency-name: "tree-sitter-*"
 
@@ -24,13 +45,28 @@ updates:
     directory: "/packages/elixir/lumis/native/lumis_nif"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
+    groups:
+      dependencies:
+        patterns:
+          - "*"
     ignore:
       - dependency-name: "tree-sitter-*"
+      - dependency-name: "wasmtime"
+        update-types:
+          - "version-update:semver-major"
 
   - package-ecosystem: "npm"
     directory: "/packages/javascript"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
+    groups:
+      dependencies:
+        patterns:
+          - "*"
     ignore:
       - dependency-name: "tree-sitter-*"
       - dependency-name: "@lumis-sh/wasm-*"
