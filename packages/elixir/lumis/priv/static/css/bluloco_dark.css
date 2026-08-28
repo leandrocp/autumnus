@@ -1,5 +1,5 @@
 /* bluloco_dark
- * revision: 4daabf6a9e6b9ecdcb19e7c78e888be0bacd866c
+ * revision: 8973f4b595a96ceb45b3885d533f287182a73c20
  */
 .lumis {
   color: #abb2bf;
@@ -157,19 +157,19 @@
   color: #10b3fe;
 }
 .l-markup-heading-2 {
-  color: #10b3fe;
+  color: #3892ff;
 }
 .l-markup-heading-3 {
-  color: #10b3fe;
+  color: #a081fe;
 }
 .l-markup-heading-4 {
-  color: #10b3fe;
+  color: #ff7af8;
 }
 .l-markup-heading-5 {
-  color: #10b3fe;
+  color: #ff956b;
 }
 .l-markup-heading-6 {
-  color: #10b3fe;
+  color: #ce9888;
 }
 .l-markup-italic {
   font-style: italic;
@@ -196,8 +196,14 @@
 .l-markup-math {
   color: #ff956b;
 }
+.l-markup-math-markdown {
+  color: #ff7af8;
+}
 .l-markup-quote {
   color: #ff956b;
+}
+.l-markup-quote-markdown {
+  color: #a081fe;
 }
 .l-markup-raw {
   color: #ce9888;
