@@ -100,8 +100,9 @@ beamPackages.mixRelease {
 
 The NIF archive becomes part of the `mixFodDeps` hash. That hash is now specific
 to the Nix system, so provide one per system and update it when the dependency
-set or Lumis version changes. Use `preConfigure`, not `preBuild`: `mixRelease`
-compiles dependencies during its configure phase.
+set, Lumis version, or artifact-selection settings such as
+`LUMIS_USE_LEGACY_ARTIFACTS` change. Use `preConfigure`, not `preBuild`:
+`mixRelease` compiles dependencies during its configure phase.
 
 For a portable Linux x86_64 release, export
 `LUMIS_USE_LEGACY_ARTIFACTS=true` in both phases so the NIF does not require
