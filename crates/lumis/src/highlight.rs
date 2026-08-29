@@ -6,7 +6,9 @@
 //! # Custom Formatters
 //!
 //! Custom formatters should implement [`Formatter`](crate::formatters::Formatter)
-//! and use [`highlight_iter()`] for streaming token access.
+//! and use [`highlight_iter()`] for per-token access, or
+//! [`highlight_iter_with_options()`] to opt into the scopes the built-in
+//! formatters produce.
 //!
 //! ```rust,no_run
 //! use lumis::{formatters::Formatter, highlight::highlight_iter};
@@ -48,7 +50,7 @@
 //! }
 //! ```
 //!
-//! ## Using the streaming API with a callback
+//! ## Using the token callback API
 //!
 //! ```rust
 //! use lumis::highlight::highlight_iter;
@@ -298,13 +300,11 @@ impl Highlighter {
     }
 }
 
-/// Streaming syntax highlighting with callback.
+/// Flat token iteration with a callback.
 ///
-/// Iterates over tree-sitter highlight events and calls `on_event_source` for each
-/// source-text event (i.e., each text segment).
-///
-/// This is a streaming API that processes tokens as they are produced by tree-sitter,
-/// avoiding the overhead of collecting all segments into a vector upfront.
+/// Walks the highlight events for `source` and calls `on_event_source` once per
+/// text segment, with the innermost scope and its resolved style, instead of
+/// returning the segments as a vector the way [`Highlighter::highlight`] does.
 ///
 /// # Arguments
 ///
@@ -342,6 +342,59 @@ pub fn highlight_iter<F, E>(
     source: &str,
     language: Language,
     theme: Option<Theme>,
+    on_event_source: F,
+) -> Result<(), HighlightError>
+where
+    F: FnMut(&str, Language, Range<usize>, &'static str, &Style) -> Result<(), E>,
+    E: std::error::Error + Send + Sync + 'static,
+{
+    highlight_iter_with_options(
+        source,
+        language,
+        theme,
+        HighlightOptions::default(),
+        on_event_source,
+    )
+}
+
+/// Flat token iteration with a callback, with options.
+///
+/// See [`highlight_iter`]. With [`HighlightOptions::rainbow_brackets`] the
+/// callback receives the `punctuation.bracket.rainbow.N` scopes the built-in
+/// formatters render, instead of a flat `punctuation.bracket`.
+///
+/// # Errors
+///
+/// Same as [`highlight_iter`].
+///
+/// # Examples
+///
+/// ```rust
+/// use lumis::highlight::{highlight_iter_with_options, HighlightOptions};
+/// use lumis::languages::Language;
+///
+/// let options = HighlightOptions { rainbow_brackets: true };
+/// let mut scopes = Vec::new();
+///
+/// highlight_iter_with_options(
+///     "fn main() { let x = (1); }",
+///     Language::Rust,
+///     None,
+///     options,
+///     |_text, _language, _range, scope, _style| {
+///         scopes.push(scope);
+///         Ok::<_, std::io::Error>(())
+///     },
+/// )
+/// .unwrap();
+///
+/// assert!(scopes.contains(&"punctuation.bracket.rainbow.1"));
+/// ```
+pub fn highlight_iter_with_options<F, E>(
+    source: &str,
+    language: Language,
+    theme: Option<Theme>,
+    options: HighlightOptions,
     mut on_event_source: F,
 ) -> Result<(), HighlightError>
 where
@@ -349,32 +402,29 @@ where
     E: std::error::Error + Send + Sync + 'static,
 {
     let mut ts_highlighter = TSHighlighter::new();
-    let events = ts_highlighter
-        .highlight(language.config(), source.as_bytes(), None, |injected| {
-            Some(Language::guess(Some(injected), "").config())
-        })
-        .map_err(|e| HighlightError::HighlighterInit(format!("{:?}", e)))?;
+    let events =
+        highlight_events_with(&mut ts_highlighter, source, language, options, |injected| {
+            Some(Language::guess(Some(injected), ""))
+        })?;
 
     let mut style_stack: Vec<Style> = vec![Style::default()];
     let mut scope_stack: Vec<&'static str> = vec![""];
     let mut language_stack = vec![language];
 
     for event in events {
-        let event = event.map_err(|e| HighlightError::EventProcessing(format!("{:?}", e)))?;
-
         match event {
-            HighlightEvent::HighlightStart {
-                highlight,
+            CoreHighlightEvent::Start {
+                scope_index,
                 language: lang,
             } => {
-                let scope = HIGHLIGHT_NAMES[highlight.0];
+                let scope = HIGHLIGHT_NAMES.get(scope_index).copied().unwrap_or("");
                 let injected_language = Language::guess(Some(&lang), "");
                 let new_style = resolve_style(theme.as_ref(), scope, injected_language.id_name());
                 style_stack.push(new_style);
                 scope_stack.push(scope);
                 language_stack.push(injected_language);
             }
-            HighlightEvent::Source { start, end } => {
+            CoreHighlightEvent::Source { start, end } => {
                 let text = &source[start..end];
                 if !text.is_empty() {
                     let default_style = Style::default();
@@ -391,7 +441,7 @@ where
                     .map_err(|e| HighlightError::EventProcessing(e.to_string()))?;
                 }
             }
-            HighlightEvent::HighlightEnd => {
+            CoreHighlightEvent::End => {
                 if style_stack.len() > 1 {
                     style_stack.pop();
                 }
@@ -880,6 +930,65 @@ mod tests {
 
         assert!(count > 0, "Expected at least some segments");
         assert!(has_colors, "Expected at least some segments with colors");
+    }
+
+    fn iter_scopes(code: &str, options: HighlightOptions) -> Vec<&'static str> {
+        let mut scopes = Vec::new();
+        highlight_iter_with_options(
+            code,
+            Language::Rust,
+            None,
+            options,
+            |_text, _language, _range, scope, _style| {
+                scopes.push(scope);
+                Ok::<_, std::io::Error>(())
+            },
+        )
+        .unwrap();
+        scopes
+    }
+
+    #[test]
+    fn highlight_iter_reports_rainbow_bracket_scopes_when_enabled() {
+        let code = "fn main() { let x = (1); }";
+
+        let plain = iter_scopes(code, HighlightOptions::default());
+        assert!(plain.contains(&"punctuation.bracket"));
+        assert!(!plain
+            .iter()
+            .any(|scope| scope.starts_with("punctuation.bracket.rainbow")));
+
+        let rainbow = iter_scopes(
+            code,
+            HighlightOptions {
+                rainbow_brackets: true,
+            },
+        );
+        assert!(rainbow.contains(&"punctuation.bracket.rainbow.1"));
+        assert!(rainbow.contains(&"punctuation.bracket.rainbow.2"));
+    }
+
+    #[test]
+    fn highlight_iter_with_rainbow_brackets_preserves_source_text() {
+        let code = "fn main() { let x = (1); }";
+        let mut text = String::new();
+
+        highlight_iter_with_options(
+            code,
+            Language::Rust,
+            None,
+            HighlightOptions {
+                rainbow_brackets: true,
+            },
+            |token, _language, range, _scope, _style| {
+                assert_eq!(&code[range], token);
+                text.push_str(token);
+                Ok::<_, std::io::Error>(())
+            },
+        )
+        .unwrap();
+
+        assert_eq!(text, code);
     }
 
     #[test]

@@ -91,6 +91,62 @@ describe("custom formatter", () => {
     expect(output).toContain('class="language-json"');
   }, 30_000);
 
+  it("reports rainbow bracket scopes when highlightIter asks for them", async () => {
+    const hl = await createHighlighter({ languages: [json] });
+    const source = '{"outer":{"inner":[1]}}';
+
+    const collect = (options?: { rainbowBrackets?: boolean }): string[] => {
+      const scopes: string[] = [];
+      const formatter: Formatter = {
+        language: json,
+        format(src: string) {
+          highlightIter(
+            src,
+            this.language,
+            undefined,
+            (_text, _language, _range, scope) => {
+              scopes.push(scope);
+            },
+            options,
+          );
+          return "";
+        },
+      };
+      hl.highlight(source, formatter);
+      return scopes;
+    };
+
+    const plain = collect();
+    expect(plain).toContain("punctuation.bracket");
+    expect(plain.some((scope) => scope.startsWith("punctuation.bracket.rainbow"))).toBe(false);
+
+    const rainbow = collect({ rainbowBrackets: true });
+    expect(rainbow).toContain("punctuation.bracket.rainbow.1");
+    expect(rainbow).toContain("punctuation.bracket.rainbow.2");
+  }, 30_000);
+
+  it("reports rainbow bracket scopes from hl.highlightIter", async () => {
+    const hl = await createHighlighter({ languages: [json] });
+    const source = '{"outer":{"inner":[1]}}';
+
+    const scopes: string[] = [];
+    let text = "";
+    hl.highlightIter(
+      source,
+      json,
+      undefined,
+      (token, _language, range, scope) => {
+        expect(source.slice(range.start, range.end)).toBe(token);
+        scopes.push(scope);
+        text += token;
+      },
+      { rainbowBrackets: true },
+    );
+
+    expect(text).toBe(source);
+    expect(scopes).toContain("punctuation.bracket.rainbow.1");
+  }, 30_000);
+
   it("restores the outer runtime after nested formatter calls", async () => {
     const outerHighlighter = await createHighlighter({ languages: [json] });
     const innerHighlighter = await createHighlighter({ languages: [diff] });
