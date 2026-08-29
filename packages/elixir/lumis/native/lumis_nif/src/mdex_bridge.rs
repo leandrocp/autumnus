@@ -104,15 +104,7 @@ impl ExFormatterOption {
         attributes: &HashMap<String, String>,
         render_unsafe: bool,
     ) -> Self {
-        let pre_class = || {
-            attributes.get("pre_class").map(|class| {
-                if render_unsafe {
-                    class.clone()
-                } else {
-                    html::escape(class)
-                }
-            })
-        };
+        let pre_class = || mdex_attribute(attributes, "pre_class", render_unsafe);
 
         match self {
             Self::HtmlInline {
@@ -137,7 +129,7 @@ impl ExFormatterOption {
                     include_highlights = true;
                 }
                 if let Some(lines) =
-                    inline_highlight_lines(attributes, Some(line_background(&theme)))
+                    inline_highlight_lines(attributes, Some(line_background(&theme)), render_unsafe)
                 {
                     highlight_lines = Some(lines);
                 }
@@ -163,7 +155,7 @@ impl ExFormatterOption {
                 if let Some(class) = pre_class() {
                     formatter_pre_class = Some(class);
                 }
-                if let Some(lines) = linked_highlight_lines(attributes) {
+                if let Some(lines) = linked_highlight_lines(attributes, render_unsafe) {
                     highlight_lines = Some(lines);
                 }
 
@@ -194,6 +186,7 @@ impl ExFormatterOption {
                 if let Some(lines) = inline_highlight_lines(
                     attributes,
                     Some(line_background_from_name(attributes.get("theme"))),
+                    render_unsafe,
                 ) {
                     highlight_lines = Some(lines);
                 } else if let Some(lines) = highlight_lines.as_mut() {
@@ -227,8 +220,11 @@ impl ExFormatterOption {
                 if let Some(theme_name) = attributes.get("theme") {
                     theme = Some(ThemeOrString::String(theme_name.clone()));
                 }
-                let highlight_lines =
-                    inline_highlight_lines(attributes, Some(line_background(&theme)));
+                let highlight_lines = inline_highlight_lines(
+                    attributes,
+                    Some(line_background(&theme)),
+                    render_unsafe,
+                );
 
                 Self::HtmlInline {
                     theme,
@@ -246,7 +242,7 @@ impl ExFormatterOption {
                 italic: false,
                 include_highlights: attributes.contains_key("include_highlights"),
                 rainbow_brackets,
-                highlight_lines: inline_highlight_lines(attributes, None),
+                highlight_lines: inline_highlight_lines(attributes, None, render_unsafe),
                 header: None,
             },
         }
@@ -256,6 +252,7 @@ impl ExFormatterOption {
 fn inline_highlight_lines(
     attributes: &HashMap<String, String>,
     default_style: Option<String>,
+    render_unsafe: bool,
 ) -> Option<ExHtmlInlineHighlightLines> {
     let lines = parse_highlight_lines(attributes.get("highlight_lines")?)?;
     let style = attributes
@@ -263,7 +260,7 @@ fn inline_highlight_lines(
         .map(|style| match style.as_str() {
             "theme" => ExHtmlInlineHighlightLinesStyle::Theme,
             style => ExHtmlInlineHighlightLinesStyle::Style {
-                style: style.to_string(),
+                style: escape_mdex_attribute(style, render_unsafe),
             },
         })
         .or_else(|| default_style.map(|style| ExHtmlInlineHighlightLinesStyle::Style { style }));
@@ -271,8 +268,26 @@ fn inline_highlight_lines(
     Some(ExHtmlInlineHighlightLines {
         lines,
         style,
-        class: attributes.get("highlight_lines_class").cloned(),
+        class: mdex_attribute(attributes, "highlight_lines_class", render_unsafe),
     })
+}
+
+fn mdex_attribute(
+    attributes: &HashMap<String, String>,
+    name: &str,
+    render_unsafe: bool,
+) -> Option<String> {
+    attributes
+        .get(name)
+        .map(|value| escape_mdex_attribute(value, render_unsafe))
+}
+
+fn escape_mdex_attribute(value: &str, render_unsafe: bool) -> String {
+    if render_unsafe {
+        value.to_string()
+    } else {
+        html::escape(value)
+    }
 }
 
 fn line_background(theme: &Option<ThemeOrString>) -> String {
@@ -330,12 +345,11 @@ fn flatten_events(source: &str, events: Vec<HighlightEvent>) -> Vec<HighlightEve
 
 fn linked_highlight_lines(
     attributes: &HashMap<String, String>,
+    render_unsafe: bool,
 ) -> Option<ExHtmlLinkedHighlightLines> {
     Some(ExHtmlLinkedHighlightLines {
         lines: parse_highlight_lines(attributes.get("highlight_lines")?)?,
-        class: attributes
-            .get("highlight_lines_class")
-            .cloned()
+        class: mdex_attribute(attributes, "highlight_lines_class", render_unsafe)
             .unwrap_or_else(|| "highlighted".to_string()),
     })
 }
@@ -414,5 +428,66 @@ mod tests {
                 HighlightEvent::End,
             ]
         );
+    }
+
+    #[test]
+    fn escapes_decorator_attributes_in_safe_rendering() {
+        let attributes = HashMap::from([
+            ("highlight_lines".to_string(), "1".to_string()),
+            (
+                "highlight_lines_style".to_string(),
+                "color: red;\" onmouseover=\"alert(1)".to_string(),
+            ),
+            (
+                "highlight_lines_class".to_string(),
+                "line\" onmouseover=\"alert(1)".to_string(),
+            ),
+        ]);
+
+        let inline = inline_highlight_lines(&attributes, None, false).unwrap();
+        assert!(matches!(
+            inline.style,
+            Some(ExHtmlInlineHighlightLinesStyle::Style { style })
+                if style == html::escape(&attributes["highlight_lines_style"])
+        ));
+        assert_eq!(
+            inline.class,
+            Some(html::escape(&attributes["highlight_lines_class"]))
+        );
+
+        let linked = linked_highlight_lines(&attributes, false).unwrap();
+        assert_eq!(
+            linked.class,
+            html::escape(&attributes["highlight_lines_class"])
+        );
+    }
+
+    #[test]
+    fn preserves_decorator_attributes_in_unsafe_rendering() {
+        let attributes = HashMap::from([
+            ("highlight_lines".to_string(), "1".to_string()),
+            (
+                "highlight_lines_style".to_string(),
+                "color: red;\" onmouseover=\"alert(1)".to_string(),
+            ),
+            (
+                "highlight_lines_class".to_string(),
+                "line\" onmouseover=\"alert(1)".to_string(),
+            ),
+        ]);
+
+        let inline = inline_highlight_lines(&attributes, None, true).unwrap();
+        assert!(matches!(
+            inline.style,
+            Some(ExHtmlInlineHighlightLinesStyle::Style { style })
+                if style == attributes["highlight_lines_style"]
+        ));
+        assert_eq!(
+            inline.class.as_deref(),
+            Some(attributes["highlight_lines_class"].as_str())
+        );
+
+        let linked = linked_highlight_lines(&attributes, true).unwrap();
+        assert_eq!(linked.class, attributes["highlight_lines_class"]);
     }
 }
