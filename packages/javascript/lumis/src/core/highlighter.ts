@@ -42,6 +42,7 @@ export interface Highlighter {
     language: LanguageRef | undefined,
     theme: Theme | undefined,
     onToken: HighlightCallback,
+    options?: HighlightOptions,
   ): void;
   /** Load a language by object, lazy handle, or string ID from a registered bundle. No-op if already loaded. */
   loadLanguage(language: Language | LazyLanguage | string): Promise<void>;
@@ -184,9 +185,10 @@ function runHighlightIter(
   language: LanguageRef | undefined,
   theme: Theme | undefined,
   onToken: HighlightCallback,
+  options: HighlightOptions = {},
 ): void {
   const loaded = resolveLoadedLanguage(runtime, language);
-  const events = runtime.highlightEvents(source, loaded);
+  const events = runtime.highlightEvents(source, loaded, options);
   const bytes = encoder.encode(source);
   const scopeStack: Array<{ scope: string; language: string }> = [];
 
@@ -247,15 +249,19 @@ function requireCurrentRuntime(fnName: string): RuntimeLike {
  * Sync free function usable inside {@link Formatter.format}. For top-level
  * (non-formatter) iteration, use `hl.highlightIter` on a {@link Highlighter}
  * instance instead.
+ *
+ * `options.rainbowBrackets` reports `punctuation.bracket.rainbow.N` scopes,
+ * the same ones the built-in formatters render.
  */
 export function highlightIter(
   source: string,
   language: LanguageRef | undefined,
   theme: Theme | undefined,
   onToken: HighlightCallback,
+  options: HighlightOptions = {},
 ): void {
   const runtime = requireCurrentRuntime("highlightIter");
-  runHighlightIter(runtime, source, detectLanguageRef(source, language), theme, onToken);
+  runHighlightIter(runtime, source, detectLanguageRef(source, language), theme, onToken, options);
 }
 
 /**
@@ -577,8 +583,15 @@ export function createHighlighterModule(factory: HighlighterModuleFactory) {
           const detectedRef = detectLanguageRef(source, fmt.language);
           return runFormatter(runtime, source, fmt, detectedRef);
         },
-        highlightIter: (source, language, theme, onToken) =>
-          runHighlightIter(runtime, source, detectLanguageRef(source, language), theme, onToken),
+        highlightIter: (source, language, theme, onToken, options) =>
+          runHighlightIter(
+            runtime,
+            source,
+            detectLanguageRef(source, language),
+            theme,
+            onToken,
+            options,
+          ),
         async loadLanguage(input) {
           await loadHighlighterLanguage(input, runtime, lazyRegistry);
         },
