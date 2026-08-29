@@ -426,8 +426,9 @@ Example:
 mise run release-prepare cargo-lumis-cli 0.2.0
 ```
 
-`release-prepare` updates only the target package version file and prepends the next changelog entry with `git-cliff`.
-
-If a release requires dependent manifests to move in lockstep, update those files separately and commit them with the release prep.
+`release-prepare` updates the target package version file and prepends the next
+changelog entry with `git-cliff`. Cargo releases also rewrite dependent
+manifests and lockfiles, and `hex-lumis` refreshes the packaged NIF lockfile.
+Review and commit every file the task touches.
 
 `npm-lumis` is the one exception: it additionally bumps `native/Cargo.toml`, the `@lumis-sh/lumis-native` selector, and all platform packages, because the release workflow publishes them under the same version before the main package. See [JavaScript packages](#javascript-packages).

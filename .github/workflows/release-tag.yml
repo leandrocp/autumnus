@@ -63,7 +63,12 @@ jobs:
 
           tag="$package/v$version"
           if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
-            echo "$tag already exists"
+            tagged_sha="$(git rev-parse "refs/tags/$tag^{commit}")"
+            if [ "$tagged_sha" != "$GITHUB_SHA" ]; then
+              echo "$tag points to $tagged_sha, not release commit $GITHUB_SHA" >&2
+              exit 1
+            fi
+            echo "$tag already points to $GITHUB_SHA"
             exit 0
           fi
 
