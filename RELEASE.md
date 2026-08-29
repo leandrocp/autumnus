@@ -79,6 +79,11 @@ tag and asks `git-cliff --bumped-version` what the commits since then add up to,
 using the same `--include-path` scoping and the same `cliff.toml` that write the
 changelog. Three things make a package sit the round out:
 
+For a `0.x` package, every non-breaking release bumps the patch version,
+including one with `feat` commits; only a breaking change bumps the minor
+version. From `1.0.0` onward, features bump minor and breaking changes bump
+major.
+
 - **`git-cliff` has nothing to bump.** Only the commit types `cliff.toml` groups
   count, so a package whose only new commits are `build(deps)` gets no pull
   request. `mise run release-needed` still lists it, because it filters on

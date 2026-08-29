@@ -38,5 +38,5 @@ commit_parsers = [
 ]
 
 [bump]
-features_always_bump_minor = true
+features_always_bump_minor = false
 breaking_always_bump_major = false
