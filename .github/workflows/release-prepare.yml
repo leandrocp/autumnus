@@ -116,6 +116,7 @@ jobs:
 
       - name: Prepare release
         env:
+          GITHUB_TOKEN: ${{ github.token }}
           PACKAGE: ${{ matrix.release.package }}
           VERSION: ${{ matrix.release.version }}
         run: |
