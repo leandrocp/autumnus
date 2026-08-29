@@ -8,7 +8,7 @@ defmodule Lumis.MixProject do
     [
       app: :lumis,
       version: @version,
-      elixir: "~> 1.15",
+      elixir: "~> 1.14",
       start_permanent: Mix.env() == :prod,
       build_embedded: Mix.env() == :prod,
       package: package(),

@@ -64,7 +64,9 @@ fn render_code_fence(
     // Comrak includes the code-fence terminator's newline in the literal. Its
     // adapter contract historically did not turn that into another visual line.
     let source = source.strip_suffix('\n').unwrap_or(source);
-    let language = Language::guess(language, source);
+    // A fence without an info string stays plain. Content detection would let a
+    // shebang or a doctype inside a bare fence pick a language MDEx never named.
+    let language = Language::guess(Some(language.unwrap_or("plaintext")), source);
     let formatter = formatter
         .unwrap_or_default()
         .with_mdex_attributes(attributes, render_unsafe);
@@ -362,15 +364,17 @@ fn parse_highlight_lines(spec: &str) -> Option<Vec<ExLineSpec>> {
         .map(str::trim)
         .filter(|part| !part.is_empty())
     {
+        // A part that does not parse is dropped on its own. One typo in a
+        // decorator must not silently turn off highlighting for the whole fence.
         if let Some((start, end)) = part.split_once('-') {
-            let start = start.trim().parse().ok()?;
-            let end = end.trim().parse().ok()?;
+            let (Ok(start), Ok(end)) = (start.trim().parse(), end.trim().parse()) else {
+                continue;
+            };
             if start == 0 || start > end {
                 continue;
             }
             lines.push(ExLineSpec::Range { start, end });
-        } else {
-            let line = part.parse().ok()?;
+        } else if let Ok(line) = part.parse() {
             if line > 0 {
                 lines.push(ExLineSpec::Single(line));
             }
@@ -384,12 +388,164 @@ fn parse_highlight_lines(spec: &str) -> Option<Vec<ExLineSpec>> {
 mod tests {
     use super::*;
 
+    fn render(
+        source: &str,
+        language: Option<&str>,
+        formatter: Option<ExFormatterOption>,
+        attributes: &[(&str, &str)],
+        render_unsafe: bool,
+    ) -> String {
+        let attributes = attributes
+            .iter()
+            .map(|(key, value)| (key.to_string(), value.to_string()))
+            .collect();
+
+        render_code_fence(source, language, formatter, &attributes, render_unsafe).unwrap()
+    }
+
     #[test]
     fn parses_single_lines_and_ranges() {
         let lines = parse_highlight_lines("1, 3-5, 0, 7-6").unwrap();
         assert_eq!(lines.len(), 2);
         assert!(matches!(lines[0], ExLineSpec::Single(1)));
         assert!(matches!(lines[1], ExLineSpec::Range { start: 3, end: 5 }));
+    }
+
+    #[test]
+    fn keeps_parsable_parts_when_one_part_is_malformed() {
+        let lines = parse_highlight_lines("1, oops, 3-5, 7-x").unwrap();
+        assert_eq!(lines.len(), 2);
+        assert!(matches!(lines[0], ExLineSpec::Single(1)));
+        assert!(matches!(lines[1], ExLineSpec::Range { start: 3, end: 5 }));
+    }
+
+    #[test]
+    fn omits_the_closing_tags_comrak_writes_itself() {
+        let html = render("hello\n", Some("plaintext"), None, &[], false);
+        assert!(html.starts_with("<pre"), "{html}");
+        assert!(!html.contains("</code></pre>"), "{html}");
+    }
+
+    #[test]
+    fn does_not_render_the_code_fence_terminator_as_a_line() {
+        let one_line = render("hello\n", Some("plaintext"), None, &[], false);
+        assert_eq!(one_line.matches("data-line=").count(), 1, "{one_line}");
+    }
+
+    #[test]
+    fn a_fence_without_an_info_string_stays_plain() {
+        let html = render("#!/usr/bin/env python\nx = 1\n", None, None, &[], false);
+        assert!(html.contains("language-plaintext"), "{html}");
+        assert!(!html.contains("language-python"), "{html}");
+    }
+
+    #[test]
+    fn decorator_attributes_override_the_formatter() {
+        let html = render(
+            "hello\n",
+            Some("plaintext"),
+            None,
+            &[("pre_class", "custom-class"), ("highlight_lines", "1")],
+            false,
+        );
+
+        assert!(html.contains("custom-class"), "{html}");
+        assert!(html.contains("background-color: #3b4252;"), "{html}");
+    }
+
+    #[test]
+    fn a_light_theme_decorator_picks_the_light_line_background() {
+        let html = render(
+            "hello\n",
+            Some("plaintext"),
+            None,
+            &[("theme", "github_light"), ("highlight_lines", "1")],
+            false,
+        );
+
+        assert!(html.contains("background-color: #e7eaf0;"), "{html}");
+    }
+
+    #[test]
+    fn escapes_decorator_attributes_in_the_rendered_html() {
+        let injection = "x\" onmouseover=\"alert(1)";
+        let html = render(
+            "hello\n",
+            Some("plaintext"),
+            None,
+            &[
+                ("pre_class", injection),
+                ("highlight_lines", "1"),
+                ("highlight_lines_class", injection),
+                ("highlight_lines_style", injection),
+            ],
+            false,
+        );
+
+        assert!(!html.contains("onmouseover=\"alert(1)"), "{html}");
+        assert!(html.contains("&quot;"), "{html}");
+    }
+
+    #[test]
+    fn preserves_decorator_attributes_when_rendering_unsafe() {
+        let html = render(
+            "hello\n",
+            Some("plaintext"),
+            None,
+            &[
+                ("highlight_lines", "1"),
+                ("highlight_lines_style", "color: red;"),
+            ],
+            true,
+        );
+
+        assert!(html.contains("color: red;"), "{html}");
+    }
+
+    #[test]
+    fn a_linked_formatter_defaults_the_highlighted_line_class() {
+        let formatter = ExFormatterOption::HtmlLinked {
+            pre_class: None,
+            rainbow_brackets: false,
+            highlight_lines: None,
+            header: None,
+        };
+        let html = render(
+            "hello\n",
+            Some("plaintext"),
+            Some(formatter),
+            &[("highlight_lines", "1")],
+            false,
+        );
+
+        assert!(html.contains("highlighted"), "{html}");
+    }
+
+    #[test]
+    fn an_out_of_range_highlight_line_highlights_nothing() {
+        let html = render(
+            "hello\n",
+            Some("plaintext"),
+            None,
+            &[("highlight_lines", "5-9")],
+            false,
+        );
+
+        assert!(!html.contains("background-color: #3b4252;"), "{html}");
+    }
+
+    #[test]
+    fn a_header_never_survives_the_bridge() {
+        // Comrak writes the closing tags, so an outer header could never be closed.
+        let html = render(
+            "hello\n",
+            Some("plaintext"),
+            None,
+            &[("pre_class", "plain")],
+            false,
+        );
+
+        assert!(html.starts_with("<pre"), "{html}");
     }
 
     #[test]
