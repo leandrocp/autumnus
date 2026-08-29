@@ -1,5 +1,6 @@
 [tools]
 actionlint = "1.7.12"
+git-cliff = "2.13.1"
 python = "3.11"
 stylua = "2.5.2"
 tree-sitter = "0.26"
@@ -61,12 +62,13 @@ check_bin node "https://nodejs.org"
 check_bin pnpm "https://pnpm.io/installation"
 check_bin mise "https://mise.jdx.dev/getting-started.html"
 check_bin mix "https://elixir-lang.org/install.html"
+check_bin jq "https://jqlang.org/download"
 check_bin stylua "run 'mise install'"
+check_bin git-cliff "run 'mise install'"
 echo ""
 
 echo "Checking optional tools..."
 check_tree_sitter_cli
-check_bin git-cliff "https://git-cliff.org"
 check_bin nvim "https://neovim.io (needed for theme generation)"
 echo ""
 
@@ -881,37 +883,44 @@ set -euo pipefail
 cargo run --manifest-path crates/dev/Cargo.toml -- list-themes
 '''
 
+[tasks.'release-packages']
+description = "List every releasable package and the commit paths that scope its release"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+cat <<'TABLE'
+cargo-lumis-core|crates/lumis-core
+cargo-lumis-build|crates/lumis-build
+cargo-lumis-wasm-runtime|crates/lumis-wasm-runtime
+cargo-lumis|crates/lumis
+cargo-lumis-cli|crates/lumis-cli|crates/lumis-wasm-runtime
+npm-themes|packages/javascript/themes
+npm-lumis|packages/javascript/lumis|crates/lumis|crates/lumis-core|crates/lumis-wasm-runtime
+npm-markdown-it-lumis|packages/javascript/markdown-it-lumis
+npm-rehype-lumis|packages/javascript/rehype-lumis
+npm-react|packages/javascript/react
+npm-cli|packages/javascript/cli|crates/lumis-cli|crates/lumis-wasm-runtime
+npm-wasm-bundle-web|packages/javascript/wasm-bundle-web
+npm-wasm-bundle-web-extra|packages/javascript/wasm-bundle-web-extra
+npm-wasm-bundle-system|packages/javascript/wasm-bundle-system
+npm-wasm-bundle-backend|packages/javascript/wasm-bundle-backend
+npm-wasm-bundle-full|packages/javascript/wasm-bundle-full
+hex-lumis|packages/elixir/lumis
+TABLE
+'''
+
 [tasks.'release-needed']
 description = "List packages with non-chore path-scoped commits since their latest release tag"
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
-packages=(
-    "cargo-lumis-core|crates/lumis-core"
-    "cargo-lumis-build|crates/lumis-build"
-    "cargo-lumis-wasm-runtime|crates/lumis-wasm-runtime"
-    "cargo-lumis|crates/lumis"
-    "cargo-lumis-cli|crates/lumis-cli|crates/lumis-wasm-runtime"
-    "npm-themes|packages/javascript/themes"
-    "npm-lumis|packages/javascript/lumis|crates/lumis|crates/lumis-core|crates/lumis-wasm-runtime"
-    "npm-markdown-it-lumis|packages/javascript/markdown-it-lumis"
-    "npm-rehype-lumis|packages/javascript/rehype-lumis"
-    "npm-react|packages/javascript/react"
-    "npm-cli|packages/javascript/cli|crates/lumis-cli|crates/lumis-wasm-runtime"
-    "npm-wasm-bundle-web|packages/javascript/wasm-bundle-web"
-    "npm-wasm-bundle-web-extra|packages/javascript/wasm-bundle-web-extra"
-    "npm-wasm-bundle-system|packages/javascript/wasm-bundle-system"
-    "npm-wasm-bundle-backend|packages/javascript/wasm-bundle-backend"
-    "npm-wasm-bundle-full|packages/javascript/wasm-bundle-full"
-    "hex-lumis|packages/elixir/lumis"
-)
-
+table="$(mise run release-packages)"
 found=0
 
-for entry in "${packages[@]}"; do
+while IFS= read -r entry; do
+    [ -n "$entry" ] || continue
     package="${entry%%|*}"
-    paths="${entry#*|}"
-    IFS='|' read -r -a package_paths <<< "$paths"
+    IFS='|' read -r -a package_paths <<< "${entry#*|}"
     tag="$(git tag --list "$package/v*" --sort=-version:refname | head -n1)"
 
     if [ -n "$tag" ]; then
@@ -935,11 +944,78 @@ for entry in "${packages[@]}"; do
         echo "  $line"
     done <<< "$commits"
     echo ""
-done
+done <<< "$table"
 
 if [ "$found" -eq 0 ]; then
     echo "No package-scoped commits found since the latest package tags."
 fi
+'''
+
+[tasks.'release-version']
+description = "Print the version a package's manifest declares in the working tree"
+usage = '''
+arg "<package>"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+package="${usage_package?}"
+
+entry="$(mise run release-packages | awk -F'|' -v name="$package" '$1 == name')"
+if [ -z "$entry" ]; then
+    echo "Unknown package: $package" >&2
+    exit 1
+fi
+
+IFS='|' read -r -a package_paths <<< "${entry#*|}"
+directory="${package_paths[0]}"
+
+case "${package%%-*}" in
+    cargo) sed -n 's/^version = "\([^"]*\)"$/\1/p' "$directory/Cargo.toml" | head -n1 ;;
+    npm) jq -r .version "$directory/package.json" ;;
+    hex) sed -n 's/^  @version "\([^"]*\)"$/\1/p' "$directory/mix.exs" | head -n1 ;;
+esac
+'''
+
+[tasks.'release-plan']
+description = "Print the package and version of every release that can be prepared from the current branch"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+table="$(mise run release-packages)"
+
+while IFS= read -r entry; do
+    [ -n "$entry" ] || continue
+    package="${entry%%|*}"
+    IFS='|' read -r -a package_paths <<< "${entry#*|}"
+
+    current="$(mise run release-version "$package")"
+
+    tag="$(git tag --list "$package/v*" --sort=-version:refname | head -n1)"
+    if [ -z "$tag" ]; then
+        printf 'skipping %s: no %s/v* tag yet, so the first release has to be cut by hand\n' "$package" "$package" >&2
+        continue
+    fi
+
+    if [ "$current" != "${tag#*/v}" ]; then
+        printf 'skipping %s: %s is already prepared and %s is still the latest tag\n' "$package" "$current" "$tag" >&2
+        continue
+    fi
+
+    include_args=()
+    for path in "${package_paths[@]}"; do
+        include_args+=(--include-path "$path/**/*")
+    done
+
+    next="$(git-cliff --config cliff.toml --tag-pattern "$package/v[0-9].*" --bumped-version "${include_args[@]}")"
+    next="${next#*/v}"
+
+    if [ "$next" = "$current" ]; then
+        continue
+    fi
+
+    printf '%s %s\n' "$package" "$next"
+done <<< "$table"
 '''
 
 [tasks.'release-prepare']
@@ -953,149 +1029,33 @@ run = '''
 set -euo pipefail
 package="${usage_package?}"
 version="${usage_version?}"
-case "$package" in
-    cargo-lumis)
-        manifest="crates/lumis/Cargo.toml"
-        changelog="crates/lumis/CHANGELOG.md"
-        include_path="crates/lumis/**/*"
-        kind="cargo"
-        cargo_package="lumis"
-        ;;
-    cargo-lumis-core)
-        manifest="crates/lumis-core/Cargo.toml"
-        changelog="crates/lumis-core/CHANGELOG.md"
-        include_path="crates/lumis-core/**/*"
-        kind="cargo"
-        cargo_package="lumis-core"
-        ;;
-    cargo-lumis-build)
-        manifest="crates/lumis-build/Cargo.toml"
-        changelog="crates/lumis-build/CHANGELOG.md"
-        include_path="crates/lumis-build/**/*"
-        kind="cargo"
-        cargo_package="lumis-build"
-        ;;
-    cargo-lumis-wasm-runtime)
-        manifest="crates/lumis-wasm-runtime/Cargo.toml"
-        changelog="crates/lumis-wasm-runtime/CHANGELOG.md"
-        include_path="crates/lumis-wasm-runtime/**/*"
-        kind="cargo"
-        cargo_package="lumis-wasm-runtime"
-        ;;
-    cargo-lumis-cli)
-        manifest="crates/lumis-cli/Cargo.toml"
-        changelog="crates/lumis-cli/CHANGELOG.md"
-        include_path="crates/lumis-cli/**/*"
-        kind="cargo"
-        cargo_package="lumis-cli"
-        ;;
-    npm-lumis)
-        manifest="packages/javascript/lumis/package.json"
-        changelog="packages/javascript/lumis/CHANGELOG.md"
-        include_path="packages/javascript/lumis/**/*"
-        kind="npm"
-        ;;
-    npm-markdown-it-lumis)
-        manifest="packages/javascript/markdown-it-lumis/package.json"
-        changelog="packages/javascript/markdown-it-lumis/CHANGELOG.md"
-        include_path="packages/javascript/markdown-it-lumis/**/*"
-        kind="npm"
-        ;;
-    npm-rehype-lumis)
-        manifest="packages/javascript/rehype-lumis/package.json"
-        changelog="packages/javascript/rehype-lumis/CHANGELOG.md"
-        include_path="packages/javascript/rehype-lumis/**/*"
-        kind="npm"
-        ;;
-    npm-react)
-        manifest="packages/javascript/react/package.json"
-        changelog="packages/javascript/react/CHANGELOG.md"
-        include_path="packages/javascript/react/**/*"
-        kind="npm"
-        ;;
-    npm-cli)
-        manifest="packages/javascript/cli/package.json"
-        changelog="packages/javascript/cli/CHANGELOG.md"
-        include_path="packages/javascript/cli/**/*"
-        kind="npm"
-        ;;
-    npm-themes)
-        manifest="packages/javascript/themes/package.json"
-        changelog="packages/javascript/themes/CHANGELOG.md"
-        include_path="packages/javascript/themes/**/*"
-        kind="npm"
-        ;;
-    npm-wasm-bundle-web)
-        manifest="packages/javascript/wasm-bundle-web/package.json"
-        changelog="packages/javascript/wasm-bundle-web/CHANGELOG.md"
-        include_path="packages/javascript/wasm-bundle-web/**/*"
-        kind="npm"
-        ;;
-    npm-wasm-bundle-web-extra)
-        manifest="packages/javascript/wasm-bundle-web-extra/package.json"
-        changelog="packages/javascript/wasm-bundle-web-extra/CHANGELOG.md"
-        include_path="packages/javascript/wasm-bundle-web-extra/**/*"
-        kind="npm"
-        ;;
-    npm-wasm-bundle-system)
-        manifest="packages/javascript/wasm-bundle-system/package.json"
-        changelog="packages/javascript/wasm-bundle-system/CHANGELOG.md"
-        include_path="packages/javascript/wasm-bundle-system/**/*"
-        kind="npm"
-        ;;
-    npm-wasm-bundle-backend)
-        manifest="packages/javascript/wasm-bundle-backend/package.json"
-        changelog="packages/javascript/wasm-bundle-backend/CHANGELOG.md"
-        include_path="packages/javascript/wasm-bundle-backend/**/*"
-        kind="npm"
-        ;;
-    npm-wasm-bundle-full)
-        manifest="packages/javascript/wasm-bundle-full/package.json"
-        changelog="packages/javascript/wasm-bundle-full/CHANGELOG.md"
-        include_path="packages/javascript/wasm-bundle-full/**/*"
-        kind="npm"
-        ;;
-    hex-lumis)
-        manifest="packages/elixir/lumis/mix.exs"
-        changelog="packages/elixir/lumis/CHANGELOG.md"
-        include_path="packages/elixir/lumis/**/*"
-        kind="hex"
-        ;;
-    *) echo "Unknown package: $package" >&2; exit 1 ;;
-esac
 
-tag="$package/v$version"
-include_args=(--include-path "$include_path")
-case "$package" in
-    cargo-lumis-cli)
-        include_args+=(--include-path "crates/lumis-wasm-runtime/**/*")
-        ;;
-    npm-cli)
-        include_args+=(
-            --include-path "crates/lumis-cli/**/*"
-            --include-path "crates/lumis-wasm-runtime/**/*"
-        )
-        ;;
-    npm-lumis)
-        include_args+=(
-            --include-path "crates/lumis/**/*"
-            --include-path "crates/lumis-core/**/*"
-            --include-path "crates/lumis-wasm-runtime/**/*"
-        )
-        ;;
-esac
+entry="$(mise run release-packages | awk -F'|' -v name="$package" '$1 == name')"
+if [ -z "$entry" ]; then
+    echo "Unknown package: $package" >&2
+    exit 1
+fi
 
-case "$kind" in
+IFS='|' read -r -a package_paths <<< "${entry#*|}"
+directory="${package_paths[0]}"
+changelog="$directory/CHANGELOG.md"
+
+include_args=()
+for path in "${package_paths[@]}"; do
+    include_args+=(--include-path "$path/**/*")
+done
+
+case "${package%%-*}" in
     cargo)
-        cargo set-version --manifest-path "$manifest" -p "$cargo_package" "$version"
+        cargo set-version --manifest-path "$directory/Cargo.toml" -p "${directory##*/}" "$version"
         mise run check-crate-deps --fix
         ;;
     npm)
-        npm --prefix "$(dirname "$manifest")" version --no-git-tag-version "$version"
+        npm --prefix "$directory" version --no-git-tag-version "$version"
         ;;
     hex)
         mise run elixir-nif-lock-check --fix
-        python3 -c 'from pathlib import Path; import re, sys; path = Path(sys.argv[1]); version = sys.argv[2]; content = path.read_text(); content = re.sub(r"@version \"[^\"]+\"", f"@version \"{version}\"", content, count=1); path.write_text(content)' "$manifest" "$version"
+        python3 -c 'from pathlib import Path; import re, sys; path = Path(sys.argv[1]); version = sys.argv[2]; content = path.read_text(); content = re.sub(r"@version \"[^\"]+\"", f"@version \"{version}\"", content, count=1); path.write_text(content)' "$directory/mix.exs" "$version"
         ;;
 esac
 
@@ -1112,6 +1072,6 @@ if [ "$package" = "npm-cli" ]; then
     done
 fi
 
-git-cliff --config cliff.toml --github-repo leandrocp/lumis --tag-pattern "$package/v[0-9].*" --tag "$tag" --prepend "$changelog" --strip header --unreleased "${include_args[@]}"
+git-cliff --config cliff.toml --github-repo leandrocp/lumis --tag-pattern "$package/v[0-9].*" --tag "$package/v$version" --prepend "$changelog" --strip header --unreleased "${include_args[@]}"
 printf 'Prepared %s %s\n' "$package" "$version"
 '''

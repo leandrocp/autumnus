@@ -15,8 +15,9 @@ jobs:
   benchmark:
     name: Benchmark / ${{ matrix.label }}
     if: >-
-      ${{ github.event_name != 'push' ||
-          !startsWith(github.event.head_commit.message, 'chore(release):') }}
+      ${{ !startsWith(github.event.head_commit.message, 'chore(release):') &&
+          !(github.event.pull_request.head.repo.full_name == github.repository &&
+            startsWith(github.event.pull_request.head.ref, 'release/')) }}
     continue-on-error: true
     runs-on: ubuntu-24.04
     timeout-minutes: 60
@@ -84,8 +85,9 @@ jobs:
   comparison:
     name: Comparison assets are current
     if: >-
-      ${{ github.event_name != 'push' ||
-          !startsWith(github.event.head_commit.message, 'chore(release):') }}
+      ${{ !startsWith(github.event.head_commit.message, 'chore(release):') &&
+          !(github.event.pull_request.head.repo.full_name == github.repository &&
+            startsWith(github.event.pull_request.head.ref, 'release/')) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
@@ -124,8 +126,9 @@ jobs:
     needs: benchmark
     if: >-
       ${{ always() &&
-          (github.event_name != 'push' ||
-           !startsWith(github.event.head_commit.message, 'chore(release):')) }}
+          !startsWith(github.event.head_commit.message, 'chore(release):') &&
+          !(github.event.pull_request.head.repo.full_name == github.repository &&
+            startsWith(github.event.pull_request.head.ref, 'release/')) }}
     continue-on-error: true
     runs-on: ubuntu-24.04
     timeout-minutes: 10

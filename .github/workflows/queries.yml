@@ -53,8 +53,9 @@ env:
 jobs:
   portability:
     if: >-
-      ${{ github.event_name != 'push' ||
-          !startsWith(github.event.head_commit.message, 'chore(release):') }}
+      ${{ !startsWith(github.event.head_commit.message, 'chore(release):') &&
+          !(github.event.pull_request.head.repo.full_name == github.repository &&
+            startsWith(github.event.pull_request.head.ref, 'release/')) }}
     name: Portability
     runs-on: ubuntu-latest
     steps:
@@ -87,8 +88,9 @@ jobs:
   # because that is 113 builds.
   compile:
     if: >-
-      ${{ github.event_name != 'push' ||
-          !startsWith(github.event.head_commit.message, 'chore(release):') }}
+      ${{ !startsWith(github.event.head_commit.message, 'chore(release):') &&
+          !(github.event.pull_request.head.repo.full_name == github.repository &&
+            startsWith(github.event.pull_request.head.ref, 'release/')) }}
     name: Compile queries (shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
     # llvm takes about eight minutes to compile through the WASI SDK; vim and
@@ -207,8 +209,9 @@ jobs:
   # its memory on a runner.
   compile-published:
     if: >-
-      ${{ github.event_name != 'push' ||
-          !startsWith(github.event.head_commit.message, 'chore(release):') }}
+      ${{ !startsWith(github.event.head_commit.message, 'chore(release):') &&
+          !(github.event.pull_request.head.repo.full_name == github.repository &&
+            startsWith(github.event.pull_request.head.ref, 'release/')) }}
     name: Compile queries (published parsers, shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
     strategy:

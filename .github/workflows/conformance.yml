@@ -47,8 +47,9 @@ on:
 jobs:
   conformance:
     if: >-
-      ${{ github.event_name != 'push' ||
-          !startsWith(github.event.head_commit.message, 'chore(release):') }}
+      ${{ !startsWith(github.event.head_commit.message, 'chore(release):') &&
+          !(github.event.pull_request.head.repo.full_name == github.repository &&
+            startsWith(github.event.pull_request.head.ref, 'release/')) }}
     name: Conformance (${{ matrix.name }})
     runs-on: ubuntu-latest
     timeout-minutes: 45

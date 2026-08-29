@@ -34,8 +34,9 @@ permissions:
 jobs:
   actionlint:
     if: >-
-      ${{ github.event_name != 'push' ||
-          !startsWith(github.event.head_commit.message, 'chore(release):') }}
+      ${{ !startsWith(github.event.head_commit.message, 'chore(release):') &&
+          !(github.event.pull_request.head.repo.full_name == github.repository &&
+            startsWith(github.event.pull_request.head.ref, 'release/')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -46,8 +47,9 @@ jobs:
 
   lua:
     if: >-
-      ${{ github.event_name != 'push' ||
-          !startsWith(github.event.head_commit.message, 'chore(release):') }}
+      ${{ !startsWith(github.event.head_commit.message, 'chore(release):') &&
+          !(github.event.pull_request.head.repo.full_name == github.repository &&
+            startsWith(github.event.pull_request.head.ref, 'release/')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -57,8 +59,9 @@ jobs:
   rust-outside-workspace:
     name: Rust crates outside the workspace
     if: >-
-      ${{ github.event_name != 'push' ||
-          !startsWith(github.event.head_commit.message, 'chore(release):') }}
+      ${{ !startsWith(github.event.head_commit.message, 'chore(release):') &&
+          !(github.event.pull_request.head.repo.full_name == github.repository &&
+            startsWith(github.event.pull_request.head.ref, 'release/')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7

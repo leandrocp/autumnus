@@ -27,8 +27,9 @@ jobs:
   standalone-lock:
     name: Standalone packaged NIF lockfile
     if: >-
-      ${{ github.event_name != 'push' ||
-          !startsWith(github.event.head_commit.message, 'chore(release):') }}
+      ${{ !startsWith(github.event.head_commit.message, 'chore(release):') &&
+          !(github.event.pull_request.head.repo.full_name == github.repository &&
+            startsWith(github.event.pull_request.head.ref, 'release/')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -44,8 +45,9 @@ jobs:
 
   test:
     if: >-
-      ${{ github.event_name != 'push' ||
-          !startsWith(github.event.head_commit.message, 'chore(release):') }}
+      ${{ !startsWith(github.event.head_commit.message, 'chore(release):') &&
+          !(github.event.pull_request.head.repo.full_name == github.repository &&
+            startsWith(github.event.pull_request.head.ref, 'release/')) }}
     uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
     with:
       manifest-path: 'packages/elixir/lumis/native/lumis_nif/Cargo.toml'
@@ -57,8 +59,9 @@ jobs:
       stable-os-versions: ${{ github.event_name == 'pull_request' && '["ubuntu-22.04"]' || '["ubuntu-22.04", "windows-2022", "macos-14"]' }}
   lint:
     if: >-
-      ${{ github.event_name != 'push' ||
-          !startsWith(github.event.head_commit.message, 'chore(release):') }}
+      ${{ !startsWith(github.event.head_commit.message, 'chore(release):') &&
+          !(github.event.pull_request.head.repo.full_name == github.repository &&
+            startsWith(github.event.pull_request.head.ref, 'release/')) }}
     uses: leandrocp/github-actions/.github/workflows/rust-lint.yml@main
     with:
       manifest-path: 'packages/elixir/lumis/native/lumis_nif/Cargo.toml'
