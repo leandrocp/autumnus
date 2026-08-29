@@ -1507,4 +1507,8 @@ defmodule Lumis.LumisTest do
       end
     end
   end
+
+  test "exposes the MDEx bridge resource" do
+    assert is_reference(Lumis.__mdex_bridge__())
+  end
 end

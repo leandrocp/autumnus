@@ -45,6 +45,7 @@ jobs:
       project-name: lumis_nif
       project-dir: packages/elixir/lumis/native/lumis_nif
       working-directory: packages/elixir/lumis
+      nif-versions: '["2.16"]'
       r2-path: releases/download/${{ inputs.tag || github.ref_name }}
     secrets:
       R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}

@@ -52,8 +52,7 @@ defmodule Lumis.Native do
       "x86_64-pc-windows-gnu" => other_variants,
       "x86_64-unknown-freebsd" => other_variants
     },
-    # We don't use any features of newer NIF versions, so 2.15 is enough.
-    nif_versions: ["2.15"],
+    nif_versions: ["2.16"],
     mode: mode,
     force_build: System.get_env("LUMIS_BUILD") in ["1", "true"]
 
@@ -77,4 +76,5 @@ defmodule Lumis.Native do
   def has_language(_name), do: :erlang.nif_error(:nif_not_loaded)
   def loaded_languages(), do: :erlang.nif_error(:nif_not_loaded)
   def highlight(_source, _options), do: :erlang.nif_error(:nif_not_loaded)
+  def mdex_bridge(), do: :erlang.nif_error(:nif_not_loaded)
 end

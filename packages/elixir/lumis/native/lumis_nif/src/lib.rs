@@ -3,6 +3,7 @@ use std::sync::{mpsc, Arc, Mutex};
 use std::thread;
 
 mod elixir;
+mod mdex_bridge;
 
 use anyhow::{anyhow, Context, Result};
 use elixir::{ExCssOptions, ExFormatterOption, ExTheme};

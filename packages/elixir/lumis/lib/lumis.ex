@@ -1114,4 +1114,7 @@ defmodule Lumis do
       when is_binary(language) and is_binary(source) do
     highlight!(source, language: language)
   end
+
+  @doc false
+  def __mdex_bridge__, do: Lumis.Native.mdex_bridge()
 end

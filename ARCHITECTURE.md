@@ -217,6 +217,13 @@ In Elixir it is cheaper still, because loading is global to the VM. One
 `Runtime` lives in the NIF, so the first process to need a language pays, and
 every process after it does not.
 
+The Elixir NIF also owns the Lumis implementation used by MDEx. It exposes the
+versioned `lumis_mdex_bridge_v1` dynamic resource, and mdex_native calls that
+resource through NIF 2.16 instead of linking another copy of Lumis. The bridge
+passes only BEAM terms and keeps all allocation and rendering inside Lumis's
+NIF, so the two independently released libraries do not share Rust layouts or
+allocator-owned buffers.
+
 Browsers are the exception. `web-tree-sitter` loads asynchronously, so a parser
 cannot be fetched inside a synchronous walk; an injected language has to be
 loaded before the document mentioning it. Node runs the native addon
