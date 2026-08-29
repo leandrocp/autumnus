@@ -1,8 +1,26 @@
 # Release
 
-Releases are prepared locally and published from tags.
+Releases are prepared and published by workflows, one pull request per package.
+Merging a release pull request is what ships that package.
 
 ## TLDR
+
+Every push to `main` runs `release-prepare.yml`, which opens or updates one pull
+request per package that needs a release, titled
+`chore(release): <package> <version>` on branch `release/<package>`.
+
+Merge the ones you want to ship, one at a time and in
+[publish order](#publish-order). `release-tag.yml` reads each merge commit,
+pushes `<package>/v<version>`, and that tag starts the publish workflow.
+
+Merging is the decision. Until then a pull request is a proposal you can edit,
+ignore, or close on its own, and a package you do not merge is not released.
+
+## Preparing a release by hand
+
+The workflow runs the same tasks you would, and they still work on their own. The
+package's own pull request, if one is open, closes itself on the next push to
+`main`, because the version file is then ahead of the latest tag.
 
 ```sh
 mise run release-needed
@@ -10,8 +28,6 @@ mise run release-prepare <package> <version>
 git add <changed-files>
 git commit -m "chore(release): <package> <version>"
 git push origin main
-git tag <package>/v<version>
-git push origin <package>/v<version>
 ```
 
 Example:
@@ -22,30 +38,125 @@ mise run release-prepare cargo-lumis-cli 0.2.0
 git add crates/lumis-cli/Cargo.toml crates/lumis-cli/CHANGELOG.md
 git commit -m "chore(release): cargo-lumis-cli 0.2.0"
 git push origin main
-git tag cargo-lumis-cli/v0.2.0
-git push origin cargo-lumis-cli/v0.2.0
 ```
 
-- Run `mise run release-needed` first to decide which packages ship together. It ignores `chore` commits.
+The push is the publish. `release-tag.yml` reads that subject and pushes
+`cargo-lumis-cli/v0.2.0` for you, exactly as it would for a merged pull request.
+
+- Run `mise run release-needed` first to decide which packages ship together. It ignores `chore` commits. `mise run release-plan` answers the narrower question the workflow asks, and prints the version each package would get.
 - Pass the bare version to `mise run release-prepare`, for example `0.2.0`, not `v0.2.0`.
-- Include `v` only in the git tag, for example `cargo-lumis-cli/v0.2.0`.
-- Review each changed manifest and `CHANGELOG.md` after `mise run release-prepare`.
-- If one released package depends on another released package, update the dependent manifest in the same commit. See [Crate version requirements](#crate-version-requirements).
-- Push package tags in dependency order.
-- Watch the tag-triggered publish workflows after pushing tags.
-- Keep the commit subject exactly `chore(release): <package> <version>`. See [CI on the release commit](#ci-on-the-release-commit).
+- Review every file `mise run release-prepare` touches, not just the target package's manifest and `CHANGELOG.md`. See [Crate version requirements](#crate-version-requirements).
+- One release per commit. The subject names one package, so a commit bumping two releases only one of them.
+- Push releases in dependency order, one at a time, and let each publish finish before the next.
+- Write the commit subject as `chore(release): <package> <version>` and nothing else, except the `(#1234)` suffix a squash merge appends, which `release-tag.yml` strips. The subject decides whether CI skips and whether the release publishes at all. See [CI on the release commit](#ci-on-the-release-commit) and [Tagging](#tagging).
+
+## The release pull requests
+
+`release-prepare.yml` runs on every push to `main` and opens one pull request per
+package. Each is prepared independently, so you choose which packages ship and
+which sit; the order you merge them in is still [publish order](#publish-order),
+because that is dependency order and nothing enforces it for you.
+
+Every branch is rebuilt from `main` on every run rather than added to, and each
+one is prepared on a fresh checkout of `main` rather than on top of another
+package's preparation. Two consequences follow, and together they are what makes
+a pull request per package work at all:
+
+- **Each pull request always describes what would ship right now.** A package
+  that stops needing a release has its branch deleted, which closes its pull
+  request.
+- **Overlap resolves itself as you merge.** Preparing a crate rewrites the
+  version requirement other crates state for it, so two crate releases genuinely
+  touch some of the same files. Merging one rebuilds every other branch on top of
+  it, so the remaining pull requests carry the merged state rather than a stale
+  copy of it. This is why `release-prepare.yml` does not carry the
+  `chore(release):` guard the branch workflows do: the merge of a release pull
+  request is the push that changes the plan the most.
+
+`mise run release-plan` decides which packages get one. For each package in
+`mise run release-packages`, in that order, it takes the latest `<package>/v*`
+tag and asks `git-cliff --bumped-version` what the commits since then add up to,
+using the same `--include-path` scoping and the same `cliff.toml` that write the
+changelog. Three things make a package sit the round out:
+
+- **`git-cliff` has nothing to bump.** Only the commit types `cliff.toml` groups
+  count, so a package whose only new commits are `build(deps)` gets no pull
+  request. `mise run release-needed` still lists it, because it filters on
+  `chore` alone; releasing on a dependency bump is a judgement call, and the
+  automation does not make it for you. Prepare that one by hand.
+- **The version file is ahead of the latest tag.** That is a merged release
+  waiting for its tag. Preparing again would write a second changelog section for
+  a version that already has one, so `release-plan` skips the package and says so
+  until the tag is pushed.
+- **No `<package>/v*` tag exists.** `git-cliff` has no base to bump from, so cut
+  the first release by hand.
+
+The title and the commit message are both `chore(release): <package> <version>`,
+the subject a hand-prepared release uses, so squash-merging one produces the
+commit [CI on the release commit](#ci-on-the-release-commit) skips and
+[Tagging](#tagging) reads, give or take the `(#1234)` suffix GitHub appends. The
+body is the same few lines for every package apart from the name and the
+version.
+
+Everything about a package is derived from its name and its first path in
+`mise run release-packages`: `cargo-`, `npm-` and `hex-` select
+`Cargo.toml`, `package.json` or `mix.exs`, and the directory also holds the
+`CHANGELOG.md` and, for a crate, names the cargo package. Adding a package is
+therefore one row, as long as it follows that layout.
+
+## Tagging
+
+`release-tag.yml` runs on every push to `main` whose head commit subject starts
+with `chore(release):`, which is every merged release pull request and every
+hand-prepared release. It reads `<package> <version>` out of the subject, checks
+that the package exists and that its manifest really declares that version, and
+creates `<package>/v<version>` on the merge commit. Anything it cannot read, or a
+version the manifest disagrees with, fails the job rather than guessing.
+
+Two details that are load-bearing:
+
+- **The tag is created with `CI_TOKEN`, not `GITHUB_TOKEN`.** A ref pushed with
+  `GITHUB_TOKEN` raises no events, so the publish workflow the tag exists to
+  start would never run.
+- **The subject is the input.** `chore(release): <package> <version>` is what
+  `release-prepare.yml` writes and what a hand-prepared release must write, so
+  the spelling rule in [CI on the release commit](#ci-on-the-release-commit) now
+  decides whether a release publishes as well as whether CI skips.
+
+Merge one release at a time and let its publish finish before merging the next.
+Nothing enforces [publish order](#publish-order); merge order is publish order.
+
+One release per push, too. The workflow reads `github.event.head_commit`, so a
+push carrying two release commits tags only the last one, and the other ships
+nothing until its tag is pushed by hand. Merging pull requests one at a time
+gives that for free; batching commits locally does not.
 
 ## CI on the release commit
 
 A release commit is a version bump and a changelog entry on top of a commit CI
-already passed, so every branch workflow skips itself when the pushed head
-commit's subject starts with `chore(release):`:
+already passed, so every branch workflow skips itself for one, on the push and on
+the pull request that carries it:
 
 ```yaml
     if: >-
-      ${{ github.event_name != 'push' ||
-          !startsWith(github.event.head_commit.message, 'chore(release):') }}
+      ${{ !startsWith(github.event.head_commit.message, 'chore(release):') &&
+          !(github.event.pull_request.head.repo.full_name == github.repository &&
+            startsWith(github.event.pull_request.head.ref, 'release/')) }}
 ```
+
+Both halves are needed. The head commit covers the push, whether it came from a
+merged release pull request or from a hand-prepared release, and the branch covers
+the pull request itself, where there is no head commit to read. Without the second
+half, `Standalone packaged NIF lockfile` fails on every release pull request that
+bumps a crate, for exactly the reason below.
+
+**The second half keys on the branch rather than the title, and it must stay that
+way.** A title is contributor-controlled: anyone able to open a pull request could
+name it `chore(release): …` and skip the entire matrix on a change that had never
+been tested. A `release/*` branch in this repository is not, because only
+`release-prepare.yml` and people with push access can create one, which is the
+same set that could already skip CI by writing `chore(release):` in a commit
+subject. Widening the guard past that set gives a stranger the same power.
 
 Two consequences worth knowing:
 
@@ -63,7 +174,9 @@ Two consequences worth knowing:
   the package tag points at, so pushing `<package>/v<version>` would skip the
   publish workflow the release exists to trigger.
 
-Tag-triggered workflows carry no such guard, and must not grow one.
+Tag-triggered workflows carry no such guard, and must not grow one. Neither does
+`release-prepare.yml`, for the reason in
+[The release pull requests](#the-release-pull-requests).
 
 One branch job is exempt: `crate-deps` in `rust.yml`. `mise run check-crate-deps`
 reads manifests rather than the registry, so it passes on the bump commit, and
@@ -237,6 +350,14 @@ re-resolves the lockfile, and three places run it or check it:
 A red `Standalone packaged NIF lockfile` job on `main` means the refresh has not
 landed yet. Merge the pull request, or run the fix locally and commit the result.
 
+`hex-lumis` is therefore the one package whose job in `release-prepare.yml` can
+fail: while a crate release it requires is merged into `main` but not published,
+the fix has no version to resolve. That job is `continue-on-error`, so the failure
+shows in the run without turning it red or touching any other package's pull
+request, and the existing `hex-lumis` pull request, if there is one, stays as it
+was. Nothing is stuck: publishing the crate and merging `refresh-nif-lock` pushes
+to `main`, and the next run prepares `hex-lumis` against the published version.
+
 `elixir-release.yml` uploads the precompiled NIFs to a GitHub Release and syncs
 the same files to Cloudflare R2 under `releases/download/<tag>`, served from
 `https://artifacts.lumis.sh`. The R2 step fails the release if any of
@@ -253,11 +374,19 @@ If a release fails before any registry accepts the new version:
 
 1. Delete every package tag from the failed attempt.
 2. Fix the mistake on `main`.
-3. Run `mise run release-prepare <package> <version>` again for each affected package.
-4. Commit the updated changelog and version bump.
-5. Push the corrected package tags in dependency order.
+3. Push the corrected package tags in dependency order.
 
-If any registry already published the version, do not reuse it. Cut a new patch release instead.
+Push them by hand. The bump and the changelog are already on `main`, so nothing
+reopens a pull request to merge: with the tag deleted, the version file is ahead
+of the latest tag, which is exactly the state `release-plan` skips. `release-tag.yml`
+only reacts to a `chore(release):` commit arriving on `main`, and there is no new
+one, so the tag push is yours to make. It starts the publish workflow either way.
+
+If any registry already published the version, do not reuse it. Cut a new patch
+release instead. `release-plan` will not propose one, because the version file
+matches the tag again, so run `mise run release-prepare <package> <version>` and
+commit it to `main` with the usual `chore(release): <package> <version>` subject;
+tagging and publishing then happen on their own.
 
 ## Tag format
 
@@ -297,8 +426,9 @@ Example:
 mise run release-prepare cargo-lumis-cli 0.2.0
 ```
 
-`release-prepare` updates only the target package version file and prepends the next changelog entry with `git-cliff`.
-
-If a release requires dependent manifests to move in lockstep, update those files separately and commit them with the release prep.
+`release-prepare` updates the target package version file and prepends the next
+changelog entry with `git-cliff`. Cargo releases also rewrite dependent
+manifests and lockfiles, and `hex-lumis` refreshes the packaged NIF lockfile.
+Review and commit every file the task touches.
 
 `npm-lumis` is the one exception: it additionally bumps `native/Cargo.toml`, the `@lumis-sh/lumis-native` selector, and all platform packages, because the release workflow publishes them under the same version before the main package. See [JavaScript packages](#javascript-packages).

@@ -373,11 +373,12 @@ For language, theme, query, docs-generation, or bundle changes, run the relevant
 
 ## Release discipline
 
-Releases are prepared locally with `mise run release-prepare` and published from tags.
+Releases are prepared by `release-prepare.yml` on every push to `main`, which opens or updates one pull request per package that needs one, and published when a maintainer merges one: `release-tag.yml` turns the merge commit into the package tag the publish workflows run from. `mise run release-prepare` does the same preparation locally.
 
 - Do not hand-edit versions or changelog release sections in normal feature work.
 - Follow `RELEASE.md` for release-specific tasks.
-- Write the release commit subject as `chore(release): <package> <version>`. CI keys on that prefix to skip itself, so a different spelling silently runs every workflow against a commit that was already green.
+- Write the release commit subject as `chore(release): <package> <version>` and nothing else. The `(#1234)` suffix a squash merge appends is the one addition `release-tag.yml` tolerates. That subject is the whole interface: CI skips on the prefix, and `release-tag.yml` reads the package and version out of it to decide what to publish. A different spelling runs every workflow against a change that was already green, and ships nothing.
+- Adding a releasable package is a row in `mise run release-packages`. Nothing else holds a per-package list, so a second copy of that table is a bug waiting to drift.
 - If a change affects packaging, tags, publish behavior, or release metadata expectations, treat it as a release-sensitive change and review the release docs before touching anything.
 
 ## Commit messages

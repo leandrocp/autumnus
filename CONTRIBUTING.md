@@ -99,15 +99,16 @@ The browser task installs the required Chromium, Firefox, and WebKit builds befo
 
 ## Releases
 
-Releases are prepared locally and published from tags.
+Releases are prepared by `release-prepare.yml`, one pull request per package, and published when one of those pull requests is merged.
 
-- Run `mise run release-needed` to list packages with non-chore path-scoped commits since their latest package tag.
-- Prepare each release with `mise run release-prepare <package> <version>`.
-- `mise run release-prepare` updates only the target package version file and prepends the next changelog entry.
+- Every push to `main` opens or updates one `chore(release): <package> <version>` pull request per package that `mise run release-plan` says needs one, on branch `release/<package>`.
+- Merging one is what ships it: `release-tag.yml` reads the merge commit and pushes `<package>/v<version>`, which starts the publish workflow. Merge one at a time, in publish order, and let each publish finish first.
+- Run `mise run release-plan` to see the same list locally, and `mise run release-needed` for the commits behind it.
+- Prepare a release by hand with `mise run release-prepare <package> <version>`, then commit it to `main` with that same subject; the tagging is automatic either way.
+- `mise run release-prepare` bumps the target package version file and prepends the next changelog entry, and also rewrites dependent manifests and lockfiles. Review and commit everything it touches.
 - If dependent manifests must move together, update them separately in the same release commit. `npm-lumis` is the exception: it also bumps the native crate, the `@lumis-sh/lumis-native` selector and all platform packages, because the release workflow publishes them under the same version first.
 - A `version` requirement on a lumis crate must equal that crate's version in this repository. `mise run release-prepare` keeps them in step, rewriting dependent manifests beyond the package being released, so review and commit every file it touches. `mise run check-crate-deps` reports drift and `--fix` repairs it. Apart from `crates/autumnus`, no build here resolves those requirements, so that check is the only thing that can catch them. See [Crate version requirements](RELEASE.md#crate-version-requirements).
-- Maintainers commit the release prep changes, then push package tags such as `cargo-lumis-cli/v0.2.0`.
-- Pushing a package tag triggers the publish workflows.
+- The package tag, such as `cargo-lumis-cli/v0.2.0`, is pushed by `release-tag.yml` rather than by hand, and pushing it triggers the publish workflows.
 
 Do not hand-edit release versions or changelog sections when `mise run release-prepare` can generate them.
 
