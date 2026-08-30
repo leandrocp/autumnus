@@ -485,6 +485,10 @@ async function resolveDefinition(
 }
 
 // The first bundle to claim an id or alias keeps it.
+//
+// `registerLazyBundle` is this plus a `validateLanguageBoundary` on every entry.
+// The caller here has already validated the bundle it was handed, and validating
+// each entry again would reject bundles this path accepts today.
 function registerBundleLazily(
   input: LanguageBundle,
   lazyRegistry: Map<string, LazyLanguage>,
