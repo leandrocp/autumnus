@@ -28,7 +28,7 @@ fn main() {
         .themes(themes)
         .default_theme("light-dark()")
         .build()
-        .map_err(|e| format!("Build error: {}", e))?;
+        .map_err(|e| format!("Build error: {e}"))?;
 
     let mut output = Vec::new();
     formatter.format(source, &mut output)?;
@@ -64,11 +64,10 @@ fn main() {
         Change your system theme to see the code highlighting update automatically.
     </p>
 
-    {}
+    {highlighted}
 
 </body>
-</html>"#,
-        highlighted
+</html>"#
     );
 
     std::fs::write("examples/html_multi_themes_light_dark.html", html)?;

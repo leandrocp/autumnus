@@ -26,7 +26,7 @@
 
 use crate::highlight::{highlight_iter, HighlightError, Style};
 use crate::languages::Language;
-use crate::themes::Theme;
+use crate::themes::{Theme, UnderlineStyle};
 use std::ops::Range;
 
 /// ANSI reset sequence to clear all formatting.
@@ -91,9 +91,9 @@ pub fn hex_to_rgb(hex: &str) -> Option<(u8, u8, u8)> {
 /// ```
 pub fn rgb_to_ansi(r: u8, g: u8, b: u8, is_background: bool) -> String {
     if is_background {
-        format!("\u{1b}[48;2;{};{};{}m", r, g, b)
+        format!("\u{1b}[48;2;{r};{g};{b}m")
     } else {
-        format!("\u{1b}[38;2;{};{};{}m", r, g, b)
+        format!("\u{1b}[38;2;{r};{g};{b}m")
     }
 }
 
@@ -148,7 +148,6 @@ pub fn style_to_ansi(style: &Style) -> String {
         result.push_str("\u{1b}[3m");
     }
 
-    use crate::themes::UnderlineStyle;
     match style.text_decoration.underline {
         UnderlineStyle::None => {}
         UnderlineStyle::Solid => result.push_str("\u{1b}[4m"),

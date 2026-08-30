@@ -215,8 +215,7 @@ pub const DOWNLOAD_CONCURRENCY: usize = 8;
 #[must_use]
 pub fn compile_concurrency() -> usize {
     std::thread::available_parallelism()
-        .map(usize::from)
-        .unwrap_or(1)
+        .map_or(1, usize::from)
         .min(4)
 }
 
@@ -284,7 +283,10 @@ mod parallel_map_tests {
     #[test]
     fn handles_empty_input_and_excess_concurrency() {
         let empty: Vec<usize> = Vec::new();
-        assert!(super::parallel_map(&empty, 8, |item| *item).is_empty());
+        assert!(
+            super::parallel_map(&empty, 8, |item| *item).is_empty(),
+            "no items in, so nothing should come out"
+        );
         assert_eq!(super::parallel_map(&[7usize], 64, |item| *item), vec![7]);
     }
 

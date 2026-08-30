@@ -8,24 +8,50 @@ on:
   push:
     branches: [main]
     paths:
+      - "**/*.cjs"
+      - "**/*.js"
+      - "**/*.jsx"
       - "**/*.lua"
+      - "**/*.mjs"
+      - "**/*.ts"
+      - "**/*.tsx"
       - ".github/actionlint.yaml"
       - ".github/workflows/**"
+      - ".oxfmtrc.json"
+      - ".oxlintrc.json"
+      - "Cargo.toml"
+      - "benchmarks/rust/**"
       - "crates/autumnus/**"
       - "crates/dev/**"
       - "crates/lumis-wasm-runtime/src/catalog.rs"
       - "languages.toml"
       - "mise.toml"
+      - "neovim.yml"
+      - "pnpm-lock.yaml"
+      - "selene.toml"
   pull_request:
     paths:
+      - "**/*.cjs"
+      - "**/*.js"
+      - "**/*.jsx"
       - "**/*.lua"
+      - "**/*.mjs"
+      - "**/*.ts"
+      - "**/*.tsx"
       - ".github/actionlint.yaml"
       - ".github/workflows/**"
+      - ".oxfmtrc.json"
+      - ".oxlintrc.json"
+      - "Cargo.toml"
+      - "benchmarks/rust/**"
       - "crates/autumnus/**"
       - "crates/dev/**"
       - "crates/lumis-wasm-runtime/src/catalog.rs"
       - "languages.toml"
       - "mise.toml"
+      - "neovim.yml"
+      - "pnpm-lock.yaml"
+      - "selene.toml"
   workflow_dispatch:
 
 permissions:
@@ -55,6 +81,33 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: jdx/mise-action@3c2e0cf82a5b2e5249f0d3635a4d83d0ae861518 # v4.2.5
       - run: mise run fmt-lua -- --check
+      - run: mise run lint-lua
+
+  # Every file the repo authors, including the website, the docs site, the
+  # benchmark scripts and every example. The per-package `lint` scripts in
+  # `javascript.yml` add the type-aware rules on top, and only reach what their
+  # own tsconfig covers.
+  javascript:
+    name: JavaScript and TypeScript
+    if: >-
+      ${{ !startsWith(github.event.head_commit.message, 'chore(release):') &&
+          !(github.event.pull_request.head.repo.full_name == github.repository &&
+            startsWith(github.event.pull_request.head.ref, 'release/')) }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: jdx/mise-action@3c2e0cf82a5b2e5249f0d3635a4d83d0ae861518 # v4.2.5
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
+        with:
+          version: 11.15.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 'lts/*'
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: mise run fmt-js -- --check
+      - run: mise run lint-js
 
   rust-outside-workspace:
     name: Rust crates outside the workspace
@@ -67,7 +120,23 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
         with:
-          components: rustfmt
-      - run: cargo fmt --manifest-path crates/dev/Cargo.toml --check
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          workspaces: |
+            benchmarks/rust -> target
+            crates/autumnus -> target
+            crates/dev -> target
+          shared-key: outside-workspace
+      - run: cargo fmt --manifest-path benchmarks/rust/Cargo.toml --check
       - run: cargo fmt --manifest-path crates/autumnus/Cargo.toml --check
+      - run: cargo fmt --manifest-path crates/dev/Cargo.toml --check
       - run: cargo test --manifest-path crates/dev/Cargo.toml --no-default-features
+      # Each of these is its own workspace, so it carries its own `[lints]`
+      # table; Cargo cannot inherit one across workspaces. Nothing else compiles
+      # them, so without these steps nothing reports on them at all.
+      - run: cargo clippy --manifest-path benchmarks/rust/Cargo.toml --all-targets -- -D warnings
+      - run: cargo clippy --manifest-path crates/autumnus/Cargo.toml --all-targets -- -D warnings
+      - run: >-
+          cargo clippy --manifest-path crates/dev/Cargo.toml
+          --all-targets --no-default-features -- -D warnings

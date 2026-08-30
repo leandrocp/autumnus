@@ -28,6 +28,7 @@ defmodule MyBlogWeb.CoreComponents do
   """
   use Phoenix.Component
 
+  alias Phoenix.HTML.{Form, FormField}
   alias Phoenix.LiveView.JS
 
   @doc """
@@ -165,7 +166,7 @@ defmodule MyBlogWeb.CoreComponents do
     values: ~w(checkbox color date datetime-local email file month number password
                search select tel text textarea time url week hidden)
 
-  attr :field, Phoenix.HTML.FormField,
+  attr :field, FormField,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
   attr :errors, :list, default: []
@@ -180,7 +181,7 @@ defmodule MyBlogWeb.CoreComponents do
     include: ~w(accept autocomplete capture cols disabled form list max maxlength min minlength
                 multiple pattern placeholder readonly required rows size step)
 
-  def input(%{field: %Phoenix.HTML.FormField{} = field} = assigns) do
+  def input(%{field: %FormField{} = field} = assigns) do
     errors = if Phoenix.Component.used_input?(field), do: field.errors, else: []
 
     assigns
@@ -200,7 +201,7 @@ defmodule MyBlogWeb.CoreComponents do
   def input(%{type: "checkbox"} = assigns) do
     assigns =
       assign_new(assigns, :checked, fn ->
-        Phoenix.HTML.Form.normalize_value("checkbox", assigns[:value])
+        Form.normalize_value("checkbox", assigns[:value])
       end)
 
     ~H"""

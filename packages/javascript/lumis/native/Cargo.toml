@@ -28,3 +28,6 @@ napi-build = "2"
 
 [dev-dependencies]
 napi = { version = "3", default-features = false, features = ["dyn-symbols"] }
+
+[lints]
+workspace = true

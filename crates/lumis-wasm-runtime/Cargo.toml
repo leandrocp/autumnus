@@ -31,3 +31,6 @@ wasmparser = "0.257"
 
 [dev-dependencies]
 tree-sitter-json = "0.24.8"
+
+[lints]
+workspace = true

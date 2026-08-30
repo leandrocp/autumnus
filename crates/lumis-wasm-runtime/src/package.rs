@@ -54,7 +54,7 @@ where
 {
     struct ParserSizeVisitor;
 
-    impl<'de> serde::de::Visitor<'de> for ParserSizeVisitor {
+    impl serde::de::Visitor<'_> for ParserSizeVisitor {
         type Value = u64;
 
         fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -79,6 +79,9 @@ where
             parser_size_from_u64(value)
         }
 
+        // The guards below leave `value` a non-negative integer no larger than
+        // 2^53 - 1, which is exact in both `f64` and `u64`.
+        #[allow(clippy::cast_precision_loss, clippy::cast_sign_loss)]
         fn visit_f64<E>(self, value: f64) -> Result<Self::Value, E>
         where
             E: serde::de::Error,

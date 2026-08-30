@@ -178,8 +178,8 @@ describe("native runtime", () => {
       '{"answer": 42}',
       internalId,
       false,
-      () => undefined,
-      () => undefined,
+      () => {},
+      () => {},
     );
 
     expect(highlighted.events.length).toBeGreaterThan(0);
@@ -397,9 +397,12 @@ describe("native runtime", () => {
 
 describe("native adapter routing", () => {
   it("passes addon resolver callbacks only when an override is active", () => {
-    const highlightEvents = vi.fn(() => ({ events: new Uint8Array(), unresolved: [] }));
+    const highlightEvents = vi.fn<NativeRuntimeInstance["highlightEvents"]>(() => ({
+      events: new Uint8Array(),
+      unresolved: [],
+    }));
     const nativeRuntime = { highlightEvents } as unknown as NativeRuntimeInstance;
-    const binding = {
+    const addon = {
       NativeRuntime: function NativeRuntime() {
         return nativeRuntime;
       },
@@ -409,7 +412,7 @@ describe("native adapter routing", () => {
     const resolvers = {
       createRuntime: () => ({}),
     } as unknown as LanguagesModule;
-    const languages = createNativeLanguagesModule(binding, resolvers);
+    const languages = createNativeLanguagesModule(addon, resolvers);
     const loaded = { definition: { id: "json", aliases: [] } } as LoadedLanguage;
 
     languages.createRuntime().highlightEvents("{}", loaded);
@@ -417,19 +420,21 @@ describe("native adapter routing", () => {
       .createRuntime({ wasmResolver: () => new URL("file:///unused") })
       .highlightEvents("{}", loaded);
 
-    expect(highlightEvents.mock.calls[0]!.slice(3)).toEqual([undefined, undefined]);
-    expect(highlightEvents.mock.calls[1]![3]).toBeTypeOf("function");
-    expect(highlightEvents.mock.calls[1]![4]).toBeTypeOf("function");
-    const packageResolver = highlightEvents.mock.calls[1]![3] as (packageName: string) => string;
+    expect(highlightEvents.mock.calls[0].slice(3)).toEqual([undefined, undefined]);
+    expect(highlightEvents.mock.calls[1][3]).toBeTypeOf("function");
+    expect(highlightEvents.mock.calls[1][4]).toBeTypeOf("function");
+    const packageResolver = highlightEvents.mock.calls[1][3] as (packageName: string) => string;
     expect(packageResolver("@lumis-sh/wasm-json")).toContain(
       `@lumis-sh/wasm-json@${LANGUAGE_PACKAGE_VERSION_RANGE}/lumis.json`,
     );
   });
 
   it("coalesces concurrent loads of the same definition", async () => {
-    const loadLanguageDefinition = vi.fn(() => "concurrent\u0001definition");
+    const loadLanguageDefinition = vi.fn<NativeRuntimeInstance["loadLanguageDefinition"]>(
+      () => "concurrent\u0001definition",
+    );
     const nativeRuntime = { loadLanguageDefinition } as unknown as NativeRuntimeInstance;
-    const binding = {
+    const addon = {
       NativeRuntime: function NativeRuntime() {
         return nativeRuntime;
       },
@@ -454,7 +459,7 @@ describe("native adapter routing", () => {
           }),
       }),
     } as unknown as LanguagesModule;
-    const runtime = createNativeLanguagesModule(binding, resolvers).createRuntime();
+    const runtime = createNativeLanguagesModule(addon, resolvers).createRuntime();
     const language = {
       definition: { id: "concurrent", aliases: [] },
       packageName: "@test/concurrent",
@@ -473,20 +478,22 @@ describe("native adapter routing", () => {
   it("does not replace a caller-selected package with the catalog package", async () => {
     const metadata = localLanguagePackageMetadata("@lumis-sh/wasm-json");
     const wasm = new Uint8Array(readFileSync(ensureLocalParserWasm("json", metadata.parser.name)));
-    const loadLanguage = vi.fn();
-    const loadLanguageDefinition = vi.fn(() => "json\u0001caller-package");
+    const loadLanguage = vi.fn<NativeRuntimeInstance["loadLanguage"]>();
+    const loadLanguageDefinition = vi.fn<NativeRuntimeInstance["loadLanguageDefinition"]>(
+      () => "json\u0001caller-package",
+    );
     const nativeRuntime = {
       loadLanguage,
       loadLanguageDefinition,
     } as unknown as NativeRuntimeInstance;
-    const binding = {
+    const addon = {
       NativeRuntime: function NativeRuntime() {
         return nativeRuntime;
       },
       configureStore: () => true,
       runtimeKind: () => "native",
     } as unknown as NativeBinding;
-    const resolveLanguagePackage = vi.fn(async () => ({
+    const resolveLanguagePackage = vi.fn<RuntimeLike["resolveLanguagePackage"]>(async () => ({
       definition: { id: "json", aliases: [] },
       wasm: {
         packageName: "@test/custom-json",
@@ -504,7 +511,7 @@ describe("native adapter routing", () => {
     const resolvers = {
       createRuntime: () => resolverRuntime,
     } as unknown as LanguagesModule;
-    const runtime = createNativeLanguagesModule(binding, resolvers).createRuntime();
+    const runtime = createNativeLanguagesModule(addon, resolvers).createRuntime();
 
     await runtime.loadLanguage({
       definition: { id: "json", aliases: [] },

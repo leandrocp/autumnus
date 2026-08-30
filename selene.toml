@@ -1,0 +1,3 @@
+std = "lua51+neovim"
+# Samples are byte-for-byte source corpora, not repository Lua programs.
+exclude = ["samples/**"]

@@ -8,6 +8,7 @@ use lumis_wasm_runtime::{parser_filename, LanguagePackage, PackagedLanguage, Par
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::collections::{BTreeMap, HashSet};
+use std::fmt::Write as _;
 use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -234,6 +235,8 @@ struct HtmlMultiThemesFixture {
     highlight_lines: Vec<usize>,
 }
 
+// `serde`'s `skip_serializing_if` hands the predicate a reference.
+#[allow(clippy::trivially_copy_pass_by_ref)]
 fn is_false(value: &bool) -> bool {
     !*value
 }
@@ -285,7 +288,7 @@ fn serialize_events(events: Vec<HighlightEvent>) -> Vec<SerializableHighlightEve
 fn parse_language(language: &str) -> Result<Language> {
     language
         .parse()
-        .map_err(|_| anyhow::anyhow!("invalid language '{}'", language))
+        .map_err(|_| anyhow::anyhow!("invalid language '{language}'"))
 }
 
 fn fixture_root() -> PathBuf {
@@ -318,7 +321,7 @@ fn selected_fixture_dirs(name: &str) -> Result<Vec<PathBuf>> {
 
     let dir = root.join(name);
     if !dir.is_dir() {
-        bail!("fixture '{}' not found", name);
+        bail!("fixture '{name}' not found");
     }
     Ok(vec![dir])
 }
@@ -365,7 +368,7 @@ fn render_formatter_output(
             for spec in themes {
                 let (name, theme_id) = spec
                     .split_once(':')
-                    .ok_or_else(|| anyhow::anyhow!("invalid theme spec '{}'", spec))?;
+                    .ok_or_else(|| anyhow::anyhow!("invalid theme spec '{spec}'"))?;
                 theme_map.insert(name.to_string(), fixture_theme(theme_id)?);
             }
 
@@ -412,7 +415,7 @@ fn render_formatter_output(
                 .map_err(|e| anyhow::anyhow!("{e}"))?;
             formatter.format(source, &mut output)?;
         }
-        other => bail!("unsupported formatter '{}'", other),
+        other => bail!("unsupported formatter '{other}'"),
     }
 
     String::from_utf8(output).map_err(Into::into)
@@ -428,26 +431,27 @@ fn fixture_outputs(
 ) -> Result<FixtureOutputs> {
     let events =
         highlight_events_with_options(source, language, HighlightOptions { rainbow_brackets })?;
-    let (multi_themes, multi_default_theme, multi_highlight_lines) = html_multi_themes
-        .as_ref()
-        .map(|config| {
-            (
-                config
-                    .themes
-                    .iter()
-                    .map(|(name, theme)| format!("{name}:{theme}"))
-                    .collect(),
-                config.default_theme.clone(),
-                config.highlight_lines.clone(),
-            )
-        })
-        .unwrap_or_else(|| {
-            (
-                vec![format!("main:{theme}")],
-                Some("main".to_string()),
-                vec![],
-            )
-        });
+    let (multi_themes, multi_default_theme, multi_highlight_lines) =
+        html_multi_themes.as_ref().map_or_else(
+            || {
+                (
+                    vec![format!("main:{theme}")],
+                    Some("main".to_string()),
+                    vec![],
+                )
+            },
+            |config| {
+                (
+                    config
+                        .themes
+                        .iter()
+                        .map(|(name, theme)| format!("{name}:{theme}"))
+                        .collect(),
+                    config.default_theme.clone(),
+                    config.highlight_lines.clone(),
+                )
+            },
+        );
     let metadata = FixtureMetadata {
         name: name.to_string(),
         language: language.id_name().to_string(),
@@ -783,7 +787,7 @@ fn sync_css() -> Result<()> {
     Ok(())
 }
 
-/// Extract (name, url) pairs from themes/themes.lua using full_moon AST parsing.
+/// Extract (name, url) pairs from themes/themes.lua using `full_moon` AST parsing.
 fn parse_themes_lua() -> Result<Vec<(String, String)>> {
     use full_moon::ast::{Expression, Field, LastStmt};
     use full_moon::tokenizer::TokenType;
@@ -1258,7 +1262,7 @@ fn latest_crate_version(crate_name: &str) -> Result<Option<String>> {
     for version in versions {
         if version
             .get("yanked")
-            .and_then(|yanked| yanked.as_bool())
+            .and_then(serde_json::Value::as_bool)
             .unwrap_or(true)
         {
             continue;
@@ -1606,14 +1610,13 @@ fn upgrade_queries(name: &str) -> Result<()> {
 
     let mut url_revs: BTreeMap<String, String> = BTreeMap::new();
     for (query_name, info) in queries_to_upgrade(&toml.queries, name) {
-        let new_rev = match url_revs.get(&info.git) {
-            Some(rev) => rev.clone(),
-            None => {
-                let rev = git_ls_remote(&info.git)?;
-                println!("  {} -> {}", info.git, &rev[..12.min(rev.len())]);
-                url_revs.insert(info.git.clone(), rev.clone());
-                rev
-            }
+        let new_rev = if let Some(rev) = url_revs.get(&info.git) {
+            rev.clone()
+        } else {
+            let rev = git_ls_remote(&info.git)?;
+            println!("  {} -> {}", info.git, &rev[..12.min(rev.len())]);
+            url_revs.insert(info.git.clone(), rev.clone());
+            rev
         };
 
         if info.rev != new_rev {
@@ -1802,7 +1805,7 @@ fn requirement_of(spec: &toml_edit::Item) -> Option<String> {
 /// itself visited, so the requirement is still checked once.
 fn inherits_from_workspace(spec: &toml_edit::Item) -> bool {
     spec.get("workspace")
-        .and_then(|workspace| workspace.as_bool())
+        .and_then(toml_edit::Item::as_bool)
         .unwrap_or(false)
 }
 
@@ -2086,10 +2089,13 @@ fn fetch_queries(name: &str) -> Result<()> {
 
         if !repo_clones.contains_key(&clone_key) {
             use md5::{Digest, Md5};
-            let hash = Md5::digest(clone_key.as_bytes())
-                .iter()
-                .map(|byte| format!("{byte:02x}"))
-                .collect::<String>();
+            let hash =
+                Md5::digest(clone_key.as_bytes())
+                    .iter()
+                    .fold(String::new(), |mut hash, byte| {
+                        let _ = write!(hash, "{byte:02x}");
+                        hash
+                    });
             let clone_dir = format!("{tmp}/repo-{hash}");
             println!(
                 "Cloning {} at {}",
@@ -2160,7 +2166,7 @@ fn apply_text_replacements(content: &str, lang: &str) -> String {
         (r"\c", "(?i)"),
         (r"\(?i)", "(?i)"),
         ("^{[-]|[^|]", r"^\{[-]|^\{[^|]"),
-        (r#"^\\if"#, r#"^if"#),
+        (r"^\\if", r"^if"),
         (
             "[
   \"\\\\.and\\\\.\"
@@ -2753,15 +2759,12 @@ fn build_wasm(name: &str) -> Result<()> {
         let build_log = log_dir.join(format!("{wasm_name}.log"));
         println!("* building wasm in {repo_dir}");
         println!("* build log: {}", build_log.display());
-        match build_repo_wasm(&repo_dir, &wasm_file, &build_log) {
-            Ok(()) => {
-                fs::write(&build_id_file, &build_id)?;
-                println!("{wasm_path}");
-            }
-            Err(_) => {
-                println!("  ERROR: failed to build {parser_name}");
-                failed.push(parser_name.clone());
-            }
+        if let Ok(()) = build_repo_wasm(&repo_dir, &wasm_file, &build_log) {
+            fs::write(&build_id_file, &build_id)?;
+            println!("{wasm_path}");
+        } else {
+            println!("  ERROR: failed to build {parser_name}");
+            failed.push(parser_name.clone());
         }
 
         let _ = run_cmd_ok(&format!("rm -rf {clone_dir}"));
@@ -2836,7 +2839,7 @@ fn build_repo_wasm_with(
 
     let mut tail = String::from_utf8_lossy(&output.stdout).into_owned();
     tail.push_str(&String::from_utf8_lossy(&output.stderr));
-    tail.push_str(&format!("[end] {:.1}s\n", started.elapsed().as_secs_f64()));
+    let _ = writeln!(tail, "[end] {:.1}s", started.elapsed().as_secs_f64());
 
     fs::write(
         build_log,
@@ -3075,9 +3078,7 @@ fn write_tree_sitter_json(
                 "name": grammar_name,
                 "camelcase": selected_grammar
                     .and_then(|grammar| grammar.get("camelcase"))
-                    .and_then(Value::as_str)
-                    .map(ToOwned::to_owned)
-                    .unwrap_or_else(|| to_camel_case(parser_name)),
+                    .and_then(Value::as_str).map_or_else(|| to_camel_case(parser_name), ToOwned::to_owned),
                 "scope": scope,
                 "path": grammar_path,
                 "file-types": file_types,
@@ -3724,7 +3725,10 @@ mod crate_dep_tests {
 
     #[test]
     fn matching_requirements_are_accepted() {
-        assert!(problems(Vec::new()).is_empty());
+        assert!(
+            problems(Vec::new()).is_empty(),
+            "no dependencies, so no problems"
+        );
     }
 
     #[test]
@@ -3756,7 +3760,10 @@ mod crate_dep_tests {
     fn an_unpublished_crate_may_omit_the_version() {
         let mut unpublished = dependency("benchmarks/rust/Cargo.toml", None);
         unpublished.publishable = false;
-        assert!(problems(vec![unpublished]).is_empty());
+        assert!(
+            problems(vec![unpublished]).is_empty(),
+            "an unpublished crate needs no version requirement"
+        );
     }
 
     #[test]
@@ -4139,8 +4146,14 @@ mod tests {
     /// 115 pull requests carrying the same shared revision bump.
     #[test]
     fn a_language_backed_by_the_default_source_upgrades_nothing() {
-        assert!(selected("c").is_empty());
-        assert!(selected("rust").is_empty());
+        assert!(
+            selected("c").is_empty(),
+            "`c` reads the default query source"
+        );
+        assert!(
+            selected("rust").is_empty(),
+            "`rust` reads the default query source"
+        );
     }
 
     #[test]
@@ -4428,7 +4441,9 @@ mod tests {
     static CWD: Mutex<()> = Mutex::new(());
 
     fn in_directory<T>(root: &Path, body: impl FnOnce() -> T + std::panic::UnwindSafe) -> T {
-        let guard = CWD.lock().unwrap_or_else(|error| error.into_inner());
+        let guard = CWD
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
         let cwd = std::env::current_dir().expect("cwd should be available");
         std::env::set_current_dir(root).expect("should switch to temp dir");
 
@@ -4639,7 +4654,10 @@ mod tests {
             .map(|(name, members)| {
                 (
                     *name,
-                    members.iter().map(|id| id.to_string()).collect::<Vec<_>>(),
+                    members
+                        .iter()
+                        .map(std::string::ToString::to_string)
+                        .collect::<Vec<_>>(),
                 )
             })
             .collect::<BTreeMap<_, _>>();

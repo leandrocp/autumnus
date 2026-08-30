@@ -1,6 +1,154 @@
 {
+  // Every JavaScript and TypeScript file the repo authors, at oxlint's strict
+  // categories. `mise run lint-js` runs it from the repo root; the per-package
+  // `pnpm run lint` scripts point `-c` here and add `--type-aware`, which needs
+  // each package's tsconfig and built dependencies.
+  //
+  // Rules below are either configured (the rule stays on, with the option that
+  // matches how this repository writes) or waived, with the reason and the
+  // number of sites it fired on when it was written down. The waivers shrink.
+  "plugins": [
+    "import",
+    "jsdoc",
+    "jsx-a11y",
+    "node",
+    "oxc",
+    "promise",
+    "react",
+    "react-perf",
+    "typescript",
+    "unicorn",
+    "vitest"
+  ],
+  "categories": {
+    "correctness": "error",
+    "pedantic": "error",
+    "perf": "error",
+    "suspicious": "error"
+  },
+  // The same list `.oxfmtrc.json` carries, for the same reasons: vendored code,
+  // build output, and corpora whose exact bytes are the test.
+  "ignorePatterns": [
+    "**/dist/**",
+    "**/vendored_parsers/**",
+    "benchmarks/shadcn_sidebar.tsx",
+    "fixtures/**",
+    "packages/elixir/lumis/examples/**/vendor/**",
+    "packages/javascript/lumis/langs/**",
+    "packages/javascript/lumis/src/generated/**",
+    "packages/javascript/lumis/src/tree-sitter-wasm.ts",
+    "packages/javascript/themes/themes/**",
+    "samples/**"
+  ],
   "rules": {
+    // `x == null` is how this code asks "null or undefined", 33 times.
+    "eslint/eqeqeq": ["error", "always", { "null": "ignore" }],
+    // Set to the deepest block the tree actually has, so it catches a regression
+    // rather than describing one.
+    "eslint/max-depth": ["error", 6],
+    // A line count is not a complexity measure.
+    "eslint/max-lines": "off",
+    "eslint/max-lines-per-function": "off",
+    // Parsers are loaded one at a time on purpose; see "Highlighting loads what
+    // a document needs, in one pass" in AGENTS.md.
+    "eslint/no-await-in-loop": "off",
+    "eslint/no-inline-comments": "off",
+    // 5 sites, every one an explicit `return;` from a `T | undefined` function,
+    // where saying nothing is returned is the point.
+    "eslint/no-useless-return": "off",
+    // 58 sites. `async` is how a method satisfies a Promise-returning interface
+    // such as `RuntimeEnvironment` without awaiting, and how the mocks match it.
+    // `no-floating-promises` and `await-thenable` catch the real mistake.
+    "eslint/require-await": "off",
+    "import/max-dependencies": "off",
+    // Side-effect imports are how CSS and polyfills are pulled in.
+    "import/no-unassigned-import": "off",
+    // 87 sites. Runtime-matrix and conformance tests branch because each arm
+    // pins a different supported behavior; splitting them would hide the parity.
+    "jest/no-conditional-expect": "off",
+    "jest/no-conditional-in-test": "off",
+    // The native test suite chooses the Vitest test function from platform and
+    // runtime support before registering each test.
+    "jest/no-standalone-expect": [
+      "error",
+      { "additionalTestBlockFunctions": ["itWithAddon", "itForCacheCompilation"] }
+    ],
+    // Vitest accepts a second argument as the assertion failure message.
+    "jest/valid-expect": ["error", { "maxArgs": 2 }],
+    // TypeScript already carries parameter and return types. Repeating them in
+    // JSDoc would add 102 `@param` and 118 `@returns` tags with no new contract.
+    "jsdoc/require-param": "off",
+    "jsdoc/require-returns": "off",
+    // The chains it flags end in a side effect, not a value.
+    "promise/always-return": ["error", { "ignoreLastCallback": true }],
+    "react/react-in-jsx-scope": "off",
+    "typescript/no-confusing-void-expression": [
+      "error",
+      { "ignoreArrowShorthand": true, "ignoreVoidReturningFunctions": true }
+    ],
     "typescript/no-explicit-any": "error",
-    "typescript/only-throw-error": "error"
-  }
+    // 608 sites between them, from `any` reaching in at untyped boundaries.
+    // Closing them is the work "Parse TypeScript boundaries into domain types"
+    // in AGENTS.md describes, and it is a change of its own, not a lint switch.
+    "typescript/no-unsafe-argument": "off",
+    "typescript/no-unsafe-assignment": "off",
+    "typescript/no-unsafe-call": "off",
+    "typescript/no-unsafe-member-access": "off",
+    "typescript/no-unsafe-return": "off",
+    "typescript/no-unsafe-type-assertion": "off",
+    "typescript/only-throw-error": "error",
+    // `if (!x) { x = y }` guards on truthiness; `??=` would stop treating `""`
+    // as absent.
+    "typescript/prefer-nullish-coalescing": ["error", { "ignoreIfStatements": true }],
+    "typescript/require-await": "off",
+    // 146 sites.
+    "typescript/strict-boolean-expressions": "off",
+    "typescript/switch-exhaustiveness-check": [
+      "error",
+      { "considerDefaultExhaustiveForUnions": true }
+    ],
+    // Wants `toSorted`, which needs Node 20; the package supports Node 18.
+    "unicorn/no-array-sort": "off",
+    // Both options drop arguments TypeScript requires and turn `Promise<T |
+    // undefined>` into `Promise<T | void>`.
+    "unicorn/no-useless-undefined": [
+      "error",
+      { "checkArguments": false, "checkArrowFunctionBody": false }
+    ],
+    // The handlers it flags are set once, on a fresh one-shot `IDBRequest` or
+    // `IDBTransaction`, or on a worker's own global, where assignment is the API.
+    "unicorn/prefer-add-event-listener": "off",
+    // The code it flags validates surrogate pairs, so it needs UTF-16 code
+    // units. `codePointAt` returns the combined code point and would silently
+    // stop rejecting lone surrogates.
+    "unicorn/prefer-code-point": "off",
+    // Fires on `Worker.postMessage`, which takes no `targetOrigin`.
+    "unicorn/require-post-message-target-origin": "off"
+  },
+  "overrides": [
+    {
+      // 5 sites. These tests and the public re-export intentionally exercise
+      // deprecated compatibility names; all other deprecations remain errors.
+      "files": [
+        "**/src/formatter/ansi.ts",
+        "**/test/formatter-ansi.test.ts",
+        "**/test/formatter-shared.test.ts"
+      ],
+      "rules": { "typescript/no-deprecated": "off" }
+    },
+    {
+      // 1 site. The test verifies normalization of a rejection value that is not an Error.
+      "files": ["**/react/test/index.test.tsx"],
+      "rules": { "typescript/prefer-promise-reject-errors": "off" }
+    },
+    {
+      // 8 sites. These heterogeneous invalid corpora assert rejection itself;
+      // there is intentionally no one error message shared by every table row.
+      "files": [
+        "**/test/language-package-corpus.test.ts",
+        "**/test/native-targets.test.ts"
+      ],
+      "rules": { "jest/require-to-throw-message": "off" }
+    }
+  ]
 }

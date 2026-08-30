@@ -26,8 +26,7 @@ const fixtureNames = readdirSync(conformanceDir, { withFileTypes: true })
   .sort();
 
 const fixtureSource = readFixture(CUSTOM_FORMATTER_FIXTURE, "source.txt");
-const customSource =
-  `const nested = foo(bar([1, 2], { a: "3" }));\n` + `const view = ${fixtureSource.trim()};\n`;
+const customSource = `const nested = foo(bar([1, 2], { a: "3" }));\nconst view = ${fixtureSource.trim()};\n`;
 
 test.describe("browser runtime", () => {
   let context: BrowserContext;

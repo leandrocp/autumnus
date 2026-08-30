@@ -1,0 +1,7 @@
+---
+# The theme extraction scripts run inside Neovim, so `vim` is ambient. Selene
+# ships no Neovim standard library, and declaring the whole API here would be a
+# second copy of Neovim's surface to keep in step, so the global is opaque.
+globals:
+  vim:
+    any: true

@@ -83,8 +83,8 @@ defmodule MyBlogWeb do
       import MyBlogWeb.CoreComponents
 
       # Common modules used in templates
-      alias Phoenix.LiveView.JS
       alias MyBlogWeb.Layouts
+      alias Phoenix.LiveView.JS
 
       # Routes generation with the ~p sigil
       unquote(verified_routes())

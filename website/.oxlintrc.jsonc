@@ -1,3 +1,0 @@
-{
-  // Explicit config file to stop oxlint from trying to load vite.config.ts.
-}

@@ -32,10 +32,10 @@ export function setupTabs(
 
 export function escapeHtml(str: string) {
   return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
 }
 
 export function setupCopyButtons(root: HTMLElement) {
@@ -46,7 +46,7 @@ export function setupCopyButtons(root: HTMLElement) {
       navigator.clipboard.writeText(text);
       btn.innerHTML = CHECK_SVG;
       btn.classList.add("text-emerald-500");
-      const liveRegion = document.getElementById("live-region");
+      const liveRegion = document.querySelector("#live-region");
       if (liveRegion) liveRegion.textContent = "Copied to clipboard";
       setTimeout(() => {
         btn.innerHTML = COPY_SVG;

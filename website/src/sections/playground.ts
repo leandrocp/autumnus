@@ -68,7 +68,7 @@ export async function setupPlayground(root: HTMLElement) {
     const language = LANGUAGES_BY_ID.get(languageSelect.value) ?? LANGUAGES[0]!;
     const theme = THEMES_BY_ID.get(themeSelect.value) ?? THEMES[0]!;
 
-    preview.setAttribute("data-state", "loading");
+    preview.dataset.state = "loading";
 
     try {
       const themeData = await loadTheme(theme.id);
@@ -76,13 +76,13 @@ export async function setupPlayground(root: HTMLElement) {
       if (token !== renderToken) return;
 
       preview.innerHTML = html;
-      preview.setAttribute("data-state", "ready");
+      preview.dataset.state = "ready";
     } catch (err) {
       if (token !== renderToken) return;
 
       console.error(`Failed to highlight ${language.id}`, err);
       preview.innerHTML = `<div class="p-6 font-mono text-xs text-red-500">Failed to highlight ${language.label}: ${String(err)}</div>`;
-      preview.setAttribute("data-state", "error");
+      preview.dataset.state = "error";
     }
   };
 

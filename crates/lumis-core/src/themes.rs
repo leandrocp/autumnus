@@ -215,10 +215,10 @@ where
 
     struct UnderlineVisitor;
 
-    impl<'de> de::Visitor<'de> for UnderlineVisitor {
+    impl de::Visitor<'_> for UnderlineVisitor {
         type Value = UnderlineStyle;
 
-        fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
             formatter.write_str("a boolean or underline style string")
         }
 
@@ -708,8 +708,8 @@ impl Css<'_> {
                     self.scope_prefix(),
                     scope.replace('.', "-"),
                     style_css
-                ))
-            };
+                ));
+            }
         }
 
         rules.join("")
@@ -747,7 +747,7 @@ impl Css<'_> {
 
         for (property, value) in &self.container_style {
             if let Some(existing) = decls.iter_mut().find(|(p, _)| p == property) {
-                existing.1 = value.clone();
+                existing.1.clone_from(value);
             } else {
                 decls.push((property.clone(), value.clone()));
             }
@@ -766,20 +766,20 @@ impl Style {
         let mut rules = Vec::new();
 
         if let Some(fg) = &self.fg {
-            rules.push(format!("color: {fg};"))
-        };
+            rules.push(format!("color: {fg};"));
+        }
 
         if let Some(bg) = &self.bg {
-            rules.push(format!("background-color: {bg};"))
-        };
+            rules.push(format!("background-color: {bg};"));
+        }
 
         if self.bold {
-            rules.push("font-weight: bold;".to_string())
+            rules.push("font-weight: bold;".to_string());
         }
 
         if enable_italic && self.italic {
-            rules.push("font-style: italic;".to_string())
-        };
+            rules.push("font-style: italic;".to_string());
+        }
 
         let td = &self.text_decoration;
         let underline_css = match td.underline {
@@ -796,7 +796,7 @@ impl Style {
             (Some(u), false) => rules.push(format!("text-decoration: {u};")),
             (None, true) => rules.push("text-decoration: line-through;".to_string()),
             (None, false) => (),
-        };
+        }
 
         rules.join(separator)
     }
@@ -813,7 +813,7 @@ mod tests {
     fn test_available_themes() {
         let themes: Vec<_> = available_themes().collect();
 
-        assert!(!themes.is_empty());
+        assert!(!themes.is_empty(), "no themes are compiled in");
 
         let dracula = themes.iter().find(|t| t.name == "dracula").unwrap();
         assert_eq!(dracula.name, "dracula");
@@ -824,7 +824,7 @@ mod tests {
         assert_eq!(github_light.appearance, Appearance::Light);
 
         for theme in themes {
-            assert!(!theme.name.is_empty());
+            assert!(!theme.name.is_empty(), "a theme has no name");
             assert!(theme.appearance == Appearance::Light || theme.appearance == Appearance::Dark);
         }
     }
@@ -852,13 +852,13 @@ mod tests {
     #[test]
     fn test_load_all_themes() {
         for theme in ALL_THEMES.iter() {
-            assert!(!theme.name.is_empty());
+            assert!(!theme.name.is_empty(), "a theme has no name");
         }
 
         let manifest_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
         let expected_count = std::fs::read_dir(manifest_dir.join("themes"))
             .unwrap()
-            .filter_map(|entry| entry.ok())
+            .filter_map(std::result::Result::ok)
             .filter(|entry| entry.path().extension().and_then(|s| s.to_str()) == Some("json"))
             .count();
 
@@ -924,7 +924,7 @@ mod tests {
         let json = r#"{"name": "test", "appearance": "dark", "revision": "3e976b4", "highlights": {"normal": {"fg": "red", "bg": "green"}, "keyword": {"fg": "blue", "italic": true}, "tag.attribute": {"bg": "gray", "bold": true}}}"#;
         let theme = from_json(json).unwrap();
 
-        let expected = r#"/* test
+        let expected = r"/* test
  * revision: 3e976b4
  */
 .lumis {
@@ -939,7 +939,7 @@ mod tests {
   background-color: gray;
   font-weight: bold;
 }
-"#;
+";
 
         assert_eq!(
             CssBuilder::new(&theme).enable_italic(true).build(),
@@ -960,7 +960,7 @@ mod tests {
 
     #[test]
     fn test_css_builder_scopes_selectors_and_container_style() {
-        let json = r##"{"name": "test", "appearance": "dark", "revision": "3e976b4", "highlights": {"normal": {"fg": "red", "bg": "green"}, "keyword": {"fg": "blue"}}}"##;
+        let json = r#"{"name": "test", "appearance": "dark", "revision": "3e976b4", "highlights": {"normal": {"fg": "red", "bg": "green"}, "keyword": {"fg": "blue"}}}"#;
         let theme = from_json(json).unwrap();
 
         let expected = r#"/* test
@@ -994,7 +994,7 @@ html[data-theme="dark"] .l-keyword {
         let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {"keyword": {"fg": "blue", "italic": true}}}"#;
         let theme = from_json(json).unwrap();
 
-        let expected = r#"/* test
+        let expected = r"/* test
  * revision: abc
  */
 .lumis {}
@@ -1002,7 +1002,7 @@ html[data-theme="dark"] .l-keyword {
   color: blue;
   font-style: italic;
 }
-"#;
+";
 
         // No `enable_italic` call: the default must be `true`.
         assert_eq!(CssBuilder::new(&theme).build(), expected);
@@ -1013,11 +1013,11 @@ html[data-theme="dark"] .l-keyword {
         let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {}}"#;
         let theme = from_json(json).unwrap();
 
-        let expected = r#"/* test
+        let expected = r"/* test
  * revision: abc
  */
 .lumis {}
-"#;
+";
 
         assert_eq!(CssBuilder::new(&theme).build(), expected);
     }
@@ -1027,7 +1027,7 @@ html[data-theme="dark"] .l-keyword {
         let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {"normal": {"fg": "red", "bg": "green"}, "keyword": {"fg": "blue"}}}"#;
         let theme = from_json(json).unwrap();
 
-        let expected = r#"/* test
+        let expected = r"/* test
  * revision: abc
  */
 .lumis {
@@ -1038,7 +1038,7 @@ html[data-theme="dark"] .l-keyword {
 .l-keyword {
   color: blue;
 }
-"#;
+";
 
         assert_eq!(
             CssBuilder::new(&theme)
@@ -1053,14 +1053,14 @@ html[data-theme="dark"] .l-keyword {
         let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {"normal": {"fg": "red"}}}"#;
         let theme = from_json(json).unwrap();
 
-        let expected = r#"/* test
+        let expected = r"/* test
  * revision: abc
  */
 .lumis {
   color: red;
   background-color: #000;
 }
-"#;
+";
 
         assert_eq!(
             CssBuilder::new(&theme)
@@ -1075,14 +1075,14 @@ html[data-theme="dark"] .l-keyword {
         let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {"normal": {"fg": "red", "bg": "green"}}}"#;
         let theme = from_json(json).unwrap();
 
-        let expected = r#"/* test
+        let expected = r"/* test
  * revision: abc
  */
 .lumis {
   color: red;
   background-color: #000;
 }
-"#;
+";
 
         // The theme's `background-color: green` is replaced in place, not duplicated.
         let css = CssBuilder::new(&theme)
@@ -1110,7 +1110,7 @@ html[data-theme="dark"] .l-keyword {
         let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {"normal": {"fg": "red"}}}"#;
         let theme = from_json(json).unwrap();
 
-        let expected = r#"/* test
+        let expected = r"/* test
  * revision: abc
  */
 .lumis {
@@ -1119,7 +1119,7 @@ html[data-theme="dark"] .l-keyword {
   padding: 1rem;
   overflow-x: auto;
 }
-"#;
+";
 
         assert_eq!(
             CssBuilder::new(&theme)
@@ -1138,7 +1138,7 @@ html[data-theme="dark"] .l-keyword {
         let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {"normal": {"fg": "red"}, "keyword": {"fg": "blue"}}}"#;
         let theme = from_json(json).unwrap();
 
-        let expected = r#"/* test
+        let expected = r"/* test
  * revision: abc
  */
 .app .lumis {
@@ -1147,7 +1147,7 @@ html[data-theme="dark"] .l-keyword {
 .app .l-keyword {
   color: blue;
 }
-"#;
+";
 
         assert_eq!(CssBuilder::new(&theme).scope(".app").build(), expected);
     }
@@ -1157,7 +1157,7 @@ html[data-theme="dark"] .l-keyword {
         let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {"keyword": {"fg": "blue", "bold": true, "italic": true, "underline": "double", "strikethrough": true}}}"#;
         let theme = from_json(json).unwrap();
 
-        let expected = r#"/* test
+        let expected = r"/* test
  * revision: abc
  */
 .lumis {}
@@ -1167,7 +1167,7 @@ html[data-theme="dark"] .l-keyword {
   font-style: italic;
   text-decoration: underline double line-through;
 }
-"#;
+";
 
         assert_eq!(CssBuilder::new(&theme).build(), expected);
     }

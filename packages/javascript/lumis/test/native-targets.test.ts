@@ -143,7 +143,7 @@ async function selectorNativeTargetFor(): Promise<typeof nativeTargetFor> {
     const rule = rules.find(
       (candidate) => candidate.platform === platform && candidate.arch === arch,
     );
-    if (!rule) return undefined;
+    if (!rule) return;
     const variables: Record<SelectorVariable, string> = { platform, arch, libc };
     return rule.target
       .map((part) => (part.kind === "literal" ? part.value : variables[part.name]))
@@ -181,7 +181,9 @@ describe("native target selection", () => {
     const withoutWindowsArm64 = EXPECTED_NATIVE_TARGETS.filter(
       (target) => target !== "win32-arm64-msvc",
     );
-    expect(() => expectCompleteTargetCorpus(withoutWindowsArm64)).toThrow();
+    expect(() => {
+      expectCompleteTargetCorpus(withoutWindowsArm64);
+    }).toThrow();
   });
 
   it("resolves each host to the package that declares it", () => {

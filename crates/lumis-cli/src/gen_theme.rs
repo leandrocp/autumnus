@@ -5,7 +5,7 @@ use tempfile::TempDir;
 
 const EXTRACT_THEME_LUA: &str = include_str!(concat!(env!("OUT_DIR"), "/extract_theme.lua"));
 
-pub fn generate_theme(
+pub(crate) fn generate_theme(
     url: &str,
     colorscheme: &str,
     setup: Option<&str>,
@@ -21,16 +21,18 @@ pub fn generate_theme(
 
     run_nvim_extraction(temp_path, colorscheme)?;
 
-    let json_path = temp_path.join(format!("{}.json", colorscheme));
-    let json_content = fs::read_to_string(&json_path)
-        .context(format!("Failed to read generated JSON at {:?}", json_path))?;
+    let json_path = temp_path.join(format!("{colorscheme}.json"));
+    let json_content = fs::read_to_string(&json_path).context(format!(
+        "Failed to read generated JSON at {}",
+        json_path.display()
+    ))?;
 
     if let Some(output_path) = output {
         fs::write(output_path, &json_content)
-            .context(format!("Failed to write output to {}", output_path))?;
-        eprintln!("Theme saved to {}", output_path);
+            .context(format!("Failed to write output to {output_path}"))?;
+        eprintln!("Theme saved to {output_path}");
     } else {
-        println!("{}", json_content);
+        println!("{json_content}");
     }
 
     Ok(())
@@ -59,32 +61,29 @@ fn create_themes_lua(
     let config_fn = if let Some(setup_code) = setup {
         format!(
             r#"config = function()
-			vim.o.background = "{}"
-			{}
-			vim.cmd([[colorscheme {}]])
-		end,"#,
-            appearance, setup_code, colorscheme
+			vim.o.background = "{appearance}"
+			{setup_code}
+			vim.cmd([[colorscheme {colorscheme}]])
+		end,"#
         )
     } else {
         format!(
             r#"config = function()
-			vim.o.background = "{}"
-			vim.cmd([[colorscheme {}]])
-		end,"#,
-            appearance, colorscheme
+			vim.o.background = "{appearance}"
+			vim.cmd([[colorscheme {colorscheme}]])
+		end,"#
         )
     };
 
     let themes_content = format!(
         r#"return {{
 	{{
-		url = "{}",
-		name = "{}",
-		{}
+		url = "{url}",
+		name = "{colorscheme}",
+		{config_fn}
 	}},
 }}
-"#,
-        url, colorscheme, config_fn
+"#
     );
 
     fs::write(temp_path.join("themes.lua"), themes_content)
@@ -118,11 +117,7 @@ fn run_nvim_extraction(temp_path: &std::path::Path, colorscheme: &str) -> Result
         let stderr = String::from_utf8_lossy(&output.stderr);
         let stdout = String::from_utf8_lossy(&output.stdout);
 
-        anyhow::bail!(
-            "Neovim theme extraction failed:\nstdout: {}\nstderr: {}",
-            stdout,
-            stderr
-        );
+        anyhow::bail!("Neovim theme extraction failed:\nstdout: {stdout}\nstderr: {stderr}");
     }
 
     Ok(())

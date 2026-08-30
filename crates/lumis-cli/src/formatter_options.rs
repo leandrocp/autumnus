@@ -14,14 +14,15 @@ use crate::Formatter;
 
 include!(concat!(env!("OUT_DIR"), "/formatter_options.rs"));
 
-pub const OPTSET_GLOBAL: &str = "Global options";
-pub const OPTSET_TERMINAL: &str = "Options for --formatter terminal";
-pub const OPTSET_HTML: &str = "Options for --formatter html-inline, html-linked, html-multi-themes";
-pub const OPTSET_STYLED: &str = "Options for --formatter html-inline, html-multi-themes";
-pub const OPTSET_MULTI_THEME: &str = "Options for --formatter html-multi-themes";
+pub(crate) const OPTSET_GLOBAL: &str = "Global options";
+pub(crate) const OPTSET_TERMINAL: &str = "Options for --formatter terminal";
+pub(crate) const OPTSET_HTML: &str =
+    "Options for --formatter html-inline, html-linked, html-multi-themes";
+pub(crate) const OPTSET_STYLED: &str = "Options for --formatter html-inline, html-multi-themes";
+pub(crate) const OPTSET_MULTI_THEME: &str = "Options for --formatter html-multi-themes";
 
 /// A set of flags that the same formatters accept.
-pub struct OptionGroup {
+pub(crate) struct OptionGroup {
     /// How the group is named in an error. Reads after "are not accepted by".
     pub label: &'static str,
     /// Every CLI flag in the group, in `--help` order.
@@ -32,14 +33,14 @@ pub struct OptionGroup {
 }
 
 impl OptionGroup {
-    pub fn accepts(&self, formatter: Formatter) -> bool {
+    pub(crate) fn accepts(&self, formatter: Formatter) -> bool {
         let accepted = manifest_options_for(formatter);
         self.manifest_options
             .iter()
             .all(|option| accepted.contains(option))
     }
 
-    pub fn accepted_by(&self) -> Vec<Formatter> {
+    pub(crate) fn accepted_by(&self) -> Vec<Formatter> {
         Formatter::ALL
             .into_iter()
             .filter(|formatter| self.accepts(*formatter))
@@ -52,7 +53,7 @@ impl OptionGroup {
 /// inline-style formatters have a `style` field on theirs, so the flag sits in
 /// the styled group and inherits the formatters `italic` and
 /// `include_highlights` derive.
-pub const OPTION_GROUPS: &[OptionGroup] = &[
+pub(crate) const OPTION_GROUPS: &[OptionGroup] = &[
     OptionGroup {
         label: "`--theme`",
         flags: &["--theme"],
@@ -95,14 +96,16 @@ fn manifest_options_for(formatter: Formatter) -> &'static [&'static str] {
     FORMATTER_OPTIONS
         .iter()
         .find(|(name, _)| *name == slug)
-        .map(|(_, options)| *options)
-        .unwrap_or_else(|| panic!("formatter-options.json has no entry for `{slug}`"))
+        .map_or_else(
+            || panic!("formatter-options.json has no entry for `{slug}`"),
+            |(_, options)| *options,
+        )
 }
 
 /// Every flag a formatter accepts, for `lumis formatters show`. The universal
 /// flags come first, then each group in `--help` order. `--formatter` is not
 /// among them: it selects the formatter rather than configuring one.
-pub fn accepted_flags(formatter: Formatter) -> Vec<&'static str> {
+pub(crate) fn accepted_flags(formatter: Formatter) -> Vec<&'static str> {
     let mut flags = vec!["--language", "--rainbow-brackets"];
     for group in OPTION_GROUPS.iter().filter(|g| g.accepts(formatter)) {
         flags.extend_from_slice(group.flags);

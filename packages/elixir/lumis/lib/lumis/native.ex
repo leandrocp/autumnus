@@ -57,17 +57,17 @@ defmodule Lumis.Native do
     mode: mode,
     force_build: System.get_env("LUMIS_BUILD") in ["1", "true"]
 
-  def available_languages(), do: :erlang.nif_error(:nif_not_loaded)
+  def available_languages, do: :erlang.nif_error(:nif_not_loaded)
   def language_info(_name), do: :erlang.nif_error(:nif_not_loaded)
-  def available_themes(), do: :erlang.nif_error(:nif_not_loaded)
+  def available_themes, do: :erlang.nif_error(:nif_not_loaded)
   def get_theme(_name), do: :erlang.nif_error(:nif_not_loaded)
   def build_theme_from_file(_path), do: :erlang.nif_error(:nif_not_loaded)
   def build_theme_from_json_string(_json_string), do: :erlang.nif_error(:nif_not_loaded)
   def theme_css_from_name(_name, _options), do: :erlang.nif_error(:nif_not_loaded)
   def theme_css_from_theme(_theme, _options), do: :erlang.nif_error(:nif_not_loaded)
   def configure_store(_data_dir), do: :erlang.nif_error(:nif_not_loaded)
-  def language_package_refs(), do: :erlang.nif_error(:nif_not_loaded)
-  def language_bundles(), do: :erlang.nif_error(:nif_not_loaded)
+  def language_package_refs, do: :erlang.nif_error(:nif_not_loaded)
+  def language_bundles, do: :erlang.nif_error(:nif_not_loaded)
   def load_language_by_name(_name), do: :erlang.nif_error(:nif_not_loaded)
 
   def cache_languages(_names, _force), do: :erlang.nif_error(:nif_not_loaded)
@@ -75,6 +75,6 @@ defmodule Lumis.Native do
 
   def guess_language(_name, _source), do: :erlang.nif_error(:nif_not_loaded)
   def has_language(_name), do: :erlang.nif_error(:nif_not_loaded)
-  def loaded_languages(), do: :erlang.nif_error(:nif_not_loaded)
+  def loaded_languages, do: :erlang.nif_error(:nif_not_loaded)
   def highlight(_source, _options), do: :erlang.nif_error(:nif_not_loaded)
 end

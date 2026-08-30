@@ -117,7 +117,7 @@ fn unescape_query_string(raw: &str) -> String {
             continue;
         }
         match characters.next() {
-            Some('\\') => unescaped.push('\\'),
+            Some('\\') | None => unescaped.push('\\'),
             Some('"') => unescaped.push('"'),
             Some('n') => unescaped.push('\n'),
             Some('r') => unescaped.push('\r'),
@@ -126,7 +126,6 @@ fn unescape_query_string(raw: &str) -> String {
                 unescaped.push('\\');
                 unescaped.push(other);
             }
-            None => unescaped.push('\\'),
         }
     }
 

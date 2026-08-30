@@ -331,7 +331,7 @@ function parseLanguagePackageValue(value: unknown, expectedPackageName: string):
   const parserValue = requireObject(property(packageValue, "parser"), expectedPackageName);
   const parserName = requireString(property(parserValue, "name"), expectedPackageName);
   const grammarName = requireString(property(parserValue, "grammarName"), expectedPackageName);
-  const sha256 = requireString(property(parserValue, "sha256"), expectedPackageName);
+  const parserSha256 = requireString(property(parserValue, "sha256"), expectedPackageName);
   const size = property(parserValue, "size");
   const languagesValue = requireObject(property(packageValue, "languages"), expectedPackageName);
 
@@ -342,7 +342,7 @@ function parseLanguagePackageValue(value: unknown, expectedPackageName: string):
     definitionHash.length === 0 ||
     !isSafePackagePathSegment(parserName) ||
     grammarName.length === 0 ||
-    !/^[0-9a-f]{64}$/.test(sha256) ||
+    !/^[0-9a-f]{64}$/.test(parserSha256) ||
     typeof size !== "number" ||
     !Number.isSafeInteger(size) ||
     size <= 0
@@ -368,7 +368,7 @@ function parseLanguagePackageValue(value: unknown, expectedPackageName: string):
         expectedPackageName,
       ),
       revision: optionalNullableString(property(parserValue, "revision"), expectedPackageName),
-      sha256,
+      sha256: parserSha256,
       size,
     },
     languages,
@@ -433,7 +433,7 @@ function hasOnlyUnicodeScalarStrings(value: unknown): boolean {
     }
     return true;
   }
-  if (Array.isArray(value)) return value.every(hasOnlyUnicodeScalarStrings);
+  if (Array.isArray(value)) return value.every((entry) => hasOnlyUnicodeScalarStrings(entry));
   if (typeof value === "object" && value !== null) {
     return Object.entries(value).every(
       ([key, child]) => hasOnlyUnicodeScalarStrings(key) && hasOnlyUnicodeScalarStrings(child),
@@ -449,7 +449,7 @@ function isValidPackageName(value: string): boolean {
   if (value.startsWith("@")) {
     const scoped = value.slice(1);
     const slash = scoped.indexOf("/");
-    if (slash < 0 || scoped.indexOf("/", slash + 1) >= 0) return false;
+    if (slash < 0 || scoped.includes("/", slash + 1)) return false;
     segments = [scoped.slice(0, slash), scoped.slice(slash + 1)];
   } else {
     if (value.includes("/")) return false;
@@ -768,13 +768,13 @@ function parseOffsetDelta(input: string): number | undefined {
   if (value.length === 0) return undefined;
 
   const binary = BINARY_OFFSET.exec(value);
-  const hex = HEX_OFFSET.exec(value);
+  const hexadecimal = HEX_OFFSET.exec(value);
   const decimal = DECIMAL_OFFSET.exec(value);
   let parsed = NaN;
   if (binary) {
     parsed = parseBinaryOffset(binary);
-  } else if (hex && isLuaExponent(hex[3])) {
-    parsed = parseHexOffset(hex);
+  } else if (hexadecimal && isLuaExponent(hexadecimal[3])) {
+    parsed = parseHexOffset(hexadecimal);
   } else if (decimal && isLuaExponent(decimal[1])) {
     parsed = Number(value);
   }
@@ -1245,7 +1245,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
     async initParser(): Promise<void> {
       this.sharedCache.parserInit ??= Promise.all([
         loadTreeSitter(),
-        runtime.parserInitOptions?.() ?? Promise.resolve(undefined),
+        runtime.parserInitOptions?.() ?? Promise.resolve(),
       ]).then(([{ Parser }, initOptions]) => Parser.init(initOptions));
       await this.sharedCache.parserInit;
     }
@@ -1376,7 +1376,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
       return defaultRuntime.getLoadedLanguageIds();
     },
     availableLanguages() {
-      return LANGUAGES.map(cloneLanguageInfo);
+      return LANGUAGES.map((language) => cloneLanguageInfo(language));
     },
     getDefaultRuntime() {
       return defaultRuntime;

@@ -1,5 +1,4 @@
 import type { Formatter } from "@lumis-sh/lumis/formatters";
-import type { Root } from "hast";
 import type { ReactNode } from "react";
 import { fromHtml } from "hast-util-from-html";
 import { toJsxRuntime } from "hast-util-to-jsx-runtime";
@@ -24,7 +23,7 @@ export function getLanguageId(language: Formatter["language"]): string | undefin
 }
 
 export function toReactNode(html: string): ReactNode {
-  const tree = fromHtml(html, { fragment: true }) as Root;
+  const tree = fromHtml(html, { fragment: true });
   return toJsxRuntime(tree, {
     Fragment,
     jsx,

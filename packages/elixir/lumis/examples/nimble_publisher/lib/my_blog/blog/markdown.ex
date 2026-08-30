@@ -1,4 +1,8 @@
 defmodule MyBlog.Blog.Markdown do
+  @moduledoc """
+  Converts the example blog's Markdown posts to highlighted HTML.
+  """
+
   def convert(_path, body, _attrs, _opts) do
     MDEx.to_html!(body,
       extension: [

@@ -151,7 +151,7 @@ export async function cacheLanguages(
   const directory = options.directory;
   const resolver = options.resolver ?? DEFAULT_RESOLVER;
   const packageResolver = options.languagePackageResolver ?? DEFAULT_LANGUAGE_PACKAGE_RESOLVER;
-  const languages = await Promise.all(expandBundles(names).map(resolveLanguage));
+  const languages = await Promise.all(expandBundles(names).map((name) => resolveLanguage(name)));
   const seen = new Set<string>();
   const packages = new Map<string, LanguagePackage>();
   const persisted = new Set<string>();

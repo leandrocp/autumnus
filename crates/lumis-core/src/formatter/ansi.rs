@@ -26,9 +26,9 @@ pub fn hex_to_rgb(hex: &str) -> Option<(u8, u8, u8)> {
 /// Generate ANSI color escape sequence from RGB values.
 pub fn rgb_to_ansi(r: u8, g: u8, b: u8, is_background: bool) -> String {
     if is_background {
-        format!("\u{1b}[48;2;{};{};{}m", r, g, b)
+        format!("\u{1b}[48;2;{r};{g};{b}m")
     } else {
-        format!("\u{1b}[38;2;{};{};{}m", r, g, b)
+        format!("\u{1b}[38;2;{r};{g};{b}m")
     }
 }
 
@@ -101,7 +101,7 @@ pub fn paint(text: &str, style: &Style) -> String {
 
         result
     } else {
-        format!("{}{}{}{}", ANSI_RESET, ansi_codes, text, ANSI_RESET)
+        format!("{ANSI_RESET}{ansi_codes}{text}{ANSI_RESET}")
     }
 }
 

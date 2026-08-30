@@ -4,7 +4,7 @@
 //! accept. This reads `lumis highlight --help`, so it checks the flags clap
 //! actually parses rather than a list maintained beside them.
 //!
-//! Options are snake_case in the manifest and kebab-case behind `--` here.
+//! Options are `snake_case` in the manifest and kebab-case behind `--` here.
 //! An option that needs more than one flag records that in `spelling.cli`.
 
 use assert_cmd::cargo::cargo_bin_cmd;

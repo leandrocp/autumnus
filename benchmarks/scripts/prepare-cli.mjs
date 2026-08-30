@@ -152,7 +152,7 @@ await writeFile(
 console.log(JSON.stringify({ commandsDir, dataDir, languages }));
 
 function shellCommand(parts) {
-  return parts.map(shellQuote).join(" ");
+  return parts.map((part) => shellQuote(part)).join(" ");
 }
 
 function shellQuote(value) {

@@ -69,7 +69,9 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - run: mise run fmt-js -- --check
+      # Formatting and the rules that need no type information are checked over
+      # the whole repository by `lint.yml`. These add the type-aware rules, so
+      # they build what each package's tsconfig resolves against.
       - run: pnpm --filter @lumis-sh/lumis run lint
       - run: pnpm --filter @lumis-sh/markdown-it-lumis run lint
       - run: pnpm --filter @lumis-sh/rehype-lumis run lint

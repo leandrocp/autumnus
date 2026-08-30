@@ -43,11 +43,9 @@ export function buildCss(theme: ThemeData, options: BuildCssOptions = {}): strin
   const containerSelector = options.containerSelector ?? ".lumis";
   const containerStyle = options.containerStyle ?? [];
 
-  const rules: string[] = [];
-
-  rules.push(
+  const rules: string[] = [
     `/* ${theme.name}\n * revision: ${theme.revision ?? ""}\n */\n${scopedSelector(scope, containerSelector)}`,
-  );
+  ];
 
   const normal = theme.highlights["normal"];
   const scopeStyle = renderContainerStyle(normal, containerStyle, "\n  ");

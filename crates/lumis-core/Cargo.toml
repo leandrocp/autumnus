@@ -281,3 +281,6 @@ prettyplease = "0.3"
 
 [dev-dependencies]
 pretty_assertions = "1"
+
+[lints]
+workspace = true

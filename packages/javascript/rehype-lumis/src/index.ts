@@ -122,7 +122,7 @@ const rehypeLumis: Plugin<[RehypeLumisOptions], Root> = function rehypeLumis(opt
         try {
           return await renderBlock(highlighter, parsed.code, parsed.language, options.formatter);
         } catch {
-          return undefined;
+          return;
         }
       }),
     );
