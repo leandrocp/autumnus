@@ -18,7 +18,7 @@ pub enum ExAppearance {
     Dark,
 }
 
-#[derive(Debug, NifTaggedEnum)]
+#[derive(Clone, Debug, NifTaggedEnum)]
 pub enum ExFormatterOption {
     HtmlInline {
         theme: Option<ThemeOrString>,
@@ -57,7 +57,7 @@ pub enum ExFormatterOption {
     },
 }
 
-#[derive(Debug, NifTaggedEnum)]
+#[derive(Clone, Debug, NifTaggedEnum)]
 pub enum ExTerminalBackground {
     Theme,
     String(String),
@@ -77,7 +77,7 @@ impl Default for ExFormatterOption {
     }
 }
 
-#[derive(Debug, NifTaggedEnum)]
+#[derive(Clone, Debug, NifTaggedEnum)]
 pub enum ThemeOrString {
     Theme(ExTheme),
     String(String),
