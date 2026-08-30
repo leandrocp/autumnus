@@ -102,8 +102,13 @@ pnpm --filter @lumis-sh/themes run build
 echo ""
 
 echo "Generating JS language/runtime artifacts..."
-pnpm --filter @lumis-sh/lumis run build:generate
+pnpm --filter @lumis-sh/lumis run build
 pnpm --dir packages/javascript run build:wasm-bundles
+echo ""
+
+echo "Building the packages whose examples import them by name..."
+pnpm --filter @lumis-sh/markdown-it-lumis run build
+pnpm --filter @lumis-sh/rehype-lumis run build
 echo ""
 
 echo "Fetching Elixir dependencies..."
