@@ -64,6 +64,10 @@ const INSPECTOR_SOURCE = `<article class="profile-card">
   </script>
 </article>`;
 
+function themedColor(light: string | undefined, dark: string | undefined): string | undefined {
+  return light && dark ? `light-dark(${light}, ${dark})` : (light ?? dark);
+}
+
 export async function setupTokenInspector(root: HTMLElement) {
   const output = root.querySelector<HTMLDivElement>("#inspector-output");
   if (!output) return;
@@ -131,61 +135,52 @@ async function initInspector(root: HTMLElement, output: HTMLDivElement) {
       );
 
       let darkStyleIndex = 0;
-      highlightIter(
-        source,
-        html,
-        lightTheme,
-        (
-          text: string,
-          language: string,
-          range: { start: number; end: number },
-          scope: string,
-          style: { fg?: string; bg?: string } | undefined,
-        ) => {
-          const parts = text.split("\n");
-          for (let i = 0; i < parts.length; i++) {
-            const part = parts[i];
-            if (part.length > 0) {
-              const escaped = escape(part);
-              if (scope) {
-                const darkStyle = darkStyles[darkStyleIndex++];
-                lines[lines.length - 1] +=
-                  openSpanTag({
-                    class: "tok",
-                    tabindex: 0,
-                    "data-token-id": String(++tokenId),
-                    "data-scope": scope,
-                    "data-language": language,
-                    "data-start": String(range.start),
-                    "data-end": String(range.end),
-                    "data-fg": style?.fg,
-                    "data-bg": style?.bg,
-                    "data-fg-dark": darkStyle?.fg,
-                    "data-bg-dark": darkStyle?.bg,
-                    style: styleToCss(
-                      {
-                        fg:
-                          style?.fg && darkStyle?.fg
-                            ? `light-dark(${style.fg}, ${darkStyle.fg})`
-                            : (style?.fg ?? darkStyle?.fg),
-                        bg:
-                          style?.bg && darkStyle?.bg
-                            ? `light-dark(${style.bg}, ${darkStyle.bg})`
-                            : (style?.bg ?? darkStyle?.bg),
-                      },
-                      { italic: true },
-                    ),
-                  }) +
-                  escaped +
-                  "</span>";
-              } else {
-                lines[lines.length - 1] += escaped;
-              }
+      function appendHighlightedText(
+        text: string,
+        language: string,
+        range: { start: number; end: number },
+        scope: string,
+        style: { fg?: string; bg?: string } | undefined,
+      ): void {
+        const parts = text.split("\n");
+        for (let i = 0; i < parts.length; i++) {
+          const part = parts[i];
+          if (part.length > 0) {
+            const escaped = escape(part);
+            if (scope) {
+              const darkStyle = darkStyles[darkStyleIndex++];
+              lines[lines.length - 1] +=
+                openSpanTag({
+                  class: "tok",
+                  tabindex: 0,
+                  "data-token-id": String(++tokenId),
+                  "data-scope": scope,
+                  "data-language": language,
+                  "data-start": String(range.start),
+                  "data-end": String(range.end),
+                  "data-fg": style?.fg,
+                  "data-bg": style?.bg,
+                  "data-fg-dark": darkStyle?.fg,
+                  "data-bg-dark": darkStyle?.bg,
+                  style: styleToCss(
+                    {
+                      fg: themedColor(style?.fg, darkStyle?.fg),
+                      bg: themedColor(style?.bg, darkStyle?.bg),
+                    },
+                    { italic: true },
+                  ),
+                }) +
+                escaped +
+                "</span>";
+            } else {
+              lines[lines.length - 1] += escaped;
             }
-            if (i < parts.length - 1) lines.push("");
           }
-        },
-      );
+          if (i < parts.length - 1) lines.push("");
+        }
+      }
+
+      highlightIter(source, html, lightTheme, appendHighlightedText);
 
       const body = lines.map((line: string, i: number) => wrapLine(i + 1, line)).join("");
       return `${openPreTag({ preClass: "inspector-demo" })}${openCodeTag(html)}${body}${closingTags()}`;

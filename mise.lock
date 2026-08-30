@@ -114,6 +114,10 @@ checksum = "sha256:3ae3a5549e85c7ad5b20192ebcfee4371269deca51255f6f2f2e051c6541f
 url = "https://github.com/orhun/git-cliff/releases/download/v2.13.1/git-cliff-2.13.1-x86_64-pc-windows-msvc.zip"
 url_api = "https://api.github.com/repos/orhun/git-cliff/releases/assets/405851866"
 
+[[tools."pipx:lizard"]]
+version = "1.24.0"
+backend = "pipx:lizard"
+
 [[tools.python]]
 version = "3.11.15"
 backend = "core:python"

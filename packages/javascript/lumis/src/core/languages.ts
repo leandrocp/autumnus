@@ -1160,19 +1160,13 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
       await verifyWasm(packaged.wasm, wasmInput);
 
       const { Language, Parser, Query } = await loadTreeSitter();
-      const parserKey =
-        packaged?.wasm.sha256 ??
-        (typeof resolved.wasm === "object" && resolved.wasm !== null && isWasmRef(resolved.wasm)
-          ? resolved.wasm.sha256
-          : await sha256Hex(wasmInput));
+      const parserKey = packaged.wasm.sha256;
       let parserModule = parserModules.get(parserKey);
       if (!parserModule) {
         parserModule = {};
         parserModules.set(parserKey, parserModule);
       }
-      if (packaged) {
-        requireParserGrammar(parserModule, wasmInput, packaged.wasm, packaged.grammarName);
-      }
+      requireParserGrammar(parserModule, wasmInput, packaged.wasm, packaged.grammarName);
       // web-tree-sitter cannot reclaim a failed dynamic-linker load. Retaining
       // the rejection prevents identical bad bytes from growing its global store.
       parserModule.language ??= Language.load(wasmInput);

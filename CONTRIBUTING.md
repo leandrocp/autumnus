@@ -109,11 +109,16 @@ means per language, and where the configuration lives:
 
 | Runtime | Linter | Strict setting | Configuration |
 | --- | --- | --- | --- |
-| Rust | clippy | `clippy::pedantic` plus `rust_2018_idioms` and `unreachable_pub`, all denied | `[workspace.lints]` in the root `Cargo.toml` |
-| JavaScript, TypeScript | oxlint | the `correctness`, `suspicious`, `perf` and `pedantic` categories, as errors | `.oxlintrc.json` |
-| Elixir | credo | `mix credo --strict` | `packages/elixir/lumis/.credo.exs` |
+| Rust | clippy, lizard | clippy's `pedantic` group plus `rust_2018_idioms` and `unreachable_pub`, all denied; classic cyclomatic complexity at most 20 | `[workspace.lints]` in the root `Cargo.toml`, `.lizard-whitelist` |
+| JavaScript, TypeScript | oxlint | the `correctness`, `suspicious`, `perf` and `pedantic` categories, as errors; classic cyclomatic complexity at most 20 | `.oxlintrc.json` |
+| Elixir | credo | `mix credo --strict`; cyclomatic complexity at most 20 | `packages/elixir/lumis/.credo.exs` |
 | Lua | selene | every lint selene ships, warnings included | `selene.toml`, `neovim.yml` |
 | GitHub Actions | actionlint | its default, which is already strict | `.github/actionlint.yaml` |
+
+Every runtime implemented in this repository enforces a cyclomatic-complexity
+ceiling of 20 with its language-specific analyzer. The Rust check covers every
+`*.rs` file, including crates outside the workspace; its only whitelist entry is
+an exact function in the upstream-vendored Tree-sitter highlighter.
 
 Two rules hold this together, and both come from what the checks used to miss:
 
