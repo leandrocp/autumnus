@@ -409,7 +409,6 @@ describe("ansi helpers", () => {
   });
 
   it("keeps wrapWithAnsi aligned with paint", () => {
-    // oxlint-disable-next-line typescript/no-deprecated -- the point of the test is that the deprecated name still works.
     expect(wrapWithAnsi("fn", { fg: "#8be9fd" })).toBe(paint("fn", { fg: "#8be9fd" }));
   });
 });

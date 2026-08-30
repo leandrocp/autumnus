@@ -242,7 +242,7 @@ Rationale that is about the change rather than the code belongs in the commit me
 
 Every file the repo authors is formatted and linted, including generated ones. `mise run fmt` formats every language, `mise run lint` checks them. Run those before pushing; CI only checks.
 
-There is no per-package path list. `fmt-js` is `oxfmt "**/*.{ts,tsx,mjs,cjs,js,jsx}"` from the repo root and `lint-js` is `oxlint --deny-warnings .` beside it, so a new package, script, example or test directory is covered the day it is added, whether or not the file has been staged yet.
+There is no per-package path list. `fmt-js` is `oxfmt "**/*.{ts,tsx,mjs,cjs,js,jsx}"` from the repo root and `lint-js` is `oxlint --deny-warnings --report-unused-disable-directives .` beside it, so a new package, script, example or test directory is covered the day it is added, whether or not the file has been staged yet.
 
 **Generated files are not an exception.** A generator writes its output and then formats it, so regenerating and format-checking agree. If you add a generator, format what it emits.
 

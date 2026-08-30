@@ -160,7 +160,7 @@ describe("Wasm resolver", () => {
   it("shares verified parser bytes across highlighter instances", async () => {
     const { createHighlighter } = await import("../src/index.js");
     const { default: diff } = await import("../langs/diff.ts");
-    const resolver = vi.fn((language: string, wasm: { name: string }) =>
+    const resolver = vi.fn<(language: string, wasm: { name: string }) => URL>((language, wasm) =>
       ensureLocalParserWasm(language, wasm.name),
     );
 

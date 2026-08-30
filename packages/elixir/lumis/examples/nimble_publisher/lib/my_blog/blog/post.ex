@@ -1,4 +1,8 @@
 defmodule MyBlog.Blog.Post do
+  @moduledoc """
+  Represents a published blog post loaded from a Markdown file.
+  """
+
   @enforce_keys [:id, :title, :author, :description, :body, :date]
   defstruct [:id, :title, :author, :description, :body, :date]
 

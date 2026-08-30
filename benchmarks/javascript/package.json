@@ -9,7 +9,7 @@
     "showcase": "node src/showcase.mjs",
     "fmt": "cd ../.. && oxfmt benchmarks/javascript/src/ benchmarks/scripts/",
     "fmt:check": "cd ../.. && oxfmt --check benchmarks/javascript/src/ benchmarks/scripts/",
-    "lint": "cd ../.. && oxlint --deny-warnings benchmarks/"
+    "lint": "cd ../.. && oxlint --deny-warnings --report-unused-disable-directives benchmarks/"
   },
   "dependencies": {
     "@catppuccin/highlightjs": "1.0.1",

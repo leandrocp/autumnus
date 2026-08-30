@@ -104,9 +104,8 @@ defmodule Lumis.MixProject do
   defp aliases do
     [
       setup: ["deps.get", "compile"],
-      # TODO: stage from the committed fixtures only because the suite has no
-      # published parsers to fetch. Once it can download them, drop this and let
-      # the tests exercise the real registry path instead.
+      # The suite stages committed fixtures because it has no published parsers
+      # to fetch. Once it can download them, the tests can use the registry path.
       test: ["stage.test_parsers", "test"],
       "stage.test_parsers": [
         "cmd --cd ../../.. cargo run -q --manifest-path crates/dev/Cargo.toml -- " <>

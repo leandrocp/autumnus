@@ -42,10 +42,10 @@ describe("cacheLanguages", () => {
     expect(first).toHaveLength(1);
     expect(first[0]).toMatchObject({ language: "diff", downloaded: true });
 
-    const unavailableWasm = vi.fn(() => {
+    const unavailableWasm = vi.fn<() => never>(() => {
       throw new Error("WASM resolver must not run");
     });
-    const unavailablePackage = vi.fn(() => {
+    const unavailablePackage = vi.fn<() => never>(() => {
       throw new Error("package resolver must not run");
     });
     const second = await cacheLanguages(["diff"], {
@@ -69,7 +69,9 @@ describe("cacheLanguages", () => {
       resolver,
       languagePackageResolver: localLanguagePackageResolver,
     });
-    const packageResolver = vi.fn(localLanguagePackageResolver);
+    const packageResolver = vi
+      .fn<typeof localLanguagePackageResolver>()
+      .mockImplementation(localLanguagePackageResolver);
 
     await cacheLanguages(["diff"], {
       directory,

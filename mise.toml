@@ -371,7 +371,7 @@ mix credo --strict
 
 [tasks.'lint-lua']
 description = "Lint every Lua file with selene"
-run = "selene themes/ crates/lumis-cli/themes/"
+run = "selene ."
 
 [tasks.'lint-workflows']
 description = "Validate GitHub Actions workflows with actionlint"
@@ -387,7 +387,7 @@ run = 'packages/javascript/lumis/node_modules/.bin/oxfmt "**/*.{ts,tsx,mjs,cjs,j
 
 [tasks.'lint-js']
 description = "Lint every JavaScript and TypeScript file"
-run = 'packages/javascript/lumis/node_modules/.bin/oxlint --deny-warnings .'
+run = 'packages/javascript/lumis/node_modules/.bin/oxlint --deny-warnings --report-unused-disable-directives .'
 
 [tasks.'lint']
 description = "Run all linters"

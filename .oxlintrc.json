@@ -7,7 +7,19 @@
   // Rules below are either configured (the rule stays on, with the option that
   // matches how this repository writes) or waived, with the reason and the
   // number of sites it fired on when it was written down. The waivers shrink.
-  "plugins": ["import", "node", "oxc", "promise", "react", "typescript", "unicorn"],
+  "plugins": [
+    "import",
+    "jsdoc",
+    "jsx-a11y",
+    "node",
+    "oxc",
+    "promise",
+    "react",
+    "react-perf",
+    "typescript",
+    "unicorn",
+    "vitest"
+  ],
   "categories": {
     "correctness": "error",
     "pedantic": "error",
@@ -51,6 +63,22 @@
     "import/max-dependencies": "off",
     // Side-effect imports are how CSS and polyfills are pulled in.
     "import/no-unassigned-import": "off",
+    // 87 sites. Runtime-matrix and conformance tests branch because each arm
+    // pins a different supported behavior; splitting them would hide the parity.
+    "jest/no-conditional-expect": "off",
+    "jest/no-conditional-in-test": "off",
+    // The native test suite chooses the Vitest test function from platform and
+    // runtime support before registering each test.
+    "jest/no-standalone-expect": [
+      "error",
+      { "additionalTestBlockFunctions": ["itWithAddon", "itForCacheCompilation"] }
+    ],
+    // Vitest accepts a second argument as the assertion failure message.
+    "jest/valid-expect": ["error", { "maxArgs": 2 }],
+    // TypeScript already carries parameter and return types. Repeating them in
+    // JSDoc would add 102 `@param` and 118 `@returns` tags with no new contract.
+    "jsdoc/require-param": "off",
+    "jsdoc/require-returns": "off",
     // The chains it flags end in a side effect, not a value.
     "promise/always-return": ["error", { "ignoreLastCallback": true }],
     "react/react-in-jsx-scope": "off",
@@ -96,5 +124,31 @@
     "unicorn/prefer-code-point": "off",
     // Fires on `Worker.postMessage`, which takes no `targetOrigin`.
     "unicorn/require-post-message-target-origin": "off"
-  }
+  },
+  "overrides": [
+    {
+      // 5 sites. These tests and the public re-export intentionally exercise
+      // deprecated compatibility names; all other deprecations remain errors.
+      "files": [
+        "**/src/formatter/ansi.ts",
+        "**/test/formatter-ansi.test.ts",
+        "**/test/formatter-shared.test.ts"
+      ],
+      "rules": { "typescript/no-deprecated": "off" }
+    },
+    {
+      // 1 site. The test verifies normalization of a rejection value that is not an Error.
+      "files": ["**/react/test/index.test.tsx"],
+      "rules": { "typescript/prefer-promise-reject-errors": "off" }
+    },
+    {
+      // 8 sites. These heterogeneous invalid corpora assert rejection itself;
+      // there is intentionally no one error message shared by every table row.
+      "files": [
+        "**/test/language-package-corpus.test.ts",
+        "**/test/native-targets.test.ts"
+      ],
+      "rules": { "jest/require-to-throw-message": "off" }
+    }
+  ]
 }

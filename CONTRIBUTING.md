@@ -111,7 +111,7 @@ means per language, and where the configuration lives:
 | --- | --- | --- | --- |
 | Rust | clippy | `clippy::pedantic` plus `rust_2018_idioms` and `unreachable_pub`, all denied | `[workspace.lints]` in the root `Cargo.toml` |
 | JavaScript, TypeScript | oxlint | the `correctness`, `suspicious`, `perf` and `pedantic` categories, as errors | `.oxlintrc.json` |
-| Elixir | credo | `mix credo --strict` | credo's defaults |
+| Elixir | credo | `mix credo --strict` | `packages/elixir/lumis/.credo.exs` |
 | Lua | selene | every lint selene ships, warnings included | `selene.toml`, `neovim.yml` |
 | GitHub Actions | actionlint | its default, which is already strict | `.github/actionlint.yaml` |
 
@@ -127,8 +127,8 @@ Two rules hold this together, and both come from what the checks used to miss:
   `ignorePatterns`, and give each entry a reason.
 - **A silenced lint says why.** Line-level `// oxlint-disable-next-line <rule> --
   <why>` and `#[allow(...)]` with a comment above it. `--report-unused-disable-directives`
-  runs in the per-package lint scripts, so a silence that stops being needed
-  fails the build rather than sitting there.
+  runs in both the root and type-aware package passes, so a silence that stops
+  being needed fails the build rather than sitting there.
 
 A lint the repository has decided not to adopt is a waiver, not a silence: it
 sits in one place, with the reason and the number of sites it fired on when it

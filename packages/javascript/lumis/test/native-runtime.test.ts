@@ -397,7 +397,10 @@ describe("native runtime", () => {
 
 describe("native adapter routing", () => {
   it("passes addon resolver callbacks only when an override is active", () => {
-    const highlightEvents = vi.fn(() => ({ events: new Uint8Array(), unresolved: [] }));
+    const highlightEvents = vi.fn<NativeRuntimeInstance["highlightEvents"]>(() => ({
+      events: new Uint8Array(),
+      unresolved: [],
+    }));
     const nativeRuntime = { highlightEvents } as unknown as NativeRuntimeInstance;
     const addon = {
       NativeRuntime: function NativeRuntime() {
@@ -427,7 +430,9 @@ describe("native adapter routing", () => {
   });
 
   it("coalesces concurrent loads of the same definition", async () => {
-    const loadLanguageDefinition = vi.fn(() => "concurrent\u0001definition");
+    const loadLanguageDefinition = vi.fn<NativeRuntimeInstance["loadLanguageDefinition"]>(
+      () => "concurrent\u0001definition",
+    );
     const nativeRuntime = { loadLanguageDefinition } as unknown as NativeRuntimeInstance;
     const addon = {
       NativeRuntime: function NativeRuntime() {
@@ -473,8 +478,10 @@ describe("native adapter routing", () => {
   it("does not replace a caller-selected package with the catalog package", async () => {
     const metadata = localLanguagePackageMetadata("@lumis-sh/wasm-json");
     const wasm = new Uint8Array(readFileSync(ensureLocalParserWasm("json", metadata.parser.name)));
-    const loadLanguage = vi.fn();
-    const loadLanguageDefinition = vi.fn(() => "json\u0001caller-package");
+    const loadLanguage = vi.fn<NativeRuntimeInstance["loadLanguage"]>();
+    const loadLanguageDefinition = vi.fn<NativeRuntimeInstance["loadLanguageDefinition"]>(
+      () => "json\u0001caller-package",
+    );
     const nativeRuntime = {
       loadLanguage,
       loadLanguageDefinition,
@@ -486,7 +493,7 @@ describe("native adapter routing", () => {
       configureStore: () => true,
       runtimeKind: () => "native",
     } as unknown as NativeBinding;
-    const resolveLanguagePackage = vi.fn(async () => ({
+    const resolveLanguagePackage = vi.fn<RuntimeLike["resolveLanguagePackage"]>(async () => ({
       definition: { id: "json", aliases: [] },
       wasm: {
         packageName: "@test/custom-json",

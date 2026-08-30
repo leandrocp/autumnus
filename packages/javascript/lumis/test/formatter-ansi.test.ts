@@ -76,14 +76,11 @@ describe("formatter ansi helpers", () => {
   });
 
   it("keeps wrapWithAnsi as an alias for paint", () => {
-    // oxlint-disable-next-line typescript/no-deprecated -- the point of the test is that the deprecated name still works.
     expect(wrapWithAnsi("plain")).toBe(paint("plain"));
-    // oxlint-disable-next-line typescript/no-deprecated -- the point of the test is that the deprecated name still works.
     expect(wrapWithAnsi("fn", { fg: "#8be9fd" })).toBe(paint("fn", { fg: "#8be9fd" }));
   });
 
   it("collects ANSI wrapped segments from highlight iteration", async () => {
-    // oxlint-disable-next-line typescript/no-deprecated -- the point of the test is that the deprecated name still works.
     const segments = await highlightIterWithAnsi('{"x":1}', json, theme);
 
     expect(segments.length).toBeGreaterThan(0);

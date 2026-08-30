@@ -301,7 +301,6 @@ describe("@lumis-sh/react", () => {
   });
 
   it("normalizes non-Error failures returned by useLumis", async () => {
-    // oxlint-disable-next-line typescript/prefer-promise-reject-errors -- rejecting with a non-Error is what this test covers.
     const highlighter = Promise.reject<Awaited<ReturnType<typeof createHighlighter>>>("boom");
     const container = document.createElement("div");
     document.body.append(container);
