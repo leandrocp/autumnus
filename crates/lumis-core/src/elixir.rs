@@ -8,7 +8,7 @@ use crate::formatter::{
     HtmlLinkedBuilder, HtmlMultiThemesBuilder, TerminalBackground, TerminalBuilder,
 };
 use crate::{languages::Language, themes};
-use rustler::{NifMap, NifStruct, NifTaggedEnum, NifUnitEnum};
+use rustler::{Encoder, NifMap, NifStruct, NifTaggedEnum, NifUnitEnum};
 use std::collections::HashMap;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, NifUnitEnum)]
@@ -77,10 +77,47 @@ impl Default for ExFormatterOption {
     }
 }
 
-#[derive(Clone, Debug, NifTaggedEnum)]
+#[derive(Clone, Debug)]
 pub enum ThemeOrString {
     Theme(ExTheme),
     String(String),
+}
+
+/// Also accepts a bare name, which is how `mdex_native` has always spelled a
+/// theme in `{:html_inline, theme: "onedark"}`. The tagged forms `{:string,
+/// name}` and `{:theme, theme}` keep working.
+impl<'a> rustler::Decoder<'a> for ThemeOrString {
+    fn decode(term: rustler::Term<'a>) -> rustler::NifResult<Self> {
+        if let Ok(name) = String::decode(term) {
+            return Ok(Self::String(name));
+        }
+
+        let (kind, value): (rustler::Atom, rustler::Term<'a>) = term.decode()?;
+        let env = term.get_env();
+
+        if kind == rustler::Atom::from_str(env, "string")? {
+            return Ok(Self::String(value.decode()?));
+        }
+
+        if kind == rustler::Atom::from_str(env, "theme")? {
+            return Ok(Self::Theme(value.decode()?));
+        }
+
+        Err(rustler::Error::BadArg)
+    }
+}
+
+impl rustler::Encoder for ThemeOrString {
+    fn encode<'a>(&self, env: rustler::Env<'a>) -> rustler::Term<'a> {
+        match self {
+            Self::Theme(theme) => {
+                (rustler::Atom::from_str(env, "theme").unwrap(), theme).encode(env)
+            }
+            Self::String(name) => {
+                (rustler::Atom::from_str(env, "string").unwrap(), name).encode(env)
+            }
+        }
+    }
 }
 
 impl Default for ThemeOrString {
