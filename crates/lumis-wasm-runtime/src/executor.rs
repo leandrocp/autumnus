@@ -46,6 +46,11 @@ enum Job {
         rainbow_brackets: bool,
         reply: mpsc::SyncSender<Result<Vec<HighlightEvent>, RuntimeError>>,
     },
+    Precompile {
+        names: Vec<String>,
+        concurrency: usize,
+        reply: mpsc::SyncSender<Vec<Result<(), RuntimeError>>>,
+    },
 }
 
 /// Why a load failed, at the granularity a caller can act on.
@@ -66,6 +71,16 @@ pub enum ExecutorError {
     InitPanicked,
     #[error(transparent)]
     Runtime(#[from] RuntimeError),
+}
+
+fn unavailable(count: usize) -> Vec<Result<(), RuntimeError>> {
+    (0..count)
+        .map(|_| {
+            Err(RuntimeError::Highlight(
+                "WASM executor is unavailable".into(),
+            ))
+        })
+        .collect()
 }
 
 pub struct Executor {
@@ -123,6 +138,13 @@ impl Executor {
                             let _ =
                                 reply.send(runtime.highlight(&source, &language, rainbow_brackets));
                         }
+                        Job::Precompile {
+                            names,
+                            concurrency,
+                            reply,
+                        } => {
+                            let _ = reply.send(runtime.precompile_languages(&names, concurrency));
+                        }
                     }
                 })?;
         }
@@ -130,9 +152,43 @@ impl Executor {
         Ok(Self { runtime, sender })
     }
 
-    /// The runtime the pool owns, for reads that do not parse or highlight.
-    pub fn runtime(&self) -> &Arc<Runtime> {
-        &self.runtime
+    /// Whether a language is resolved and held in memory.
+    ///
+    /// A catalog read, so it does not need the pool's stack.
+    pub fn has_language(&self, name_or_alias: &str) -> bool {
+        self.runtime.has_language(name_or_alias)
+    }
+
+    /// Ids of the languages resolved and held in memory, sorted.
+    pub fn loaded_languages(&self) -> Vec<String> {
+        self.runtime.loaded_languages()
+    }
+
+    /// Compile parsers into the module cache ahead of use.
+    ///
+    /// Cranelift recurses as deeply as highlighting does, so this runs on the
+    /// pool's threads. Answers positionally, one result per name.
+    pub fn precompile_languages(
+        &self,
+        names: Vec<String>,
+        concurrency: usize,
+    ) -> Vec<Result<(), RuntimeError>> {
+        let count = names.len();
+        let (reply, result) = mpsc::sync_channel(1);
+
+        if self
+            .sender
+            .send(Job::Precompile {
+                names,
+                concurrency,
+                reply,
+            })
+            .is_err()
+        {
+            return unavailable(count);
+        }
+
+        result.recv().unwrap_or_else(|_| unavailable(count))
     }
 
     /// Resolving a language does a TLS handshake, which needs far more stack
