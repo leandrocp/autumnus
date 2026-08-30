@@ -1507,4 +1507,14 @@ defmodule Lumis.LumisTest do
       end
     end
   end
+
+  describe "data_dir/0" do
+    test "resolves to the directory the store was configured with" do
+      data_dir = Lumis.data_dir()
+
+      assert is_binary(data_dir)
+      assert data_dir != ""
+      assert Path.type(data_dir) == :absolute
+    end
+  end
 end

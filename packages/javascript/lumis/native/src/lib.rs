@@ -233,13 +233,8 @@ fn build_runtime() -> std::result::Result<Runtime, String> {
     let workers = std::thread::available_parallelism()
         .map(usize::from)
         .unwrap_or(1);
-    let runtime = Runtime::with_worker_limit(workers)
-        .map_err(|error| error.to_string())?
-        .with_store(language_store(None));
-    for language in catalog::LANGUAGES {
-        runtime.declare_language(language.id, language.aliases);
-    }
-    Ok(runtime)
+    lumis_wasm_runtime::runtime_with_catalog(language_store(None), workers)
+        .map_err(|error| error.to_string())
 }
 
 fn shared_runtime() -> Result<&'static Arc<Runtime>> {

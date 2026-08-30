@@ -1538,6 +1538,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "regex",
+ "rustler",
  "serde",
  "serde_json",
  "syn 3.0.4",

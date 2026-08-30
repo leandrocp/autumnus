@@ -1,8 +1,13 @@
-use lumis_core::formatter::{
+//! Elixir-facing decoders for the Lumis option surface.
+//!
+//! Both `lumis_nif` and `mdex_native_nif` decode the same option maps from the
+//! BEAM. One copy lives here so the wire format cannot drift between them.
+
+use crate::formatter::{
     html_inline, html_linked, BBCodeScopedBuilder, Formatter, HtmlElement, HtmlInlineBuilder,
     HtmlLinkedBuilder, HtmlMultiThemesBuilder, TerminalBackground, TerminalBuilder,
 };
-use lumis_core::{languages::Language, themes};
+use crate::{languages::Language, themes};
 use rustler::{NifMap, NifStruct, NifTaggedEnum, NifUnitEnum};
 use std::collections::HashMap;
 
