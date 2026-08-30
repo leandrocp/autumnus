@@ -13,5 +13,5 @@ fn main() {
         .unwrap();
 
     let html = highlight(source, formatter);
-    println!("{}", html);
+    println!("{html}");
 }

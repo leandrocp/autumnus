@@ -4,6 +4,7 @@
 
 use crate::languages::Language;
 use crate::themes::{Style, TextDecoration, Theme, UnderlineStyle};
+use std::fmt::Write as _;
 use std::io::{self, Write};
 
 /// Generate HTML attributes for a span with inline CSS styles.
@@ -17,7 +18,7 @@ pub fn span_inline_attrs(
     let mut attrs = String::new();
 
     if include_highlights {
-        attrs.push_str(&format!("data-highlight=\"{}\"", scope));
+        let _ = write!(attrs, "data-highlight=\"{scope}\"");
     }
 
     if let Some(theme) = theme {
@@ -42,7 +43,7 @@ pub fn span_inline_attrs(
 
             let css = style.css(italic, " ");
             if !css.is_empty() {
-                attrs.push_str(&format!("style=\"{}\"", css));
+                let _ = write!(attrs, "style=\"{css}\"");
             }
         }
     }
@@ -68,14 +69,14 @@ pub fn span_inline(
 /// Generate HTML attributes for a span with CSS class.
 pub fn span_linked_attrs(scope: &str) -> String {
     let class = scope_to_class(scope);
-    format!("class=\"{}\"", class)
+    format!("class=\"{class}\"")
 }
 
 /// Generate an HTML `<span>` element with CSS class.
 pub fn span_linked(text: &str, scope: &str) -> String {
     let escaped = escape(text);
     let class = scope_to_class(scope);
-    format!("<span class=\"{}\">{}</span>", class, escaped)
+    format!("<span class=\"{class}\">{escaped}</span>")
 }
 
 /// Sanitize a theme name for use in CSS variable names.
@@ -91,7 +92,7 @@ pub fn sanitize_theme_name(name: &str) -> String {
         .collect()
 }
 
-/// Get the CSS text-decoration value from a TextDecoration struct.
+/// Get the CSS text-decoration value from a `TextDecoration` struct.
 pub fn text_decoration(td: &TextDecoration) -> &'static str {
     match (td.underline, td.strikethrough) {
         (UnderlineStyle::None, false) => "none",
@@ -132,14 +133,12 @@ fn push_default_theme_css_vars(
 
     let font_style = if style.italic { "italic" } else { "normal" };
     css_vars.push(format!(
-        "{}-{}-font-style:{};",
-        css_variable_prefix, sanitized, font_style
+        "{css_variable_prefix}-{sanitized}-font-style:{font_style};"
     ));
 
     let font_weight = if style.bold { "bold" } else { "normal" };
     css_vars.push(format!(
-        "{}-{}-font-weight:{};",
-        css_variable_prefix, sanitized, font_weight
+        "{css_variable_prefix}-{sanitized}-font-weight:{font_weight};"
     ));
 
     css_vars.push(format!(
@@ -159,22 +158,20 @@ fn push_theme_css_vars(
     let sanitized = sanitize_theme_name(theme_name);
 
     if let Some(fg) = &style.fg {
-        css_vars.push(format!("{}-{}:{};", css_variable_prefix, sanitized, fg));
+        css_vars.push(format!("{css_variable_prefix}-{sanitized}:{fg};"));
     }
     if let Some(bg) = &style.bg {
-        css_vars.push(format!("{}-{}-bg:{};", css_variable_prefix, sanitized, bg));
+        css_vars.push(format!("{css_variable_prefix}-{sanitized}-bg:{bg};"));
     }
 
     let font_style = if style.italic { "italic" } else { "normal" };
     css_vars.push(format!(
-        "{}-{}-font-style:{};",
-        css_variable_prefix, sanitized, font_style
+        "{css_variable_prefix}-{sanitized}-font-style:{font_style};"
     ));
 
     let font_weight = if style.bold { "bold" } else { "normal" };
     css_vars.push(format!(
-        "{}-{}-font-weight:{};",
-        css_variable_prefix, sanitized, font_weight
+        "{css_variable_prefix}-{sanitized}-font-weight:{font_weight};"
     ));
 
     css_vars.push(format!(
@@ -217,20 +214,17 @@ pub fn span_multi_themes_attrs(
                     dark_theme.get_style(&specialized_scope),
                 ) {
                     if let (Some(light_fg), Some(dark_fg)) = (&light_style.fg, &dark_style.fg) {
-                        inline_styles
-                            .push(format!("color: light-dark({}, {});", light_fg, dark_fg));
+                        inline_styles.push(format!("color: light-dark({light_fg}, {dark_fg});"));
                     }
                     if let (Some(light_bg), Some(dark_bg)) = (&light_style.bg, &dark_style.bg) {
                         inline_styles.push(format!(
-                            "background-color: light-dark({}, {});",
-                            light_bg, dark_bg
+                            "background-color: light-dark({light_bg}, {dark_bg});"
                         ));
                     }
                     let light_weight = if light_style.bold { "bold" } else { "normal" };
                     let dark_weight = if dark_style.bold { "bold" } else { "normal" };
                     inline_styles.push(format!(
-                        "font-weight: light-dark({}, {});",
-                        light_weight, dark_weight
+                        "font-weight: light-dark({light_weight}, {dark_weight});"
                     ));
                     if italic {
                         let light_style_val = if light_style.italic {
@@ -244,25 +238,23 @@ pub fn span_multi_themes_attrs(
                             "normal"
                         };
                         inline_styles.push(format!(
-                            "font-style: light-dark({}, {});",
-                            light_style_val, dark_style_val
+                            "font-style: light-dark({light_style_val}, {dark_style_val});"
                         ));
                     }
                     let light_decoration = text_decoration(&light_style.text_decoration);
                     let dark_decoration = text_decoration(&dark_style.text_decoration);
                     inline_styles.push(format!(
-                        "text-decoration: light-dark({}, {});",
-                        light_decoration, dark_decoration
+                        "text-decoration: light-dark({light_decoration}, {dark_decoration});"
                     ));
                 }
             }
         } else if let Some(default_theme_obj) = themes.get(default_name) {
             if let Some(style) = default_theme_obj.get_style(&specialized_scope) {
                 if let Some(fg) = &style.fg {
-                    inline_styles.push(format!("color:{};", fg));
+                    inline_styles.push(format!("color:{fg};"));
                 }
                 if let Some(bg) = &style.bg {
-                    inline_styles.push(format!("background-color:{};", bg));
+                    inline_styles.push(format!("background-color:{bg};"));
                 }
                 if style.bold {
                     inline_styles.push("font-weight:bold;".to_string());
@@ -272,7 +264,7 @@ pub fn span_multi_themes_attrs(
                 }
                 let td_css = text_decoration(&style.text_decoration);
                 if td_css != "none" {
-                    inline_styles.push(format!("text-decoration:{};", td_css));
+                    inline_styles.push(format!("text-decoration:{td_css};"));
                 }
 
                 push_default_theme_css_vars(
@@ -306,7 +298,7 @@ pub fn span_multi_themes_attrs(
 
     let mut attrs = String::new();
     if include_highlights {
-        attrs.push_str(&format!("data-highlight=\"{}\" ", scope));
+        let _ = write!(attrs, "data-highlight=\"{scope}\" ");
     }
 
     attrs.push_str("style=\"");
@@ -392,19 +384,15 @@ pub fn wrap_line(
     style: Option<&str>,
 ) -> String {
     let class_attr = match class_suffix {
-        Some(suffix) => format!("l-line{}", suffix),
+        Some(suffix) => format!("l-line{suffix}"),
         None => "l-line".to_string(),
     };
 
     match style {
         Some(s) => format!(
-            "<div class=\"{}\" style=\"{}\" data-line=\"{}\">{}</div>",
-            class_attr, s, line_number, content
+            "<div class=\"{class_attr}\" style=\"{s}\" data-line=\"{line_number}\">{content}</div>"
         ),
-        None => format!(
-            "<div class=\"{}\" data-line=\"{}\">{}</div>",
-            class_attr, line_number, content
-        ),
+        None => format!("<div class=\"{class_attr}\" data-line=\"{line_number}\">{content}</div>"),
     }
 }
 
@@ -414,8 +402,7 @@ pub fn scope_to_class(scope: &str) -> String {
         .iter()
         .position(|&s| s == scope)
         .and_then(|idx| crate::highlights::CLASSES.get(idx))
-        .map(|class| format!("l-{class}"))
-        .unwrap_or_else(|| "l-text".to_string())
+        .map_or_else(|| "l-text".to_string(), |class| format!("l-{class}"))
 }
 
 /// Generate an opening `<pre>` tag with optional class and theme styles.
@@ -452,9 +439,9 @@ pub fn open_multi_themes_pre_tag(
     let classes = multi_themes_pre_classes(pre_class, themes);
     let style = multi_themes_pre_style(themes, default_theme, css_variable_prefix);
 
-    write!(output, "<pre class=\"{}\"", classes)?;
+    write!(output, "<pre class=\"{classes}\"")?;
     if !style.is_empty() {
-        write!(output, " style=\"{}\"", style)?;
+        write!(output, " style=\"{style}\"")?;
     }
     write!(output, ">")
 }
@@ -482,10 +469,10 @@ fn push_normal_theme_vars(
 ) {
     let sanitized = sanitize_theme_name(theme_name);
     if let Some(fg) = theme.fg() {
-        styles.push(format!("{}-{}:{};", css_variable_prefix, sanitized, fg));
+        styles.push(format!("{css_variable_prefix}-{sanitized}:{fg};"));
     }
     if let Some(bg) = theme.bg() {
-        styles.push(format!("{}-{}-bg:{};", css_variable_prefix, sanitized, bg));
+        styles.push(format!("{css_variable_prefix}-{sanitized}-bg:{bg};"));
     }
 }
 
@@ -504,20 +491,19 @@ fn multi_themes_pre_style(
                 let dark_fg = dark.fg().unwrap_or("#ffffff");
                 let dark_bg = dark.bg().unwrap_or("#000000");
 
-                styles.push(format!("color: light-dark({}, {});", light_fg, dark_fg));
+                styles.push(format!("color: light-dark({light_fg}, {dark_fg});"));
                 styles.push(format!(
-                    "background-color: light-dark({}, {});",
-                    light_bg, dark_bg
+                    "background-color: light-dark({light_bg}, {dark_bg});"
                 ));
             }
         }
         Some(default_name) => {
             if let Some(default_theme) = themes.get(default_name) {
                 if let Some(fg) = default_theme.fg() {
-                    styles.push(format!("color:{};", fg));
+                    styles.push(format!("color:{fg};"));
                 }
                 if let Some(bg) = default_theme.bg() {
-                    styles.push(format!("background-color:{};", bg));
+                    styles.push(format!("background-color:{bg};"));
                 }
             }
 
@@ -653,19 +639,16 @@ fn render_source_event<F>(
     let mut remaining = text;
 
     loop {
-        match remaining.find('\n') {
-            Some(newline_index) => {
-                let fragment = &remaining[..newline_index];
-                append_fragment(lines, &escape_fragment(fragment));
-                close_open_spans(lines, stack.len());
-                lines.push(String::new());
-                reopen_spans(lines, stack, span_attrs);
-                remaining = &remaining[newline_index + 1..];
-            }
-            None => {
-                append_fragment(lines, &escape_fragment(remaining));
-                break;
-            }
+        if let Some(newline_index) = remaining.find('\n') {
+            let fragment = &remaining[..newline_index];
+            append_fragment(lines, &escape_fragment(fragment));
+            close_open_spans(lines, stack.len());
+            lines.push(String::new());
+            reopen_spans(lines, stack, span_attrs);
+            remaining = &remaining[newline_index + 1..];
+        } else {
+            append_fragment(lines, &escape_fragment(remaining));
+            break;
         }
     }
 }
@@ -688,7 +671,7 @@ where
 
 /// Render highlight events into HTML lines, calling `attribute_callback` for each highlight span.
 ///
-/// This is a simplified version of the vendored HtmlRenderer that works with
+/// This is a simplified version of the vendored `HtmlRenderer` that works with
 /// pre-computed `HighlightEvent` slices instead of tree-sitter iterators.
 pub fn render_events<F>(
     source: &str,

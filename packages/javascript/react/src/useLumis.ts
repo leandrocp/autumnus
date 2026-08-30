@@ -26,7 +26,7 @@ function normalizeError(error: unknown): Error {
 }
 
 export function useLumis(options: UseLumisOptions): UseLumisResult {
-  const [asyncContent, setAsyncContent] = useState<ReactNode>(undefined);
+  const [asyncContent, setAsyncContent] = useState<ReactNode>();
   const [asyncError, setAsyncError] = useState<Error>();
   const highlighter = getHighlighter(options.highlighter);
 
@@ -115,6 +115,7 @@ export function useLumis(options: UseLumisOptions): UseLumisResult {
     return () => {
       active = false;
     };
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- `options` is a fresh object every render; the fields the effect reads are listed instead.
   }, [highlighter, options.children, options.formatter, syncState.needsLoad]);
 
   return {

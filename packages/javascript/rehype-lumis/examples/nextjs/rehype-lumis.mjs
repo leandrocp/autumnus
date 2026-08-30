@@ -4,6 +4,7 @@ import { bundledLanguages } from "@lumis-sh/lumis/bundles/web";
 import githubLight from "@lumis-sh/themes/github_light";
 
 export default function configuredRehypeLumis() {
+  // oxlint-disable-next-line oxc/no-this-in-exported-function -- unified passes the processor as `this`.
   return rehypeLumis.call(this, {
     formatter: (language) => htmlInline({ language, theme: githubLight }),
     languages: [bundledLanguages],

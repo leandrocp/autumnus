@@ -1,7 +1,7 @@
 import type { HighlightStyle } from "../types.js";
 
 /** ANSI reset escape sequence. */
-export const ANSI_RESET = "\u001b[0m";
+export const ANSI_RESET = "\u001B[0m";
 
 /**
  * Parse a hex color string to RGB components.
@@ -35,7 +35,7 @@ export function hexToRgb(hex: string): [number, number, number] | undefined {
  * ```
  */
 export function rgbToAnsi(r: number, g: number, b: number, isBackground: boolean): string {
-  return isBackground ? `\u001b[48;2;${r};${g};${b}m` : `\u001b[38;2;${r};${g};${b}m`;
+  return isBackground ? `\u001B[48;2;${r};${g};${b}m` : `\u001B[38;2;${r};${g};${b}m`;
 }
 
 /**
@@ -61,30 +61,33 @@ export function styleToAnsi(style: HighlightStyle | undefined): string {
     if (rgb) codes.push(rgbToAnsi(rgb[0], rgb[1], rgb[2], true));
   }
 
-  if (style.bold) codes.push("\u001b[1m");
-  if (style.italic) codes.push("\u001b[3m");
+  if (style.bold) codes.push("\u001B[1m");
+  if (style.italic) codes.push("\u001B[3m");
 
   switch (style.underline) {
     case true:
     case "solid":
-      codes.push("\u001b[4m");
+      codes.push("\u001B[4m");
       break;
     case "wavy":
     case "undercurl":
-      codes.push("\u001b[4:3m");
+      codes.push("\u001B[4:3m");
       break;
     case "double":
-      codes.push("\u001b[4:2m");
+      codes.push("\u001B[4:2m");
       break;
     case "dotted":
-      codes.push("\u001b[4:4m");
+      codes.push("\u001B[4:4m");
       break;
     case "dashed":
-      codes.push("\u001b[4:5m");
+      codes.push("\u001B[4:5m");
+      break;
+    case false:
+    case undefined:
       break;
   }
 
-  if (style.strikethrough) codes.push("\u001b[9m");
+  if (style.strikethrough) codes.push("\u001B[9m");
 
   return codes.join("");
 }

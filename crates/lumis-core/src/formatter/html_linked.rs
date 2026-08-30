@@ -85,7 +85,7 @@ impl HtmlLinked {
         })
     }
 
-    fn span_attrs_from_index(&self, scope_index: usize) -> String {
+    fn span_attrs_from_index(scope_index: usize) -> String {
         let scope = crate::highlights::HIGHLIGHT_NAMES
             .get(scope_index)
             .copied()
@@ -124,7 +124,7 @@ impl Formatter for HtmlLinked {
         let lines = crate::formatter::html::render_lines_from_events(
             source,
             events,
-            |scope_index, _language| self.span_attrs_from_index(scope_index),
+            |scope_index, _language| Self::span_attrs_from_index(scope_index),
         );
 
         for (i, line) in lines.iter().enumerate() {
@@ -137,7 +137,7 @@ impl Formatter for HtmlLinked {
                 class_suffix.as_deref(),
                 None,
             );
-            write!(&mut buffer, "{}", wrapped)?;
+            write!(&mut buffer, "{wrapped}")?;
         }
 
         crate::formatter::html::closing_tags(&mut buffer)?;

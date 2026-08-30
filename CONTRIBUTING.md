@@ -6,6 +6,7 @@ See `ARCHITECTURE.md` for how the crates, packages, website, and build pipeline 
 
 - [Getting started](#getting-started)
 - [Testing](#testing)
+- [Linting](#linting)
 - [Releases](#releases)
 - [Benchmarks](#benchmarks)
 - [Environment variables](#environment-variables)
@@ -96,6 +97,49 @@ genuinely cannot offer; the tests fail on a waiver that is no longer needed, so
 it can only shrink. It is currently empty.
 
 The browser task installs the required Chromium, Firefox, and WebKit builds before running. CI runs these six tasks as independent parallel jobs.
+
+## Linting
+
+```sh
+mise run lint
+```
+
+Every linter runs at its strict setting, and every runtime has one. What that
+means per language, and where the configuration lives:
+
+| Runtime | Linter | Strict setting | Configuration |
+| --- | --- | --- | --- |
+| Rust | clippy | `clippy::pedantic` plus `rust_2018_idioms` and `unreachable_pub`, all denied | `[workspace.lints]` in the root `Cargo.toml` |
+| JavaScript, TypeScript | oxlint | the `correctness`, `suspicious`, `perf` and `pedantic` categories, as errors | `.oxlintrc.json` |
+| Elixir | credo | `mix credo --strict` | credo's defaults |
+| Lua | selene | every lint selene ships, warnings included | `selene.toml`, `neovim.yml` |
+| GitHub Actions | actionlint | its default, which is already strict | `.github/actionlint.yaml` |
+
+Two rules hold this together, and both come from what the checks used to miss:
+
+- **Every file the repo authors is linted.** `mise run lint-js` runs oxlint from
+  the repo root over everything, the way `mise run fmt-js` formats. Directory
+  lists go stale in one direction only: `website/` carried an empty
+  `.oxlintrc.jsonc` that silently exempted all 28 of its files from every rule,
+  and the per-package scripts named `src/` and `test/`, so the CLI package, the
+  docs site, the benchmark scripts and every `examples/` directory had never been
+  linted at all. Subtract from "everything" in `.oxlintrc.json`'s
+  `ignorePatterns`, and give each entry a reason.
+- **A silenced lint says why.** Line-level `// oxlint-disable-next-line <rule> --
+  <why>` and `#[allow(...)]` with a comment above it. `--report-unused-disable-directives`
+  runs in the per-package lint scripts, so a silence that stops being needed
+  fails the build rather than sitting there.
+
+A lint the repository has decided not to adopt is a waiver, not a silence: it
+sits in one place, with the reason and the number of sites it fired on when it
+was written down. `[workspace.lints.clippy]` and the `rules` block in
+`.oxlintrc.json` hold all of them. That list is allowed to shrink; adding to it
+needs the same justification the existing entries carry.
+
+TypeScript's type-aware rules cannot run from the repo root, because they need
+each package's `tsconfig.json` and its built dependencies. The per-package
+`pnpm run lint` scripts add them on top of the root sweep, and CI runs both:
+`lint.yml` for the repo-wide pass, `javascript.yml` for the type-aware one.
 
 ## Releases
 

@@ -385,3 +385,6 @@ pretty_assertions = "1.4"
 ratatui = "0.30"
 ratatui-core = "0.1"
 syn = { version = "3.0", features = ["full", "parsing"] }
+
+[lints]
+workspace = true

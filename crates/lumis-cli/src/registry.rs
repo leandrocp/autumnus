@@ -14,13 +14,13 @@ use tree_sitter::Tree;
 
 /// The CLI's view of [`Runtime`]: the same one-pass highlighting Elixir and Node
 /// use, plus the paths and cache reporting `lumis languages cache` prints.
-pub struct Registry {
+pub(crate) struct Registry {
     data_dir: PathBuf,
     runtime: Runtime,
 }
 
 impl Registry {
-    pub fn new(data_dir: PathBuf) -> Result<Self> {
+    pub(crate) fn new(data_dir: PathBuf) -> Result<Self> {
         std::fs::create_dir_all(data_dir.join("parsers"))?;
         std::fs::create_dir_all(data_dir.join("themes"))?;
         let store = LanguageStore::new(
@@ -38,15 +38,15 @@ impl Registry {
         Ok(Self { data_dir, runtime })
     }
 
-    pub fn data_dir(&self) -> &Path {
+    pub(crate) fn data_dir(&self) -> &Path {
         &self.data_dir
     }
 
-    pub fn parse_tree(&self, language: &str, source: &str) -> Result<Tree> {
+    pub(crate) fn parse_tree(&self, language: &str, source: &str) -> Result<Tree> {
         Ok(self.runtime.parse_tree(source, language)?)
     }
 
-    pub fn highlight(
+    pub(crate) fn highlight(
         &self,
         source: &str,
         language: &str,
@@ -59,7 +59,7 @@ impl Registry {
     ///
     /// Caching a bundle one language at a time is a hundred sequential round
     /// trips to the CDN, which is most of the wall clock.
-    pub fn cache_parsers_detailed(
+    pub(crate) fn cache_parsers_detailed(
         &self,
         languages: &[String],
         force: bool,
@@ -76,7 +76,7 @@ impl Registry {
     /// Each parser uses a disposable Tree-sitter store, so a whole catalog never
     /// shares one address space. The load validates the parser and writes its
     /// compiled form into the image; query configuration is validated too.
-    pub fn precompile_parsers_detailed(
+    pub(crate) fn precompile_parsers_detailed(
         &self,
         languages: &[String],
     ) -> Vec<Result<std::time::Duration>> {
@@ -88,18 +88,18 @@ impl Registry {
     }
 
     #[cfg(test)]
-    pub fn is_cached(&self, language: &str) -> bool {
+    pub(crate) fn is_cached(&self, language: &str) -> bool {
         self.local_package(language)
             .is_some_and(|package| self.store().cached_parser(&package).is_some())
     }
 
     #[cfg(test)]
-    pub fn parser_path(&self, language: &str) -> Result<PathBuf> {
+    pub(crate) fn parser_path(&self, language: &str) -> Result<PathBuf> {
         Ok(self.store().parser_path(self.package(language)?.as_ref())?)
     }
 
     #[cfg(test)]
-    pub fn parser_download_url(&self, language: &str) -> Result<String> {
+    pub(crate) fn parser_download_url(&self, language: &str) -> Result<String> {
         Ok(LanguageStore::parser_url(self.package(language)?.as_ref())?)
     }
 
@@ -121,7 +121,7 @@ impl Registry {
     }
 
     #[cfg(test)]
-    pub fn cache_test_language(
+    pub(crate) fn cache_test_language(
         &self,
         id: &str,
         grammar_name: &str,
@@ -164,7 +164,7 @@ impl Registry {
     }
 }
 
-pub fn all_language_ids() -> impl Iterator<Item = &'static str> {
+pub(crate) fn all_language_ids() -> impl Iterator<Item = &'static str> {
     catalog::LANGUAGES.iter().map(|language| language.id)
 }
 
@@ -198,7 +198,10 @@ mod tests {
         let output = registry
             .highlight("fn main() {}", "rust", &HighlightOptions::default())
             .unwrap();
-        assert!(!output.events.is_empty());
+        assert!(
+            !output.events.is_empty(),
+            "highlighting Rust produced no events"
+        );
     }
 
     #[test]

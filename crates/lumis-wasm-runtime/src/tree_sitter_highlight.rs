@@ -22,6 +22,9 @@
 //   `injection.language` capture it is an alternative to, and is the only reason this file
 //   references `lumis_core`. Upstream has no equivalent, so the diff hunk injection queries
 //   cannot work without it.
+// - A module-level `allow` holds the workspace lint levels off this file. Upstream is not
+//   written to them, and restyling it to satisfy `clippy::pedantic` would grow the diff for
+//   nothing. Lumis code in here is still reviewed against those lints by hand.
 //
 // When touching this file, prefer minimizing the diff against upstream rather than extending it,
 // and add what you did to the list above in the same change. The list is the only record of why
@@ -30,7 +33,7 @@
 // Reference:
 // https://github.com/tree-sitter/tree-sitter/blob/master/crates/highlight/src/highlight.rs
 
-#![allow(clippy::all, dead_code)]
+#![allow(clippy::all, clippy::pedantic, dead_code, elided_lifetimes_in_paths)]
 
 use core::slice;
 use std::{
@@ -137,7 +140,7 @@ pub enum Error {
 
 /// Represents a single step in rendering a syntax-highlighted document.
 ///
-/// Modified from upstream to include language context in HighlightStart.
+/// Modified from upstream to include language context in `HighlightStart`.
 #[derive(Clone, Debug)]
 pub enum HighlightEvent {
     Source {
@@ -282,7 +285,7 @@ fn add_offset_delta(value: usize, delta: i64) -> Option<usize> {
 ///
 /// Neovim reads exactly `pred[3]` through `pred[6]` and never looks further, so
 /// an omitted operand is zero and anything after the fourth is untouched —
-/// including a non-numeric one. Operands use LuaJIT's numeric-string coercion;
+/// including a non-numeric one. Operands use `LuaJIT`'s numeric-string coercion;
 /// values that cannot form an integral Tree-sitter point make the directive
 /// unusable instead of reaching range arithmetic.
 fn parse_offset_operands(deltas: &[&str]) -> Option<[i64; 4]> {
@@ -429,7 +432,7 @@ fn parse_hex_float(value: &str) -> Option<f64> {
             continue;
         }
 
-        let digit = char::from(byte).to_digit(16)? as u128;
+        let digit = u128::from(char::from(byte).to_digit(16)?);
         digits += 1;
         if significand >> 124 == 0 {
             significand = (significand << 4) | digit;
@@ -592,7 +595,7 @@ struct HighlightIterLayer<'a> {
     depth: usize,
 }
 
-pub struct _QueryCaptures<'query, 'tree: 'query, T: TextProvider<I>, I: AsRef<[u8]>> {
+pub struct _QueryCaptures<'query, 'tree, T: TextProvider<I>, I: AsRef<[u8]>> {
     ptr: *mut ffi::TSQueryCursor,
     query: &'query Query,
     text_provider: T,
@@ -1714,7 +1717,7 @@ impl HtmlRenderer {
     where
         F: Fn(Highlight, &mut Vec<u8>),
     {
-        pub const fn html_escape(c: u8) -> Option<&'static [u8]> {
+        pub(crate) const fn html_escape(c: u8) -> Option<&'static [u8]> {
             match c as char {
                 '>' => Some(b"&gt;"),
                 '<' => Some(b"&lt;"),
@@ -2072,7 +2075,7 @@ mod tests {
         );
     }
 
-    /// LuaJIT's numeric-string coercion is broader than signed decimal, but a
+    /// `LuaJIT`'s numeric-string coercion is broader than signed decimal, but a
     /// fractional or non-finite result cannot form a Tree-sitter point. The
     /// browser reads the same cases from the fixture.
     #[test]

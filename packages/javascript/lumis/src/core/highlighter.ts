@@ -203,7 +203,7 @@ function runHighlightIter(
       continue;
     }
 
-    const active = scopeStack[scopeStack.length - 1];
+    const active = scopeStack.at(-1);
     const scope = active?.scope ?? "";
     const tokenLanguage = active?.language ?? loaded.definition.id;
 
@@ -583,7 +583,7 @@ export function createHighlighterModule(factory: HighlighterModuleFactory) {
           const detectedRef = detectLanguageRef(source, fmt.language);
           return runFormatter(runtime, source, fmt, detectedRef);
         },
-        highlightIter: (source, language, theme, onToken, options) =>
+        highlightIter: (source, language, theme, onToken, options) => {
           runHighlightIter(
             runtime,
             source,
@@ -591,7 +591,8 @@ export function createHighlighterModule(factory: HighlighterModuleFactory) {
             theme,
             onToken,
             options,
-          ),
+          );
+        },
         async loadLanguage(input) {
           await loadHighlighterLanguage(input, runtime, lazyRegistry);
         },

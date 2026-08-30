@@ -115,6 +115,9 @@ async function readWasmInput(wasm: RuntimeWasmInput): Promise<Uint8Array> {
  * uses, so there is one implementation of resolve, verify and cache rather than
  * a native copy that can drift.
  */
+const resolverSource = (source: string | URL): string =>
+  source instanceof URL ? source.href : source;
+
 export function createNativeLanguagesModule(
   binding: NativeBinding,
   resolvers: LanguagesModule,
@@ -122,9 +125,6 @@ export function createNativeLanguagesModule(
   let globalWasmResolver: WasmResolver | undefined;
   let globalLanguagePackageResolver: LanguagePackageResolver | undefined;
   let resolverCallbackDepth = 0;
-
-  const resolverSource = (source: string | URL): string =>
-    source instanceof URL ? source.href : source;
 
   /**
    * Hand the addon the directories the environment names before it builds its
@@ -603,7 +603,7 @@ export function createNativeLanguagesModule(
       return defaultRuntime.getLoadedLanguageIds();
     },
     availableLanguages(): LanguageInfo[] {
-      return LANGUAGES.map(cloneLanguageInfo);
+      return LANGUAGES.map((language) => cloneLanguageInfo(language));
     },
     getDefaultRuntime() {
       return defaultRuntime;

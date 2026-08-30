@@ -238,7 +238,7 @@ async function run(): Promise<void> {
     const formatterThemes = config
       ? Object.fromEntries(
           Object.entries(config.themes)
-            .reverse()
+            .toReversed()
             .map(([name, themeId]) => [name, getTheme(themeId)]),
         )
       : { main: theme };
@@ -351,8 +351,7 @@ async function run(): Promise<void> {
     },
   };
 
-  const customSource =
-    `const nested = foo(bar([1, 2], { a: "3" }));\n` + `const view = ${fixtureSource.trim()};\n`;
+  const customSource = `const nested = foo(bar([1, 2], { a: "3" }));\nconst view = ${fixtureSource.trim()};\n`;
   const customFormatterResult = JSON.parse(
     highlighter.highlight(customSource, customFormatter),
   ) as Omit<CustomFormatterResult, "restoredLanguage">;
@@ -404,10 +403,12 @@ async function languagePackageDataUrl(
   });
   const bytes = new TextEncoder().encode(metadata);
   let binary = "";
-  for (const byte of bytes) binary += String.fromCharCode(byte);
+  for (const byte of bytes) binary += String.fromCodePoint(byte);
   return `data:application/json;base64,${btoa(binary)}`;
 }
 
-run().catch((error: unknown) => {
+try {
+  await run();
+} catch (error: unknown) {
   window.__lumisBrowserError = error instanceof Error ? error.stack : String(error);
-});
+}

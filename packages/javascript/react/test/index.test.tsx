@@ -67,7 +67,9 @@ async function waitForHtml(container: HTMLElement, expected: string) {
     }
 
     await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await new Promise((resolve) => {
+        setTimeout(resolve, 10);
+      });
     });
   }
 }
@@ -96,7 +98,7 @@ function HookHarness({
     return <div data-error={error.message} />;
   }
 
-  return <>{content}</>;
+  return content;
 }
 
 afterEach(() => {
@@ -299,6 +301,7 @@ describe("@lumis-sh/react", () => {
   });
 
   it("normalizes non-Error failures returned by useLumis", async () => {
+    // oxlint-disable-next-line typescript/prefer-promise-reject-errors -- rejecting with a non-Error is what this test covers.
     const highlighter = Promise.reject<Awaited<ReturnType<typeof createHighlighter>>>("boom");
     const container = document.createElement("div");
     document.body.append(container);
@@ -315,7 +318,7 @@ describe("@lumis-sh/react", () => {
       );
     });
 
-    expect(container.querySelector("[data-error]")?.getAttribute("data-error")).toBe(
+    expect(container.querySelector("[data-error]").dataset.error).toBe(
       "Failed to render code block",
     );
 

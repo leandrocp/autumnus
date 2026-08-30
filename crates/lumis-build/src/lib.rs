@@ -196,7 +196,7 @@ fn convert_line(line: &str, fallback: PatternFallback) -> Result<String, LuaPatt
             (Err(error), PatternFallback::Reject) => return Err(error),
         };
 
-        result.push_str(&rest[..pattern_start + 1]);
+        result.push_str(&rest[..=pattern_start]);
         result.push_str(&escape_regex_for_query_string(&regex));
         result.push('"');
         rest = &rest[pattern_end + 1..];
@@ -526,7 +526,7 @@ fn unescape_query_string(raw: &str) -> String {
             continue;
         }
         match characters.next() {
-            Some('\\') => unescaped.push('\\'),
+            Some('\\') | None => unescaped.push('\\'),
             Some('"') => unescaped.push('"'),
             Some('n') => unescaped.push('\n'),
             Some('r') => unescaped.push('\r'),
@@ -536,7 +536,6 @@ fn unescape_query_string(raw: &str) -> String {
                 unescaped.push('\\');
                 unescaped.push(other);
             }
-            None => unescaped.push('\\'),
         }
     }
 
@@ -565,7 +564,7 @@ fn expand_query_case_insensitive_regexes(line: &str) -> String {
     let mut rest = line;
 
     while let Some(start) = rest.find("\"(?i)") {
-        result.push_str(&rest[..start + 1]);
+        result.push_str(&rest[..=start]);
         rest = &rest[start + 5..];
         let Some(end) = rest.find('"') else {
             result.push_str("(?i)");

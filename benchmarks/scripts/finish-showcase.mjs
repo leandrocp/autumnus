@@ -234,15 +234,15 @@ for (const document of documents) {
       // the pipeline rather than a second number to publish.
       const tokens = countTokens(fragment, label);
       const recorded = outputs.get(id);
-      if (!recorded) {
+      if (recorded === undefined) {
         outputs.set(id, { id, tokens, outputBytes: { [theme.id]: Buffer.byteLength(fragment) } });
-      } else if (recorded.tokens !== tokens) {
+      } else if (recorded.tokens === tokens) {
+        recorded.outputBytes[theme.id] = Buffer.byteLength(fragment);
+      } else {
         throw new Error(
           `${label} found ${tokens} tokens in ${document.id} with ${theme.name} but ` +
             `${recorded.tokens} with ${themes[0].name}`,
         );
-      } else {
-        recorded.outputBytes[theme.id] = Buffer.byteLength(fragment);
       }
     }
 

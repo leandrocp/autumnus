@@ -6,14 +6,14 @@
 use lumis::{highlight, languages::Language, themes, HtmlInlineBuilder};
 
 fn main() {
-    let code = r#"#!/usr/bin/env python3
+    let code = r"#!/usr/bin/env python3
 def fibonacci(n):
     if n <= 1:
         return n
     return fibonacci(n-1) + fibonacci(n-2)
 
 print(fibonacci(10))
-"#;
+";
 
     // Detect language from file path/extension or source content.
     // Pass the file path as the first argument (can be just filename).
@@ -30,5 +30,5 @@ print(fibonacci(10))
 
     let html = highlight(code, formatter);
 
-    println!("{}", html);
+    println!("{html}");
 }

@@ -912,13 +912,13 @@ function closeOpenSpans(
 function reopenSpans(
   lines: string[],
   stack: SpanStackEntry[],
-  openSpan: (span: HighlightSpan, style: HighlightStyle | undefined) => string,
+  renderOpenSpan: (span: HighlightSpan, style: HighlightStyle | undefined) => string,
   theme: Theme | undefined,
 ): void {
   for (const entry of stack) {
     if (!entry.emitted) continue;
     const style = getSpanStyle(theme, entry.scope, entry.language);
-    appendFragment(lines, openSpan(emptySpan(entry.scope, entry.language), style));
+    appendFragment(lines, renderOpenSpan(emptySpan(entry.scope, entry.language), style));
   }
 }
 
@@ -927,7 +927,7 @@ function renderSourceEvent(
   text: string,
   stack: SpanStackEntry[],
   formatText: (text: string) => string,
-  openSpan: (span: HighlightSpan, style: HighlightStyle | undefined) => string,
+  renderOpenSpan: (span: HighlightSpan, style: HighlightStyle | undefined) => string,
   closeSpan: (span: HighlightSpan, style: HighlightStyle | undefined) => string,
   theme: Theme | undefined,
 ): void {
@@ -943,7 +943,7 @@ function renderSourceEvent(
     appendFragment(lines, formatText(remaining.slice(0, newlineIndex)));
     closeOpenSpans(lines, stack, closeSpan, theme);
     lines.push("");
-    reopenSpans(lines, stack, openSpan, theme);
+    reopenSpans(lines, stack, renderOpenSpan, theme);
     remaining = remaining.slice(newlineIndex + 1);
   }
 }
@@ -989,7 +989,7 @@ export function formatHighlightIterLines(
 
     // source event
     if (!language || language === "plaintext") {
-      const top = stack[stack.length - 1];
+      const top = stack.at(-1);
       if (top) language = top.language;
     }
 

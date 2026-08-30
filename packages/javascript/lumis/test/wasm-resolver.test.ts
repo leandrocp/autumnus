@@ -133,7 +133,7 @@ describe("Wasm resolver", () => {
     const language = withWasm(diff, ensureLocalWasm("diff"));
     const hl = await createHighlighter({
       languages: [language],
-      wasmResolver: (language, wasm) => ensureLocalParserWasm(language, wasm.name),
+      wasmResolver: (requested, wasm) => ensureLocalParserWasm(requested, wasm.name),
     });
 
     const html = hl.highlight("- old\n+ new", htmlLinked({ language }));

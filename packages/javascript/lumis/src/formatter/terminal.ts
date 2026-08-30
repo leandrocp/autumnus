@@ -55,7 +55,7 @@ function activeStyle(
   scopeStack: Array<{ scope: string; language: string }>,
   theme: Theme | undefined,
 ): HighlightStyle | undefined {
-  const active = scopeStack[scopeStack.length - 1];
+  const active = scopeStack.at(-1);
   if (!active || active.scope.length === 0) return undefined;
   return getScopedThemeStyle(theme, active.scope, active.language);
 }

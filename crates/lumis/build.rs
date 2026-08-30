@@ -33,6 +33,7 @@ use rayon::prelude::*;
 use serde::Deserialize;
 use std::collections::BTreeMap;
 use std::env;
+use std::fmt::Write as _;
 use std::fs::{self, File};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
@@ -202,7 +203,7 @@ fn find_vendored_dir(vendored_root: &Path, key: &str, entry: &ParserEntry) -> Op
         }
     }
 
-    let default_name = format!("tree-sitter-{}", key);
+    let default_name = format!("tree-sitter-{key}");
     if vendored_root.join(&default_name).exists() {
         return Some(default_name);
     }
@@ -326,7 +327,7 @@ fn vendored_parsers(toml: &LanguagesToml) {
         println!("cargo:rerun-if-changed={}", parser.parser_dir.display());
     }
 
-    parsers.par_iter().for_each(|p| p.build());
+    parsers.par_iter().for_each(TreeSitterParser::build);
 }
 
 // ── queries ────────────────────────────────────────────────────────────────
@@ -372,7 +373,7 @@ fn require_highlights_query(path: &Path, language: &str) {
 ///
 /// Uses `query_name` (or the parser key) as the map key, and `feature`
 /// (or `lang-{key}`) as the feature flag. Multiple parsers may share the
-/// same query name (e.g. ejs and erb both use "embedded_template").
+/// same query name (e.g. ejs and erb both use "`embedded_template`").
 fn build_query_feature_map(toml: &LanguagesToml) -> BTreeMap<String, Vec<String>> {
     let mut map: BTreeMap<String, Vec<String>> = BTreeMap::new();
 
@@ -502,7 +503,8 @@ fn gen_conformance_tests() {
 
         for name in &names {
             let ident = name.replace('-', "_");
-            code.push_str(&format!(
+            let _ = write!(
+                code,
                 r#"
 mod {ident} {{
     use super::*;
@@ -515,7 +517,7 @@ mod {ident} {{
     #[test] #[ignore = "conformance"] fn conformance_bbcode_scoped() {{ check_bbcode(&fixture()); }}
 }}
 "#
-            ));
+            );
         }
     }
 

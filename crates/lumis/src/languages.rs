@@ -2419,8 +2419,8 @@ mod tests {
         assert!(!languages.is_empty(), "catalog looks empty");
 
         for language in &languages {
-            assert!(!language.id.is_empty());
-            assert!(!language.name.is_empty());
+            assert!(!language.id.is_empty(), "a language has no id");
+            assert!(!language.name.is_empty(), "a language has no name");
             assert!(
                 !language.aliases.contains(&language.id),
                 "{} lists its own id as an alias",

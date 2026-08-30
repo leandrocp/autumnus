@@ -120,7 +120,7 @@ const warnedUnresolved = new Set<string>();
  * on the Rust side.
  */
 const catalogNames = new Set(
-  LANGUAGES.flatMap(({ id, aliases }) => [id, ...aliases]).map((name) => name.toLowerCase()),
+  LANGUAGES.flatMap(({ id, aliases }) => aliases.concat(id)).map((name) => name.toLowerCase()),
 );
 
 /**
@@ -734,7 +734,7 @@ function colorizeBracketPairs(
       openIndex += 1;
     }
 
-    const lastOpen = openStack[openStack.length - 1];
+    const lastOpen = openStack.at(-1);
     if (
       lastOpen &&
       lastOpen.startByte === pair.open.startByte &&
@@ -800,21 +800,48 @@ function applyRainbowBrackets(
   return output;
 }
 
+interface LayerState extends HighlightLayer {
+  captureIndex: number;
+  removedMatches: Uint8Array;
+  scopeStack: LocalScope[];
+  highlightEndStack: number[];
+}
+
+interface Boundary {
+  offset: number;
+  isStart: boolean;
+}
+
+function peekCapture(layer: LayerState): LayerQueryCapture | undefined {
+  while (layer.captureIndex < layer.captures.length) {
+    const capture = layer.captures[layer.captureIndex]!;
+    if (layer.removedMatches[capture.matchIndex] !== 0) {
+      layer.captureIndex += 1;
+      continue;
+    }
+    return capture;
+  }
+  return undefined;
+}
+
+function precedes(
+  candidate: Boundary,
+  candidateDepth: number,
+  current: Boundary,
+  currentDepth: number,
+): boolean {
+  if (candidate.offset !== current.offset) {
+    return candidate.offset < current.offset;
+  }
+  if (candidate.isStart !== current.isStart) {
+    return !candidate.isStart;
+  }
+  return candidateDepth > currentDepth;
+}
+
 /** Merge parser layers using tree-sitter-highlight's boundary ordering. */
 function buildNestedEvents(inputLayers: HighlightLayer[], maps: SourceMaps): HighlightEvent[] {
   const events: HighlightEvent[] = [];
-
-  interface LayerState extends HighlightLayer {
-    captureIndex: number;
-    removedMatches: Uint8Array;
-    scopeStack: LocalScope[];
-    highlightEndStack: number[];
-  }
-
-  interface Boundary {
-    offset: number;
-    isStart: boolean;
-  }
 
   const layers: LayerState[] = inputLayers.map((layer) => ({
     ...layer,
@@ -839,18 +866,6 @@ function buildNestedEvents(inputLayers: HighlightLayer[], maps: SourceMaps): Hig
     }
   }
 
-  function peekCapture(layer: LayerState): LayerQueryCapture | undefined {
-    while (layer.captureIndex < layer.captures.length) {
-      const capture = layer.captures[layer.captureIndex]!;
-      if (layer.removedMatches[capture.matchIndex] !== 0) {
-        layer.captureIndex += 1;
-        continue;
-      }
-      return capture;
-    }
-    return undefined;
-  }
-
   function takeCapture(layer: LayerState): LayerQueryCapture | undefined {
     const capture = peekCapture(layer);
     if (capture) layer.captureIndex += 1;
@@ -871,21 +886,6 @@ function buildNestedEvents(inputLayers: HighlightLayer[], maps: SourceMaps): Hig
     return undefined;
   }
 
-  function precedes(
-    candidate: Boundary,
-    candidateDepth: number,
-    current: Boundary,
-    currentDepth: number,
-  ): boolean {
-    if (candidate.offset !== current.offset) {
-      return candidate.offset < current.offset;
-    }
-    if (candidate.isStart !== current.isStart) {
-      return !candidate.isStart;
-    }
-    return candidateDepth > currentDepth;
-  }
-
   function consumeNextHighlight(
     layer: LayerState,
     lastRange: typeof lastHighlightRange,
@@ -893,10 +893,7 @@ function buildNestedEvents(inputLayers: HighlightLayer[], maps: SourceMaps): Hig
     let capture = takeCapture(layer);
     if (!capture) return undefined;
 
-    while (
-      layer.scopeStack.length > 1 &&
-      capture.startByte > layer.scopeStack[layer.scopeStack.length - 1]!.endByte
-    ) {
+    while (layer.scopeStack.length > 1 && capture.startByte > layer.scopeStack.at(-1)!.endByte) {
       layer.scopeStack.pop();
     }
 
@@ -918,7 +915,7 @@ function buildNestedEvents(inputLayers: HighlightLayer[], maps: SourceMaps): Hig
           name: decoder.decode(maps.sourceBytes.subarray(capture.startByte, capture.endByte)),
           valueEndByte: layer.localDefinitionValueEnds[capture.matchIndex]!,
         };
-        layer.scopeStack[layer.scopeStack.length - 1]!.localDefs.push(definitionTarget);
+        layer.scopeStack.at(-1)!.localDefs.push(definitionTarget);
       } else if (metadata?.isLocalReference && !definitionTarget) {
         const name = decoder.decode(maps.sourceBytes.subarray(capture.startByte, capture.endByte));
         let found = false;

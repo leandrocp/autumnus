@@ -1,4 +1,4 @@
-//! Using the highlight_iter function for streaming highlighting
+//! Using the `highlight_iter` function for streaming highlighting
 //!
 //! This example demonstrates:
 //! - Using `highlight_iter()` with a callback for streaming highlighting
@@ -8,9 +8,9 @@
 use lumis::{highlight::highlight_iter, languages::Language, themes};
 
 fn main() {
-    let code = r#"fn add(a: i32, b: i32) -> i32 {
+    let code = r"fn add(a: i32, b: i32) -> i32 {
     a + b
-}"#;
+}";
 
     let theme = themes::get("github_light").ok();
     let lang = Language::guess(Some("rust"), code);

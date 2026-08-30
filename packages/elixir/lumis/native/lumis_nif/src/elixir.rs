@@ -145,7 +145,7 @@ impl ExFormatterOption {
                     .highlight_lines(highlight_lines)
                     .header(header)
                     .build()
-                    .map_err(|e| format!("HtmlInline builder error: {:?}", e))?;
+                    .map_err(|e| format!("HtmlInline builder error: {e:?}"))?;
 
                 Ok((Box::new(formatter), rainbow_brackets))
             }
@@ -171,7 +171,7 @@ impl ExFormatterOption {
                     .highlight_lines(highlight_lines)
                     .header(header)
                     .build()
-                    .map_err(|e| format!("HtmlLinked builder error: {:?}", e))?;
+                    .map_err(|e| format!("HtmlLinked builder error: {e:?}"))?;
 
                 Ok((Box::new(formatter), rainbow_brackets))
             }
@@ -217,7 +217,7 @@ impl ExFormatterOption {
 
                 let formatter = builder
                     .build()
-                    .map_err(|e| format!("HtmlMultiThemes builder error: {:?}", e))?;
+                    .map_err(|e| format!("HtmlMultiThemes builder error: {e:?}"))?;
 
                 Ok((Box::new(formatter), rainbow_brackets))
             }
@@ -240,7 +240,7 @@ impl ExFormatterOption {
                     .background(background)
                     .width(width)
                     .build()
-                    .map_err(|e| format!("Terminal builder error: {:?}", e))?;
+                    .map_err(|e| format!("Terminal builder error: {e:?}"))?;
 
                 Ok((Box::new(formatter), rainbow_brackets))
             }
@@ -248,7 +248,7 @@ impl ExFormatterOption {
                 let formatter = BBCodeScopedBuilder::new()
                     .language(language)
                     .build()
-                    .map_err(|e| format!("BBCode scoped builder error: {:?}", e))?;
+                    .map_err(|e| format!("BBCode scoped builder error: {e:?}"))?;
 
                 Ok((Box::new(formatter), rainbow_brackets))
             }
@@ -306,14 +306,14 @@ impl<'a> From<&'a themes::Theme> for ExTheme {
                 let fg = v.fg.as_ref().map(|color_str| {
                     color_cache
                         .entry(color_str.as_str())
-                        .or_insert_with(|| color_str.to_string())
+                        .or_insert_with(|| color_str.clone())
                         .clone()
                 });
 
                 let bg = v.bg.as_ref().map(|color_str| {
                     color_cache
                         .entry(color_str.as_str())
-                        .or_insert_with(|| color_str.to_string())
+                        .or_insert_with(|| color_str.clone())
                         .clone()
                 });
 
@@ -336,9 +336,9 @@ impl<'a> From<&'a themes::Theme> for ExTheme {
         };
 
         ExTheme {
-            name: theme.name.to_owned(),
+            name: theme.name.clone(),
             appearance,
-            revision: theme.revision.to_owned(),
+            revision: theme.revision.clone(),
             highlights,
         }
     }
@@ -470,7 +470,7 @@ pub struct ExHtmlLinkedHighlightLines {
 }
 
 #[derive(Clone, Debug, NifMap)]
-pub struct ExCssOptions {
+pub(crate) struct ExCssOptions {
     pub enable_italic: bool,
     pub scope: String,
     pub container_selector: String,
@@ -526,7 +526,7 @@ impl From<html_inline::HighlightLines> for ExHtmlInlineHighlightLines {
                 .into_iter()
                 .map(ExLineSpec::from_range_inclusive)
                 .collect(),
-            style: highlight_lines.style.map(|s| s.into()),
+            style: highlight_lines.style.map(std::convert::Into::into),
             class: highlight_lines.class,
         }
     }

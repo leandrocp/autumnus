@@ -85,7 +85,11 @@ function regexPredicates(): Predicate[] {
 
       let rest = line;
       for (;;) {
-        const found = OPERATORS.map((operator) => ({ operator, offset: rest.indexOf(operator) }))
+        const remaining = rest;
+        const found = OPERATORS.map((operator) => ({
+          operator,
+          offset: remaining.indexOf(operator),
+        }))
           .filter(({ offset }) => offset !== -1)
           .sort((a, b) => a.offset - b.offset || b.operator.length - a.operator.length)[0];
         if (!found) break;
@@ -118,6 +122,7 @@ describe("processed query predicates", () => {
   it("compiles every predicate regex with RegExp", () => {
     const failures = predicates.flatMap(({ file, line, operator, regex }) => {
       try {
+        // oxlint-disable-next-line no-new -- constructing it is the validity test.
         new RegExp(regex);
         return [];
       } catch (error) {

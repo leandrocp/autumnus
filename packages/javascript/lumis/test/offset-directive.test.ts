@@ -80,26 +80,26 @@ describe("#offset! matches Neovim", () => {
         endIndex: endIndex!,
         startPosition: {
           row: entry.original.startRow,
-          column: startIndex! - maps.lineStarts[entry.original.startRow]!,
+          column: startIndex! - maps.lineStarts[entry.original.startRow],
         },
         endPosition: {
           row: entry.original.endRow,
-          column: endIndex! - maps.lineStarts[entry.original.endRow]!,
+          column: endIndex! - maps.lineStarts[entry.original.endRow],
         },
       },
       offset,
       maps,
     );
 
-    const actualStartByte = maps.utf8Offsets[actual.startIndex]!;
-    const actualEndByte = maps.utf8Offsets[actual.endIndex]!;
+    const actualStartByte = maps.utf8Offsets[actual.startIndex];
+    const actualEndByte = maps.utf8Offsets[actual.endIndex];
 
     expect({
       startRow: actual.startPosition.row,
-      startColumn: actualStartByte - maps.byteLineStarts[actual.startPosition.row]!,
+      startColumn: actualStartByte - maps.byteLineStarts[actual.startPosition.row],
       startByte: actualStartByte,
       endRow: actual.endPosition.row,
-      endColumn: actualEndByte - maps.byteLineStarts[actual.endPosition.row]!,
+      endColumn: actualEndByte - maps.byteLineStarts[actual.endPosition.row],
       endByte: actualEndByte,
     }).toEqual(entry.expected);
   });

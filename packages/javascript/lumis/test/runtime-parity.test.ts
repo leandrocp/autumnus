@@ -88,10 +88,10 @@ async function rejectedError(promise: Promise<unknown>): Promise<Error> {
 function encodeBase64Octet(dataUrl: string): string {
   const comma = dataUrl.indexOf(",");
   const body = dataUrl.slice(comma + 1);
-  const index = body.search(/[+/=]/);
-  if (comma < 0 || index < 0) throw new Error("test data URL has no encodable base64 octet");
-  const octet = body[index]!;
-  return `${dataUrl.slice(0, comma + 1)}${body.slice(0, index)}%${octet.charCodeAt(0).toString(16)}${body.slice(index + 1)}`;
+  const octetIndex = body.search(/[+/=]/);
+  if (comma < 0 || octetIndex < 0) throw new Error("test data URL has no encodable base64 octet");
+  const octet = body[octetIndex];
+  return `${dataUrl.slice(0, comma + 1)}${body.slice(0, octetIndex)}%${octet.charCodeAt(0).toString(16)}${body.slice(octetIndex + 1)}`;
 }
 
 function injectedLanguages(markdown: Language, json: Language): Language[] {
@@ -103,9 +103,6 @@ function injectedLanguages(markdown: Language, json: Language): Language[] {
 /// holds parsers and would quietly stop testing the resolver path.
 async function withoutStagedParsers<T>(run: () => Promise<T>): Promise<T> {
   const previous = process.env.LUMIS_DATA_DIR;
-  const { mkdtempSync } = await import("node:fs");
-  const { tmpdir } = await import("node:os");
-  const { join } = await import("node:path");
   process.env.LUMIS_DATA_DIR = mkdtempSync(join(tmpdir(), "lumis-empty-store-"));
   try {
     return await run();
@@ -203,7 +200,7 @@ describe("runtime parity", () => {
   it("rejects package grammar metadata before loading and accepts corrected metadata", async () => {
     const basePackageName = "@lumis-sh/wasm-comment";
     const source = localLanguagePackageMetadata(basePackageName);
-    const highlights = source.languages.comment!.highlights;
+    const highlights = source.languages.comment.highlights;
     const { Language: TreeSitterLanguage } = await import("web-tree-sitter");
     const load = vi.spyOn(TreeSitterLanguage, "load");
     const moduleExports = vi.spyOn(WebAssembly.Module, "exports");

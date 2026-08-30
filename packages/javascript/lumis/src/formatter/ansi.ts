@@ -1,6 +1,7 @@
 import type { HighlightRange, LanguageRef, Theme } from "../types.js";
 import { paint } from "./ansi-core.js";
 
+// oxlint-disable-next-line typescript/no-deprecated -- re-exporting the deprecated name is what keeps it available.
 export { ANSI_RESET, hexToRgb, paint, rgbToAnsi, styleToAnsi, wrapWithAnsi } from "./ansi-core.js";
 
 /** A rendered ANSI segment paired with its byte range. */

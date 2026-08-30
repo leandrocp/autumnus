@@ -694,9 +694,12 @@ mod tests {
         assert_eq!(plaintext.name, "Plain Text");
         assert_eq!(plaintext.aliases, ["text", "txt", "plain"]);
         assert_eq!(plaintext.emacs_modes, ["fundamental", "text"]);
-        assert!(plaintext.extensions.is_empty());
-        assert!(plaintext.globs.is_empty());
-        assert!(plaintext.shebangs.is_empty());
+        assert!(
+            plaintext.extensions.is_empty(),
+            "plaintext claims an extension"
+        );
+        assert!(plaintext.globs.is_empty(), "plaintext claims a glob");
+        assert!(plaintext.shebangs.is_empty(), "plaintext claims a shebang");
 
         for name in std::iter::once(plaintext.id).chain(plaintext.aliases.iter().copied()) {
             assert_eq!(

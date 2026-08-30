@@ -69,7 +69,7 @@ function style(element: Element): string {
 function assertLumisPreElement(tree: Root) {
   const pres = findElements(tree, "pre");
   expect(pres.length).toBeGreaterThan(0);
-  const pre = pres[0]!;
+  const pre = pres[0];
   expect(classNames(pre)).toContain("lumis");
   return pre;
 }
@@ -131,7 +131,7 @@ describe("rehype-lumis", () => {
       expect(spanWithStyle).toBeDefined();
 
       const codes = findElements(tree, "code");
-      expect(classNames(codes[0]!)).toContain("language-javascript");
+      expect(classNames(codes[0])).toContain("language-javascript");
     });
 
     it("applies preClass", async () => {
@@ -229,7 +229,7 @@ describe("rehype-lumis", () => {
       await transform(tree);
 
       const codes = findElements(tree, "code");
-      expect(classNames(codes[0]!)).toContain("language-javascript");
+      expect(classNames(codes[0])).toContain("language-javascript");
     });
 
     it("reads language from pre element class", async () => {
@@ -288,7 +288,7 @@ describe("rehype-lumis", () => {
       await transform(tree);
 
       const codes = findElements(tree, "code");
-      expect(classNames(codes[0]!)).toContain("language-json");
+      expect(classNames(codes[0])).toContain("language-json");
     });
 
     it("ignores empty string language attributes", async () => {
@@ -467,7 +467,7 @@ describe("rehype-lumis", () => {
 
       expect((tree.children[0] as Element).tagName).toBe("h1");
       assertLumisPreElement(tree);
-      const lastElement = tree.children[tree.children.length - 1] as Element;
+      const lastElement = tree.children.at(-1) as Element;
       expect(lastElement.tagName).toBe("p");
     });
 
@@ -512,9 +512,9 @@ describe("rehype-lumis", () => {
 
       const pres = findElements(tree, "pre");
       // First: highlighted
-      expect(classNames(pres[0]!)).toContain("lumis");
+      expect(classNames(pres[0])).toContain("lumis");
       // Second: preserved
-      const secondCode = pres[1]!.children[0] as Element;
+      const secondCode = pres[1].children[0] as Element;
       expect(secondCode.tagName).toBe("code");
     });
 

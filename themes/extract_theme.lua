@@ -575,9 +575,9 @@ vim.pack.add = function(specs, opts)
 end
 
 if theme.config then
-	local success, err = pcall(theme.config)
+	local configured, err = pcall(theme.config)
 	vim.pack.add = original_pack_add
-	if not success then
+	if not configured then
 		print(string.format("❌ Failed to configure theme '%s'\n", theme.name))
 		print(string.format("   Error: %s\n", err))
 		print(string.format("   Skipping theme extraction for '%s'\n\n", theme.name))

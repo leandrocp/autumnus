@@ -26,7 +26,7 @@ fn main() {
         .themes(themes)
         .default_theme("light")
         .build()
-        .map_err(|e| format!("Build error: {}", e))?;
+        .map_err(|e| format!("Build error: {e}"))?;
 
     let mut output = Vec::new();
     formatter.format(source, &mut output)?;
@@ -66,11 +66,10 @@ fn main() {
     <h1>Lumis Multiple Themes Demo</h1>
     <p>Change your system theme preference to see the syntax highlighting update automatically.</p>
 
-    {}
+    {highlighted}
 
 </body>
-</html>"#,
-        highlighted
+</html>"#
     );
 
     std::fs::write("examples/html_multi_themes_vars.html", html)?;

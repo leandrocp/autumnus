@@ -46,7 +46,7 @@
     "build:themes": "tsx scripts/build-themes.ts --step=ts",
     "build:assets": "tsx scripts/build-themes.ts --step=json && mkdir -p dist/css && cp ../../../css/*.css dist/css/",
     "build": "pnpm run build:themes && tsup && pnpm run build:assets",
-    "lint": "oxlint --type-aware --deny-warnings src/ scripts/",
+    "lint": "oxlint -c ../../../.oxlintrc.json --type-aware --deny-warnings --report-unused-disable-directives --ignore-pattern 'examples/**' .",
     "prepack": "pnpm run build"
   },
   "devDependencies": {

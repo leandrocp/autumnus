@@ -2,6 +2,7 @@
 actionlint = "1.7.12"
 git-cliff = "2.13.1"
 python = "3.11"
+"aqua:Kampfkarren/selene" = "0.31.0"
 stylua = "2.5.2"
 tree-sitter = "0.26"
 
@@ -365,8 +366,12 @@ run = '''
 set -euo pipefail
 mix format --check-formatted
 mix compile --warnings-as-errors
-mix credo
+mix credo --strict
 '''
+
+[tasks.'lint-lua']
+description = "Lint every Lua file with selene"
+run = "selene themes/ crates/lumis-cli/themes/"
 
 [tasks.'lint-workflows']
 description = "Validate GitHub Actions workflows with actionlint"
@@ -380,6 +385,10 @@ run = "stylua themes/ crates/lumis-cli/themes/"
 description = "Format every JavaScript and TypeScript file"
 run = 'packages/javascript/lumis/node_modules/.bin/oxfmt "**/*.{ts,tsx,mjs,cjs,js,jsx}"'
 
+[tasks.'lint-js']
+description = "Lint every JavaScript and TypeScript file"
+run = 'packages/javascript/lumis/node_modules/.bin/oxlint --deny-warnings .'
+
 [tasks.'lint']
 description = "Run all linters"
 run = '''
@@ -390,6 +399,8 @@ actionlint -color
 echo ""
 echo "Running Rust clippy..."
 cargo clippy --workspace --all-targets --all-features -- -D warnings
+cargo clippy --manifest-path crates/dev/Cargo.toml --all-targets -- -D warnings
+cargo clippy --manifest-path crates/autumnus/Cargo.toml --all-targets -- -D warnings
 echo ""
 echo "Running Rust fmt check..."
 cargo fmt --all -- --check
@@ -403,6 +414,7 @@ echo "Running JS fmt check..."
 mise run fmt-js -- --check
 echo ""
 echo "Running JS lint..."
+mise run lint-js
 pnpm --filter @lumis-sh/lumis run lint
 pnpm --filter @lumis-sh/markdown-it-lumis run lint
 pnpm --filter @lumis-sh/rehype-lumis run lint
@@ -412,8 +424,9 @@ echo ""
 echo "Running benchmark checks through mise..."
 mise run -C benchmarks lint
 echo ""
-echo "Running Lua fmt check..."
+echo "Running Lua checks..."
 mise run fmt-lua -- --check
+mise run lint-lua
 echo ""
 echo "Checking native package versions..."
 mise run check-native-versions
