@@ -164,22 +164,24 @@ export function styleToCss(
 
   const separator = options.separator ?? " ";
   const compact = options.compact ?? false;
-  const declaration = (property: string, value: string) =>
-    compact ? `${property}:${value};` : `${property}: ${value};`;
 
-  const rules: string[] = [];
+  return styleDeclarations(style, Boolean(options.italic))
+    .map(([property, value]) => (compact ? `${property}:${value};` : `${property}: ${value};`))
+    .join(separator);
+}
 
-  if (style.fg) rules.push(declaration("color", style.fg));
-  if (style.bg) rules.push(declaration("background-color", style.bg));
-  if (style.bold) rules.push(declaration("font-weight", "bold"));
-  if (options.italic && style.italic) rules.push(declaration("font-style", "italic"));
+function styleDeclarations(style: HighlightStyle, italic: boolean): Array<[string, string]> {
+  const declarations: Array<[string, string]> = [];
+
+  if (style.fg) declarations.push(["color", style.fg]);
+  if (style.bg) declarations.push(["background-color", style.bg]);
+  if (style.bold) declarations.push(["font-weight", "bold"]);
+  if (italic && style.italic) declarations.push(["font-style", "italic"]);
 
   const decoration = textDecoration(style);
-  if (decoration !== "none") {
-    rules.push(declaration("text-decoration", decoration));
-  }
+  if (decoration !== "none") declarations.push(["text-decoration", decoration]);
 
-  return rules.join(separator);
+  return declarations;
 }
 
 /**
@@ -623,19 +625,27 @@ function appendLightDarkStyles(
     inlineStyles.push(`background-color: light-dark(${lightStyle.bg}, ${darkStyle.bg});`);
   }
 
-  inlineStyles.push(
-    `font-weight: light-dark(${lightStyle.bold ? "bold" : "normal"}, ${darkStyle.bold ? "bold" : "normal"});`,
-  );
+  inlineStyles.push(lightDarkWeight(lightStyle, darkStyle));
 
   if (italic) {
-    inlineStyles.push(
-      `font-style: light-dark(${lightStyle.italic ? "italic" : "normal"}, ${darkStyle.italic ? "italic" : "normal"});`,
-    );
+    inlineStyles.push(lightDarkStyle(lightStyle, darkStyle));
   }
 
   const lightDecoration = textDecoration(lightStyle) ?? "none";
   const darkDecoration = textDecoration(darkStyle);
   inlineStyles.push(`text-decoration: light-dark(${lightDecoration}, ${darkDecoration});`);
+}
+
+function lightDarkWeight(lightStyle: HighlightStyle, darkStyle: HighlightStyle): string {
+  const light = lightStyle.bold ? "bold" : "normal";
+  const dark = darkStyle.bold ? "bold" : "normal";
+  return `font-weight: light-dark(${light}, ${dark});`;
+}
+
+function lightDarkStyle(lightStyle: HighlightStyle, darkStyle: HighlightStyle): string {
+  const light = lightStyle.italic ? "italic" : "normal";
+  const dark = darkStyle.italic ? "italic" : "normal";
+  return `font-style: light-dark(${light}, ${dark});`;
 }
 
 function applyDefaultMultiTheme(
@@ -761,6 +771,22 @@ export function buildNormalThemeVars(
   }
 }
 
+// The `<pre>` colours for `light-dark()`, falling back to black on white and
+// white on black where a theme leaves them unset.
+function lightDarkPreStyles(themes: Record<string, Theme>): string[] {
+  const lightNormal = getThemeStyle(themes.light, "normal");
+  const darkNormal = getThemeStyle(themes.dark, "normal");
+  const lightFg = lightNormal?.fg ?? "#000000";
+  const lightBg = lightNormal?.bg ?? "#ffffff";
+  const darkFg = darkNormal?.fg ?? "#ffffff";
+  const darkBg = darkNormal?.bg ?? "#000000";
+
+  return [
+    `color: light-dark(${lightFg}, ${darkFg});`,
+    `background-color: light-dark(${lightBg}, ${darkBg});`,
+  ];
+}
+
 export function buildPreThemeStyle(options: {
   themes: Record<string, Theme>;
   defaultTheme?: string;
@@ -770,15 +796,7 @@ export function buildPreThemeStyle(options: {
   const styles: string[] = [];
 
   if (options.defaultTheme === "light-dark()") {
-    const lightNormal = getThemeStyle(options.themes.light, "normal");
-    const darkNormal = getThemeStyle(options.themes.dark, "normal");
-    const lightFg = lightNormal?.fg ?? "#000000";
-    const lightBg = lightNormal?.bg ?? "#ffffff";
-    const darkFg = darkNormal?.fg ?? "#ffffff";
-    const darkBg = darkNormal?.bg ?? "#000000";
-
-    styles.push(`color: light-dark(${lightFg}, ${darkFg});`);
-    styles.push(`background-color: light-dark(${lightBg}, ${darkBg});`);
+    styles.push(...lightDarkPreStyles(options.themes));
   } else if (options.defaultTheme) {
     const defaultStyle = getThemeStyle(options.themes[options.defaultTheme], "normal");
     if (defaultStyle?.fg) styles.push(`color:${defaultStyle.fg};`);
@@ -948,6 +966,37 @@ function renderSourceEvent(
   }
 }
 
+function resolveDocumentLanguage(language: string, stack: SpanStackEntry[]): string {
+  if (language && language !== "plaintext") return language;
+  return stack.at(-1)?.language ?? language;
+}
+
+function openSpanEvent(
+  lines: string[],
+  stack: SpanStackEntry[],
+  event: { scope: string; language: string },
+  theme: Theme | undefined,
+  renderOpen: (span: HighlightSpan, style: HighlightStyle | undefined) => string,
+): void {
+  const style = getSpanStyle(theme, event.scope, event.language);
+  const open = renderOpen(emptySpan(event.scope, event.language), style);
+  appendFragment(lines, open);
+  stack.push({ scope: event.scope, language: event.language, emitted: open.length > 0 });
+}
+
+function closeSpanEvent(
+  lines: string[],
+  stack: SpanStackEntry[],
+  theme: Theme | undefined,
+  renderClose: (span: HighlightSpan, style: HighlightStyle | undefined) => string,
+): void {
+  const top = stack.pop();
+  if (!top?.emitted) return;
+
+  const style = getSpanStyle(theme, top.scope, top.language);
+  appendFragment(lines, renderClose(emptySpan(top.scope, top.language), style));
+}
+
 /** @internal */
 export function formatHighlightIterLines(
   source: string,
@@ -969,42 +1018,32 @@ export function formatHighlightIterLines(
 
   for (const event of events) {
     if (event.type === "start") {
-      const style = getSpanStyle(theme, event.scope, event.language);
-      const span = emptySpan(event.scope, event.language);
-      const open = options.openSpan(span, style);
-      appendFragment(lines, open);
-      stack.push({ scope: event.scope, language: event.language, emitted: open.length > 0 });
-      continue;
-    }
-
-    if (event.type === "end") {
-      const top = stack.pop();
-      if (top?.emitted) {
-        const style = getSpanStyle(theme, top.scope, top.language);
-        const span = emptySpan(top.scope, top.language);
-        appendFragment(lines, closeSpan(span, style));
-      }
-      continue;
-    }
-
-    // source event
-    if (!language || language === "plaintext") {
-      const top = stack.at(-1);
-      if (top) language = top.language;
-    }
-
-    const text = decodeSourceSlice(sourceBytes, event.startByte, event.endByte);
-
-    renderSourceEvent(lines, text, stack, formatText, options.openSpan, closeSpan, theme);
-  }
-
-  for (let entry = stack.pop(); entry; entry = stack.pop()) {
-    if (entry.emitted) {
-      appendFragment(lines, closeSpan(emptySpan("", ""), undefined));
+      openSpanEvent(lines, stack, event, theme, options.openSpan);
+    } else if (event.type === "end") {
+      closeSpanEvent(lines, stack, theme, closeSpan);
+    } else {
+      // The document's language is the outermost span's, once one is open.
+      language = resolveDocumentLanguage(language, stack);
+      const text = decodeSourceSlice(sourceBytes, event.startByte, event.endByte);
+      renderSourceEvent(lines, text, stack, formatText, options.openSpan, closeSpan, theme);
     }
   }
+
+  closeRemainingSpans(lines, stack, closeSpan);
 
   return { lines, language };
+}
+
+function closeRemainingSpans(
+  lines: string[],
+  stack: SpanStackEntry[],
+  closeRemaining: (span: HighlightSpan, style: HighlightStyle | undefined) => string,
+): void {
+  for (let entry = stack.pop(); entry; entry = stack.pop()) {
+    if (entry.emitted) {
+      appendFragment(lines, closeRemaining(emptySpan("", ""), undefined));
+    }
+  }
 }
 
 /**
@@ -1030,6 +1069,18 @@ export function renderLinesFromEvents(
  *
  * The returned offsets can be passed to {@link linesFromOffsets}.
  */
+const ESCAPED_CHARS: Record<string, string> = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#39;",
+};
+
+function escapeChar(char: string): string {
+  return ESCAPED_CHARS[char] ?? char;
+}
+
 export function renderEvents(
   source: string,
   events: HighlightEvent[],
@@ -1061,31 +1112,8 @@ export function renderEvents(
     const text = decodeSourceSlice(sourceBytes, event.startByte, event.endByte);
     for (let i = 0; i < text.length; i += 1) {
       const char = text[i]!;
-      if (char === "\n") {
-        push("\n");
-        lineOffsets.push(renderedLength);
-        continue;
-      }
-
-      switch (char) {
-        case "&":
-          push("&amp;");
-          break;
-        case "<":
-          push("&lt;");
-          break;
-        case ">":
-          push("&gt;");
-          break;
-        case '"':
-          push("&quot;");
-          break;
-        case "'":
-          push("&#39;");
-          break;
-        default:
-          push(char);
-      }
+      push(escapeChar(char));
+      if (char === "\n") lineOffsets.push(renderedLength);
     }
   }
 

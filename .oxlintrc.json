@@ -41,9 +41,10 @@
     "samples/**"
   ],
   "rules": {
-    // Match the classic McCabe metric and ceiling enforced in the Rust and
-    // Elixir implementations.
-    "eslint/complexity": ["error", { "max": 20, "variant": "classic" }],
+    // Classic McCabe complexity, at the ceiling shared by every project in this
+    // family, in JavaScript and in Elixir alike. Rust enforces the same idea
+    // through clippy's cognitive complexity, which `?` does not inflate.
+    "eslint/complexity": ["error", { "max": 9, "variant": "classic" }],
     // `x == null` is how this code asks "null or undefined", 33 times.
     "eslint/eqeqeq": ["error", "always", { "null": "ignore" }],
     // Set to the deepest block the tree actually has, so it catches a regression

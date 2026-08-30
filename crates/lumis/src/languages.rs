@@ -1987,6 +1987,9 @@ static ZSH_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     config
 });
 
+// A table-driven test's branches are its coverage; splitting one to satisfy the
+// cognitive complexity ceiling would hide what it asserts.
+#[allow(clippy::cognitive_complexity)]
 #[cfg(test)]
 mod tests {
     use super::*;

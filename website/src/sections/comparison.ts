@@ -278,19 +278,25 @@ function readTimings(report: unknown): Map<string, number> {
   }
   const timings = new Map<string, number>();
   for (const result of scenario.results) {
-    if (!isObject(result) || typeof result.id !== "string") {
-      throw new Error(`${TIMED_SCENARIO} has a result without an id`);
-    }
-    if (
-      typeof result.totalNs !== "number" ||
-      !Number.isFinite(result.totalNs) ||
-      result.totalNs <= 0
-    ) {
-      throw new Error(`${result.id} has no positive Total`);
-    }
-    timings.set(result.id === TIMED_LUMIS_RUNTIME ? "lumis" : result.id, result.totalNs);
+    const { id, totalNs } = readTimingResult(result);
+    timings.set(id === TIMED_LUMIS_RUNTIME ? "lumis" : id, totalNs);
   }
   return timings;
+}
+
+function readTimingResult(result: unknown): { id: string; totalNs: number } {
+  if (!isObject(result) || typeof result.id !== "string") {
+    throw new Error(`${TIMED_SCENARIO} has a result without an id`);
+  }
+  if (!isPositiveFinite(result.totalNs)) {
+    throw new Error(`${result.id} has no positive Total`);
+  }
+
+  return { id: result.id, totalNs: result.totalNs };
+}
+
+function isPositiveFinite(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value > 0;
 }
 
 function isObject(value: unknown): value is { [key: string]: unknown } {

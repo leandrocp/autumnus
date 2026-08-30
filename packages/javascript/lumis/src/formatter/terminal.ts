@@ -60,6 +60,36 @@ function activeStyle(
   return getScopedThemeStyle(theme, active.scope, active.language);
 }
 
+// One segment of a source event, which is either a run of text or that run and
+// the newline that ends it. A newline pads the line out to the formatter's width
+// so the background reaches the edge, and resets the width count.
+function paintSegment(
+  segment: string,
+  style: HighlightStyle | undefined,
+  fallbackBg: string,
+  width: number | undefined,
+  lineWidth: number,
+): { output: string; lineWidth: number } {
+  const hasNewline = segment.endsWith("\n");
+  const content = hasNewline ? segment.slice(0, -1) : segment;
+
+  let output = "";
+  let nextLineWidth = lineWidth;
+
+  if (content !== "") {
+    output += paintWithBackground(content, style, fallbackBg);
+    nextLineWidth += displayWidth(content);
+  }
+
+  if (hasNewline) {
+    output += linePadding(fallbackBg, width, nextLineWidth);
+    output += "\n";
+    nextLineWidth = 0;
+  }
+
+  return { output, lineWidth: nextLineWidth };
+}
+
 export function formatTerminal(
   source: string,
   events: HighlightEvent[],
@@ -91,19 +121,9 @@ export function formatTerminal(
     }
 
     for (const segment of splitInclusive(text)) {
-      const hasNewline = segment.endsWith("\n");
-      const content = hasNewline ? segment.slice(0, -1) : segment;
-
-      if (content !== "") {
-        output += paintWithBackground(content, style, fallbackBg);
-        lineWidth += displayWidth(content);
-      }
-
-      if (hasNewline) {
-        output += linePadding(fallbackBg, formatter.width, lineWidth);
-        output += "\n";
-        lineWidth = 0;
-      }
+      const painted = paintSegment(segment, style, fallbackBg, formatter.width, lineWidth);
+      output += painted.output;
+      lineWidth = painted.lineWidth;
     }
   }
 

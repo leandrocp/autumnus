@@ -24,6 +24,8 @@ unreachable_pub = "warn"
 
 [workspace.lints.clippy]
 pedantic = { level = "warn", priority = -1 }
+# Threshold in clippy.toml.
+cognitive_complexity = "warn"
 
 # Waivers. Every entry is a `clippy::pedantic` lint this repository has not
 # adopted, with the number of sites it fired on when it was written down. The

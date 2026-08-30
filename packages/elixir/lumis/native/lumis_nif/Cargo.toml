@@ -28,6 +28,8 @@ unreachable_pub = "warn"
 
 [lints.clippy]
 pedantic = { level = "warn", priority = -1 }
+# Threshold in the root `clippy.toml`.
+cognitive_complexity = "warn"
 # `rustler_precompiled` builds this crate on its own, outside the workspace, so
 # it cannot inherit the root lint table. Keep the two in step; the reasoning
 # behind each waiver lives in the root `Cargo.toml`.

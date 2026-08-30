@@ -56,23 +56,28 @@ export function buildCss(theme: ThemeData, options: BuildCssOptions = {}): strin
     rules.push(` {\n  ${scopeStyle}\n}\n`);
   }
 
+  rules.push(...scopeRules(theme, scope, enableItalic));
+
+  return rules.join("");
+}
+
+// One rule per scope that renders to anything. `normal` defines the code block's
+// base colors, already emitted above and inherited by all text; it is never
+// applied as a token class, so a `.normal` rule would be dead CSS.
+function scopeRules(theme: ThemeData, scope: string, enableItalic: boolean): string[] {
   const entries = Object.entries(theme.highlights).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+  const rules: string[] = [];
 
   for (const [scopeName, style] of entries) {
-    // `normal` defines the code block's base colors, already emitted above and inherited by all
-    // text. It is never applied as a token class, so a `.normal` rule would be dead CSS.
-    if (scopeName === "normal") {
-      continue;
-    }
+    if (scopeName === "normal") continue;
 
     const styleCss = renderStyle(style, enableItalic, "\n  ");
-
     if (styleCss !== "") {
       rules.push(`${scopePrefix(scope)}.l-${scopeName.replaceAll(".", "-")} {\n  ${styleCss}\n}\n`);
     }
   }
 
-  return rules.join("");
+  return rules;
 }
 
 function scopePrefix(scope: string): string {
@@ -131,17 +136,19 @@ function renderStyle(style: StyleEntry, enableItalic: boolean, separator: string
     rules.push("font-style: italic;");
   }
 
-  const underline = underlineDecoration(style.underline);
-
-  if (underline && style.strikethrough) {
-    rules.push(`text-decoration: ${underline} line-through;`);
-  } else if (underline) {
-    rules.push(`text-decoration: ${underline};`);
-  } else if (style.strikethrough) {
-    rules.push("text-decoration: line-through;");
-  }
+  const decoration = textDecorationRule(style);
+  if (decoration) rules.push(decoration);
 
   return rules.join(separator);
+}
+
+function textDecorationRule(style: StyleEntry): string | undefined {
+  const parts = [
+    underlineDecoration(style.underline),
+    style.strikethrough && "line-through",
+  ].filter(Boolean);
+
+  return parts.length > 0 ? `text-decoration: ${parts.join(" ")};` : undefined;
 }
 
 function underlineDecoration(underline: StyleEntry["underline"]): string | undefined {

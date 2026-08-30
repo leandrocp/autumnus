@@ -109,16 +109,24 @@ means per language, and where the configuration lives:
 
 | Runtime | Linter | Strict setting | Configuration |
 | --- | --- | --- | --- |
-| Rust | clippy, lizard | clippy's `pedantic` group plus `rust_2018_idioms` and `unreachable_pub`, all denied; classic cyclomatic complexity at most 20 | `[workspace.lints]` in the root `Cargo.toml`, `.lizard-whitelist` |
-| JavaScript, TypeScript | oxlint | the `correctness`, `suspicious`, `perf` and `pedantic` categories, as errors; classic cyclomatic complexity at most 20 | `.oxlintrc.json` |
-| Elixir | credo | `mix credo --strict`; cyclomatic complexity at most 20 | `packages/elixir/lumis/.credo.exs` |
+| Rust | clippy, lizard | clippy's `pedantic` group plus `rust_2018_idioms` and `unreachable_pub`, all denied; cognitive complexity at most 10; classic cyclomatic complexity at most 20 | `[workspace.lints]` in the root `Cargo.toml`, `clippy.toml`, `.lizard-whitelist` |
+| JavaScript, TypeScript | oxlint | the `correctness`, `suspicious`, `perf` and `pedantic` categories, as errors; classic cyclomatic complexity at most 9 | `.oxlintrc.json` |
+| Elixir | credo | `mix credo --strict`; cyclomatic complexity at most 9 | `packages/elixir/lumis/.credo.exs` |
 | Lua | selene | every lint selene ships, warnings included | `selene.toml`, `neovim.yml` |
 | GitHub Actions | actionlint | its default, which is already strict | `.github/actionlint.yaml` |
 
-Every runtime implemented in this repository enforces a cyclomatic-complexity
-ceiling of 20 with its language-specific analyzer. The Rust check covers every
-`*.rs` file, including crates outside the workspace; its only whitelist entry is
-an exact function in the upstream-vendored Tree-sitter highlighter.
+Every runtime implemented in this repository enforces a complexity ceiling with
+its language-specific analyzer, at the number the other projects in this family
+hold: **9**, classic McCabe, for Elixir and for JavaScript.
+
+Rust uses clippy's cognitive complexity at **10** rather than a McCabe ceiling of
+9, because `?` makes every fallible call a cyclomatic branch and would score a
+flat decoder the same as a deeply nested function. The lizard check still applies
+classic cyclomatic complexity at 20 on top, so each metric covers what the other
+is blind to. It reads every `*.rs` file, including crates outside the workspace;
+its only whitelist entry is an exact function in the upstream-vendored
+Tree-sitter highlighter, and the file that function lives in carries the matching
+`#[allow(clippy::cognitive_complexity)]` for the same reason.
 
 Two rules hold this together, and both come from what the checks used to miss:
 

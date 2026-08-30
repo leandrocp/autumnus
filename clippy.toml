@@ -1,0 +1,11 @@
+# Complexity ceiling for every crate in the workspace, warned in Cargo.toml's
+# [workspace.lints.clippy] and turned into an error by the `-D warnings` that
+# `mise run lint-rust` passes.
+#
+# Cognitive rather than cyclomatic complexity: `?` makes every fallible call a
+# cyclomatic branch, which scores a flat decoder the same as a deeply nested
+# function. `lint-complexity-rust` still enforces cyclomatic complexity through
+# lizard; this catches the nesting that metric is blind to. 10 is the Rust
+# counterpart of the ceiling of 9 that Credo enforces on the Elixir here and
+# oxlint enforces on the JavaScript.
+cognitive-complexity-threshold = 10

@@ -161,30 +161,14 @@ export async function cacheLanguages(
     if (language.id === "plaintext") continue;
 
     const packageName = languagePackageName(language);
-    let packageMetadata = packages.get(packageName);
-    if (!packageMetadata) {
-      if (!options.force) {
-        const bytes = await readCachedWasm(languagePackageCacheKey(packageName), directory);
-        if (bytes) {
-          try {
-            const candidate = parseLanguagePackage(bytes, packageName);
-            if (isCompatibleLanguagePackageVersion(candidate.version)) {
-              packageMetadata = candidate;
-            }
-          } catch {
-            // Invalid metadata is replaced below.
-          }
-        }
-      }
-      packageMetadata ??= await fetchLanguagePackage(packageName, packageResolver);
-      packages.set(packageName, packageMetadata);
-    }
-    const packaged = packageMetadata.languages[language.id];
-    if (!packaged) {
-      throw new Error(
-        `Language "${language.id}" is not provided by ${packageMetadata.packageName}@${packageMetadata.version}`,
-      );
-    }
+    const packageMetadata = await languagePackageFor(
+      packageName,
+      packages,
+      options,
+      packageResolver,
+    );
+    requirePackagedLanguage(packageMetadata, language.id);
+
     const ref: WasmRef = {
       packageName,
       name: packageMetadata.parser.name,
@@ -199,26 +183,11 @@ export async function cacheLanguages(
     const result = await withWasmCacheLock(
       key,
       async () => {
-        if (!options.force) {
-          const existing = await readCachedWasm(key, directory);
-          if (existing) {
-            try {
-              await verifyWasm(ref, existing);
-              return {
-                path: await wasmCachePath(key, directory),
-                downloaded: false,
-              };
-            } catch {
-              // Replace corrupt cache entries below.
-            }
-          }
-        }
+        const existing = options.force ? undefined : await readVerifiedWasm(key, ref, directory);
+        if (existing) return existing;
 
         const bytes = await fetchWasm(language, ref, resolver);
-        return {
-          path: await writeCachedWasm(key, bytes, directory),
-          downloaded: true,
-        };
+        return { path: await writeCachedWasm(key, bytes, directory), downloaded: true };
       },
       directory,
     );
@@ -228,26 +197,105 @@ export async function cacheLanguages(
     // pointing every runtime sharing this directory at bytes nothing holds.
     if (!persisted.has(packageName)) {
       persisted.add(packageName);
-      await writeCachedWasm(
-        languagePackageCacheKey(packageName),
-        serializeLanguagePackageCache(packageMetadata),
-        directory,
-      );
-      await writeSharedLanguagePackage(packageName, packageMetadata, directory);
+      await persistLanguagePackage(packageName, packageMetadata, directory);
     }
 
     cached.push({ language: language.id, wasm: ref, ...result });
   }
 
-  const binding = loadNativeBinding();
-  if (binding) {
-    // Every id, not one per parser: languages sharing a grammar have their own
-    // queries, and compiling validates those too.
-    const compilable = [...new Set(languages.map((language) => language.id))].filter(
-      (id) => id !== "plaintext",
-    );
-    if (compilable.length > 0) await binding.precompileLanguages(compilable, directory);
-  }
+  await precompileNatively(languages, directory);
 
   return cached;
+}
+
+// The manifest for a package, read from this run's map, then the cache, then
+// the network.
+async function languagePackageFor(
+  packageName: string,
+  packages: Map<string, LanguagePackage>,
+  options: CacheLanguagesOptions,
+  packageResolver: LanguagePackageResolver,
+): Promise<LanguagePackage> {
+  const known = packages.get(packageName);
+  if (known) return known;
+
+  const metadata =
+    (options.force ? undefined : await readCachedLanguagePackage(packageName, options.directory)) ??
+    (await fetchLanguagePackage(packageName, packageResolver));
+  packages.set(packageName, metadata);
+  return metadata;
+}
+
+function requirePackagedLanguage(packageMetadata: LanguagePackage, languageId: string): void {
+  if (!packageMetadata.languages[languageId]) {
+    throw new Error(
+      `Language "${languageId}" is not provided by ${packageMetadata.packageName}@${packageMetadata.version}`,
+    );
+  }
+}
+
+// A cached manifest is only usable when it parses and its version is one this
+// build still understands; anything else is refetched.
+async function readCachedLanguagePackage(
+  packageName: string,
+  directory: string | undefined,
+): Promise<LanguagePackage | undefined> {
+  const bytes = await readCachedWasm(languagePackageCacheKey(packageName), directory);
+  if (!bytes) return undefined;
+
+  try {
+    const candidate = parseLanguagePackage(bytes, packageName);
+    return isCompatibleLanguagePackageVersion(candidate.version) ? candidate : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+// Cached parser bytes, if they are there and still match the digest the package
+// names. A corrupt entry reads as absent and is replaced.
+async function readVerifiedWasm(
+  key: string,
+  ref: WasmRef,
+  directory: string | undefined,
+): Promise<{ path: string; downloaded: boolean } | undefined> {
+  const existing = await readCachedWasm(key, directory);
+  if (!existing) return undefined;
+
+  try {
+    await verifyWasm(ref, existing);
+    return { path: await wasmCachePath(key, directory), downloaded: false };
+  } catch {
+    return undefined;
+  }
+}
+
+// A manifest names a parser, so it is only writable once that parser is in the
+// store. Replacing it first leaves a forced refresh that failed halfway pointing
+// every runtime sharing this directory at bytes nothing holds.
+async function persistLanguagePackage(
+  packageName: string,
+  packageMetadata: LanguagePackage,
+  directory: string | undefined,
+): Promise<void> {
+  await writeCachedWasm(
+    languagePackageCacheKey(packageName),
+    serializeLanguagePackageCache(packageMetadata),
+    directory,
+  );
+  await writeSharedLanguagePackage(packageName, packageMetadata, directory);
+}
+
+// Every id, not one per parser: languages sharing a grammar have their own
+// queries, and compiling validates those too.
+async function precompileNatively(
+  languages: Array<{ id: string }>,
+  directory: string | undefined,
+): Promise<void> {
+  const binding = loadNativeBinding();
+  if (!binding) return;
+
+  const compilable = [...new Set(languages.map((language) => language.id))].filter(
+    (id) => id !== "plaintext",
+  );
+  if (compilable.length > 0) await binding.precompileLanguages(compilable, directory);
 }

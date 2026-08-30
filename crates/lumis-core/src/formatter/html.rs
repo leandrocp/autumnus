@@ -286,54 +286,91 @@ pub fn span_multi_themes_attrs(
     let mut inline_styles = Vec::new();
     let mut css_vars = Vec::new();
 
-    if let Some(default_name) = default_theme {
-        if default_name == "light-dark()" {
-            if let (Some(light_theme), Some(dark_theme)) = (themes.get("light"), themes.get("dark"))
-            {
-                if let (Some(light_style), Some(dark_style)) = (
-                    light_theme.get_style(&specialized_scope),
-                    dark_theme.get_style(&specialized_scope),
-                ) {
-                    push_light_dark_inline_styles(
-                        &mut inline_styles,
-                        light_style,
-                        dark_style,
-                        italic,
-                    );
-                }
-            }
-        } else if let Some(default_theme_obj) = themes.get(default_name) {
-            if let Some(style) = default_theme_obj.get_style(&specialized_scope) {
-                push_default_inline_styles(&mut inline_styles, style, italic);
-                push_default_theme_css_vars(
-                    &mut css_vars,
-                    css_variable_prefix,
-                    default_name,
-                    style,
-                );
-            }
-            push_other_theme_css_vars(
-                &mut css_vars,
-                themes,
-                &specialized_scope,
-                css_variable_prefix,
-                Some(default_name),
-            );
+    match default_theme {
+        Some("light-dark()") => {
+            push_light_dark_styles(&mut inline_styles, themes, &specialized_scope, italic);
         }
-    } else {
-        push_other_theme_css_vars(
+        Some(default_name) => push_named_default_styles(
+            &mut inline_styles,
+            &mut css_vars,
+            themes,
+            &specialized_scope,
+            css_variable_prefix,
+            default_name,
+            italic,
+        ),
+        None => push_other_theme_css_vars(
             &mut css_vars,
             themes,
             &specialized_scope,
             css_variable_prefix,
             None,
-        );
+        ),
     }
 
     if inline_styles.is_empty() && css_vars.is_empty() {
         return String::new();
     }
 
+    render_style_attrs(&inline_styles, &css_vars, scope, include_highlights)
+}
+
+/// `light-dark()` takes its inline styles from the two themes named `light` and
+/// `dark`, and contributes no CSS variables.
+fn push_light_dark_styles(
+    inline_styles: &mut Vec<String>,
+    themes: &std::collections::HashMap<String, Theme>,
+    specialized_scope: &str,
+    italic: bool,
+) {
+    let (Some(light_theme), Some(dark_theme)) = (themes.get("light"), themes.get("dark")) else {
+        return;
+    };
+    let (Some(light_style), Some(dark_style)) = (
+        light_theme.get_style(specialized_scope),
+        dark_theme.get_style(specialized_scope),
+    ) else {
+        return;
+    };
+
+    push_light_dark_inline_styles(inline_styles, light_style, dark_style, italic);
+}
+
+/// A named default theme is written inline, and every other theme becomes a CSS
+/// variable.
+fn push_named_default_styles(
+    inline_styles: &mut Vec<String>,
+    css_vars: &mut Vec<String>,
+    themes: &std::collections::HashMap<String, Theme>,
+    specialized_scope: &str,
+    css_variable_prefix: &str,
+    default_name: &str,
+    italic: bool,
+) {
+    let Some(default_theme_obj) = themes.get(default_name) else {
+        return;
+    };
+
+    if let Some(style) = default_theme_obj.get_style(specialized_scope) {
+        push_default_inline_styles(inline_styles, style, italic);
+        push_default_theme_css_vars(css_vars, css_variable_prefix, default_name, style);
+    }
+
+    push_other_theme_css_vars(
+        css_vars,
+        themes,
+        specialized_scope,
+        css_variable_prefix,
+        Some(default_name),
+    );
+}
+
+fn render_style_attrs(
+    inline_styles: &[String],
+    css_vars: &[String],
+    scope: &str,
+    include_highlights: bool,
+) -> String {
     let mut attrs = String::new();
     if include_highlights {
         let _ = write!(attrs, "data-highlight=\"{scope}\" ");

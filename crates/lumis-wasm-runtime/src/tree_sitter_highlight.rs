@@ -1,3 +1,7 @@
+// Cognitive complexity is not enforced here, for the same reason `next` is in
+// `.lizard-whitelist`: this file tracks upstream, and the local deltas listed
+// below are the only ones it should carry.
+#![allow(clippy::cognitive_complexity)]
 // Vendored from tree-sitter `crates/highlight/src/highlight.rs`.
 //
 // Shared by Lumis runtimes. The only change Lumis fundamentally needs is
@@ -32,7 +36,6 @@
 //
 // Reference:
 // https://github.com/tree-sitter/tree-sitter/blob/master/crates/highlight/src/highlight.rs
-
 #![allow(clippy::all, clippy::pedantic, dead_code, elided_lifetimes_in_paths)]
 
 use core::slice;
