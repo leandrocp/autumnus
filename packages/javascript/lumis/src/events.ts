@@ -886,17 +886,36 @@ function buildNestedEvents(inputLayers: HighlightLayer[], maps: SourceMaps): Hig
     return undefined;
   }
 
-  function consumeNextHighlight(
+  function findReferenceHighlight(
     layer: LayerState,
-    lastRange: typeof lastHighlightRange,
-  ): HighlightCapture | undefined {
-    let capture = takeCapture(layer);
-    if (!capture) return undefined;
+    capture: LayerQueryCapture,
+  ): string | undefined {
+    const name = decoder.decode(maps.sourceBytes.subarray(capture.startByte, capture.endByte));
 
-    while (layer.scopeStack.length > 1 && capture.startByte > layer.scopeStack.at(-1)!.endByte) {
-      layer.scopeStack.pop();
+    for (let scopeIndex = layer.scopeStack.length - 1; scopeIndex >= 0; scopeIndex -= 1) {
+      const scope = layer.scopeStack[scopeIndex]!;
+      for (let defIndex = scope.localDefs.length - 1; defIndex >= 0; defIndex -= 1) {
+        const definition = scope.localDefs[defIndex]!;
+        if (definition.name === name && capture.startByte >= definition.valueEndByte) {
+          return definition.highlight;
+        }
+      }
+      if (!scope.inherits) break;
     }
+    return undefined;
+  }
 
+  function consumeLocalCaptures(
+    layer: LayerState,
+    initialCapture: LayerQueryCapture,
+  ):
+    | {
+        capture: LayerQueryCapture;
+        definitionTarget?: LocalDef;
+        referenceHighlight?: string;
+      }
+    | undefined {
+    let capture = initialCapture;
     let definitionTarget: LocalDef | undefined;
     let referenceHighlight: string | undefined;
 
@@ -917,29 +936,61 @@ function buildNestedEvents(inputLayers: HighlightLayer[], maps: SourceMaps): Hig
         };
         layer.scopeStack.at(-1)!.localDefs.push(definitionTarget);
       } else if (metadata?.isLocalReference && !definitionTarget) {
-        const name = decoder.decode(maps.sourceBytes.subarray(capture.startByte, capture.endByte));
-        let found = false;
-
-        for (let scopeIndex = layer.scopeStack.length - 1; scopeIndex >= 0; scopeIndex -= 1) {
-          const scope = layer.scopeStack[scopeIndex]!;
-          for (let defIndex = scope.localDefs.length - 1; defIndex >= 0; defIndex -= 1) {
-            const definition = scope.localDefs[defIndex]!;
-            if (definition.name === name && capture.startByte >= definition.valueEndByte) {
-              referenceHighlight = definition.highlight;
-              found = true;
-              break;
-            }
-          }
-          if (found || !scope.inherits) break;
-        }
+        referenceHighlight = findReferenceHighlight(layer, capture);
       }
 
       const next = peekCapture(layer);
-      if (!next || next.nodeId !== capture.nodeId) {
-        return undefined;
-      }
+      if (!next || next.nodeId !== capture.nodeId) return undefined;
       capture = takeCapture(layer)!;
     }
+
+    return { capture, definitionTarget, referenceHighlight };
+  }
+
+  function chooseHighlightCapture(
+    layer: LayerState,
+    initialCapture: LayerQueryCapture,
+    isLocal: boolean,
+  ): LayerQueryCapture {
+    let capture = initialCapture;
+
+    while (true) {
+      const next = peekCapture(layer);
+      if (!next || next.nodeId !== capture.nodeId) break;
+
+      const following = takeCapture(layer)!;
+      if (isLocal && layer.language.config.nonLocalVariablePatterns[following.patternIndex]) {
+        continue;
+      }
+
+      // A capture with no recognized highlight does not win the node.
+      // nvim-treesitter marks helper captures `@_name`, and Neovim skips them
+      // because they resolve to no highlight group. Letting one win here would
+      // blank the node and discard its match's other captures with it.
+      if (!layer.language.config.captureMetadata[following.name]?.highlightScope) continue;
+
+      layer.removedMatches[capture.matchIndex] = 1;
+      capture = following;
+    }
+
+    return capture;
+  }
+
+  function consumeNextHighlight(
+    layer: LayerState,
+    lastRange: typeof lastHighlightRange,
+  ): HighlightCapture | undefined {
+    let capture = takeCapture(layer);
+    if (!capture) return undefined;
+
+    while (layer.scopeStack.length > 1 && capture.startByte > layer.scopeStack.at(-1)!.endByte) {
+      layer.scopeStack.pop();
+    }
+
+    const localCaptures = consumeLocalCaptures(layer, capture);
+    if (!localCaptures) return undefined;
+    ({ capture } = localCaptures);
+    const { definitionTarget, referenceHighlight } = localCaptures;
 
     if (
       lastRange &&
@@ -950,29 +1001,11 @@ function buildNestedEvents(inputLayers: HighlightLayer[], maps: SourceMaps): Hig
       return undefined;
     }
 
-    while (true) {
-      const next = peekCapture(layer);
-      if (!next || next.nodeId !== capture.nodeId) break;
-
-      const following = takeCapture(layer)!;
-      if (
-        (definitionTarget || referenceHighlight) &&
-        layer.language.config.nonLocalVariablePatterns[following.patternIndex]
-      ) {
-        continue;
-      }
-
-      // A capture with no recognized highlight does not win the node.
-      // nvim-treesitter marks helper captures `@_name`, and Neovim skips them
-      // because they resolve to no highlight group. Letting one win here would
-      // blank the node and discard its match's other captures with it.
-      if (!layer.language.config.captureMetadata[following.name]?.highlightScope) {
-        continue;
-      }
-
-      layer.removedMatches[capture.matchIndex] = 1;
-      capture = following;
-    }
+    capture = chooseHighlightCapture(
+      layer,
+      capture,
+      Boolean(definitionTarget ?? referenceHighlight),
+    );
 
     // A MISSING node is synthesised by error recovery, spans no bytes, and so can
     // only ever produce an empty span. Skip it: this runtime and the Rust one do

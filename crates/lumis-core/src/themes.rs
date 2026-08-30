@@ -311,6 +311,15 @@ impl<'de> Deserialize<'de> for Style {
     }
 }
 
+fn serialized_style_field_count(style: &Style) -> usize {
+    usize::from(style.fg.is_some())
+        + usize::from(style.bg.is_some())
+        + usize::from(style.bold)
+        + usize::from(style.italic)
+        + usize::from(style.text_decoration.underline != UnderlineStyle::None)
+        + usize::from(style.text_decoration.strikethrough)
+}
+
 impl Serialize for Style {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -318,27 +327,7 @@ impl Serialize for Style {
     {
         use serde::ser::SerializeStruct;
 
-        let mut count = 0;
-        if self.fg.is_some() {
-            count += 1;
-        }
-        if self.bg.is_some() {
-            count += 1;
-        }
-        if self.bold {
-            count += 1;
-        }
-        if self.italic {
-            count += 1;
-        }
-        if self.text_decoration.underline != UnderlineStyle::None {
-            count += 1;
-        }
-        if self.text_decoration.strikethrough {
-            count += 1;
-        }
-
-        let mut state = serializer.serialize_struct("Style", count)?;
+        let mut state = serializer.serialize_struct("Style", serialized_style_field_count(self))?;
 
         if let Some(fg) = &self.fg {
             state.serialize_field("fg", fg)?;

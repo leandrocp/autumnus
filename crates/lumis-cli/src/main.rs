@@ -1528,6 +1528,77 @@ fn header_element(args: &HighlightArgs) -> Option<lumis_core::formatter::HtmlEle
     })
 }
 
+fn print_verbose_separator(verbose: bool) {
+    if verbose {
+        eprintln!("--\n");
+    }
+}
+
+// These are the already-validated CLI option groups; bundling them again here
+// would create a second configuration model for one formatter.
+#[allow(clippy::too_many_arguments)]
+fn render_html_multi_themes(
+    reg: &registry::Registry,
+    source: &str,
+    events: &[HighlightEvent],
+    lang: Language,
+    themes: &[String],
+    default_theme: Option<&str>,
+    css_variable_prefix: Option<&str>,
+    pre_class: Option<String>,
+    italic: bool,
+    include_highlights: bool,
+    highlight_lines: Option<lumis_core::formatter::html_inline::HighlightLines>,
+    header: Option<lumis_core::formatter::HtmlElement>,
+    verbose: bool,
+) -> Result<Vec<u8>> {
+    if themes.is_empty() {
+        return Err(anyhow::anyhow!(
+            "--formatter html-multi-themes requires --themes"
+        ));
+    }
+
+    let mut theme_map = std::collections::HashMap::new();
+    for theme_spec in themes {
+        let parts: Vec<&str> = theme_spec.split(':').collect();
+        if parts.len() != 2 {
+            return Err(anyhow::anyhow!(
+                "Invalid theme format '{theme_spec}', expected 'name:theme_id'"
+            ));
+        }
+        let theme_name = parts[0];
+        let theme_id = parts[1];
+        let theme = resolve_theme(Some(theme_id.to_string()), Some(reg.data_dir()), verbose)
+            .ok_or_else(|| anyhow::anyhow!("Theme '{theme_id}' not found"))?;
+        theme_map.insert(theme_name.to_string(), theme);
+    }
+
+    print_verbose_separator(verbose);
+    let mut builder = lumis_core::formatter::HtmlMultiThemesBuilder::new();
+    builder
+        .language(lang)
+        .themes(theme_map)
+        .css_variable_prefix(
+            css_variable_prefix
+                .unwrap_or(DEFAULT_CSS_VARIABLE_PREFIX)
+                .to_string(),
+        )
+        .pre_class(pre_class)
+        .italic(italic)
+        .include_highlights(include_highlights)
+        .highlight_lines(highlight_lines)
+        .header(header);
+
+    if let Some(default) = default_theme {
+        builder.default_theme(default.to_string());
+    }
+
+    let fmt = builder.build().map_err(|e| anyhow::anyhow!("{e}"))?;
+    let mut output = Vec::new();
+    fmt.render(source, events, &mut output)?;
+    Ok(output)
+}
+
 fn render_output(
     reg: &registry::Registry,
     source: &str,
@@ -1565,9 +1636,7 @@ fn render_output(
     match chosen {
         Formatter::HtmlInline => {
             let theme_obj = resolve_theme(theme.clone(), Some(reg.data_dir()), verbose);
-            if verbose {
-                eprintln!("--\n");
-            }
+            print_verbose_separator(verbose);
             let mut builder = lumis_core::formatter::HtmlInlineBuilder::new();
             builder
                 .language(lang)
@@ -1585,60 +1654,26 @@ fn render_output(
         }
 
         Formatter::HtmlMultiThemes => {
-            if themes.is_empty() {
-                return Err(anyhow::anyhow!(
-                    "--formatter html-multi-themes requires --themes"
-                ));
-            }
-
-            let mut theme_map = std::collections::HashMap::new();
-            for theme_spec in themes {
-                let parts: Vec<&str> = theme_spec.split(':').collect();
-                if parts.len() != 2 {
-                    return Err(anyhow::anyhow!(
-                        "Invalid theme format '{theme_spec}', expected 'name:theme_id'"
-                    ));
-                }
-                let theme_name = parts[0].to_string();
-                let theme_id = parts[1];
-                let theme_obj =
-                    resolve_theme(Some(theme_id.to_string()), Some(reg.data_dir()), verbose)
-                        .ok_or_else(|| anyhow::anyhow!("Theme '{theme_id}' not found"))?;
-                theme_map.insert(theme_name, theme_obj);
-            }
-            if verbose {
-                eprintln!("--\n");
-            }
-
-            let mut builder = lumis_core::formatter::HtmlMultiThemesBuilder::new();
-            builder
-                .language(lang)
-                .themes(theme_map)
-                .css_variable_prefix(
-                    css_variable_prefix
-                        .clone()
-                        .unwrap_or_else(|| DEFAULT_CSS_VARIABLE_PREFIX.to_string()),
-                )
-                .pre_class(pre_class.clone())
-                .italic(italic)
-                .include_highlights(include_highlights)
-                .highlight_lines(highlight_lines)
-                .header(header);
-
-            if let Some(default) = default_theme {
-                builder.default_theme(default.clone());
-            }
-
-            let fmt = builder.build().map_err(|e| anyhow::anyhow!("{e}"))?;
-            let mut output = Vec::new();
-            fmt.render(source, events, &mut output)?;
+            let output = render_html_multi_themes(
+                reg,
+                source,
+                events,
+                lang,
+                themes,
+                default_theme.as_deref(),
+                css_variable_prefix.as_deref(),
+                pre_class.clone(),
+                italic,
+                include_highlights,
+                highlight_lines,
+                header,
+                verbose,
+            )?;
             print!("{}", String::from_utf8(output)?);
         }
 
         Formatter::HtmlLinked => {
-            if verbose {
-                eprintln!("--\n");
-            }
+            print_verbose_separator(verbose);
             let mut builder = lumis_core::formatter::HtmlLinkedBuilder::new();
             builder
                 .language(lang)
@@ -1654,9 +1689,7 @@ fn render_output(
 
         Formatter::Terminal => {
             let theme_obj = resolve_theme(theme.clone(), Some(reg.data_dir()), verbose);
-            if verbose {
-                eprintln!("--\n");
-            }
+            print_verbose_separator(verbose);
             let mut builder = lumis_core::formatter::TerminalBuilder::new();
             builder
                 .language(lang)
@@ -1671,9 +1704,7 @@ fn render_output(
         }
 
         Formatter::BbcodeScoped => {
-            if verbose {
-                eprintln!("--\n");
-            }
+            print_verbose_separator(verbose);
             let fmt = lumis_core::formatter::BBCodeScoped::new(lang);
             let mut output = Vec::new();
             fmt.render(source, events, &mut output)?;

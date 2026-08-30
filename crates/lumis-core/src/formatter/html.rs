@@ -182,6 +182,87 @@ fn push_theme_css_vars(
     ));
 }
 
+fn push_light_dark_inline_styles(
+    inline_styles: &mut Vec<String>,
+    light_style: &Style,
+    dark_style: &Style,
+    italic: bool,
+) {
+    if let (Some(light_fg), Some(dark_fg)) = (&light_style.fg, &dark_style.fg) {
+        inline_styles.push(format!("color: light-dark({light_fg}, {dark_fg});"));
+    }
+    if let (Some(light_bg), Some(dark_bg)) = (&light_style.bg, &dark_style.bg) {
+        inline_styles.push(format!(
+            "background-color: light-dark({light_bg}, {dark_bg});"
+        ));
+    }
+
+    let light_weight = if light_style.bold { "bold" } else { "normal" };
+    let dark_weight = if dark_style.bold { "bold" } else { "normal" };
+    inline_styles.push(format!(
+        "font-weight: light-dark({light_weight}, {dark_weight});"
+    ));
+
+    if italic {
+        let light_value = if light_style.italic {
+            "italic"
+        } else {
+            "normal"
+        };
+        let dark_value = if dark_style.italic {
+            "italic"
+        } else {
+            "normal"
+        };
+        inline_styles.push(format!(
+            "font-style: light-dark({light_value}, {dark_value});"
+        ));
+    }
+
+    let light_decoration = text_decoration(&light_style.text_decoration);
+    let dark_decoration = text_decoration(&dark_style.text_decoration);
+    inline_styles.push(format!(
+        "text-decoration: light-dark({light_decoration}, {dark_decoration});"
+    ));
+}
+
+fn push_default_inline_styles(inline_styles: &mut Vec<String>, style: &Style, italic: bool) {
+    if let Some(fg) = &style.fg {
+        inline_styles.push(format!("color:{fg};"));
+    }
+    if let Some(bg) = &style.bg {
+        inline_styles.push(format!("background-color:{bg};"));
+    }
+    if style.bold {
+        inline_styles.push("font-weight:bold;".to_string());
+    }
+    if italic && style.italic {
+        inline_styles.push("font-style:italic;".to_string());
+    }
+
+    let decoration = text_decoration(&style.text_decoration);
+    if decoration != "none" {
+        inline_styles.push(format!("text-decoration:{decoration};"));
+    }
+}
+
+fn push_other_theme_css_vars(
+    css_vars: &mut Vec<String>,
+    themes: &std::collections::HashMap<String, Theme>,
+    specialized_scope: &str,
+    css_variable_prefix: &str,
+    skipped_theme: Option<&str>,
+) {
+    for theme_name in sorted_theme_names(themes) {
+        if skipped_theme == Some(theme_name) {
+            continue;
+        }
+        if let Some(style) = themes[theme_name].get_style(specialized_scope) {
+            push_theme_css_vars(css_vars, css_variable_prefix, theme_name, style);
+        }
+    }
+}
+
 #[allow(clippy::too_many_arguments)]
 pub fn span_multi_themes_attrs(
     scope: &str,
@@ -213,60 +294,17 @@ pub fn span_multi_themes_attrs(
                     light_theme.get_style(&specialized_scope),
                     dark_theme.get_style(&specialized_scope),
                 ) {
-                    if let (Some(light_fg), Some(dark_fg)) = (&light_style.fg, &dark_style.fg) {
-                        inline_styles.push(format!("color: light-dark({light_fg}, {dark_fg});"));
-                    }
-                    if let (Some(light_bg), Some(dark_bg)) = (&light_style.bg, &dark_style.bg) {
-                        inline_styles.push(format!(
-                            "background-color: light-dark({light_bg}, {dark_bg});"
-                        ));
-                    }
-                    let light_weight = if light_style.bold { "bold" } else { "normal" };
-                    let dark_weight = if dark_style.bold { "bold" } else { "normal" };
-                    inline_styles.push(format!(
-                        "font-weight: light-dark({light_weight}, {dark_weight});"
-                    ));
-                    if italic {
-                        let light_style_val = if light_style.italic {
-                            "italic"
-                        } else {
-                            "normal"
-                        };
-                        let dark_style_val = if dark_style.italic {
-                            "italic"
-                        } else {
-                            "normal"
-                        };
-                        inline_styles.push(format!(
-                            "font-style: light-dark({light_style_val}, {dark_style_val});"
-                        ));
-                    }
-                    let light_decoration = text_decoration(&light_style.text_decoration);
-                    let dark_decoration = text_decoration(&dark_style.text_decoration);
-                    inline_styles.push(format!(
-                        "text-decoration: light-dark({light_decoration}, {dark_decoration});"
-                    ));
+                    push_light_dark_inline_styles(
+                        &mut inline_styles,
+                        light_style,
+                        dark_style,
+                        italic,
+                    );
                 }
             }
         } else if let Some(default_theme_obj) = themes.get(default_name) {
             if let Some(style) = default_theme_obj.get_style(&specialized_scope) {
-                if let Some(fg) = &style.fg {
-                    inline_styles.push(format!("color:{fg};"));
-                }
-                if let Some(bg) = &style.bg {
-                    inline_styles.push(format!("background-color:{bg};"));
-                }
-                if style.bold {
-                    inline_styles.push("font-weight:bold;".to_string());
-                }
-                if italic && style.italic {
-                    inline_styles.push("font-style:italic;".to_string());
-                }
-                let td_css = text_decoration(&style.text_decoration);
-                if td_css != "none" {
-                    inline_styles.push(format!("text-decoration:{td_css};"));
-                }
-
+                push_default_inline_styles(&mut inline_styles, style, italic);
                 push_default_theme_css_vars(
                     &mut css_vars,
                     css_variable_prefix,
@@ -274,22 +312,22 @@ pub fn span_multi_themes_attrs(
                     style,
                 );
             }
-
-            for theme_name in sorted_theme_names(themes) {
-                if theme_name == default_name {
-                    continue;
-                }
-                if let Some(style) = themes[theme_name].get_style(&specialized_scope) {
-                    push_theme_css_vars(&mut css_vars, css_variable_prefix, theme_name, style);
-                }
-            }
+            push_other_theme_css_vars(
+                &mut css_vars,
+                themes,
+                &specialized_scope,
+                css_variable_prefix,
+                Some(default_name),
+            );
         }
     } else {
-        for theme_name in sorted_theme_names(themes) {
-            if let Some(style) = themes[theme_name].get_style(&specialized_scope) {
-                push_theme_css_vars(&mut css_vars, css_variable_prefix, theme_name, style);
-            }
-        }
+        push_other_theme_css_vars(
+            &mut css_vars,
+            themes,
+            &specialized_scope,
+            css_variable_prefix,
+            None,
+        );
     }
 
     if inline_styles.is_empty() && css_vars.is_empty() {
