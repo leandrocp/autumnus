@@ -281,27 +281,19 @@ fn precompile_languages<'a>(env: Env<'a>, names: Vec<String>) -> Term<'a> {
         Err(error) => return repeated_failure(env, &format!("{error:#}"), names.len()),
     };
 
-    let results = on_deep_stack(|| {
+    let results = {
         let _batch = PRECOMPILE_BATCH.lock();
-        executor
-            .runtime()
-            .precompile_languages(&names, lumis_wasm_runtime::compile_concurrency())
-            .into_iter()
-            .map(|result| result.map_err(|failure| failure.to_string()))
-            .collect::<Vec<_>>()
-    });
+        executor.precompile_languages(names, lumis_wasm_runtime::compile_concurrency())
+    };
 
-    match results {
-        Ok(results) => results
-            .into_iter()
-            .map(|result| match result {
-                Ok(()) => ok().encode(env),
-                Err(message) => (error(), message).encode(env),
-            })
-            .collect::<Vec<_>>()
-            .encode(env),
-        Err(error) => repeated_failure(env, &format!("{error:#}"), names.len()),
-    }
+    results
+        .into_iter()
+        .map(|result| match result {
+            Ok(()) => ok().encode(env),
+            Err(failure) => (error(), failure.to_string()).encode(env),
+        })
+        .collect::<Vec<_>>()
+        .encode(env)
 }
 
 /// One failure per name, for the cases that fail before any name is attempted.
@@ -322,14 +314,14 @@ fn guess_language(name: Option<&str>, source: &str) -> &'static str {
 #[rustler::nif]
 fn has_language(name: &str) -> bool {
     executor()
-        .map(|executor| executor.runtime().has_language(name))
+        .map(|executor| executor.has_language(name))
         .unwrap_or(false)
 }
 
 #[rustler::nif]
 fn loaded_languages() -> Vec<String> {
     executor()
-        .map(|executor| executor.runtime().loaded_languages())
+        .map(|executor| executor.loaded_languages())
         .unwrap_or_default()
 }
 

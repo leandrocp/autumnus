@@ -1509,12 +1509,20 @@ defmodule Lumis.LumisTest do
   end
 
   describe "data_dir/0" do
-    test "resolves to the directory the store was configured with" do
-      data_dir = Lumis.data_dir()
+    test "reports the directory Lumis.Application configured the store with" do
+      expected =
+        cond do
+          path = Application.get_env(:lumis, :data_dir) -> Path.expand(path)
+          path = System.get_env("LUMIS_DATA_DIR") -> Path.expand(path)
+          true -> Path.join(List.to_string(:code.priv_dir(:lumis)), "lumis")
+        end
 
-      assert is_binary(data_dir)
-      assert data_dir != ""
-      assert Path.type(data_dir) == :absolute
+      assert Lumis.data_dir() == expected
+    end
+
+    test "names the directory the store actually writes parsers into" do
+      assert :ok = Lumis.Languages.load("json")
+      assert File.dir?(Path.join(Lumis.data_dir(), "parsers"))
     end
   end
 end
