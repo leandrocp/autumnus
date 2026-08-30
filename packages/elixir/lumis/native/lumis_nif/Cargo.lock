@@ -451,7 +451,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -724,7 +724,7 @@ checksum = "0ceec5bc11778974d1bcb055b18002eba7f4b3518b6a0081b3af5f21666da9ad"
 [[package]]
 name = "lumis-core"
 version = "2.4.0"
-source = "git+https://github.com/leandrocp/lumis?branch=refactor%2Fshare-wasm-runtime#642293fa065d7a88f6af85000d0009e33d0cd102"
+source = "git+https://github.com/leandrocp/lumis?branch=refactor%2Fshare-wasm-runtime#4fae11eb5ca30df2ff1a29448f4de6ca0864477e"
 dependencies = [
  "derive_builder",
  "glob",
@@ -744,7 +744,7 @@ dependencies = [
 [[package]]
 name = "lumis-wasm-runtime"
 version = "0.2.0"
-source = "git+https://github.com/leandrocp/lumis?branch=refactor%2Fshare-wasm-runtime#642293fa065d7a88f6af85000d0009e33d0cd102"
+source = "git+https://github.com/leandrocp/lumis?branch=refactor%2Fshare-wasm-runtime#4fae11eb5ca30df2ff1a29448f4de6ca0864477e"
 dependencies = [
  "etcetera",
  "lumis-core",
@@ -1035,7 +1035,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -1284,7 +1284,7 @@ dependencies = [
  "getrandom 0.4.3",
  "once_cell",
  "rustix",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -1877,7 +1877,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
