@@ -150,22 +150,22 @@ async function readLockOwner(lockPath: string): Promise<LockOwner | undefined> {
   const { readFile } = await import(nodeFsPromises);
   try {
     const owner: unknown = JSON.parse(await readFile(lockPath, "utf8"));
-    if (
-      typeof owner !== "object" ||
-      owner === null ||
-      !("host" in owner) ||
-      typeof owner.host !== "string" ||
-      !("pid" in owner) ||
-      typeof owner.pid !== "number" ||
-      !Number.isInteger(owner.pid) ||
-      owner.pid <= 0
-    ) {
-      return undefined;
-    }
-    return { host: owner.host, pid: owner.pid };
+    return isLockOwner(owner) ? { host: owner.host, pid: owner.pid } : undefined;
   } catch {
     return undefined;
   }
+}
+
+function isLockOwner(owner: unknown): owner is LockOwner {
+  if (typeof owner !== "object" || owner === null) return false;
+
+  const record = owner as Record<string, unknown>;
+  return (
+    typeof record.host === "string" &&
+    typeof record.pid === "number" &&
+    Number.isInteger(record.pid) &&
+    record.pid > 0
+  );
 }
 
 /** @internal */

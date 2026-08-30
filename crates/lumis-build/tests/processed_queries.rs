@@ -9,6 +9,10 @@
 //! `packages/javascript/lumis/test/query-patterns.test.ts`, which compiles the same
 //! patterns with `RegExp`.
 
+// A table-driven test's branches are its coverage; splitting one to satisfy
+// the cognitive complexity ceiling would hide what it asserts.
+#![allow(clippy::cognitive_complexity)]
+
 use lumis_build::{convert_lua_pattern, LuaPatternError};
 use std::fs;
 use std::path::{Path, PathBuf};

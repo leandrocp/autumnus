@@ -705,6 +705,9 @@ pub fn write_atomic(path: &Path, bytes: &[u8]) -> Result<(), StoreError> {
     unreachable!("the loop returns on the final attempt")
 }
 
+// A table-driven test's branches are its coverage; splitting one to satisfy the
+// cognitive complexity ceiling would hide what it asserts.
+#[allow(clippy::cognitive_complexity)]
 #[cfg(test)]
 // Every `.wasm`/`.tmp` suffix compared below is one this module built itself.
 #[allow(clippy::case_sensitive_file_extension_comparisons)]

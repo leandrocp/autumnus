@@ -211,17 +211,25 @@ function hasNestedCharacterClass(regex: string): boolean {
   let depth = 0;
   for (let index = 0; index < regex.length; index += 1) {
     const character = regex[index];
+
     if (character === "\\") {
       index += 1;
-    } else if (character === "[" && depth === 0) {
-      depth = 1;
-      if (regex[index + 1] === "^") index += 1;
-      if (regex[index + 1] === "]") index += 1;
     } else if (character === "[") {
-      return true;
+      if (depth === 1) return true;
+      depth = 1;
+      index = skipClassPrefix(regex, index);
     } else if (character === "]" && depth === 1) {
       depth = 0;
     }
   }
   return false;
+}
+
+// `^` right after `[` negates the class, and a `]` right after that is a
+// literal; neither opens or closes anything.
+function skipClassPrefix(regex: string, index: number): number {
+  let next = index;
+  if (regex[next + 1] === "^") next += 1;
+  if (regex[next + 1] === "]") next += 1;
+  return next;
 }
