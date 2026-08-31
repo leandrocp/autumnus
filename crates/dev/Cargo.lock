@@ -1464,9 +1464,9 @@ dependencies = [
 
 [[package]]
 name = "tree-sitter-graphql"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bfea063b7fa0e07529c2ca9cecf59d490fbc0259987493728596c16932ab2027"
+checksum = "e54723227ad8bf2b5700331ea522785d545a7f9787ff7271044a8f9e24ea660b"
 dependencies = [
  "cc",
  "tree-sitter-language",
