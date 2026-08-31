@@ -1,7 +1,7 @@
 {
   "name": "solarized_osaka_light",
   "appearance": "light",
-  "revision": "f675d9a5c58f3b0d6158d665a623f81a62e7bdaf",
+  "revision": "a21176efde15fab21fabda0bf2ba123ed6d7332d",
   "highlights": {
     "attribute": {
       "fg": "#db302d"
@@ -57,7 +57,7 @@
       "fg": "#268bd3"
     },
     "diff.delta": {
-      "bg": "#ebffd7"
+      "bg": "#feccb7"
     },
     "diff.minus": {
       "bg": "#ffd2d1"
