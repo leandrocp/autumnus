@@ -83,6 +83,7 @@ that from the CLI. On native Node both also persist compiled Wasmtime modules.
 - [WASM and CDN](https://lumis.sh/docs/usage/wasm-and-cdn) — resolution, caching, custom resolvers
 - [Formatters](https://lumis.sh/docs/usage/formatters) — every formatter and its options
 - [Custom formatters](https://lumis.sh/docs/usage/custom-formatters)
+- [Annotations](https://lumis.sh/docs/formatters/annotations) — compose your own ranges into the event stream
 - [Themes](https://lumis.sh/docs/usage/themes) and [CSS theme files](https://lumis.sh/docs/usage/css-theme-files)
 - [Integrations](https://lumis.sh/docs/integrations/react) — React, Next.js, Astro, Nuxt, VitePress, rehype, markdown-it
 - [Recipes](https://lumis.sh/docs/recipes)

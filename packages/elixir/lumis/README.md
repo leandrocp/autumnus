@@ -101,6 +101,7 @@ to use the mirror when GitHub is down, see
 
 - [Elixir integration](https://lumis.sh/docs/usage/elixir-integration) — configuration, releases, Phoenix
 - [Formatters](https://lumis.sh/docs/usage/formatters) — every formatter and its options
+- [Annotations](https://lumis.sh/docs/formatters/annotations) — compose your own ranges into the event stream
 - [Themes](https://lumis.sh/docs/usage/themes) — the theme list, custom themes, CSS files
 - [Languages](https://lumis.sh/docs/reference/languages) — what is supported and how detection works
 - [Line highlighting](https://lumis.sh/docs/usage/line-highlighting)
