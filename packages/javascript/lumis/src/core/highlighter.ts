@@ -44,6 +44,7 @@ export interface Highlighter {
     language: LanguageRef | undefined,
     theme: Theme | undefined,
     onToken: HighlightCallback,
+    options?: HighlightOptions,
   ): void;
   /** Load a language by object, lazy handle, or string ID from a registered bundle. No-op if already loaded. */
   loadLanguage(language: Language | LazyLanguage | string): Promise<void>;
@@ -131,14 +132,7 @@ async function ensureLanguageLoaded(
 
   if (typeof ref !== "string") {
     if (!runtime.getLoadedLanguage(ref.id)) {
-      if (isLanguage(ref)) {
-        await loadLanguageDefinition(runtime, ref);
-      } else if (isLazyLanguage(ref)) {
-        const language = requireLoadableLanguage(await ref(), `Lazy language "${ref.id}"`);
-        await loadLanguageDefinition(runtime, language);
-      } else {
-        await ensureLanguageLoaded(runtime, ref.id, lazyRegistry);
-      }
+      await loadLanguageRef(runtime, ref, lazyRegistry);
     }
     return;
   }
@@ -158,6 +152,25 @@ async function ensureLanguageLoaded(
   const builtin = await loadBuiltinLanguageById(languageId);
   if (builtin) {
     await loadLanguageDefinition(runtime, builtin);
+  }
+}
+
+// A `Language` loads directly, a `LazyLanguage` after resolving, and anything
+// else by its id.
+async function loadLanguageRef(
+  runtime: RuntimeLike,
+  ref: Exclude<LanguageRef, string>,
+  lazyRegistry?: Map<string, LazyLanguage>,
+): Promise<void> {
+  if (isLanguage(ref)) {
+    await loadLanguageDefinition(runtime, ref);
+  } else if (isLazyLanguage(ref)) {
+    await loadLanguageDefinition(
+      runtime,
+      requireLoadableLanguage(await ref(), `Lazy language "${ref.id}"`),
+    );
+  } else {
+    await ensureLanguageLoaded(runtime, ref.id, lazyRegistry);
   }
 }
 
@@ -186,9 +199,12 @@ function runHighlightIter(
   language: LanguageRef | undefined,
   theme: Theme | undefined,
   onToken: HighlightCallback,
+  options: HighlightOptions = {},
 ): void {
   const loaded = resolveLoadedLanguage(runtime, language);
-  const events = runtime.highlightEvents(source, loaded);
+  const events = runtime.highlightEvents(source, loaded, {
+    rainbowBrackets: options.rainbowBrackets,
+  });
   const bytes = buildSourceIndex(source).sourceBytes;
   const scopeStack: Array<{ scope: string; language: string }> = [];
 
@@ -197,24 +213,36 @@ function runHighlightIter(
       scopeStack.push({ scope: event.scope, language: event.language });
       continue;
     }
-
     if (event.type === "end") {
       scopeStack.pop();
       continue;
     }
 
-    const active = scopeStack[scopeStack.length - 1];
-    const scope = active?.scope ?? "";
-    const tokenLanguage = active?.language ?? loaded.definition.id;
-
-    onToken(
-      decodeSlice(bytes, event.startByte, event.endByte),
-      tokenLanguage,
-      { start: event.startByte, end: event.endByte },
-      scope,
-      scope.length > 0 ? getScopedThemeStyle(theme, scope, tokenLanguage) : undefined,
-    );
+    emitToken(event, scopeStack, bytes, theme, loaded.definition.id, onToken);
   }
+}
+
+// The innermost open span decides a token's scope and language; a token outside
+// any span carries the document's language and no scope.
+function emitToken(
+  event: { startByte: number; endByte: number },
+  scopeStack: Array<{ scope: string; language: string }>,
+  bytes: Uint8Array,
+  theme: Theme | undefined,
+  documentLanguage: string,
+  onToken: HighlightCallback,
+): void {
+  const active = scopeStack.at(-1);
+  const scope = active?.scope ?? "";
+  const tokenLanguage = active?.language ?? documentLanguage;
+
+  onToken(
+    decodeSlice(bytes, event.startByte, event.endByte),
+    tokenLanguage,
+    { start: event.startByte, end: event.endByte },
+    scope,
+    scope.length > 0 ? getScopedThemeStyle(theme, scope, tokenLanguage) : undefined,
+  );
 }
 
 function runHighlightEvents<T>(
@@ -255,15 +283,19 @@ function requireCurrentRuntime(fnName: string): RuntimeLike {
  * Sync free function usable inside {@link Formatter.render}. For top-level
  * (non-formatter) iteration, use `hl.highlightIter` on a {@link Highlighter}
  * instance instead.
+ *
+ * `options.rainbowBrackets` reports `punctuation.bracket.rainbow.N` scopes,
+ * the same ones the built-in formatters render.
  */
 export function highlightIter(
   source: string,
   language: LanguageRef | undefined,
   theme: Theme | undefined,
   onToken: HighlightCallback,
+  options: HighlightOptions = {},
 ): void {
   const runtime = requireCurrentRuntime("highlightIter");
-  runHighlightIter(runtime, source, detectLanguageRef(source, language), theme, onToken);
+  runHighlightIter(runtime, source, detectLanguageRef(source, language), theme, onToken, options);
 }
 
 /**
@@ -439,28 +471,12 @@ async function resolveInitialLanguage(
   }
 
   if (isLanguageDefinition(input)) {
-    const lazy = lazyRegistry.get(normalizeLanguageName(input.id));
-    if (lazy) {
-      return requireLoadableLanguage(await lazy(), `Lazy language "${lazy.id}"`);
-    }
-
-    const builtin = await loadBuiltinLanguageById(input.id);
-    if (builtin) return builtin;
-
-    throw new Error(`Language "${input.id}" is not registered in any bundle.`);
+    return resolveDefinition(input, lazyRegistry);
   }
 
   // LanguageBundle (Record<string, LazyLanguage>) — register all lazily
   if (isLanguageBundle(input)) {
-    for (const [id, lazy] of Object.entries(input)) {
-      const key = normalizeLanguageName(id);
-      if (!lazyRegistry.has(key)) {
-        lazyRegistry.set(key, lazy);
-        for (const alias of lazy.aliases) {
-          lazyRegistry.set(normalizeLanguageName(alias), lazy);
-        }
-      }
-    }
+    registerBundleLazily(input, lazyRegistry);
     return undefined;
   }
 
@@ -473,6 +489,42 @@ async function resolveInitialLanguage(
   // Promise<{ default: Language }> — eager dynamic import
   const mod = await input;
   return requireLoadableLanguage(mod.default, "Language import");
+}
+
+// A definition names a language the caller expects some bundle to provide.
+async function resolveDefinition(
+  input: { id: string },
+  lazyRegistry: Map<string, LazyLanguage>,
+): Promise<Language> {
+  const lazy = lazyRegistry.get(normalizeLanguageName(input.id));
+  if (lazy) {
+    return requireLoadableLanguage(await lazy(), `Lazy language "${lazy.id}"`);
+  }
+
+  const builtin = await loadBuiltinLanguageById(input.id);
+  if (builtin) return builtin;
+
+  throw new Error(`Language "${input.id}" is not registered in any bundle.`);
+}
+
+// The first bundle to claim an id or alias keeps it.
+//
+// `registerLazyBundle` is this plus a `validateLanguageBoundary` on every entry.
+// The caller here has already validated the bundle it was handed, and validating
+// each entry again would reject bundles this path accepts today.
+function registerBundleLazily(
+  input: LanguageBundle,
+  lazyRegistry: Map<string, LazyLanguage>,
+): void {
+  for (const [id, lazy] of Object.entries(input)) {
+    const key = normalizeLanguageName(id);
+    if (lazyRegistry.has(key)) continue;
+
+    lazyRegistry.set(key, lazy);
+    for (const alias of lazy.aliases) {
+      lazyRegistry.set(normalizeLanguageName(alias), lazy);
+    }
+  }
 }
 
 function registerLazyBundle(bundle: LanguageBundle, lazyRegistry: Map<string, LazyLanguage>): void {
@@ -598,8 +650,16 @@ export function createHighlighterModule(factory: HighlighterModuleFactory) {
           const detectedRef = detectLanguageRef(source, fmt.language);
           return runFormatter(runtime, source, fmt, detectedRef, options);
         },
-        highlightIter: (source, language, theme, onToken) =>
-          runHighlightIter(runtime, source, detectLanguageRef(source, language), theme, onToken),
+        highlightIter: (source, language, theme, onToken, options) => {
+          runHighlightIter(
+            runtime,
+            source,
+            detectLanguageRef(source, language),
+            theme,
+            onToken,
+            options,
+          );
+        },
         async loadLanguage(input) {
           await loadHighlighterLanguage(input, runtime, lazyRegistry);
         },

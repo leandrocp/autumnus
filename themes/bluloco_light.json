@@ -1,7 +1,7 @@
 {
   "name": "bluloco_light",
   "appearance": "light",
-  "revision": "4daabf6a9e6b9ecdcb19e7c78e888be0bacd866c",
+  "revision": "8973f4b595a96ceb45b3885d533f287182a73c20",
   "highlights": {
     "attribute": {
       "fg": "#047486"
@@ -155,19 +155,19 @@
       "fg": "#0096db"
     },
     "markup.heading.2": {
-      "fg": "#0096db"
+      "fg": "#255ee4"
     },
     "markup.heading.3": {
-      "fg": "#0096db"
+      "fg": "#8541f1"
     },
     "markup.heading.4": {
-      "fg": "#0096db"
+      "fg": "#cd32c0"
     },
     "markup.heading.5": {
-      "fg": "#0096db"
+      "fg": "#de631b"
     },
     "markup.heading.6": {
-      "fg": "#0096db"
+      "fg": "#9e5947"
     },
     "markup.italic": {
       "italic": true
@@ -194,8 +194,14 @@
     "markup.math": {
       "fg": "#de631b"
     },
+    "markup.math.markdown": {
+      "fg": "#cd32c0"
+    },
     "markup.quote": {
       "fg": "#de631b"
+    },
+    "markup.quote.markdown": {
+      "fg": "#8541f1"
     },
     "markup.raw": {
       "fg": "#9e5947"

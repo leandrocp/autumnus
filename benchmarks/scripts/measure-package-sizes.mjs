@@ -197,17 +197,22 @@ async function packageClosure(packageDir, packRoot, { includeOptional = true } =
       ...manifest.dependencies,
       ...(includeOptional ? manifest.optionalDependencies : {}),
     })) {
-      try {
-        queue.push(await resolvePackageDirectory(directory, dependency));
-      } catch (error) {
-        if (manifest.optionalDependencies?.[dependency]) continue;
-        throw new Error(`${key} is missing production dependency ${dependency}`, {
-          cause: error,
-        });
-      }
+      const resolved = await resolveDependencyDirectory(directory, dependency, manifest, key);
+      if (resolved) queue.push(resolved);
     }
   }
   return packages;
+}
+
+// An optional dependency that will not resolve is skipped; a production one that
+// will not resolve is an error naming the package that wanted it.
+async function resolveDependencyDirectory(directory, dependency, manifest, key) {
+  try {
+    return await resolvePackageDirectory(directory, dependency);
+  } catch (error) {
+    if (manifest.optionalDependencies?.[dependency]) return;
+    throw new Error(`${key} is missing production dependency ${dependency}`, { cause: error });
+  }
 }
 
 async function resolvePackageDirectory(directory, name) {
@@ -215,15 +220,11 @@ async function resolvePackageDirectory(directory, name) {
     resolve(directory, "node_modules", name),
     resolve(dirname(directory), name),
   ]) {
-    try {
-      const resolved = await realpath(candidate);
-      const manifest = JSON.parse(await readFile(resolve(resolved, "package.json"), "utf8"));
-      if (manifest.name === name) return resolved;
-    } catch {
-      // Fall back to Node's package resolution.
-    }
+    const resolved = await packageDirectoryNamed(candidate, name);
+    if (resolved) return resolved;
   }
 
+  // Fall back to Node's package resolution.
   const require = createRequire(resolve(directory, "package.json"));
   try {
     return dirname(await realpath(require.resolve(`${name}/package.json`)));
@@ -231,14 +232,28 @@ async function resolvePackageDirectory(directory, name) {
     if (error.code !== "ERR_PACKAGE_PATH_NOT_EXPORTED") throw error;
   }
 
-  let candidate = dirname(await realpath(require.resolve(name)));
+  return walkUpToPackageRoot(dirname(await realpath(require.resolve(name))), name);
+}
+
+// The candidate directory, if it exists and its manifest claims `name`.
+async function packageDirectoryNamed(candidate, name) {
+  try {
+    const resolved = await realpath(candidate);
+    const manifest = JSON.parse(await readFile(resolve(resolved, "package.json"), "utf8"));
+    if (manifest.name === name) return resolved;
+  } catch {
+    // Not a package directory, or not the one asked for.
+  }
+}
+
+// A package whose exports hide its manifest resolves to a file inside it; walk
+// up from there until a manifest claims `name`.
+async function walkUpToPackageRoot(start, name) {
+  let candidate = start;
   while (true) {
-    try {
-      const manifest = JSON.parse(await readFile(resolve(candidate, "package.json"), "utf8"));
-      if (manifest.name === name) return candidate;
-    } catch {
-      // Continue walking from an exported file to its package root.
-    }
+    const resolved = await packageDirectoryNamed(candidate, name);
+    if (resolved) return resolved;
+
     const parent = dirname(candidate);
     if (parent === candidate) throw new Error(`could not resolve package root for ${name}`);
     candidate = parent;
@@ -256,28 +271,35 @@ async function packPackage(directory, key, packRoot) {
   );
   await mkdir(destination, { recursive: true });
   const args = ["pack", "--json", "--ignore-scripts", "--pack-destination", destination, directory];
-  let stdout;
+  const stdout = await npmPack(args, packRoot, key);
+  const result = JSON.parse(stdout).at(-1);
+  if (!result || !Number.isSafeInteger(result.size) || !Number.isSafeInteger(result.unpackedSize)) {
+    throw new Error(`npm pack returned invalid sizes for ${key}`);
+  }
+  return result;
+}
+
+// npm intermittently fails with "Exit handler never called"; one retry is
+// enough, and anything else is the real failure.
+async function npmPack(args, packRoot, key) {
   for (let attempt = 1; attempt <= 2; attempt += 1) {
     try {
-      ({ stdout } = await execFile("npm", args, {
+      const { stdout } = await execFile("npm", args, {
         env: {
           ...process.env,
           npm_config_cache: resolve(packRoot, "npm-cache"),
           npm_config_ignore_scripts: "true",
         },
         maxBuffer: 10 * 1024 * 1024,
-      }));
-      break;
+      });
+      return stdout;
     } catch (error) {
       if (attempt === 2 || !error.stderr?.includes("Exit handler never called")) throw error;
       console.warn(`npm pack hit npm's exit-handler failure for ${key}; retrying once`);
     }
   }
-  const result = JSON.parse(stdout).at(-1);
-  if (!result || !Number.isSafeInteger(result.size) || !Number.isSafeInteger(result.unpackedSize)) {
-    throw new Error(`npm pack returned invalid sizes for ${key}`);
-  }
-  return result;
+
+  throw new Error(`npm pack did not produce output for ${key}`);
 }
 
 async function packPackageWithPnpm(directory, key, packRoot) {

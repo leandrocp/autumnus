@@ -264,7 +264,7 @@ mod tests {
         let result = String::from_utf8(buffer).unwrap();
         let expected = r#"<pre class="lumis"><code class="language-elixir" translate="no" tabindex="0"><div class="l-line" data-line="1"><span><span>@<span><span>lang <span>:rust</span></span></span></span></span>
 </div></code></pre>"#;
-        assert_eq!(result, expected)
+        assert_eq!(result, expected);
     }
 
     #[test]

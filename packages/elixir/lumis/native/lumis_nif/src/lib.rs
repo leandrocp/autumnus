@@ -1,3 +1,4 @@
+use once_cell::sync::Lazy;
 use std::collections::HashMap;
 use std::io::Write;
 use std::sync::{mpsc, Arc, Mutex};
@@ -13,18 +14,21 @@ use lumis_core::formatter::Formatter;
 use lumis_core::languages::Language;
 use lumis_core::{languages, themes};
 use lumis_wasm_runtime::{catalog, store, Runtime, RuntimeError};
-use once_cell::sync::Lazy;
 use parking_lot::RwLock;
 use rustler::{Decoder, Encoder, Env, Error, NifMap, NifResult, NifStruct, Term};
 
 /// Lazy per-theme cache to eliminate repeated allocations.
 /// Themes are converted and cached on first access, amortizing the cost.
-static THEME_CACHE: Lazy<RwLock<HashMap<String, ExTheme>>> =
-    Lazy::new(|| RwLock::new(HashMap::new()));
+static THEME_CACHE: std::sync::LazyLock<RwLock<HashMap<String, ExTheme>>> =
+    std::sync::LazyLock::new(|| RwLock::new(HashMap::new()));
 
+// `LazyLock::get`, which `configure_store` needs, is newer than the MSRV.
+#[allow(clippy::non_std_lazy_statics)]
 static EXECUTOR: Lazy<Result<WasmExecutor>> = Lazy::new(WasmExecutor::new);
-static CACHE_BATCH: Lazy<parking_lot::Mutex<()>> = Lazy::new(|| parking_lot::Mutex::new(()));
-static PRECOMPILE_BATCH: Lazy<parking_lot::Mutex<()>> = Lazy::new(|| parking_lot::Mutex::new(()));
+static CACHE_BATCH: std::sync::LazyLock<parking_lot::Mutex<()>> =
+    std::sync::LazyLock::new(|| parking_lot::Mutex::new(()));
+static PRECOMPILE_BATCH: std::sync::LazyLock<parking_lot::Mutex<()>> =
+    std::sync::LazyLock::new(|| parking_lot::Mutex::new(()));
 
 enum WasmJob {
     LoadNamed {
@@ -65,7 +69,8 @@ struct StorePaths {
     data_dir: Option<std::path::PathBuf>,
 }
 
-static STORE_PATHS: Lazy<RwLock<StorePaths>> = Lazy::new(|| RwLock::new(StorePaths::default()));
+static STORE_PATHS: std::sync::LazyLock<RwLock<StorePaths>> =
+    std::sync::LazyLock::new(|| RwLock::new(StorePaths::default()));
 
 /// The same resolve, verify and cache path the CLI uses, pointed at the
 /// directories Lumis persists under.
@@ -88,9 +93,7 @@ impl WasmExecutor {
         // Sized to the machine, not capped. These threads exist for their 8 MiB
         // stacks: nested injections recurse per layer and overflow the BEAM
         // dirty-scheduler default, which crashes the VM rather than erroring.
-        let workers = thread::available_parallelism()
-            .map(usize::from)
-            .unwrap_or(1);
+        let workers = thread::available_parallelism().map_or(1, usize::from);
         let runtime = thread::Builder::new()
             .name("lumis-wasm-init".into())
             .stack_size(8 * 1024 * 1024)
@@ -115,9 +118,8 @@ impl WasmExecutor {
                 .name(format!("lumis-wasm-{index}"))
                 .stack_size(8 * 1024 * 1024)
                 .spawn(move || loop {
-                    let job = match receiver.lock().expect("executor lock poisoned").recv() {
-                        Ok(job) => job,
-                        Err(_) => return,
+                    let Ok(job) = receiver.lock().expect("executor lock poisoned").recv() else {
+                        return;
                     };
                     match job {
                         WasmJob::LoadNamed { name, reply } => {
@@ -431,7 +433,11 @@ impl From<&catalog::LanguagePackageRef> for ExLanguagePackageRef<'static> {
 }
 
 #[rustler::nif(schedule = "DirtyCpu")]
-pub fn highlight<'a>(env: Env<'a>, source: &'a str, options: ExOptions<'a>) -> NifResult<Term<'a>> {
+pub(crate) fn highlight<'a>(
+    env: Env<'a>,
+    source: &'a str,
+    options: ExOptions<'a>,
+) -> NifResult<Term<'a>> {
     let language = languages::Language::guess(options.language, source);
     let annotations = decode_annotations(options.annotations)?;
     let formatter = match options.formatter.into_formatter(language) {
@@ -602,7 +608,7 @@ fn on_deep_stack<Output: Send>(work: impl FnOnce() -> Output + Send) -> Result<O
 /// Downloading needs no Wasmtime runtime, so this goes straight to a store
 /// rather than waking the executor.
 #[rustler::nif(schedule = "DirtyIo")]
-fn cache_languages<'a>(env: Env<'a>, names: Vec<String>, force: bool) -> Term<'a> {
+fn cache_languages(env: Env<'_>, names: Vec<String>, force: bool) -> Term<'_> {
     let results = on_deep_stack(|| {
         let _batch = CACHE_BATCH.lock();
         language_store(None)
@@ -631,7 +637,7 @@ fn cache_languages<'a>(env: Env<'a>, names: Vec<String>, force: bool) -> Term<'a
 /// the larger, and this is what puts it in the image. One result per name, in
 /// order.
 #[rustler::nif(schedule = "DirtyCpu")]
-fn precompile_languages<'a>(env: Env<'a>, names: Vec<String>) -> Term<'a> {
+fn precompile_languages(env: Env<'_>, names: Vec<String>) -> Term<'_> {
     let executor = match executor() {
         Ok(executor) => executor,
         Err(error) => return repeated_failure(env, &format!("{error:#}"), names.len()),
@@ -677,9 +683,7 @@ fn guess_language(name: Option<&str>, source: &str) -> &'static str {
 
 #[rustler::nif]
 fn has_language(name: &str) -> bool {
-    executor()
-        .map(|executor| executor.runtime.has_language(name))
-        .unwrap_or(false)
+    executor().is_ok_and(|executor| executor.runtime.has_language(name))
 }
 
 #[rustler::nif]
@@ -874,6 +878,9 @@ mod tests {
         let events = runtime
             .highlight("defmodule Test do\nend", "elixir", false)
             .unwrap();
-        assert!(!events.is_empty());
+        assert!(
+            !events.is_empty(),
+            "highlighting an Elixir module produced no events"
+        );
     }
 }

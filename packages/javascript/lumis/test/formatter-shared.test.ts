@@ -391,20 +391,20 @@ describe("ansi helpers", () => {
   });
 
   it("generates foreground and background ANSI codes", () => {
-    expect(rgbToAnsi(255, 85, 85, false)).toBe("\u001b[38;2;255;85;85m");
-    expect(rgbToAnsi(40, 42, 54, true)).toBe("\u001b[48;2;40;42;54m");
+    expect(rgbToAnsi(255, 85, 85, false)).toBe("\u001B[38;2;255;85;85m");
+    expect(rgbToAnsi(40, 42, 54, true)).toBe("\u001B[48;2;40;42;54m");
   });
 
   it("converts style to ANSI codes", () => {
-    expect(styleToAnsi({ bold: true })).toBe("\u001b[1m");
-    expect(styleToAnsi({ fg: "#8be9fd" })).toContain("\u001b[38;2;");
-    expect(styleToAnsi(undefined)).toBe("");
+    expect(styleToAnsi({ bold: true })).toBe("\u001B[1m");
+    expect(styleToAnsi({ fg: "#8be9fd" })).toContain("\u001B[38;2;");
+    expect(styleToAnsi()).toBe("");
   });
 
   it("renders text with ANSI codes", () => {
-    expect(paint("text", undefined)).toBe("text");
+    expect(paint("text")).toBe("text");
     const result = paint("fn", { fg: "#8be9fd" });
-    expect(result).toContain("\u001b[0m");
+    expect(result).toContain("\u001B[0m");
     expect(result).toContain("fn");
   });
 

@@ -5,7 +5,7 @@
 //! - [`html_multi_themes`] - HTML output with inline CSS styles (multiple themes)
 //! - [`html_linked`] - HTML output with CSS classes (requires external CSS)
 //! - [`terminal`] - ANSI color codes for terminal output
-//! - [`bbcode`] - BBCode scoped output using highlight scope names as tags
+//! - [`bbcode`] - `BBCode` scoped output using highlight scope names as tags
 //!
 //! # Builder Pattern
 //!
@@ -14,7 +14,7 @@
 //! - [`HtmlMultiThemesBuilder`] - Create HTML formatters with multiple theme support
 //! - [`HtmlLinkedBuilder`] - Create HTML formatters with CSS classes
 //! - [`TerminalBuilder`] - Create terminal formatters with ANSI colors
-//! - [`BBCodeScopedBuilder`] - Create BBCode scoped formatters using highlight scope names as tags
+//! - [`BBCodeScopedBuilder`] - Create `BBCode` scoped formatters using highlight scope names as tags
 //!
 //! Builders are exported at the crate root for convenient access:
 //! ```rust
@@ -23,7 +23,7 @@
 //!
 //! # Examples
 //!
-//! ## Using HtmlInlineBuilder
+//! ## Using `HtmlInlineBuilder`
 //!
 //! ```rust
 //! use lumis::{HtmlInlineBuilder, languages::Language, themes, formatters::Formatter};
@@ -47,7 +47,7 @@
 //! let html = String::from_utf8(output).unwrap();
 //! ```
 //!
-//! ## Using HtmlMultiThemesBuilder
+//! ## Using `HtmlMultiThemesBuilder`
 //!
 //! ```rust
 //! use lumis::{HtmlMultiThemesBuilder, languages::Language, themes, formatters::Formatter};
@@ -72,7 +72,7 @@
 //! let html = String::from_utf8(output).unwrap();
 //! ```
 //!
-//! ## Using HtmlLinkedBuilder
+//! ## Using `HtmlLinkedBuilder`
 //!
 //! ```rust
 //! use lumis::{HtmlLinkedBuilder, languages::Language, formatters::Formatter};
@@ -91,7 +91,7 @@
 //! let html = String::from_utf8(output).unwrap();
 //! ```
 //!
-//! ## Using TerminalBuilder
+//! ## Using `TerminalBuilder`
 //!
 //! ```rust
 //! use lumis::{TerminalBuilder, languages::Language, themes, formatters::Formatter};

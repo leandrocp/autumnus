@@ -23,3 +23,7 @@ packages/javascript/lumis/native/npm/*/*.node
 # CLI binaries, staged into the platform packages by javascript-release.yml
 packages/javascript/cli/npm/*/lumis
 packages/javascript/cli/npm/*/lumis.exe
+
+# `crates/autumnus` is a published library in its own workspace, so its lockfile
+# binds nothing for consumers. Linting it produces one.
+crates/autumnus/Cargo.lock

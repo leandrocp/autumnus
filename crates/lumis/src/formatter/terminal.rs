@@ -132,7 +132,7 @@ mod tests {
         crate::write_highlight(&mut buffer, code, formatter).unwrap();
         let result = String::from_utf8_lossy(&buffer);
 
-        assert!(result.contains("@"));
+        assert!(result.contains('@'));
         assert!(result.contains("lang"));
         assert!(result.contains(":rust"));
         // Without a theme, some tokens may not have styling, so just check the text is there

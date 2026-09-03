@@ -124,7 +124,7 @@ const warnedUnresolved = new Set<string>();
  * on the Rust side.
  */
 const catalogNames = new Set(
-  LANGUAGES.flatMap(({ id, aliases }) => [id, ...aliases]).map((name) => name.toLowerCase()),
+  LANGUAGES.flatMap(({ id, aliases }) => aliases.concat(id)).map((name) => name.toLowerCase()),
 );
 
 /**
@@ -212,6 +212,37 @@ function snapshotCapturesWithMatches(
   firstHighlightPattern: number,
   captureOffsets: Array<Record<string, QueryCaptureOffset> | undefined>,
 ): CaptureSnapshot {
+  const queues = buildCaptureMatchQueues(matches, firstHighlightPattern);
+
+  const result: LayerQueryCapture[] = [];
+  let nextMatchIndex = matches.length;
+
+  for (const capture of captures) {
+    if (capture.patternIndex < firstHighlightPattern) continue;
+
+    const queue = queues.get(capture.patternIndex)?.get(capture.node.id)?.get(capture.name);
+    let matchIndex = queue?.indexes[queue.cursor];
+    if (queue && matchIndex != null) {
+      queue.cursor += 1;
+    } else {
+      // web-tree-sitter can omit valid captures from matches(). Give each
+      // unmatched capture its own identity while preserving captures() order.
+      matchIndex = nextMatchIndex;
+      nextMatchIndex += 1;
+    }
+
+    result.push(snapshotCapture(capture, matchIndex, maps, captureOffsets));
+  }
+
+  return { captures: result, matchCount: nextMatchIndex };
+}
+
+// The match indexes each (pattern, node, capture name) was seen at, in order,
+// so a capture from `captures()` can be paired with its match from `matches()`.
+function buildCaptureMatchQueues(
+  matches: QueryMatch[],
+  firstHighlightPattern: number,
+): CaptureMatchQueues {
   const queues: CaptureMatchQueues = new Map();
 
   for (const [matchIndex, match] of matches.entries()) {
@@ -239,47 +270,34 @@ function snapshotCapturesWithMatches(
     }
   }
 
-  const result: LayerQueryCapture[] = [];
-  let nextMatchIndex = matches.length;
+  return queues;
+}
 
-  for (const capture of captures) {
-    if (capture.patternIndex < firstHighlightPattern) continue;
+function snapshotCapture(
+  capture: QueryCapture,
+  matchIndex: number,
+  maps: SourceMaps,
+  captureOffsets: Array<Record<string, QueryCaptureOffset> | undefined>,
+): LayerQueryCapture {
+  // Neovim resolves a highlight capture's range through `get_range`, so `#offset!`
+  // narrows the highlighted span as well as injection ranges.
+  const offset = captureOffsets[capture.patternIndex]?.[capture.name];
+  const adjusted = offset ? applyCaptureOffset(nodeToRange(capture.node), offset, maps) : undefined;
 
-    const queue = queues.get(capture.patternIndex)?.get(capture.node.id)?.get(capture.name);
-    let matchIndex = queue?.indexes[queue.cursor];
-    if (queue && matchIndex != null) {
-      queue.cursor += 1;
-    } else {
-      // web-tree-sitter can omit valid captures from matches(). Give each
-      // unmatched capture its own identity while preserving captures() order.
-      matchIndex = nextMatchIndex;
-      nextMatchIndex += 1;
-    }
-
-    // Neovim resolves a highlight capture's range through `get_range`, so `#offset!`
-    // narrows the highlighted span as well as injection ranges.
-    const offset = captureOffsets[capture.patternIndex]?.[capture.name];
-    const adjusted = offset
-      ? applyCaptureOffset(nodeToRange(capture.node), offset, maps)
-      : undefined;
-
-    result.push({
-      matchIndex,
-      patternIndex: capture.patternIndex,
-      name: capture.name,
-      nodeId: capture.node.id,
-      startByte: adjusted
-        ? (maps.utf8Offsets[adjusted.startIndex] ?? nodeStartByte(capture.node, maps))
-        : nodeStartByte(capture.node, maps),
-      endByte: adjusted
-        ? (maps.utf8Offsets[adjusted.endIndex] ?? nodeEndByte(capture.node, maps))
-        : nodeEndByte(capture.node, maps),
-      isMissing: capture.node.isMissing,
-      setProperties: capture.setProperties,
-    });
-  }
-
-  return { captures: result, matchCount: nextMatchIndex };
+  return {
+    matchIndex,
+    patternIndex: capture.patternIndex,
+    name: capture.name,
+    nodeId: capture.node.id,
+    startByte: adjusted
+      ? (maps.utf8Offsets[adjusted.startIndex] ?? nodeStartByte(capture.node, maps))
+      : nodeStartByte(capture.node, maps),
+    endByte: adjusted
+      ? (maps.utf8Offsets[adjusted.endIndex] ?? nodeEndByte(capture.node, maps))
+      : nodeEndByte(capture.node, maps),
+    isMissing: capture.node.isMissing,
+    setProperties: capture.setProperties,
+  };
 }
 
 function resolveInjection(
@@ -289,33 +307,74 @@ function resolveInjection(
   maps: SourceMaps,
   parentLanguageName?: string,
 ): { languageName?: string; ranges: Range[]; combined: boolean } {
+  const offsets = language.config.captureOffsets[match.patternIndex];
+  const captured = readInjectionCaptures(source, match, language, maps, offsets);
+  const setProperties = match.setProperties ?? {};
+
+  const includeChildren = "injection.include-children" in setProperties;
+  const ranges = captured.contentCaptures.flatMap((capture) =>
+    getCaptureRanges(capture, maps, includeChildren, offsets?.[capture.name]),
+  );
+
+  return {
+    languageName: injectionLanguageName(captured, setProperties, language, parentLanguageName),
+    ranges,
+    combined: "injection.combined" in setProperties,
+  };
+}
+
+function readInjectionCaptures(
+  source: string,
+  match: QueryMatch,
+  language: LoadedLanguage,
+  maps: SourceMaps,
+  offsets: Record<string, QueryCaptureOffset> | undefined,
+): { languageName?: string; filenameLanguage?: string; contentCaptures: QueryCapture[] } {
   let languageName: string | undefined;
   let filenameLanguage: string | undefined;
   const contentCaptures: QueryCapture[] = [];
-  const offsets = language.config.captureOffsets[match.patternIndex];
 
   for (const capture of match.captures) {
     const metadata = language.config.captureMetadata[capture.name];
-    if (metadata?.isInjectionLanguage && !languageName) {
-      languageName = capture.node.text;
-    } else if (metadata?.isInjectionFilename && !filenameLanguage) {
-      // Neovim resolves this capture through `vim.filetype.match`, so the text is
-      // a path rather than a language name. A diff names `b/lib/varsel.ex`.
-      // The whole capture is one path, so masking named children out of it, as
-      // injection content wants, would resolve a fragment of the filename.
-      // `injection_for_match` reads the same undivided range.
-      const range = applyCaptureOffset(nodeToRange(capture.node), offsets?.[capture.name], maps);
-      filenameLanguage = languageIdForFilename(source.slice(range.startIndex, range.endIndex));
-    } else if (metadata?.isInjectionContent) {
+    if (!metadata) continue;
+
+    if (metadata.isInjectionContent) {
       contentCaptures.push(capture);
+    } else if (metadata.isInjectionLanguage) {
+      languageName ??= capture.node.text;
+    } else if (metadata.isInjectionFilename) {
+      filenameLanguage ??= filenameCaptureLanguage(source, capture, maps, offsets);
     }
   }
 
-  // An explicit `@injection.language` capture outranks a filename, which is only
-  // ever an inference about one.
-  languageName ??= filenameLanguage;
+  return { languageName, filenameLanguage, contentCaptures };
+}
 
-  const setProperties = match.setProperties ?? {};
+// Neovim resolves this capture through `vim.filetype.match`, so the text is a
+// path rather than a language name. A diff names `b/lib/varsel.ex`. The whole
+// capture is one path, so masking named children out of it, as injection content
+// wants, would resolve a fragment of the filename. `injection_for_match` reads
+// the same undivided range.
+function filenameCaptureLanguage(
+  source: string,
+  capture: QueryCapture,
+  maps: SourceMaps,
+  offsets: Record<string, QueryCaptureOffset> | undefined,
+): string | undefined {
+  const range = applyCaptureOffset(nodeToRange(capture.node), offsets?.[capture.name], maps);
+  return languageIdForFilename(source.slice(range.startIndex, range.endIndex));
+}
+
+// In precedence order: an explicit `@injection.language` capture, a filename the
+// capture resolved to, `injection.language`, `injection.self`, then
+// `injection.parent`.
+function injectionLanguageName(
+  captured: { languageName?: string; filenameLanguage?: string },
+  setProperties: NonNullable<QueryMatch["setProperties"]>,
+  language: LoadedLanguage,
+  parentLanguageName?: string,
+): string | undefined {
+  let languageName = captured.languageName ?? captured.filenameLanguage;
   if (!languageName) {
     languageName = setProperties["injection.language"] ?? undefined;
   }
@@ -326,12 +385,7 @@ function resolveInjection(
     languageName = parentLanguageName;
   }
 
-  const includeChildren = "injection.include-children" in setProperties;
-  const ranges = contentCaptures.flatMap((capture) =>
-    getCaptureRanges(capture, maps, includeChildren, offsets?.[capture.name]),
-  );
-
-  return { languageName, ranges, combined: "injection.combined" in setProperties };
+  return languageName;
 }
 
 function collectHighlightLayers(
@@ -357,16 +411,12 @@ function collectHighlightLayers(
       language.config.injectionPatternEnd,
       language.config.captureOffsets,
     );
-    const localDefinitionValueEnds = new Uint32Array(snapshot.matchCount);
-
-    for (const [matchIndex, match] of queryMatches.entries()) {
-      const value = match.captures.find(
-        (capture) => language.config.captureMetadata[capture.name]?.isLocalDefinitionValue,
-      );
-      if (value) {
-        localDefinitionValueEnds[matchIndex] = nodeEndByte(value.node, maps);
-      }
-    }
+    const localDefinitionValueEnds = collectLocalDefinitionValueEnds(
+      queryMatches,
+      language,
+      maps,
+      snapshot.matchCount,
+    );
 
     const layers: HighlightLayer[] = [
       {
@@ -381,65 +431,128 @@ function collectHighlightLayers(
       return layers;
     }
 
-    // `injection.combined` means every match of the pattern feeds one layer, not
-    // one layer each. Markdown injects each html tag separately, so without this
-    // `</h1>` is parsed on its own and never becomes a closing tag.
-    const combined = new Map<number, { languageName: string; ranges: Range[] }>();
-
-    const inject = (languageName: string, ranges: Range[]) => {
-      const injectedLanguage = runtime.getLoadedLanguage(languageName);
-      if (!injectedLanguage) {
-        warnUnresolvedInjection(languageName);
-        return;
-      }
-      layers.push(
-        ...collectHighlightLayers(
-          source,
-          maps,
-          runtime,
-          injectedLanguage,
-          depth + 1,
-          ranges,
-          language.definition.id,
-        ),
-      );
-    };
-
-    for (const match of queryMatches) {
-      if (match.patternIndex >= language.config.injectionPatternEnd) {
-        continue;
-      }
-
-      const resolved = resolveInjection(source, match, language, maps, parentLanguageName);
-      if (!resolved.languageName || resolved.ranges.length === 0) {
-        continue;
-      }
-
-      if (!resolved.combined) {
-        inject(resolved.languageName, resolved.ranges);
-        continue;
-      }
-
-      const group = combined.get(match.patternIndex);
-      if (group) {
-        group.ranges.push(...resolved.ranges);
-      } else {
-        combined.set(match.patternIndex, {
-          languageName: resolved.languageName,
-          ranges: [...resolved.ranges],
-        });
-      }
-    }
-
-    for (const { languageName, ranges } of combined.values()) {
-      // Tree-sitter requires included ranges in ascending order.
-      ranges.sort((a, b) => a.startIndex - b.startIndex);
-      inject(languageName, ranges);
-    }
+    layers.push(
+      ...collectInjectedLayers(
+        queryMatches,
+        source,
+        maps,
+        runtime,
+        language,
+        depth,
+        parentLanguageName,
+      ),
+    );
 
     return layers;
   } finally {
     tree.delete();
+  }
+}
+
+// Every layer the injection patterns of this language contribute.
+//
+// `injection.combined` means every match of the pattern feeds one layer, not one
+// layer each. Markdown injects each html tag separately, so without this
+// `</h1>` is parsed on its own and never becomes a closing tag.
+function collectInjectedLayers(
+  queryMatches: QueryMatch[],
+  source: string,
+  maps: SourceMaps,
+  runtime: RuntimeLookup,
+  language: LoadedLanguage,
+  depth: number,
+  parentLanguageName?: string,
+): HighlightLayer[] {
+  const layers: HighlightLayer[] = [];
+  const combined = new Map<number, { languageName: string; ranges: Range[] }>();
+
+  const inject = (languageName: string, ranges: Range[]) => {
+    layers.push(...injectedLayers(languageName, ranges, source, maps, runtime, language, depth));
+  };
+
+  for (const match of queryMatches) {
+    if (match.patternIndex >= language.config.injectionPatternEnd) continue;
+
+    const resolved = resolveInjection(source, match, language, maps, parentLanguageName);
+    if (!resolved.languageName || resolved.ranges.length === 0) continue;
+
+    if (resolved.combined) {
+      addCombinedInjection(combined, match.patternIndex, resolved.languageName, resolved.ranges);
+    } else {
+      inject(resolved.languageName, resolved.ranges);
+    }
+  }
+
+  for (const { languageName, ranges } of combined.values()) {
+    // Tree-sitter requires included ranges in ascending order.
+    ranges.sort((a, b) => a.startIndex - b.startIndex);
+    inject(languageName, ranges);
+  }
+
+  return layers;
+}
+
+// The layers an injected language contributes, or none when the runtime has not
+// loaded it.
+function injectedLayers(
+  languageName: string,
+  ranges: Range[],
+  source: string,
+  maps: SourceMaps,
+  runtime: RuntimeLookup,
+  language: LoadedLanguage,
+  depth: number,
+): HighlightLayer[] {
+  const injectedLanguage = runtime.getLoadedLanguage(languageName);
+  if (!injectedLanguage) {
+    warnUnresolvedInjection(languageName);
+    return [];
+  }
+
+  return collectHighlightLayers(
+    source,
+    maps,
+    runtime,
+    injectedLanguage,
+    depth + 1,
+    ranges,
+    language.definition.id,
+  );
+}
+
+// The end byte of each match's `@local.definition.value` capture, indexed by
+// match, or 0 where the match has none.
+function collectLocalDefinitionValueEnds(
+  queryMatches: QueryMatch[],
+  language: LoadedLanguage,
+  maps: SourceMaps,
+  matchCount: number,
+): Uint32Array {
+  const ends = new Uint32Array(matchCount);
+
+  for (const [matchIndex, match] of queryMatches.entries()) {
+    const value = match.captures.find(
+      (capture) => language.config.captureMetadata[capture.name]?.isLocalDefinitionValue,
+    );
+    if (value) {
+      ends[matchIndex] = nodeEndByte(value.node, maps);
+    }
+  }
+
+  return ends;
+}
+
+function addCombinedInjection(
+  combined: Map<number, { languageName: string; ranges: Range[] }>,
+  patternIndex: number,
+  languageName: string,
+  ranges: Range[],
+): void {
+  const group = combined.get(patternIndex);
+  if (group) {
+    group.ranges.push(...ranges);
+  } else {
+    combined.set(patternIndex, { languageName, ranges: [...ranges] });
   }
 }
 
@@ -457,11 +570,15 @@ function getCaptureRanges(
     return [range];
   }
 
-  // Masking has to happen inside the adjusted bounds, not inside the node's own.
-  // `(#offset! @c 0 1 0 1)` on a diff hunk line pushes the end past the node onto
-  // the newline, and intersecting with the unadjusted node would drop it again,
-  // joining every hunk line into one. Mirrors `intersect_ranges` in
-  // lumis-wasm-runtime, which builds the same spans from `content.range`.
+  return maskNamedChildren(capture, range, maps);
+}
+
+// Masking has to happen inside the adjusted bounds, not inside the node's own.
+// `(#offset! @c 0 1 0 1)` on a diff hunk line pushes the end past the node onto
+// the newline, and intersecting with the unadjusted node would drop it again,
+// joining every hunk line into one. Mirrors `intersect_ranges` in
+// lumis-wasm-runtime, which builds the same spans from `content.range`.
+function maskNamedChildren(capture: QueryCapture, range: Range, maps: SourceMaps): Range[] {
   const ranges: Range[] = [];
   let startIndex = range.startIndex;
 
@@ -537,24 +654,12 @@ function shiftEndpoint(
   if (byte == null || originalLineStart == null || targetLineStart == null) return undefined;
 
   const byteColumn = byte - originalLineStart + columnDelta;
-  if (!Number.isSafeInteger(targetRow) || !Number.isSafeInteger(byteColumn) || byteColumn < 0) {
-    return undefined;
-  }
+  if (!isSafeColumn(targetRow, byteColumn)) return undefined;
 
   const targetByte = targetLineStart + byteColumn;
-  const nextLineStart = maps.byteLineStarts[targetRow + 1];
-  // A same-row column one past the end addresses that line's newline, which the
-  // diff injection queries rely on to keep joined hunk lines apart. Stopping
-  // there rather than at the document end keeps the returned byte and point
-  // describing one place; Neovim clamps neither, and returns a point whose row
-  // no longer holds its byte.
-  const limit =
-    rowDelta === 0
-      ? (nextLineStart ?? maps.sourceUtf8ByteLength)
-      : nextLineStart == null
-        ? maps.sourceUtf8ByteLength
-        : nextLineStart - 1;
-  if (!Number.isSafeInteger(targetByte) || targetByte > limit) return undefined;
+  if (!Number.isSafeInteger(targetByte) || targetByte > endpointLimit(targetRow, rowDelta, maps)) {
+    return undefined;
+  }
 
   const targetIndex = maps.utf16Indices[targetByte];
   const targetUtf16LineStart = maps.lineStarts[targetRow];
@@ -565,6 +670,25 @@ function shiftEndpoint(
     index: targetIndex,
     position: { row: targetRow, column: targetIndex - targetUtf16LineStart },
   };
+}
+
+function isSafeColumn(targetRow: number, byteColumn: number): boolean {
+  return Number.isSafeInteger(targetRow) && Number.isSafeInteger(byteColumn) && byteColumn >= 0;
+}
+
+// The furthest byte a shifted endpoint may land on. A same-row column one past
+// the end addresses that line's newline, which the diff injection queries rely
+// on to keep joined hunk lines apart. Stopping there rather than at the document
+// end keeps the returned byte and point describing one place; Neovim clamps
+// neither, and returns a point whose row no longer holds its byte.
+function endpointLimit(targetRow: number, rowDelta: number, maps: SourceMaps): number {
+  const nextLineStart = maps.byteLineStarts[targetRow + 1];
+
+  if (rowDelta === 0) {
+    return nextLineStart ?? maps.sourceUtf8ByteLength;
+  }
+
+  return nextLineStart == null ? maps.sourceUtf8ByteLength : nextLineStart - 1;
 }
 
 function indexToPoint(index: number, lineStarts: number[]): Point {
@@ -693,43 +817,60 @@ function queryRainbowBracketRanges(
   try {
     const pairs: BracketPair[] = [];
     for (const match of language.brackets.query.matches(tree.rootNode)) {
-      if (language.brackets.rainbowExcludePatterns[match.patternIndex]) {
-        continue;
-      }
-
-      const opens = [];
-      const closes = [];
-      for (const capture of match.captures) {
-        const metadata = language.brackets.captureMetadata[capture.name];
-        if (metadata?.isOpen) {
-          opens.push({
-            startByte: nodeStartByte(capture.node, maps),
-            endByte: nodeEndByte(capture.node, maps),
-          });
-        } else if (metadata?.isClose) {
-          closes.push({
-            startByte: nodeStartByte(capture.node, maps),
-            endByte: nodeEndByte(capture.node, maps),
-          });
-        }
-      }
-
-      for (let index = 0; index < Math.min(opens.length, closes.length); index += 1) {
-        const open = opens[index]!;
-        const close = closes[index]!;
-        if (
-          open.startByte < close.endByte &&
-          (open.endByte - open.startByte === 1 || close.endByte - close.startByte === 1)
-        ) {
-          pairs.push({ open, close });
-        }
-      }
+      if (language.brackets.rainbowExcludePatterns[match.patternIndex]) continue;
+      pairs.push(...matchBracketPairs(match, language.brackets.captureMetadata, maps));
     }
 
     return colorizeBracketPairs(pairs);
   } finally {
     tree.delete();
   }
+}
+
+// The open/close captures of one match, paired positionally. A pair counts only
+// when the open precedes the close and one side is a single byte, which is what
+// keeps a multi-byte token from pairing with another multi-byte one.
+function matchBracketPairs(
+  match: QueryMatch,
+  captureMetadata: Record<string, { isOpen?: boolean; isClose?: boolean } | undefined>,
+  maps: SourceMaps,
+): BracketPair[] {
+  const opens: Array<{ startByte: number; endByte: number }> = [];
+  const closes: Array<{ startByte: number; endByte: number }> = [];
+
+  for (const capture of match.captures) {
+    const metadata = captureMetadata[capture.name];
+    const range = {
+      startByte: nodeStartByte(capture.node, maps),
+      endByte: nodeEndByte(capture.node, maps),
+    };
+    if (metadata?.isOpen) {
+      opens.push(range);
+    } else if (metadata?.isClose) {
+      closes.push(range);
+    }
+  }
+
+  const pairs: BracketPair[] = [];
+  for (let index = 0; index < Math.min(opens.length, closes.length); index += 1) {
+    const open = opens[index]!;
+    const close = closes[index]!;
+    if (isBracketPair(open, close)) {
+      pairs.push({ open, close });
+    }
+  }
+
+  return pairs;
+}
+
+function isBracketPair(
+  open: { startByte: number; endByte: number },
+  close: { startByte: number; endByte: number },
+): boolean {
+  return (
+    open.startByte < close.endByte &&
+    (open.endByte - open.startByte === 1 || close.endByte - close.startByte === 1)
+  );
 }
 
 function colorizeBracketPairs(
@@ -756,7 +897,7 @@ function colorizeBracketPairs(
       openIndex += 1;
     }
 
-    const lastOpen = openStack[openStack.length - 1];
+    const lastOpen = openStack.at(-1);
     if (
       lastOpen &&
       lastOpen.startByte === pair.open.startByte &&
@@ -790,53 +931,329 @@ function applyRainbowBrackets(
       continue;
     }
 
-    let cursor = event.startByte;
     while (rangeIndex < ranges.length && ranges[rangeIndex]!.endByte <= event.startByte) {
       rangeIndex += 1;
     }
 
-    let nextIndex = rangeIndex;
-    while (nextIndex < ranges.length) {
-      const range = ranges[nextIndex]!;
-      if (range.startByte >= event.endByte) break;
-      if (range.startByte < event.startByte || range.endByte > event.endByte) {
-        nextIndex += 1;
-        continue;
-      }
-
-      if (cursor < range.startByte) {
-        output.push({ type: "source", startByte: cursor, endByte: range.startByte });
-      }
-      output.push({ type: "start", scope: range.scope, language: language.definition.id });
-      output.push({ type: "source", startByte: range.startByte, endByte: range.endByte });
-      output.push({ type: "end" });
-      cursor = range.endByte;
-      nextIndex += 1;
-    }
-
-    if (cursor < event.endByte) {
-      output.push({ type: "source", startByte: cursor, endByte: event.endByte });
-    }
+    output.push(...splitSourceEvent(event, ranges, rangeIndex, language.definition.id));
   }
 
   return output;
 }
 
+// One source event, with a start/source/end triple spliced in for every bracket
+// range it wholly contains. A range that straddles the event is left to the
+// event that does contain it.
+function splitSourceEvent(
+  event: { type: "source"; startByte: number; endByte: number },
+  ranges: Array<{ startByte: number; endByte: number; scope: string }>,
+  rangeIndex: number,
+  languageId: string,
+): HighlightEvent[] {
+  const output: HighlightEvent[] = [];
+  let cursor = event.startByte;
+
+  for (let index = rangeIndex; index < ranges.length; index += 1) {
+    const range = ranges[index]!;
+    if (range.startByte >= event.endByte) break;
+    if (range.startByte < event.startByte || range.endByte > event.endByte) continue;
+
+    if (cursor < range.startByte) {
+      output.push({ type: "source", startByte: cursor, endByte: range.startByte });
+    }
+    output.push({ type: "start", scope: range.scope, language: languageId });
+    output.push({ type: "source", startByte: range.startByte, endByte: range.endByte });
+    output.push({ type: "end" });
+    cursor = range.endByte;
+  }
+
+  if (cursor < event.endByte) {
+    output.push({ type: "source", startByte: cursor, endByte: event.endByte });
+  }
+
+  return output;
+}
+
+interface LayerState extends HighlightLayer {
+  captureIndex: number;
+  removedMatches: Uint8Array;
+  scopeStack: LocalScope[];
+  highlightEndStack: number[];
+}
+
+interface Boundary {
+  offset: number;
+  isStart: boolean;
+}
+
+function takeCapture(layer: LayerState): LayerQueryCapture | undefined {
+  const capture = peekCapture(layer);
+  if (capture) layer.captureIndex += 1;
+  return capture;
+}
+
+// Walks the locals captures on one node, recording scopes and definitions, and
+// returns the capture the highlight patterns should see. Returns undefined when
+// the node's captures run out before leaving the locals patterns.
+function consumeLocalCaptures(
+  layer: LayerState,
+  initialCapture: LayerQueryCapture,
+  maps: SourceMaps,
+):
+  | { capture: LayerQueryCapture; definitionTarget?: LocalDef; referenceHighlight?: string }
+  | undefined {
+  let capture = initialCapture;
+  let definitionTarget: LocalDef | undefined;
+  let referenceHighlight: string | undefined;
+
+  while (capture.patternIndex < layer.language.config.localsPatternEnd) {
+    const applied = applyLocalCapture(layer, capture, maps, definitionTarget != null);
+    definitionTarget = applied.definitionTarget ?? definitionTarget;
+    referenceHighlight = applied.referenceHighlight ?? referenceHighlight;
+
+    const next = peekCapture(layer);
+    if (!next || next.nodeId !== capture.nodeId) return undefined;
+    capture = takeCapture(layer)!;
+  }
+
+  return { capture, definitionTarget, referenceHighlight };
+}
+
+// A scope opens, a definition is recorded, or a reference resolves against the
+// definitions already in scope. A reference is only resolved before this node
+// has produced a definition of its own.
+function applyLocalCapture(
+  layer: LayerState,
+  capture: LayerQueryCapture,
+  maps: SourceMaps,
+  hasDefinition: boolean,
+): { definitionTarget?: LocalDef; referenceHighlight?: string } {
+  const metadata = layer.language.config.captureMetadata[capture.name];
+
+  if (metadata?.isLocalScope) {
+    pushLocalScope(layer, capture);
+  } else if (metadata?.isLocalDefinition) {
+    return { definitionTarget: pushLocalDefinition(layer, capture, maps) };
+  } else if (metadata?.isLocalReference && !hasDefinition) {
+    return { referenceHighlight: findReferenceHighlight(layer, capture, maps) };
+  }
+
+  return {};
+}
+
+// The last capture on the node that resolves to a highlight wins it.
+function chooseHighlightCapture(
+  layer: LayerState,
+  initialCapture: LayerQueryCapture,
+  isLocal: boolean,
+): LayerQueryCapture {
+  let capture = initialCapture;
+
+  while (true) {
+    const next = peekCapture(layer);
+    if (!next || next.nodeId !== capture.nodeId) break;
+
+    const following = takeCapture(layer)!;
+    if (isLocal && layer.language.config.nonLocalVariablePatterns[following.patternIndex]) {
+      continue;
+    }
+
+    // A capture with no recognized highlight does not win the node.
+    // nvim-treesitter marks helper captures `@_name`, and Neovim skips them
+    // because they resolve to no highlight group. Letting one win here would
+    // blank the node and discard its match's other captures with it.
+    if (!layer.language.config.captureMetadata[following.name]?.highlightScope) continue;
+
+    layer.removedMatches[capture.matchIndex] = 1;
+    capture = following;
+  }
+
+  return capture;
+}
+
+function consumeNextHighlight(
+  layer: LayerState,
+  lastRange: { startByte: number; endByte: number; depth: number } | undefined,
+  maps: SourceMaps,
+): HighlightCapture | undefined {
+  let capture = takeCapture(layer);
+  if (!capture) return undefined;
+
+  while (layer.scopeStack.length > 1 && capture.startByte > layer.scopeStack.at(-1)!.endByte) {
+    layer.scopeStack.pop();
+  }
+
+  const localCaptures = consumeLocalCaptures(layer, capture, maps);
+  if (!localCaptures) return undefined;
+  ({ capture } = localCaptures);
+  const { definitionTarget, referenceHighlight } = localCaptures;
+
+  if (shadowedByShallowerLayer(capture, layer, lastRange)) return undefined;
+
+  capture = chooseHighlightCapture(layer, capture, Boolean(definitionTarget ?? referenceHighlight));
+
+  // A MISSING node is synthesised by error recovery, spans no bytes, and so can
+  // only ever produce an empty span. Skip it: this runtime and the Rust one do
+  // not recover identically — given `write!(x, "y")`, the injected macro body
+  // parses to a `MISSING ";"` here and to an `ERROR` there — and highlighting
+  // the artefact would leak that disagreement into output the two are required
+  // to render identically.
+  if (capture.isMissing) return undefined;
+
+  return highlightCapture(layer, capture, definitionTarget, referenceHighlight);
+}
+
+// A reference takes the highlight of the definition it resolved to; anything
+// else takes its capture's own. A definition also records its highlight, so the
+// references that follow it can find one.
+function highlightCapture(
+  layer: LayerState,
+  capture: LayerQueryCapture,
+  definitionTarget: LocalDef | undefined,
+  referenceHighlight: string | undefined,
+): HighlightCapture | undefined {
+  const scope = layer.language.config.captureMetadata[capture.name]?.highlightScope;
+  if (definitionTarget) {
+    definitionTarget.highlight = scope;
+  }
+
+  const effectiveScope = referenceHighlight ?? scope;
+  if (!effectiveScope) return undefined;
+
+  return {
+    startByte: capture.startByte,
+    endByte: capture.endByte,
+    scope: effectiveScope,
+    language: layer.language.definition.id,
+  };
+}
+
+// The same span already highlighted by a layer closer to the surface.
+function shadowedByShallowerLayer(
+  capture: LayerQueryCapture,
+  layer: LayerState,
+  lastRange: { startByte: number; endByte: number; depth: number } | undefined,
+): boolean {
+  return (
+    lastRange != null &&
+    capture.startByte === lastRange.startByte &&
+    capture.endByte === lastRange.endByte &&
+    layer.depth < lastRange.depth
+  );
+}
+
+// `local.scope-inherits` defaults to true when the property is absent.
+function pushLocalScope(layer: LayerState, capture: LayerQueryCapture): void {
+  const inheritsValue = capture.setProperties?.["local.scope-inherits"];
+  layer.scopeStack.push({
+    inherits: inheritsValue == null || inheritsValue === "true",
+    endByte: capture.endByte,
+    localDefs: [],
+  });
+}
+
+function pushLocalDefinition(
+  layer: LayerState,
+  capture: LayerQueryCapture,
+  maps: SourceMaps,
+): LocalDef {
+  const definition: LocalDef = {
+    name: decoder.decode(maps.sourceBytes.subarray(capture.startByte, capture.endByte)),
+    valueEndByte: layer.localDefinitionValueEnds[capture.matchIndex]!,
+  };
+  layer.scopeStack.at(-1)!.localDefs.push(definition);
+  return definition;
+}
+
+// Whichever comes first: the next capture that opens, or the innermost
+// highlight that closes.
+function nextBoundary(layer: LayerState): Boundary | undefined {
+  const nextStart = peekCapture(layer)?.startByte;
+  const nextEnd = layer.highlightEndStack.at(-1);
+
+  if (nextStart != null && nextEnd != null) {
+    return nextStart < nextEnd
+      ? { offset: nextStart, isStart: true }
+      : { offset: nextEnd, isStart: false };
+  }
+  if (nextStart != null) return { offset: nextStart, isStart: true };
+  if (nextEnd != null) return { offset: nextEnd, isStart: false };
+  return undefined;
+}
+
+// The highlight of the nearest enclosing definition of the same name, searching
+// outward until a scope that does not inherit.
+function findReferenceHighlight(
+  layer: LayerState,
+  capture: LayerQueryCapture,
+  maps: SourceMaps,
+): string | undefined {
+  const name = decoder.decode(maps.sourceBytes.subarray(capture.startByte, capture.endByte));
+
+  for (let scopeIndex = layer.scopeStack.length - 1; scopeIndex >= 0; scopeIndex -= 1) {
+    const scope = layer.scopeStack[scopeIndex]!;
+    for (let defIndex = scope.localDefs.length - 1; defIndex >= 0; defIndex -= 1) {
+      const definition = scope.localDefs[defIndex]!;
+      if (definition.name === name && capture.startByte >= definition.valueEndByte) {
+        return definition.highlight;
+      }
+    }
+    if (!scope.inherits) break;
+  }
+  return undefined;
+}
+
+function peekCapture(layer: LayerState): LayerQueryCapture | undefined {
+  while (layer.captureIndex < layer.captures.length) {
+    const capture = layer.captures[layer.captureIndex]!;
+    if (layer.removedMatches[capture.matchIndex] !== 0) {
+      layer.captureIndex += 1;
+      continue;
+    }
+    return capture;
+  }
+  return undefined;
+}
+
+function precedes(
+  candidate: Boundary,
+  candidateDepth: number,
+  current: Boundary,
+  currentDepth: number,
+): boolean {
+  if (candidate.offset !== current.offset) {
+    return candidate.offset < current.offset;
+  }
+  if (candidate.isStart !== current.isStart) {
+    return !candidate.isStart;
+  }
+  return candidateDepth > currentDepth;
+}
+
 /** Merge parser layers using tree-sitter-highlight's boundary ordering. */
+// The layer whose next boundary comes first, deepest layer winning a tie.
+function nextLayerBoundary(
+  layers: LayerState[],
+): { layer: LayerState; boundary: Boundary } | undefined {
+  let layer: LayerState | undefined;
+  let boundary: Boundary | undefined;
+
+  for (const candidate of layers) {
+    const candidateBoundary = nextBoundary(candidate);
+    if (
+      candidateBoundary &&
+      (!boundary || !layer || precedes(candidateBoundary, candidate.depth, boundary, layer.depth))
+    ) {
+      layer = candidate;
+      boundary = candidateBoundary;
+    }
+  }
+
+  return layer && boundary ? { layer, boundary } : undefined;
+}
+
 function buildNestedEvents(inputLayers: HighlightLayer[], maps: SourceMaps): HighlightEvent[] {
   const events: HighlightEvent[] = [];
-
-  interface LayerState extends HighlightLayer {
-    captureIndex: number;
-    removedMatches: Uint8Array;
-    scopeStack: LocalScope[];
-    highlightEndStack: number[];
-  }
-
-  interface Boundary {
-    offset: number;
-    isStart: boolean;
-  }
 
   const layers: LayerState[] = inputLayers.map((layer) => ({
     ...layer,
@@ -861,184 +1278,10 @@ function buildNestedEvents(inputLayers: HighlightLayer[], maps: SourceMaps): Hig
     }
   }
 
-  function peekCapture(layer: LayerState): LayerQueryCapture | undefined {
-    while (layer.captureIndex < layer.captures.length) {
-      const capture = layer.captures[layer.captureIndex]!;
-      if (layer.removedMatches[capture.matchIndex] !== 0) {
-        layer.captureIndex += 1;
-        continue;
-      }
-      return capture;
-    }
-    return undefined;
-  }
-
-  function takeCapture(layer: LayerState): LayerQueryCapture | undefined {
-    const capture = peekCapture(layer);
-    if (capture) layer.captureIndex += 1;
-    return capture;
-  }
-
-  function nextBoundary(layer: LayerState): Boundary | undefined {
-    const nextStart = peekCapture(layer)?.startByte;
-    const nextEnd = layer.highlightEndStack.at(-1);
-
-    if (nextStart != null && nextEnd != null) {
-      return nextStart < nextEnd
-        ? { offset: nextStart, isStart: true }
-        : { offset: nextEnd, isStart: false };
-    }
-    if (nextStart != null) return { offset: nextStart, isStart: true };
-    if (nextEnd != null) return { offset: nextEnd, isStart: false };
-    return undefined;
-  }
-
-  function precedes(
-    candidate: Boundary,
-    candidateDepth: number,
-    current: Boundary,
-    currentDepth: number,
-  ): boolean {
-    if (candidate.offset !== current.offset) {
-      return candidate.offset < current.offset;
-    }
-    if (candidate.isStart !== current.isStart) {
-      return !candidate.isStart;
-    }
-    return candidateDepth > currentDepth;
-  }
-
-  function consumeNextHighlight(
-    layer: LayerState,
-    lastRange: typeof lastHighlightRange,
-  ): HighlightCapture | undefined {
-    let capture = takeCapture(layer);
-    if (!capture) return undefined;
-
-    while (
-      layer.scopeStack.length > 1 &&
-      capture.startByte > layer.scopeStack[layer.scopeStack.length - 1]!.endByte
-    ) {
-      layer.scopeStack.pop();
-    }
-
-    let definitionTarget: LocalDef | undefined;
-    let referenceHighlight: string | undefined;
-
-    while (capture.patternIndex < layer.language.config.localsPatternEnd) {
-      const metadata = layer.language.config.captureMetadata[capture.name];
-
-      if (metadata?.isLocalScope) {
-        const inheritsValue = capture.setProperties?.["local.scope-inherits"];
-        layer.scopeStack.push({
-          inherits: inheritsValue == null || inheritsValue === "true",
-          endByte: capture.endByte,
-          localDefs: [],
-        });
-      } else if (metadata?.isLocalDefinition) {
-        definitionTarget = {
-          name: decoder.decode(maps.sourceBytes.subarray(capture.startByte, capture.endByte)),
-          valueEndByte: layer.localDefinitionValueEnds[capture.matchIndex]!,
-        };
-        layer.scopeStack[layer.scopeStack.length - 1]!.localDefs.push(definitionTarget);
-      } else if (metadata?.isLocalReference && !definitionTarget) {
-        const name = decoder.decode(maps.sourceBytes.subarray(capture.startByte, capture.endByte));
-        let found = false;
-
-        for (let scopeIndex = layer.scopeStack.length - 1; scopeIndex >= 0; scopeIndex -= 1) {
-          const scope = layer.scopeStack[scopeIndex]!;
-          for (let defIndex = scope.localDefs.length - 1; defIndex >= 0; defIndex -= 1) {
-            const definition = scope.localDefs[defIndex]!;
-            if (definition.name === name && capture.startByte >= definition.valueEndByte) {
-              referenceHighlight = definition.highlight;
-              found = true;
-              break;
-            }
-          }
-          if (found || !scope.inherits) break;
-        }
-      }
-
-      const next = peekCapture(layer);
-      if (!next || next.nodeId !== capture.nodeId) {
-        return undefined;
-      }
-      capture = takeCapture(layer)!;
-    }
-
-    if (
-      lastRange &&
-      capture.startByte === lastRange.startByte &&
-      capture.endByte === lastRange.endByte &&
-      layer.depth < lastRange.depth
-    ) {
-      return undefined;
-    }
-
-    while (true) {
-      const next = peekCapture(layer);
-      if (!next || next.nodeId !== capture.nodeId) break;
-
-      const following = takeCapture(layer)!;
-      if (
-        (definitionTarget || referenceHighlight) &&
-        layer.language.config.nonLocalVariablePatterns[following.patternIndex]
-      ) {
-        continue;
-      }
-
-      // A capture with no recognized highlight does not win the node.
-      // nvim-treesitter marks helper captures `@_name`, and Neovim skips them
-      // because they resolve to no highlight group. Letting one win here would
-      // blank the node and discard its match's other captures with it.
-      if (!layer.language.config.captureMetadata[following.name]?.highlightScope) {
-        continue;
-      }
-
-      layer.removedMatches[capture.matchIndex] = 1;
-      capture = following;
-    }
-
-    // A MISSING node is synthesised by error recovery, spans no bytes, and so can
-    // only ever produce an empty span. Skip it: this runtime and the Rust one do
-    // not recover identically — given `write!(x, "y")`, the injected macro body
-    // parses to a `MISSING ";"` here and to an `ERROR` there — and highlighting
-    // the artefact would leak that disagreement into output the two are required
-    // to render identically.
-    if (capture.isMissing) return undefined;
-
-    const scope = layer.language.config.captureMetadata[capture.name]?.highlightScope;
-    if (definitionTarget) {
-      definitionTarget.highlight = scope;
-    }
-
-    const effectiveScope = referenceHighlight ?? scope;
-    if (!effectiveScope) return undefined;
-
-    return {
-      startByte: capture.startByte,
-      endByte: capture.endByte,
-      scope: effectiveScope,
-      language: layer.language.definition.id,
-    };
-  }
-
   while (true) {
-    let layer: LayerState | undefined;
-    let boundary: Boundary | undefined;
-
-    for (const candidate of layers) {
-      const candidateBoundary = nextBoundary(candidate);
-      if (
-        candidateBoundary &&
-        (!boundary || !layer || precedes(candidateBoundary, candidate.depth, boundary, layer.depth))
-      ) {
-        layer = candidate;
-        boundary = candidateBoundary;
-      }
-    }
-
-    if (!layer || !boundary) break;
+    const next = nextLayerBoundary(layers);
+    if (!next) break;
+    const { layer, boundary } = next;
 
     if (!boundary.isStart) {
       layer.highlightEndStack.pop();
@@ -1047,7 +1290,7 @@ function buildNestedEvents(inputLayers: HighlightLayer[], maps: SourceMaps): Hig
       continue;
     }
 
-    const capture = consumeNextHighlight(layer, lastHighlightRange);
+    const capture = consumeNextHighlight(layer, lastHighlightRange, maps);
     if (!capture) continue;
 
     emitSource(capture.startByte);

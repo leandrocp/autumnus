@@ -10,6 +10,11 @@
 //! highlighting and event composition before calling the formatter's
 //! [`render()`](crate::formatters::Formatter::render) method.
 //!
+//! To highlight something else from inside `render()`, or outside a formatter
+//! entirely, [`highlight_iter()`] gives per-token access and
+//! [`highlight_iter_with_options()`] opts into the scopes the built-in
+//! formatters produce.
+//!
 //! See also:
 //! - [`Formatter`](crate::formatters::Formatter) trait documentation
 //! - [`HighlightEvent`](crate::events::HighlightEvent) event contract
@@ -36,7 +41,7 @@
 //! }
 //! ```
 //!
-//! ## Using the streaming API with a callback
+//! ## Using the token callback API
 //!
 //! ```rust
 //! use lumis::highlight::highlight_iter;
@@ -215,7 +220,7 @@ pub enum HighlightError {
 pub struct Highlighter {
     language: Language,
     theme: Option<Theme>,
-    ts_highlighter: RefCell<TSHighlighter>,
+    tree_sitter: RefCell<TSHighlighter>,
 }
 
 impl Highlighter {
@@ -244,7 +249,7 @@ impl Highlighter {
         Self {
             language,
             theme,
-            ts_highlighter: RefCell::new(TSHighlighter::new()),
+            tree_sitter: RefCell::new(TSHighlighter::new()),
         }
     }
 
@@ -285,7 +290,7 @@ impl Highlighter {
         &self,
         source: &'a str,
     ) -> Result<Vec<(Arc<Style>, &'a str)>, HighlightError> {
-        let mut ts_highlighter = self.ts_highlighter.borrow_mut();
+        let mut ts_highlighter = self.tree_sitter.borrow_mut();
         let events = ts_highlighter
             .highlight(
                 self.language.config(),
@@ -293,13 +298,13 @@ impl Highlighter {
                 None,
                 |injected| Some(Language::guess(Some(injected), "").config()),
             )
-            .map_err(|e| HighlightError::HighlighterInit(format!("{:?}", e)))?;
+            .map_err(|e| HighlightError::HighlighterInit(format!("{e:?}")))?;
 
         let mut result = Vec::new();
         let mut style_stack: Vec<Arc<Style>> = vec![Arc::clone(&DEFAULT_STYLE)];
 
         for event in events {
-            let event = event.map_err(|e| HighlightError::EventProcessing(format!("{:?}", e)))?;
+            let event = event.map_err(|e| HighlightError::EventProcessing(format!("{e:?}")))?;
 
             match event {
                 HighlightEvent::HighlightStart {
@@ -312,8 +317,7 @@ impl Highlighter {
                         .theme
                         .as_ref()
                         .and_then(|t| t.get_style(&specialized_scope))
-                        .map(|s| Arc::new(s.clone()))
-                        .unwrap_or_else(|| Arc::clone(&DEFAULT_STYLE));
+                        .map_or_else(|| Arc::clone(&DEFAULT_STYLE), |s| Arc::new(s.clone()));
                     style_stack.push(new_style);
                 }
                 HighlightEvent::Source { start, end } => {
@@ -335,13 +339,11 @@ impl Highlighter {
     }
 }
 
-/// Streaming syntax highlighting with callback.
+/// Flat token iteration with a callback.
 ///
-/// Iterates over tree-sitter highlight events and calls `on_event_source` for each
-/// source-text event (i.e., each text segment).
-///
-/// This is a streaming API that processes tokens as they are produced by tree-sitter,
-/// avoiding the overhead of collecting all segments into a vector upfront.
+/// Walks the highlight events for `source` and calls `on_event_source` once per
+/// text segment, with the innermost scope and its resolved style, instead of
+/// returning the segments as a vector the way [`Highlighter::highlight`] does.
 ///
 /// # Arguments
 ///
@@ -379,6 +381,59 @@ pub fn highlight_iter<F, E>(
     source: &str,
     language: Language,
     theme: Option<Theme>,
+    on_event_source: F,
+) -> Result<(), HighlightError>
+where
+    F: FnMut(&str, Language, Range<usize>, &'static str, &Style) -> Result<(), E>,
+    E: std::error::Error + Send + Sync + 'static,
+{
+    highlight_iter_with_options(
+        source,
+        language,
+        theme,
+        HighlightOptions::default(),
+        on_event_source,
+    )
+}
+
+/// Flat token iteration with a callback, with options.
+///
+/// See [`highlight_iter`]. With [`HighlightOptions::rainbow_brackets`] the
+/// callback receives the `punctuation.bracket.rainbow.N` scopes the built-in
+/// formatters render, instead of a flat `punctuation.bracket`.
+///
+/// # Errors
+///
+/// Same as [`highlight_iter`].
+///
+/// # Examples
+///
+/// ```rust
+/// use lumis::highlight::{highlight_iter_with_options, HighlightOptions};
+/// use lumis::languages::Language;
+///
+/// let options = HighlightOptions { rainbow_brackets: true };
+/// let mut scopes = Vec::new();
+///
+/// highlight_iter_with_options(
+///     "fn main() { let x = (1); }",
+///     Language::Rust,
+///     None,
+///     options,
+///     |_text, _language, _range, scope, _style| {
+///         scopes.push(scope);
+///         Ok::<_, std::io::Error>(())
+///     },
+/// )
+/// .unwrap();
+///
+/// assert!(scopes.contains(&"punctuation.bracket.rainbow.1"));
+/// ```
+pub fn highlight_iter_with_options<F, E>(
+    source: &str,
+    language: Language,
+    theme: Option<Theme>,
+    options: HighlightOptions,
     mut on_event_source: F,
 ) -> Result<(), HighlightError>
 where
@@ -386,32 +441,29 @@ where
     E: std::error::Error + Send + Sync + 'static,
 {
     let mut ts_highlighter = TSHighlighter::new();
-    let events = ts_highlighter
-        .highlight(language.config(), source.as_bytes(), None, |injected| {
-            Some(Language::guess(Some(injected), "").config())
-        })
-        .map_err(|e| HighlightError::HighlighterInit(format!("{:?}", e)))?;
+    let events =
+        highlight_events_with(&mut ts_highlighter, source, language, options, |injected| {
+            Some(Language::guess(Some(injected), ""))
+        })?;
 
     let mut style_stack: Vec<Style> = vec![Style::default()];
     let mut scope_stack: Vec<&'static str> = vec![""];
     let mut language_stack = vec![language];
 
     for event in events {
-        let event = event.map_err(|e| HighlightError::EventProcessing(format!("{:?}", e)))?;
-
         match event {
-            HighlightEvent::HighlightStart {
-                highlight,
+            CoreHighlightEvent::Start {
+                scope_index,
                 language: lang,
             } => {
-                let scope = HIGHLIGHT_NAMES[highlight.0];
+                let scope = HIGHLIGHT_NAMES.get(scope_index).copied().unwrap_or("");
                 let injected_language = Language::guess(Some(&lang), "");
                 let new_style = resolve_style(theme.as_ref(), scope, injected_language.id_name());
                 style_stack.push(new_style);
                 scope_stack.push(scope);
                 language_stack.push(injected_language);
             }
-            HighlightEvent::Source { start, end } => {
+            CoreHighlightEvent::Source { start, end } => {
                 let text = &source[start..end];
                 if !text.is_empty() {
                     let default_style = Style::default();
@@ -428,7 +480,7 @@ where
                     .map_err(|e| HighlightError::EventProcessing(e.to_string()))?;
                 }
             }
-            HighlightEvent::HighlightEnd => {
+            CoreHighlightEvent::End => {
                 if style_stack.len() > 1 {
                     style_stack.pop();
                 }
@@ -439,6 +491,9 @@ where
                     language_stack.pop();
                 }
             }
+            // The flat token stream has no place to surface an annotation.
+            // Formatters take the composed event stream instead.
+            CoreHighlightEvent::AnnotationStart { .. } | CoreHighlightEvent::AnnotationEnd => {}
         }
     }
 
@@ -575,12 +630,12 @@ where
         .highlight(language.config(), source.as_bytes(), None, |injected| {
             injected_language(injected).map(|language| language.config())
         })
-        .map_err(|e| HighlightError::HighlighterInit(format!("{:?}", e)))?;
+        .map_err(|e| HighlightError::HighlighterInit(format!("{e:?}")))?;
 
     let core_events = events
         .map(|event| {
             event
-                .map_err(|e| HighlightError::EventProcessing(format!("{:?}", e)))
+                .map_err(|e| HighlightError::EventProcessing(format!("{e:?}")))
                 .map(|event| match event {
                     HighlightEvent::HighlightStart {
                         highlight,
@@ -836,7 +891,7 @@ mod tests {
         let highlighter = Highlighter::new(Language::Rust, None);
         let segments = highlighter.highlight(code).unwrap();
 
-        assert!(!segments.is_empty());
+        assert!(!segments.is_empty(), "highlighting produced no segments");
         // Segments should have text but no styling
         for (style, _text) in &segments {
             assert_eq!(style.fg, None);
@@ -851,7 +906,7 @@ mod tests {
         let highlighter = Highlighter::new(Language::Rust, Some(theme));
         let segments = highlighter.highlight(code).unwrap();
 
-        assert!(!segments.is_empty());
+        assert!(!segments.is_empty(), "highlighting produced no segments");
 
         // At least some segments should have styling
         let has_styling = segments.iter().any(|(style, _text)| style.fg.is_some());
@@ -885,7 +940,7 @@ mod tests {
         )
         .unwrap();
 
-        assert!(!segments.is_empty());
+        assert!(!segments.is_empty(), "highlighting produced no segments");
 
         // Check that ranges are valid and scopes are present
         for (text, language, range, _scope, _style) in &segments {
@@ -919,13 +974,65 @@ mod tests {
         assert!(has_colors, "Expected at least some segments with colors");
     }
 
+    fn iter_scopes(code: &str, options: HighlightOptions) -> Vec<&'static str> {
+        let mut scopes = Vec::new();
+        highlight_iter_with_options(
+            code,
+            Language::Rust,
+            None,
+            options,
+            |_text, _language, _range, scope, _style| {
+                scopes.push(scope);
+                Ok::<_, std::io::Error>(())
+            },
+        )
+        .unwrap();
+        scopes
+    }
+
+    #[test]
+    fn highlight_iter_reports_rainbow_bracket_scopes_when_enabled() {
+        let code = "fn main() { let x = (1); }";
+
+        let plain = iter_scopes(code, HighlightOptions::default());
+        assert!(plain.contains(&"punctuation.bracket"));
+        assert!(!plain
+            .iter()
+            .any(|scope| scope.starts_with("punctuation.bracket.rainbow")));
+
+        let rainbow = iter_scopes(code, HighlightOptions::new().rainbow_brackets(true));
+        assert!(rainbow.contains(&"punctuation.bracket.rainbow.1"));
+        assert!(rainbow.contains(&"punctuation.bracket.rainbow.2"));
+    }
+
+    #[test]
+    fn highlight_iter_with_rainbow_brackets_preserves_source_text() {
+        let code = "fn main() { let x = (1); }";
+        let mut text = String::new();
+
+        highlight_iter_with_options(
+            code,
+            Language::Rust,
+            None,
+            HighlightOptions::new().rainbow_brackets(true),
+            |token, _language, range, _scope, _style| {
+                assert_eq!(&code[range], token);
+                text.push_str(token);
+                Ok::<_, std::io::Error>(())
+            },
+        )
+        .unwrap();
+
+        assert_eq!(text, code);
+    }
+
     #[test]
     fn test_empty_source() {
         let code = "";
         let highlighter = Highlighter::new(Language::Rust, None);
         let segments = highlighter.highlight(code).unwrap();
 
-        assert!(segments.is_empty());
+        assert!(segments.is_empty(), "empty source produced segments");
     }
 
     #[test]
@@ -973,8 +1080,8 @@ mod tests {
         let first = highlight_events("{\"first\": 1}", Language::JSON).unwrap();
         let second = highlight_events("{\"second\": 2}", Language::JSON).unwrap();
 
-        assert!(!first.is_empty());
-        assert!(!second.is_empty());
+        assert!(!first.is_empty(), "the first call produced no events");
+        assert!(!second.is_empty(), "the second call produced no events");
     }
 
     #[test]

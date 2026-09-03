@@ -117,7 +117,7 @@ impl<T> Formatter<T> for Terminal {
                             .get(*scope_index)
                             .copied()
                             .unwrap_or("");
-                        let specialized = format!("{}.{}", scope, language);
+                        let specialized = format!("{scope}.{language}");
                         theme
                             .get_style(&specialized)
                             .or_else(|| theme.get_style(scope))

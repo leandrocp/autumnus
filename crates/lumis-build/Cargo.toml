@@ -14,3 +14,6 @@ include = ["/src/", "/CHANGELOG.md", "/README.md", "/LICENSE"]
 
 [dev-dependencies]
 regex = "1"
+
+[lints]
+workspace = true

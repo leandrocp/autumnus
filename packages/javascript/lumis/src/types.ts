@@ -417,12 +417,20 @@ export type HighlightEvent<T = unknown> =
  *   console.log(`${scope}: ${text}`)
  * })
  * ```
+ *
+ * Pass {@link HighlightOptions} last to opt into the same scopes the built-in
+ * formatters produce:
+ *
+ * ```ts
+ * highlightIter(source, javascript, dracula, onToken, {rainbowBrackets: true})
+ * ```
  */
 export type HighlightIterFn = (
   source: string,
   language: LanguageRef | undefined,
   theme: Theme | undefined,
   onToken: HighlightCallback,
+  options?: HighlightOptions,
 ) => void;
 
 /**

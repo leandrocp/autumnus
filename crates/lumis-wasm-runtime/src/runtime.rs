@@ -396,8 +396,7 @@ impl Runtime {
         let id = catalog
             .aliases
             .get(name_or_alias)
-            .map(String::as_str)
-            .unwrap_or(name_or_alias);
+            .map_or(name_or_alias, String::as_str);
         catalog.languages.get(id).cloned()
     }
 
@@ -736,10 +735,7 @@ impl Runtime {
                     InjectionResolution::Fallback => {}
                 }
 
-                let id = aliases
-                    .get(injected)
-                    .map(String::as_str)
-                    .unwrap_or(injected);
+                let id = aliases.get(injected).map_or(injected, String::as_str);
 
                 if let Some(loaded) = languages.get(id) {
                     return Some(&loaded.highlight);
@@ -750,12 +746,11 @@ impl Runtime {
                 // contains, however deeply nested. A language that cannot be
                 // fetched leaves its block unhighlighted rather than failing the
                 // document around it.
-                match self.load_through_store(id) {
-                    Ok(loaded) => Some(&loaded_here.alloc(loaded).highlight),
-                    Err(_) => {
-                        record_unresolved(id);
-                        None
-                    }
+                if let Ok(loaded) = self.load_through_store(id) {
+                    Some(&loaded_here.alloc(loaded).highlight)
+                } else {
+                    record_unresolved(id);
+                    None
                 }
             })
             .map_err(|error| RuntimeError::Highlight(error.to_string()))?;
@@ -957,7 +952,12 @@ fn apply_rainbow_brackets(
     output
 }
 
+// A table-driven test's branches are its coverage; splitting one to satisfy the
+// cognitive complexity ceiling would hide what it asserts.
+#[allow(clippy::cognitive_complexity)]
 #[cfg(test)]
+// Every `.wasm`/`.tmp` suffix compared below is one this module built itself.
+#[allow(clippy::case_sensitive_file_extension_comparisons)]
 mod tests {
     use super::*;
     use crate::store::StoreConfig;
@@ -1241,7 +1241,7 @@ mod tests {
                 let events = runtime
                     .highlight(r#"{"language":"json","value":42}"#, "json", false)
                     .unwrap();
-                assert!(!events.is_empty());
+                assert!(!events.is_empty(), "highlighting produced no events");
             }));
         }
 
@@ -1276,7 +1276,7 @@ mod tests {
         // Nothing is fetchable, so this must still succeed rather than fail the
         // document; the injected block simply stays unhighlighted.
         let events = runtime.highlight(r#""embedded""#, "json", false).unwrap();
-        assert!(!events.is_empty());
+        assert!(!events.is_empty(), "highlighting produced no events");
     }
 
     #[test]
@@ -1317,9 +1317,9 @@ mod tests {
         let runtime = Runtime::with_worker_limit(1).unwrap().with_store(store);
         install_json(
             &runtime,
-            r#"(pair
+            r"(pair
                  key: (string (string_content) @injection.language)
-                 value: (string (string_content) @injection.content))"#,
+                 value: (string (string_content) @injection.content))",
         );
 
         let output = runtime
@@ -1361,9 +1361,9 @@ mod tests {
         let runtime = Runtime::with_worker_limit(1).unwrap().with_store(store);
         install_json(
             &runtime,
-            r#"(pair
+            r"(pair
                  key: (string (string_content) @injection.language)
-                 value: (string (string_content) @injection.content))"#,
+                 value: (string (string_content) @injection.content))",
         );
 
         let document = (0..200)
@@ -1469,7 +1469,7 @@ mod tests {
         );
 
         let events = runtime.highlight(r#""%s""#, "json", false).unwrap();
-        assert!(!events.is_empty());
+        assert!(!events.is_empty(), "highlighting produced no events");
     }
 
     #[test]
@@ -1493,7 +1493,7 @@ mod tests {
             let events = runtime
                 .highlight("+ added\n- removed", "diff", false)
                 .unwrap();
-            assert!(!events.is_empty());
+            assert!(!events.is_empty(), "highlighting produced no events");
         }
     }
 
@@ -1519,7 +1519,7 @@ mod tests {
             "defmodule Test do\nend",
         ] {
             let events = runtime.highlight(source, "elixir", false).unwrap();
-            assert!(!events.is_empty());
+            assert!(!events.is_empty(), "highlighting produced no events");
         }
     }
 }

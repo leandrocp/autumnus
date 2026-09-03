@@ -74,7 +74,7 @@ pub struct HighlightLines {
     /// You can then style these classes in your CSS to achieve the desired highlighting effect.
     ///
     /// Note that themes include a `l-highlighted` class for convenience,
-    /// which contains the colors from the theme's "CursorLine" highlight from Neovim.
+    /// which contains the colors from the theme's "`CursorLine`" highlight from Neovim.
     ///
     /// Defaults to `"l-highlighted"`.
     /// ```rust
@@ -228,7 +228,7 @@ mod tests {
         let result = String::from_utf8(buffer).unwrap();
         let expected = r#"<pre class="lumis"><code class="language-elixir" translate="no" tabindex="0"><div class="l-line" data-line="1"><span class="l-operator"><span class="l-constant">@<span class="l-function-call"><span class="l-constant">lang <span class="l-string-special-symbol">:rust</span></span></span></span></span>
 </div></code></pre>"#;
-        assert_eq!(result, expected)
+        assert_eq!(result, expected);
     }
 
     #[test]

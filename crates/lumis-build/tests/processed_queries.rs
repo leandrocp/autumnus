@@ -9,6 +9,10 @@
 //! `packages/javascript/lumis/test/query-patterns.test.ts`, which compiles the same
 //! patterns with `RegExp`.
 
+// A table-driven test's branches are its coverage; splitting one to satisfy
+// the cognitive complexity ceiling would hide what it asserts.
+#![allow(clippy::cognitive_complexity)]
+
 use lumis_build::{convert_lua_pattern, LuaPatternError};
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -117,7 +121,7 @@ fn unescape_query_string(raw: &str) -> String {
             continue;
         }
         match characters.next() {
-            Some('\\') => unescaped.push('\\'),
+            Some('\\') | None => unescaped.push('\\'),
             Some('"') => unescaped.push('"'),
             Some('n') => unescaped.push('\n'),
             Some('r') => unescaped.push('\r'),
@@ -126,7 +130,6 @@ fn unescape_query_string(raw: &str) -> String {
                 unescaped.push('\\');
                 unescaped.push(other);
             }
-            None => unescaped.push('\\'),
         }
     }
 

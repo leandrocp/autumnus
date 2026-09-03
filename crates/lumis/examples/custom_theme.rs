@@ -99,5 +99,5 @@ fn main() {
         .expect("Failed to build formatter");
 
     let html = highlight(code, formatter);
-    println!("{}", html);
+    println!("{html}");
 }

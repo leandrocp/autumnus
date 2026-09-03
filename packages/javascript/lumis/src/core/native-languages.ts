@@ -37,23 +37,18 @@ const PLAINTEXT_ALIASES = LANGUAGES.find(({ id }) => id === PLAINTEXT_LANG_ID)?.
 const CATALOG_LANGUAGE_IDS = new Set(LANGUAGES.map(({ id }) => normalizeLanguageName(id)));
 const encoder = new TextEncoder();
 
+const WASM_REF_STRING_FIELDS = ["packageName", "name", "version", "sha256"] as const;
+
 function isWasmRef(wasm: unknown): wasm is WasmRef {
+  if (typeof wasm !== "object" || wasm === null) return false;
+
+  const record = wasm as Record<string, unknown>;
   return (
-    typeof wasm === "object" &&
-    wasm !== null &&
-    "packageName" in wasm &&
-    typeof wasm.packageName === "string" &&
-    "name" in wasm &&
-    typeof wasm.name === "string" &&
-    "version" in wasm &&
-    typeof wasm.version === "string" &&
-    "sha256" in wasm &&
-    typeof wasm.sha256 === "string" &&
-    /^[0-9a-f]{64}$/.test(wasm.sha256) &&
-    "size" in wasm &&
-    typeof wasm.size === "number" &&
-    Number.isSafeInteger(wasm.size) &&
-    wasm.size > 0
+    WASM_REF_STRING_FIELDS.every((field) => typeof record[field] === "string") &&
+    /^[0-9a-f]{64}$/.test(record.sha256 as string) &&
+    typeof record.size === "number" &&
+    Number.isSafeInteger(record.size) &&
+    record.size > 0
   );
 }
 
@@ -116,6 +111,9 @@ async function readWasmInput(wasm: RuntimeWasmInput): Promise<Uint8Array> {
  * uses, so there is one implementation of resolve, verify and cache rather than
  * a native copy that can drift.
  */
+const resolverSource = (source: string | URL): string =>
+  source instanceof URL ? source.href : source;
+
 export function createNativeLanguagesModule(
   binding: NativeBinding,
   resolvers: LanguagesModule,
@@ -123,9 +121,6 @@ export function createNativeLanguagesModule(
   let globalWasmResolver: WasmResolver | undefined;
   let globalLanguagePackageResolver: LanguagePackageResolver | undefined;
   let resolverCallbackDepth = 0;
-
-  const resolverSource = (source: string | URL): string =>
-    source instanceof URL ? source.href : source;
 
   /**
    * Hand the addon the directories the environment names before it builds its
@@ -523,16 +518,11 @@ export function createNativeLanguagesModule(
       // it already does for `html-multi-themes`. A Node worker cannot call the
       // JavaScript resolver needed by a language first discovered mid-walk, so
       // the async path also stays on the main thread when one is configured.
-      if (
-        !kind ||
-        kind === "html-multi-themes" ||
-        (!canCallResolver && hasResolverOverride(this.resolverState)) ||
-        language.definition.id === PLAINTEXT_LANG_ID ||
-        !CATALOG_LANGUAGE_IDS.has(normalizeLanguageName(language.definition.id))
-      ) {
-        return undefined;
-      }
+      if (!kind || kind === "html-multi-themes") return undefined;
+      if (!this.canFormatNatively(language, canCallResolver)) return undefined;
+
       const rainbowBrackets = highlightOptions.rainbowBrackets;
+
       switch (kind) {
         case "html-inline":
           return {
@@ -562,6 +552,14 @@ export function createNativeLanguagesModule(
         case "terminal":
           return { rainbowBrackets, kind, options: { theme: builtin.theme } };
       }
+    }
+
+    private canFormatNatively(language: LoadedLanguage, canCallResolver: boolean): boolean {
+      return (
+        (canCallResolver || !hasResolverOverride(this.resolverState)) &&
+        language.definition.id !== PLAINTEXT_LANG_ID &&
+        CATALOG_LANGUAGE_IDS.has(normalizeLanguageName(language.definition.id))
+      );
     }
   }
 
@@ -611,7 +609,7 @@ export function createNativeLanguagesModule(
       return defaultRuntime.getLoadedLanguageIds();
     },
     availableLanguages(): LanguageInfo[] {
-      return LANGUAGES.map(cloneLanguageInfo);
+      return LANGUAGES.map((language) => cloneLanguageInfo(language));
     },
     getDefaultRuntime() {
       return defaultRuntime;

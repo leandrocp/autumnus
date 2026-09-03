@@ -43,7 +43,7 @@
     "build": "node -e \"fs.rmSync('dist', { recursive: true, force: true })\" && tsc --project tsconfig.json",
     "prelint": "pnpm --filter @lumis-sh/lumis run build",
     "test": "vitest run",
-    "lint": "oxlint --type-aware --deny-warnings src/ test/",
+    "lint": "oxlint -c ../../../.oxlintrc.json --type-aware --deny-warnings --report-unused-disable-directives --ignore-pattern 'examples/**' .",
     "prepack": "pnpm run build"
   },
   "dependencies": {

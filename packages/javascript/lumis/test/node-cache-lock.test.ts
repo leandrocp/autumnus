@@ -14,7 +14,9 @@ import {
 } from "../src/runtime/node-cache.js";
 
 const directory = mkdtempSync(join(tmpdir(), "lumis-lock-"));
-afterAll(() => rmSync(directory, { recursive: true, force: true }));
+afterAll(() => {
+  rmSync(directory, { recursive: true, force: true });
+});
 
 const lockPath = (key: string) => join(directory, "parsers", `${wasmCacheFilename(key)}.lock`);
 
@@ -64,7 +66,9 @@ describe("withWasmCacheLock", () => {
         async () => {
           running += 1;
           if (running > 1) overlapped = true;
-          await new Promise((resolve) => setTimeout(resolve, ms));
+          await new Promise((resolve) => {
+            setTimeout(resolve, ms);
+          });
           running -= 1;
         },
         directory,

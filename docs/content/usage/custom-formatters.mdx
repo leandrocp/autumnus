@@ -140,6 +140,39 @@ const formatter: Formatter = {
 const html = hl.highlight('fn main() {}', formatter)
 ```
 
+## Highlight options
+
+The built-in formatters take options that change which scopes highlighting
+produces. Custom formatters take the same options, as a trailing argument to the
+token iterator.
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```ts
+highlightIter(source, this.language, frappe, (text, language, _range, scope) => {
+  // scope is punctuation.bracket.rainbow.1 .. .6 on bracket pairs
+}, {rainbowBrackets: true})
+```
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```rust
+use lumis::highlight::{highlight_iter_with_options, HighlightOptions};
+
+let options = HighlightOptions { rainbow_brackets: true };
+
+highlight_iter_with_options(source, self.language, self.theme.clone(), options, |text, language, _range, scope, _style| {
+    // scope is punctuation.bracket.rainbow.1 .. .6 on bracket pairs
+    write!(output, "{}", span_inline(text, Some(language), scope, self.theme.as_ref(), false, false))
+})
+.map_err(io::Error::other)?;
+```
+
+  </TabItem>
+</Tabs>
+
 ## Nested events instead of flat tokens
 
 `highlightIter` / `highlight_iter` hand you one callback per token. When the

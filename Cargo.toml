@@ -18,6 +18,48 @@ homepage = "https://lumis.sh"
 repository = "https://github.com/leandrocp/lumis"
 authors = ["Leandro Pereira <leandro@leandro.io>"]
 
+[workspace.lints.rust]
+rust_2018_idioms = { level = "warn", priority = -1 }
+unreachable_pub = "warn"
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+# Threshold in clippy.toml.
+cognitive_complexity = "warn"
+
+# Waivers. Every entry is a `clippy::pedantic` lint this repository has not
+# adopted, with the number of sites it fired on when it was written down. The
+# list is allowed to shrink and not to grow: a new entry needs the same
+# justification these have, and closing one is a change on its own.
+#
+# Documentation, 112 sites. `# Errors` and `# Panics` sections are worth
+# writing, and worth writing carefully; a sweep would produce 112 restatements
+# of the signature.
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+# 149 sites, all of them public constructors and accessors. `#[must_use]` is a
+# promise to callers about a specific function, so it is added where it means
+# something rather than wherever the lint can prove it applies.
+must_use_candidate = "allow"
+# 54 sites. Taking `&T` instead of `T` is an API change per call site, and the
+# owned argument is deliberate in the builders, which consume and return self.
+needless_pass_by_value = "allow"
+# 21 sites, all narrowing a byte offset or a column to `u32` for Tree-sitter's
+# and the NIF boundary's types. The invariant is the document size, which the
+# lint cannot see.
+cast_possible_truncation = "allow"
+# A line count is not a complexity measure. The functions it flags are the
+# match arms over language and theme tables.
+too_many_lines = "allow"
+# Would put `S: BuildHasher` in public signatures to let callers pass a hasher
+# no caller has asked for.
+implicit_hasher = "allow"
+# Flags pairs like `theme` and `themes` that the domain names that way.
+similar_names = "allow"
+# The flags it counts are the CLI's, and they are bools because the command
+# line is.
+struct_excessive_bools = "allow"
+
 [patch.crates-io]
 lumis = { path = "crates/lumis" }
 lumis-core = { path = "crates/lumis-core" }

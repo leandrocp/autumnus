@@ -74,9 +74,10 @@ fn repo_dir() -> PathBuf {
 }
 
 fn load_scenarios() -> Vec<Scenario> {
-    let manifest_path = env::var_os("BENCH_SCENARIO_MANIFEST")
-        .map(PathBuf::from)
-        .unwrap_or_else(|| repo_dir().join("target/benchmarks/fixtures/scenarios.json"));
+    let manifest_path = env::var_os("BENCH_SCENARIO_MANIFEST").map_or_else(
+        || repo_dir().join("target/benchmarks/fixtures/scenarios.json"),
+        PathBuf::from,
+    );
     let manifest: Manifest = serde_json::from_str(
         &fs::read_to_string(manifest_path).expect("read resolved benchmark manifest"),
     )
@@ -300,14 +301,14 @@ fn benchmarks(c: &mut Criterion) {
                 let runtime = initialize_lumis(scenario);
                 let output_bytes = render_lumis(&runtime, scenario, false);
                 black_box((runtime, output_bytes))
-            })
+            });
         });
         group.bench_function(BenchmarkId::new("syntect", "total"), |b| {
             b.iter_with_large_drop(|| {
                 let runtime = initialize_syntect();
                 let output_bytes = render_syntect(&runtime, scenario, false);
                 black_box((runtime, output_bytes))
-            })
+            });
         });
         group.finish();
     }

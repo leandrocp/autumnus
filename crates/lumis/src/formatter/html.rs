@@ -148,7 +148,7 @@ pub fn sanitize_theme_name(name: &str) -> String {
 
 use crate::themes::TextDecoration;
 
-/// Get the CSS text-decoration value from a TextDecoration struct.
+/// Get the CSS text-decoration value from a `TextDecoration` struct.
 ///
 /// # Example
 ///

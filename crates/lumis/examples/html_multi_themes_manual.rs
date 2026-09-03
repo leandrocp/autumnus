@@ -22,7 +22,7 @@ fn main() {
         .themes(themes)
         .default_theme("light")
         .build()
-        .map_err(|e| format!("Build error: {}", e))?;
+        .map_err(|e| format!("Build error: {e}"))?;
 
     let mut output = Vec::new();
     lumis::write_highlight(&mut output, source, formatter)?;
@@ -115,7 +115,7 @@ fn main() {
 
     <p>Click the buttons above to manually switch between light and dark themes.</p>
 
-    {}
+    {highlighted}
 
     <script>
         function setTheme(theme) {{
@@ -142,8 +142,7 @@ fn main() {
         }}
     </script>
 </body>
-</html>"#,
-        highlighted
+</html>"#
     );
 
     std::fs::write("examples/html_multi_themes_manual.html", html)?;

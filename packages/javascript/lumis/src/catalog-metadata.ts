@@ -2,7 +2,7 @@ import { LANGUAGES } from "./generated/languages-meta.js";
 import type { LanguageInfo, ThemeInfo } from "./types.js";
 
 export function normalizeLanguageName(value: string): string {
-  return value.replace(/[A-Z]/g, (character) => character.toLowerCase());
+  return value.replaceAll(/[A-Z]/g, (character) => character.toLowerCase());
 }
 
 /**

@@ -12,7 +12,7 @@ import type { ThemeInfo } from "./types.js";
  * ```
  */
 export function availableThemes(): ThemeInfo[] {
-  return THEMES.map(cloneThemeInfo);
+  return THEMES.map((theme) => cloneThemeInfo(theme));
 }
 
 /**
@@ -23,5 +23,5 @@ export function availableThemes(): ThemeInfo[] {
  * ```
  */
 export function sanitizeThemeName(name: string): string {
-  return name.replace(/[^0-9A-Za-z_-]/g, "-");
+  return name.replaceAll(/[^0-9A-Za-z_-]/g, "-");
 }

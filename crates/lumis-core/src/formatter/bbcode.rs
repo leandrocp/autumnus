@@ -1,9 +1,9 @@
-//! BBCode formatter for syntax highlighting.
+//! `BBCode` formatter for syntax highlighting.
 //!
-//! This module provides the [`BBCodeScoped`] formatter that generates BBCode output with
+//! This module provides the [`BBCodeScoped`] formatter that generates `BBCode` output with
 //! highlight scope names as tags (e.g., `[keyword-function]text[/keyword-function]`).
 //!
-//! It does not emit standard forum-style BBCode such as `[b]`, `[color]`, or `[code]`.
+//! It does not emit standard forum-style `BBCode` such as `[b]`, `[color]`, or `[code]`.
 //!
 //! Works with pre-computed highlight events from any source.
 
@@ -13,12 +13,12 @@ use crate::languages::Language;
 use derive_builder::Builder;
 use std::io::{self, Write};
 
-/// BBCode formatter for syntax highlighting using highlight scope names as tags.
+/// `BBCode` formatter for syntax highlighting using highlight scope names as tags.
 ///
-/// Generates BBCode output using scope-based tags derived from tree-sitter scope names.
+/// Generates `BBCode` output using scope-based tags derived from tree-sitter scope names.
 /// Dots in scope names are converted to hyphens (e.g., `keyword.function` becomes
 /// `[keyword-function]...[/keyword-function]`).
-/// It does not emit standard forum-style BBCode tags.
+/// It does not emit standard forum-style `BBCode` tags.
 ///
 /// Use [`BBCodeScopedBuilder`] to create instances.
 ///
@@ -66,9 +66,9 @@ impl Default for BBCodeScoped {
     }
 }
 
-/// Convert scope name to BBCode tag name.
+/// Convert scope name to `BBCode` tag name.
 ///
-/// Converts tree-sitter scope names (dot-separated) to BBCode tag names
+/// Converts tree-sitter scope names (dot-separated) to `BBCode` tag names
 /// (hyphen-separated).
 fn scope_to_tag_name(scope: &str) -> String {
     scope.replace('.', "-")
@@ -91,7 +91,7 @@ fn tag_name(scope_index: usize, language: &str) -> String {
         .get(scope_index)
         .copied()
         .unwrap_or("");
-    let specialized = format!("{}.{}", scope, language);
+    let specialized = format!("{scope}.{language}");
     scope_to_tag_name(&specialized)
 }
 

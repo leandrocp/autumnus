@@ -1,3 +1,15 @@
+## [0.6.2](https://github.com/leandrocp/lumis/compare/npm-cli/v0.6.1...npm-cli/v0.6.2) (2026-09-03)
+
+
+### Code Refactoring
+
+- keep one copy of each test parser - [#1288](https://github.com/leandrocp/lumis/pull/1288)
+
+
+### Features
+
+- highlight code inside diff hunks - [#1284](https://github.com/leandrocp/lumis/pull/1284)
+
 ## [0.6.1](https://github.com/leandrocp/lumis/compare/npm-cli/v0.6.0...npm-cli/v0.6.1) (2026-08-13)
 
 

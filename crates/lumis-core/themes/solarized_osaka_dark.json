@@ -1,7 +1,7 @@
 {
   "name": "solarized_osaka_dark",
   "appearance": "dark",
-  "revision": "f675d9a5c58f3b0d6158d665a623f81a62e7bdaf",
+  "revision": "a21176efde15fab21fabda0bf2ba123ed6d7332d",
   "highlights": {
     "attribute": {
       "fg": "#db302d"
@@ -57,7 +57,7 @@
       "fg": "#268bd3"
     },
     "diff.delta": {
-      "bg": "#191d00"
+      "bg": "#3c1403"
     },
     "diff.minus": {
       "bg": "#380605"

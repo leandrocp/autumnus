@@ -15,8 +15,9 @@ jobs:
   benchmark:
     name: Benchmark / ${{ matrix.label }}
     if: >-
-      ${{ github.event_name != 'push' ||
-          !startsWith(github.event.head_commit.message, 'chore(release):') }}
+      ${{ !startsWith(github.event.head_commit.message, 'chore(release):') &&
+          !(github.event.pull_request.head.repo.full_name == github.repository &&
+            startsWith(github.event.pull_request.head.ref, 'release/')) }}
     continue-on-error: true
     runs-on: ubuntu-24.04
     timeout-minutes: 60
@@ -40,7 +41,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
-      - uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
           # Pinned: mise 2026.7.18 cannot install core:erlang/core:elixir on the
           # runner, and benchmarks/mise.lock was produced by this version.
@@ -84,15 +85,16 @@ jobs:
   comparison:
     name: Comparison assets are current
     if: >-
-      ${{ github.event_name != 'push' ||
-          !startsWith(github.event.head_commit.message, 'chore(release):') }}
+      ${{ !startsWith(github.event.head_commit.message, 'chore(release):') &&
+          !(github.event.pull_request.head.repo.full_name == github.repository &&
+            startsWith(github.event.pull_request.head.ref, 'release/')) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
-      - uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
           # Pinned: mise 2026.7.18 cannot install core:erlang/core:elixir on the
           # runner, and benchmarks/mise.lock was produced by this version.
@@ -124,8 +126,9 @@ jobs:
     needs: benchmark
     if: >-
       ${{ always() &&
-          (github.event_name != 'push' ||
-           !startsWith(github.event.head_commit.message, 'chore(release):')) }}
+          !startsWith(github.event.head_commit.message, 'chore(release):') &&
+          !(github.event.pull_request.head.repo.full_name == github.repository &&
+            startsWith(github.event.pull_request.head.ref, 'release/')) }}
     continue-on-error: true
     runs-on: ubuntu-24.04
     timeout-minutes: 10

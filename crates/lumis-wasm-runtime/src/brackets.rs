@@ -204,6 +204,9 @@ mod tests {
 
     #[test]
     fn unmatched_pairs_are_dropped() {
-        assert!(colorize_bracket_pairs(Vec::new()).is_empty());
+        assert!(
+            colorize_bracket_pairs(Vec::new()).is_empty(),
+            "no pairs in, so nothing should come out"
+        );
     }
 }

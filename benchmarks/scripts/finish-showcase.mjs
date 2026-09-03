@@ -234,15 +234,15 @@ for (const document of documents) {
       // the pipeline rather than a second number to publish.
       const tokens = countTokens(fragment, label);
       const recorded = outputs.get(id);
-      if (!recorded) {
+      if (recorded === undefined) {
         outputs.set(id, { id, tokens, outputBytes: { [theme.id]: Buffer.byteLength(fragment) } });
-      } else if (recorded.tokens !== tokens) {
+      } else if (recorded.tokens === tokens) {
+        recorded.outputBytes[theme.id] = Buffer.byteLength(fragment);
+      } else {
         throw new Error(
           `${label} found ${tokens} tokens in ${document.id} with ${theme.name} but ` +
             `${recorded.tokens} with ${themes[0].name}`,
         );
-      } else {
-        recorded.outputBytes[theme.id] = Buffer.byteLength(fragment);
       }
     }
 
@@ -331,11 +331,9 @@ function validateLumisScopes(output, implementation, document, expectations, the
     const expected = palette[colour];
     if (!expected) throw new Error(`${theme.name} has no ${colour} in its palette`);
 
-    const found = new Set();
-    for (const [, style, span] of output.matchAll(/<span style="([^"]*)">([^<]*)<\/span>/g)) {
-      if (span === text) found.add(style.match(/color:\s*(#[0-9a-f]{6})/i)?.[1]?.toLowerCase());
-    }
+    const found = spanColours(output, text);
     if (found.has(expected)) continue;
+
     throw new Error(
       found.size === 0
         ? `${implementation} coloured no ${scope} in ${document.id}: "${text}" is not a span`
@@ -343,6 +341,17 @@ function validateLumisScopes(output, implementation, document, expectations, the
             `rather than ${theme.name} ${colour} (${expected})`,
     );
   }
+}
+
+// Every colour the output gives to spans whose text is exactly `text`.
+function spanColours(output, text) {
+  const found = new Set();
+
+  for (const [, style, span] of output.matchAll(/<span style="([^"]*)">([^<]*)<\/span>/g)) {
+    if (span === text) found.add(style.match(/color:\s*(#[0-9a-f]{6})/i)?.[1]?.toLowerCase());
+  }
+
+  return found;
 }
 
 // Every Lumis runtime has to render this document identically. The comparison is

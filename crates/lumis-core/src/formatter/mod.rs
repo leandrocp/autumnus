@@ -9,7 +9,7 @@
 //! - [`html_multi_themes`] - HTML with multiple theme support
 //! - [`html_linked`] - HTML with CSS classes
 //! - [`terminal`] - ANSI color codes for terminal output
-//! - [`bbcode`] - BBCode scoped output using highlight scope names as tags
+//! - [`bbcode`] - `BBCode` scoped output using highlight scope names as tags
 
 use crate::events::HighlightEvent;
 use std::io::{self, Write};

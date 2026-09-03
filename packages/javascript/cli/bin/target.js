@@ -16,7 +16,7 @@ function cliTargetFor(platform, arch, libc) {
   if (platform === "win32" && ["arm64", "x64"].includes(arch)) {
     return `win32-${arch}-msvc`;
   }
-  return undefined;
+  return;
 }
 
 function hostLibc() {

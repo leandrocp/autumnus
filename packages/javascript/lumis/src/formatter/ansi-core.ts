@@ -1,7 +1,7 @@
 import type { HighlightStyle } from "../types.js";
 
 /** ANSI reset escape sequence. */
-export const ANSI_RESET = "\u001b[0m";
+export const ANSI_RESET = "\u001B[0m";
 
 /**
  * Parse a hex color string to RGB components.
@@ -35,7 +35,7 @@ export function hexToRgb(hex: string): [number, number, number] | undefined {
  * ```
  */
 export function rgbToAnsi(r: number, g: number, b: number, isBackground: boolean): string {
-  return isBackground ? `\u001b[48;2;${r};${g};${b}m` : `\u001b[38;2;${r};${g};${b}m`;
+  return isBackground ? `\u001B[48;2;${r};${g};${b}m` : `\u001B[38;2;${r};${g};${b}m`;
 }
 
 /**
@@ -46,45 +46,46 @@ export function rgbToAnsi(r: number, g: number, b: number, isBackground: boolean
  * // "\x1b[38;2;255;121;198m\x1b[1m"
  * ```
  */
+function colorCode(hex: string | undefined, background: boolean): string | undefined {
+  if (!hex) return undefined;
+
+  const rgb = hexToRgb(hex);
+  return rgb ? rgbToAnsi(rgb[0], rgb[1], rgb[2], background) : undefined;
+}
+
+const UNDERLINE_CODES: Record<string, string> = {
+  true: "\u001B[4m",
+  solid: "\u001B[4m",
+  wavy: "\u001B[4:3m",
+  undercurl: "\u001B[4:3m",
+  double: "\u001B[4:2m",
+  dotted: "\u001B[4:4m",
+  dashed: "\u001B[4:5m",
+};
+
+function underlineCode(underline: HighlightStyle["underline"]): string | undefined {
+  if (underline === false || underline === undefined) return undefined;
+  return UNDERLINE_CODES[String(underline)];
+}
+
 export function styleToAnsi(style: HighlightStyle | undefined): string {
   if (!style) return "";
 
   const codes: string[] = [];
 
-  if (style.fg) {
-    const rgb = hexToRgb(style.fg);
-    if (rgb) codes.push(rgbToAnsi(rgb[0], rgb[1], rgb[2], false));
-  }
+  const fg = colorCode(style.fg, false);
+  if (fg) codes.push(fg);
 
-  if (style.bg) {
-    const rgb = hexToRgb(style.bg);
-    if (rgb) codes.push(rgbToAnsi(rgb[0], rgb[1], rgb[2], true));
-  }
+  const bg = colorCode(style.bg, true);
+  if (bg) codes.push(bg);
 
-  if (style.bold) codes.push("\u001b[1m");
-  if (style.italic) codes.push("\u001b[3m");
+  if (style.bold) codes.push("\u001B[1m");
+  if (style.italic) codes.push("\u001B[3m");
 
-  switch (style.underline) {
-    case true:
-    case "solid":
-      codes.push("\u001b[4m");
-      break;
-    case "wavy":
-    case "undercurl":
-      codes.push("\u001b[4:3m");
-      break;
-    case "double":
-      codes.push("\u001b[4:2m");
-      break;
-    case "dotted":
-      codes.push("\u001b[4:4m");
-      break;
-    case "dashed":
-      codes.push("\u001b[4:5m");
-      break;
-  }
+  const underline = underlineCode(style.underline);
+  if (underline) codes.push(underline);
 
-  if (style.strikethrough) codes.push("\u001b[9m");
+  if (style.strikethrough) codes.push("\u001B[9m");
 
   return codes.join("");
 }

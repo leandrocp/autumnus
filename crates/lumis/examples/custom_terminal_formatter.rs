@@ -108,11 +108,12 @@ impl Formatter for LineNumberedTerminal {
                     if at_line_start {
                         // Add line number in gray using ANSI helpers
                         let gray_fg = ansi::rgb_to_ansi(128, 128, 128, false);
-                        write!(output, "{}{:3} │ {}", gray_fg, line_num, ansi::ANSI_RESET)?;
+                        let reset = ansi::ANSI_RESET;
+                        write!(output, "{gray_fg}{line_num:3} │ {reset}")?;
                         at_line_start = false;
                     }
 
-                    write!(output, "{}", ansi_text)?;
+                    write!(output, "{ansi_text}")?;
 
                     if ansi_text.contains('\n') {
                         line_num += ansi_text.matches('\n').count();

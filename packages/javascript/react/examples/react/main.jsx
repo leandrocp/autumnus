@@ -12,30 +12,29 @@ const languages = withWasmBundle(bundledLanguages, bundledWasms);
 const highlighter = await createHighlighter({ languages: [languages] });
 await Promise.all([highlighter.loadLanguage("javascript"), highlighter.loadLanguage("tsx")]);
 
+const mainStyle = { fontFamily: "system-ui, sans-serif", margin: "2rem auto", maxWidth: 880 };
+const spacerStyle = { height: 24 };
+const javascriptFormatter = htmlInline({ language: "javascript", theme: githubLight });
+const typescriptFormatter = htmlMultiThemes({
+  language: "tsx",
+  themes: { light: githubLight, dark: githubDark },
+  defaultTheme: "light-dark()",
+});
+
 function App() {
   return (
-    <main style={{ fontFamily: "system-ui, sans-serif", margin: "2rem auto", maxWidth: 880 }}>
+    <main style={mainStyle}>
       <h1>Lumis React</h1>
 
-      <CodeBlock
-        highlighter={highlighter}
-        formatter={htmlInline({ language: "javascript", theme: githubLight })}
-      >
+      <CodeBlock highlighter={highlighter} formatter={javascriptFormatter}>
         {`export function greet(name) {
   return \`Hello, \${name}!\`
 }`}
       </CodeBlock>
 
-      <div style={{ height: 24 }} />
+      <div style={spacerStyle} />
 
-      <CodeBlock
-        highlighter={highlighter}
-        formatter={htmlMultiThemes({
-          language: "tsx",
-          themes: { light: githubLight, dark: githubDark },
-          defaultTheme: "light-dark()",
-        })}
-      >
+      <CodeBlock highlighter={highlighter} formatter={typescriptFormatter}>
         {`export function Button() {
   return <button type="button">Click me</button>
 }`}

@@ -68,7 +68,7 @@ fn format_str_list(list: &[String]) -> String {
     if list.is_empty() {
         return "[]".to_string();
     }
-    let items: Vec<String> = list.iter().map(|s| format!("\"{}\"", s)).collect();
+    let items: Vec<String> = list.iter().map(|s| format!("\"{s}\"")).collect();
     format!("[{}]", items.join(", "))
 }
 
@@ -106,9 +106,9 @@ fn format_entry(key: &str, entry: &ParserEntry) -> String {
         key = key,
         display_name = display_name,
         from_str = format_str_list(&from_str),
-        globs = format_str_list(&globs.iter().map(|s| s.to_string()).collect::<Vec<_>>()),
-        emacs = format_str_list(&emacs.iter().map(|s| s.to_string()).collect::<Vec<_>>()),
-        shebang = format_str_list(&shebang.iter().map(|s| s.to_string()).collect::<Vec<_>>()),
+        globs = format_str_list(globs),
+        emacs = format_str_list(emacs),
+        shebang = format_str_list(shebang),
     )
 }
 
@@ -148,10 +148,10 @@ fn languages() {
         let body = format_entry(key, entry);
 
         if key == "diff" {
-            always_entries.push(format!("        {}", body));
+            always_entries.push(format!("        {body}"));
         } else {
             let feat = entry.feature.clone().unwrap_or_else(|| key_to_feature(key));
-            gated_entries.push(format!("        [\"{}\"] {}", feat, body));
+            gated_entries.push(format!("        [\"{feat}\"] {body}"));
         }
     }
 

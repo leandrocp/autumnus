@@ -135,7 +135,7 @@ describe.each(conformanceFixtures.map((f) => [f.name, f]))("%s", (_name, fixture
     const formatterThemes = config
       ? Object.fromEntries(
           Object.entries(config.themes)
-            .reverse()
+            .toReversed()
             .map(([name, theme]) => [name, getTheme(theme)]),
         )
       : { main: getTheme(fixture.theme) };

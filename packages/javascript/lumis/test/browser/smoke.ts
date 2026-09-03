@@ -170,6 +170,36 @@ function getTheme(id: string): Theme {
   return module[1].default;
 }
 
+// One package per parser, carrying every language that parser serves, because
+// `mdx` and `markdown` share one and a package holding only the last would
+// leave the other unresolvable.
+function groupLanguagesByParser(needed: string[]): Map<string, string[]> {
+  const languagesByParser = new Map<string, string[]>();
+
+  for (const language of needed) {
+    const parser = PARSER_OF[language] ?? language;
+    languagesByParser.set(parser, [...(languagesByParser.get(parser) ?? []), language]);
+  }
+
+  return languagesByParser;
+}
+
+function languageDefinition(language: string): LanguageDefinition {
+  const module = Object.entries(languageModules).find(
+    ([path]) => basename(path) === `${language}.ts`,
+  );
+  if (!module) throw new Error(`no language module for ${language}`);
+  return module[1].default;
+}
+
+function parserWasmUrl(parser: string, wasmName: string): string {
+  const wasmEntry = Object.entries(parserWasms).find(
+    ([path]) => basename(path) === `${wasmName}.wasm`,
+  );
+  if (!wasmEntry) throw new Error(`no committed parser fixture for ${parser}`);
+  return wasmEntry[1];
+}
+
 async function run(): Promise<void> {
   const corpus = loadCorpus();
   const needed = [...new Set(corpus.flatMap((fixture) => fixture.languages))].sort();
@@ -178,34 +208,20 @@ async function run(): Promise<void> {
   const languagePackages = new Map<string, string>();
   const definitions: LanguageDefinition[] = [];
 
-  // One package per parser, carrying every language that parser serves, because
-  // `mdx` and `markdown` share one and a package holding only the last would
-  // leave the other unresolvable.
-  const languagesByParser = new Map<string, string[]>();
-  for (const language of needed) {
-    const parser = PARSER_OF[language] ?? language;
-    languagesByParser.set(parser, [...(languagesByParser.get(parser) ?? []), language]);
-  }
+  const languagesByParser = groupLanguagesByParser(needed);
 
   for (const language of needed) {
-    const module = Object.entries(languageModules).find(
-      ([path]) => basename(path) === `${language}.ts`,
-    );
-    if (!module) throw new Error(`no language module for ${language}`);
-    definitions.push(module[1].default);
+    definitions.push(languageDefinition(language));
   }
 
   for (const [parser, languages] of languagesByParser) {
     const wasmName = `tree-sitter-${parser}`;
-    const wasmEntry = Object.entries(parserWasms).find(
-      ([path]) => basename(path) === `${wasmName}.wasm`,
-    );
-    if (!wasmEntry) throw new Error(`no committed parser fixture for ${parser}`);
+    const wasmUrl = parserWasmUrl(parser, wasmName);
 
-    wasmUrls[wasmName] = wasmEntry[1];
+    wasmUrls[wasmName] = wasmUrl;
     languagePackages.set(
       `@lumis-sh/wasm-${parser}`,
-      await languagePackageDataUrl(parser, languages, wasmEntry[1]),
+      await languagePackageDataUrl(parser, languages, wasmUrl),
     );
   }
 
@@ -238,7 +254,7 @@ async function run(): Promise<void> {
     const formatterThemes = config
       ? Object.fromEntries(
           Object.entries(config.themes)
-            .reverse()
+            .toReversed()
             .map(([name, themeId]) => [name, getTheme(themeId)]),
         )
       : { main: theme };
@@ -350,8 +366,7 @@ async function run(): Promise<void> {
     },
   };
 
-  const customSource =
-    `const nested = foo(bar([1, 2], { a: "3" }));\n` + `const view = ${fixtureSource.trim()};\n`;
+  const customSource = `const nested = foo(bar([1, 2], { a: "3" }));\nconst view = ${fixtureSource.trim()};\n`;
   const customFormatterResult = JSON.parse(
     highlighter.highlight(customSource, customFormatter),
   ) as Omit<CustomFormatterResult, "restoredLanguage">;
@@ -403,10 +418,12 @@ async function languagePackageDataUrl(
   });
   const bytes = new TextEncoder().encode(metadata);
   let binary = "";
-  for (const byte of bytes) binary += String.fromCharCode(byte);
+  for (const byte of bytes) binary += String.fromCodePoint(byte);
   return `data:application/json;base64,${btoa(binary)}`;
 }
 
-run().catch((error: unknown) => {
+try {
+  await run();
+} catch (error: unknown) {
   window.__lumisBrowserError = error instanceof Error ? error.stack : String(error);
-});
+}

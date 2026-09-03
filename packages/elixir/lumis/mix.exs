@@ -2,13 +2,13 @@ defmodule Lumis.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/leandrocp/lumis"
-  @version "0.7.0"
+  @version "0.8.0"
 
   def project do
     [
       app: :lumis,
       version: @version,
-      elixir: "~> 1.14",
+      elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
       build_embedded: Mix.env() == :prod,
       package: package(),
@@ -104,9 +104,8 @@ defmodule Lumis.MixProject do
   defp aliases do
     [
       setup: ["deps.get", "compile"],
-      # TODO: stage from the committed fixtures only because the suite has no
-      # published parsers to fetch. Once it can download them, drop this and let
-      # the tests exercise the real registry path instead.
+      # The suite stages committed fixtures because it has no published parsers
+      # to fetch. Once it can download them, the tests can use the registry path.
       test: ["stage.test_parsers", "test"],
       "stage.test_parsers": [
         "cmd --cd ../../.. cargo run -q --manifest-path crates/dev/Cargo.toml -- " <>

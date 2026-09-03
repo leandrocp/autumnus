@@ -1307,9 +1307,8 @@ fn cache_languages_compiles_what_it_downloads() {
     // non-empty cache proves nothing. Each additional parser adds an entry
     // beside it, and only compiling produces that.
     fn cached_modules(store: &std::path::Path) -> usize {
-        let namespaces = match fs::read_dir(store.join("compiled").join("modules")) {
-            Ok(entries) => entries,
-            Err(_) => return 0,
+        let Ok(namespaces) = fs::read_dir(store.join("compiled").join("modules")) else {
+            return 0;
         };
         namespaces
             .filter_map(Result::ok)

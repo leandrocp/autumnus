@@ -6,6 +6,7 @@ See `ARCHITECTURE.md` for how the crates, packages, website, and build pipeline 
 
 - [Getting started](#getting-started)
 - [Testing](#testing)
+- [Linting](#linting)
 - [Releases](#releases)
 - [Benchmarks](#benchmarks)
 - [Environment variables](#environment-variables)
@@ -97,17 +98,74 @@ it can only shrink. It is currently empty.
 
 The browser task installs the required Chromium, Firefox, and WebKit builds before running. CI runs these six tasks as independent parallel jobs.
 
+## Linting
+
+```sh
+mise run lint
+```
+
+Every linter runs at its strict setting, and every runtime has one. What that
+means per language, and where the configuration lives:
+
+| Runtime | Linter | Strict setting | Configuration |
+| --- | --- | --- | --- |
+| Rust | clippy, lizard | clippy's `pedantic` group plus `rust_2018_idioms` and `unreachable_pub`, all denied; cognitive complexity at most 10; classic cyclomatic complexity at most 20 | `[workspace.lints]` in the root `Cargo.toml`, `clippy.toml`, `.lizard-whitelist` |
+| JavaScript, TypeScript | oxlint | the `correctness`, `suspicious`, `perf` and `pedantic` categories, as errors; classic cyclomatic complexity at most 9 | `.oxlintrc.json` |
+| Elixir | credo | `mix credo --strict`; cyclomatic complexity at most 9 | `packages/elixir/lumis/.credo.exs` |
+| Lua | selene | every lint selene ships, warnings included | `selene.toml`, `neovim.yml` |
+| GitHub Actions | actionlint | its default, which is already strict | `.github/actionlint.yaml` |
+
+Every runtime implemented in this repository enforces a complexity ceiling with
+its language-specific analyzer, at the number the other projects in this family
+hold: **9**, classic McCabe, for Elixir and for JavaScript.
+
+Rust uses clippy's cognitive complexity at **10** rather than a McCabe ceiling of
+9, because `?` makes every fallible call a cyclomatic branch and would score a
+flat decoder the same as a deeply nested function. The lizard check still applies
+classic cyclomatic complexity at 20 on top, so each metric covers what the other
+is blind to. It reads every `*.rs` file, including crates outside the workspace;
+its only whitelist entry is an exact function in the upstream-vendored
+Tree-sitter highlighter, and the file that function lives in carries the matching
+`#[allow(clippy::cognitive_complexity)]` for the same reason.
+
+Two rules hold this together, and both come from what the checks used to miss:
+
+- **Every file the repo authors is linted.** `mise run lint-js` runs oxlint from
+  the repo root over everything, the way `mise run fmt-js` formats. Directory
+  lists go stale in one direction only: `website/` carried an empty
+  `.oxlintrc.jsonc` that silently exempted all 28 of its files from every rule,
+  and the per-package scripts named `src/` and `test/`, so the CLI package, the
+  docs site, the benchmark scripts and every `examples/` directory had never been
+  linted at all. Subtract from "everything" in `.oxlintrc.json`'s
+  `ignorePatterns`, and give each entry a reason.
+- **A silenced lint says why.** Line-level `// oxlint-disable-next-line <rule> --
+  <why>` and `#[allow(...)]` with a comment above it. `--report-unused-disable-directives`
+  runs in both the root and type-aware package passes, so a silence that stops
+  being needed fails the build rather than sitting there.
+
+A lint the repository has decided not to adopt is a waiver, not a silence: it
+sits in one place, with the reason and the number of sites it fired on when it
+was written down. `[workspace.lints.clippy]` and the `rules` block in
+`.oxlintrc.json` hold all of them. That list is allowed to shrink; adding to it
+needs the same justification the existing entries carry.
+
+TypeScript's type-aware rules cannot run from the repo root, because they need
+each package's `tsconfig.json` and its built dependencies. The per-package
+`pnpm run lint` scripts add them on top of the root sweep, and CI runs both:
+`lint.yml` for the repo-wide pass, `javascript.yml` for the type-aware one.
+
 ## Releases
 
-Releases are prepared locally and published from tags.
+Releases are prepared by `release-prepare.yml`, one pull request per package, and published when one of those pull requests is merged.
 
-- Run `mise run release-needed` to list packages with non-chore path-scoped commits since their latest package tag.
-- Prepare each release with `mise run release-prepare <package> <version>`.
-- `mise run release-prepare` updates only the target package version file and prepends the next changelog entry.
+- Every push to `main` opens or updates one `chore(release): <package> <version>` pull request per package that `mise run release-plan` says needs one, on branch `release/<package>`.
+- Merging one is what ships it: `release-tag.yml` reads the merge commit and pushes `<package>/v<version>`, which starts the publish workflow. Merge one at a time, in publish order, and let each publish finish first.
+- Run `mise run release-plan` to see the same list locally, and `mise run release-needed` for the commits behind it.
+- Prepare a release by hand with `mise run release-prepare <package> <version>`, then commit it to `main` with that same subject; the tagging is automatic either way.
+- `mise run release-prepare` bumps the target package version file and prepends the next changelog entry, and also rewrites dependent manifests and lockfiles. Review and commit everything it touches.
 - If dependent manifests must move together, update them separately in the same release commit. `npm-lumis` is the exception: it also bumps the native crate, the `@lumis-sh/lumis-native` selector and all platform packages, because the release workflow publishes them under the same version first.
 - A `version` requirement on a lumis crate must equal that crate's version in this repository. `mise run release-prepare` keeps them in step, rewriting dependent manifests beyond the package being released, so review and commit every file it touches. `mise run check-crate-deps` reports drift and `--fix` repairs it. Apart from `crates/autumnus`, no build here resolves those requirements, so that check is the only thing that can catch them. See [Crate version requirements](RELEASE.md#crate-version-requirements).
-- Maintainers commit the release prep changes, then push package tags such as `cargo-lumis-cli/v0.2.0`.
-- Pushing a package tag triggers the publish workflows.
+- The package tag, such as `cargo-lumis-cli/v0.2.0`, is pushed by `release-tag.yml` rather than by hand, and pushing it triggers the publish workflows.
 
 Do not hand-edit release versions or changelog sections when `mise run release-prepare` can generate them.
 

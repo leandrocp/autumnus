@@ -33,7 +33,7 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
 
-      - uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
           install: false
 
@@ -90,7 +90,7 @@ jobs:
             packages/elixir/lumis/priv/static/css
             packages/javascript/themes/themes
           commit-message: "feat(themes): update generated themes"
-          title: "feat(themes): update generated themes"
+          title: "feat(themes): update themes"
           body-path: .github/gen-themes-pr-body.md
           branch: gen-themes
           delete-branch: true
