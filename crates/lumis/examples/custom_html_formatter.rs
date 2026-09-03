@@ -39,7 +39,7 @@ impl Formatter for CustomHtmlFormatter {
                     false,
                     true,
                 );
-                write!(output, "{}", span)
+                write!(output, "{span}")
             },
         )
         .map_err(io::Error::other)?;

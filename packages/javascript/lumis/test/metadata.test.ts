@@ -140,11 +140,11 @@ describe("availableThemes", () => {
 
   it("returns fresh theme records", () => {
     const first = availableThemes();
-    first[0]!.name = "mutated";
+    first[0].name = "mutated";
     first.length = 0;
 
     const next = availableThemes();
-    expect(next[0]!.name).not.toBe("mutated");
+    expect(next[0].name).not.toBe("mutated");
     expect(next.length).toBeGreaterThan(0);
   });
 });

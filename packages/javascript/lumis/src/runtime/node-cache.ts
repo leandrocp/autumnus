@@ -1,5 +1,6 @@
 import { LOCK_RETRY_MS, LOCK_STALE_AFTER_MS, LOCK_TIMEOUT_MS } from "../cache-timing.js";
 
+// oxlint-disable-next-line no-useless-concat -- keeps a bundler from resolving the specifier statically.
 const nodeFsPromises = "node:fs" + "/promises";
 const nodePath = "node:path";
 const nodeOs = "node:os";
@@ -8,6 +9,7 @@ const nodeOs = "node:os";
 export function isUrlString(source: string): boolean {
   if (/^[a-zA-Z]:/.test(source)) return false;
   try {
+    // oxlint-disable-next-line no-new -- constructing it is the validity test.
     new URL(source);
     return true;
   } catch {
@@ -49,7 +51,7 @@ export async function platformDataDir(): Promise<string> {
   const { homedir } = await import(nodeOs);
 
   if (process.platform === "win32") {
-    const appData = process.env.APPDATA || join(homedir(), "AppData", "Roaming");
+    const appData = process.env.APPDATA ?? join(homedir(), "AppData", "Roaming");
     return join(appData, "lumis");
   }
 
@@ -148,22 +150,22 @@ async function readLockOwner(lockPath: string): Promise<LockOwner | undefined> {
   const { readFile } = await import(nodeFsPromises);
   try {
     const owner: unknown = JSON.parse(await readFile(lockPath, "utf8"));
-    if (
-      typeof owner !== "object" ||
-      owner === null ||
-      !("host" in owner) ||
-      typeof owner.host !== "string" ||
-      !("pid" in owner) ||
-      typeof owner.pid !== "number" ||
-      !Number.isInteger(owner.pid) ||
-      owner.pid <= 0
-    ) {
-      return undefined;
-    }
-    return { host: owner.host, pid: owner.pid };
+    return isLockOwner(owner) ? { host: owner.host, pid: owner.pid } : undefined;
   } catch {
     return undefined;
   }
+}
+
+function isLockOwner(owner: unknown): owner is LockOwner {
+  if (typeof owner !== "object" || owner === null) return false;
+
+  const record = owner as Record<string, unknown>;
+  return (
+    typeof record.host === "string" &&
+    typeof record.pid === "number" &&
+    Number.isInteger(record.pid) &&
+    record.pid > 0
+  );
 }
 
 /** @internal */
@@ -204,9 +206,13 @@ export async function withWasmCacheLock<T>(
       }
 
       if (Date.now() >= deadline) {
-        throw new Error(`Timed out waiting for Lumis WASM cache lock: ${lockPath}`);
+        throw new Error(`Timed out waiting for Lumis WASM cache lock: ${lockPath}`, {
+          cause: error,
+        });
       }
-      await new Promise((resolve) => setTimeout(resolve, LOCK_RETRY_MS));
+      await new Promise((resolve) => {
+        setTimeout(resolve, LOCK_RETRY_MS);
+      });
     }
   }
 

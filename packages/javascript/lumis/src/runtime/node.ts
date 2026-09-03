@@ -12,6 +12,7 @@ import {
   writeCachedWasm,
 } from "./node-cache.js";
 
+// oxlint-disable-next-line no-useless-concat -- keeps a bundler from resolving the specifier statically.
 const nodeFsPromises = "node:fs" + "/promises";
 const nodePath = "node:path";
 const nodeUrl = "node:url";
@@ -55,13 +56,13 @@ export const nodeRuntime: RuntimeEnvironment = {
 
   async readStagedAsset(filename) {
     const root = process.env.LUMIS_DATA_DIR;
-    if (!root) return undefined;
+    if (!root) return;
     const { join } = await import(nodePath);
     const { readFile } = await import(nodeFsPromises);
     try {
       return new Uint8Array(await readFile(join(root, "parsers", filename)));
     } catch {
-      return undefined;
+      return;
     }
   },
 
@@ -70,7 +71,7 @@ export const nodeRuntime: RuntimeEnvironment = {
 
     if (source instanceof URL) {
       if (source.protocol !== "file:") {
-        return undefined;
+        return;
       }
 
       const { fileURLToPath } = await import(nodeUrl);
@@ -85,14 +86,14 @@ export const nodeRuntime: RuntimeEnvironment = {
     }
 
     if (isUrlString(source)) {
-      return undefined;
+      return;
     }
 
     const { readFile } = await import(nodeFsPromises);
     try {
       return new Uint8Array(await readFile(source));
     } catch {
-      if (!isAbsolute(source)) return undefined;
+      if (!isAbsolute(source)) return;
       throw new Error(`Failed to read parser WASM from ${source}`);
     }
   },
@@ -164,16 +165,16 @@ export function createRuntime(...args: Parameters<LanguagesModule["createRuntime
  * ```
  */
 export function configureWasmResolver(fn: WasmResolver) {
-  return runtime.configureWasmResolver(fn);
+  runtime.configureWasmResolver(fn);
 }
 export function configureLanguagePackageResolver(fn: LanguagePackageResolver) {
-  return runtime.configureLanguagePackageResolver(fn);
+  runtime.configureLanguagePackageResolver(fn);
 }
 export function initParser(...args: Parameters<LanguagesModule["initParser"]>) {
   return runtime.initParser(...args);
 }
 export function registerLanguage(...args: Parameters<LanguagesModule["registerLanguage"]>) {
-  return runtime.registerLanguage(...args);
+  runtime.registerLanguage(...args);
 }
 export function resolveLanguageId(...args: Parameters<LanguagesModule["resolveLanguageId"]>) {
   return runtime.resolveLanguageId(...args);

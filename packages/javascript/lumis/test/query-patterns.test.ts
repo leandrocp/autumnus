@@ -85,7 +85,11 @@ function regexPredicates(): Predicate[] {
 
       let rest = line;
       for (;;) {
-        const found = OPERATORS.map((operator) => ({ operator, offset: rest.indexOf(operator) }))
+        const remaining = rest;
+        const found = OPERATORS.map((operator) => ({
+          operator,
+          offset: remaining.indexOf(operator),
+        }))
           .filter(({ offset }) => offset !== -1)
           .sort((a, b) => a.offset - b.offset || b.operator.length - a.operator.length)[0];
         if (!found) break;
@@ -118,6 +122,7 @@ describe("processed query predicates", () => {
   it("compiles every predicate regex with RegExp", () => {
     const failures = predicates.flatMap(({ file, line, operator, regex }) => {
       try {
+        // oxlint-disable-next-line no-new -- constructing it is the validity test.
         new RegExp(regex);
         return [];
       } catch (error) {
@@ -206,17 +211,25 @@ function hasNestedCharacterClass(regex: string): boolean {
   let depth = 0;
   for (let index = 0; index < regex.length; index += 1) {
     const character = regex[index];
+
     if (character === "\\") {
       index += 1;
-    } else if (character === "[" && depth === 0) {
-      depth = 1;
-      if (regex[index + 1] === "^") index += 1;
-      if (regex[index + 1] === "]") index += 1;
     } else if (character === "[") {
-      return true;
+      if (depth === 1) return true;
+      depth = 1;
+      index = skipClassPrefix(regex, index);
     } else if (character === "]" && depth === 1) {
       depth = 0;
     }
   }
   return false;
+}
+
+// `^` right after `[` negates the class, and a `]` right after that is a
+// literal; neither opens or closes anything.
+function skipClassPrefix(regex: string, index: number): number {
+  let next = index;
+  if (regex[next + 1] === "^") next += 1;
+  if (regex[next + 1] === "]") next += 1;
+  return next;
 }

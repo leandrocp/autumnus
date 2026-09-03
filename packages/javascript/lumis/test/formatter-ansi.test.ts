@@ -21,7 +21,7 @@ describe("formatter ansi helpers", () => {
   }, 120_000);
 
   it("exports the ANSI reset sequence", () => {
-    expect(ANSI_RESET).toBe("\u001b[0m");
+    expect(ANSI_RESET).toBe("\u001B[0m");
   });
 
   it("parses full hex colors", () => {
@@ -35,13 +35,13 @@ describe("formatter ansi helpers", () => {
   });
 
   it("creates foreground and background ANSI codes", () => {
-    expect(rgbToAnsi(17, 34, 51, false)).toBe("\u001b[38;2;17;34;51m");
-    expect(rgbToAnsi(17, 34, 51, true)).toBe("\u001b[48;2;17;34;51m");
+    expect(rgbToAnsi(17, 34, 51, false)).toBe("\u001B[38;2;17;34;51m");
+    expect(rgbToAnsi(17, 34, 51, true)).toBe("\u001B[48;2;17;34;51m");
   });
 
   it("supports extended underline modes", () => {
-    expect(styleToAnsi({ underline: "wavy" })).toBe("\u001b[4:3m");
-    expect(styleToAnsi({ underline: "double" })).toBe("\u001b[4:2m");
+    expect(styleToAnsi({ underline: "wavy" })).toBe("\u001B[4:3m");
+    expect(styleToAnsi({ underline: "double" })).toBe("\u001B[4:2m");
   });
 
   it("combines color and font styles into ANSI output", () => {
@@ -53,11 +53,11 @@ describe("formatter ansi helpers", () => {
       strikethrough: true,
     });
 
-    expect(ansi).toContain("\u001b[38;2;255;255;255m");
-    expect(ansi).toContain("\u001b[48;2;0;0;0m");
-    expect(ansi).toContain("\u001b[1m");
-    expect(ansi).toContain("\u001b[3m");
-    expect(ansi).toContain("\u001b[9m");
+    expect(ansi).toContain("\u001B[38;2;255;255;255m");
+    expect(ansi).toContain("\u001B[48;2;0;0;0m");
+    expect(ansi).toContain("\u001B[1m");
+    expect(ansi).toContain("\u001B[3m");
+    expect(ansi).toContain("\u001B[9m");
   });
 
   it("preserves background styling across lines and resets safely", () => {
@@ -66,17 +66,17 @@ describe("formatter ansi helpers", () => {
       bg: "#000000",
     });
 
-    expect(output).toContain("\u001b[0m\u001b[38;2;255;255;255m\u001b[48;2;0;0;0ma");
-    expect(output).toContain("\u001b[0m\n\u001b[38;2;255;255;255m\u001b[48;2;0;0;0mb");
-    expect(output.endsWith("\u001b[0m")).toBe(true);
+    expect(output).toContain("\u001B[0m\u001B[38;2;255;255;255m\u001B[48;2;0;0;0ma");
+    expect(output).toContain("\u001B[0m\n\u001B[38;2;255;255;255m\u001B[48;2;0;0;0mb");
+    expect(output.endsWith("\u001B[0m")).toBe(true);
   });
 
   it("returns unmodified text when no style is present", () => {
-    expect(paint("plain", undefined)).toBe("plain");
+    expect(paint("plain")).toBe("plain");
   });
 
   it("keeps wrapWithAnsi as an alias for paint", () => {
-    expect(wrapWithAnsi("plain", undefined)).toBe(paint("plain", undefined));
+    expect(wrapWithAnsi("plain")).toBe(paint("plain"));
     expect(wrapWithAnsi("fn", { fg: "#8be9fd" })).toBe(paint("fn", { fg: "#8be9fd" }));
   });
 
@@ -84,7 +84,7 @@ describe("formatter ansi helpers", () => {
     const segments = await highlightIterWithAnsi('{"x":1}', json, theme);
 
     expect(segments.length).toBeGreaterThan(0);
-    expect(segments.some(([text]) => text.includes("\u001b["))).toBe(true);
-    expect(segments.map(([text]) => text.replaceAll("\u001b[0m", "")).join("")).toContain('"x"');
+    expect(segments.some(([text]) => text.includes("\u001B["))).toBe(true);
+    expect(segments.map(([text]) => text.replaceAll("\u001B[0m", "")).join("")).toContain('"x"');
   }, 30_000);
 });

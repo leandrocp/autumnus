@@ -91,9 +91,7 @@ pub struct Executor {
 impl Executor {
     /// Sizes the pool to the machine.
     pub fn new(store: LanguageStore) -> Result<Self, ExecutorError> {
-        let workers = thread::available_parallelism()
-            .map(usize::from)
-            .unwrap_or(1);
+        let workers = thread::available_parallelism().map_or(1, usize::from);
 
         Self::with_workers(store, workers)
     }
@@ -121,9 +119,8 @@ impl Executor {
                 .name(format!("lumis-wasm-{index}"))
                 .stack_size(STACK_SIZE)
                 .spawn(move || loop {
-                    let job = match receiver.lock().expect("executor lock poisoned").recv() {
-                        Ok(job) => job,
-                        Err(_) => return,
+                    let Ok(job) = receiver.lock().expect("executor lock poisoned").recv() else {
+                        return;
                     };
                     match job {
                         Job::LoadNamed { name, reply } => {

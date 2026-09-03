@@ -11,7 +11,7 @@ import {
 import * as formatterApi from "../src/formatters.js";
 import type { Highlighter, Language, LanguageBundle, LanguageInput, Theme } from "../src/index.js";
 import json from "../langs/json.ts";
-import html from "../langs/html.ts";
+import htmlLanguage from "../langs/html.ts";
 import plaintext from "../langs/plaintext.ts";
 import javascript from "../langs/javascript.ts";
 import python from "../langs/python.ts";
@@ -275,8 +275,8 @@ describe("createHighlighter", () => {
   it("restores specialized injections when a target language is loaded later", async () => {
     const source = 'element.innerHTML = "<strong>hello</strong>"';
     const dynamic = await createHighlighter({ languages: [javascript] });
-    await dynamic.loadLanguage(html);
-    const eager = await createHighlighter({ languages: [javascript, html] });
+    await dynamic.loadLanguage(htmlLanguage);
+    const eager = await createHighlighter({ languages: [javascript, htmlLanguage] });
 
     expect(dynamic.highlight(source, htmlLinked({ language: javascript }))).toBe(
       eager.highlight(source, htmlLinked({ language: javascript })),
@@ -690,18 +690,18 @@ describe("htmlMultiThemes", () => {
 describe("terminal", () => {
   it("produces ANSI escape codes with theme", () => {
     const output = hl.highlight('{"a": 1}', terminal({ language: json, theme }));
-    expect(output).toContain("\x1b[");
+    expect(output).toContain("\u001B[");
   });
 
   it("outputs plain text without theme", () => {
     const output = hl.highlight('{"a": 1}', terminal({ language: json }));
     expect(output).toContain('{"a": 1}');
-    expect(output).not.toContain("\x1b[");
+    expect(output).not.toContain("\u001B[");
   });
 
   it("works with stateless highlight()", async () => {
     const output = await highlight('{"a": 1}', terminal({ language: json, theme }));
-    expect(output).toContain("\x1b[");
+    expect(output).toContain("\u001B[");
   });
 });
 

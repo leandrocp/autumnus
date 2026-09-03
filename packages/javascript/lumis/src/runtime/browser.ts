@@ -165,7 +165,7 @@ export const browserRuntime: RuntimeEnvironment = {
   },
 
   async readResolvedWasmFromDisk() {
-    return undefined;
+    return;
   },
 
   async parserInitOptions() {
@@ -189,18 +189,20 @@ export function createRuntime(...args: Parameters<typeof runtime.createRuntime>)
   return runtime.createRuntime(...args);
 }
 /** {@inheritDoc node.configureWasmResolver} */
-export function configureWasmResolver(...args: Parameters<typeof runtime.configureWasmResolver>) {
+export function configureWasmResolver(
+  ...args: Parameters<typeof runtime.configureWasmResolver>
+): void {
   return runtime.configureWasmResolver(...args);
 }
 export function configureLanguagePackageResolver(
   ...args: Parameters<typeof runtime.configureLanguagePackageResolver>
-) {
+): void {
   return runtime.configureLanguagePackageResolver(...args);
 }
 export function initParser(...args: Parameters<typeof runtime.initParser>) {
   return runtime.initParser(...args);
 }
-export function registerLanguage(...args: Parameters<typeof runtime.registerLanguage>) {
+export function registerLanguage(...args: Parameters<typeof runtime.registerLanguage>): void {
   return runtime.registerLanguage(...args);
 }
 export function resolveLanguageId(...args: Parameters<typeof runtime.resolveLanguageId>) {

@@ -1,7 +1,7 @@
 //! HTML output with CSS classes instead of inline styles
 //!
 //! This example demonstrates:
-//! - Using HtmlLinkedBuilder for CSS class-based output
+//! - Using `HtmlLinkedBuilder` for CSS class-based output
 //! - Generating separate CSS that can be linked in your HTML
 //! - Highlighting specific lines with custom classes
 
@@ -39,8 +39,8 @@ export default {
     let css = themes::CssBuilder::new(&theme).enable_italic(true).build();
 
     println!("<!-- Include this CSS in your HTML -->");
-    println!("<style>\n{}\n</style>\n", css);
+    println!("<style>\n{css}\n</style>\n");
 
     println!("<!-- And use this HTML markup -->");
-    println!("{}", html);
+    println!("{html}");
 }

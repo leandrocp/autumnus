@@ -32,6 +32,7 @@ if (!scenarioSpec) throw new Error(`unknown benchmark scenario: ${scenarioId}`);
 const scenario = {
   ...scenarioSpec,
   files: await Promise.all(
+    // oxlint-disable-next-line no-map-spread -- one-shot setup; mutating the spec is not worth the bytes.
     scenarioSpec.files.map(async (file) => ({
       ...file,
       source: await readFile(resolve(repoDir, file.path), "utf8"),

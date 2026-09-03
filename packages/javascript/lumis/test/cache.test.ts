@@ -42,10 +42,10 @@ describe("cacheLanguages", () => {
     expect(first).toHaveLength(1);
     expect(first[0]).toMatchObject({ language: "diff", downloaded: true });
 
-    const unavailableWasm = vi.fn(() => {
+    const unavailableWasm = vi.fn<() => never>(() => {
       throw new Error("WASM resolver must not run");
     });
-    const unavailablePackage = vi.fn(() => {
+    const unavailablePackage = vi.fn<() => never>(() => {
       throw new Error("package resolver must not run");
     });
     const second = await cacheLanguages(["diff"], {
@@ -57,7 +57,7 @@ describe("cacheLanguages", () => {
     expect(second[0]).toMatchObject({ language: "diff", downloaded: false });
     expect(unavailableWasm).not.toHaveBeenCalled();
     expect(unavailablePackage).not.toHaveBeenCalled();
-    expect(readFileSync(second[0]!.path).byteLength).toBeGreaterThan(0);
+    expect(readFileSync(second[0].path).byteLength).toBeGreaterThan(0);
   });
 
   it("resolves package metadata again when forced", async () => {
@@ -69,7 +69,9 @@ describe("cacheLanguages", () => {
       resolver,
       languagePackageResolver: localLanguagePackageResolver,
     });
-    const packageResolver = vi.fn(localLanguagePackageResolver);
+    const packageResolver = vi
+      .fn<typeof localLanguagePackageResolver>()
+      .mockImplementation(localLanguagePackageResolver);
 
     await cacheLanguages(["diff"], {
       directory,
@@ -94,7 +96,7 @@ describe("cacheLanguages", () => {
       resolver,
       languagePackageResolver: localLanguagePackageResolver,
     });
-    const cachedVersion = first[0]!.wasm.version;
+    const cachedVersion = first[0].wasm.version;
     const shared = join(directory, "parsers", "diff.lumis.json");
     expect(JSON.parse(readFileSync(shared, "utf8")).version).toBe(cachedVersion);
 

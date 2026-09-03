@@ -30,7 +30,7 @@ import { CHECK_SVG, COPY_SVG, escapeHtml } from "../lib/utils";
 
 const REPO = "https://github.com/leandrocp/lumis/tree/main";
 const PRE_CLASS = "m-0 overflow-x-auto p-5 font-mono text-[13px] leading-relaxed";
-const ESCAPE = "\u001b";
+const ESCAPE = "\u001B";
 const FENCE = "```";
 
 /** Every demo renders in both, so a code block follows the page rather than fighting it. */

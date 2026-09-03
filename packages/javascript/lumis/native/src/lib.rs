@@ -230,9 +230,7 @@ static SHARED_DEFINITIONS: LazyLock<Mutex<HashMap<String, Arc<lumis_wasm_runtime
     LazyLock::new(|| Mutex::new(HashMap::new()));
 
 fn build_runtime() -> std::result::Result<Runtime, String> {
-    let workers = std::thread::available_parallelism()
-        .map(usize::from)
-        .unwrap_or(1);
+    let workers = std::thread::available_parallelism().map_or(1, usize::from);
     lumis_wasm_runtime::runtime_with_catalog(language_store(None), workers)
         .map_err(|error| error.to_string())
 }
@@ -328,8 +326,8 @@ fn has_malformed_percent_escape(source: &str) -> bool {
     false
 }
 
-fn is_infra_ascii_whitespace(byte: &u8) -> bool {
-    matches!(*byte, b'\t' | b'\n' | 0x0c | b'\r' | b' ')
+fn is_infra_ascii_whitespace(byte: u8) -> bool {
+    matches!(byte, b'\t' | b'\n' | 0x0c | b'\r' | b' ')
 }
 
 fn file_url_host_and_path(file: &str) -> (&str, String) {
@@ -370,7 +368,7 @@ fn read_resolved_source(source: &str) -> std::result::Result<Vec<u8>, String> {
         if is_base64 {
             let decoded = decoded
                 .into_iter()
-                .filter(|byte| !is_infra_ascii_whitespace(byte))
+                .filter(|byte| !is_infra_ascii_whitespace(*byte))
                 .collect::<Vec<_>>();
             return FORGIVING_BASE64
                 .decode(decoded)
@@ -655,8 +653,7 @@ fn highlight_events(
             internal_ids
                 .get(&injected.to_ascii_lowercase())
                 .cloned()
-                .map(InjectionResolution::Loaded)
-                .unwrap_or(InjectionResolution::Fallback)
+                .map_or(InjectionResolution::Fallback, InjectionResolution::Loaded)
         },
     )?;
     Ok((output.events, output.unresolved))
@@ -906,7 +903,7 @@ impl NativeRuntime {
     fn resolve_injected(
         &self,
         runtime: &Runtime,
-        env: &Env,
+        env: Env,
         injected: &str,
         package_resolver: Option<&PackageResolverFunction<'_>>,
         wasm_resolver: Option<&WasmResolverFunction<'_>>,
@@ -922,7 +919,7 @@ impl NativeRuntime {
             return InjectionResolution::Fallback;
         };
         let package_source = {
-            let _guard = ResolverCallbackGuard::enter(env);
+            let _guard = ResolverCallbackGuard::enter(&env);
             match package_resolver.call(location.package_name.to_string()) {
                 Ok(Some(source)) => source,
                 Ok(None) => return InjectionResolution::Fallback,
@@ -958,7 +955,7 @@ impl NativeRuntime {
             let wasm_resolver =
                 wasm_resolver.ok_or_else(|| native_error("WASM resolver is not configured"))?;
             let wasm_source = {
-                let _guard = ResolverCallbackGuard::enter(env);
+                let _guard = ResolverCallbackGuard::enter(&env);
                 wasm_resolver
                     .call(FnArgs::from((resolved.to_string(), wasm_ref)))?
                     .ok_or_else(|| native_error("WASM resolver did not return a source"))?
@@ -1147,7 +1144,7 @@ impl NativeRuntime {
                 |injected| {
                     self.resolve_injected(
                         &runtime,
-                        &env,
+                        env,
                         injected,
                         package_resolver.as_ref(),
                         wasm_resolver.as_ref(),
@@ -1201,7 +1198,7 @@ impl NativeRuntime {
                 |injected| {
                     self.resolve_injected(
                         &runtime,
-                        &env,
+                        env,
                         injected,
                         package_resolver.as_ref(),
                         wasm_resolver.as_ref(),

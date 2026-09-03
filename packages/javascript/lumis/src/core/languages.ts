@@ -331,21 +331,22 @@ function parseLanguagePackageValue(value: unknown, expectedPackageName: string):
   const parserValue = requireObject(property(packageValue, "parser"), expectedPackageName);
   const parserName = requireString(property(parserValue, "name"), expectedPackageName);
   const grammarName = requireString(property(parserValue, "grammarName"), expectedPackageName);
-  const sha256 = requireString(property(parserValue, "sha256"), expectedPackageName);
+  const parserSha256 = requireString(property(parserValue, "sha256"), expectedPackageName);
   const size = property(parserValue, "size");
   const languagesValue = requireObject(property(packageValue, "languages"), expectedPackageName);
 
   if (
-    packageName !== expectedPackageName ||
-    !isValidPackageName(expectedPackageName) ||
-    !isSafePackagePathSegment(version) ||
-    definitionHash.length === 0 ||
-    !isSafePackagePathSegment(parserName) ||
-    grammarName.length === 0 ||
-    !/^[0-9a-f]{64}$/.test(sha256) ||
-    typeof size !== "number" ||
-    !Number.isSafeInteger(size) ||
-    size <= 0
+    !isValidPackageManifest({
+      packageName,
+      expectedPackageName,
+      version,
+      definitionHash,
+      parserName,
+      grammarName,
+      parserSha256,
+      size,
+    }) ||
+    !isPositiveSafeInteger(size)
   ) {
     return invalidLanguagePackage(expectedPackageName);
   }
@@ -368,11 +369,53 @@ function parseLanguagePackageValue(value: unknown, expectedPackageName: string):
         expectedPackageName,
       ),
       revision: optionalNullableString(property(parserValue, "revision"), expectedPackageName),
-      sha256,
+      sha256: parserSha256,
       size,
     },
     languages,
   };
+}
+
+// Every field a package manifest has to satisfy before its languages are read.
+function isValidPackageManifest(fields: {
+  packageName: string;
+  expectedPackageName: string;
+  version: string;
+  definitionHash: string;
+  parserName: string;
+  grammarName: string;
+  parserSha256: string;
+  size: unknown;
+}): boolean {
+  return (
+    fields.packageName === fields.expectedPackageName &&
+    isValidPackageName(fields.expectedPackageName) &&
+    isSafePackagePathSegment(fields.version) &&
+    fields.definitionHash.length > 0 &&
+    isSafePackagePathSegment(fields.parserName) &&
+    fields.grammarName.length > 0 &&
+    /^[0-9a-f]{64}$/.test(fields.parserSha256) &&
+    isPositiveSafeInteger(fields.size)
+  );
+}
+
+function isPositiveSafeInteger(value: unknown): value is number {
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+}
+
+// Every surrogate has to be half of a pair; a lone one is not a scalar value.
+function isUnicodeScalarString(value: string): boolean {
+  for (let index = 0; index < value.length; index += 1) {
+    const unit = value.charCodeAt(index);
+    if (unit >= 0xd800 && unit <= 0xdbff) {
+      const next = value.charCodeAt(index + 1);
+      if (!(next >= 0xdc00 && next <= 0xdfff)) return false;
+      index += 1;
+    } else if (unit >= 0xdc00 && unit <= 0xdfff) {
+      return false;
+    }
+  }
+  return true;
 }
 
 // JSON.parse discards overwritten members and turns 1e400 into Infinity, so
@@ -382,58 +425,73 @@ function hasValidRawJsonProfile(json: string): boolean {
   let index = 0;
   while (index < json.length) {
     const character = json[index]!;
-    if (character === '"') {
-      let end = index + 1;
-      while (end < json.length && json[end] !== '"') {
-        end += json[end] === "\\" ? 2 : 1;
-      }
-      if (end >= json.length) return false;
 
-      let decoded: unknown;
-      try {
-        decoded = JSON.parse(json.slice(index, end + 1));
-      } catch {
-        return false;
-      }
-      if (!hasOnlyUnicodeScalarStrings(decoded)) return false;
-      index = end + 1;
+    if (character === '"') {
+      const end = scanJsonString(json, index);
+      if (end < 0) return false;
+      index = end;
       continue;
     }
 
-    if (character === "{" || character === "[") {
-      depth += 1;
-      if (depth > MAX_JSON_CONTAINER_DEPTH) return false;
-    } else if (character === "}" || character === "]") {
-      depth -= 1;
-    } else if (character === "-" || (character >= "0" && character <= "9")) {
-      JSON_NUMBER.lastIndex = index;
-      const number = JSON_NUMBER.exec(json);
-      if (number !== null) {
-        if (!Number.isFinite(Number(number[0]))) return false;
-        index = JSON_NUMBER.lastIndex;
+    if (isJsonNumberStart(character)) {
+      const end = scanJsonNumber(json, index);
+      if (end < 0) return false;
+      if (end > index) {
+        index = end;
         continue;
       }
+    } else {
+      depth += containerDepthDelta(character);
+      if (depth > MAX_JSON_CONTAINER_DEPTH) return false;
     }
+
     index += 1;
   }
   return true;
 }
 
-function hasOnlyUnicodeScalarStrings(value: unknown): boolean {
-  if (typeof value === "string") {
-    for (let index = 0; index < value.length; index += 1) {
-      const unit = value.charCodeAt(index);
-      if (unit >= 0xd800 && unit <= 0xdbff) {
-        const next = value.charCodeAt(index + 1);
-        if (!(next >= 0xdc00 && next <= 0xdfff)) return false;
-        index += 1;
-      } else if (unit >= 0xdc00 && unit <= 0xdfff) {
-        return false;
-      }
-    }
-    return true;
+function isJsonNumberStart(character: string): boolean {
+  return character === "-" || (character >= "0" && character <= "9");
+}
+
+function containerDepthDelta(character: string): number {
+  if (character === "{" || character === "[") return 1;
+  if (character === "}" || character === "]") return -1;
+  return 0;
+}
+
+// The index just past the string literal at `start`, or -1 when it is
+// unterminated or carries a lone surrogate.
+function scanJsonString(json: string, start: number): number {
+  let end = start + 1;
+  while (end < json.length && json[end] !== '"') {
+    end += json[end] === "\\" ? 2 : 1;
   }
-  if (Array.isArray(value)) return value.every(hasOnlyUnicodeScalarStrings);
+  if (end >= json.length) return -1;
+
+  let decoded: unknown;
+  try {
+    decoded = JSON.parse(json.slice(start, end + 1));
+  } catch {
+    return -1;
+  }
+
+  return hasOnlyUnicodeScalarStrings(decoded) ? end + 1 : -1;
+}
+
+// The index just past the number at `start`, `start` itself when no number
+// begins there, or -1 when the number does not survive as a finite value.
+function scanJsonNumber(json: string, start: number): number {
+  JSON_NUMBER.lastIndex = start;
+  const number = JSON_NUMBER.exec(json);
+  if (number === null) return start;
+
+  return Number.isFinite(Number(number[0])) ? JSON_NUMBER.lastIndex : -1;
+}
+
+function hasOnlyUnicodeScalarStrings(value: unknown): boolean {
+  if (typeof value === "string") return isUnicodeScalarString(value);
+  if (Array.isArray(value)) return value.every((entry) => hasOnlyUnicodeScalarStrings(entry));
   if (typeof value === "object" && value !== null) {
     return Object.entries(value).every(
       ([key, child]) => hasOnlyUnicodeScalarStrings(key) && hasOnlyUnicodeScalarStrings(child),
@@ -449,7 +507,7 @@ function isValidPackageName(value: string): boolean {
   if (value.startsWith("@")) {
     const scoped = value.slice(1);
     const slash = scoped.indexOf("/");
-    if (slash < 0 || scoped.indexOf("/", slash + 1) >= 0) return false;
+    if (slash < 0 || scoped.includes("/", slash + 1)) return false;
     segments = [scoped.slice(0, slash), scoped.slice(slash + 1)];
   } else {
     if (value.includes("/")) return false;
@@ -601,6 +659,17 @@ function inspectParserGrammar(data: Uint8Array): ParserGrammar {
     : { ok: false, detail: `expected one grammar export, got ${names.length}` };
 }
 
+async function downloadParserWasm(source: string, languageId: string): Promise<Uint8Array> {
+  const response = await fetch(source);
+  if (!response.ok) {
+    throw new Error(
+      `could not download parser WASM for ${languageId}: HTTP ${response.status} ${response.statusText}`,
+    );
+  }
+
+  return new Uint8Array(await response.arrayBuffer());
+}
+
 function requireParserGrammar(
   cached: CachedParserModule,
   data: Uint8Array,
@@ -638,21 +707,29 @@ function matchesSpecialCapture(name: string, base: string): boolean {
   return name === base;
 }
 
+const NON_HIGHLIGHT_CAPTURES = [
+  "injection.content",
+  "injection.language",
+  "local.scope",
+  "local.definition",
+  "local.definition-value",
+  "local.reference",
+];
+
+// A helper capture, `@_name` in nvim-treesitter, or one of the captures the
+// injection and locals passes own rather than the highlight pass.
+function isNonHighlightCapture(name: string): boolean {
+  return (
+    name.length === 0 ||
+    name.startsWith("_") ||
+    NON_HIGHLIGHT_CAPTURES.some((special) => matchesSpecialCapture(name, special))
+  );
+}
+
 function resolveHighlightName(captureName: string): string | undefined {
   const name = captureName.startsWith("@") ? captureName.slice(1) : captureName;
 
-  if (
-    name.length === 0 ||
-    name.startsWith("_") ||
-    matchesSpecialCapture(name, "injection.content") ||
-    matchesSpecialCapture(name, "injection.language") ||
-    matchesSpecialCapture(name, "local.scope") ||
-    matchesSpecialCapture(name, "local.definition") ||
-    matchesSpecialCapture(name, "local.definition-value") ||
-    matchesSpecialCapture(name, "local.reference")
-  ) {
-    return undefined;
-  }
+  if (isNonHighlightCapture(name)) return undefined;
 
   if (HIGHLIGHT_NAMES_SET.has(name)) {
     return name;
@@ -698,13 +775,33 @@ function parseBinaryOffset(match: RegExpExecArray): number {
   return match[1] === "-" ? -value : value;
 }
 
+const SIGNIFICAND_BITS = 52;
+const MINIMUM_SUBNORMAL_EXPONENT = -1074;
+const INFINITY_BITS = 0x7ffn << 52n;
+
 function parseHexOffset(match: RegExpExecArray): number {
+  const exponent = { value: Number(match[3] ?? 0) };
+  const mantissa = parseHexMantissa(match[2]!, exponent);
+  const negative = match[1] === "-";
+
+  if (mantissa.significand === 0n) return negative ? -0 : 0;
+
+  const significand = mantissa.inexact ? mantissa.significand | 1n : mantissa.significand;
+  const rounded = roundHexSignificand(significand, exponent);
+  return hexBitsToFloat(rounded, exponent, negative);
+}
+
+// Accumulates the mantissa's hex digits, adjusting `exponent` for the radix
+// point and for any digit past the 128 bits the accumulator holds.
+function parseHexMantissa(
+  mantissa: string,
+  exponent: { value: number },
+): { significand: bigint; inexact: boolean } {
   let significand = 0n;
-  let binaryExponent = Number(match[3] ?? 0);
   let seenPoint = false;
   let inexact = false;
 
-  for (const character of match[2]!) {
+  for (const character of mantissa) {
     if (character === ".") {
       seenPoint = true;
       continue;
@@ -714,48 +811,54 @@ function parseHexOffset(match: RegExpExecArray): number {
     if (significand >> 124n === 0n) {
       significand = (significand << 4n) | digit;
     } else {
-      binaryExponent += 4;
+      exponent.value += 4;
       inexact ||= digit !== 0n;
     }
-    if (seenPoint) binaryExponent -= 4;
+    if (seenPoint) exponent.value -= 4;
   }
 
-  if (significand === 0n) return match[1] === "-" ? -0 : 0;
-  if (inexact) significand |= 1n;
+  return { significand, inexact };
+}
 
-  const significandBits = 52;
-  const minimumSubnormalExponent = -1074;
-  const infinityBits = 0x7ffn << 52n;
-  let roundBits = significand.toString(2).length - 1 - significandBits;
-  if (binaryExponent < minimumSubnormalExponent - roundBits) {
-    roundBits = minimumSubnormalExponent - binaryExponent;
+// Rounds the significand to the 53 bits an f64 holds, to nearest and ties to
+// even, adjusting `exponent` by the same amount.
+function roundHexSignificand(significand: bigint, exponent: { value: number }): bigint {
+  let roundBits = significand.toString(2).length - 1 - SIGNIFICAND_BITS;
+  if (exponent.value < MINIMUM_SUBNORMAL_EXPONENT - roundBits) {
+    roundBits = MINIMUM_SUBNORMAL_EXPONENT - exponent.value;
   }
-  binaryExponent += roundBits;
+  exponent.value += roundBits;
 
-  if (roundBits > 0) {
-    if (roundBits === 1) {
-      significand <<= 1n;
-    } else if (roundBits > 2) {
-      const shift = roundBits - 2;
-      if (shift < 128) {
-        const discarded = significand & ((1n << BigInt(shift)) - 1n);
-        significand = (significand >> BigInt(shift)) | BigInt(discarded !== 0n);
-      } else {
-        significand = 1n;
-      }
-    }
+  if (roundBits < 0) return significand << BigInt(-roundBits);
+  if (roundBits === 0) return significand;
 
-    const trailing = Number(significand & 0b111n);
-    significand >>= 2n;
-    significand += BigInt((0b11001000 >> trailing) & 1);
-  } else if (roundBits < 0) {
-    significand <<= BigInt(-roundBits);
-  }
+  const shifted = shiftForRounding(significand, roundBits);
+  const trailing = Number(shifted & 0b111n);
+  return (shifted >> 2n) + BigInt((0b11001000 >> trailing) & 1);
+}
 
-  const encodedExponent = BigInt(binaryExponent - minimumSubnormalExponent) << 52n;
+// Leaves the three bits rounding needs: the last kept bit, the round bit, and a
+// sticky bit standing for everything discarded below them.
+function shiftForRounding(significand: bigint, roundBits: number): bigint {
+  if (roundBits === 1) return significand << 1n;
+  if (roundBits <= 2) return significand;
+
+  const shift = roundBits - 2;
+  if (shift >= 128) return 1n;
+
+  const discarded = significand & ((1n << BigInt(shift)) - 1n);
+  return (significand >> BigInt(shift)) | BigInt(discarded !== 0n);
+}
+
+function hexBitsToFloat(
+  significand: bigint,
+  exponent: { value: number },
+  negative = false,
+): number {
+  const encodedExponent = BigInt(exponent.value - MINIMUM_SUBNORMAL_EXPONENT) << 52n;
   let bits = significand + encodedExponent;
-  if (bits >= infinityBits) bits = infinityBits;
-  if (match[1] === "-") bits |= 1n << 63n;
+  if (bits >= INFINITY_BITS) bits = INFINITY_BITS;
+  if (negative) bits |= 1n << 63n;
 
   const buffer = new ArrayBuffer(8);
   const view = new DataView(buffer);
@@ -768,13 +871,13 @@ function parseOffsetDelta(input: string): number | undefined {
   if (value.length === 0) return undefined;
 
   const binary = BINARY_OFFSET.exec(value);
-  const hex = HEX_OFFSET.exec(value);
+  const hexadecimal = HEX_OFFSET.exec(value);
   const decimal = DECIMAL_OFFSET.exec(value);
   let parsed = NaN;
   if (binary) {
     parsed = parseBinaryOffset(binary);
-  } else if (hex && isLuaExponent(hex[3])) {
-    parsed = parseHexOffset(hex);
+  } else if (hexadecimal && isLuaExponent(hexadecimal[3])) {
+    parsed = parseHexOffset(hexadecimal);
   } else if (decimal && isLuaExponent(decimal[1])) {
     parsed = Number(value);
   }
@@ -899,6 +1002,27 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
     DEFAULT_LANGUAGE_PACKAGE_RESOLVER;
   const moduleCache = createSharedRuntimeCache();
   const parserModules = new Map<string, CachedParserModule>();
+
+  // One tree-sitter Language per parser digest, shared across every language the
+  // parser serves. web-tree-sitter cannot reclaim a failed dynamic-linker load,
+  // so retaining the rejection keeps identical bad bytes from growing its global
+  // store.
+  async function loadParserLanguage(
+    Language: Awaited<ReturnType<typeof loadTreeSitter>>["Language"],
+    wasmInput: Uint8Array,
+    packaged: { wasm: WasmRef; grammarName: string },
+  ) {
+    const parserKey = packaged.wasm.sha256;
+    let parserModule = parserModules.get(parserKey);
+    if (!parserModule) {
+      parserModule = {};
+      parserModules.set(parserKey, parserModule);
+    }
+
+    requireParserGrammar(parserModule, wasmInput, packaged.wasm, packaged.grammarName);
+    parserModule.language ??= Language.load(wasmInput);
+    return parserModule.language;
+  }
 
   class HighlighterRuntime implements RuntimeLike {
     private explicitResolver: WasmResolver | undefined;
@@ -1116,6 +1240,29 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
       });
     }
 
+    // A package reference resolves through the store; anything else is a source
+    // the runtime knows how to reach.
+    private async readParserWasm(
+      resolved: { wasm: NonNullable<LoadLanguageOptions["wasm"]>; definition: { id: string } },
+      requestedId: string,
+    ): Promise<Uint8Array> {
+      const { wasm } = resolved;
+      if (typeof wasm === "object" && isWasmRef(wasm)) {
+        return this.resolveParserWasm(resolved.definition.id, wasm);
+      }
+      if (!isRuntimeWasmInput(wasm)) {
+        throw new Error(`Unsupported WASM input for language "${requestedId}"`);
+      }
+
+      const source = await runtime.resolveWasm(wasm);
+      if (source instanceof Uint8Array) return source;
+
+      const disk = await runtime.readResolvedWasmFromDisk(source);
+      if (disk) return disk;
+
+      return downloadParserWasm(source, resolved.definition.id);
+    }
+
     private async createLoadedLanguage(opts: LoadLanguageOptions): Promise<LoadedLanguage> {
       await this.initParser();
 
@@ -1131,52 +1278,13 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
         throw new Error(`Language package "${opts.packageName}" has no parser or highlights query`);
       }
 
-      let wasmInput: Uint8Array;
-      if (typeof resolved.wasm === "object" && resolved.wasm !== null && isWasmRef(resolved.wasm)) {
-        wasmInput = await this.resolveParserWasm(resolved.definition.id, resolved.wasm);
-      } else if (isRuntimeWasmInput(resolved.wasm)) {
-        const source = await runtime.resolveWasm(resolved.wasm);
-        if (source instanceof Uint8Array) {
-          wasmInput = source;
-        } else {
-          const disk = await runtime.readResolvedWasmFromDisk(source);
-          if (disk) {
-            wasmInput = disk;
-          } else {
-            const response = await fetch(source);
-            if (!response.ok) {
-              throw new Error(
-                `could not download parser WASM for ${resolved.definition.id}: HTTP ${response.status} ${response.statusText}`,
-              );
-            }
-            wasmInput = new Uint8Array(await response.arrayBuffer());
-          }
-        }
-      } else {
-        throw new Error(`Unsupported WASM input for language "${opts.definition.id}"`);
-      }
+      const wasmInput = await this.readParserWasm(resolved, opts.definition.id);
       // Always, including when the caller chose where the bytes come from:
       // `withWasm()` selects a source, it does not waive the package's digest.
       await verifyWasm(packaged.wasm, wasmInput);
 
       const { Language, Parser, Query } = await loadTreeSitter();
-      const parserKey =
-        packaged?.wasm.sha256 ??
-        (typeof resolved.wasm === "object" && resolved.wasm !== null && isWasmRef(resolved.wasm)
-          ? resolved.wasm.sha256
-          : await sha256Hex(wasmInput));
-      let parserModule = parserModules.get(parserKey);
-      if (!parserModule) {
-        parserModule = {};
-        parserModules.set(parserKey, parserModule);
-      }
-      if (packaged) {
-        requireParserGrammar(parserModule, wasmInput, packaged.wasm, packaged.grammarName);
-      }
-      // web-tree-sitter cannot reclaim a failed dynamic-linker load. Retaining
-      // the rejection prevents identical bad bytes from growing its global store.
-      parserModule.language ??= Language.load(wasmInput);
-      const language = await parserModule.language;
+      const language = await loadParserLanguage(Language, wasmInput, packaged);
       const config = compileHighlightConfig(
         language,
         Query,
@@ -1245,7 +1353,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
     async initParser(): Promise<void> {
       this.sharedCache.parserInit ??= Promise.all([
         loadTreeSitter(),
-        runtime.parserInitOptions?.() ?? Promise.resolve(undefined),
+        runtime.parserInitOptions?.() ?? Promise.resolve(),
       ]).then(([{ Parser }, initOptions]) => Parser.init(initOptions));
       await this.sharedCache.parserInit;
     }
@@ -1376,7 +1484,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
       return defaultRuntime.getLoadedLanguageIds();
     },
     availableLanguages() {
-      return LANGUAGES.map(cloneLanguageInfo);
+      return LANGUAGES.map((language) => cloneLanguageInfo(language));
     },
     getDefaultRuntime() {
       return defaultRuntime;

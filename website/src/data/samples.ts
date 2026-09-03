@@ -14,7 +14,7 @@ const samples = new Map<string, string>();
 for (const [path, content] of Object.entries(sampleModules)) {
   const filename = path.split("/").pop();
   if (!filename) continue;
-  const id = filename.substring(0, filename.indexOf("."));
+  const id = filename.slice(0, filename.indexOf("."));
   if (id) {
     samples.set(id, content);
   }

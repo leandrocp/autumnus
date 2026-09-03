@@ -8,6 +8,7 @@ use lumis_wasm_runtime::{parser_filename, LanguagePackage, PackagedLanguage, Par
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::collections::{BTreeMap, HashSet};
+use std::fmt::Write as _;
 use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -234,6 +235,8 @@ struct HtmlMultiThemesFixture {
     highlight_lines: Vec<usize>,
 }
 
+// `serde`'s `skip_serializing_if` hands the predicate a reference.
+#[allow(clippy::trivially_copy_pass_by_ref)]
 fn is_false(value: &bool) -> bool {
     !*value
 }
@@ -285,7 +288,7 @@ fn serialize_events(events: Vec<HighlightEvent>) -> Vec<SerializableHighlightEve
 fn parse_language(language: &str) -> Result<Language> {
     language
         .parse()
-        .map_err(|_| anyhow::anyhow!("invalid language '{}'", language))
+        .map_err(|_| anyhow::anyhow!("invalid language '{language}'"))
 }
 
 fn fixture_root() -> PathBuf {
@@ -318,9 +321,58 @@ fn selected_fixture_dirs(name: &str) -> Result<Vec<PathBuf>> {
 
     let dir = root.join(name);
     if !dir.is_dir() {
-        bail!("fixture '{}' not found", name);
+        bail!("fixture '{name}' not found");
     }
     Ok(vec![dir])
+}
+
+// Keep the fixture fields explicit so this extraction cannot introduce a
+// second formatter configuration model.
+#[allow(clippy::too_many_arguments)]
+fn render_html_multi_themes_fixture(
+    source: &str,
+    language: Language,
+    themes: Vec<String>,
+    default_theme: Option<String>,
+    rainbow_brackets: bool,
+    highlight_lines: Vec<usize>,
+    output: &mut Vec<u8>,
+) -> Result<()> {
+    if themes.is_empty() {
+        bail!("html-multi-themes requires at least one --themes entry");
+    }
+
+    let mut theme_map = std::collections::HashMap::new();
+    for spec in themes {
+        let (name, theme_id) = spec
+            .split_once(':')
+            .ok_or_else(|| anyhow::anyhow!("invalid theme spec '{spec}'"))?;
+        theme_map.insert(name.to_string(), fixture_theme(theme_id)?);
+    }
+
+    let mut builder = lumis::HtmlMultiThemesBuilder::new();
+    builder
+        .language(language)
+        .themes(theme_map)
+        .rainbow_brackets(rainbow_brackets);
+
+    if let Some(default_theme) = default_theme {
+        builder.default_theme(default_theme);
+    }
+    if !highlight_lines.is_empty() {
+        builder.highlight_lines(Some(lumis::formatters::html_inline::HighlightLines {
+            lines: highlight_lines
+                .into_iter()
+                .map(|line| line..=line)
+                .collect(),
+            style: Some(lumis::formatters::html_inline::HighlightLinesStyle::Theme),
+            class: None,
+        }));
+    }
+
+    let formatter = builder.build().map_err(|e| anyhow::anyhow!("{e}"))?;
+    formatter.format(source, output)?;
+    Ok(())
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -357,41 +409,15 @@ fn render_formatter_output(
             formatter.format(source, &mut output)?;
         }
         "html-multi-themes" => {
-            if themes.is_empty() {
-                bail!("html-multi-themes requires at least one --themes entry");
-            }
-
-            let mut theme_map = std::collections::HashMap::new();
-            for spec in themes {
-                let (name, theme_id) = spec
-                    .split_once(':')
-                    .ok_or_else(|| anyhow::anyhow!("invalid theme spec '{}'", spec))?;
-                theme_map.insert(name.to_string(), fixture_theme(theme_id)?);
-            }
-
-            let mut builder = lumis::HtmlMultiThemesBuilder::new();
-            builder
-                .language(language)
-                .themes(theme_map)
-                .rainbow_brackets(rainbow_brackets);
-
-            if let Some(default_theme) = default_theme {
-                builder.default_theme(default_theme);
-            }
-
-            if !highlight_lines.is_empty() {
-                builder.highlight_lines(Some(lumis::formatters::html_inline::HighlightLines {
-                    lines: highlight_lines
-                        .into_iter()
-                        .map(|line| line..=line)
-                        .collect(),
-                    style: Some(lumis::formatters::html_inline::HighlightLinesStyle::Theme),
-                    class: None,
-                }));
-            }
-
-            let formatter = builder.build().map_err(|e| anyhow::anyhow!("{e}"))?;
-            formatter.format(source, &mut output)?;
+            render_html_multi_themes_fixture(
+                source,
+                language,
+                themes,
+                default_theme,
+                rainbow_brackets,
+                highlight_lines,
+                &mut output,
+            )?;
         }
         "terminal" => {
             let theme_name = theme.unwrap_or_else(|| "dracula".to_string());
@@ -412,7 +438,7 @@ fn render_formatter_output(
                 .map_err(|e| anyhow::anyhow!("{e}"))?;
             formatter.format(source, &mut output)?;
         }
-        other => bail!("unsupported formatter '{}'", other),
+        other => bail!("unsupported formatter '{other}'"),
     }
 
     String::from_utf8(output).map_err(Into::into)
@@ -428,26 +454,27 @@ fn fixture_outputs(
 ) -> Result<FixtureOutputs> {
     let events =
         highlight_events_with_options(source, language, HighlightOptions { rainbow_brackets })?;
-    let (multi_themes, multi_default_theme, multi_highlight_lines) = html_multi_themes
-        .as_ref()
-        .map(|config| {
-            (
-                config
-                    .themes
-                    .iter()
-                    .map(|(name, theme)| format!("{name}:{theme}"))
-                    .collect(),
-                config.default_theme.clone(),
-                config.highlight_lines.clone(),
-            )
-        })
-        .unwrap_or_else(|| {
-            (
-                vec![format!("main:{theme}")],
-                Some("main".to_string()),
-                vec![],
-            )
-        });
+    let (multi_themes, multi_default_theme, multi_highlight_lines) =
+        html_multi_themes.as_ref().map_or_else(
+            || {
+                (
+                    vec![format!("main:{theme}")],
+                    Some("main".to_string()),
+                    vec![],
+                )
+            },
+            |config| {
+                (
+                    config
+                        .themes
+                        .iter()
+                        .map(|(name, theme)| format!("{name}:{theme}"))
+                        .collect(),
+                    config.default_theme.clone(),
+                    config.highlight_lines.clone(),
+                )
+            },
+        );
     let metadata = FixtureMetadata {
         name: name.to_string(),
         language: language.id_name().to_string(),
@@ -783,7 +810,7 @@ fn sync_css() -> Result<()> {
     Ok(())
 }
 
-/// Extract (name, url) pairs from themes/themes.lua using full_moon AST parsing.
+/// Extract (name, url) pairs from themes/themes.lua using `full_moon` AST parsing.
 fn parse_themes_lua() -> Result<Vec<(String, String)>> {
     use full_moon::ast::{Expression, Field, LastStmt};
     use full_moon::tokenizer::TokenType;
@@ -1258,7 +1285,7 @@ fn latest_crate_version(crate_name: &str) -> Result<Option<String>> {
     for version in versions {
         if version
             .get("yanked")
-            .and_then(|yanked| yanked.as_bool())
+            .and_then(serde_json::Value::as_bool)
             .unwrap_or(true)
         {
             continue;
@@ -1345,6 +1372,31 @@ fn langs_list() -> Result<()> {
     Ok(())
 }
 
+fn parser_upgrade_candidate(
+    info: &ParserInfo,
+    git: &str,
+    current_version: &str,
+) -> Result<(String, String)> {
+    if let Some(crate_name) = info.crate_field.as_deref() {
+        let version =
+            latest_crate_version(crate_name)?.unwrap_or_else(|| current_version.to_string());
+        let revision = git_resolve_version_tag(git, &version)
+            .or_else(|| {
+                git_latest_release_rev(git)
+                    .ok()
+                    .flatten()
+                    .map(|(_, revision)| revision)
+            })
+            .unwrap_or_else(|| git_ls_remote(git).unwrap_or_default());
+        return Ok((version, revision));
+    }
+
+    if let Some((version, revision)) = git_latest_release_rev(git)? {
+        return Ok((version, revision));
+    }
+    Ok((current_version.to_string(), git_ls_remote(git)?))
+}
+
 fn upgrade_parsers(name: &str) -> Result<()> {
     let mut doc = read_languages_toml_edit()?;
     let toml = read_languages_toml()?;
@@ -1357,22 +1409,7 @@ fn upgrade_parsers(name: &str) -> Result<()> {
 
         let current_ver = info.version.as_deref().unwrap_or("");
         let current_rev = info.rev.as_deref().unwrap_or("");
-        let (ver, new_rev) = if let Some(crate_name) = info.crate_field.as_deref() {
-            let ver = latest_crate_version(crate_name)?.unwrap_or_else(|| current_ver.to_string());
-            let rev = git_resolve_version_tag(git, &ver)
-                .or_else(|| {
-                    git_latest_release_rev(git)
-                        .ok()
-                        .flatten()
-                        .map(|(_, rev)| rev)
-                })
-                .unwrap_or_else(|| git_ls_remote(git).unwrap_or_default());
-            (ver, rev)
-        } else if let Some((ver, rev)) = git_latest_release_rev(git)? {
-            (ver, rev)
-        } else {
-            (current_ver.to_string(), git_ls_remote(git)?)
-        };
+        let (ver, new_rev) = parser_upgrade_candidate(info, git, current_ver)?;
 
         if new_rev.is_empty() {
             println!("Warning: could not resolve revision for {parser_name}, skipping");
@@ -1407,6 +1444,62 @@ fn upgrade_parsers(name: &str) -> Result<()> {
     Ok(())
 }
 
+fn fetch_parser(tmp: &str, parser_name: &str, info: &ParserInfo, git: &str) -> Result<()> {
+    let rev = info.rev.as_deref().unwrap_or("HEAD");
+    let parser_dir = vendored_parser_dir_name(parser_name, info);
+    let clone_dir = format!("{tmp}/{parser_dir}");
+
+    println!("Fetching {parser_name} from {git} at {rev}");
+    run_cmd_ok(&format!("git clone {git} {clone_dir} 2>/dev/null"))?;
+    run_cmd_ok(&format!("cd {clone_dir} && git checkout {rev} 2>/dev/null"))?;
+
+    let dest = format!("crates/lumis/vendored_parsers/{parser_dir}");
+    if info.generate.unwrap_or(false) {
+        run_cmd_ok(&format!("cd {clone_dir} && tree-sitter generate"))?;
+        let src = format!("{clone_dir}/src");
+        if !Path::new(&src).is_dir() {
+            bail!("no generated src directory found for {parser_name} at {src}");
+        }
+
+        let _ = run_cmd_ok(&format!("rm -rf {dest}"));
+        fs::create_dir_all(&dest)?;
+        run_cmd_ok(&format!("cp -r {src} {dest}/"))?;
+        println!("  Updated {parser_name} (generated)");
+    } else if let Some(ref location) = info.location {
+        let src = format!("{clone_dir}/{location}/src");
+        if !Path::new(&src).is_dir() {
+            bail!("no src directory found for {parser_name} in location {location}");
+        }
+
+        let _ = run_cmd_ok(&format!("rm -rf {dest}"));
+        let location_dest = format!("{dest}/{location}");
+        fs::create_dir_all(&location_dest)?;
+        run_cmd_ok(&format!("cp -r {src} {location_dest}/"))?;
+
+        // Multi-grammar repositories can share support files from a root-level
+        // common directory (for example XML). Preserve the complete directory:
+        // scanners may include or otherwise depend on non-header files too.
+        let common = format!("{clone_dir}/common");
+        if Path::new(&common).is_dir() {
+            run_cmd_ok(&format!("cp -r {common} {dest}/"))?;
+        }
+        println!("  Updated {parser_name} (location: {location})");
+    } else {
+        let src = format!("{clone_dir}/src");
+        if !Path::new(&src).is_dir() {
+            bail!("no src directory found for {parser_name} at {src}");
+        }
+
+        fs::create_dir_all(&dest)?;
+        let _ = run_cmd_ok(&format!("rm -rf {dest}/src"));
+        run_cmd_ok(&format!("cp -r {src} {dest}/"))?;
+        println!("  Updated {parser_name}");
+    }
+
+    let _ = run_cmd_ok(&format!("rm -rf {clone_dir}"));
+    Ok(())
+}
+
 fn fetch_parsers(name: &str) -> Result<()> {
     let toml = read_languages_toml()?;
     let tmp = tmpdir()?;
@@ -1423,62 +1516,7 @@ fn fetch_parsers(name: &str) -> Result<()> {
         if !name.is_empty() && parser_name != name {
             continue;
         }
-
-        let rev = info.rev.as_deref().unwrap_or("HEAD");
-        let parser_dir = vendored_parser_dir_name(parser_name, info);
-        let clone_dir = format!("{tmp}/{parser_dir}");
-
-        println!("Fetching {parser_name} from {git} at {rev}");
-
-        run_cmd_ok(&format!("git clone {git} {clone_dir} 2>/dev/null"))?;
-        run_cmd_ok(&format!("cd {clone_dir} && git checkout {rev} 2>/dev/null"))?;
-
-        let dest = format!("crates/lumis/vendored_parsers/{parser_dir}");
-
-        if info.generate.unwrap_or(false) {
-            run_cmd_ok(&format!("cd {clone_dir} && tree-sitter generate"))?;
-            let src = format!("{clone_dir}/src");
-            if !Path::new(&src).is_dir() {
-                bail!("no generated src directory found for {parser_name} at {src}");
-            }
-
-            let _ = run_cmd_ok(&format!("rm -rf {dest}"));
-            fs::create_dir_all(&dest)?;
-            run_cmd_ok(&format!("cp -r {src} {dest}/"))?;
-            println!("  Updated {parser_name} (generated)");
-        } else if let Some(ref location) = info.location {
-            let src = format!("{clone_dir}/{location}/src");
-            if !Path::new(&src).is_dir() {
-                bail!("no src directory found for {parser_name} in location {location}");
-            }
-
-            let _ = run_cmd_ok(&format!("rm -rf {dest}"));
-            let location_dest = format!("{dest}/{location}");
-            fs::create_dir_all(&location_dest)?;
-            run_cmd_ok(&format!("cp -r {src} {location_dest}/"))?;
-
-            // Multi-grammar repositories can share support files from a root-level
-            // common directory (for example XML). Preserve the complete directory:
-            // scanners may include or otherwise depend on non-header files too.
-            let common = format!("{clone_dir}/common");
-            if Path::new(&common).is_dir() {
-                run_cmd_ok(&format!("cp -r {common} {dest}/"))?;
-            }
-
-            println!("  Updated {parser_name} (location: {location})");
-        } else {
-            let src = format!("{clone_dir}/src");
-            if !Path::new(&src).is_dir() {
-                bail!("no src directory found for {parser_name} at {src}");
-            }
-
-            fs::create_dir_all(&dest)?;
-            let _ = run_cmd_ok(&format!("rm -rf {dest}/src"));
-            run_cmd_ok(&format!("cp -r {src} {dest}/"))?;
-            println!("  Updated {parser_name}");
-        }
-
-        let _ = run_cmd_ok(&format!("rm -rf {clone_dir}"));
+        fetch_parser(&tmp, parser_name, info, git)?;
     }
 
     let _ = run_cmd_ok(&format!("rm -rf {tmp}"));
@@ -1606,14 +1644,13 @@ fn upgrade_queries(name: &str) -> Result<()> {
 
     let mut url_revs: BTreeMap<String, String> = BTreeMap::new();
     for (query_name, info) in queries_to_upgrade(&toml.queries, name) {
-        let new_rev = match url_revs.get(&info.git) {
-            Some(rev) => rev.clone(),
-            None => {
-                let rev = git_ls_remote(&info.git)?;
-                println!("  {} -> {}", info.git, &rev[..12.min(rev.len())]);
-                url_revs.insert(info.git.clone(), rev.clone());
-                rev
-            }
+        let new_rev = if let Some(rev) = url_revs.get(&info.git) {
+            rev.clone()
+        } else {
+            let rev = git_ls_remote(&info.git)?;
+            println!("  {} -> {}", info.git, &rev[..12.min(rev.len())]);
+            url_revs.insert(info.git.clone(), rev.clone());
+            rev
         };
 
         if info.rev != new_rev {
@@ -1802,7 +1839,7 @@ fn requirement_of(spec: &toml_edit::Item) -> Option<String> {
 /// itself visited, so the requirement is still checked once.
 fn inherits_from_workspace(spec: &toml_edit::Item) -> bool {
     spec.get("workspace")
-        .and_then(|workspace| workspace.as_bool())
+        .and_then(toml_edit::Item::as_bool)
         .unwrap_or(false)
 }
 
@@ -2086,10 +2123,13 @@ fn fetch_queries(name: &str) -> Result<()> {
 
         if !repo_clones.contains_key(&clone_key) {
             use md5::{Digest, Md5};
-            let hash = Md5::digest(clone_key.as_bytes())
-                .iter()
-                .map(|byte| format!("{byte:02x}"))
-                .collect::<String>();
+            let hash =
+                Md5::digest(clone_key.as_bytes())
+                    .iter()
+                    .fold(String::new(), |mut hash, byte| {
+                        let _ = write!(hash, "{byte:02x}");
+                        hash
+                    });
             let clone_dir = format!("{tmp}/repo-{hash}");
             println!(
                 "Cloning {} at {}",
@@ -2160,7 +2200,7 @@ fn apply_text_replacements(content: &str, lang: &str) -> String {
         (r"\c", "(?i)"),
         (r"\(?i)", "(?i)"),
         ("^{[-]|[^|]", r"^\{[-]|^\{[^|]"),
-        (r#"^\\if"#, r#"^if"#),
+        (r"^\\if", r"^if"),
         (
             "[
   \"\\\\.and\\\\.\"
@@ -2643,6 +2683,114 @@ fn render_language_catalog(
     Ok(lines.join("\n"))
 }
 
+struct WasmBuildContext<'a> {
+    tmp: &'a str,
+    out_dir: &'a Path,
+    log_dir: &'a Path,
+    toolchain: &'a str,
+    rebuild: bool,
+}
+
+fn build_parser_wasm(
+    context: &WasmBuildContext<'_>,
+    parser_name: &str,
+    wasm_name: &str,
+    info: &ParserInfo,
+    git: &str,
+) -> Result<bool> {
+    let rev = info.rev.as_deref().unwrap_or("HEAD");
+    let wasm_file = context.out_dir.join(format!("{wasm_name}.wasm"));
+    let build_id_file = context.out_dir.join(format!("{wasm_name}.build-id"));
+    let build_id = wasm_build_id(
+        git,
+        rev,
+        info.location.as_deref(),
+        info.generate.unwrap_or(false),
+        context.toolchain,
+    );
+
+    if !context.rebuild && cached_parser_is_current(&wasm_file, &build_id_file, &build_id) {
+        println!("-> Reusing {wasm_name} built from {rev}");
+        return Ok(true);
+    }
+
+    // A restored `.wasm` that this revision no longer describes has to go
+    // before the rebuild, not after it. `stage-wasm` and `test:queries`
+    // both take whatever file is present, so leaving the old one behind
+    // would let a parser that failed to build be staged, or have its
+    // queries checked against the grammar it replaced.
+    let _ = fs::remove_file(&build_id_file);
+    let _ = fs::remove_file(&wasm_file);
+
+    let clone_dir = format!("{}/tree-sitter-{parser_name}", context.tmp);
+    println!("-> Building WASM for {parser_name} ...");
+    println!("* cloning {git}");
+    let _ = run_cmd_ok(&format!("git clone --depth 1 {git} {clone_dir}"));
+    println!("* checking out {rev}");
+    let _ = run_cmd_ok(&format!(
+        "cd {clone_dir} && git fetch --depth 1 origin {rev} && git checkout {rev}"
+    ));
+
+    let repo_dir = if let Some(ref location) = info.location {
+        format!("{clone_dir}/{location}")
+    } else {
+        clone_dir.clone()
+    };
+    let metadata_dir = clone_dir.clone();
+    let tree_sitter_json = Path::new(&repo_dir).join("tree-sitter.json");
+    let has_grammar_source = Path::new(&repo_dir).join("grammar.js").exists()
+        || Path::new(&repo_dir).join("grammar.json").exists();
+    let has_package_json = Path::new(&repo_dir).join("package.json").exists()
+        || Path::new(&metadata_dir).join("package.json").exists();
+    let has_package_lock = Path::new(&repo_dir).join("package-lock.json").exists()
+        || Path::new(&metadata_dir).join("package-lock.json").exists();
+
+    if has_package_json || tree_sitter_json.exists() {
+        println!("* writing tree-sitter.json metadata");
+        write_tree_sitter_json(parser_name, &repo_dir, &metadata_dir, info)?;
+    }
+    if has_grammar_source || info.generate.unwrap_or(false) {
+        if has_package_json {
+            let install_dir = if Path::new(&repo_dir).join("package.json").exists() {
+                &repo_dir
+            } else {
+                &metadata_dir
+            };
+            println!("* installing npm dependencies in {install_dir}");
+            // `npm ci` refuses to run when a grammar repository ships a
+            // `package-lock.json` that has drifted from its `package.json`, which
+            // several upstream grammars do. Fall back to `npm install` so the parser
+            // stays buildable instead of silently generating without dependencies.
+            let ci_failed = has_package_lock
+                && run_cmd_ok(&format!("cd {install_dir} && npm ci --ignore-scripts")).is_err();
+            if ci_failed {
+                println!("  npm ci failed, retrying with npm install");
+            }
+            if ci_failed || !has_package_lock {
+                let _ = run_cmd_ok(&format!("cd {install_dir} && npm install --ignore-scripts"));
+            }
+        }
+        println!("* generating parser sources in {repo_dir}");
+        let _ = run_cmd_ok(&format!("cd {repo_dir} && tree-sitter generate"));
+    }
+
+    let wasm_path = wasm_file.display();
+    let build_log = context.log_dir.join(format!("{wasm_name}.log"));
+    println!("* building wasm in {repo_dir}");
+    println!("* build log: {}", build_log.display());
+    let succeeded = if let Ok(()) = build_repo_wasm(&repo_dir, &wasm_file, &build_log) {
+        fs::write(&build_id_file, &build_id)?;
+        println!("{wasm_path}");
+        true
+    } else {
+        println!("  ERROR: failed to build {parser_name}");
+        false
+    };
+
+    let _ = run_cmd_ok(&format!("rm -rf {clone_dir}"));
+    Ok(succeeded)
+}
+
 fn build_wasm(name: &str) -> Result<()> {
     let toml = read_languages_toml()?;
     let tmp = tmpdir()?;
@@ -2654,117 +2802,28 @@ fn build_wasm(name: &str) -> Result<()> {
     let mut built_wasm_names = HashSet::new();
     let mut failed = Vec::new();
     let toolchain = wasm_toolchain_id();
-    let rebuild = std::env::var("LUMIS_WASM_REBUILD").ok().as_deref() == Some("1");
+    let context = WasmBuildContext {
+        tmp: &tmp,
+        out_dir: &out_dir,
+        log_dir: &log_dir,
+        toolchain: &toolchain,
+        rebuild: std::env::var("LUMIS_WASM_REBUILD").ok().as_deref() == Some("1"),
+    };
 
     for (parser_name, info) in &toml.parsers {
         let Some(ref git) = info.git else { continue };
-        let rev = info.rev.as_deref().unwrap_or("HEAD");
         let default_wasm_name = format!("tree-sitter-{parser_name}");
         let wasm_name = info.wasm_name.as_deref().unwrap_or(&default_wasm_name);
 
         if !name.is_empty() && parser_name != name && wasm_name != name {
             continue;
         }
-
         if !built_wasm_names.insert(wasm_name.to_string()) {
             continue;
         }
-
-        let wasm_file = out_dir.join(format!("{wasm_name}.wasm"));
-        let build_id_file = out_dir.join(format!("{wasm_name}.build-id"));
-        let build_id = wasm_build_id(
-            git,
-            rev,
-            info.location.as_deref(),
-            info.generate.unwrap_or(false),
-            &toolchain,
-        );
-
-        if !rebuild && cached_parser_is_current(&wasm_file, &build_id_file, &build_id) {
-            println!("-> Reusing {wasm_name} built from {rev}");
-            continue;
+        if !build_parser_wasm(&context, parser_name, wasm_name, info, git)? {
+            failed.push(parser_name.clone());
         }
-
-        // A restored `.wasm` that this revision no longer describes has to go
-        // before the rebuild, not after it. `stage-wasm` and `test:queries`
-        // both take whatever file is present, so leaving the old one behind
-        // would let a parser that failed to build be staged, or have its
-        // queries checked against the grammar it replaced.
-        let _ = fs::remove_file(&build_id_file);
-        let _ = fs::remove_file(&wasm_file);
-
-        let clone_dir = format!("{tmp}/tree-sitter-{parser_name}");
-        println!("-> Building WASM for {parser_name} ...");
-
-        println!("* cloning {git}");
-        let _ = run_cmd_ok(&format!("git clone --depth 1 {git} {clone_dir}"));
-        println!("* checking out {rev}");
-        let _ = run_cmd_ok(&format!(
-            "cd {clone_dir} && git fetch --depth 1 origin {rev} && git checkout {rev}"
-        ));
-
-        let repo_dir = if let Some(ref location) = info.location {
-            format!("{clone_dir}/{location}")
-        } else {
-            clone_dir.clone()
-        };
-        let metadata_dir = clone_dir.clone();
-
-        let tree_sitter_json = Path::new(&repo_dir).join("tree-sitter.json");
-        let has_grammar_source = Path::new(&repo_dir).join("grammar.js").exists()
-            || Path::new(&repo_dir).join("grammar.json").exists();
-        let has_package_json = Path::new(&repo_dir).join("package.json").exists()
-            || Path::new(&metadata_dir).join("package.json").exists();
-        let has_package_lock = Path::new(&repo_dir).join("package-lock.json").exists()
-            || Path::new(&metadata_dir).join("package-lock.json").exists();
-
-        if has_package_json || tree_sitter_json.exists() {
-            println!("* writing tree-sitter.json metadata");
-            write_tree_sitter_json(parser_name, &repo_dir, &metadata_dir, info)?;
-        }
-
-        if has_grammar_source || info.generate.unwrap_or(false) {
-            if has_package_json {
-                let install_dir = if Path::new(&repo_dir).join("package.json").exists() {
-                    &repo_dir
-                } else {
-                    &metadata_dir
-                };
-                println!("* installing npm dependencies in {install_dir}");
-                // `npm ci` refuses to run when a grammar repository ships a
-                // `package-lock.json` that has drifted from its `package.json`, which
-                // several upstream grammars do. Fall back to `npm install` so the parser
-                // stays buildable instead of silently generating without dependencies.
-                let ci_failed = has_package_lock
-                    && run_cmd_ok(&format!("cd {install_dir} && npm ci --ignore-scripts")).is_err();
-                if ci_failed {
-                    println!("  npm ci failed, retrying with npm install");
-                }
-                if ci_failed || !has_package_lock {
-                    let _ =
-                        run_cmd_ok(&format!("cd {install_dir} && npm install --ignore-scripts"));
-                }
-            }
-            println!("* generating parser sources in {repo_dir}");
-            let _ = run_cmd_ok(&format!("cd {repo_dir} && tree-sitter generate"));
-        }
-
-        let wasm_path = wasm_file.display();
-        let build_log = log_dir.join(format!("{wasm_name}.log"));
-        println!("* building wasm in {repo_dir}");
-        println!("* build log: {}", build_log.display());
-        match build_repo_wasm(&repo_dir, &wasm_file, &build_log) {
-            Ok(()) => {
-                fs::write(&build_id_file, &build_id)?;
-                println!("{wasm_path}");
-            }
-            Err(_) => {
-                println!("  ERROR: failed to build {parser_name}");
-                failed.push(parser_name.clone());
-            }
-        }
-
-        let _ = run_cmd_ok(&format!("rm -rf {clone_dir}"));
     }
 
     let _ = run_cmd_ok(&format!("rm -rf {tmp}"));
@@ -2836,7 +2895,7 @@ fn build_repo_wasm_with(
 
     let mut tail = String::from_utf8_lossy(&output.stdout).into_owned();
     tail.push_str(&String::from_utf8_lossy(&output.stderr));
-    tail.push_str(&format!("[end] {:.1}s\n", started.elapsed().as_secs_f64()));
+    let _ = writeln!(tail, "[end] {:.1}s", started.elapsed().as_secs_f64());
 
     fs::write(
         build_log,
@@ -3075,9 +3134,7 @@ fn write_tree_sitter_json(
                 "name": grammar_name,
                 "camelcase": selected_grammar
                     .and_then(|grammar| grammar.get("camelcase"))
-                    .and_then(Value::as_str)
-                    .map(ToOwned::to_owned)
-                    .unwrap_or_else(|| to_camel_case(parser_name)),
+                    .and_then(Value::as_str).map_or_else(|| to_camel_case(parser_name), ToOwned::to_owned),
                 "scope": scope,
                 "path": grammar_path,
                 "file-types": file_types,
@@ -3724,7 +3781,10 @@ mod crate_dep_tests {
 
     #[test]
     fn matching_requirements_are_accepted() {
-        assert!(problems(Vec::new()).is_empty());
+        assert!(
+            problems(Vec::new()).is_empty(),
+            "no dependencies, so no problems"
+        );
     }
 
     #[test]
@@ -3756,7 +3816,10 @@ mod crate_dep_tests {
     fn an_unpublished_crate_may_omit_the_version() {
         let mut unpublished = dependency("benchmarks/rust/Cargo.toml", None);
         unpublished.publishable = false;
-        assert!(problems(vec![unpublished]).is_empty());
+        assert!(
+            problems(vec![unpublished]).is_empty(),
+            "an unpublished crate needs no version requirement"
+        );
     }
 
     #[test]
@@ -4139,8 +4202,14 @@ mod tests {
     /// 115 pull requests carrying the same shared revision bump.
     #[test]
     fn a_language_backed_by_the_default_source_upgrades_nothing() {
-        assert!(selected("c").is_empty());
-        assert!(selected("rust").is_empty());
+        assert!(
+            selected("c").is_empty(),
+            "`c` reads the default query source"
+        );
+        assert!(
+            selected("rust").is_empty(),
+            "`rust` reads the default query source"
+        );
     }
 
     #[test]
@@ -4428,7 +4497,9 @@ mod tests {
     static CWD: Mutex<()> = Mutex::new(());
 
     fn in_directory<T>(root: &Path, body: impl FnOnce() -> T + std::panic::UnwindSafe) -> T {
-        let guard = CWD.lock().unwrap_or_else(|error| error.into_inner());
+        let guard = CWD
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
         let cwd = std::env::current_dir().expect("cwd should be available");
         std::env::set_current_dir(root).expect("should switch to temp dir");
 
@@ -4639,7 +4710,10 @@ mod tests {
             .map(|(name, members)| {
                 (
                     *name,
-                    members.iter().map(|id| id.to_string()).collect::<Vec<_>>(),
+                    members
+                        .iter()
+                        .map(std::string::ToString::to_string)
+                        .collect::<Vec<_>>(),
                 )
             })
             .collect::<BTreeMap<_, _>>();

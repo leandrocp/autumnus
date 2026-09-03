@@ -133,7 +133,7 @@ describe("Wasm resolver", () => {
     const language = withWasm(diff, ensureLocalWasm("diff"));
     const hl = await createHighlighter({
       languages: [language],
-      wasmResolver: (language, wasm) => ensureLocalParserWasm(language, wasm.name),
+      wasmResolver: (requested, wasm) => ensureLocalParserWasm(requested, wasm.name),
     });
 
     const html = hl.highlight("- old\n+ new", htmlLinked({ language }));
@@ -160,7 +160,7 @@ describe("Wasm resolver", () => {
   it("shares verified parser bytes across highlighter instances", async () => {
     const { createHighlighter } = await import("../src/index.js");
     const { default: diff } = await import("../langs/diff.ts");
-    const resolver = vi.fn((language: string, wasm: { name: string }) =>
+    const resolver = vi.fn<(language: string, wasm: { name: string }) => URL>((language, wasm) =>
       ensureLocalParserWasm(language, wasm.name),
     );
 

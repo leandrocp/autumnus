@@ -18,9 +18,7 @@ describe("shared language detection", () => {
     expect(cases.length).toBeGreaterThanOrEqual(20);
   });
 
-  for (const detection of cases) {
-    it(detection.name, () => {
-      expect(guessLanguage(detection.hint ?? undefined, detection.source)).toBe(detection.expected);
-    });
-  }
+  it.each(cases)("$name", (detection) => {
+    expect(guessLanguage(detection.hint ?? undefined, detection.source)).toBe(detection.expected);
+  });
 });

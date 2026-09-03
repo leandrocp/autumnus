@@ -47,7 +47,7 @@ for (const scenario of manifest.scenarios) {
   });
 }
 
-const report = {
+const mergedReport = {
   schemaVersion: 1,
   metric: "total",
   timingBoundary:
@@ -55,8 +55,8 @@ const report = {
   results,
 };
 await mkdir(runDir, { recursive: true });
-await writeFile(resolve(runDir, "results.json"), `${JSON.stringify(report, null, 2)}\n`);
-const markdown = renderMarkdown(report, packageSizes);
+await writeFile(resolve(runDir, "results.json"), `${JSON.stringify(mergedReport, null, 2)}\n`);
+const markdown = renderMarkdown(mergedReport, packageSizes);
 await writeFile(resolve(runDir, "results.md"), markdown);
 await writeFile(resolve(benchmarksDir, "README.md"), markdown);
 console.log(resolve(runDir, "results.json"));

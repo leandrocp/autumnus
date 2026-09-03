@@ -56,12 +56,10 @@ if (process.argv.includes("--check")) {
     process.exit(1);
   }
   console.log(`every benchmark language dependency matches the catalog (${pinned.size} pinned)`);
+} else if (drift.length > 0) {
+  await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+  console.log(`updated ${drift.length} dependency/dependencies:`);
+  for (const line of drift) console.log(`  ${line}`);
 } else {
-  if (drift.length > 0) {
-    await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
-    console.log(`updated ${drift.length} dependency/dependencies:`);
-    for (const line of drift) console.log(`  ${line}`);
-  } else {
-    console.log("already in sync with the catalog");
-  }
+  console.log("already in sync with the catalog");
 }

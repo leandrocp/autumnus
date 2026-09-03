@@ -1,0 +1,38 @@
+name: Rust complexity
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**/*.rs"
+      - ".github/workflows/complexity.yml"
+      - ".lizard-whitelist"
+      - "mise.lock"
+      - "mise.toml"
+  pull_request:
+    paths:
+      - "**/*.rs"
+      - ".github/workflows/complexity.yml"
+      - ".lizard-whitelist"
+      - "mise.lock"
+      - "mise.toml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rust-complexity:
+    if: >-
+      ${{ !startsWith(github.event.head_commit.message, 'chore(release):') &&
+          !(github.event.pull_request.head.repo.full_name == github.repository &&
+            startsWith(github.event.pull_request.head.ref, 'release/')) }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+      - run: mise run lint-complexity-rust

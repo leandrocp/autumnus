@@ -81,7 +81,7 @@
 //! | [`HtmlMultiThemesBuilder`] | HTML (inline) with multiple themes | Support light/dark mode, theme switching |
 //! | [`HtmlLinkedBuilder`] | HTML with CSS classes | Multiple code blocks, custom styling |
 //! | [`TerminalBuilder`] | ANSI escape codes | CLI tools, terminal output |
-//! | [`BBCodeScopedBuilder`] | BBCode with highlight scope tags | Scope-aware BBCode parsers, BBCode-based platforms |
+//! | [`BBCodeScopedBuilder`] | `BBCode` with highlight scope tags | Scope-aware `BBCode` parsers, BBCode-based platforms |
 //!
 //! See the [`formatters`] module for advanced features like line highlighting and custom formatters.
 //!
@@ -109,10 +109,10 @@
 //! | Angular | *.angular, component.html |
 //! | Assembly | *.s, *.asm, *.assembly |
 //! | Astro | *.astro |
-//! | Bash | *.bash, *.bats, *.cgi, *.command, *.env, *.fcgi, *.ksh, *.sh, *.sh.in, *.tmux, *.tool, *.zsh, .bash_aliases, .bash_history, .bash_logout, .bash_profile, .bashrc, .cshrc, .env, .env.example, .flaskenv, .kshrc, .login, .profile, .zlogin, .zlogout, .zprofile, .zshenv, .zshrc, 9fs, PKGBUILD, bash_aliases, bash_logout, bash_profile, bashrc, cshrc, ebuild, eclass, gradlew, kshrc, login, man, profile, zlogin, zlogout, zprofile, zshenv, zshrc |
+//! | Bash | *.bash, *.bats, *.cgi, *.command, *.env, *.fcgi, *.ksh, *.sh, *.sh.in, *.tmux, *.tool, *.zsh, .`bash_aliases`, .`bash_history`, .`bash_logout`, .`bash_profile`, .bashrc, .cshrc, .env, .env.example, .flaskenv, .kshrc, .login, .profile, .zlogin, .zlogout, .zprofile, .zshenv, .zshrc, 9fs, PKGBUILD, `bash_aliases`, `bash_logout`, `bash_profile`, bashrc, cshrc, ebuild, eclass, gradlew, kshrc, login, man, profile, zlogin, zlogout, zprofile, zshenv, zshrc |
 //! | C | *.c |
 //! | Caddy | Caddyfile |
-//! | CMake | *.cmake, *.cmake.in, CMakeLists.txt |
+//! | `CMake` | *.cmake, *.cmake.in, CMakeLists.txt |
 //! | C++ | *.cc, *.cpp, *.h, *.hh, *.hpp, *.ino, *.cxx, *.cu, *.hxx |
 //! | CSS | *.css |
 //! | CSV | *.csv |
@@ -123,7 +123,7 @@
 //! | Dart | *.dart |
 //! | Diff | *.diff |
 //! | Dockerfile | Dockerfile, dockerfile, docker, Containerfile, container, *.dockerfile, *.docker, *.container |
-//! | EEx | *.eex |
+//! | `EEx` | *.eex |
 //! | EJS | *.ejs |
 //! | ERB | *.erb |
 //! | Elixir | *.ex, *.exs |
@@ -135,11 +135,11 @@
 //! | Glimmer | *.hbs, *.handlebars, *.html.handlebars, *.glimmer |
 //! | Go | *.go |
 //! | GraphQL | |
-//! | HEEx | *.heex, *.neex |
+//! | `HEEx` | *.heex, *.neex |
 //! | HTML | *.html, *.htm, *.xhtml |
 //! | Haskell | *.hs, *.hs-boot |
 //! | HCL | *.hcl, *.nomad, *.tf, *.tfvars, *.workflow |
-//! | IEx | *.iex |
+//! | `IEx` | *.iex |
 //! | JSON | *.json, *.avsc, *.geojson, *.gltf, *.har, *.ice, *.JSON-tmLanguage, *.jsonl, *.mcmeta, *.tfstate, *.tfstate.backup, *.topojson, *.webapp, *.webmanifest, .arcconfig, .auto-changelog, .c8rc, .htmlhintrc, .imgbotconfig, .nycrc, .tern-config, .tern-project, .watchmanconfig, Pipfile.lock, composer.lock, mcmod.info, flake.lock |
 //! | Java | *.java |
 //! | JavaScript | *.cjs, *.js, *.mjs, *.snap, *.jsx |
@@ -148,7 +148,7 @@
 //! | Liquid | *liquid |
 //! | LLVM | *.llvm, *.ll |
 //! | Lua | *.lua |
-//! | Make | *.mak, *.d, *.make, *.makefile, *.mk, *.mkfile, *.dsp, BSDmakefile, GNUmakefile, Kbuild, Makefile, MAKEFILE, Makefile.am, Makefile.boot, Makefile.frag, Makefile*.in, Makefile.inc, Makefile.wat, makefile, makefile.sco, mkfile |
+//! | Make | *.mak, *.d, *.make, *.makefile, *.mk, *.mkfile, *.dsp, `BSDmakefile`, `GNUmakefile`, Kbuild, Makefile, MAKEFILE, Makefile.am, Makefile.boot, Makefile.frag, Makefile*.in, Makefile.inc, Makefile.wat, makefile, makefile.sco, mkfile |
 //! | Markdown | *.md, README, LICENSE |
 //! | Markdown Inline | |
 //! | Nix | *.nix |
@@ -438,7 +438,7 @@ mod tests {
 
     #[test]
     fn test_write_highlight() {
-        let code = r#"const = 1"#;
+        let code = r"const = 1";
 
         let expected = r#"<pre class="lumis" style="color: #c6d0f6; background-color: #303447;"><code class="language-javascript" translate="no" tabindex="0"><div class="l-line" data-line="1"><span style="color: #ca9ee7;">const</span> <span style="color: #99d1dc;">=</span> <span style="color: #ef9f77;">1</span>
 </div></code></pre>"#;
@@ -496,10 +496,10 @@ end
 
     #[test]
     fn test_highlight_html_inline_include_highlights() {
-        let code = r#"defmodule Foo do
+        let code = r"defmodule Foo do
   @lang :elixir
 end
-"#;
+";
 
         let expected = r#"<pre class="lumis" style="color: #c6d0f6; background-color: #303447;"><code class="language-elixir" translate="no" tabindex="0"><div class="l-line" data-line="1"><span data-highlight="keyword.function" style="color: #ca9ee7;">defmodule</span> <span data-highlight="module" style="color: #e5c891;">Foo</span> <span data-highlight="keyword" style="color: #ca9ee7;">do</span>
 </div><div class="l-line" data-line="2">  <span data-highlight="operator" style="color: #99d1dc;"><span data-highlight="constant" style="color: #ef9f77;">@<span data-highlight="function.call" style="color: #8caaef;"><span data-highlight="constant" style="color: #ef9f77;">lang <span data-highlight="string.special.symbol" style="color: #eebebf;">:elixir</span></span></span></span></span>

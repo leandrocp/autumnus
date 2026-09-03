@@ -86,7 +86,7 @@ impl Formatter for LineNumberedTerminal {
                     at_line_start = false;
                 }
 
-                write!(output, "{}", ansi_text)?;
+                write!(output, "{ansi_text}")?;
 
                 if ansi_text.contains('\n') {
                     line_num += ansi_text.matches('\n').count();

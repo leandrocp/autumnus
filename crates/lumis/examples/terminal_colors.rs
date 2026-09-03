@@ -28,5 +28,5 @@ end"#;
 
     let ansi_output = highlight(code, formatter);
 
-    println!("{}", ansi_output);
+    println!("{ansi_output}");
 }

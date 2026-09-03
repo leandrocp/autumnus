@@ -19,14 +19,10 @@ fn main() {
 \`\`\`
 `;
 
+const rehypePlugins = [[rehypeLumis, { theme: githubLight, fallbackLanguage: "plaintext" }]];
+
 function App() {
-  return (
-    <MarkdownHooks
-      rehypePlugins={[[rehypeLumis, { theme: githubLight, fallbackLanguage: "plaintext" }]]}
-    >
-      {source}
-    </MarkdownHooks>
-  );
+  return <MarkdownHooks rehypePlugins={rehypePlugins}>{source}</MarkdownHooks>;
 }
 
 createRoot(document.querySelector("#app")).render(<App />);

@@ -15,6 +15,8 @@ struct Document {
     file: String,
 }
 
+// The fields mirror the JSON keys the showcase manifest uses.
+#[allow(clippy::struct_field_names)]
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct Theme {

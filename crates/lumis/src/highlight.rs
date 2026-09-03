@@ -180,7 +180,7 @@ pub enum HighlightError {
 pub struct Highlighter {
     language: Language,
     theme: Option<Theme>,
-    ts_highlighter: RefCell<TSHighlighter>,
+    tree_sitter: RefCell<TSHighlighter>,
 }
 
 impl Highlighter {
@@ -209,7 +209,7 @@ impl Highlighter {
         Self {
             language,
             theme,
-            ts_highlighter: RefCell::new(TSHighlighter::new()),
+            tree_sitter: RefCell::new(TSHighlighter::new()),
         }
     }
 
@@ -250,7 +250,7 @@ impl Highlighter {
         &self,
         source: &'a str,
     ) -> Result<Vec<(Arc<Style>, &'a str)>, HighlightError> {
-        let mut ts_highlighter = self.ts_highlighter.borrow_mut();
+        let mut ts_highlighter = self.tree_sitter.borrow_mut();
         let events = ts_highlighter
             .highlight(
                 self.language.config(),
@@ -258,13 +258,13 @@ impl Highlighter {
                 None,
                 |injected| Some(Language::guess(Some(injected), "").config()),
             )
-            .map_err(|e| HighlightError::HighlighterInit(format!("{:?}", e)))?;
+            .map_err(|e| HighlightError::HighlighterInit(format!("{e:?}")))?;
 
         let mut result = Vec::new();
         let mut style_stack: Vec<Arc<Style>> = vec![Arc::clone(&DEFAULT_STYLE)];
 
         for event in events {
-            let event = event.map_err(|e| HighlightError::EventProcessing(format!("{:?}", e)))?;
+            let event = event.map_err(|e| HighlightError::EventProcessing(format!("{e:?}")))?;
 
             match event {
                 HighlightEvent::HighlightStart {
@@ -277,8 +277,7 @@ impl Highlighter {
                         .theme
                         .as_ref()
                         .and_then(|t| t.get_style(&specialized_scope))
-                        .map(|s| Arc::new(s.clone()))
-                        .unwrap_or_else(|| Arc::clone(&DEFAULT_STYLE));
+                        .map_or_else(|| Arc::clone(&DEFAULT_STYLE), |s| Arc::new(s.clone()));
                     style_stack.push(new_style);
                 }
                 HighlightEvent::Source { start, end } => {
@@ -588,12 +587,12 @@ where
         .highlight(language.config(), source.as_bytes(), None, |injected| {
             injected_language(injected).map(|language| language.config())
         })
-        .map_err(|e| HighlightError::HighlighterInit(format!("{:?}", e)))?;
+        .map_err(|e| HighlightError::HighlighterInit(format!("{e:?}")))?;
 
     let core_events = events
         .map(|event| {
             event
-                .map_err(|e| HighlightError::EventProcessing(format!("{:?}", e)))
+                .map_err(|e| HighlightError::EventProcessing(format!("{e:?}")))
                 .map(|event| match event {
                     HighlightEvent::HighlightStart {
                         highlight,
@@ -849,7 +848,7 @@ mod tests {
         let highlighter = Highlighter::new(Language::Rust, None);
         let segments = highlighter.highlight(code).unwrap();
 
-        assert!(!segments.is_empty());
+        assert!(!segments.is_empty(), "highlighting produced no segments");
         // Segments should have text but no styling
         for (style, _text) in &segments {
             assert_eq!(style.fg, None);
@@ -864,7 +863,7 @@ mod tests {
         let highlighter = Highlighter::new(Language::Rust, Some(theme));
         let segments = highlighter.highlight(code).unwrap();
 
-        assert!(!segments.is_empty());
+        assert!(!segments.is_empty(), "highlighting produced no segments");
 
         // At least some segments should have styling
         let has_styling = segments.iter().any(|(style, _text)| style.fg.is_some());
@@ -898,7 +897,7 @@ mod tests {
         )
         .unwrap();
 
-        assert!(!segments.is_empty());
+        assert!(!segments.is_empty(), "highlighting produced no segments");
 
         // Check that ranges are valid and scopes are present
         for (text, language, range, _scope, _style) in &segments {
@@ -997,7 +996,7 @@ mod tests {
         let highlighter = Highlighter::new(Language::Rust, None);
         let segments = highlighter.highlight(code).unwrap();
 
-        assert!(segments.is_empty());
+        assert!(segments.is_empty(), "empty source produced segments");
     }
 
     #[test]
@@ -1045,8 +1044,8 @@ mod tests {
         let first = highlight_events("{\"first\": 1}", Language::JSON).unwrap();
         let second = highlight_events("{\"second\": 2}", Language::JSON).unwrap();
 
-        assert!(!first.is_empty());
-        assert!(!second.is_empty());
+        assert!(!first.is_empty(), "the first call produced no events");
+        assert!(!second.is_empty(), "the second call produced no events");
     }
 
     #[test]

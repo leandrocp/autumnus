@@ -111,7 +111,7 @@ describe("D4 highlightLines style", () => {
   }
 
   it("uses the theme's highlighted style when style is omitted", () => {
-    expect(lineAttrs(undefined)).toContain("background-color: #303030");
+    expect(lineAttrs()).toContain("background-color: #303030");
   });
 
   it("uses the theme's highlighted style for the explicit 'theme' sentinel", () => {

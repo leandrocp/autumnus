@@ -14,7 +14,7 @@ function normalize(value: string): string {
 }
 
 function escapeRegex(value: string): string {
-  return value.replace(/[|\\{}()[\]^$+?.]/g, "\\$&");
+  return value.replaceAll(/[|\\{}()[\]^$+?.]/g, "\\$&");
 }
 
 function globToRegExp(glob: string): RegExp {

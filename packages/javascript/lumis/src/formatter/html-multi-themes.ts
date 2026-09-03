@@ -18,6 +18,22 @@ import {
   wrapWithHeader,
 } from "./html.js";
 
+// The `<pre>` colours for `light-dark()`, falling back to black on white and
+// white on black where a theme leaves them unset.
+function lightDarkPreStyles(themes: Record<string, Theme>): string[] {
+  const lightNormal = getThemeStyle(themes.light, "normal");
+  const darkNormal = getThemeStyle(themes.dark, "normal");
+  const lightFg = lightNormal?.fg ?? "#000000";
+  const lightBg = lightNormal?.bg ?? "#ffffff";
+  const darkFg = darkNormal?.fg ?? "#ffffff";
+  const darkBg = darkNormal?.bg ?? "#000000";
+
+  return [
+    `color: light-dark(${lightFg}, ${darkFg});`,
+    `background-color: light-dark(${lightBg}, ${darkBg});`,
+  ];
+}
+
 function buildPreThemeStyle(options: {
   themes: Record<string, Theme>;
   defaultTheme?: string;
@@ -27,15 +43,7 @@ function buildPreThemeStyle(options: {
   const styles: string[] = [];
 
   if (options.defaultTheme === "light-dark()") {
-    const lightNormal = getThemeStyle(options.themes.light, "normal");
-    const darkNormal = getThemeStyle(options.themes.dark, "normal");
-    const lightFg = lightNormal?.fg ?? "#000000";
-    const lightBg = lightNormal?.bg ?? "#ffffff";
-    const darkFg = darkNormal?.fg ?? "#ffffff";
-    const darkBg = darkNormal?.bg ?? "#000000";
-
-    styles.push(`color: light-dark(${lightFg}, ${darkFg});`);
-    styles.push(`background-color: light-dark(${lightBg}, ${darkBg});`);
+    styles.push(...lightDarkPreStyles(options.themes));
   } else if (options.defaultTheme) {
     const defaultStyle = getThemeStyle(options.themes[options.defaultTheme], "normal");
     if (defaultStyle?.fg) styles.push(`color:${defaultStyle.fg};`);
@@ -84,27 +92,19 @@ function highlightLineStyle(
   lineNumber: number,
 ): string | undefined {
   const highlightLines = formatter.highlightLines;
-  if (!lineIsHighlighted(highlightLines?.lines, lineNumber)) {
-    return undefined;
-  }
+  if (!lineIsHighlighted(highlightLines?.lines, lineNumber)) return undefined;
 
   // Explicit `null` opts out of the inline style entirely, leaving the class to
   // do the highlighting. Absent still means the theme's `highlighted` style.
-  if (highlightLines?.style === null) {
-    return undefined;
-  }
+  if (highlightLines?.style === null) return undefined;
+  if (highlightLines?.style && highlightLines.style !== "theme") return highlightLines.style;
 
-  if (highlightLines?.style && highlightLines.style !== "theme") {
-    return highlightLines.style;
-  }
+  return themeHighlightStyle(formatter);
+}
 
-  if (!formatter.defaultTheme) {
-    return undefined;
-  }
-
-  if (formatter.defaultTheme === "light-dark()") {
-    return lightDarkHighlightStyle(formatter);
-  }
+function themeHighlightStyle(formatter: HtmlMultiThemesFormatter): string | undefined {
+  if (!formatter.defaultTheme) return undefined;
+  if (formatter.defaultTheme === "light-dark()") return lightDarkHighlightStyle(formatter);
 
   const style = getThemeStyle(formatter.themes[formatter.defaultTheme], "highlighted");
   return styleToCss(style, { italic: formatter.italic }) || undefined;

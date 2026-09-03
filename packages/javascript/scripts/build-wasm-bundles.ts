@@ -57,8 +57,8 @@ function packageDir(bundleName: string): string {
 function importName(packageName: string): string {
   const cleaned = packageName
     .replace("@lumis-sh/", "")
-    .replace(/[^a-zA-Z0-9]+(.)/g, (_match, next: string) => next.toUpperCase())
-    .replace(/[^a-zA-Z0-9]/g, "");
+    .replaceAll(/[^a-zA-Z0-9]+(.)/g, (_match, next: string) => next.toUpperCase())
+    .replaceAll(/[^a-zA-Z0-9]/g, "");
   return cleaned.replace(/^[A-Z]/, (char) => char.toLowerCase());
 }
 

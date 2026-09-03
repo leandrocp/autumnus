@@ -124,7 +124,7 @@ fn formatter_struct_fields() -> BTreeMap<String, BTreeSet<String>> {
 }
 
 /// The struct behind each manifest formatter. `BBCodeScoped` does not
-/// snake_case to `bbcode_scoped`, so the pairing is written out.
+/// `snake_case` to `bbcode_scoped`, so the pairing is written out.
 fn formatter_fields() -> BTreeMap<&'static str, BTreeSet<String>> {
     let structs = formatter_struct_fields();
 

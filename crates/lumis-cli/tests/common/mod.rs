@@ -5,18 +5,18 @@ use std::fs;
 use std::path::PathBuf;
 use std::sync::OnceLock;
 
-pub fn source_fixtures_dir() -> PathBuf {
+pub(crate) fn source_fixtures_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("fixtures")
 }
 
-pub fn language_fixtures_dir() -> PathBuf {
+pub(crate) fn language_fixtures_dir() -> PathBuf {
     static FIXTURES: OnceLock<PathBuf> = OnceLock::new();
     FIXTURES.get_or_init(build_language_fixtures).clone()
 }
 
-pub fn data_dir() -> PathBuf {
+pub(crate) fn data_dir() -> PathBuf {
     static DATA: OnceLock<PathBuf> = OnceLock::new();
     DATA.get_or_init(|| {
         let path = std::env::temp_dir().join(format!("lumis-cli-data-{}", std::process::id()));

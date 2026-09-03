@@ -1,4 +1,8 @@
 defmodule MyBlog.Blog do
+  @moduledoc """
+  Publishes and queries the example application's Markdown posts.
+  """
+
   alias MyBlog.Blog.Post
 
   use NimblePublisher,

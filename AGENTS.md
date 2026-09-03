@@ -242,7 +242,7 @@ Rationale that is about the change rather than the code belongs in the commit me
 
 Every file the repo authors is formatted and linted, including generated ones. `mise run fmt` formats every language, `mise run lint` checks them. Run those before pushing; CI only checks.
 
-There is no per-package path list. `fmt-js` is `oxfmt "**/*.{ts,tsx,mjs,cjs,js,jsx}"` from the repo root, so a new package, script, example or test directory is covered the day it is added, whether or not the file has been staged yet.
+There is no per-package path list. `fmt-js` is `oxfmt "**/*.{ts,tsx,mjs,cjs,js,jsx}"` from the repo root and `lint-js` is `oxlint --deny-warnings --report-unused-disable-directives .` beside it, so a new package, script, example or test directory is covered the day it is added, whether or not the file has been staged yet.
 
 **Generated files are not an exception.** A generator writes its output and then formats it, so regenerating and format-checking agree. If you add a generator, format what it emits.
 
@@ -259,7 +259,15 @@ There is no per-package path list. `fmt-js` is `oxfmt "**/*.{ts,tsx,mjs,cjs,js,j
 
 This replaced a per-package `fmt:check` that named `src/` only. Every `test/`, `scripts/` and `examples/` directory in the repo had therefore never been formatted, and nobody could tell, because the check was green. When adding a formatter or a linter, make the default "everything" and subtract; never name a directory and hope the list is maintained.
 
-`oxlint` runs with `--deny-warnings`, so a warning fails the build. Silence a genuinely intentional one at the line with `// oxlint-disable-next-line <rule> -- <why>`; do not let it sit in the output.
+`oxlint` runs with `--deny-warnings`, so a warning fails the build. Silence a genuinely intentional one at the line with `// oxlint-disable-next-line <rule> -- <why>`; do not let it sit in the output. `--report-unused-disable-directives` runs too, so a silence that stops being needed fails rather than lingering.
+
+**Every linter runs at its strict setting.** clippy at `clippy::pedantic`, oxlint with `correctness`, `suspicious`, `perf` and `pedantic` as errors, credo with `--strict`, selene with warnings fatal. `CONTRIBUTING.md` has the table and where each configuration lives.
+
+Every runtime implemented here also caps cyclomatic complexity at 20: oxlint's classic `eslint/complexity` rule for JavaScript, Credo's `CyclomaticComplexity` check for Elixir, and pinned Lizard for every Rust source file. The sole Rust whitelist entry is the exact upstream-vendored Tree-sitter iterator; do not broaden it or add authored code to it.
+
+A lint the repository has decided against is a waiver, not a line-level silence: it goes in `[workspace.lints.clippy]` or the `rules` block of `.oxlintrc.json`, with the reason and the number of sites it fired on. Those lists shrink; an addition needs the same justification the existing entries carry. Prefer configuring a rule over disabling it — `eqeqeq` keeps `== null`, `max-depth` is set to the deepest block the tree actually has, `prefer-nullish-coalescing` skips `if` statements whose guard is truthiness rather than nullishness.
+
+**An autofix is a proposed edit, not a result.** Read what `--fix` wrote before keeping it. In this repository `unicorn/prefer-code-point` rewrote surrogate-pair validation that has to work in UTF-16 code units, `unicorn/no-useless-undefined` dropped arguments that were required, `oxc/no-map-spread` proposed an in-place `Object.assign`, and `prefer-nullish-coalescing` turned an `if (!x)` guard into `??=`, which stops treating `""` as absent. Build and test after a sweep; two of those four only surfaced as a `tsc` error, and the other two would not have surfaced at all.
 
 ### Validate workflow changes with `actionlint` before pushing
 

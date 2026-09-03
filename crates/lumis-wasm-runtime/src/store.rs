@@ -142,9 +142,10 @@ impl Fetcher for NoNetwork {
 pub fn default_data_dir() -> PathBuf {
     use etcetera::BaseStrategy;
 
-    etcetera::choose_base_strategy()
-        .map(|strategy| strategy.data_dir().join("lumis"))
-        .unwrap_or_else(|_| PathBuf::from(".lumis"))
+    etcetera::choose_base_strategy().map_or_else(
+        |_| PathBuf::from(".lumis"),
+        |strategy| strategy.data_dir().join("lumis"),
+    )
 }
 
 /// The data directory, preferring `explicit` and then `LUMIS_DATA_DIR`.
@@ -704,7 +705,12 @@ pub fn write_atomic(path: &Path, bytes: &[u8]) -> Result<(), StoreError> {
     unreachable!("the loop returns on the final attempt")
 }
 
+// A table-driven test's branches are its coverage; splitting one to satisfy the
+// cognitive complexity ceiling would hide what it asserts.
+#[allow(clippy::cognitive_complexity)]
 #[cfg(test)]
+// Every `.wasm`/`.tmp` suffix compared below is one this module built itself.
+#[allow(clippy::case_sensitive_file_extension_comparisons)]
 mod tests {
     use super::*;
     use crate::package::{sha256_hex, PackagedLanguage, ParserMetadata};
@@ -990,7 +996,7 @@ mod tests {
             // Nothing may appear outside the cache directory it was given.
             let escaped: Vec<_> = std::fs::read_dir(dir.path().parent().unwrap())
                 .unwrap()
-                .filter_map(|entry| entry.ok())
+                .filter_map(std::result::Result::ok)
                 .map(|entry| entry.file_name().to_string_lossy().into_owned())
                 .filter(|name| name.contains("escaped"))
                 .collect();
@@ -1140,7 +1146,6 @@ mod tests {
 
     #[test]
     fn a_missing_package_resolves_the_supported_range() {
-        let urls = Arc::new(Mutex::new(Vec::new()));
         struct Recording {
             package: Vec<u8>,
             urls: Arc<Mutex<Vec<String>>>,
@@ -1151,6 +1156,8 @@ mod tests {
                 Ok(self.package.clone())
             }
         }
+
+        let urls = Arc::new(Mutex::new(Vec::new()));
 
         let dir = tempdir();
         let store = make(
@@ -1286,7 +1293,7 @@ mod tests {
         // No temporary files left behind for a reader to trip over.
         let leftovers: Vec<_> = std::fs::read_dir(target.parent().unwrap())
             .unwrap()
-            .filter_map(|entry| entry.ok())
+            .filter_map(std::result::Result::ok)
             .map(|entry| entry.file_name().to_string_lossy().into_owned())
             .filter(|name| name.ends_with(".tmp"))
             .collect();
@@ -1303,11 +1310,11 @@ mod tests {
         const OLD: &[u8] = b"old";
         const NEW: &[u8] = b"new-and-longer";
 
+        use std::sync::atomic::{AtomicBool, Ordering};
+
         let dir = tempdir();
         let target = dir.path().join("swap.bin");
         write_atomic(&target, OLD).unwrap();
-
-        use std::sync::atomic::{AtomicBool, Ordering};
 
         let done = Arc::new(AtomicBool::new(false));
         let seen_old = Arc::new(AtomicBool::new(false));
@@ -1379,10 +1386,6 @@ mod tests {
 
     #[test]
     fn caching_a_language_leaves_the_cache_self_sufficient() {
-        let dir = tempdir();
-        let package = package();
-        let served = serde_json::to_vec(&package).unwrap();
-
         struct Serve {
             package: Vec<u8>,
         }
@@ -1394,6 +1397,10 @@ mod tests {
                 Ok(self.package.clone())
             }
         }
+
+        let dir = tempdir();
+        let package = package();
+        let served = serde_json::to_vec(&package).unwrap();
 
         let store = make(dir.path(), Box::new(Serve { package: served }));
         let path = store.cache_language("json", false).unwrap();

@@ -16,6 +16,7 @@ use lumis_wasm_runtime::tree_sitter_highlight::ParsedLayer;
 use lumis_wasm_runtime::{HighlightOptions, HighlightOutput};
 use serde::Serialize;
 use std::fmt::Display;
+use std::fmt::Write as _;
 use std::fs;
 use std::io::{IsTerminal, Read as _};
 use std::ops::RangeInclusive;
@@ -102,7 +103,7 @@ struct HighlightArgs {
     #[arg(short = 'f', long)]
     formatter: Option<Formatter>,
 
-    /// Theme name, e.g. dracula, github_dark, or auto
+    /// Theme name, e.g. dracula, `github_dark`, or auto
     #[arg(short = 't', long)]
     theme: Option<String>,
 
@@ -178,7 +179,7 @@ struct StyledArgs {
 #[derive(clap::Args)]
 #[command(next_help_heading = OPTSET_MULTI_THEME)]
 struct MultiThemeArgs {
-    /// Theme pair as name:theme_id, can be repeated
+    /// Theme pair as `name:theme_id`, can be repeated
     #[arg(long)]
     themes: Vec<String>,
 
@@ -417,7 +418,7 @@ enum Formatter {
     /// ANSI escape codes
     #[default]
     Terminal,
-    /// BBCode using highlight scope names as tags
+    /// `BBCode` using highlight scope names as tags
     BbcodeScoped,
 }
 
@@ -546,7 +547,8 @@ fn reject_unaccepted_options(args: &HighlightArgs) {
     );
     for (group, _) in &rejected {
         let accepts: Vec<&str> = group.accepted_by().iter().map(|f| f.slug()).collect();
-        message.push_str(&format!(
+        let _ = write!(
+            message,
             "\n  {} {} to: {}",
             group.label,
             if group.flags.len() == 1 {
@@ -555,11 +557,12 @@ fn reject_unaccepted_options(args: &HighlightArgs) {
                 "apply"
             },
             accepts.join(", "),
-        ));
+        );
     }
-    message.push_str(&format!(
+    let _ = write!(
+        message,
         "\n  run `lumis formatters show {chosen}` to see what it accepts"
-    ));
+    );
 
     Cli::command()
         .find_subcommand_mut("highlight")
@@ -570,6 +573,8 @@ fn reject_unaccepted_options(args: &HighlightArgs) {
         .exit()
 }
 
+// Returns `Result` so every `Commands` arm has one signature to dispatch to.
+#[allow(clippy::unnecessary_wraps)]
 fn list_formatters() -> Result<()> {
     let width = Formatter::ALL
         .iter()
@@ -587,6 +592,8 @@ fn list_formatters() -> Result<()> {
     Ok(())
 }
 
+// Returns `Result` so every `Commands` arm has one signature to dispatch to.
+#[allow(clippy::unnecessary_wraps)]
 fn show_formatter(formatter: Formatter) -> Result<()> {
     println!("{}: {}\n", formatter.slug(), formatter.description());
     println!("Accepted options:");
@@ -723,6 +730,8 @@ fn resolve_language_id(name: &str) -> &str {
         .map_or(name, |language| language.id_name())
 }
 
+// Returns `Result` so every `Commands` arm has one signature to dispatch to.
+#[allow(clippy::unnecessary_wraps)]
 fn list_themes(data_dir: &Path) -> Result<()> {
     let mut themes: Vec<_> = lumis_core::themes::available_themes()
         .map(|t| t.name.clone())
@@ -744,12 +753,14 @@ fn list_themes(data_dir: &Path) -> Result<()> {
 
     themes.sort();
     for theme in themes {
-        println!("{}", theme);
+        println!("{theme}");
     }
 
     Ok(())
 }
 
+// Returns `Result` so every `Commands` arm has one signature to dispatch to.
+#[allow(clippy::unnecessary_wraps)]
 fn list_languages() -> Result<()> {
     for language in Language::iter() {
         let name = Language::id_name(&language);
@@ -771,15 +782,16 @@ fn resolve_theme(
     verbose: bool,
 ) -> Option<lumis_core::themes::Theme> {
     let name = match name.as_deref() {
-        None | Some("auto") => match guess_terminal_theme() {
-            Some(name) => name,
-            None => {
+        None | Some("auto") => {
+            if let Some(name) = guess_terminal_theme() {
+                name
+            } else {
                 if verbose {
                     eprintln!("theme: auto unavailable");
                 }
                 return None;
             }
-        },
+        }
         Some(name) => name.to_string(),
     };
 
@@ -793,7 +805,7 @@ fn resolve_theme(
 
     // Try file theme from data dir
     if let Some(dir) = data_dir {
-        let path = dir.join("themes").join(format!("{}.json", name));
+        let path = dir.join("themes").join(format!("{name}.json"));
         if let Ok(theme) = lumis_core::themes::from_file(&path) {
             if verbose {
                 eprintln!("theme: {}", theme.name);
@@ -843,7 +855,7 @@ fn parse_hex_color(color: &str) -> Option<(u8, u8, u8)> {
 
 // Redmean color distance weights RGB channels based on human perception.
 fn color_distance(left: (u8, u8, u8), right: (u8, u8, u8)) -> u64 {
-    let red_mean = (u64::from(left.0) + u64::from(right.0)) / 2;
+    let red_mean = u64::midpoint(u64::from(left.0), u64::from(right.0));
     let red = i64::from(left.0) - i64::from(right.0);
     let green = i64::from(left.1) - i64::from(right.1);
     let blue = i64::from(left.2) - i64::from(right.2);
@@ -857,7 +869,7 @@ fn read_source(path: Option<String>, language: Option<String>) -> Result<(String
     if let Some(path) = path {
         let bytes = read_or_die(Path::new(&path));
         let source = std::str::from_utf8(&bytes)
-            .map_err(|e| anyhow::anyhow!("Failed to decode file '{}' as UTF-8: {}", path, e))?
+            .map_err(|e| anyhow::anyhow!("Failed to decode file '{path}' as UTF-8: {e}"))?
             .to_string();
         let lang = if language.is_some() {
             Language::guess(language.as_deref(), &source)
@@ -1182,12 +1194,13 @@ enum TreeRenderEntry {
 }
 
 fn truncate_tree_text(text: &str, limit: usize) -> String {
+    const MARKER: &str = "...";
+
     let char_count = text.chars().count();
     if char_count <= limit {
         return text.to_string();
     }
 
-    const MARKER: &str = "...";
     if limit <= MARKER.len() {
         return text.chars().take(limit).collect();
     }
@@ -1452,7 +1465,7 @@ fn do_highlight(reg: &registry::Registry, args: HighlightArgs, verbose: bool) ->
         if verbose {
             eprintln!("--\n");
         }
-        print!("{}", source);
+        print!("{source}");
         return Ok(());
     }
 
@@ -1515,6 +1528,77 @@ fn header_element(args: &HighlightArgs) -> Option<lumis_core::formatter::HtmlEle
     })
 }
 
+fn print_verbose_separator(verbose: bool) {
+    if verbose {
+        eprintln!("--\n");
+    }
+}
+
+// These are the already-validated CLI option groups; bundling them again here
+// would create a second configuration model for one formatter.
+#[allow(clippy::too_many_arguments)]
+fn render_html_multi_themes(
+    reg: &registry::Registry,
+    source: &str,
+    events: &[HighlightEvent],
+    lang: Language,
+    themes: &[String],
+    default_theme: Option<&str>,
+    css_variable_prefix: Option<&str>,
+    pre_class: Option<String>,
+    italic: bool,
+    include_highlights: bool,
+    highlight_lines: Option<lumis_core::formatter::html_inline::HighlightLines>,
+    header: Option<lumis_core::formatter::HtmlElement>,
+    verbose: bool,
+) -> Result<Vec<u8>> {
+    if themes.is_empty() {
+        return Err(anyhow::anyhow!(
+            "--formatter html-multi-themes requires --themes"
+        ));
+    }
+
+    let mut theme_map = std::collections::HashMap::new();
+    for theme_spec in themes {
+        let parts: Vec<&str> = theme_spec.split(':').collect();
+        if parts.len() != 2 {
+            return Err(anyhow::anyhow!(
+                "Invalid theme format '{theme_spec}', expected 'name:theme_id'"
+            ));
+        }
+        let theme_name = parts[0];
+        let theme_id = parts[1];
+        let theme = resolve_theme(Some(theme_id.to_string()), Some(reg.data_dir()), verbose)
+            .ok_or_else(|| anyhow::anyhow!("Theme '{theme_id}' not found"))?;
+        theme_map.insert(theme_name.to_string(), theme);
+    }
+
+    print_verbose_separator(verbose);
+    let mut builder = lumis_core::formatter::HtmlMultiThemesBuilder::new();
+    builder
+        .language(lang)
+        .themes(theme_map)
+        .css_variable_prefix(
+            css_variable_prefix
+                .unwrap_or(DEFAULT_CSS_VARIABLE_PREFIX)
+                .to_string(),
+        )
+        .pre_class(pre_class)
+        .italic(italic)
+        .include_highlights(include_highlights)
+        .highlight_lines(highlight_lines)
+        .header(header);
+
+    if let Some(default) = default_theme {
+        builder.default_theme(default.to_string());
+    }
+
+    let fmt = builder.build().map_err(|e| anyhow::anyhow!("{e}"))?;
+    let mut output = Vec::new();
+    fmt.render(source, events, &mut output)?;
+    Ok(output)
+}
+
 fn render_output(
     reg: &registry::Registry,
     source: &str,
@@ -1552,9 +1636,7 @@ fn render_output(
     match chosen {
         Formatter::HtmlInline => {
             let theme_obj = resolve_theme(theme.clone(), Some(reg.data_dir()), verbose);
-            if verbose {
-                eprintln!("--\n");
-            }
+            print_verbose_separator(verbose);
             let mut builder = lumis_core::formatter::HtmlInlineBuilder::new();
             builder
                 .language(lang)
@@ -1565,68 +1647,33 @@ fn render_output(
                 .highlight_lines(highlight_lines)
                 .header(header);
 
-            let fmt = builder.build().map_err(|e| anyhow::anyhow!("{}", e))?;
+            let fmt = builder.build().map_err(|e| anyhow::anyhow!("{e}"))?;
             let mut output = Vec::new();
             fmt.render(source, events, &mut output)?;
             print!("{}", String::from_utf8(output)?);
         }
 
         Formatter::HtmlMultiThemes => {
-            if themes.is_empty() {
-                return Err(anyhow::anyhow!(
-                    "--formatter html-multi-themes requires --themes"
-                ));
-            }
-
-            let mut theme_map = std::collections::HashMap::new();
-            for theme_spec in themes {
-                let parts: Vec<&str> = theme_spec.split(':').collect();
-                if parts.len() != 2 {
-                    return Err(anyhow::anyhow!(
-                        "Invalid theme format '{}', expected 'name:theme_id'",
-                        theme_spec
-                    ));
-                }
-                let theme_name = parts[0].to_string();
-                let theme_id = parts[1];
-                let theme_obj =
-                    resolve_theme(Some(theme_id.to_string()), Some(reg.data_dir()), verbose)
-                        .ok_or_else(|| anyhow::anyhow!("Theme '{}' not found", theme_id))?;
-                theme_map.insert(theme_name, theme_obj);
-            }
-            if verbose {
-                eprintln!("--\n");
-            }
-
-            let mut builder = lumis_core::formatter::HtmlMultiThemesBuilder::new();
-            builder
-                .language(lang)
-                .themes(theme_map)
-                .css_variable_prefix(
-                    css_variable_prefix
-                        .clone()
-                        .unwrap_or_else(|| DEFAULT_CSS_VARIABLE_PREFIX.to_string()),
-                )
-                .pre_class(pre_class.clone())
-                .italic(italic)
-                .include_highlights(include_highlights)
-                .highlight_lines(highlight_lines)
-                .header(header);
-
-            if let Some(default) = default_theme {
-                builder.default_theme(default.clone());
-            }
-
-            let fmt = builder.build().map_err(|e| anyhow::anyhow!("{}", e))?;
-            let mut output = Vec::new();
-            fmt.render(source, events, &mut output)?;
+            let output = render_html_multi_themes(
+                reg,
+                source,
+                events,
+                lang,
+                themes,
+                default_theme.as_deref(),
+                css_variable_prefix.as_deref(),
+                pre_class.clone(),
+                italic,
+                include_highlights,
+                highlight_lines,
+                header,
+                verbose,
+            )?;
             print!("{}", String::from_utf8(output)?);
         }
 
         Formatter::HtmlLinked => {
-            if verbose {
-                eprintln!("--\n");
-            }
+            print_verbose_separator(verbose);
             let mut builder = lumis_core::formatter::HtmlLinkedBuilder::new();
             builder
                 .language(lang)
@@ -1634,7 +1681,7 @@ fn render_output(
                 .highlight_lines(linked_highlight_lines(&args)?)
                 .header(header);
 
-            let fmt = builder.build().map_err(|e| anyhow::anyhow!("{}", e))?;
+            let fmt = builder.build().map_err(|e| anyhow::anyhow!("{e}"))?;
             let mut output = Vec::new();
             fmt.render(source, events, &mut output)?;
             print!("{}", String::from_utf8(output)?);
@@ -1642,9 +1689,7 @@ fn render_output(
 
         Formatter::Terminal => {
             let theme_obj = resolve_theme(theme.clone(), Some(reg.data_dir()), verbose);
-            if verbose {
-                eprintln!("--\n");
-            }
+            print_verbose_separator(verbose);
             let mut builder = lumis_core::formatter::TerminalBuilder::new();
             builder
                 .language(lang)
@@ -1652,16 +1697,14 @@ fn render_output(
                 .background(parse_terminal_background(background.as_deref()))
                 .width(resolve_terminal_width(width.as_deref())?);
 
-            let fmt = builder.build().map_err(|e| anyhow::anyhow!("{}", e))?;
+            let fmt = builder.build().map_err(|e| anyhow::anyhow!("{e}"))?;
             let mut output = Vec::new();
             fmt.render(source, events, &mut output)?;
             print!("{}", String::from_utf8(output)?);
         }
 
         Formatter::BbcodeScoped => {
-            if verbose {
-                eprintln!("--\n");
-            }
+            print_verbose_separator(verbose);
             let fmt = lumis_core::formatter::BBCodeScoped::new(lang);
             let mut output = Vec::new();
             fmt.render(source, events, &mut output)?;
@@ -1684,10 +1727,7 @@ fn resolve_terminal_width(width: Option<&str>) -> Result<Option<usize>> {
     match width {
         Some("auto") | None => Ok(auto_terminal_width()),
         Some(raw) => raw.parse::<usize>().map(Some).map_err(|_| {
-            anyhow::anyhow!(
-                "invalid width '{}', expected a positive integer or 'auto'",
-                raw
-            )
+            anyhow::anyhow!("invalid width '{raw}', expected a positive integer or 'auto'")
         }),
     }
 }
@@ -1740,7 +1780,7 @@ fn eprint_read_error(file_arg: &FileArgument, e: &std::io::Error) {
             }
             _ => eprintln!("Could not read file: {} (error {:?})", file_arg, e.kind()),
         },
-    };
+    }
 }
 
 #[allow(dead_code)]
@@ -1786,9 +1826,7 @@ fn parse_highlight_lines(input: &str) -> Result<Vec<RangeInclusive<usize>>> {
             }
             if start > end {
                 return Err(anyhow::anyhow!(
-                    "Start line ({}) must be less than or equal to end line ({})",
-                    start,
-                    end
+                    "Start line ({start}) must be less than or equal to end line ({end})"
                 ));
             }
 
@@ -1796,7 +1834,7 @@ fn parse_highlight_lines(input: &str) -> Result<Vec<RangeInclusive<usize>>> {
         } else {
             let line: usize = part
                 .parse()
-                .map_err(|_| anyhow::anyhow!("Invalid line number: '{}'", part))?;
+                .map_err(|_| anyhow::anyhow!("Invalid line number: '{part}'"))?;
 
             if line == 0 {
                 return Err(anyhow::anyhow!("Line numbers must be greater than 0"));
@@ -1900,11 +1938,11 @@ mod tests {
             include_str!("../../../queries/processed/javascript/locals.scm"),
         );
 
-        let source = r#"
+        let source = r"
 <script>
   const count = 1
 </script>
-"#;
+";
 
         let events = highlight_to_events(&reg, source, "html", false).unwrap();
 

@@ -1,6 +1,6 @@
 [package]
 name = "lumis-cli"
-version = "0.5.0"
+version = "0.5.1"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
@@ -25,8 +25,8 @@ path = "src/main.rs"
 doc = false
 
 [dependencies]
-lumis-core = { path = "../lumis-core", version = "2.4.0", features = ["all-languages"] }
-lumis-wasm-runtime = { path = "../lumis-wasm-runtime", version = "0.2.0" }
+lumis-core = { path = "../lumis-core", version = "2.5.0", features = ["all-languages"] }
+lumis-wasm-runtime = { path = "../lumis-wasm-runtime", version = "0.2.1" }
 tree-sitter = { version = "^0.26.9", features = ["wasm"] }
 wasmtime = { version = "36", default-features = false, features = ["cache", "cranelift", "runtime", "std"] }
 streaming-iterator = "0.1"
@@ -47,3 +47,6 @@ serde_json = "1"
 [dev-dependencies]
 assert_cmd = "2"
 predicates = "3"
+
+[lints]
+workspace = true

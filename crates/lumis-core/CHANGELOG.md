@@ -1,3 +1,13 @@
+## [2.5.0](https://github.com/leandrocp/lumis/compare/cargo-lumis-core/v2.4.0...cargo-lumis-core/v2.5.0) (2026-09-03)
+
+
+### Features
+
+- highlight code inside diff hunks - [#1284](https://github.com/leandrocp/lumis/pull/1284)
+- update generated themes - [#1293](https://github.com/leandrocp/lumis/pull/1293)
+- update generated themes - [#1307](https://github.com/leandrocp/lumis/pull/1307)
+- update generated themes - [#1343](https://github.com/leandrocp/lumis/pull/1343)
+
 ## [2.4.0](https://github.com/leandrocp/lumis/compare/cargo-lumis-core/v2.3.0...cargo-lumis-core/v2.4.0) (2026-08-13)
 
 ### Bug Fixes

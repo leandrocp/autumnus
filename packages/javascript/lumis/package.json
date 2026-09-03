@@ -1,6 +1,6 @@
 {
   "name": "@lumis-sh/lumis",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Syntax Highlighter powered by Tree-sitter and Neovim themes",
   "author": "Leandro Pereira",
   "license": "MIT",
@@ -94,7 +94,7 @@
     "test:all-languages": "vitest run test/all-languages.test.ts",
     "dev": "vite",
     "docs": "typedoc",
-    "lint": "oxlint --type-aware --deny-warnings src/ test/ scripts/",
+    "lint": "oxlint -c ../../../.oxlintrc.json --type-aware --deny-warnings --report-unused-disable-directives --ignore-pattern 'examples/**' .",
     "prepack": "pnpm run build"
   },
   "dependencies": {

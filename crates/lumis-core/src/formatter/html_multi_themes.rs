@@ -92,7 +92,7 @@ impl HtmlMultiThemesBuilder {
 
         match &result.default_theme {
             Some(DefaultTheme::Theme(name)) if !result.themes.contains_key(name) => {
-                return Err(format!("Default theme '{}' not found in themes map", name));
+                return Err(format!("Default theme '{name}' not found in themes map"));
             }
             Some(DefaultTheme::LightDark)
                 if !result.themes.contains_key("light") || !result.themes.contains_key("dark") =>
@@ -215,7 +215,7 @@ impl HtmlMultiThemes {
             .highlight_lines
             .as_ref()
             .and_then(|hl| hl.class.as_ref())
-            .map(|c| format!(" {}", c));
+            .map(|c| format!(" {c}"));
 
         let style = self.get_highlight_style();
 
@@ -303,7 +303,7 @@ impl Formatter for HtmlMultiThemes {
                 class_suffix.as_deref(),
                 style.as_deref(),
             );
-            write!(&mut buffer, "{}", wrapped)?;
+            write!(&mut buffer, "{wrapped}")?;
         }
 
         crate::formatter::html::closing_tags(&mut buffer)?;

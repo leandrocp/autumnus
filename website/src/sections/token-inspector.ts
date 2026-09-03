@@ -64,6 +64,10 @@ const INSPECTOR_SOURCE = `<article class="profile-card">
   </script>
 </article>`;
 
+function themedColor(light: string | undefined, dark: string | undefined): string | undefined {
+  return light && dark ? `light-dark(${light}, ${dark})` : (light ?? dark);
+}
+
 export async function setupTokenInspector(root: HTMLElement) {
   const output = root.querySelector<HTMLDivElement>("#inspector-output");
   if (!output) return;
@@ -78,6 +82,30 @@ export async function setupTokenInspector(root: HTMLElement) {
     { rootMargin: "200px" },
   );
   observer.observe(output);
+}
+
+function tokenForeground(token: HTMLElement, dark: boolean): string {
+  if (dark) return token.dataset.fgDark ?? token.dataset.fg ?? "none";
+  return token.dataset.fg ?? "none";
+}
+
+function countTokens(tokens: HTMLElement[]): {
+  scopeTotals: Map<string, number>;
+  languageTotals: Map<string, number>;
+} {
+  const scopeTotals = new Map<string, number>();
+  const languageTotals = new Map<string, number>();
+
+  for (const token of tokens) {
+    const scope = token.dataset.scope;
+    if (!scope) continue;
+
+    scopeTotals.set(scope, (scopeTotals.get(scope) ?? 0) + 1);
+    const lang = token.dataset.language;
+    if (lang) languageTotals.set(lang, (languageTotals.get(lang) ?? 0) + 1);
+  }
+
+  return { scopeTotals, languageTotals };
 }
 
 async function initInspector(root: HTMLElement, output: HTMLDivElement) {
@@ -131,61 +159,60 @@ async function initInspector(root: HTMLElement, output: HTMLDivElement) {
       );
 
       let darkStyleIndex = 0;
-      highlightIter(
-        source,
-        html,
-        lightTheme,
-        (
-          text: string,
-          language: string,
-          range: { start: number; end: number },
-          scope: string,
-          style: { fg?: string; bg?: string } | undefined,
-        ) => {
-          const parts = text.split("\n");
-          for (let i = 0; i < parts.length; i++) {
-            const part = parts[i];
-            if (part.length > 0) {
-              const escaped = escape(part);
-              if (scope) {
-                const darkStyle = darkStyles[darkStyleIndex++];
-                lines[lines.length - 1] +=
-                  openSpanTag({
-                    class: "tok",
-                    tabindex: 0,
-                    "data-token-id": String(++tokenId),
-                    "data-scope": scope,
-                    "data-language": language,
-                    "data-start": String(range.start),
-                    "data-end": String(range.end),
-                    "data-fg": style?.fg,
-                    "data-bg": style?.bg,
-                    "data-fg-dark": darkStyle?.fg,
-                    "data-bg-dark": darkStyle?.bg,
-                    style: styleToCss(
-                      {
-                        fg:
-                          style?.fg && darkStyle?.fg
-                            ? `light-dark(${style.fg}, ${darkStyle.fg})`
-                            : (style?.fg ?? darkStyle?.fg),
-                        bg:
-                          style?.bg && darkStyle?.bg
-                            ? `light-dark(${style.bg}, ${darkStyle.bg})`
-                            : (style?.bg ?? darkStyle?.bg),
-                      },
-                      { italic: true },
-                    ),
-                  }) +
-                  escaped +
-                  "</span>";
-              } else {
-                lines[lines.length - 1] += escaped;
-              }
-            }
-            if (i < parts.length - 1) lines.push("");
+      function appendHighlightedText(
+        text: string,
+        language: string,
+        range: { start: number; end: number },
+        scope: string,
+        style: { fg?: string; bg?: string } | undefined,
+      ): void {
+        const parts = text.split("\n");
+        for (let i = 0; i < parts.length; i++) {
+          const part = parts[i];
+          if (part.length > 0) {
+            lines[lines.length - 1] += scope
+              ? tokenSpan(part, language, range, scope, style, darkStyles[darkStyleIndex++])
+              : escape(part);
           }
-        },
-      );
+          if (i < parts.length - 1) lines.push("");
+        }
+      }
+
+      // Both palettes travel on the span so the page can switch colour scheme
+      // without re-highlighting.
+      function tokenSpan(
+        part: string,
+        language: string,
+        range: { start: number; end: number },
+        scope: string,
+        style: { fg?: string; bg?: string } | undefined,
+        darkStyle: { fg?: string; bg?: string } | undefined,
+      ): string {
+        const attrs = openSpanTag({
+          class: "tok",
+          tabindex: 0,
+          "data-token-id": String(++tokenId),
+          "data-scope": scope,
+          "data-language": language,
+          "data-start": String(range.start),
+          "data-end": String(range.end),
+          "data-fg": style?.fg,
+          "data-bg": style?.bg,
+          "data-fg-dark": darkStyle?.fg,
+          "data-bg-dark": darkStyle?.bg,
+          style: styleToCss(
+            {
+              fg: themedColor(style?.fg, darkStyle?.fg),
+              bg: themedColor(style?.bg, darkStyle?.bg),
+            },
+            { italic: true },
+          ),
+        });
+
+        return `${attrs}${escape(part)}</span>`;
+      }
+
+      highlightIter(source, html, lightTheme, appendHighlightedText);
 
       const body = lines.map((line: string, i: number) => wrapLine(i + 1, line)).join("");
       return `${openPreTag({ preClass: "inspector-demo" })}${openCodeTag(html)}${body}${closingTags()}`;
@@ -195,16 +222,7 @@ async function initInspector(root: HTMLElement, output: HTMLDivElement) {
   output.innerHTML = hl.highlight(INSPECTOR_SOURCE, docsFormatter);
 
   const tokens = [...output.querySelectorAll<HTMLElement>(".tok")];
-  const scopeTotals = new Map<string, number>();
-  const languageTotals = new Map<string, number>();
-
-  for (const token of tokens) {
-    const scope = token.dataset.scope;
-    if (!scope) continue;
-    scopeTotals.set(scope, (scopeTotals.get(scope) ?? 0) + 1);
-    const lang = token.dataset.language;
-    if (lang) languageTotals.set(lang, (languageTotals.get(lang) ?? 0) + 1);
-  }
+  const { scopeTotals, languageTotals } = countTokens(tokens);
 
   const tokenCountEl = root.querySelector("#inspector-token-count");
   const scopeCountEl = root.querySelector("#inspector-scope-count");
@@ -225,13 +243,12 @@ async function initInspector(root: HTMLElement, output: HTMLDivElement) {
     activeToken = token;
     for (const t of tokens) t.classList.remove("is-active");
     token.classList.add("is-active");
+
     textEl.textContent = token.textContent ?? "";
     scopeEl.textContent = token.dataset.scope ?? "-";
     languageEl.textContent = token.dataset.language ?? "-";
     rangeEl.textContent = `${token.dataset.start ?? "?"}..${token.dataset.end ?? "?"}`;
-    fgEl.textContent = colorScheme.matches
-      ? (token.dataset.fgDark ?? token.dataset.fg ?? "none")
-      : (token.dataset.fg ?? "none");
+    fgEl.textContent = tokenForeground(token, colorScheme.matches);
   }
 
   for (const token of tokens) {

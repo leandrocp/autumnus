@@ -112,7 +112,7 @@ impl HtmlInline {
             .highlight_lines
             .as_ref()
             .and_then(|hl| hl.class.as_ref())
-            .map(|c| format!(" {}", c));
+            .map(|c| format!(" {c}"));
 
         let style = self.get_highlight_style();
 
@@ -199,7 +199,7 @@ impl Formatter for HtmlInline {
                 class_suffix.as_deref(),
                 style.as_deref(),
             );
-            write!(&mut buffer, "{}", wrapped)?;
+            write!(&mut buffer, "{wrapped}")?;
         }
 
         crate::formatter::html::closing_tags(&mut buffer)?;

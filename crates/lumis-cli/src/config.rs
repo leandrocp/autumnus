@@ -7,13 +7,13 @@ use std::path::{Path, PathBuf};
 
 #[derive(Debug, Default, Deserialize)]
 #[serde(default)]
-pub struct Config {
+pub(crate) struct Config {
     pub highlight: HighlightConfig,
 }
 
 #[derive(Debug, Default, Deserialize)]
 #[serde(default)]
-pub struct HighlightConfig {
+pub(crate) struct HighlightConfig {
     pub theme: Option<String>,
 }
 
@@ -22,7 +22,7 @@ pub struct HighlightConfig {
 ///
 /// Errors rather than panics when there is no home directory, since `--config`
 /// and `LUMIS_CONFIG` both name a file without needing one.
-pub fn default_path() -> Result<PathBuf> {
+pub(crate) fn default_path() -> Result<PathBuf> {
     Ok(etcetera::choose_base_strategy()
         .context("failed to determine the home directory holding config.toml")?
         .config_dir()
@@ -31,7 +31,7 @@ pub fn default_path() -> Result<PathBuf> {
 }
 
 impl Config {
-    pub fn load(path: &Path) -> Result<Self> {
+    pub(crate) fn load(path: &Path) -> Result<Self> {
         let contents = match fs::read_to_string(path) {
             Ok(contents) => contents,
             Err(error) if error.kind() == ErrorKind::NotFound => return Ok(Self::default()),

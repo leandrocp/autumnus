@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+inheritance: true
+reviews:
+  auto_review:
+    ignore_title_keywords:
+      - "feat: update lang "
+      - "feat(themes): update themes"
+      - "feat: update default queries"
+      - "chore(release): "
