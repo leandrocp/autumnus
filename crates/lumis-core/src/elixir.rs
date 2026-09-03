@@ -512,7 +512,7 @@ pub struct ExHtmlLinkedHighlightLines {
 }
 
 #[derive(Clone, Debug, NifMap)]
-pub(crate) struct ExCssOptions {
+pub struct ExCssOptions {
     pub enable_italic: bool,
     pub scope: String,
     pub container_selector: String,
