@@ -1,3 +1,27 @@
+## [0.7.1](https://github.com/leandrocp/lumis/compare/npm-lumis/v0.7.0...npm-lumis/v0.7.1) (2026-09-03)
+
+
+### Code Refactoring
+
+- keep one copy of each test parser - [#1288](https://github.com/leandrocp/lumis/pull/1288)
+
+
+### Features
+
+- highlight code inside diff hunks - [#1284](https://github.com/leandrocp/lumis/pull/1284)
+- update lang diff - [#1290](https://github.com/leandrocp/lumis/pull/1290)
+- update generated themes - [#1293](https://github.com/leandrocp/lumis/pull/1293)
+- update lang graphql - [#1292](https://github.com/leandrocp/lumis/pull/1292)
+- name the highlight options in every runtime - [#1289](https://github.com/leandrocp/lumis/pull/1289)
+- update lang racket - [#1306](https://github.com/leandrocp/lumis/pull/1306)
+- update generated themes - [#1307](https://github.com/leandrocp/lumis/pull/1307)
+- update lang tcl - [#1294](https://github.com/leandrocp/lumis/pull/1294)
+- opt into rainbow brackets from the flat token iterator - [#1333](https://github.com/leandrocp/lumis/pull/1333)
+- update lang protobuf - [#1345](https://github.com/leandrocp/lumis/pull/1345)
+- update lang matlab - [#1344](https://github.com/leandrocp/lumis/pull/1344)
+- update generated themes - [#1343](https://github.com/leandrocp/lumis/pull/1343)
+- update lang graphql - [#1342](https://github.com/leandrocp/lumis/pull/1342)
+
 ## [0.7.0](https://github.com/leandrocp/lumis/compare/npm-lumis/v0.6.1...npm-lumis/v0.7.0) (2026-08-13)
 
 ### Bug Fixes
