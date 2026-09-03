@@ -161,7 +161,7 @@ highlightIter(source, this.language, frappe, (text, language, _range, scope) => 
 ```rust
 use lumis::highlight::{highlight_iter_with_options, HighlightOptions};
 
-let options = HighlightOptions { rainbow_brackets: true };
+let options = HighlightOptions::new().rainbow_brackets(true);
 
 highlight_iter_with_options(source, self.language, self.theme.clone(), options, |text, language, _range, scope, _style| {
     // scope is punctuation.bracket.rainbow.1 .. .6 on bracket pairs

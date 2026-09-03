@@ -139,16 +139,13 @@ impl Formatter<DiffAnnotation> for DiffHtmlFormatter {
     }
 }
 
-fn render_pane(
-    source: &str,
-    annotations: &[Annotation<DiffAnnotation>],
-) -> Result<String, Box<dyn std::error::Error>> {
+fn render_pane(source: &str, annotations: &[Annotation<DiffAnnotation>]) -> String {
     let formatter = DiffHtmlFormatter {
         language: Language::Rust,
     };
     let options = HighlightOptions::new().annotations(annotations);
 
-    Ok(lumis::highlight_with_options(source, formatter, options))
+    lumis::highlight_with_options(source, formatter, options)
 }
 
 fn range_of(source: &str, text: &str) -> Range<usize> {
@@ -273,8 +270,8 @@ fn calculate(price: i64, tax: i64, fee: i64) -> i64 {
         )?,
     ];
 
-    let old_html = render_pane(old_source, &old_annotations)?;
-    let new_html = render_pane(new_source, &new_annotations)?;
+    let old_html = render_pane(old_source, &old_annotations);
+    let new_html = render_pane(new_source, &new_annotations);
     let mut page = String::from(PAGE_START);
     page.push_str(&old_html);
     page.push_str(PAGE_MIDDLE);
@@ -340,13 +337,13 @@ const PAGE_MIDDLE: &str = r#"
 <h2>calculator.rs · after</h2>
 "#;
 
-const PAGE_END: &str = r#"
+const PAGE_END: &str = r"
 </section>
 </div>
 </main>
 </body>
 </html>
-"#;
+";
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     print!("{}", render_example()?);

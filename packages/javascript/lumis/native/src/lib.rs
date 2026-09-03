@@ -458,7 +458,7 @@ fn render_formatter(
     Ok((output, unresolved))
 }
 
-fn publicize_event_languages(events: &mut [HighlightEvent], ids: &HashMap<String, String>) {
+fn publicize_event_languages(events: &mut [HighlightEvent<'_>], ids: &HashMap<String, String>) {
     for event in events {
         if let HighlightEvent::Start { language, .. } = event {
             if let Some(public) = ids.get(language) {
@@ -472,7 +472,7 @@ fn render_events(
     source: &str,
     display_language: &str,
     formatter: NativeFormatter,
-    events: &[HighlightEvent],
+    events: &[HighlightEvent<'_>],
 ) -> std::result::Result<String, Box<dyn std::error::Error + Send + Sync>> {
     let language = if display_language == "plaintext" {
         Language::PlainText
@@ -531,7 +531,7 @@ fn render_events(
 
 /// Encode the event protocol documented and decoded in
 /// `src/core/native-event-codec.ts`.
-fn encode_events(events: &[HighlightEvent]) -> Result<Buffer> {
+fn encode_events(events: &[HighlightEvent<'_>]) -> Result<Buffer> {
     let mut output = Vec::with_capacity(events.len() * 9);
     for event in events {
         match event {
@@ -831,7 +831,7 @@ impl NativeRuntime {
             .clone()
     }
 
-    fn publicize_events(&self, events: &mut [HighlightEvent]) {
+    fn publicize_events(&self, events: &mut [HighlightEvent<'_>]) {
         publicize_event_languages(events, &self.public_ids());
     }
 

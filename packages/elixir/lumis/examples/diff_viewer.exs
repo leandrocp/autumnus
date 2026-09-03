@@ -59,6 +59,9 @@ end
 defmodule LumisDiffViewerExample do
   @moduledoc false
 
+  alias Lumis.Annotation
+  alias Lumis.Range.Offset
+
   def render_example do
     old_source = """
     def calculate(price, tax) do
@@ -160,8 +163,8 @@ defmodule LumisDiffViewerExample do
         :last -> List.last(matches)
       end
 
-    Lumis.Annotation.new(
-      Lumis.Range.Offset.new(start, start + length),
+    Annotation.new(
+      Offset.new(start, start + length),
       properties
     )
   end

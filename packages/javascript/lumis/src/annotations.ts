@@ -51,7 +51,7 @@ function validateByteOffset(sourceIndex: SourceIndex, index: number, offset: num
   }
 }
 
-function resolvePosition(sourceIndex: SourceIndex, index: number, position: Position): number {
+function validatePosition(index: number, position: Position): void {
   if (
     !Number.isSafeInteger(position.line) ||
     position.line < 0 ||
@@ -62,19 +62,36 @@ function resolvePosition(sourceIndex: SourceIndex, index: number, position: Posi
       `annotation ${index} position must contain non-negative integer line and column values`,
     );
   }
+}
 
-  const lineStartIndex = sourceIndex.lineStarts[position.line];
+function lineByteRange(
+  sourceIndex: SourceIndex,
+  index: number,
+  line: number,
+): { start: number; end: number } {
+  const lineStartIndex = sourceIndex.lineStarts[line];
   if (lineStartIndex === undefined) {
     throw new RangeError(
-      `annotation ${index} line ${position.line} is outside the source's ${sourceIndex.lineStarts.length} lines`,
+      `annotation ${index} line ${line} is outside the source's ${sourceIndex.lineStarts.length} lines`,
     );
   }
-  const lineStart = sourceIndex.utf8Offsets[lineStartIndex] ?? 0;
-  const nextLineStartIndex = sourceIndex.lineStarts[position.line + 1];
+  const nextLineStartIndex = sourceIndex.lineStarts[line + 1];
   const nextLineStart =
     nextLineStartIndex === undefined ? undefined : sourceIndex.utf8Offsets[nextLineStartIndex];
-  const lineEnd = nextLineStart === undefined ? sourceIndex.sourceBytes.length : nextLineStart - 1;
-  const lineLength = lineEnd - lineStart;
+
+  return {
+    start: sourceIndex.utf8Offsets[lineStartIndex] ?? 0,
+    // The trailing newline is not part of the line.
+    end: nextLineStart === undefined ? sourceIndex.sourceBytes.length : nextLineStart - 1,
+  };
+}
+
+function resolvePosition(sourceIndex: SourceIndex, index: number, position: Position): number {
+  validatePosition(index, position);
+
+  const line = lineByteRange(sourceIndex, index, position.line);
+  const lineStart = line.start;
+  const lineLength = line.end - lineStart;
 
   if (position.column > lineLength) {
     throw new RangeError(
@@ -149,6 +166,27 @@ function applyBoundary(boundary: Boundary, active: Set<number>): void {
   for (const index of boundary.starts) active.add(index);
 }
 
+/** Every annotation boundary in the source, in ascending byte order. */
+interface BoundaryTable {
+  byOffset: Map<number, Boundary>;
+  offsets: number[];
+}
+
+/** Applies every boundary at or before `limit`, and reports where that left off. */
+function advanceBoundaries(
+  boundaries: BoundaryTable,
+  active: Set<number>,
+  from: number,
+  limit: number,
+): number {
+  let index = from;
+  while (index < boundaries.offsets.length && boundaries.offsets[index]! <= limit) {
+    applyBoundary(boundaries.byOffset.get(boundaries.offsets[index]!)!, active);
+    index += 1;
+  }
+  return index;
+}
+
 function sameLayer<T>(left: ActiveLayer<T>, right: ActiveLayer<T>): boolean {
   if (left.type !== right.type) return false;
 
@@ -214,6 +252,57 @@ function transitionLayers<T>(
   return desired;
 }
 
+/** What the walk over the syntax events carries from one source event to the next. */
+interface ComposeState<T> {
+  boundaryIndex: number;
+  activeLayers: ActiveLayer<T>[];
+}
+
+/**
+ * Splits one source event at every annotation boundary inside it, reopening the
+ * syntax layers around each piece so the emitted stream stays nested.
+ */
+function composeSourceEvent<T>(
+  event: { startByte: number; endByte: number },
+  state: ComposeState<T>,
+  boundaries: BoundaryTable,
+  activeAnnotations: Set<number>,
+  annotations: readonly ResolvedAnnotation<T>[],
+  syntaxLayers: readonly SyntaxLayer[],
+  output: HighlightEvent<T>[],
+): void {
+  state.boundaryIndex = advanceBoundaries(
+    boundaries,
+    activeAnnotations,
+    state.boundaryIndex,
+    event.startByte,
+  );
+
+  let cursor = event.startByte;
+  while (cursor < event.endByte) {
+    const boundary = boundaries.offsets[state.boundaryIndex];
+    const next = boundary !== undefined && boundary < event.endByte ? boundary : event.endByte;
+
+    state.activeLayers = transitionLayers(
+      output,
+      state.activeLayers,
+      desiredLayers(activeAnnotations, annotations, syntaxLayers),
+    );
+
+    if (cursor < next) {
+      output.push({ type: "source", startByte: cursor, endByte: next });
+    }
+    cursor = next;
+
+    state.boundaryIndex = advanceBoundaries(
+      boundaries,
+      activeAnnotations,
+      state.boundaryIndex,
+      cursor,
+    );
+  }
+}
+
 /** @internal */
 export function composeAnnotations<T>(
   syntaxEvents: readonly SyntaxHighlightEvent[],
@@ -224,13 +313,15 @@ export function composeAnnotations<T>(
 
   const resolvedAnnotations = resolveAnnotations(sourceIndex, annotations);
 
-  const boundaries = annotationBoundaries(resolvedAnnotations);
-  const boundaryPositions = [...boundaries.keys()].sort((left, right) => left - right);
+  const byOffset = annotationBoundaries(resolvedAnnotations);
+  const boundaries: BoundaryTable = {
+    byOffset,
+    offsets: [...byOffset.keys()].sort((left, right) => left - right),
+  };
   const activeAnnotations = new Set<number>();
   const syntaxLayers: SyntaxLayer[] = [];
   const output: HighlightEvent<T>[] = [];
-  let activeLayers: ActiveLayer<T>[] = [];
-  let boundaryIndex = 0;
+  const state: ComposeState<T> = { boundaryIndex: 0, activeLayers: [] };
   let nextSyntaxId = 0;
 
   for (const event of syntaxEvents) {
@@ -242,48 +333,21 @@ export function composeAnnotations<T>(
         language: event.language,
       });
       nextSyntaxId += 1;
-      continue;
-    }
-
-    if (event.type === "end") {
+    } else if (event.type === "end") {
       syntaxLayers.pop();
-      continue;
-    }
-
-    while (
-      boundaryIndex < boundaryPositions.length &&
-      boundaryPositions[boundaryIndex]! <= event.startByte
-    ) {
-      applyBoundary(boundaries.get(boundaryPositions[boundaryIndex]!)!, activeAnnotations);
-      boundaryIndex += 1;
-    }
-
-    let cursor = event.startByte;
-    while (cursor < event.endByte) {
-      const boundary = boundaryPositions[boundaryIndex];
-      const next = boundary !== undefined && boundary < event.endByte ? boundary : event.endByte;
-
-      activeLayers = transitionLayers(
+    } else {
+      composeSourceEvent(
+        event,
+        state,
+        boundaries,
+        activeAnnotations,
+        resolvedAnnotations,
+        syntaxLayers,
         output,
-        activeLayers,
-        desiredLayers(activeAnnotations, resolvedAnnotations, syntaxLayers),
       );
-
-      if (cursor < next) {
-        output.push({ type: "source", startByte: cursor, endByte: next });
-      }
-      cursor = next;
-
-      while (
-        boundaryIndex < boundaryPositions.length &&
-        boundaryPositions[boundaryIndex] === cursor
-      ) {
-        applyBoundary(boundaries.get(cursor)!, activeAnnotations);
-        boundaryIndex += 1;
-      }
     }
   }
 
-  transitionLayers(output, activeLayers, []);
+  transitionLayers(output, state.activeLayers, []);
   return output;
 }

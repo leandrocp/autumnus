@@ -134,7 +134,7 @@ impl HighlightOptions<'static> {
     }
 
     /// Adds caller-provided annotations to this highlighting operation.
-    pub fn annotations<'a, T>(self, annotations: &'a [Annotation<T>]) -> HighlightOptions<'a, T> {
+    pub fn annotations<T>(self, annotations: &[Annotation<T>]) -> HighlightOptions<'_, T> {
         HighlightOptions {
             annotations,
             rainbow_brackets: self.rainbow_brackets,
@@ -412,7 +412,7 @@ where
 /// use lumis::highlight::{highlight_iter_with_options, HighlightOptions};
 /// use lumis::languages::Language;
 ///
-/// let options = HighlightOptions { rainbow_brackets: true };
+/// let options = HighlightOptions::new().rainbow_brackets(true);
 /// let mut scopes = Vec::new();
 ///
 /// highlight_iter_with_options(
@@ -433,7 +433,7 @@ pub fn highlight_iter_with_options<F, E>(
     source: &str,
     language: Language,
     theme: Option<Theme>,
-    options: HighlightOptions,
+    options: HighlightOptions<'_>,
     mut on_event_source: F,
 ) -> Result<(), HighlightError>
 where
@@ -974,7 +974,7 @@ mod tests {
         assert!(has_colors, "Expected at least some segments with colors");
     }
 
-    fn iter_scopes(code: &str, options: HighlightOptions) -> Vec<&'static str> {
+    fn iter_scopes(code: &str, options: HighlightOptions<'_>) -> Vec<&'static str> {
         let mut scopes = Vec::new();
         highlight_iter_with_options(
             code,

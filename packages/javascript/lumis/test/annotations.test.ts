@@ -27,8 +27,8 @@ describe("annotations", () => {
     ];
     const formatter: Formatter<Change> = {
       language: javascript,
-      render(source, events) {
-        const bytes = new TextEncoder().encode(source);
+      render(rendered, events) {
+        const bytes = new TextEncoder().encode(rendered);
         const decoder = new TextDecoder();
         const output: string[] = [];
 
@@ -97,8 +97,8 @@ describe("annotations", () => {
     ];
     const formatter: Formatter<Change> = {
       language: javascript,
-      render(source, events) {
-        const sourceBytes = new TextEncoder().encode(source);
+      render(rendered, events) {
+        const sourceBytes = new TextEncoder().encode(rendered);
         const decoder = new TextDecoder();
 
         return events

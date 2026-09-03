@@ -101,9 +101,8 @@ impl Formatter for LineNumberedTerminal {
                             .get_style(&specialized_scope)
                             .or_else(|| theme.get_style(scope))
                     });
-                    let ansi_text = style
-                        .map(|style| ansi::paint(text, style))
-                        .unwrap_or_else(|| text.to_owned());
+                    let ansi_text =
+                        style.map_or_else(|| text.to_owned(), |style| ansi::paint(text, style));
 
                     if at_line_start {
                         // Add line number in gray using ANSI helpers

@@ -3,6 +3,11 @@ defmodule Lumis.AnnotationsTest do
 
   import ExUnit.CaptureIO
 
+  alias Lumis.Annotation
+  alias Lumis.Position
+  alias Lumis.Range.Offset
+  alias Lumis.Range.Position, as: PositionRange
+
   defmodule TestFormatter do
     @behaviour Lumis.Formatter
 
@@ -16,7 +21,7 @@ defmodule Lumis.AnnotationsTest do
         {:source, %{start: start, end: end_offset}} ->
           binary_part(source, start, end_offset - start)
 
-        {:annotation_start, %Lumis.Annotation{range: range, properties: %{id: id}}} ->
+        {:annotation_start, %Annotation{range: range, properties: %{id: id}}} ->
           send(self(), {:resolved_range, id, range})
           ["<annotation:", Integer.to_string(id), ">"]
 
@@ -33,8 +38,8 @@ defmodule Lumis.AnnotationsTest do
     source = "(price + tax)"
 
     annotations = [
-      Lumis.Annotation.new(
-        Lumis.Range.Offset.new(1, byte_size(source) - 1),
+      Annotation.new(
+        Offset.new(1, byte_size(source) - 1),
         %{id: 7}
       )
     ]
@@ -47,14 +52,14 @@ defmodule Lumis.AnnotationsTest do
              )
 
     assert output == "(<annotation:7>price + tax</annotation>)"
-    assert_received {:resolved_range, 7, %Lumis.Range.Offset{start: 1, end: 12}}
+    assert_received {:resolved_range, 7, %Offset{start: 1, end: 12}}
     assert_received :saw_rainbow_bracket
   end
 
   test "invalid UTF-8 byte boundaries are rejected against the source" do
     annotations = [
-      Lumis.Annotation.new(
-        Lumis.Range.Offset.new(1, 2),
+      Annotation.new(
+        Offset.new(1, 2),
         %{}
       )
     ]
@@ -71,10 +76,10 @@ defmodule Lumis.AnnotationsTest do
     source = "π\ncafé"
 
     annotations = [
-      Lumis.Annotation.new(
-        Lumis.Range.Position.new(
-          Lumis.Position.new(1, 0),
-          Lumis.Position.new(1, 5)
+      Annotation.new(
+        PositionRange.new(
+          Position.new(1, 0),
+          Position.new(1, 5)
         ),
         %{id: 8}
       )
@@ -87,15 +92,15 @@ defmodule Lumis.AnnotationsTest do
              )
 
     assert output == "π\n<annotation:8>café</annotation>"
-    assert_received {:resolved_range, 8, %Lumis.Range.Offset{start: 3, end: 8}}
+    assert_received {:resolved_range, 8, %Offset{start: 3, end: 8}}
   end
 
   test "position columns must be UTF-8 byte boundaries" do
     annotations = [
-      Lumis.Annotation.new(
-        Lumis.Range.Position.new(
-          Lumis.Position.new(1, 0),
-          Lumis.Position.new(1, 4)
+      Annotation.new(
+        PositionRange.new(
+          Position.new(1, 0),
+          Position.new(1, 4)
         ),
         %{}
       )
@@ -111,13 +116,13 @@ defmodule Lumis.AnnotationsTest do
 
   test "range constructors reject empty ranges" do
     assert_raise ArgumentError, ~r/offset range start must be before its end/, fn ->
-      Lumis.Range.Offset.new(4, 4)
+      Offset.new(4, 4)
     end
 
-    position = Lumis.Position.new(1, 4)
+    position = Position.new(1, 4)
 
     assert_raise ArgumentError, ~r/position range start must be before its end/, fn ->
-      Lumis.Range.Position.new(position, position)
+      PositionRange.new(position, position)
     end
   end
 

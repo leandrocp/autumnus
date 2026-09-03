@@ -489,7 +489,7 @@ fn syntax_events<'a>(
 }
 
 #[rustler::nif(schedule = "DirtyCpu")]
-pub fn highlight_events<'a>(
+pub(crate) fn highlight_events<'a>(
     env: Env<'a>,
     source: &'a str,
     options: ExEventOptions<'a>,
@@ -520,9 +520,7 @@ pub fn highlight_events<'a>(
     Ok((ok(), events).encode(env))
 }
 
-fn decode_annotations<'a>(
-    annotations: Vec<ExAnnotation<'a>>,
-) -> NifResult<Vec<Annotation<Term<'a>>>> {
+fn decode_annotations(annotations: Vec<ExAnnotation<'_>>) -> NifResult<Vec<Annotation<Term<'_>>>> {
     annotations
         .into_iter()
         .map(|annotation| {

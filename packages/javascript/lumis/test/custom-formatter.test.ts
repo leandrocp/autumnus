@@ -99,7 +99,7 @@ describe("custom formatter", () => {
       const scopes: string[] = [];
       const formatter: Formatter = {
         language: json,
-        format(src: string) {
+        render(src: string) {
           highlightIter(
             src,
             this.language,

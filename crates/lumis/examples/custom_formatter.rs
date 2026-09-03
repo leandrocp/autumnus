@@ -45,12 +45,12 @@ impl Formatter for TokenMetadataFormatter {
                 }
                 HighlightEvent::Source { start, end } => {
                     let text = &source[*start..*end];
-                    let (scope, language) = scopes
-                        .last()
-                        .map(|(scope_index, language)| {
+                    let (scope, language) = scopes.last().map_or(
+                        ("", self.language.id_name()),
+                        |(scope_index, language)| {
                             (lumis::highlights::HIGHLIGHT_NAMES[*scope_index], *language)
-                        })
-                        .unwrap_or(("", self.language.id_name()));
+                        },
+                    );
                     let specialized_scope = format!("{scope}.{language}");
                     let style = self
                         .theme

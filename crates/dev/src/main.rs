@@ -265,7 +265,7 @@ struct FixtureOutputs {
     bbcode: String,
 }
 
-fn serialize_events(events: Vec<HighlightEvent>) -> Vec<SerializableHighlightEvent> {
+fn serialize_events(events: Vec<HighlightEvent<'_>>) -> Vec<SerializableHighlightEvent> {
     events
         .into_iter()
         .map(|event| match event {

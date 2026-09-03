@@ -254,7 +254,7 @@ function runHighlightEvents<T>(
   const loaded = resolveLoadedLanguage(runtime, language);
   const events = runtime.highlightEvents(source, loaded, {
     rainbowBrackets: options.rainbowBrackets,
-  }) as SyntaxHighlightEvent[];
+  });
   const annotations = options.annotations ?? [];
   if (annotations.length === 0) return events;
 
