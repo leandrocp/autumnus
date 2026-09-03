@@ -1550,7 +1550,7 @@ dependencies = [
 [[package]]
 name = "lumis-core"
 version = "2.5.0"
-source = "git+https://github.com/leandrocp/lumis?branch=refactor%2Fshare-wasm-runtime#b8e178f6384a9e183ce60a3c5646efca83c13c32"
+source = "git+https://github.com/leandrocp/lumis?branch=refactor%2Fshare-wasm-runtime#f0e7aba526cd2b2ebcb2cc65ba641ac01f0156be"
 dependencies = [
  "derive_builder",
  "glob",
@@ -1606,7 +1606,7 @@ dependencies = [
 [[package]]
 name = "lumis-wasm-runtime"
 version = "0.2.1"
-source = "git+https://github.com/leandrocp/lumis?branch=refactor%2Fshare-wasm-runtime#b8e178f6384a9e183ce60a3c5646efca83c13c32"
+source = "git+https://github.com/leandrocp/lumis?branch=refactor%2Fshare-wasm-runtime#f0e7aba526cd2b2ebcb2cc65ba641ac01f0156be"
 dependencies = [
  "etcetera",
  "lumis-core 2.5.0 (git+https://github.com/leandrocp/lumis?branch=refactor%2Fshare-wasm-runtime)",
@@ -2784,7 +2784,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32497e9a4c7b38532efcdebeef879707aa9f794296a4f0244f6f69e9bc8574bd"
 dependencies = [
  "fastrand",
- "getrandom 0.4.3",
+ "getrandom 0.3.4",
  "once_cell",
  "rustix",
  "windows-sys 0.61.2",
