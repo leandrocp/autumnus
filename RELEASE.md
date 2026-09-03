@@ -102,6 +102,14 @@ Nothing built here resolves these requirements except `crates/autumnus`, so
 [#1118](https://github.com/leandrocp/lumis/issues/1118) shipped: `lumis` 0.12.1 called
 `lumis-core` 2.2.0 API while requiring `"2"`.
 
+## npm CLI
+
+`npm-cli` owns its version and changelog. Shared Rust CLI changes publish through
+`cargo-lumis-cli` first; once crates.io accepts them, `rust-release.yml` opens
+`align-npm-cli` to update the package's `binaryVersion`. Merge that small pull request,
+then `release-prepare.yml` opens the normal `npm-cli` release pull request. npm-only
+changes continue through the normal flow without a Cargo release.
+
 ## Elixir package
 
 `packages/elixir/lumis/native/lumis_nif/Cargo.lock` resolves `lumis-core` and
