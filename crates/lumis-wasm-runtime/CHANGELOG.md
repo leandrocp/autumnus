@@ -1,3 +1,15 @@
+## [0.2.1](https://github.com/leandrocp/lumis/compare/cargo-lumis-wasm-runtime/v0.2.0...cargo-lumis-wasm-runtime/v0.2.1) (2026-09-03)
+
+
+### Code Refactoring
+
+- keep one copy of each test parser - [#1288](https://github.com/leandrocp/lumis/pull/1288)
+
+
+### Features
+
+- highlight code inside diff hunks - [#1284](https://github.com/leandrocp/lumis/pull/1284)
+
 ## [0.2.0](https://github.com/leandrocp/lumis/compare/cargo-lumis-wasm-runtime/v0.1.0...cargo-lumis-wasm-runtime/v0.2.0) (2026-08-13)
 
 ### Bug Fixes
