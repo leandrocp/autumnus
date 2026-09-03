@@ -334,6 +334,29 @@
     }
   },
   {
+    "type": "group",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "field_number",
+          "named": true
+        },
+        {
+          "type": "message_body",
+          "named": true
+        },
+        {
+          "type": "message_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "import",
     "named": true,
     "fields": {
@@ -453,6 +476,10 @@
         },
         {
           "type": "field",
+          "named": true
+        },
+        {
+          "type": "group",
           "named": true
         },
         {
@@ -937,6 +964,10 @@
     "named": true
   },
   {
+    "type": "export",
+    "named": false
+  },
+  {
     "type": "extend",
     "named": false
   },
@@ -965,6 +996,10 @@
     "named": true
   },
   {
+    "type": "group",
+    "named": false
+  },
+  {
     "type": "hex_lit",
     "named": true
   },
@@ -982,6 +1017,10 @@
   },
   {
     "type": "int64",
+    "named": false
+  },
+  {
+    "type": "local",
     "named": false
   },
   {
