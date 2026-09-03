@@ -1578,7 +1578,7 @@ dependencies = [
  "tree-sitter-json",
  "typed-arena",
  "ureq",
- "wasmparser 0.257.1",
+ "wasmparser 0.258.0",
  "wasmtime",
 ]
 
@@ -3049,9 +3049,9 @@ dependencies = [
 
 [[package]]
 name = "tree-sitter"
-version = "0.26.12"
+version = "0.26.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "83c567a8e18ae93f20982c90370b16fd24023aeaf52f6052b96957ab253a0fec"
+checksum = "17ebdd3a5a7e28a1890b876fdbd0c3c0fe0a6336cffaa104f11b9f720c9daa29"
 dependencies = [
  "cc",
  "regex",
@@ -3934,9 +3934,9 @@ dependencies = [
 
 [[package]]
 name = "wasmparser"
-version = "0.257.1"
+version = "0.258.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d92fc335fb6d48f46bda1d8b26b69e28320c15ac3272208333833d6e217e2b4a"
+checksum = "d9a61719f93a87b16d325921e251800c4833f8fab50fa21c7de73aed50086313"
 dependencies = [
  "bitflags 2.13.1",
  "hashbrown 0.17.1",
@@ -4001,9 +4001,9 @@ dependencies = [
 
 [[package]]
 name = "wasmtime-c-api-impl"
-version = "36.0.13"
+version = "36.0.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ae273769c129ee7ca247c3d849dfdda9957fece8c93307a4ef727ca0e35d62c3"
+checksum = "d35b46d644ad4caf48ec1b45c4059b9f41a3e114ce5c0f7d3b53fef891c61d35"
 dependencies = [
  "anyhow",
  "log",
@@ -4046,9 +4046,9 @@ dependencies = [
 
 [[package]]
 name = "wasmtime-internal-c-api-macros"
-version = "36.0.13"
+version = "36.0.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8fcd4661fe1146d284b5b82d26d12c4b8056b1f0aa8a3a8f6d33e9597abf147f"
+checksum = "cb19363c969ac158cab961ff379243d09481493e35b391d0c60deed4fb32e286"
 dependencies = [
  "proc-macro2",
  "quote",
