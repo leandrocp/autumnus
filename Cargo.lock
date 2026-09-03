@@ -1529,11 +1529,11 @@ dependencies = [
 
 [[package]]
 name = "lumis-core"
-version = "2.4.0"
-source = "git+https://github.com/leandrocp/lumis?branch=refactor%2Fshare-wasm-runtime#a23a3bf766c06741c816c7215e09e163061a393e"
+version = "2.5.0"
 dependencies = [
  "derive_builder",
  "glob",
+ "pretty_assertions",
  "prettyplease",
  "proc-macro2",
  "quote",
@@ -1550,10 +1550,10 @@ dependencies = [
 [[package]]
 name = "lumis-core"
 version = "2.5.0"
+source = "git+https://github.com/leandrocp/lumis?branch=refactor%2Fshare-wasm-runtime#b8e178f6384a9e183ce60a3c5646efca83c13c32"
 dependencies = [
  "derive_builder",
  "glob",
- "pretty_assertions",
  "prettyplease",
  "proc-macro2",
  "quote",
@@ -1584,27 +1584,6 @@ dependencies = [
 
 [[package]]
 name = "lumis-wasm-runtime"
-version = "0.2.0"
-source = "git+https://github.com/leandrocp/lumis?branch=refactor%2Fshare-wasm-runtime#a23a3bf766c06741c816c7215e09e163061a393e"
-dependencies = [
- "etcetera",
- "lumis-core 2.4.0",
- "semver",
- "serde",
- "serde_json",
- "sha2 0.11.0",
- "streaming-iterator",
- "tempfile",
- "thiserror 2.0.20",
- "tree-sitter",
- "typed-arena",
- "ureq",
- "wasmparser 0.257.1",
- "wasmtime",
-]
-
-[[package]]
-name = "lumis-wasm-runtime"
 version = "0.2.1"
 dependencies = [
  "etcetera",
@@ -1625,12 +1604,33 @@ dependencies = [
 ]
 
 [[package]]
+name = "lumis-wasm-runtime"
+version = "0.2.1"
+source = "git+https://github.com/leandrocp/lumis?branch=refactor%2Fshare-wasm-runtime#b8e178f6384a9e183ce60a3c5646efca83c13c32"
+dependencies = [
+ "etcetera",
+ "lumis-core 2.5.0 (git+https://github.com/leandrocp/lumis?branch=refactor%2Fshare-wasm-runtime)",
+ "semver",
+ "serde",
+ "serde_json",
+ "sha2 0.11.0",
+ "streaming-iterator",
+ "tempfile",
+ "thiserror 2.0.20",
+ "tree-sitter",
+ "typed-arena",
+ "ureq",
+ "wasmparser 0.258.0",
+ "wasmtime",
+]
+
+[[package]]
 name = "lumis_nif"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "lumis-core 2.4.0",
- "lumis-wasm-runtime 0.2.0",
+ "lumis-core 2.5.0 (git+https://github.com/leandrocp/lumis?branch=refactor%2Fshare-wasm-runtime)",
+ "lumis-wasm-runtime 0.2.1 (git+https://github.com/leandrocp/lumis?branch=refactor%2Fshare-wasm-runtime)",
  "once_cell",
  "parking_lot",
  "rustler",
@@ -2784,7 +2784,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32497e9a4c7b38532efcdebeef879707aa9f794296a4f0244f6f69e9bc8574bd"
 dependencies = [
  "fastrand",
- "getrandom 0.3.4",
+ "getrandom 0.4.3",
  "once_cell",
  "rustix",
  "windows-sys 0.61.2",
@@ -3969,19 +3969,6 @@ checksum = "a9b1e81f3eb254cf7404a82cee6926a4a3ccc5aad80cc3d43608a070c67aa1d7"
 dependencies = [
  "bitflags 2.13.1",
  "hashbrown 0.15.5",
- "indexmap",
- "semver",
- "serde",
-]
-
-[[package]]
-name = "wasmparser"
-version = "0.257.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d92fc335fb6d48f46bda1d8b26b69e28320c15ac3272208333833d6e217e2b4a"
-dependencies = [
- "bitflags 2.13.1",
- "hashbrown 0.17.1",
  "indexmap",
  "semver",
  "serde",
