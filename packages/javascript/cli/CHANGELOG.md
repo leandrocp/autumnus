@@ -1,3 +1,10 @@
+## [0.6.3](https://github.com/leandrocp/lumis/compare/npm-cli/v0.6.2...npm-cli/v0.6.3) (2026-09-04)
+
+
+### Bug Fixes
+
+- queue npm CLI after Cargo publish - [#1353](https://github.com/leandrocp/lumis/pull/1353)
+
 ## [0.6.2](https://github.com/leandrocp/lumis/compare/npm-cli/v0.6.1...npm-cli/v0.6.2) (2026-09-03)
 
 
