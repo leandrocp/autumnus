@@ -362,7 +362,9 @@ export interface HighlightLinesLinked {
  *   properties: "search-match",
  * }
  *
- * source.slice(annotation.range.start, annotation.range.end) // "price"
+ * // Offsets are UTF-8 bytes, which String.prototype.slice does not count.
+ * const bytes = new TextEncoder().encode(source)
+ * new TextDecoder().decode(bytes.subarray(annotation.range.start, annotation.range.end)) // "price"
  * ```
  *
  * When passed in highlighting options, a custom formatter receives
@@ -450,9 +452,14 @@ export type HighlightIterFn = (
  * const formatter: Formatter = {
  *   language: javascript,
  *   render(source, events) {
+ *     // Byte offsets, so decode the slice rather than using String.slice,
+ *     // which counts UTF-16 code units.
+ *     const bytes = new TextEncoder().encode(source)
+ *     const decoder = new TextDecoder()
+ *
  *     return events
  *       .filter(event => event.type === 'source')
- *       .map(event => source.slice(event.startByte, event.endByte))
+ *       .map(event => decoder.decode(bytes.subarray(event.startByte, event.endByte)))
  *       .join('')
  *   },
  * }

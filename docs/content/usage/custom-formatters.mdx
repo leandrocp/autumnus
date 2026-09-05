@@ -98,7 +98,7 @@ impl Formatter for MinimalHtmlFormatter {
 
 ## JavaScript
 
-Pass an object with `language` and `render(source, events)`. Lumis highlights the source and hands you the event stream; the sync free functions `highlightIter()` and `highlightEvents()` from `@lumis-sh/lumis` remain available if you need to highlight something else from inside `render()`.
+Pass an object with `language` and `render(source, events)`. Lumis highlights the source and hands you the event stream; the synchronous free functions `highlightIter()` and `highlightEvents()` from `@lumis-sh/lumis` remain available if you need to highlight something else from inside `render()`.
 
 ```ts
 import {createHighlighter} from '@lumis-sh/lumis'

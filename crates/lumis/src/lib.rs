@@ -397,6 +397,13 @@ where
 /// Highlights source code with per-operation options and returns it as a string.
 ///
 /// Use this variant when supplying annotations or enabling rainbow brackets.
+///
+/// # Panics
+///
+/// Annotation ranges are checked against `source`, not at construction, so an
+/// annotation reaching past the end of the source or landing inside a UTF-8
+/// character panics here. Call
+/// [`write_highlight_with_options`] instead to handle that as an error.
 pub fn highlight_with_options<T, F>(
     source: &str,
     formatter: F,
@@ -407,7 +414,7 @@ where
 {
     let mut buffer = Vec::new();
     write_highlight_with_options(&mut buffer, source, formatter, options)
-        .expect("formatter failed to format source code");
+        .unwrap_or_else(|error| panic!("could not highlight source: {error}"));
     String::from_utf8(buffer).expect("formatter produced invalid UTF-8")
 }
 
