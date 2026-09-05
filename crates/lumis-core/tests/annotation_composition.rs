@@ -147,7 +147,7 @@ fn the_corpus_covers_the_shapes_composition_has_to_get_right() {
 
     // A discovery bug that found nothing would otherwise pass silently.
     assert!(
-        manifest.cases.len() >= 16,
+        manifest.cases.len() >= 24,
         "corpus shrank to {} cases",
         manifest.cases.len()
     );
@@ -158,6 +158,10 @@ fn the_corpus_covers_the_shapes_composition_has_to_get_right() {
         "multi/nested",
         "position/across-lines",
         "utf8/mid-character-offset",
+        "point/blank-line",
+        "point/end-of-source",
+        "point/nested-in-span-start",
+        "point/at-span-end",
     ] {
         assert!(
             manifest.cases.iter().any(|case| case.name == required),

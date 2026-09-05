@@ -12,6 +12,10 @@ import type {
 interface Boundary {
   starts: number[];
   ends: number[];
+  /** Empty annotations sitting exactly here. They never join the layer stack —
+   *  an interval that opens and closes at one offset would be entered and never
+   *  left — so they are emitted as a start/end pair. */
+  points: number[];
 }
 
 interface SyntaxLayer {
@@ -124,9 +128,9 @@ function resolveRange(
     throw new RangeError(`annotation ${index} has an unknown range type`);
   }
 
-  if (start >= end) {
+  if (start > end) {
     throw new RangeError(
-      `annotation ${index} range start must be before its end: ${start}..${end}`,
+      `annotation ${index} range start must not be after its end: ${start}..${end}`,
     );
   }
 
@@ -148,14 +152,19 @@ function annotationBoundaries<T>(
 ): Map<number, Boundary> {
   const boundaries = new Map<number, Boundary>();
 
-  annotations.forEach((annotation, index) => {
-    const start = boundaries.get(annotation.range.start) ?? { starts: [], ends: [] };
-    start.starts.push(index);
-    boundaries.set(annotation.range.start, start);
+  const at = (offset: number): Boundary => {
+    const boundary = boundaries.get(offset) ?? { starts: [], ends: [], points: [] };
+    boundaries.set(offset, boundary);
+    return boundary;
+  };
 
-    const end = boundaries.get(annotation.range.end) ?? { starts: [], ends: [] };
-    end.ends.push(index);
-    boundaries.set(annotation.range.end, end);
+  annotations.forEach((annotation, index) => {
+    if (annotation.range.start === annotation.range.end) {
+      at(annotation.range.start).points.push(index);
+      return;
+    }
+    at(annotation.range.start).starts.push(index);
+    at(annotation.range.end).ends.push(index);
   });
 
   return boundaries;
@@ -256,6 +265,28 @@ function transitionLayers<T>(
 interface ComposeState<T> {
   boundaryIndex: number;
   activeLayers: ActiveLayer<T>[];
+  pendingPoints: Set<number>;
+}
+
+/**
+ * Emits the empty annotations sitting at `offset`, if any, as start/end pairs.
+ *
+ * Called with the layer stack already transitioned for `offset`, so a point at
+ * the start of a span lands inside it and a point where a span ends lands
+ * outside it, matching the half-open ranges everywhere else.
+ */
+function emitPoints<T>(
+  output: HighlightEvent<T>[],
+  boundaries: BoundaryTable,
+  annotations: readonly ResolvedAnnotation<T>[],
+  pending: Set<number>,
+  offset: number,
+): void {
+  if (!pending.delete(offset)) return;
+  for (const index of boundaries.byOffset.get(offset)!.points) {
+    output.push({ type: "annotationStart", annotation: annotations[index]! });
+    output.push({ type: "annotationEnd" });
+  }
 }
 
 /**
@@ -288,6 +319,7 @@ function composeSourceEvent<T>(
       state.activeLayers,
       desiredLayers(activeAnnotations, annotations, syntaxLayers),
     );
+    emitPoints(output, boundaries, annotations, state.pendingPoints, cursor);
 
     if (cursor < next) {
       output.push({ type: "source", startByte: cursor, endByte: next });
@@ -321,7 +353,13 @@ export function composeAnnotations<T>(
   const activeAnnotations = new Set<number>();
   const syntaxLayers: SyntaxLayer[] = [];
   const output: HighlightEvent<T>[] = [];
-  const state: ComposeState<T> = { boundaryIndex: 0, activeLayers: [] };
+  const state: ComposeState<T> = {
+    boundaryIndex: 0,
+    activeLayers: [],
+    pendingPoints: new Set(
+      [...byOffset].filter(([, boundary]) => boundary.points.length > 0).map(([offset]) => offset),
+    ),
+  };
   let nextSyntaxId = 0;
 
   for (const event of syntaxEvents) {
@@ -349,5 +387,13 @@ export function composeAnnotations<T>(
   }
 
   transitionLayers(output, state.activeLayers, []);
+
+  // A point at the end of the source has no following text to split, and one in
+  // a source with no events at all is never reached by the walk. Both land here,
+  // outside every scope, which is where the end of the document is.
+  for (const offset of [...state.pendingPoints].sort((left, right) => left - right)) {
+    emitPoints(output, boundaries, resolvedAnnotations, state.pendingPoints, offset);
+  }
+
   return output;
 }

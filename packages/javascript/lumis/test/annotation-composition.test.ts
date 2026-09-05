@@ -58,7 +58,7 @@ function render(testCase: Case): string {
 describe("annotation composition parity", () => {
   it("covers the shapes composition has to get right", () => {
     // A discovery bug that found nothing would otherwise pass silently.
-    expect(manifest.cases.length).toBeGreaterThanOrEqual(16);
+    expect(manifest.cases.length).toBeGreaterThanOrEqual(24);
 
     const names = manifest.cases.map((c) => c.name);
     for (const required of [

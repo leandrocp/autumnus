@@ -114,16 +114,38 @@ defmodule Lumis.AnnotationsTest do
     end
   end
 
-  test "range constructors reject empty ranges" do
-    assert_raise ArgumentError, ~r/offset range start must be before its end/, fn ->
-      Offset.new(4, 4)
+  test "range constructors reject reversed ranges" do
+    assert_raise ArgumentError, ~r/offset range start must not be after its end/, fn ->
+      Offset.new(6, 4)
     end
+
+    assert_raise ArgumentError, ~r/position range start must not be after its end/, fn ->
+      PositionRange.new(Position.new(2, 0), Position.new(1, 0))
+    end
+  end
+
+  test "range constructors accept an empty range as a point" do
+    assert %Offset{start: 4, end: 4} = Offset.new(4, 4)
 
     position = Position.new(1, 4)
 
-    assert_raise ArgumentError, ~r/position range start must be before its end/, fn ->
-      PositionRange.new(position, position)
-    end
+    assert %PositionRange{start: ^position, end: ^position} =
+             PositionRange.new(position, position)
+  end
+
+  test "a point annotation on a blank line reaches the formatter" do
+    source = "a\n\nb"
+
+    annotations = [Annotation.new(Offset.new(2, 2), %{id: 3})]
+
+    assert {:ok, output} =
+             Lumis.highlight(source,
+               formatter: {TestFormatter, language: "elixir"},
+               annotations: annotations
+             )
+
+    assert output == "a\n<annotation:3></annotation>\nb"
+    assert_received {:resolved_range, 3, %Offset{start: 2, end: 2}}
   end
 
   test "the diff viewer example renders the complete annotation flow" do

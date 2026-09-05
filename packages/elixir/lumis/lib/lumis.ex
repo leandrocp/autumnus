@@ -575,7 +575,7 @@ defmodule Lumis do
       else
         {:halt,
          {:error,
-          "annotation #{index} must be a Lumis.Annotation with a non-empty offset or position range"}}
+          "annotation #{index} must be a Lumis.Annotation whose offset or position range does not run backwards"}}
       end
     end)
   end
@@ -583,7 +583,7 @@ defmodule Lumis do
   defp valid_annotation?(%Lumis.Annotation{
          range: %Lumis.Range.Offset{start: start, end: end_offset}
        }) do
-    is_integer(start) and start >= 0 and is_integer(end_offset) and end_offset > start
+    is_integer(start) and start >= 0 and is_integer(end_offset) and end_offset >= start
   end
 
   defp valid_annotation?(%Lumis.Annotation{
@@ -592,7 +592,7 @@ defmodule Lumis do
            end: %Lumis.Position{} = stop
          }
        }) do
-    valid_position?(start) and valid_position?(stop) and precedes?(start, stop)
+    valid_position?(start) and valid_position?(stop) and not_after?(start, stop)
   end
 
   defp valid_annotation?(_annotation), do: false
@@ -601,11 +601,11 @@ defmodule Lumis do
     is_integer(line) and line >= 0 and is_integer(column) and column >= 0
   end
 
-  defp precedes?(%Lumis.Position{line: line, column: column}, %Lumis.Position{
+  defp not_after?(%Lumis.Position{line: line, column: column}, %Lumis.Position{
          line: stop_line,
          column: stop_column
        }) do
-    line < stop_line or (line == stop_line and column < stop_column)
+    line < stop_line or (line == stop_line and column <= stop_column)
   end
 
   @doc false

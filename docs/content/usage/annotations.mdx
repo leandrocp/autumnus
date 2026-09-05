@@ -33,10 +33,16 @@ A range is either absolute offsets in **UTF-8 bytes**, or zero-based lines with
 UTF-8 byte columns. Both are half-open, and both are rejected if they fall
 outside the source or land inside a character.
 
-An annotation covers at least one byte: `start` must be before `end`, so an
-empty range is rejected rather than composed as a zero-width marker. Overlays
-keyed by line hit this on a blank line, which has nothing to cover — annotate
-the lines that have content and carry the rest alongside the stream.
+An empty range is a **point**: it marks a position rather than covering text,
+and the formatter gets `AnnotationStart` immediately followed by
+`AnnotationEnd` there. Line-based views need this, because a blank line has
+nothing to cover and is still somewhere a review comment can land. Only a range
+that runs backwards is rejected.
+
+A point has no interior, so it does not split the syntax scope it falls in —
+unlike a range, which closes and reopens one. A point at a range's start nests
+inside it; a point where a range ends falls outside it, following the same
+half-open rule as everything else.
 
 A `position` column counts bytes within the line, and a CRLF line keeps its
 `\r`, so measure the line before splitting the terminator off or the last

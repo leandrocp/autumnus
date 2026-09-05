@@ -80,18 +80,27 @@ pub struct Annotation<T = ()> {
 }
 
 impl<T> Annotation<T> {
-    /// Creates an annotation for a non-empty offset or position range.
+    /// Creates an annotation for an offset or position range.
     ///
-    /// Source bounds, position bounds, and UTF-8 character boundaries are
-    /// checked when the annotation is used to format a specific source.
+    /// An empty range is a point: it marks a position rather than covering
+    /// text, and a formatter receives
+    /// [`AnnotationStart`](crate::events::HighlightEvent::AnnotationStart)
+    /// immediately followed by
+    /// [`AnnotationEnd`](crate::events::HighlightEvent::AnnotationEnd) there.
+    /// Line-keyed overlays need this for a blank line, which has nothing to
+    /// cover but is still somewhere a review comment can land.
+    ///
+    /// Only a reversed range is rejected. Source bounds, position bounds, and
+    /// UTF-8 character boundaries are checked when the annotation is used to
+    /// format a specific source.
     pub fn new(range: impl Into<AnnotationRange>, properties: T) -> Result<Self, AnnotationError> {
         let range = range.into();
-        let is_empty_or_reversed = match &range {
-            AnnotationRange::Offset(range) => range.start >= range.end,
-            AnnotationRange::Position(range) => range.start >= range.end,
+        let is_reversed = match &range {
+            AnnotationRange::Offset(range) => range.start > range.end,
+            AnnotationRange::Position(range) => range.start > range.end,
         };
 
-        if is_empty_or_reversed {
+        if is_reversed {
             return Err(AnnotationError::InvalidRange { range });
         }
 
@@ -176,7 +185,7 @@ impl fmt::Display for AnnotationError {
             Self::InvalidRange { range } => {
                 write!(
                     f,
-                    "annotation range start must be before its end: {range:?}"
+                    "annotation range start must not be after its end: {range:?}"
                 )
             }
             Self::OutOfBounds {
@@ -231,6 +240,10 @@ enum ActiveLayer<'s> {
 struct AnnotationBoundary {
     starts: Vec<usize>,
     ends: Vec<usize>,
+    /// Empty annotations sitting exactly here. They never join the layer
+    /// stack — an interval that opens and closes at one offset would be
+    /// entered and never left — so they are emitted as a start/end pair.
+    points: Vec<usize>,
 }
 
 /// Compose caller-provided annotation intervals into syntax highlight events.
@@ -252,6 +265,11 @@ pub fn compose_annotations<'a, T>(
 
     let boundaries = annotation_boundaries(&annotations);
     let mut boundary_positions = boundaries.keys().peekable();
+    let mut pending_points: BTreeSet<usize> = boundaries
+        .iter()
+        .filter(|(_, boundary)| !boundary.points.is_empty())
+        .map(|(offset, _)| *offset)
+        .collect();
     let mut active_annotations = BTreeSet::new();
     let mut syntax_layers = Vec::new();
     let mut next_syntax_id = 0usize;
@@ -301,6 +319,13 @@ pub fn compose_annotations<'a, T>(
                         &mut desired_layers,
                         &annotations,
                     );
+                    emit_points(
+                        &mut output,
+                        &boundaries,
+                        &annotations,
+                        &mut pending_points,
+                        cursor,
+                    );
 
                     if cursor < next {
                         output.push(HighlightEvent::Source {
@@ -332,6 +357,20 @@ pub fn compose_annotations<'a, T>(
         &mut desired_layers,
         &annotations,
     );
+
+    // A point at the end of the source has no following text to split, and one
+    // in a source with no events at all is never reached by the walk. Both land
+    // here, outside every scope, which is where the end of the document is.
+    for offset in pending_points.clone() {
+        emit_points(
+            &mut output,
+            &boundaries,
+            &annotations,
+            &mut pending_points,
+            offset,
+        );
+    }
+
     Ok(output)
 }
 
@@ -448,6 +487,14 @@ fn annotation_boundaries<T>(
 ) -> BTreeMap<usize, AnnotationBoundary> {
     let mut boundaries = BTreeMap::<usize, AnnotationBoundary>::new();
     for (index, annotation) in annotations.iter().enumerate() {
+        if annotation.range.start == annotation.range.end {
+            boundaries
+                .entry(annotation.range.start)
+                .or_default()
+                .points
+                .push(index);
+            continue;
+        }
         boundaries
             .entry(annotation.range.start)
             .or_default()
@@ -460,6 +507,29 @@ fn annotation_boundaries<T>(
             .push(index);
     }
     boundaries
+}
+
+/// Emits the empty annotations sitting at `offset`, if any, as start/end pairs.
+///
+/// Called with the layer stack already transitioned for `offset`, so a point at
+/// the start of a span lands inside it and a point where a span ends lands
+/// outside it, matching the half-open ranges everywhere else.
+fn emit_points<'a, T>(
+    output: &mut Vec<HighlightEvent<'a, T>>,
+    boundaries: &BTreeMap<usize, AnnotationBoundary>,
+    annotations: &[ResolvedAnnotation<'a, T>],
+    pending: &mut BTreeSet<usize>,
+    offset: usize,
+) {
+    if !pending.remove(&offset) {
+        return;
+    }
+    for index in &boundaries[&offset].points {
+        output.push(HighlightEvent::AnnotationStart {
+            annotation: annotations[*index].clone(),
+        });
+        output.push(HighlightEvent::AnnotationEnd);
+    }
 }
 
 fn apply_boundary(boundary: &AnnotationBoundary, active: &mut BTreeSet<usize>) {
@@ -526,13 +596,124 @@ mod tests {
     use super::*;
 
     #[test]
-    fn rejects_empty_ranges_at_construction() {
+    // The reversed literals are the input under test.
+    #[allow(clippy::reversed_empty_ranges)]
+    fn rejects_reversed_ranges_at_construction() {
         assert_eq!(
-            Annotation::new(2..2, ()).unwrap_err(),
+            Annotation::new(3..2, ()).unwrap_err(),
             AnnotationError::InvalidRange {
-                range: AnnotationRange::Offset(2..2),
+                range: AnnotationRange::Offset(3..2),
             }
         );
+        assert_eq!(
+            Annotation::new(Position::new(1, 0)..Position::new(0, 0), ()).unwrap_err(),
+            AnnotationError::InvalidRange {
+                range: AnnotationRange::Position(Position::new(1, 0)..Position::new(0, 0)),
+            }
+        );
+    }
+
+    #[test]
+    fn accepts_empty_ranges_as_points() {
+        assert!(Annotation::new(2..2, ()).is_ok());
+        assert!(Annotation::new(Position::new(1, 0)..Position::new(1, 0), ()).is_ok());
+    }
+
+    #[test]
+    fn composes_an_empty_annotation_as_a_start_end_pair() {
+        // A blank line: "a\n\nb" puts line 1 at offset 2, with nothing to cover.
+        let source = "a\n\nb";
+        let syntax = vec![HighlightEvent::Source { start: 0, end: 4 }];
+        let annotations = vec![Annotation::new(2..2, "blank-line").unwrap()];
+
+        let events = compose_annotations(source, &syntax, &annotations).unwrap();
+
+        assert_eq!(
+            events,
+            vec![
+                HighlightEvent::Source { start: 0, end: 2 },
+                HighlightEvent::AnnotationStart {
+                    annotation: ResolvedAnnotation {
+                        range: 2..2,
+                        properties: &"blank-line",
+                    },
+                },
+                HighlightEvent::AnnotationEnd,
+                HighlightEvent::Source { start: 2, end: 4 },
+            ]
+        );
+    }
+
+    #[test]
+    fn composes_a_point_at_the_end_of_the_source() {
+        // A trailing blank line: the point sits at source.len(), where the walk
+        // over source events never lands.
+        let source = "a\n";
+        let syntax = vec![HighlightEvent::Source { start: 0, end: 2 }];
+        let annotations = vec![Annotation::new(2..2, "trailing").unwrap()];
+
+        let events = compose_annotations(source, &syntax, &annotations).unwrap();
+
+        assert_eq!(
+            events,
+            vec![
+                HighlightEvent::Source { start: 0, end: 2 },
+                HighlightEvent::AnnotationStart {
+                    annotation: ResolvedAnnotation {
+                        range: 2..2,
+                        properties: &"trailing",
+                    },
+                },
+                HighlightEvent::AnnotationEnd,
+            ]
+        );
+    }
+
+    #[test]
+    fn a_point_does_not_leak_into_later_layers() {
+        // An interval opening and closing at one offset would be entered and
+        // never left, marking the whole rest of the document.
+        let source = "abcd";
+        let syntax = vec![HighlightEvent::Source { start: 0, end: 4 }];
+        let annotations = vec![Annotation::new(1..1, "point").unwrap()];
+
+        let events = compose_annotations(source, &syntax, &annotations).unwrap();
+
+        let starts = events
+            .iter()
+            .filter(|event| matches!(event, HighlightEvent::AnnotationStart { .. }))
+            .count();
+        let ends = events
+            .iter()
+            .filter(|event| matches!(event, HighlightEvent::AnnotationEnd))
+            .count();
+
+        assert_eq!((starts, ends), (1, 1));
+        assert!(matches!(
+            events.last(),
+            Some(HighlightEvent::Source { start: 1, end: 4 })
+        ));
+    }
+
+    #[test]
+    fn a_point_nests_inside_a_span_starting_at_the_same_offset() {
+        let source = "abcd";
+        let syntax = vec![HighlightEvent::Source { start: 0, end: 4 }];
+        let annotations = vec![
+            Annotation::new(1..3, "span").unwrap(),
+            Annotation::new(1..1, "point").unwrap(),
+        ];
+
+        let events = compose_annotations(source, &syntax, &annotations).unwrap();
+        let order: Vec<&str> = events
+            .iter()
+            .filter_map(|event| match event {
+                HighlightEvent::AnnotationStart { annotation } => Some(*annotation.properties()),
+                _ => None,
+            })
+            .collect();
+
+        assert_eq!(order, vec!["span", "point"]);
     }
 
     #[test]

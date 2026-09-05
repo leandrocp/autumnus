@@ -148,6 +148,75 @@ describe("annotations", () => {
     );
   }, 30_000);
 
+  it("marks a blank line with an empty annotation", async () => {
+    // The line-based review case: a blank line has nothing to cover, but it is
+    // still somewhere a comment can land.
+    const source = "const a = 1;\n\nconst b = 2;";
+    const blankLineOffset = source.indexOf("\n") + 1;
+    const annotations: Annotation<Change>[] = [
+      {
+        range: { type: "offset", start: blankLineOffset, end: blankLineOffset },
+        properties: { id: 1 },
+      },
+    ];
+    const formatter: Formatter<Change> = {
+      language: javascript,
+      render(rendered, events) {
+        const bytes = new TextEncoder().encode(rendered);
+        const decoder = new TextDecoder();
+        const parts: string[] = [];
+        for (const event of events) {
+          if (event.type === "annotationStart")
+            parts.push(`<mark:${event.annotation.properties.id}>`);
+          else if (event.type === "annotationEnd") parts.push("</mark>");
+          else if (event.type === "source") {
+            parts.push(decoder.decode(bytes.subarray(event.startByte, event.endByte)));
+          }
+        }
+        return parts.join("");
+      },
+    };
+    const highlighter = await createHighlighter({ languages: [javascript] });
+
+    expect(highlighter.highlight(source, formatter, { annotations })).toBe(
+      "const a = 1;\n<mark:1></mark>\nconst b = 2;",
+    );
+  }, 30_000);
+
+  it("does not let a point annotation leak into the rest of the document", async () => {
+    const source = "const a = 1;";
+    const annotations: Annotation<Change>[] = [
+      { range: { type: "offset", start: 5, end: 5 }, properties: { id: 2 } },
+    ];
+    const formatter: Formatter<Change> = {
+      language: javascript,
+      render(_rendered, events) {
+        const starts = events.filter((event) => event.type === "annotationStart").length;
+        const ends = events.filter((event) => event.type === "annotationEnd").length;
+        return `${starts}:${ends}`;
+      },
+    };
+    const highlighter = await createHighlighter({ languages: [javascript] });
+
+    expect(highlighter.highlight(source, formatter, { annotations })).toBe("1:1");
+  }, 30_000);
+
+  it("rejects a range that runs backwards", async () => {
+    const source = "const a = 1;";
+    const annotations: Annotation<Change>[] = [
+      { range: { type: "offset", start: 8, end: 5 }, properties: { id: 3 } },
+    ];
+    const formatter: Formatter<Change> = {
+      language: javascript,
+      render: (_rendered, events) => String(events.length),
+    };
+    const highlighter = await createHighlighter({ languages: [javascript] });
+
+    expect(() => highlighter.highlight(source, formatter, { annotations })).toThrow(
+      "must not be after its end",
+    );
+  }, 30_000);
+
   it("renders the complete JavaScript diff viewer example", async () => {
     const output = await renderExample();
 
