@@ -33,6 +33,15 @@ A range is either absolute offsets in **UTF-8 bytes**, or zero-based lines with
 UTF-8 byte columns. Both are half-open, and both are rejected if they fall
 outside the source or land inside a character.
 
+An annotation covers at least one byte: `start` must be before `end`, so an
+empty range is rejected rather than composed as a zero-width marker. Overlays
+keyed by line hit this on a blank line, which has nothing to cover — annotate
+the lines that have content and carry the rest alongside the stream.
+
+A `position` column counts bytes within the line, and a CRLF line keeps its
+`\r`, so measure the line before splitting the terminator off or the last
+character falls outside the range.
+
 <Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
   <TabItem value="javascript" label="JavaScript">
 
@@ -247,6 +256,13 @@ Annotating only `rice` inside the identifier `price` splits the surrounding
 
 That means a formatter never has to reconcile crossing ranges, and can emit
 tags as it goes.
+
+Annotations nest against each other the same way. Two that overlap without
+containing one another leave the inner one closed and reopened around the
+outer one's end, so one annotation can produce more than one
+`AnnotationStart`. A formatter that opens a tag per start is correct; one that
+records something once per annotation should key on the annotation rather than
+count the events.
 
 ## Built-in formatters ignore annotations
 
