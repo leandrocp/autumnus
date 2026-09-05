@@ -882,7 +882,7 @@ mod tests {
 
         assert!(options.rainbow_brackets_enabled());
         assert!(!HighlightOptions::default().rainbow_brackets_enabled());
-        assert!(HighlightOptions::default().annotation_items().is_empty());
+        assert_eq!(HighlightOptions::default().annotation_items(), []);
     }
 
     #[test]

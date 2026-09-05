@@ -109,7 +109,7 @@ fn write_highlight_rejects_annotations_outside_the_source() {
 
     assert_eq!(error.kind(), io::ErrorKind::InvalidInput);
     assert_eq!(*observation.lock().unwrap(), Observation::default());
-    assert!(output.is_empty());
+    assert_eq!(output, b"");
 }
 
 #[test]
