@@ -1114,7 +1114,7 @@ defmodule Lumis do
       Logger.warning("""
       Helix themes are deprecated, use Neovim theme names instead.
 
-      See `Lumis.available_themes/0` for a list of available themes.
+      See `Lumis.Theme.available/0` for a list of available themes.
       """)
     end
   end
