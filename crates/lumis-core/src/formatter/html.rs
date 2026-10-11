@@ -571,9 +571,7 @@ pub(crate) fn write_escaped(output: &mut dyn Write, text: &str) -> io::Result<()
 /// loaded with [`crate::themes::from_json`]. Neither is a generated constant, so
 /// both are escaped here rather than interpolated raw.
 ///
-/// The escape set is the same as [`escape`], which is what `escapeAttr` in
-/// `packages/javascript/lumis/src/formatter/html.ts` covers, so the two runtimes
-/// answer the same for the same input. Escaping is safe for CSS in an attribute
+/// The escape set is the same as [`escape`]. Escaping is safe for CSS in an attribute
 /// because the HTML parser decodes the entity before the CSS parser sees it, so
 /// `font-family: 'Fira Code'` survives the round trip.
 pub fn escape_attr(value: &str) -> String {

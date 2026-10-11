@@ -35,9 +35,6 @@ let theme = themes::closest(&colors);
 assert_eq!(theme.map(|theme| theme.name.as_str()), Some("modus_vivendi"));
 ```
 
-Existing callers of `choose_theme` should follow the
-[rename guide](/migrate/theme-matching).
-
   </Tab>
   <Tab value="Elixir">
 

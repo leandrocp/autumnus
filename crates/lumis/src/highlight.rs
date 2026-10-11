@@ -105,9 +105,6 @@ static DEFAULT_STYLE: LazyLock<Arc<Style>> = LazyLock::new(|| Arc::new(Style::de
 
 /// Options for one highlighting operation.
 ///
-/// The counterpart of the `options` argument to JavaScript's `highlight()` and
-/// `highlightEvents()`.
-///
 /// `'a` is the annotation data's lifetime; `'c` is the cancellation flag's.
 /// Returned events borrow only the annotations, so they can outlive the flag.
 ///
