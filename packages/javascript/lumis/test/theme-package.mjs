@@ -10,7 +10,7 @@ const cases = JSON.parse(
 );
 
 for (const [format, themes] of Object.entries({ esm, cjs })) {
-  test(`${format} exposes closest through the published themes entry point`, () => {
+  await test(`${format} exposes closest through the published themes entry point`, () => {
     assert.ok(cases.length >= 20);
     for (const fixture of cases) {
       assert.equal(themes.closest(fixture)?.name ?? null, fixture.expected, fixture.name);
