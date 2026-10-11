@@ -274,7 +274,7 @@
         },
         {
           "name": "multi_themes_pre_attrs",
-          "expected": "<pre class=\"lumis lumis-themes sample dark\" style=\"--lumis-dark:#f8f8f2; --lumis-dark-bg:#282a36;\">"
+          "expected": "<pre class=\"lumis lumis-themes sample helper-contract\" style=\"--lumis-dark:#f8f8f2; --lumis-dark-bg:#282a36;\">"
         },
         {
           "name": "code_attrs",
@@ -286,7 +286,7 @@
         },
         {
           "name": "open_multi_themes_pre_tag",
-          "expected": "<pre class=\"lumis lumis-themes sample dark\" style=\"--lumis-dark:#f8f8f2; --lumis-dark-bg:#282a36;\">"
+          "expected": "<pre class=\"lumis lumis-themes sample helper-contract\" style=\"--lumis-dark:#f8f8f2; --lumis-dark-bg:#282a36;\">"
         },
         {
           "name": "open_code_tag",

@@ -87,7 +87,7 @@ fn multi_themes_formatter_accepts_pre_and_code_attrs() {
     let html = render(&formatter);
     assert!(
         html.starts_with(concat!(
-            r#"<pre class="lumis lumis-themes shorthand dark authored" "#,
+            r#"<pre class="lumis lumis-themes shorthand dracula authored" "#,
             r#"style="--lumis-dark:#f8f8f2; --lumis-dark-bg:#282a36; outline: 1px solid red" "#,
             r#"id="sample-pre" inert>"#,
             r#"<code class="language-plaintext copyable" translate="yes" id="sample-code">"#,

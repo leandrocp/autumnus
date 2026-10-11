@@ -20,6 +20,7 @@ import {
   lineIsHighlighted,
   openCodeTag,
   openPreTag,
+  multiThemesPreAttrs,
   openSpanTag,
   openTag,
   preAttrs,
@@ -61,6 +62,23 @@ const theme = {
 } satisfies Theme;
 
 describe("formatter shared helpers", () => {
+  it("uses theme names in key order and deduplicates shared themes", () => {
+    const attrs = multiThemesPreAttrs({
+      themes: { light: theme, dark: { ...theme, name: "night" }, "custom dark": theme },
+      cssVariablePrefix: "--custom",
+    });
+    expect(attrs.class).toBe("lumis lumis-themes test night");
+  });
+
+  it("preserves caller classes on multi-theme blocks", () => {
+    const attrs = multiThemesPreAttrs({
+      themes: { dark: theme },
+      preClass: "dark",
+      attrs: { class: "light card" },
+    });
+    expect(attrs.class).toBe("lumis lumis-themes dark test light card");
+  });
+
   it("falls back from specific scopes to parent scopes", () => {
     expect(getThemeStyle(theme, "string.special.regex")).toEqual({ fg: "#00ff00" });
   });

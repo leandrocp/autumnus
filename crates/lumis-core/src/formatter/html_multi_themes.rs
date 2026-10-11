@@ -482,7 +482,13 @@ mod tests {
 
         assert_classes(
             pre_tag,
-            &["lumis", "lumis-themes", "custom-pre", "light", "dark"],
+            &[
+                "lumis",
+                "lumis-themes",
+                "custom-pre",
+                "catppuccin_latte",
+                "catppuccin_mocha",
+            ],
         );
         assert_eq!(
             attr_value(pre_tag, "style"),

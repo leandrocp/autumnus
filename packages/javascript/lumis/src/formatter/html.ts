@@ -470,8 +470,12 @@ export interface OpenMultiThemesPreTagOptions {
 /** Build the attributes used by a multi-theme `<pre>` tag. */
 export function multiThemesPreAttrs(options: OpenMultiThemesPreTagOptions): HtmlAttrs {
   const classes =
-    classList("lumis", "lumis-themes", options.preClass, ...sortedThemeNames(options.themes)) ??
-    "lumis lumis-themes";
+    classList(
+      "lumis",
+      "lumis-themes",
+      options.preClass,
+      ...sortedThemeNames(options.themes).map((key) => options.themes[key]?.name),
+    ) ?? "lumis lumis-themes";
 
   return mergeAttrs(
     // A `preClass` naming one of the themes would otherwise appear twice.
@@ -490,7 +494,7 @@ export function multiThemesPreAttrs(options: OpenMultiThemesPreTagOptions): Html
  *
  * ```ts
  * openMultiThemesPreTag({ themes: { light: githubLight, dark: githubDark }, defaultTheme: 'light' })
- * // '<pre class="lumis lumis-themes dark light" style="color:#1f2328; ... --lumis-dark:#e6edf3; ...">'
+ * // '<pre class="lumis lumis-themes github_dark github_light" style="color:#1f2328; ... --lumis-dark:#e6edf3; ...">'
  * ```
  */
 export function openMultiThemesPreTag(options: OpenMultiThemesPreTagOptions): string {
