@@ -55,7 +55,7 @@ package, so install the packages for the languages your HTML can inject too.
 
 ## Mark code in HTML
 
-Use the same conventions as `rehype-lumis`:
+Name a language to highlight a block:
 
 ```html
 <pre><code class="language-javascript">const answer = 42</code></pre>
@@ -66,6 +66,35 @@ Or put `data-language` on `<pre>`:
 ```html
 <pre data-language="javascript"><code>const answer = 42</code></pre>
 ```
+
+Blocks without a language are left untouched. For plain text with Lumis styling,
+use `language-plaintext` or `data-language="plaintext"`.
+
+To format all unlabeled blocks, set `defaultLanguage` to a language name:
+
+```js
+lumis({
+  defaultLanguage: 'plaintext',
+  formatter: (language) => htmlMultiThemes({
+    language,
+    themes: {light: githubLight, dark: githubDark},
+    defaultTheme: 'light-dark()',
+  }),
+})
+```
+
+The default is `false`, which skips unlabeled blocks. An omitted or `undefined`
+value uses that default.
+
+Add `nohighlight` or `no-highlight` to either `<pre>` or `<code>` to leave that
+block untouched, even when it names a language or `defaultLanguage` is set:
+
+```html
+<pre><code class="language-javascript nohighlight">filled after load</code></pre>
+```
+
+Skipped blocks keep their original source byte for byte. A block that names an
+unavailable language still renders as plain text with the configured formatter.
 
 `<code>` has to be the first child of `<pre>`. The HTML parser drops a single newline directly
 after `<pre>`, so writing the `<code>` on the next line still matches, but indenting it does not:
