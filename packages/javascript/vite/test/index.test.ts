@@ -1,4 +1,5 @@
 import type { Plugin } from "vite";
+import type { VitePluginLumisOptions } from "../src/index.js";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { build } from "vite";
@@ -28,20 +29,69 @@ async function transformHtml(plugin: Plugin, html: string): Promise<string> {
   return result;
 }
 
-function createPlugin(): Plugin {
+function createPlugin(options: Partial<VitePluginLumisOptions> = {}): Plugin {
   return lumis({
     languages: [plaintext],
     formatter: (language) => htmlInline({ language, theme: dracula }),
+    ...options,
   });
 }
 
 describe("@lumis-sh/vite", () => {
+  it.each([
+    "<pre><code>keep &amp; preserve</code></pre>",
+    '<pre class="p-4 sm:p-6"><code id="hero-code-content" class="block"></code><span id="code-cursor">_</span></pre>',
+  ])("leaves an unlabeled block byte for byte: %s", async (html) => {
+    expect(await runTransform(createPlugin(), html)).toBeUndefined();
+
+    const labeled = '<pre data-language="plaintext"><code>highlight me</code></pre>';
+    const result = await transformHtml(createPlugin(), `${html}${labeled}${html}`);
+
+    expect(result.startsWith(html)).toBe(true);
+    expect(result.endsWith(html)).toBe(true);
+    expect(result.match(/<pre class="lumis"/gu)).toHaveLength(1);
+  });
+
+  it("uses Vite's default when defaultLanguage is explicitly undefined", async () => {
+    const result = await runTransform(
+      createPlugin({ defaultLanguage: undefined }),
+      "<pre><code>keep me</code></pre>",
+    );
+
+    expect(result).toBeUndefined();
+  });
+
+  it("restores unlabeled block formatting with defaultLanguage plaintext", async () => {
+    const result = await transformHtml(
+      createPlugin({ defaultLanguage: "plaintext" }),
+      "<pre><code>format me</code></pre>",
+    );
+
+    expect(result).toContain('<pre class="lumis"');
+    expect(result).toContain('class="language-plaintext"');
+    expect(result).toContain('class="l-line"');
+    expect(result).toContain("format me");
+  });
+
+  it.each(["nohighlight", "no-highlight"])("preserves %s blocks byte for byte", async (optOut) => {
+    const skipped = `<pre class='panel ${optOut}'><code class=language-plaintext>one &amp; two</code></pre>\n<pre data-language=plaintext><code class='${optOut} source'>three &lt; four</code></pre>`;
+    const plugin = createPlugin({ defaultLanguage: "plaintext" });
+    expect(await runTransform(plugin, skipped)).toBeUndefined();
+
+    const result = await transformHtml(plugin, `${skipped}<pre><code>format me</code></pre>`);
+
+    expect(result.startsWith(skipped)).toBe(true);
+    expect(result.match(/<pre class="lumis"/gu)).toHaveLength(1);
+  });
+
   it("runs through Vite's HTML build pipeline", async () => {
     const root = await mkdtemp(join(process.cwd(), ".tmp-lumis-vite-"));
+    const placeholder =
+      '<pre><code id="hero-code-content"></code><span id="code-cursor">_</span></pre>';
     try {
       await writeFile(
         join(root, "index.html"),
-        '<!doctype html><pre id="example" data-language="plaintext"><code>built by Vite</code></pre>',
+        `<!doctype html>${placeholder}<pre id="example" data-language="plaintext"><code>built by Vite</code></pre>`,
       );
 
       await build({
@@ -54,6 +104,7 @@ describe("@lumis-sh/vite", () => {
       expect(result).toContain('<pre class="lumis"');
       expect(result).toContain('id="example"');
       expect(result).toContain("built by Vite");
+      expect(result).toContain(placeholder);
     } finally {
       await rm(root, { recursive: true, force: true });
     }
@@ -178,7 +229,8 @@ describe("@lumis-sh/vite", () => {
   });
 
   it("preserves authored children after a code element", async () => {
-    const html = '<pre><code id="target"></code><span id="cursor">_</span></pre>';
+    const html =
+      '<pre data-language="plaintext"><code id="target"></code><span id="cursor">_</span></pre>';
 
     const result = await transformHtml(createPlugin(), html);
 

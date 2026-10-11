@@ -14,6 +14,11 @@ const LANGUAGE_PREFIX = "language-";
 export interface RehypeLumisOptions {
   formatter: (language: string | undefined) => Formatter;
   languages?: LanguageInput[];
+  /**
+   * Language for unlabeled blocks, or false to leave them untouched.
+   * Defaults to "plaintext" in rehype-lumis and false in @lumis-sh/vite.
+   */
+  defaultLanguage?: string | false;
 }
 
 interface ParsedCodeBlock {
@@ -46,7 +51,10 @@ function getClassNames(node: Element): string[] {
 
 function getLanguageFromClassNames(node: Element): string | undefined {
   return getClassNames(node)
-    .find((className) => className.startsWith(LANGUAGE_PREFIX))
+    .find(
+      (className) =>
+        className.startsWith(LANGUAGE_PREFIX) && className.length > LANGUAGE_PREFIX.length,
+    )
     ?.slice(LANGUAGE_PREFIX.length);
 }
 
@@ -58,16 +66,34 @@ function getLanguageFromProperties(node: Element): string | undefined {
   );
 }
 
-function parseCodeBlock(node: Element): ParsedCodeBlock | undefined {
+function skipsHighlighting(...nodes: Element[]): boolean {
+  return nodes
+    .flatMap((node) => getClassNames(node))
+    .some((className) => className === "nohighlight" || className === "no-highlight");
+}
+
+function parseCodeBlock(
+  node: Element,
+  defaultLanguage: string | false,
+): ParsedCodeBlock | undefined {
   const head = node.children[0];
   if (!head || head.type !== "element" || head.tagName !== "code") {
+    return undefined;
+  }
+
+  if (skipsHighlighting(node, head)) {
     return undefined;
   }
 
   const language =
     getLanguageFromClassNames(head) ??
     getLanguageFromClassNames(node) ??
-    getLanguageFromProperties(node);
+    getLanguageFromProperties(node) ??
+    defaultLanguage;
+
+  if (language === false) {
+    return undefined;
+  }
 
   return {
     code: toString(head),
@@ -192,7 +218,7 @@ const rehypeLumis: Plugin<[RehypeLumisOptions], Root> = function rehypeLumis(opt
         return undefined;
       }
 
-      const parsed = parseCodeBlock(node);
+      const parsed = parseCodeBlock(node, options.defaultLanguage ?? "plaintext");
       if (!parsed) {
         // oxlint-disable-next-line unicorn/no-useless-undefined -- explicit no-op result keeps visitor returns consistent.
         return undefined;

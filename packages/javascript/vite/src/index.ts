@@ -22,7 +22,9 @@ interface Block {
 const PRE_TAG = /<pre[\s/>]/iu;
 
 function createProcessor(options: VitePluginLumisOptions) {
-  return unified().use(rehypeLumis, options).freeze();
+  return unified()
+    .use(rehypeLumis, { ...options, defaultLanguage: options.defaultLanguage ?? false })
+    .freeze();
 }
 
 // Vite splices its own HTML edits into the source string by offset rather than
