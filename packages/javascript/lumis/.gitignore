@@ -5,7 +5,7 @@ playwright-report/
 test-results/
 .tmp/
 langs/
-themes/
+/themes/
 wasm/
 queries/
 src/generated/

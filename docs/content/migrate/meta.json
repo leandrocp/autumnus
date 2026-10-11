@@ -1,4 +1,12 @@
 {
   "title": "Migrate",
-  "pages": ["index", "elixir", "html-lines", "javascript", "mdex", "autumnus"]
+  "pages": [
+    "index",
+    "theme-matching",
+    "elixir",
+    "html-lines",
+    "javascript",
+    "mdex",
+    "autumnus"
+  ]
 }

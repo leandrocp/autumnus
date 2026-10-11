@@ -176,7 +176,10 @@ fn exercised_entry_points() -> BTreeSet<&'static str> {
         "rust"
     );
 
+    assert!(themes::closest(&themes::TerminalColors::default()).is_none());
+
     [
+        "themes::closest",
         "highlight",
         "highlight_with_options",
         "highlight_events",

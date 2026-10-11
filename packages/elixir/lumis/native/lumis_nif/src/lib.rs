@@ -1008,6 +1008,31 @@ fn available_themes() -> Vec<ExThemeInfo<'static>> {
 }
 
 #[rustler::nif]
+fn closest_theme(
+    background: Option<&str>,
+    foreground: Option<&str>,
+    ansi: Option<Vec<Option<&str>>>,
+) -> NifResult<Option<ExTheme>> {
+    let mut colors = themes::TerminalColors::default();
+    colors.background = theme_color(background)?;
+    colors.foreground = theme_color(foreground)?;
+    if let Some(ansi) = ansi {
+        if ansi.len() != 16 {
+            return Err(Error::BadArg);
+        }
+        for (index, hex) in ansi.into_iter().enumerate() {
+            colors.ansi[index] = theme_color(hex)?;
+        }
+    }
+    Ok(themes::closest(&colors).map(ExTheme::from))
+}
+
+fn theme_color(hex: Option<&str>) -> NifResult<Option<(u8, u8, u8)>> {
+    hex.map(|value| lumis_core::formatter::ansi::hex_to_rgb(value).ok_or(Error::BadArg))
+        .transpose()
+}
+
+#[rustler::nif]
 fn get_theme(name: &str) -> NifResult<ExTheme> {
     // Fast path: check if theme is already cached (read lock)
     {

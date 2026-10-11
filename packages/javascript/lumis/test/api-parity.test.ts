@@ -15,7 +15,8 @@
  * - `still exports every runtime_only entry point` fails on a `runtime_only`
  *   name that is gone, so the list cannot outlive its reasons.
  *
- * Both published entries are checked. `.` resolves to `index.ts` under Node and
+ * The themes subpath and both published root entries are checked. `.` resolves
+ * to `index.ts` under Node and
  * `index.browser.ts` in a browser, and `./client` is `index.browser.ts`
  * everywhere, so a capability present in one and not the other is a gap for
  * whichever half of the audience lands on the wrong file.
@@ -29,6 +30,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import * as browserEntry from "../src/index.browser.js";
 import * as nodeEntry from "../src/index.js";
+import * as themes from "../src/themes/index.js";
 
 type Spelling = string | string[];
 
@@ -74,9 +76,12 @@ function requiredNames(): string[] {
     .flatMap((capability) => jsNames(capability));
 }
 
-/** Value exports. `import * as` omits types, so this is the callable surface. */
+/** Include the public themes subpath with its qualified manifest spelling. */
 function exportedNames(entry: string): string[] {
-  return Object.keys(entries[entry] ?? {}).sort();
+  return [
+    ...Object.keys(entries[entry] ?? {}),
+    ...Object.keys(themes).map((name) => `themes.${name}`),
+  ].sort();
 }
 
 function sectionNames(section: Record<string, Record<string, string>>): string[] {
@@ -84,21 +89,6 @@ function sectionNames(section: Record<string, Record<string, string>>): string[]
 }
 
 describe("top-level API manifest", () => {
-  it("spells every capability inside the package index", () => {
-    // Rust and Elixir reach some capabilities through another module and prove
-    // those by calling them. Every JavaScript one is an index export today, so
-    // this file only reflects. A spelling naming a home elsewhere needs a call
-    // here instead, and would otherwise be looked for as an export and missed.
-    const elsewhere = manifest.capabilities
-      .flatMap(jsNames)
-      .filter((name) => name.includes(".") || name.includes("::"));
-
-    expect(
-      elsewhere,
-      "these live outside the package index; add a call for them rather than relying on the scan",
-    ).toEqual([]);
-  });
-
   for (const entry of Object.keys(entries)) {
     it(`${entry} exports every capability in the manifest`, () => {
       const exported = new Set(exportedNames(entry));

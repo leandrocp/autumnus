@@ -31,7 +31,7 @@ pub struct TerminalColors {
     pub ansi: [Option<Rgb>; 16],
 }
 
-/// Choose a built-in theme from the colors reported by a terminal.
+/// Find a readable built-in theme matching the supplied terminal colors.
 ///
 /// Returns `None` without a background or a sufficiently close theme whose
 /// default text has at least 3:1 contrast against that background.
@@ -44,7 +44,7 @@ pub struct TerminalColors {
 /// compete by foreground distance, then ANSI 1–6 distance to syntax colors,
 /// then background distance and name. Otherwise the closest background wins.
 /// These distances correspond to about 27 and 7 levels per RGB channel on gray.
-pub fn choose_theme(colors: &TerminalColors) -> Option<&'static Theme> {
+pub fn closest(colors: &TerminalColors) -> Option<&'static Theme> {
     let background = colors.background?;
     let appearance = appearance(colors, background);
     let candidates: Vec<_> = available_themes()
@@ -208,7 +208,7 @@ mod tests {
                 foreground: color(case.foreground.as_deref()),
                 ansi: case.ansi.unwrap_or_default().map(|c| color(c.as_deref())),
             };
-            let actual = choose_theme(&colors).map(|theme| theme.name.as_str());
+            let actual = closest(&colors).map(|theme| theme.name.as_str());
             if actual != case.expected.as_deref() {
                 failures.push(format!(
                     "{}: {actual:?}, expected {:?}",

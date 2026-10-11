@@ -1,3 +1,4 @@
+import * as themes from "../src/themes/index.js";
 import diff from "../langs/diff.js";
 import plaintext from "../langs/plaintext.js";
 import { withWasm } from "../src/index.js";
@@ -87,3 +88,5 @@ export const positionAnnotation: Annotation<{ id: number }> = {
   range: { type: "position", start: { line: 0, column: 0 }, end: { line: 0, column: 1 } },
   data: { id: 2 },
 };
+
+export const matchingTheme: themes.Theme | undefined = themes.closest({ background: "#000000" });

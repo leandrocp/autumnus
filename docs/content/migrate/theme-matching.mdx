@@ -1,0 +1,22 @@
+---
+title: Theme matching
+description: Rename Rust theme matching calls from choose_theme to closest.
+---
+
+`lumis::themes::choose_theme` and `lumis_core::themes::choose_theme` are renamed
+to `closest`. Update the function name; inputs, selection rules, and return
+values are unchanged.
+
+```rust
+// Before
+let theme = lumis::themes::choose_theme(&colors);
+
+// After
+let theme = lumis::themes::closest(&colors);
+```
+
+Update explicit imports in the same way. The CLI's `--theme auto` option is
+unchanged. JavaScript and Elixir now offer the same operation through
+`@lumis-sh/lumis/themes` and `Lumis.Theme.closest/1`.
+
+See [Match surrounding colors](/themes/closest) for examples and no-match behavior.

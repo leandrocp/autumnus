@@ -152,6 +152,29 @@ defmodule Lumis.Theme do
   end
 
   @doc """
+  Finds a readable built-in theme matching the supplied colors.
+
+  Colors are six-digit RGB hex strings, with an optional `#`. Pass `:background`
+  and optionally `:foreground` and `:ansi`, a list of 16 colors with `nil` for
+  unknown entries. Foreground and ANSI accents break ties between similar backgrounds.
+
+  Returns `nil` without a background or a sufficiently close theme with at least
+  3:1 text contrast. Monochrome themes are excluded. Raises `ArgumentError` for
+  invalid colors or an ANSI palette other than 16 entries.
+
+      Lumis.Theme.closest(%{background: "#000000"}).name
+      #=> "modus_vivendi"
+  """
+  @spec closest(%{
+          optional(:background) => String.t() | nil,
+          optional(:foreground) => String.t() | nil,
+          optional(:ansi) => [String.t() | nil] | nil
+        }) :: t() | nil
+  def closest(colors) when is_map(colors) do
+    Lumis.Native.closest_theme(colors[:background], colors[:foreground], colors[:ansi])
+  end
+
+  @doc """
   Get a theme by name.
   """
   @spec get(String.t(), any()) :: Lumis.Theme.t() | nil
