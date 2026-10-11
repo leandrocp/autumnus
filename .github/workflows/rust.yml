@@ -8,6 +8,8 @@ on:
   push:
     branches: [ main ]
     paths:
+      - "fixtures/api.json"
+      - "fixtures/language-lookup.json"
       - ".cargo/config.toml"
       - ".gitattributes"
       - "Cargo.lock"
@@ -24,6 +26,8 @@ on:
       - ".github/workflows/rust.yml"
   pull_request:
     paths:
+      - "fixtures/api.json"
+      - "fixtures/language-lookup.json"
       - ".cargo/config.toml"
       - ".gitattributes"
       - "Cargo.lock"

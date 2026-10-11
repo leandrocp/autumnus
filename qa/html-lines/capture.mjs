@@ -204,9 +204,10 @@ async function browserHtml(page) {
   return page.evaluate(
     async ({ repository, languagePackage: browserPackage, theme: browserTheme }) => {
       const api = await import("/src/index.browser.ts");
+      const { withWasm } = await import("/src/languages.browser.ts");
       const { default: rust } = await import("/langs/rust.ts");
       const { renderCases } = await import(`/@fs/${repository}/qa/html-lines/render.mjs`);
-      const language = api.withWasm(
+      const language = withWasm(
         rust,
         `/@fs/${repository}/fixtures/test-parsers/tree-sitter-rust.wasm`,
       );

@@ -1,0 +1,148 @@
+---
+title: Language and theme modules
+description: Move catalog and parser helpers to their language and theme modules.
+---
+
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+Language operations live in a language module; theme operations live in a theme
+module. The names are `guess`, `get`, `available`, and `closest`, with the module
+providing the context.
+
+Existing JavaScript root imports and Elixir root catalog functions still work.
+They are deprecated, with a pointer to the replacement. No compatibility alias
+is removed in this release. Rust's existing catalog functions and `Language`
+methods remain supported.
+
+<Tabs groupId="runtime" persist items={['JavaScript / TypeScript', 'Rust', 'Elixir', 'Java', 'CLI']}>
+  <Tab value="JavaScript / TypeScript">
+
+```ts
+import { highlight } from '@lumis-sh/lumis';
+import * as languages from '@lumis-sh/lumis/languages';
+import * as themes from '@lumis-sh/lumis/themes';
+import { htmlInline } from '@lumis-sh/lumis/formatters';
+
+const language = languages.guess('src/main.rs');
+const theme = themes.get('dracula');
+const html = await highlight('fn main() {}', htmlInline({ language, theme }));
+```
+
+These imports work in Node and browser bundlers. CommonJS uses
+`require('@lumis-sh/lumis/languages')` and `require('@lumis-sh/lumis/themes')`.
+
+| Deprecated root import | Replacement |
+| --- | --- |
+| `guessLanguage` | `languages.guess` |
+| `getLanguage` | `languages.get` |
+| `availableLanguages` | `languages.available` |
+| `loadLanguages` | `languages.load` |
+| `loadedLanguages` | `languages.loaded` |
+| `configureWasmResolver` | `languages.configureWasmResolver` |
+| `configureLanguagePackageResolver` | `languages.configurePackageResolver` |
+| `withWasm` | `languages.withWasm` |
+| `withWasmBundle` | `languages.withWasmBundle` |
+| `availableThemes` | `themes.available` |
+| `sanitizeThemeName` | `sanitizeThemeName` from `@lumis-sh/lumis/formatters/html` |
+
+`languages.load()` and the resolver functions still configure the runtime used
+by the root `highlight()`. Moving the import does not create another parser
+cache. Highlighter instances keep their own existing configuration.
+
+If you intentionally select a runtime with `@lumis-sh/lumis/client` or
+`@lumis-sh/lumis/node`, import its language helpers from
+`@lumis-sh/lumis/client/languages` or `@lumis-sh/lumis/node/languages` respectively.
+This keeps resolver configuration and highlighting on the same runtime even
+when your bundler's default condition selects the other one.
+
+Language types are also exported from `/languages`; theme types from `/themes`.
+Existing root type imports remain supported.
+
+`languages.get` now follows Rust and Elixir: it accepts names, aliases,
+extensions such as `rs`, and paths such as `src/main.rs`. Empty input resolves
+to plaintext; unknown input returns `undefined`. This also applies to the
+deprecated `getLanguage` alias. Previously JavaScript only accepted IDs and
+aliases. Shared lookup cases cover the same inputs in all three runtimes.
+
+The shared hint parser also corrects `languages.guess`, its deprecated
+`guessLanguage` alias, and the `language` option used for highlighting. A path
+such as `src/rs` no longer treats its basename as a bare extension, and Unicode
+letters such as the Kelvin sign in `Kotlin` no longer fold to ASCII language
+names. These hints now follow Rust: they remain unresolved, allowing source
+content detection to run before falling back to plaintext.
+
+The `/themes` entry includes all built-in themes. For a fixed theme, keep using
+an individual import such as `@lumis-sh/themes/dracula` to avoid bundling the
+catalog.
+
+  </Tab>
+  <Tab value="Rust">
+
+```rust
+use lumis::{languages, themes};
+
+let language = languages::guess(Some("src/main.rs"), "");
+let metadata = languages::get("rs");
+let languages = languages::available();
+let theme = themes::get("dracula")?;
+let themes = themes::available();
+```
+
+`Language::guess`, parsing a `Language`, `Language::info`,
+`languages::available_languages`, and `themes::available_themes` remain available.
+The same module functions are exported by `lumis-core`.
+
+The separate [theme matching rename](/migrate/theme-matching) changes
+`themes::choose_theme` to `themes::closest`.
+
+  </Tab>
+  <Tab value="Elixir">
+
+```elixir
+Lumis.Languages.guess("src/main.rs")
+Lumis.Languages.get("rs")
+Lumis.Languages.available()
+Lumis.Languages.loaded()
+Lumis.Theme.get("dracula")
+Lumis.Theme.available()
+```
+
+Replace `Lumis.available_languages/0`, `Lumis.loaded_languages/0`, and
+`Lumis.available_themes/0` with `Lumis.Languages.available/0`,
+`Lumis.Languages.loaded/0`, and `Lumis.Theme.available/0` respectively.
+The old functions emit compiler deprecation warnings. Projects using
+`--warnings-as-errors` must migrate those calls before upgrading.
+
+  </Tab>
+  <Tab value="Java">
+
+The separately maintained `lumis4j` binding retains its enum API:
+
+```java
+import io.roastedroot.lumis4j.core.Lang;
+import io.roastedroot.lumis4j.core.Theme;
+
+Lang language = Lang.fromString("rust");
+Theme theme = Theme.fromString("dracula");
+Lang[] languages = Lang.values();
+Theme[] themes = Theme.values();
+```
+
+This change does not add the module functions or automatic theme matching to
+`lumis4j`. Those require a change in its repository.
+
+  </Tab>
+  <Tab value="CLI">
+
+The CLI keeps its command interface:
+
+```sh
+lumis languages list
+lumis languages show rust
+lumis themes list
+lumis themes show dracula
+lumis highlight src/main.rs --theme auto
+```
+
+  </Tab>
+</Tabs>

@@ -5,7 +5,7 @@ defmodule Lumis.Theme do
   Contains the name, appearance, and a map of highlight `Lumis.Theme.Style`'s.
 
   Lumis bundles the most popular themes from the Neovim community,
-  you can see the full list with `Lumis.available_themes/0` and
+  you can see the full list with `Lumis.Theme.available/0` and
   then fetch one of the bundled themes with `Lumis.Theme.get/1`.
 
   Or check out all the [available themes](https://docs.rs/lumis/latest/lumis/#themes-available).
@@ -74,6 +74,20 @@ defmodule Lumis.Theme do
         }
 
   defstruct name: nil, appearance: nil, revision: nil, highlights: %{}
+
+  @doc """
+  Returns every built-in theme's name and appearance, sorted by name.
+
+  Use `Lumis.Theme.get/2` to get the actual theme struct.
+
+  ## Example
+
+      iex> Lumis.Theme.available() |> Enum.find(&(&1.name == "github_light"))
+      %{name: "github_light", appearance: "light"}
+
+  """
+  @spec available() :: [Lumis.theme_info()]
+  def available, do: Lumis.Native.available_themes()
 
   @doc """
   Builds CSS for a Lumis theme.

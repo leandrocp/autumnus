@@ -5,9 +5,9 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { parse as parseToml } from "smol-toml";
 
 import {
-  configureLanguagePackageResolver as configureDefaultLanguagePackageResolver,
+  configurePackageResolver as configureDefaultLanguagePackageResolver,
   configureWasmResolver as configureDefaultWasmResolver,
-} from "../src/index.js";
+} from "../src/languages.js";
 import { lowestCompatibleLanguagePackageVersion } from "../src/core/languages.js";
 import type {
   LanguagePackage,

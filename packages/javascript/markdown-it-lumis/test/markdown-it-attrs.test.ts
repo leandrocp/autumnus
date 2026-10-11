@@ -19,7 +19,10 @@ import dracula from "../../themes/dist/json/dracula.json";
 import javascript from "../../lumis/langs/javascript.ts";
 import { configureLocalWasmResolver } from "../../lumis/test/wasm.ts";
 import markdownItLumis from "../src/index.js";
-import { configureLanguagePackageResolver, configureWasmResolver } from "@lumis-sh/lumis";
+import {
+  configurePackageResolver as configureLanguagePackageResolver,
+  configureWasmResolver,
+} from "@lumis-sh/lumis/languages";
 import { htmlInline } from "@lumis-sh/lumis/formatters";
 
 configureLocalWasmResolver(["javascript"], {

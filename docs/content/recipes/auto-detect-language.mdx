@@ -20,9 +20,9 @@ const html = await highlight(
   <Tab value="Rust">
 
 ```rust
-use lumis::languages::Language;
+use lumis::languages::{self, Language};
 
-let lang = Language::guess(Some("script.sh"), source);
+let lang = languages::guess(Some("script.sh"), source);
 ```
 
   </Tab>
@@ -52,24 +52,24 @@ highlighting would have used, falling back to `plaintext`.
   <Tab value="JavaScript / TypeScript">
 
 ```js
-import {guessLanguage} from '@lumis-sh/lumis'
+import * as languages from '@lumis-sh/lumis/languages';
 
-guessLanguage('lib/app.ex')                      // "elixir"
-guessLanguage(undefined, '#!/usr/bin/env bash')  // "bash"
+languages.guess('lib/app.ex')                      // "elixir"
+languages.guess(undefined, '#!/usr/bin/env bash')  // "bash"
 ```
 
   </Tab>
   <Tab value="Rust">
 
 ```rust
-use lumis::languages::Language;
+use lumis::languages::{self, Language};
 
 assert_eq!(
-    Language::guess(Some("lib/app.ex"), ""),
+    languages::guess(Some("lib/app.ex"), ""),
     Language::Elixir
 );
 assert_eq!(
-    Language::guess(None, "#!/usr/bin/env bash"),
+    languages::guess(None, "#!/usr/bin/env bash"),
     Language::Bash
 );
 ```

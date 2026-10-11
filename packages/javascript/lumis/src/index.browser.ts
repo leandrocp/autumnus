@@ -1,50 +1,12 @@
 /** Syntax highlighting with Tree-sitter and Neovim themes. */
 
-import { bundleWithPackages, languageWithPackage } from "./bundle-helpers.js";
 import { createHighlighterModule } from "./core/highlighter.js";
-import { createLoadLanguages } from "./core/load-languages.js";
-import {
-  availableLanguages,
-  configureLanguagePackageResolver,
-  configureWasmResolver,
-  createRuntime,
-  getDefaultRuntime,
-  loadedLanguages,
-  loadLanguage as runtimeLoadLanguage,
-} from "./runtime/browser.js";
+import { createRuntime, getDefaultRuntime } from "./runtime/browser.js";
+import * as languages from "./languages.browser.js";
+import { availableThemes as listThemes, sanitizeThemeName as sanitizeName } from "./themes.js";
 
 export { runtimeKind } from "./runtime/browser.js";
-
 export { highlightIter, highlightEvents } from "./core/highlighter.js";
-export { guessLanguage } from "./guess-language.js";
-
-/**
- * Load languages into the runtime `highlight()` uses, by name.
- *
- * This is the JavaScript / TypeScript spelling of `Lumis.Languages.load/1`:
- * it caches parser bytes and, on the native addon, their compiled
- * Wasmtime module. It keeps the languages in the default runtime so no later
- * call reloads them.
- *
- * Accepts catalog names, aliases, and `bundle-<name>` tokens.
- *
- * Highlighting loads on demand regardless, so this is an optimization. At
- * startup, prefer not blocking on it:
- *
- * ```ts
- * import { loadLanguages } from '@lumis-sh/lumis'
- *
- * await startServer()
- *
- * loadLanguages(['javascript', 'html', 'css']).catch((error) => {
- *   logger.warn({ error }, 'Lumis warm-up failed; languages load on demand')
- * })
- * ```
- *
- * Every name is attempted. If any fail, it rejects with an `AggregateError`
- * naming each one, after the rest have loaded.
- */
-export const loadLanguages = createLoadLanguages(runtimeLoadLanguage);
 
 const highlighter = createHighlighterModule({
   createRuntime,
@@ -58,31 +20,6 @@ export function createHighlighter(...args: Parameters<typeof highlighter.createH
 /** {@inheritDoc index.highlight} */
 export function highlight(...args: Parameters<typeof highlighter.highlight>) {
   return highlighter.highlight(...args);
-}
-
-/** {@inheritDoc index.withWasm} */
-export function withWasm<T extends import("./types.js").Language>(
-  language: T,
-  source:
-    | import("./types.js").Language
-    | import("./types.js").LanguagePackageExports
-    | import("./types.js").RuntimeWasmInput,
-): Omit<T, "wasm" | "languagePackage"> & {
-  wasm: import("./types.js").RuntimeWasmInput;
-  languagePackage?: object;
-} {
-  return languageWithPackage(language, source);
-}
-
-/** {@inheritDoc index.withWasmBundle} */
-export function withWasmBundle(
-  bundle: import("./types.js").LanguageBundle,
-  sources:
-    | import("./types.js").RuntimeLanguagePackageBundle
-    | import("./types.js").RuntimeWasmBundle
-    | Partial<Record<string, import("./types.js").Language>>,
-): import("./types.js").LanguageBundle {
-  return bundleWithPackages(bundle, sources);
 }
 
 export type { CreateHighlighterOptions, Highlighter } from "./core/highlighter.js";
@@ -107,6 +44,8 @@ export type {
   Position,
   PositionAnnotationRange,
   HighlightStyle,
+  HtmlAttrs,
+  HtmlStructure,
   Language,
   LanguageDefinition,
   LanguagePackageHandle,
@@ -127,12 +66,37 @@ export type {
   LanguageInfo,
   ThemeInfo,
 } from "./types.js";
-export {
-  availableLanguages,
-  configureLanguagePackageResolver,
-  configureWasmResolver,
-  loadedLanguages,
-};
-export { getLanguage } from "./catalog-metadata.js";
 export type { LanguagePackageResolver, WasmResolver } from "./core/languages.js";
-export { availableThemes, sanitizeThemeName } from "./themes.js";
+
+/** @deprecated Import { guess } from "@lumis-sh/lumis/client/languages" instead. */
+export const guessLanguage = languages.guess;
+
+/** @deprecated Import { get } from "@lumis-sh/lumis/client/languages" instead. */
+export const getLanguage = languages.get;
+
+/** @deprecated Import { available } from "@lumis-sh/lumis/client/languages" instead. */
+export const availableLanguages = languages.available;
+
+/** @deprecated Import { load } from "@lumis-sh/lumis/client/languages" instead. */
+export const loadLanguages = languages.load;
+
+/** @deprecated Import { loaded } from "@lumis-sh/lumis/client/languages" instead. */
+export const loadedLanguages = languages.loaded;
+
+/** @deprecated Import { configureWasmResolver } from "@lumis-sh/lumis/client/languages" instead. */
+export const configureWasmResolver = languages.configureWasmResolver;
+
+/** @deprecated Import { configurePackageResolver } from "@lumis-sh/lumis/client/languages" instead. */
+export const configureLanguagePackageResolver = languages.configurePackageResolver;
+
+/** @deprecated Import { withWasm } from "@lumis-sh/lumis/client/languages" instead. */
+export const withWasm = languages.withWasm;
+
+/** @deprecated Import { withWasmBundle } from "@lumis-sh/lumis/client/languages" instead. */
+export const withWasmBundle = languages.withWasmBundle;
+
+/** @deprecated Import { available } from "@lumis-sh/lumis/themes" instead. */
+export const availableThemes = listThemes;
+
+/** @deprecated Import { sanitizeThemeName } from "@lumis-sh/lumis/formatters/html" instead. */
+export const sanitizeThemeName = sanitizeName;

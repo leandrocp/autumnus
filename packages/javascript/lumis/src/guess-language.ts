@@ -10,7 +10,9 @@ import { PLAINTEXT_LANG_ID } from "./types.js";
 const GLOB_REGEXES = GLOB_MATCHERS.map(({ id, glob }) => ({ id, regex: globToRegExp(glob) }));
 
 function normalize(value: string): string {
-  return value.trim().toLowerCase();
+  return value
+    .replaceAll(/^\p{White_Space}+|\p{White_Space}+$/gu, "")
+    .replaceAll(/[A-Z]/gu, (character) => character.toLowerCase());
 }
 
 function escapeRegex(value: string): string {
@@ -39,7 +41,7 @@ export function languageIdForFilename(path: string): string | undefined {
   return idMatchingGlob(name);
 }
 
-function parseLanguageHint(language?: string): string | undefined {
+export function parseLanguageHint(language?: string): string | undefined {
   if (language == null) return undefined;
 
   const normalized = normalize(language);
@@ -51,8 +53,7 @@ function parseLanguageHint(language?: string): string | undefined {
   const byFileName = languageIdForFilename(normalized);
   if (byFileName) return byFileName;
 
-  const fileName = basename(normalized);
-  const extension = fileName.startsWith(".") ? fileName.slice(1) : fileName;
+  const extension = normalized.startsWith(".") ? normalized.slice(1) : normalized;
   if (extension.length > 0) {
     return idMatchingGlob(`*.${extension}`);
   }

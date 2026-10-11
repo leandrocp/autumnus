@@ -91,18 +91,18 @@ On Node, warm parsers alongside startup, without putting the compile on the
 boot path:
 
 ```typescript
-import { loadLanguages } from '@lumis-sh/lumis'
+import * as languages from '@lumis-sh/lumis/languages';
 
 await startServer()
 
 // Not awaited. The `.catch()` is required: an unhandled rejection would
 // terminate the process.
-loadLanguages(['javascript', 'html', 'css']).catch((error) => {
+languages.load(['javascript', 'html', 'css']).catch((error) => {
   logger.warn({ error }, 'Lumis warm-up failed; languages load on demand')
 })
 ```
 
-`loadLanguages()` warms the runtime `highlight()` uses and keeps the languages
+`languages.load()` warms the runtime `highlight()` uses and keeps the languages
 there, persisting compiled Wasmtime modules on native Node. To compile in a build
 step instead, run the same call there, awaited, with `LUMIS_DATA_DIR` set to the
 directory the server uses.

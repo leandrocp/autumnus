@@ -406,7 +406,9 @@ Lumis.Languages.async_load(["rust", "javascript"])
 ```
 
 ```javascript
-loadLanguages(["rust", "javascript"]).catch(report)
+import { load } from "@lumis-sh/lumis/languages"
+
+load(["rust", "javascript"]).catch(report)
 ```
 
 For a separate build or operations step, the CLI is the one command:
@@ -452,3 +454,13 @@ the cache path when `debug_assertions` is on, so a rebuilt binary cannot read
 entries its predecessor wrote. Measuring cache sharing with `cargo run` and
 `LUMIS_BUILD=1 mix` therefore shows two namespaces and no reuse; that is the
 debug profile, not a divergence between runtimes.
+
+### Public language and theme modules
+
+JavaScript's `/languages` and `/themes` entry points use the same short operation
+names as Rust's `languages` and `themes` modules and Elixir's `Lumis.Languages`
+and `Lumis.Theme`. The root keeps highlighting and deprecated compatibility
+aliases. Language modules share the root runtime; importing the root does not
+pull in the full theme catalog. `fixtures/api.json` records the canonical names,
+runtime-specific operations, and aliases. The external Java binding retains its
+separate enum API until that repository adopts these operations.

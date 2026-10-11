@@ -6,7 +6,10 @@ import githubLight from "../../themes/dist/json/github_light.json";
 import javascript from "../../lumis/langs/javascript.ts";
 import json from "../../lumis/langs/json.ts";
 import { configureLocalWasmResolver } from "../../lumis/test/wasm.ts";
-import { configureLanguagePackageResolver, configureWasmResolver } from "@lumis-sh/lumis";
+import {
+  configurePackageResolver as configureLanguagePackageResolver,
+  configureWasmResolver,
+} from "@lumis-sh/lumis/languages";
 import { htmlInline, htmlLinked, htmlMultiThemes, terminal } from "@lumis-sh/lumis/formatters";
 import rehypeLumis, { type RehypeLumisOptions } from "../src/index.js";
 

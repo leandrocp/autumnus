@@ -6,8 +6,8 @@ import type { ThemeInfo } from "./types.js";
  * List all built-in themes with their name and appearance.
  *
  * ```ts
- * import { availableThemes } from '@lumis-sh/lumis'
- * const themes = availableThemes()
+ * import { available } from '@lumis-sh/lumis/themes'
+ * const themes = available()
  * // [{ name: 'dracula', appearance: 'dark' }, ...]
  * ```
  */

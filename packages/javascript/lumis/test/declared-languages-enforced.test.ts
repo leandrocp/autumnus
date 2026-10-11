@@ -26,7 +26,7 @@ const { _initPaths } = await import("node:module");
 (_initPaths as () => void)();
 process.env.LUMIS_DATA_DIR = mkdtempSync(join(tmpdir(), "lumis-declared-store-"));
 
-const { loadLanguages } = await import("../src/index.js");
+const { load: loadLanguages } = await import("../src/languages.js");
 
 function reasons(error: unknown, found: string[] = []): string[] {
   if (!(error instanceof Error)) return found;

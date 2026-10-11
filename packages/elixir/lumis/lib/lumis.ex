@@ -21,7 +21,7 @@ defmodule Lumis do
   @typedoc """
   A language name, filename, or path with extension.
 
-  See `Lumis.available_languages/0` to list all available languages or check out a list of [available languages](https://docs.rs/lumis/latest/lumis/#languages-available).
+  See `Lumis.Languages.available/0` to list all available languages or check out a list of [available languages](https://docs.rs/lumis/latest/lumis/#languages-available).
 
   ## Examples
 
@@ -36,7 +36,7 @@ defmodule Lumis do
   @typedoc """
   Theme used to apply styles on the highlighted source code.
 
-  See `Lumis.available_themes/0` to list all available themes or check out a list of [available themes](https://docs.rs/lumis/latest/lumis/#themes-available).
+  See `Lumis.Theme.available/0` to list all available themes or check out a list of [available themes](https://docs.rs/lumis/latest/lumis/#themes-available).
   """
   @type theme :: String.t() | Lumis.Theme.t() | nil
 
@@ -1046,63 +1046,23 @@ defmodule Lumis do
           shebangs: [String.t()]
         }
 
-  @doc """
-  Returns every available language and what the catalog knows about it, sorted
-  by id.
-
-  ## Example
-
-      iex> Lumis.available_languages() |> Enum.find(&(&1.id == "elixir"))
-      %{
-        id: "elixir",
-        name: "Elixir",
-        aliases: [],
-        extensions: ["*.ex", "*.exs"],
-        globs: ["*.ex", "*.exs"],
-        emacs_modes: ["elixir"],
-        shebangs: ["elixir"]
-      }
-
-  """
+  @doc "Use `Lumis.Languages.available/0`."
+  @deprecated "Use Lumis.Languages.available/0 instead"
   @spec available_languages() :: [language_info()]
-  def available_languages, do: Lumis.Native.available_languages()
+  def available_languages, do: Lumis.Languages.available()
 
-  @doc """
-  Returns the ids of the languages loaded into this VM, sorted.
-
-  The complement of `available_languages/0`: what can be highlighted right now
-  without a download. Loading is global to the VM, so this is the same list in
-  every process.
-
-  ## Example
-
-      iex> Lumis.Languages.load("elixir")
-      iex> Lumis.loaded_languages()
-      ["elixir"]
-
-  """
+  @doc "Use `Lumis.Languages.loaded/0`."
+  @deprecated "Use Lumis.Languages.loaded/0 instead"
   @spec loaded_languages() :: [id :: String.t()]
-  def loaded_languages do
-    Lumis.Application.configure_store()
-    Lumis.Native.loaded_languages()
-  end
+  def loaded_languages, do: Lumis.Languages.loaded()
 
   @typedoc "A built-in theme's name and appearance, without its highlight data."
   @type theme_info :: %{name: String.t(), appearance: String.t()}
 
-  @doc """
-  Returns every built-in theme's name and appearance, sorted by name.
-
-  Use `Lumis.Theme.get/2` to get the actual theme struct.
-
-  ## Example
-
-      iex> Lumis.available_themes() |> Enum.find(&(&1.name == "github_light"))
-      %{name: "github_light", appearance: "light"}
-
-  """
+  @doc "Use `Lumis.Theme.available/0`."
+  @deprecated "Use Lumis.Theme.available/0 instead"
   @spec available_themes() :: [theme_info()]
-  def available_themes, do: Lumis.Native.available_themes()
+  def available_themes, do: Lumis.Theme.available()
 
   @deprecated "Use highlight/2 instead"
   def highlight(language, source, options) do
@@ -1388,7 +1348,7 @@ defmodule Lumis do
         Logger.warning("""
         Helix themes are deprecated, use Neovim theme names instead.
 
-        See `Lumis.available_themes/0` for a list of available themes.
+        See `Lumis.Theme.available/0` for a list of available themes.
         """)
 
         theme

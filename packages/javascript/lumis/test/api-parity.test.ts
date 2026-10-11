@@ -1,35 +1,10 @@
-/**
- * JavaScript's half of the cross-runtime top-level API check.
- *
- * `fixtures/api.json` lists the entry points every runtime must offer a caller.
- * JavaScript can read its own exports, so unlike the Rust half this reflects
- * rather than calls:
- *
- * - `exports every capability in the manifest` fails on a capability JavaScript
- *   lacks. That is the direction Elixir failed silently for `highlightEvents`
- *   until #1543.
- * - `exports nothing the manifest does not account for` fails on a value export
- *   in neither the manifest's capability set nor `runtime_only`. This is the one
- *   that catches drift: an entry point added here and nowhere else has to be
- *   classified before it can ship.
- * - `still exports every runtime_only entry point` fails on a `runtime_only`
- *   name that is gone, so the list cannot outlive its reasons.
- *
- * The themes subpath and both published root entries are checked. `.` resolves
- * to `index.ts` under Node and
- * `index.browser.ts` in a browser, and `./client` is `index.browser.ts`
- * everywhere, so a capability present in one and not the other is a gap for
- * whichever half of the audience lands on the wrong file.
- *
- * Capabilities are camelCase here and snake_case in the manifest; `toCamel`
- * bridges that, and `spelling.javascript` overrides it where the two do not line
- * up. Types are not checked: they are erased at run time, and their shape is
- * per-runtime anyway.
- */
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import * as browserEntry from "../src/index.browser.js";
 import * as nodeEntry from "../src/index.js";
+import * as nodeLanguages from "../src/languages.js";
+import * as browserLanguages from "../src/languages.browser.js";
+import * as html from "../src/formatter/html.js";
 import * as themes from "../src/themes/index.js";
 
 type Spelling = string | string[];
@@ -42,6 +17,7 @@ interface Capability {
 interface Manifest {
   capabilities: Capability[];
   runtime_only: Record<string, Record<string, string>>;
+  deprecated: Record<string, Record<string, string>>;
   waived: Record<string, Record<string, string>>;
 }
 
@@ -49,11 +25,26 @@ const manifest: Manifest = JSON.parse(
   readFileSync(new URL("../../../../fixtures/api.json", import.meta.url), "utf8"),
 );
 
+const lookupCases: { input: string; expected: string | null }[] = JSON.parse(
+  readFileSync(new URL("../../../../fixtures/language-lookup.json", import.meta.url), "utf8"),
+);
+
 /** The two published entries, each the `.` of a different condition. */
-const entries: Record<string, Record<string, unknown>> = {
-  "index.ts": nodeEntry,
-  "index.browser.ts": browserEntry,
+const entries = {
+  node: { root: nodeEntry, languages: nodeLanguages },
+  browser: { root: browserEntry, languages: browserLanguages },
 };
+
+function exportsFor(entry: keyof typeof entries): Record<string, unknown> {
+  const { root, languages } = entries[entry];
+  return {
+    ...root,
+    ...Object.fromEntries(
+      Object.entries(languages).map(([name, value]) => [`languages.${name}`, value]),
+    ),
+    ...Object.fromEntries(Object.entries(themes).map(([name, value]) => [`themes.${name}`, value])),
+  };
+}
 
 function toCamel(name: string): string {
   return name.replaceAll(/_([a-z])/gu, (_, letter: string) => letter.toUpperCase());
@@ -76,12 +67,8 @@ function requiredNames(): string[] {
     .flatMap((capability) => jsNames(capability));
 }
 
-/** Include the public themes subpath with its qualified manifest spelling. */
-function exportedNames(entry: string): string[] {
-  return [
-    ...Object.keys(entries[entry] ?? {}),
-    ...Object.keys(themes).map((name) => `themes.${name}`),
-  ].sort();
+function exportedNames(entry: keyof typeof entries): string[] {
+  return Object.keys(exportsFor(entry)).sort();
 }
 
 function sectionNames(section: Record<string, Record<string, string>>): string[] {
@@ -89,7 +76,18 @@ function sectionNames(section: Record<string, Record<string, string>>): string[]
 }
 
 describe("top-level API manifest", () => {
-  for (const entry of Object.keys(entries)) {
+  it("loads the shared language lookup corpus", () => {
+    expect(lookupCases.length).toBeGreaterThanOrEqual(24);
+  });
+
+  for (const entry of ["node", "browser"] as const) {
+    it.each(lookupCases)(
+      `${entry} resolves language metadata for $input`,
+      ({ input, expected }) => {
+        expect(entries[entry].languages.get(input)?.id ?? null).toBe(expected);
+      },
+    );
+
     it(`${entry} exports every capability in the manifest`, () => {
       const exported = new Set(exportedNames(entry));
       const missing = requiredNames().filter((name) => !exported.has(name));
@@ -101,6 +99,7 @@ describe("top-level API manifest", () => {
       const accounted = new Set([
         ...requiredNames(),
         ...sectionNames(manifest.runtime_only),
+        ...sectionNames(manifest.deprecated),
         // A waived name is accounted for, so a runtime that grows one fails
         // `has no waiver left standing` alone rather than here as well.
         ...sectionNames(manifest.waived),
@@ -129,14 +128,18 @@ describe("top-level API manifest", () => {
   }
 
   it("exports the same names from both entries", () => {
-    const [first, ...rest] = Object.keys(entries);
-
-    for (const entry of rest) {
-      expect(
-        exportedNames(entry),
-        `${first} and ${entry} disagree; a caller resolving one of them is missing what the ` +
-          "other has, and the manifest cannot tell which half of the audience is right",
-      ).toEqual(exportedNames(first ?? ""));
-    }
+    expect(exportedNames("browser")).toEqual(exportedNames("node"));
   });
+
+  for (const entry of ["node", "browser"] as const) {
+    it(`${entry} keeps every deprecated root alias identical to its replacement`, () => {
+      const exported = { ...exportsFor(entry), "html.sanitizeThemeName": html.sanitizeThemeName };
+      const aliases = manifest.deprecated.javascript ?? {};
+      expect(Object.keys(aliases).length).toBeGreaterThan(0);
+      for (const [oldName, replacement] of Object.entries(aliases)) {
+        expect(exported[replacement], replacement).toBeTypeOf("function");
+        expect(exported[oldName], oldName).toBe(exported[replacement]);
+      }
+    });
+  }
 });

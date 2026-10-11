@@ -26,7 +26,7 @@ const highlighter = await createHighlighter({ languages: [json] });
 Use the [language catalog](/reference/languages) to find a supported language,
 and see [Where parsers come from](/usage/javascript#where-parsers-come-from).
 
-`withWasm()` still attaches a package to a language, for code that imports the
+`languages.withWasm()` still attaches a package to a language, for code that imports the
 package as a namespace. It does not accept replacement queries or turn an
 arbitrary grammar into a Lumis language.
 

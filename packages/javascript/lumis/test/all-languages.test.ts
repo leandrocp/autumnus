@@ -4,7 +4,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
-import { availableLanguages } from "../src/index.js";
+import { available as availableLanguages } from "../src/languages.js";
 
 type LanguageModule = {
   id: string;

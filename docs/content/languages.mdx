@@ -89,7 +89,7 @@ the work is the one that will serve:
 
 | Runtime | In the process that serves | In a process that exits |
 | --- | --- | --- |
-| JavaScript / TypeScript | `loadLanguages([...])`, not awaited | `loadLanguages([...])`, awaited, in a build step |
+| JavaScript / TypeScript | `languages.load([...])`, not awaited | `languages.load([...])`, awaited, in a build step |
 | Elixir | `Lumis.Languages.async_load([...])` in `start/2` | `Lumis.Languages.load([...])` in a release task |
 | Browsers / CDN | `createHighlighter({languages})` with imported packages | — the bundle already carries them |
 | CLI | — the process exits, so there is no later to hold for | `lumis languages download <names>` |
@@ -155,7 +155,7 @@ range again.
 Start serving, then load in the background:
 
 ```ts title="bootstrap.ts"
-import { loadLanguages } from "@lumis-sh/lumis";
+import * as languages from "@lumis-sh/lumis/languages";
 
 await startServer();
 
@@ -163,7 +163,7 @@ await startServer();
 // `.catch()` is required: an unhandled rejection
 // terminates the process, which is exactly the failure
 // loading in the background is meant to avoid.
-loadLanguages(["javascript", "html", "css"]).catch(
+languages.load(["javascript", "html", "css"]).catch(
   (error) => {
     logger.warn(
       { error },
@@ -173,7 +173,7 @@ loadLanguages(["javascript", "html", "css"]).catch(
 );
 ```
 
-`loadLanguages()` warms the same default runtime the module-level `highlight()`
+`languages.load()` warms the same default runtime the module-level `highlight()`
 uses, so nothing has to be threaded through your application. It accepts catalog
 names, aliases, and bundle names such as `bundle-web`. Every name is attempted;
 if any fail it rejects with an `AggregateError` naming each one, after the rest
@@ -193,8 +193,8 @@ will use:
 
 ```bash
 LUMIS_DATA_DIR=/app/lumis node --input-type=module -e '
-  import { loadLanguages } from "@lumis-sh/lumis";
-  await loadLanguages(["javascript", "html", "css"]);
+  import * as languages from "@lumis-sh/lumis/languages";
+  await languages.load(["javascript", "html", "css"]);
 '
 ```
 
@@ -299,7 +299,7 @@ await renderApplication({ highlighter });
 ```
 
 A bundle registers lazy entries; call `highlighter.loadLanguage()` for the
-bundle members the application must have. `loadLanguages()` takes names, which
+bundle members the application must have. `languages.load()` takes names, which
 carry no package, so in a browser it only works with a
 [configured resolver](/usage/javascript#custom-resolvers).
 

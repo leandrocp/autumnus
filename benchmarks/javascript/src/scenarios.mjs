@@ -115,12 +115,13 @@ async function prepareRuntime() {
 }
 
 async function loadLumis() {
-  const [lumis, { htmlInline }, { default: theme }] = await Promise.all([
+  const [lumis, { withWasm }, { htmlInline }, { default: theme }] = await Promise.all([
     import("@lumis-sh/lumis"),
+    import("@lumis-sh/lumis/languages"),
     import("@lumis-sh/lumis/formatters"),
     import("@lumis-sh/themes/github_dark"),
   ]);
-  const { createHighlighter, withWasm, runtimeKind } = lumis;
+  const { createHighlighter, runtimeKind } = lumis;
 
   // Node picks the addon and falls back to Wasm silently, so a row that cannot
   // confirm which one it measured would quietly report the other one's numbers.

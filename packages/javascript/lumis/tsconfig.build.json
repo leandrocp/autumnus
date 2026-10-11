@@ -3,6 +3,8 @@
   "include": [
     "src/index.ts",
     "src/index.browser.ts",
+    "src/languages.ts",
+    "src/languages.browser.ts",
     "src/formatters.ts",
     "src/themes/index.ts",
     "src/formatter/html.ts",
