@@ -153,6 +153,12 @@ Nothing built here resolves these requirements except `crates/autumnus`, so
 
 ## Publishing to npm
 
+The four JavaScript integrations declare Lumis as a required peer. Packing
+rewrites their `workspace:^` peer range to the workspace's current Lumis version.
+When a Lumis release falls outside the published range, test and release the
+integrations against it too, in the publish order above. For example, `^0.9.4`
+does not accept `0.10.0`.
+
 No token. The release workflows request `id-token: write` and npm exchanges that
 OIDC identity for a short-lived publish token, which the registry grants only
 because the package names the workflow that asked. `--provenance` was always the

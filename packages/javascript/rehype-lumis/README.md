@@ -8,7 +8,7 @@ Authored classes, styles, ids, ARIA attributes, and data attributes on both elem
 ## Install
 
 ```sh
-npm install @lumis-sh/rehype-lumis @lumis-sh/themes \
+npm install @lumis-sh/rehype-lumis @lumis-sh/lumis @lumis-sh/themes \
   @lumis-sh/wasm-javascript @lumis-sh/wasm-bundle-web
 ```
 

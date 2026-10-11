@@ -48,6 +48,11 @@ back to `web-tree-sitter` where none is built. It also stages parsers into
 `target/test-parsers` and points the dependent packages at them, so nothing in
 the suite depends on what is currently published to npm.
 
+`mise run test-integration-packages` builds and packs the JavaScript integrations,
+then installs them with Lumis in a temporary consumer outside the workspace. It
+checks their published peer requirements and verifies that application-created
+formatters preserve code-block attributes through each integration.
+
 Cross-runtime output compatibility and browser support have dedicated suites:
 
 ```sh

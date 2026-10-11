@@ -5,7 +5,7 @@
 ## Install
 
 ```sh
-npm install @lumis-sh/markdown-it-lumis @lumis-sh/themes \
+npm install @lumis-sh/markdown-it-lumis @lumis-sh/lumis @lumis-sh/themes \
   @lumis-sh/wasm-javascript @lumis-sh/wasm-typescript @lumis-sh/wasm-json \
   @lumis-sh/wasm-bundle-web
 ```
