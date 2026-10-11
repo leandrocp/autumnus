@@ -14,7 +14,10 @@ const LANGUAGE_PREFIX = "language-";
 export interface RehypeLumisOptions {
   formatter: (language: string | undefined) => Formatter;
   languages?: LanguageInput[];
-  /** Language for unlabeled blocks, or false to leave them untouched. Defaults to "plaintext". */
+  /**
+   * Language for unlabeled blocks, or false to leave them untouched.
+   * Defaults to "plaintext" in rehype-lumis and false in @lumis-sh/vite.
+   */
   defaultLanguage?: string | false;
 }
 
