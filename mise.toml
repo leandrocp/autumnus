@@ -285,6 +285,21 @@ LUMIS_TEST_RUNTIME=wasm \
 # Downstream packages use the default Node runtime, which resolves parsers in
 # Rust against the store rather than through a JavaScript resolver.
 LUMIS_DATA_DIR="$downstream_data_dir" pnpm -r --if-present --filter '!@lumis-sh/lumis' test
+mise run test-integration-packages
+'''
+
+[tasks.'test-integration-packages']
+description = "Build and test JavaScript integrations in an isolated package consumer"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+pnpm --filter @lumis-sh/themes run build
+pnpm --filter @lumis-sh/lumis run build
+pnpm --filter @lumis-sh/rehype-lumis run build
+pnpm --filter @lumis-sh/markdown-it-lumis run build
+pnpm --filter @lumis-sh/vite run build
+pnpm --filter @lumis-sh/react run build
+node packages/javascript/scripts/test-integration-packages.mjs
 '''
 
 [tasks.'test-queries']

@@ -65,6 +65,16 @@
                                                  +---------------------------+
 ```
 
+## JavaScript integrations
+
+`@lumis-sh/rehype-lumis`, `@lumis-sh/markdown-it-lumis`, `@lumis-sh/react`, and
+`@lumis-sh/vite` require `@lumis-sh/lumis` as a peer dependency and keep it as a
+development dependency for builds and tests. The application supplies the Lumis
+installation its integrations use. Built-in formatter identity lives in a
+module-local registry; a second copy cannot recognize the application's
+formatters when rehype or markdown-it adds code-block attributes. Vite uses
+rehype for that step.
+
 ## HTML line contract
 
 HTML formatters render content-only `span.l-line` elements, separated by LF text
