@@ -37,7 +37,7 @@ console.log(String(result))
 
 `formatter` receives the language detected from the code block and returns a Lumis [Formatter](https://github.com/leandrocp/lumis/tree/main/packages/javascript/lumis#output-formats). Any built-in or custom formatter works.
 
-Each language loads from its installed package the first time a matching code block is found. Code blocks with unavailable languages are left unchanged.
+Each language loads from its installed package the first time a matching code block is found. Code blocks with unavailable languages render as plain text.
 
 ## Multiple themes
 
@@ -79,7 +79,9 @@ The plugin reads the language from (in order):
 3. `data-language` attribute on the `<pre>` element
 4. `language` attribute on the `<pre>` element
 
-If no language is detected, Lumis tries to guess from the content.
+Unlabeled blocks render as plain text. Set `defaultLanguage` to another language,
+or `false` to skip them. A `nohighlight` or `no-highlight` class on either element
+skips that block. See the [integration guide](https://docs.lumis.sh/integrations/rehype-lumis).
 
 ## Options
 
@@ -87,3 +89,4 @@ If no language is detected, Lumis tries to guess from the content.
 |--------|------|---------|-------------|
 | `formatter` | `(language: string \| undefined) => Formatter` | (required) | Creates a Lumis formatter for each code block |
 | `languages` | `LanguageInput[]` | `[]` | Languages to make available. Accepts Language objects or bundles. |
+| `defaultLanguage` | `string \| false` | `"plaintext"` | Language for unlabeled blocks, or `false` to leave them untouched. |

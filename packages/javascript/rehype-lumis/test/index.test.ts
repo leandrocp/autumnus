@@ -1,5 +1,5 @@
 import type { Element, Properties, Root } from "hast";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { visit } from "unist-util-visit";
 import dracula from "../../themes/dist/json/dracula.json";
 import githubLight from "../../themes/dist/json/github_light.json";
@@ -8,9 +8,9 @@ import json from "../../lumis/langs/json.ts";
 import { configureLocalWasmResolver } from "../../lumis/test/wasm.ts";
 import { configureLanguagePackageResolver, configureWasmResolver } from "@lumis-sh/lumis";
 import { htmlInline, htmlLinked, htmlMultiThemes, terminal } from "@lumis-sh/lumis/formatters";
-import rehypeLumis from "../src/index.js";
+import rehypeLumis, { type RehypeLumisOptions } from "../src/index.js";
 
-configureLocalWasmResolver(["javascript", "json"], {
+configureLocalWasmResolver(["javascript", "json", "elixir"], {
   configureLanguagePackageResolver,
   configureWasmResolver,
 });
@@ -86,6 +86,134 @@ function assertSpansExist(tree: Root) {
 }
 
 describe("rehype-lumis", () => {
+  describe("defaultLanguage", () => {
+    it("renders unlabeled blocks as plaintext by default", async () => {
+      const formatter = vi.fn<RehypeLumisOptions["formatter"]>((language) =>
+        htmlInline({ language, theme: dracula }),
+      );
+      const tree = codeBlockTree();
+      const explicit = codeBlockTree();
+
+      await rehypeLumis({ formatter })(tree);
+      await rehypeLumis({ formatter, defaultLanguage: "plaintext" })(explicit);
+
+      assertLumisPreElement(tree);
+      expect(classNames(findElements(tree, "code")[0])).toContain("language-plaintext");
+      expect(tree).toEqual(explicit);
+      expect(formatter).toHaveBeenNthCalledWith(1, "plaintext");
+    });
+
+    it.each([{}, { codeClassName: ["language-"] }, { preProperties: { dataLanguage: "" } }])(
+      "leaves unlabeled blocks untouched with false: %j",
+      async (properties) => {
+        const formatter = vi.fn<RehypeLumisOptions["formatter"]>((language) =>
+          htmlInline({ language, theme: dracula }),
+        );
+        const tree = codeBlockTree(properties);
+        const original = tree.children[0];
+        const snapshot = structuredClone(tree);
+
+        await rehypeLumis({ formatter, defaultLanguage: false })(tree);
+
+        expect(tree.children[0]).toBe(original);
+        expect(tree).toEqual(snapshot);
+        expect(formatter).not.toHaveBeenCalled();
+      },
+    );
+
+    it("loads and highlights an unlabeled block in the default language", async () => {
+      const formatter = vi.fn<RehypeLumisOptions["formatter"]>((language) =>
+        htmlInline({ language, theme: dracula }),
+      );
+      const tree = codeBlockTree({ code: "defmodule Example do\nend" });
+
+      await rehypeLumis({ formatter, defaultLanguage: "elixir" })(tree);
+
+      expect(formatter).toHaveBeenCalledWith("elixir");
+      expect(classNames(findElements(tree, "code")[0])).toContain("language-elixir");
+      expect(assertSpansExist(tree)).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            properties: expect.objectContaining({ style: expect.stringMatching(/color: #/u) }),
+          }),
+        ]),
+      );
+    });
+
+    it.each([false, "elixir"] as const)(
+      "uses an explicit language ahead of defaultLanguage %s",
+      async (defaultLanguage) => {
+        const formatter = vi.fn<RehypeLumisOptions["formatter"]>((language) =>
+          htmlInline({ language, theme: dracula }),
+        );
+        const tree = codeBlockTree({ code: '{"a": 1}', codeClassName: ["language-json"] });
+
+        await rehypeLumis({ formatter, defaultLanguage })(tree);
+
+        expect(formatter).toHaveBeenCalledWith("json");
+        expect(classNames(findElements(tree, "code")[0])).toContain("language-json");
+      },
+    );
+
+    it("still renders an unavailable explicit language as plaintext with false", async () => {
+      const formatter = vi.fn<RehypeLumisOptions["formatter"]>((language) =>
+        htmlInline({ language, theme: dracula }),
+      );
+      const tree = codeBlockTree({ codeClassName: ["language-no-such-language"] });
+
+      await rehypeLumis({ formatter, defaultLanguage: false })(tree);
+
+      assertLumisPreElement(tree);
+      expect(formatter).toHaveBeenCalledWith(undefined);
+      expect(classNames(findElements(tree, "code")[0])).toContain("language-plaintext");
+    });
+  });
+
+  describe.each(["nohighlight", "no-highlight"])("%s", (optOut) => {
+    it.each(["pre", "code"] as const)("leaves a labeled %s untouched", async (element) => {
+      const formatter = vi.fn<RehypeLumisOptions["formatter"]>((language) =>
+        htmlInline({ language, theme: dracula }),
+      );
+      const tree = codeBlockTree({
+        preProperties: { className: element === "pre" ? ["panel", optOut] : [] },
+        codeProperties: {
+          className: element === "code" ? `language-json ${optOut}` : "language-json",
+        },
+      });
+      const original = tree.children[0];
+      const snapshot = structuredClone(tree);
+
+      await rehypeLumis({ formatter, defaultLanguage: "elixir" })(tree);
+
+      expect(tree.children[0]).toBe(original);
+      expect(tree).toEqual(snapshot);
+      expect(formatter).not.toHaveBeenCalled();
+    });
+
+    it("leaves an unlabeled block untouched under the plaintext default", async () => {
+      const formatter = vi.fn<RehypeLumisOptions["formatter"]>((language) =>
+        htmlInline({ language, theme: dracula }),
+      );
+      const tree = codeBlockTree({ codeClassName: [optOut] });
+      const original = tree.children[0];
+
+      await rehypeLumis({ formatter })(tree);
+
+      expect(tree.children[0]).toBe(original);
+      expect(formatter).not.toHaveBeenCalled();
+    });
+
+    it("only matches a complete class name", async () => {
+      const tree = codeBlockTree({ codeClassName: [`${optOut}-example`] });
+
+      await rehypeLumis({
+        formatter: (language) => htmlInline({ language, theme: dracula }),
+      })(tree);
+
+      assertLumisPreElement(tree);
+    });
+  });
+
   describe("fence languages the caller did not declare", () => {
     it("loads what the document names, like every other runtime", async () => {
       const transform = rehypeLumis({
@@ -482,7 +610,6 @@ describe("rehype-lumis", () => {
 
       await transform(tree);
 
-      // No language detected, lumis auto-detects
       assertLumisPreElement(tree);
     });
   });
