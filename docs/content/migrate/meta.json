@@ -2,6 +2,7 @@
   "title": "Migrate",
   "pages": [
     "index",
+    "api-modules",
     "theme-matching",
     "elixir",
     "html-lines",

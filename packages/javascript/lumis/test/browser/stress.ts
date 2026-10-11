@@ -1,9 +1,5 @@
-import {
-  createHighlighter,
-  runtimeKind,
-  withWasm,
-  type Highlighter,
-} from "../../src/index.browser.ts";
+import { createHighlighter, runtimeKind, type Highlighter } from "../../src/index.browser.ts";
+import { withWasm } from "../../src/languages.browser.ts";
 import { htmlLinked } from "../../src/formatters.ts";
 import type { LanguageDefinition } from "../../src/types.ts";
 

@@ -1,55 +1,15 @@
 {
   "$comment": [
-    "The top-level entry points every runtime must present.",
-    "",
-    "`formatter-options.json` pins what the formatters ACCEPT and",
-    "`formatter-helpers.json` pins what a CUSTOM formatter can be built from.",
-    "This pins the functions a caller reaches FIRST, which nothing else checked:",
-    "Rust had `highlight_events` and JavaScript had `highlightEvents` while Elixir",
-    "could only get the event stream inside a custom formatter's `render/3`",
-    "(#1543). Nothing failed, because a function one runtime lacks raises no error",
-    "where it does exist.",
-    "",
-    "`name` is the canonical snake_case capability. Rust and Elixir spell it",
-    "verbatim, JavaScript camelCases it. `spelling` records the exceptions. A",
-    "spelling may be a list where a runtime splits one capability across several",
-    "functions, and a spelling containing `::` or `.` names a home outside the",
-    "scanned surface.",
-    "",
-    "The scanned surface is the module a caller reaches first, and it is what the",
-    "reverse direction checks:",
-    "",
-    "- Rust: module-level `pub fn` in `crates/lumis/src/lib.rs` and",
-    "  `crates/lumis/src/highlight.rs`. `#[doc(hidden)]` is not public.",
-    "- JavaScript: the value exports of `packages/javascript/lumis/src/index.ts`",
-    "  and `index.browser.ts`. Types are erased, so only functions are seen.",
-    "- Elixir: the `Lumis` module's exported functions. `@doc false` is not",
-    "  public.",
-    "",
-    "A capability whose home is outside that surface -- `lumis::languages::guess`,",
-    "`Lumis.Languages.guess/2` -- is checked by being CALLED, not by the scan,",
-    "because the scan cannot see it. That is also why the manifest does not have",
-    "to classify everything in `lumis::themes` or `Lumis.Languages`.",
-    "",
-    "Two things are deliberately out of scope. The CLI is not a runtime here: its",
-    "top level is a set of commands rather than functions, and",
-    "`formatter-options.json` already pins its flags. And there is no `deprecated`",
-    "section, unlike `formatter-helpers.json`: what is deprecated at this level is",
-    "an arity of a capability that is not going anywhere -- `Lumis.highlight/3`",
-    "with the language first -- and every check below is by name, so the section",
-    "would have nothing to hold.",
-    "",
-    "There is no shared output contract here, unlike `formatter-helpers.json`.",
-    "What these functions return is already pinned elsewhere and by exact bytes:",
-    "`fixtures/conformance/*/fixture.json` for `highlight` and `highlight_events`,",
-    "`fixtures/language-guess-cases.json` and `fixtures/language-detection.json`",
-    "for `guess`, and `fixtures/conformance-languages` for the catalog. This file",
-    "answers the question those cannot: whether the function is there at all.",
-    "",
-    "Adding an entry point means adding it here first, then watching the three",
-    "local implementations go red. `runtime_only` and `waived` are the two escape",
-    "hatches, both carry their reason, and both are checked, so neither can grow",
-    "quietly."
+    "The public highlighting, language and theme entry points for the in-repository library runtimes.",
+    "Rust and Elixir use snake_case; JavaScript uses camelCase. Qualified spellings put domain functions in their module.",
+    "JavaScript checks both Node and browser roots plus all language and theme module value exports in both directions.",
+    "Rust calls every listed capability and scans lib.rs and highlight.rs for unclassified functions. Elixir reflects on the root and resolves qualified module spellings.",
+    "Other module APIs are covered by their own manifests, including formatter-options.json and formatter-helpers.json.",
+    "deprecated maps a retained old spelling to its replacement. Compatibility tests check the aliases and their deprecation metadata.",
+    "Existing Rust Language methods and catalog functions remain supported alongside the shorter module functions.",
+    "Output contracts live in conformance, language-guess-cases.json, language-detection.json and theme-choice-cases.json.",
+    "Add capabilities here before implementing them and prove the runtime checks fail. runtime_only and waived entries require a reason.",
+    "The CLI exposes commands rather than library modules. The external Java binding is not scanned by these in-repository tests."
   ],
   "capabilities": [
     {
@@ -65,52 +25,97 @@
       "name": "highlight",
       "$comment": "Source plus a formatter, in, rendered output out. The one call the README leads with in every runtime.",
       "spelling": {
-        "rust": ["highlight", "highlight_with_options"],
-        "elixir": ["highlight", "highlight!"]
+        "rust": [
+          "highlight",
+          "highlight_with_options"
+        ],
+        "elixir": [
+          "highlight",
+          "highlight!"
+        ]
       }
     },
     {
       "name": "highlight_events",
       "$comment": "The nested open/close event stream, without a formatter. Elixir lacked this until #1543.",
       "spelling": {
-        "rust": ["highlight_events", "highlight_events_with_options"],
-        "elixir": ["highlight_events", "highlight_events!"]
+        "rust": [
+          "highlight_events",
+          "highlight_events_with_options"
+        ],
+        "elixir": [
+          "highlight_events",
+          "highlight_events!"
+        ]
       }
     },
     {
       "name": "highlight_iter",
       "$comment": "Flat per-token iteration: text, language, range, scope, resolved style. Waived for Elixir below.",
       "spelling": {
-        "rust": ["highlight_iter", "highlight_iter_with_options"]
+        "rust": [
+          "highlight_iter",
+          "highlight_iter_with_options"
+        ]
       }
     },
     {
       "name": "guess",
       "$comment": "Resolve a name, an alias or a path to a language, falling back to plain text.",
       "spelling": {
-        "rust": "languages::Language::guess",
-        "javascript": "guessLanguage",
+        "rust": [
+          "languages::guess",
+          "languages::Language::guess"
+        ],
+        "javascript": "languages.guess",
         "elixir": "Languages.guess"
       }
     },
     {
       "name": "available_languages",
       "$comment": "Every language in the catalog, with its aliases and extensions.",
-      "spelling": { "rust": "languages::available_languages" }
+      "spelling": {
+        "rust": [
+          "languages::available",
+          "languages::available_languages"
+        ],
+        "javascript": "languages.available",
+        "elixir": "Languages.available"
+      }
     },
     {
       "name": "available_themes",
       "$comment": "Every built-in theme's name and appearance.",
-      "spelling": { "rust": "themes::available_themes" }
+      "spelling": {
+        "rust": [
+          "themes::available",
+          "themes::available_themes"
+        ],
+        "javascript": "themes.available",
+        "elixir": "Theme.available"
+      }
     },
     {
       "name": "language_info",
       "$comment": "One language looked up by id or alias, without scanning the catalog.",
       "spelling": {
-        "rust": ["languages::Language::from_str", "languages::Language::info"],
-        "javascript": "getLanguage",
+        "rust": [
+          "languages::get",
+          "languages::Language::from_str",
+          "languages::Language::info"
+        ],
+        "javascript": "languages.get",
         "elixir": "Languages.get"
       }
+    },
+    {
+      "name": "theme",
+      "spelling": {
+        "rust": "themes::get",
+        "javascript": "themes.get",
+        "elixir": "Theme.get"
+      },
+      "$comment": "Look up a built-in theme by exact name. Absence uses the runtime's existing missing-value convention."
     }
   ],
   "runtime_only": {
@@ -129,19 +134,18 @@
     },
     "javascript": {
       "createHighlighter": "Splits async setup from synchronous rendering, because loading a parser is a promise here. Rust's `lumis::highlight::Highlighter` is a type rather than an entry point, and Elixir's NIF loads inside `highlight/2`, so neither has an async phase to split off.",
-      "loadLanguages": "Warms the parser cache before the first render. Elixir has `Lumis.Languages.load/1` and `async_load/1`, and the CLI has `lumis install`, so this is only top-level here; Rust's grammars are compiled in by cargo feature, so it has nothing to load.",
-      "loadedLanguages": "See `loadLanguages`. Elixir has `Lumis.loaded_languages/0`.",
+      "languages.load": "Warms the shared parser runtime by name. Elixir exposes Languages.load/1 and async_load/1; Rust selects grammars at compile time.",
+      "languages.loaded": "Reports the languages loaded into the shared runtime; the counterpart of Languages.loaded in Elixir. Rust grammars are selected at compile time.",
       "runtimeKind": "Reports whether the Wasmtime addon or `web-tree-sitter` is highlighting. JavaScript alone ships both runtimes in one package; the CLI, Elixir and Rust each have exactly one, so there is nothing to ask.",
-      "withWasm": "Attaches a parser package imported as a namespace to a language. A package's default export is already the language, so this is only for code that imports the package some other way. Rust compiles grammars in, and the CLI and Elixir read and verify them at run time, so neither has packages to import.",
-      "withWasmBundle": "See `withWasm`.",
-      "configureWasmResolver": "Overrides where parser assets are fetched from. Elixir configures that with `config :lumis, :parser_dirs` and the CLI with its config file, neither of which is a function.",
-      "configureLanguagePackageResolver": "See `configureWasmResolver`.",
-      "sanitizeThemeName": "Already pinned for all three runtimes in `formatter-helpers.json` under `html`. JavaScript also re-exports it at the package root, where its themes are plain objects the caller names, so it is top-level only here."
+      "languages.withWasm": "Attaches a parser package imported as a namespace to a language. A package's default export is already the language, so this is only for code that imports the package some other way. Rust compiles grammars in, and the CLI and Elixir read and verify them at run time, so neither has packages to import.",
+      "languages.withWasmBundle": "See languages.withWasm.",
+      "languages.configureWasmResolver": "Overrides where parser assets are fetched from. Elixir configures that with `config :lumis, :parser_dirs` and the CLI with its config file, neither of which is a function.",
+      "languages.configurePackageResolver": "See languages.configureWasmResolver."
     },
     "elixir": {
       "default_options": "The validated default keyword list. Options are a `NimbleOptions` schema here, so a caller can read the defaults back; Rust's are a typed builder's `Default` and JavaScript's an object literal, neither of which is a function.",
       "validate_options!": "Checks a keyword list against the same schema before `highlight/2` does, so a caller can fail early on user input. Rust's builder and JavaScript's types reject the same mistakes at compile time.",
-      "loaded_languages": "See `loadLanguages` under javascript."
+      "Languages.loaded": "Reports the languages loaded into the VM. See languages.loaded under javascript."
     }
   },
   "waived": {
@@ -157,6 +161,26 @@
     ],
     "elixir": {
       "highlight_iter": "Not implemented. Rust has `highlight_iter/4` and JavaScript has `highlightIter`; Elixir has no flat per-token walk, only the nested stream from `highlight_events/3`. It is implementable on top of that, so this waiver is a gap and not a boundary, and dropping it is the point."
+    }
+  },
+  "deprecated": {
+    "javascript": {
+      "guessLanguage": "languages.guess",
+      "getLanguage": "languages.get",
+      "availableLanguages": "languages.available",
+      "availableThemes": "themes.available",
+      "loadLanguages": "languages.load",
+      "loadedLanguages": "languages.loaded",
+      "withWasm": "languages.withWasm",
+      "withWasmBundle": "languages.withWasmBundle",
+      "configureWasmResolver": "languages.configureWasmResolver",
+      "configureLanguagePackageResolver": "languages.configurePackageResolver",
+      "sanitizeThemeName": "html.sanitizeThemeName"
+    },
+    "elixir": {
+      "available_languages": "Languages.available",
+      "available_themes": "Theme.available",
+      "loaded_languages": "Languages.loaded"
     }
   }
 }

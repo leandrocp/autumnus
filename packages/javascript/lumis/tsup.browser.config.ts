@@ -1,7 +1,11 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: { "index.browser": "src/index.browser.ts" },
+  entry: {
+    "index.browser": "src/index.browser.ts",
+    "languages.browser": "src/languages.browser.ts",
+    "themes.browser": "src/themes/index.ts",
+  },
   format: ["esm"],
   platform: "browser",
   target: "es2022",

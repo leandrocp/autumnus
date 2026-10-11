@@ -72,8 +72,17 @@
     },
     "./themes": {
       "types": "./dist/themes.d.ts",
+      "browser": "./dist/themes.browser.js",
       "import": "./dist/themes.js",
       "require": "./dist/themes.cjs"
+    },
+    "./languages": {
+      "types": "./dist/languages.d.ts",
+      "browser": "./dist/languages.browser.js",
+      "require": "./dist/languages.cjs",
+      "node": "./dist/languages.js",
+      "import": "./dist/languages.js",
+      "default": "./dist/languages.browser.js"
     }
   },
   "files": [

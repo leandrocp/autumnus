@@ -180,13 +180,17 @@ Useful when rendering user-provided content or pasted snippets.
 
 ## Metadata APIs
 
+Language helpers live in `@lumis-sh/lumis/languages`, and theme helpers live in
+`@lumis-sh/lumis/themes`. Old root imports still work but are deprecated; see the
+[module migration guide](/migrate/api-modules).
+
 Useful for dropdowns, config validation, and docs tooling:
 
-- [`availableLanguages()`](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/index.ts)
-- [`getLanguage()`](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/index.ts) — one language by id or alias, or `undefined`
-- [`loadedLanguages()`](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/index.ts) — ids ready to highlight without a download
-- [`availableThemes()`](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/index.ts)
-- [`sanitizeThemeName()`](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/index.ts)
+- [`languages.available()`](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/languages.ts)
+- [`languages.get()`](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/languages.ts) — one language by id or alias, or `undefined`
+- [`languages.loaded()`](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/languages.ts) — ids ready to highlight without a download
+- `themes.available()`, `themes.get(name)`, and `themes.closest(colors)` from `@lumis-sh/lumis/themes`
+- `sanitizeThemeName()` from `@lumis-sh/lumis/formatters/html`
 
 ## Runtime notes
 
@@ -297,17 +301,14 @@ run time, and configuring one is a declaration of its own: it answers for every
 language you didn't import, ahead of installed packages on Node.
 
 ```ts title="Every highlighter"
-import {
-  configureLanguagePackageResolver,
-  configureWasmResolver,
-} from "@lumis-sh/lumis";
+import * as languages from "@lumis-sh/lumis/languages";
 
-configureLanguagePackageResolver(
+languages.configurePackageResolver(
   (packageName, versionRange) =>
     `https://unpkg.com/${packageName}@${versionRange}/lumis.json`,
 );
 
-configureWasmResolver(
+languages.configureWasmResolver(
   (_language, wasm) =>
     `https://unpkg.com/${wasm.packageName}@${wasm.version}/${wasm.name}.wasm`,
 );
@@ -338,8 +339,8 @@ installed package, so install the languages a document can inject too. One that
 isn't installed leaves its own block plain rather than failing the document, and
 Lumis warns once naming it.
 
-Configured [`configureLanguagePackageResolver()` and
-`configureWasmResolver()`](#custom-resolvers) callbacks
+Configured [`languages.configurePackageResolver()` and
+`languages.configureWasmResolver()`](#custom-resolvers) callbacks
 participate in that same Node native path. They apply to a language first
 discovered mid-document as well as to the root language, without a preload or
 second pass.
@@ -383,14 +384,14 @@ paid for. See [Languages](/languages).
 Start serving, then load in the background:
 
 ```ts title="bootstrap.ts"
-import { loadLanguages } from "@lumis-sh/lumis";
+import * as languages from "@lumis-sh/lumis/languages";
 
 await startServer();
 
 // Not awaited, so a slow compile delays no request. The
 // `.catch()` is required: an unhandled rejection
 // terminates the process.
-loadLanguages(["javascript", "html", "css"]).catch(
+languages.load(["javascript", "html", "css"]).catch(
   (error) => {
     logger.warn(
       { error },
@@ -400,7 +401,7 @@ loadLanguages(["javascript", "html", "css"]).catch(
 );
 ```
 
-`loadLanguages()` warms the same default runtime `highlight()` uses, so nothing
+`languages.load()` warms the same default runtime `highlight()` uses, so nothing
 has to be threaded through the application. `createHighlighter({languages})` is
 the same load into an instance you keep yourself.
 
@@ -418,7 +419,7 @@ The portable fallback can't: `web-tree-sitter` does not persist its compilation
 across processes.
 
 To compile in an image build or a prestart step instead, run the same
-`loadLanguages()` there and await it, with `LUMIS_DATA_DIR` pointing at the
+`languages.load()` there and await it, with `LUMIS_DATA_DIR` pointing at the
 directory the server will use. The server then reuses those compiled modules.
 Being a separate process is the point: failing there fails the build rather than
 a request. [Languages](/languages#preloaded) has the command, and why

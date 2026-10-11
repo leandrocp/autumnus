@@ -18,7 +18,8 @@ import { describe, expect, it } from "vitest";
 // verify against its own fixtures.
 process.env.LUMIS_DATA_DIR = mkdtempSync(join(tmpdir(), "lumis-load-languages-"));
 
-const { loadLanguages, loadedLanguages, highlight } = await import("../src/index.js");
+const { load: loadLanguages, loaded: loadedLanguages } = await import("../src/languages.js");
+const { highlight } = await import("../src/index.js");
 const { htmlInline } = await import("../src/formatters.js");
 const { configureLocalWasmResolver } = await import("./wasm.js");
 

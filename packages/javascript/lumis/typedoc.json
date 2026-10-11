@@ -3,6 +3,8 @@
   "out": "doc",
   "entryPoints": [
     "src/index.ts",
+    "src/languages.ts",
+    "src/themes/index.ts",
     "src/formatters.ts",
     "src/formatter/html.ts",
     "src/formatter/ansi.ts"

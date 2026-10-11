@@ -104,7 +104,7 @@ defmodule Lumis.ParserError do
   end
 
   def message(%__MODULE__{reason: :unknown_language} = error) do
-    "no language named #{inspect(error.language)}; see `Lumis.available_languages/0`"
+    "no language named #{inspect(error.language)}; see `Lumis.Languages.available/0`"
   end
 
   def message(%__MODULE__{reason: :store_full} = error) do

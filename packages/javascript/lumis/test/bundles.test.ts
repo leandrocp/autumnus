@@ -3,7 +3,7 @@ import { createHighlighter } from "../src/index.js";
 import { htmlInline } from "../src/formatters.js";
 import type { Highlighter, Theme } from "../src/index.js";
 import json from "../langs/json.ts";
-import { withWasmBundle } from "../src/index.js";
+import { withWasmBundle } from "../src/languages.js";
 import { bundledLanguages as webBundle } from "../bundles/web.ts";
 import { bundledLanguages as webExtraBundle } from "../bundles/web-extra.ts";
 import { bundledLanguages as systemBundle } from "../bundles/system.ts";

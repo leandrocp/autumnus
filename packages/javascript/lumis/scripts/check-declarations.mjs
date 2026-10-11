@@ -3,12 +3,38 @@
 // do not. This checks them the way a consumer with `skipLibCheck: false` does,
 // including what they import: web-tree-sitter's declarations do not typecheck
 // without `@types/emscripten`, so its types stay out of the public API.
-import { readdir } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
 const distDir = fileURLToPath(new URL("../dist/", import.meta.url));
+const api = JSON.parse(
+  await readFile(new URL("../../../../fixtures/api.json", import.meta.url), "utf8"),
+);
+
+function checkDeprecations(checker, module, fileName) {
+  const exported = checker.getExportsOfModule(module);
+  for (const [name, replacement] of Object.entries(api.deprecated.javascript)) {
+    const symbol = resolvedSymbol(
+      checker,
+      exported.find((entry) => entry.name === name),
+    );
+    const deprecated = symbol?.getJsDocTags(checker).find((tag) => tag.name === "deprecated");
+    if (!deprecated?.text?.some((part) => part.text.includes("@lumis-sh/lumis/"))) {
+      console.error(
+        `${fileName}: ${name} must retain @deprecated with the import replacing ${replacement}`,
+      );
+      process.exitCode = 1;
+    }
+  }
+}
+
+function resolvedSymbol(checker, symbol) {
+  return (
+    symbol && (symbol.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(symbol) : symbol)
+  );
+}
 
 const options = {
   strict: true,
@@ -53,6 +79,9 @@ for (const extension of [".d.ts", ".d.cts"]) {
     if (!module || checker.getExportsOfModule(module).length === 0) {
       console.error(`${fileName} exports nothing. Is its entry point in tsconfig.build.json?`);
       process.exitCode = 1;
+    }
+    if (module && /^index(?:\.browser)?\.d\.(?:c)?ts$/u.test(path.basename(fileName))) {
+      checkDeprecations(checker, module, fileName);
     }
   }
 }

@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { guessLanguage } from "../src/index.js";
+import { guess as guessLanguage } from "../src/languages.js";
 
 interface DetectionCase {
   name: string;

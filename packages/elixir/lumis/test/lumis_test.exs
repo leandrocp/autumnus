@@ -95,7 +95,7 @@ defmodule Lumis.LumisTest do
   end
 
   test "available_languages" do
-    available_languages = Lumis.available_languages()
+    available_languages = Lumis.Languages.available()
     by_id = Map.new(available_languages, &{&1.id, &1})
 
     assert length(available_languages) >= 77
@@ -140,7 +140,7 @@ defmodule Lumis.LumisTest do
       |> File.ls!()
       |> Enum.count(&String.ends_with?(&1, ".json"))
 
-    themes = Lumis.available_themes()
+    themes = Lumis.Theme.available()
 
     assert length(themes) == expected_count
     assert themes == Enum.sort_by(themes, & &1.name)

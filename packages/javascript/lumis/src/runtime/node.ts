@@ -275,7 +275,7 @@ export function createRuntime(...args: Parameters<LanguagesModule["createRuntime
  * Set a custom WASM resolver for parser binaries. Applies globally.
  *
  * ```ts
- * import { configureWasmResolver } from '@lumis-sh/lumis'
+ * import { configureWasmResolver } from '@lumis-sh/lumis/languages'
  *
  * configureWasmResolver((_language, wasm) =>
  *   `https://unpkg.com/${wasm.packageName}@${wasm.version}/${wasm.name}.wasm`
@@ -312,11 +312,11 @@ export function getLoadedLanguageIds(...args: Parameters<LanguagesModule["getLoa
 /**
  * Ids of the languages loaded into this process, ready to highlight without a download.
  *
- * The complement of {@link availableLanguages}. Elixir spells it `Lumis.loaded_languages/0`.
+ * The complement of `languages.available()`. Elixir spells it `Lumis.Languages.loaded/0`.
  *
  * ```ts
- * import { loadedLanguages } from '@lumis-sh/lumis'
- * loadedLanguages()  // ['json', 'rust']
+ * import { loaded } from '@lumis-sh/lumis/languages'
+ * loaded()  // ['json', 'rust']
  * ```
  */
 export function loadedLanguages(): string[] {
@@ -326,8 +326,8 @@ export function loadedLanguages(): string[] {
  * List all supported languages with their ID, name, aliases, and file extensions.
  *
  * ```ts
- * import { availableLanguages } from '@lumis-sh/lumis'
- * const languages = availableLanguages()
+ * import { available } from '@lumis-sh/lumis/languages'
+ * const languages = available()
  * // [{ id: 'javascript', name: 'JavaScript', aliases: ['js', 'jsx'], extensions: ['*.js', ...] }, ...]
  * ```
  */

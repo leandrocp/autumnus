@@ -47,8 +47,8 @@
     //   wasmResolver: (_language, wasm) => `/wasm/${wasm.name}.wasm`
     //
     // Global resolver (affects all runtimes without an explicit resolver):
-    //   import { configureWasmResolver } from '@lumis-sh/lumis'
-    //   configureWasmResolver((_language, wasm) => `/wasm/${wasm.name}.wasm`)
+    //   import * as languages from '@lumis-sh/lumis/languages';
+    //   languages.configureWasmResolver((_language, wasm) => `/wasm/${wasm.name}.wasm`)
 
     // Per-instance resolver: switch from the default jsDelivr resolver to unpkg
     const hl = await createHighlighter({

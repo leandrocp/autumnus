@@ -9,28 +9,23 @@ import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
 A language is the same record everywhere, sorted by id: `id`, `name`,
 `aliases`, `extensions`, `globs`, `emacsModes` and `shebangs`.
 
-Themes differ by what each runtime can return cheaply. Rust hands back the whole
-`Theme`, colours included, because they are already in the binary. Elixir and
-the JavaScript / TypeScript package return `name` and `appearance`, because
-sending every theme's highlights across the NIF or the wire would cost far more
-than the call is worth. Reach for one in full with `themes::get` or
-`Lumis.Theme.get/2`.
+`themes.available()` and `Lumis.Theme.available/0` return theme names and
+appearances. Rust's `themes::available()` returns complete themes. Use
+`themes.get(name)`, `themes::get(name)`, or `Lumis.Theme.get/1` to look up one theme.
 
 <Tabs groupId="runtime" persist items={['JavaScript / TypeScript', 'Rust', 'Elixir', 'CLI']}>
   <Tab value="JavaScript / TypeScript">
 
 ```js
-import {
-  availableLanguages,
-  availableThemes,
-} from '@lumis-sh/lumis'
+import * as languages from '@lumis-sh/lumis/languages';
+import * as themes from '@lumis-sh/lumis/themes';
 
-for (const language of availableLanguages()) {
+for (const language of languages.available()) {
   const {id, name, extensions} = language
   console.log(id, name, extensions)
 }
 
-for (const theme of availableThemes()) {
+for (const theme of themes.available()) {
   console.log(theme.name, theme.appearance)
 }
 ```
@@ -39,16 +34,16 @@ for (const theme of availableThemes()) {
   <Tab value="Rust">
 
 ```rust
-use lumis::{languages::available_languages, themes};
+use lumis::{languages, themes};
 
-for language in available_languages() {
+for language in languages::available() {
     println!(
         "{} {} {:?}",
         language.id, language.name, language.extensions
     );
 }
 
-for theme in themes::available_themes() {
+for theme in themes::available() {
     println!("{} {:?}", theme.name, theme.appearance);
 }
 ```
@@ -57,13 +52,13 @@ for theme in themes::available_themes() {
   <Tab value="Elixir">
 
 ```elixir
-for language <- Lumis.available_languages() do
+for language <- Lumis.Languages.available() do
   IO.inspect(
     {language.id, language.name, language.extensions}
   )
 end
 
-for theme <- Lumis.available_themes() do
+for theme <- Lumis.Theme.available() do
   IO.inspect({theme.name, theme.appearance})
 end
 ```
@@ -85,20 +80,22 @@ Aliases resolve the way highlighting resolves them, so `js` finds JavaScript.
 
 How an unknown name is reported follows each host's convention: JavaScript / TypeScript
 returns `undefined` and Elixir returns `nil`, both without raising, while Rust
-returns a `Result` and the CLI exits non-zero.
+returns `None` for an unknown language and an error for an unknown theme. The CLI exits non-zero.
 
 <Tabs groupId="runtime" persist items={['JavaScript / TypeScript', 'Rust', 'Elixir', 'CLI']}>
   <Tab value="JavaScript / TypeScript">
 
 ```js
-import {getLanguage} from '@lumis-sh/lumis'
+import * as languages from '@lumis-sh/lumis/languages';
 
 // { id: 'javascript', name: 'JavaScript', ... }
-getLanguage('js')
-getLanguage('nope')  // undefined
+languages.get('js')
+languages.get('nope')  // undefined
 ```
 
-Themes are separate modules, so import the one you want:
+Look up a theme by name with `themes.get('catppuccin_frappe')`. If you know the
+name ahead of time, an individual import keeps the rest of the catalog out of
+your bundle:
 
 ```js
 import frappe from '@lumis-sh/themes/catppuccin_frappe'
@@ -108,10 +105,11 @@ import frappe from '@lumis-sh/themes/catppuccin_frappe'
   <Tab value="Rust">
 
 ```rust
-use lumis::{languages::Language, themes};
+use lumis::{languages, themes};
 
-let language: Language = "js".parse()?;
-println!("{:?}", language.info().extensions);
+if let Some(language) = languages::get("js") {
+    println!("{:?}", language.extensions);
+}
 
 let theme = themes::get("catppuccin_frappe")?;
 println!("{} {}", theme.name, theme.appearance);
@@ -157,23 +155,23 @@ load and nothing that could be missing.
   <Tab value="JavaScript / TypeScript">
 
 ```js
-import {loadedLanguages} from '@lumis-sh/lumis'
+import * as languages from '@lumis-sh/lumis/languages';
 
-loadedLanguages() // ['json', 'rust']
+languages.loaded() // ['json', 'rust']
 ```
 
   </Tab>
   <Tab value="Rust">
 
 Languages are compiled in behind `lang-*` features, so everything in
-`available_languages()` is ready to use.
+`languages::available()` is ready to use.
 
   </Tab>
   <Tab value="Elixir">
 
 ```elixir
 Lumis.Languages.load("elixir")
-Lumis.loaded_languages()
+Lumis.Languages.loaded()
 # ["elixir"]
 ```
 

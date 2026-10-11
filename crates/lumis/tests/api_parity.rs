@@ -162,6 +162,11 @@ fn exercised_entry_points() -> BTreeSet<&'static str> {
 
     [
         "themes::closest",
+        "themes::get",
+        "themes::available",
+        "languages::guess",
+        "languages::get",
+        "languages::available",
         "highlight",
         "highlight_with_options",
         "highlight_events",
@@ -179,6 +184,10 @@ fn exercised_entry_points() -> BTreeSet<&'static str> {
 
 fn exercise_language_entry_points() {
     assert_eq!(Language::guess(Some("main.rs"), "").id_name(), "rust");
+    assert_eq!(languages::guess(Some("main.rs"), ""), Language::Rust);
+    assert_eq!(languages::get("rs").unwrap().id, "rust");
+    assert!(languages::get("not-a-language").is_none());
+    assert_eq!(languages::available(), languages::available_languages());
     assert!(
         languages::available_languages()
             .iter()
@@ -195,6 +204,10 @@ fn exercise_language_entry_points() {
 }
 
 fn exercise_theme_entry_points() {
+    assert_eq!(
+        themes::available().count(),
+        themes::available_themes().count()
+    );
     assert!(
         themes::available_themes().any(|theme| theme.name == "dracula"),
         "available_themes does not list dracula"

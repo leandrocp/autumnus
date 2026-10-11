@@ -19,6 +19,22 @@ use std::path::Path;
 use std::sync::LazyLock;
 use typed_path::Utf8WindowsPath;
 
+pub use available_languages as available;
+
+/// Resolve a language name or path, then inspect the source if needed.
+#[must_use]
+pub fn guess(name: Option<&str>, source: &str) -> Language {
+    Language::guess(name, source)
+}
+
+/// Look up language metadata by name, alias or path.
+#[must_use]
+pub fn get(name: &str) -> Option<LanguageInfo> {
+    name.parse::<Language>()
+        .ok()
+        .map(|language| language.info())
+}
+
 /// Declarative macro that generates the `Language` enum, iteration, `FromStr`,
 /// `name()`, `id_name()`, `language_globs()`, `from_emacs_mode_header()`,
 /// `from_shebang()`, and `available_languages()` — all with `#[cfg(feature)]`
@@ -362,8 +378,8 @@ macro_rules! define_languages {
         /// Every compiled-in language and what the catalog knows about it,
         /// sorted by id.
         ///
-        /// Elixir's `Lumis.available_languages/0` and JavaScript's
-        /// `availableLanguages()` return this same record.
+        /// Elixir's `Lumis.Languages.available/0` and JavaScript's
+        /// `languages.available()` return this same record.
         pub fn available_languages() -> Vec<LanguageInfo> {
             let mut languages: Vec<LanguageInfo> = Language::iter().map(|l| l.info()).collect();
             languages.sort_unstable_by_key(|language| language.id);

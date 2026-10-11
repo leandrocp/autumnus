@@ -4,7 +4,7 @@ defmodule Lumis.LanguagesTest do
   import ExUnit.CaptureLog
 
   test "does not load a parser for plaintext aliases" do
-    plaintext = Enum.find(Lumis.available_languages(), &(&1.id == "plaintext"))
+    plaintext = Enum.find(Lumis.Languages.available(), &(&1.id == "plaintext"))
 
     for name <- [plaintext.id | plaintext.aliases] do
       assert :ok = Lumis.Languages.load(name)
@@ -31,11 +31,11 @@ defmodule Lumis.LanguagesTest do
   # this call put it there. Any language the rest of the suite touches would
   # pass whether or not the list stopped early.
   test "a failure in a list does not cost the languages after it" do
-    refute "dockerfile" in Lumis.loaded_languages()
+    refute "dockerfile" in Lumis.Languages.loaded()
 
     assert {:error, failures} = Lumis.Languages.load(["not-a-language", "dockerfile"])
     assert failures == %{"not-a-language" => :unknown_language}
-    assert "dockerfile" in Lumis.loaded_languages()
+    assert "dockerfile" in Lumis.Languages.loaded()
   end
 
   # A `Lumis.ParserError` is a struct, and a struct is a map, so it reaches the
@@ -69,15 +69,15 @@ defmodule Lumis.LanguagesTest do
 
   test "loaded_languages lists what is in memory, not the catalog" do
     assert :ok = Lumis.Languages.load("json")
-    loaded = Lumis.loaded_languages()
+    loaded = Lumis.Languages.loaded()
 
     assert "json" in loaded
     assert loaded == Enum.sort(loaded)
-    assert length(loaded) < length(Lumis.available_languages())
+    assert length(loaded) < length(Lumis.Languages.available())
   end
 
   test "every catalog language is nameable" do
-    names = Enum.map(Lumis.available_languages(), & &1.id)
+    names = Enum.map(Lumis.Languages.available(), & &1.id)
     assert "elixir" in names
     assert length(names) > 100
   end
@@ -93,12 +93,12 @@ defmodule Lumis.LanguagesTest do
     end
 
     test "returns the same record available_languages/0 yields" do
-      from_list = Enum.find(Lumis.available_languages(), &(&1.id == "rust"))
+      from_list = Enum.find(Lumis.Languages.available(), &(&1.id == "rust"))
       assert Lumis.Languages.get("rust") == from_list
     end
 
     test "returns every alias in the catalog" do
-      for language <- Lumis.available_languages(), alias_name <- language.aliases do
+      for language <- Lumis.Languages.available(), alias_name <- language.aliases do
         assert Lumis.Languages.get(alias_name).id == language.id,
                "alias #{alias_name} did not resolve to #{language.id}"
       end

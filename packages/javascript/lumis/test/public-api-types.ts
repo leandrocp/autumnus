@@ -1,7 +1,8 @@
 import * as themes from "../src/themes/index.js";
 import diff from "../langs/diff.js";
 import plaintext from "../langs/plaintext.js";
-import { withWasm } from "../src/index.js";
+import { withWasm, available, get, guess, type LanguageInfo } from "../src/languages.js";
+import * as browserLanguages from "../src/languages.browser.js";
 import type {
   CreateHighlighterOptions as BrowserCreateHighlighterOptions,
   Formatter as BrowserFormatter,
@@ -90,3 +91,14 @@ export const positionAnnotation: Annotation<{ id: number }> = {
 };
 
 export const matchingTheme: themes.Theme | undefined = themes.closest({ background: "#000000" });
+
+export const languageCatalog: LanguageInfo[] = available();
+export const languageLookup: LanguageInfo | undefined = get("rust");
+export const guessed: string = guess("main.rs");
+export const browserLanguageCatalog: LanguageInfo[] = browserLanguages.available();
+export const genericLanguage: ExtendedLanguage = withWasm(extensibleLanguage, new Uint8Array());
+export const browserGenericLanguage: ExtendedLanguage = browserLanguages.withWasm(
+  extensibleLanguage,
+  new Uint8Array(),
+);
+export const namedTheme: themes.Theme | undefined = themes.get("dracula");

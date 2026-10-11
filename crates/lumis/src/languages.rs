@@ -78,7 +78,8 @@
 //! ```
 //!
 pub use lumis_core::languages::{
-    available_languages, language_id_for_filename, Language, LanguageInfo, LanguageParseError,
+    available, available_languages, get, guess, language_id_for_filename, Language, LanguageInfo,
+    LanguageParseError,
 };
 
 use lumis_core::highlights::HIGHLIGHT_NAMES;

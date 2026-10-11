@@ -1,6 +1,6 @@
 defmodule Lumis.Languages do
   @moduledoc """
-  Loads Tree-sitter parsers this project depends on.
+  Discovers languages and loads their parsers.
 
   A language is a parser WASM plus the queries that drive highlighting, shipped
   together as a `lumis_wasm_*` dependency. Nothing here needs calling for normal
@@ -30,6 +30,47 @@ defmodule Lumis.Languages do
   require Logger
 
   alias Lumis.Native
+
+  @doc """
+  Returns every available language and what the catalog knows about it, sorted
+  by id.
+
+  ## Example
+
+      iex> Lumis.Languages.available() |> Enum.find(&(&1.id == "elixir"))
+      %{
+        id: "elixir",
+        name: "Elixir",
+        aliases: [],
+        extensions: ["*.ex", "*.exs"],
+        globs: ["*.ex", "*.exs"],
+        emacs_modes: ["elixir"],
+        shebangs: ["elixir"]
+      }
+
+  """
+  @spec available() :: [Lumis.language_info()]
+  def available, do: Lumis.Native.available_languages()
+
+  @doc """
+  Returns the ids of the languages loaded into this VM, sorted.
+
+  The complement of `available/0`: what can be highlighted right now
+  without a download. Loading is global to the VM, so this is the same list in
+  every process.
+
+  ## Example
+
+      iex> Lumis.Languages.load("elixir")
+      iex> Lumis.Languages.loaded()
+      ["elixir"]
+
+  """
+  @spec loaded() :: [id :: String.t()]
+  def loaded do
+    Lumis.Application.configure_store()
+    Lumis.Native.loaded_languages()
+  end
 
   @plaintext_names ~w(plaintext text txt plain)
 
@@ -277,7 +318,7 @@ defmodule Lumis.Languages do
   @doc """
   Looks one language up by id or alias, or returns `default`.
 
-  The same record `Lumis.available_languages/0` returns one of, without scanning
+  The same record `Lumis.Languages.available/0` returns one of, without scanning
   the catalog, and resolving aliases the way highlighting does: `"js"` finds
   JavaScript.
 

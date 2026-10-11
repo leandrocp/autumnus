@@ -64,11 +64,11 @@ export interface PositionAnnotationRange {
 export type AnnotationRange = OffsetAnnotationRange | PositionAnnotationRange;
 
 /**
- * Metadata about a supported language. Returned by {@link availableLanguages}.
+ * Metadata about a supported language. Returned by `languages.available()`.
  *
  * ```ts
- * import { availableLanguages } from '@lumis-sh/lumis'
- * const languages = availableLanguages()
+ * import { available } from '@lumis-sh/lumis/languages'
+ * const languages = available()
  * // [{ id: 'javascript', name: 'JavaScript', aliases: ['js', 'jsx'], extensions: ['*.js', ...] }, ...]
  * ```
  */
@@ -83,11 +83,11 @@ export interface LanguageInfo {
 }
 
 /**
- * Metadata about a built-in theme. Returned by {@link availableThemes}.
+ * Metadata about a built-in theme. Returned by `themes.available()`.
  *
  * ```ts
- * import { availableThemes } from '@lumis-sh/lumis'
- * const themes = availableThemes()
+ * import { available } from '@lumis-sh/lumis/themes'
+ * const themes = available()
  * // [{ name: 'dracula', appearance: 'dark' }, { name: 'github_light', appearance: 'light' }, ...]
  * ```
  */

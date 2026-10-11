@@ -9,9 +9,9 @@ export function normalizeLanguageName(value: string): string {
  * Look one language up by id or alias.
  *
  * ```ts
- * import { getLanguage } from '@lumis-sh/lumis'
- * getLanguage('js')    // { id: 'javascript', name: 'JavaScript', ... }
- * getLanguage('nope')  // undefined
+ * import { get } from '@lumis-sh/lumis/languages'
+ * get('js')    // { id: 'javascript', name: 'JavaScript', ... }
+ * get('nope')  // undefined
  * ```
  */
 export function getLanguage(nameOrAlias: string): LanguageInfo | undefined {

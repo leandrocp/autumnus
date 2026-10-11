@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { readdirSync } from "node:fs";
 import { resolve } from "node:path";
-import { availableLanguages, availableThemes, getLanguage } from "../src/index.js";
+import { available as availableLanguages, get as getLanguage } from "../src/languages.js";
+import { available as availableThemes } from "../src/themes/index.js";
 
 describe("getLanguage", () => {
   it("finds a language by id", () => {

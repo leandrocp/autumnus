@@ -5,7 +5,8 @@
  * quietly succeeds.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createHighlighter, withWasm } from "../src/index.browser.js";
+import { createHighlighter } from "../src/index.browser.js";
+import { withWasm } from "../src/languages.browser.js";
 import { htmlLinked } from "../src/formatters.js";
 import jsonHandle from "../langs/json.ts";
 import { localPackageLanguage } from "./wasm.js";

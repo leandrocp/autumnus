@@ -24,7 +24,7 @@ defmodule Lumis.ApiParityTest do
   checked either. Elixir keeps its own argument shapes -- a keyword list where
   Rust takes a builder -- and only the capability has to exist everywhere.
   """
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   @manifest_path Path.expand("../../../../fixtures/api.json", __DIR__)
   @external_resource @manifest_path
@@ -90,9 +90,15 @@ defmodule Lumis.ApiParityTest do
     |> Enum.sort()
   end
 
+  defp exported_name?(name) do
+    case String.split(name, ".") do
+      [function] -> function in exported(@surface)
+      [module, function] -> function in exported(Module.concat(Lumis, module))
+    end
+  end
+
   test "exports every capability in the manifest" do
-    exported = exported(@surface)
-    missing = Enum.reject(required_in_scope(), &(&1 in exported))
+    missing = Enum.reject(required_names(), &exported_name?/1)
 
     assert missing == [],
            "#{inspect(@surface)} is missing #{inspect(missing)}. Add them, or waive them in " <>
@@ -102,7 +108,10 @@ defmodule Lumis.ApiParityTest do
   test "exports nothing the manifest does not account for" do
     # A waived name is accounted for, so a runtime that grows one fails
     # "no waiver outlives its reason" alone rather than here as well.
-    accounted = required_in_scope() ++ section_names("runtime_only") ++ section_names("waived")
+    accounted =
+      required_in_scope() ++
+        section_names("runtime_only") ++ section_names("waived") ++ section_names("deprecated")
+
     unaccounted = Enum.reject(exported(@surface), &(&1 in accounted))
 
     assert unaccounted == [],
@@ -112,8 +121,7 @@ defmodule Lumis.ApiParityTest do
   end
 
   test "still exports every runtime_only entry point" do
-    exported = exported(@surface)
-    gone = Enum.reject(section_names("runtime_only"), &(&1 in exported))
+    gone = Enum.reject(section_names("runtime_only"), &exported_name?/1)
 
     assert gone == [],
            "runtime_only lists #{inspect(gone)}, which #{inspect(@surface)} no longer exports; " <>
@@ -140,6 +148,26 @@ defmodule Lumis.ApiParityTest do
     end
   end
 
+  test "deprecated root names retain behavior and deprecation metadata" do
+    {:docs_v1, _, :elixir, _, _, _, docs} = Code.fetch_docs(Lumis)
+
+    for {old, replacement} <- manifest()["deprecated"][@runtime] do
+      [module, function] = String.split(replacement, ".")
+      old_atom = String.to_existing_atom(old)
+
+      assert apply(Lumis, old_atom, []) ==
+               apply(Module.concat(Lumis, module), String.to_existing_atom(function), [])
+
+      assert Enum.any?(docs, fn
+               {{:function, ^old_atom, 0}, _, _, _, %{deprecated: message}} ->
+                 String.contains?(message, replacement)
+
+               _ ->
+                 false
+             end)
+    end
+  end
+
   describe "every capability the manifest claims for Elixir is callable" do
     @source "defmodule A do\n  @x 1\nend\n"
 
@@ -161,15 +189,20 @@ defmodule Lumis.ApiParityTest do
     end
 
     test "available_languages" do
-      assert Lumis.available_languages() != []
+      assert Lumis.Languages.available() != []
     end
 
     test "available_themes" do
-      assert Lumis.available_themes() != []
+      assert Lumis.Theme.available() != []
     end
 
     test "language_info" do
       assert Lumis.Languages.get("ex").id == "elixir"
+    end
+
+    test "theme" do
+      assert %Lumis.Theme{name: "dracula"} = Lumis.Theme.get("dracula")
+      assert Lumis.Theme.get("not-a-theme") == nil
     end
 
     test "closest_theme" do
@@ -192,7 +225,8 @@ defmodule Lumis.ApiParityTest do
                "guess",
                "highlight",
                "highlight_events",
-               "language_info"
+               "language_info",
+               "theme"
              ],
              "add a test above for the capabilities this list gained"
     end

@@ -25,7 +25,8 @@ function localParserResolver(language: string, wasm: { name: string }): URL {
 beforeEach(async () => {
   // Clear FS cache so the resolver is always called
   rmSync(CACHE_DIR, { recursive: true, force: true });
-  const { configureLanguagePackageResolver } = await import("../src/index.js");
+  const { configurePackageResolver: configureLanguagePackageResolver } =
+    await import("../src/languages.js");
   configureLanguagePackageResolver(localLanguagePackageResolver);
 });
 
@@ -130,7 +131,8 @@ describe("Wasm resolver", () => {
   }, 30_000);
 
   it("supports withWasm for explicit runtime wasm inputs", async () => {
-    const { createHighlighter, withWasm } = await import("../src/index.js");
+    const { createHighlighter } = await import("../src/index.js");
+    const { withWasm } = await import("../src/languages.js");
     const { htmlLinked } = await import("../src/formatters.js");
     const { default: diff } = await import("../langs/diff.ts");
 
@@ -258,7 +260,8 @@ describe("Wasm resolver", () => {
   }, 30_000);
 
   it("per-instance resolver is isolated from global resolver", async () => {
-    const { createHighlighter, configureWasmResolver } = await import("../src/index.js");
+    const { createHighlighter } = await import("../src/index.js");
+    const { configureWasmResolver } = await import("../src/languages.js");
     const { htmlLinked } = await import("../src/formatters.js");
     const { default: diff } = await import("../langs/diff.ts");
 
@@ -285,7 +288,8 @@ describe("Wasm resolver", () => {
   }, 30_000);
 
   it("global configureWasmResolver applies to createHighlighter without explicit resolver", async () => {
-    const { createHighlighter, configureWasmResolver } = await import("../src/index.js");
+    const { createHighlighter } = await import("../src/index.js");
+    const { configureWasmResolver } = await import("../src/languages.js");
     const { htmlLinked } = await import("../src/formatters.js");
     const { default: diff } = await import("../langs/diff.ts");
 
@@ -303,7 +307,8 @@ describe("Wasm resolver", () => {
   }, 30_000);
 
   it("configureWasmResolver called after createHighlighter affects highlighters without explicit resolver", async () => {
-    const { createHighlighter, configureWasmResolver } = await import("../src/index.js");
+    const { createHighlighter } = await import("../src/index.js");
+    const { configureWasmResolver } = await import("../src/languages.js");
     const { default: html } = await import("../langs/html.ts");
 
     configureWasmResolver((language, wasm) => ensureLocalParserWasm(language, wasm.name));

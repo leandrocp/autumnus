@@ -11,6 +11,7 @@ use std::{collections::BTreeMap, fs, path::Path, str::FromStr};
 use derive_builder::Builder;
 
 mod choice;
+pub use available_themes as available;
 pub use choice::{closest, TerminalColors};
 
 /// Error type for theme operations.

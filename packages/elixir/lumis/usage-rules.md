@@ -85,12 +85,12 @@ Lumis.highlight!(code)
 
 ```elixir
 # Get all available languages, sorted by id
-languages = Lumis.available_languages()
+languages = Lumis.Languages.available()
 # Returns: [%{id: "elixir", name: "Elixir", aliases: [], extensions: ["*.ex", "*.exs"],
 #            globs: ["*.ex", "*.exs"], emacs_modes: ["elixir"], shebangs: ["elixir"]}, ...]
 
 # Check if a language is supported
-Enum.any?(Lumis.available_languages(), &(&1.id == "elixir"))
+Enum.any?(Lumis.Languages.available(), &(&1.id == "elixir"))
 
 # Look one up by id or alias, without scanning the catalog
 Lumis.Languages.get("js")
@@ -397,11 +397,11 @@ Available options for `:bbcode_scoped`:
 
 ```elixir
 # List all available themes, sorted by name
-themes = Lumis.available_themes()
+themes = Lumis.Theme.available()
 # Returns: [%{name: "dracula", appearance: "dark"}, ...]
 
 # Or just the names
-names = Enum.map(Lumis.available_themes(), & &1.name)
+names = Enum.map(Lumis.Theme.available(), & &1.name)
 # Returns: ["adwaita_dark", "adwaita_light", ...]
 
 # Use a theme by name
@@ -900,16 +900,16 @@ html = Lumis.highlight!(source, opts)
 html = Lumis.highlight!(source, formatter: {MyFormatter, language: "elixir"})
 
 # Get all available languages
-[%{id: _} | _] = Lumis.available_languages()
+[%{id: _} | _] = Lumis.Languages.available()
 
 # Get one language by id or alias
 %{id: "javascript"} = Lumis.Languages.get("js")
 
 # Get the ids loaded into this VM
-[_ | _] = Lumis.loaded_languages()
+[_ | _] = Lumis.Languages.loaded()
 
 # Get all available themes
-[%{name: _, appearance: _} | _] = Lumis.available_themes()
+[%{name: _, appearance: _} | _] = Lumis.Theme.available()
 
 # Validate options
 opts = Lumis.validate_options!(opts)

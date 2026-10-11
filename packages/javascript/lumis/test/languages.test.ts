@@ -99,14 +99,15 @@ describe("loadedLanguages", () => {
   });
 
   it("is reachable from the package entry point", async () => {
-    const { loadedLanguages } = await import("../src/index.js");
+    const { loaded: loadedLanguages } = await import("../src/languages.js");
 
     expect(loadedLanguages()).toEqual(getLoadedLanguageIds());
     expect(loadedLanguages()).toContain("json");
   });
 
   it("lists what is loaded, not the whole catalog", async () => {
-    const { loadedLanguages, availableLanguages } = await import("../src/index.js");
+    const { loaded: loadedLanguages, available: availableLanguages } =
+      await import("../src/languages.js");
 
     expect(loadedLanguages().length).toBeLessThan(availableLanguages().length);
   });

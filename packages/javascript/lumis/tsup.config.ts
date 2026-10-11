@@ -29,6 +29,7 @@ if (fs.existsSync(bundlesDir)) {
 export default defineConfig({
   entry: {
     index: "src/index.ts",
+    languages: "src/languages.ts",
     formatters: "src/formatters.ts",
     themes: "src/themes/index.ts",
     "formatters/html": "src/formatter/html.ts",

@@ -211,8 +211,8 @@ a function one runtime lacks raises no error where it does exist.
 | Runtime | Test | How it checks |
 | --- | --- | --- |
 | Rust | `crates/lumis/tests/api_parity.rs` | calls every capability by name, so a missing one fails to compile, then parses `lib.rs` and `highlight.rs` for the reverse direction |
-| Elixir | `packages/elixir/lumis/test/api_parity_test.exs` | reflects on the `Lumis` module, minus `@doc false` |
-| JavaScript | `packages/javascript/lumis/test/api-parity.test.ts` | reads the value exports of `index.ts` and `index.browser.ts`, and requires the two to agree |
+| Elixir | `packages/elixir/lumis/test/api_parity_test.exs` | reflects on `Lumis`, resolves qualified module spellings, and checks deprecated root delegates |
+| JavaScript | `packages/javascript/lumis/test/api-parity.test.ts` | checks root, language, and theme value exports for Node and browsers, including compatibility alias identity |
 
 Every one of them checks both directions. A capability in the manifest that the
 runtime lacks fails, and a public top-level function the manifest does not
@@ -221,6 +221,12 @@ runtime and nowhere else. `runtime_only` is for an entry point the boundary give
 one runtime alone, and `waived` is for a canonical capability a runtime does not
 offer. Both carry their reason, and the tests fail on an entry that is no longer
 needed, so neither can grow quietly.
+
+`deprecated` maps old names to their replacements. JavaScript declaration checks
+require the published aliases to retain `@deprecated` import guidance. Package
+tests exercise ESM, CommonJS, and browser module resolution and verify that
+loading through `/languages` warms the runtime used by root `highlight()`.
+Run `mise run test-api`; browser coverage runs with Playwright's `api.spec.ts`.
 
 `waived` is not empty here: Elixir has no flat `highlight_iter`, which is the gap
 [#1544](https://github.com/leandrocp/lumis/issues/1544) was opened about.

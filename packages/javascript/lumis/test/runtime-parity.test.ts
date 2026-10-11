@@ -27,15 +27,17 @@ const parityDirectory = mkdtempSync(join(tmpdir(), "lumis-parity-"));
 process.env.LUMIS_DATA_DIR = parityDirectory;
 
 let index: typeof import("../src/index.js");
+let languages: typeof import("../src/languages.js");
 let htmlLinked: typeof import("../src/formatters.js").htmlLinked;
 
 beforeAll(async () => {
   index = await import("../src/index.js");
+  languages = await import("../src/languages.js");
   ({ htmlLinked } = await import("../src/formatters.js"));
 });
 
 beforeEach(() => {
-  index.configureLanguagePackageResolver(localLanguagePackageResolver);
+  languages.configurePackageResolver(localLanguagePackageResolver);
 });
 
 function createPackageBackedHighlighter(language: Language, query: string) {
@@ -566,7 +568,7 @@ describe("runtime parity", () => {
     const { default: css } = await import("../langs/css.ts");
     const seen: string[] = [];
 
-    index.configureWasmResolver((language, wasm) => {
+    languages.configureWasmResolver((language, wasm) => {
       seen.push(language);
       return ensureLocalParserWasm(language, wasm.name);
     });

@@ -14,7 +14,7 @@ defmodule Lumis.ThemeClosestTest do
 
   test "uses the complete shared corpus" do
     assert length(@cases) >= 20
-    assert length(Lumis.available_themes()) > 200
+    assert length(Lumis.Theme.available()) > 200
   end
 
   for fixture <- @cases do
@@ -34,7 +34,7 @@ defmodule Lumis.ThemeClosestTest do
 
   test "pins the excluded monochrome themes" do
     excluded =
-      Lumis.available_themes()
+      Lumis.Theme.available()
       |> Enum.map(&Theme.get(&1.name))
       |> Enum.filter(&(core_color_count(&1) <= 3))
       |> Enum.map(& &1.name)
