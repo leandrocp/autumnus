@@ -492,10 +492,10 @@ class User:
   it("does not repeat a preClass that names one of the themes", () => {
     const html = hl.highlight(
       '{"a": 1}',
-      htmlMultiThemes({ language: json, themes: { dark: theme }, preClass: "dark" }),
+      htmlMultiThemes({ language: json, themes: { dark: theme }, preClass: theme.name }),
     );
 
-    expect(html).toContain('class="lumis lumis-themes dark"');
+    expect(html).toContain('class="lumis lumis-themes tokyonight_moon"');
   });
 
   it("writes only the token spans with the inline structure", () => {

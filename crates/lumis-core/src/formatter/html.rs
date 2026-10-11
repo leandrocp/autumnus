@@ -1022,7 +1022,11 @@ fn multi_themes_pre_classes(
         classes.push(pre_class.to_string());
     }
 
-    classes.extend(sorted_theme_names(themes).into_iter().map(str::to_string));
+    classes.extend(
+        sorted_theme_names(themes)
+            .into_iter()
+            .map(|key| themes[key].name.clone()),
+    );
 
     // A `pre_class` naming one of the themes would otherwise appear twice.
     merge_classes(&classes.join(" "), "")
@@ -2110,15 +2114,55 @@ mod tests {
     }
 
     #[test]
+    fn multi_theme_classes_use_theme_names_in_key_order() {
+        let themes = [
+            (
+                "light".to_string(),
+                crate::themes::get("github_light").unwrap(),
+            ),
+            ("dark".to_string(), crate::themes::get("dracula").unwrap()),
+            (
+                "custom dark".to_string(),
+                crate::themes::get("github_light").unwrap(),
+            ),
+        ]
+        .into_iter()
+        .collect();
+        let attrs = multi_themes_pre_attrs(None, &themes, None, "--custom", &[]);
+        assert_eq!(
+            attrs[0].1,
+            AttrValue::Value("lumis lumis-themes github_light dracula".to_string())
+        );
+    }
+
+    #[test]
+    fn multi_theme_classes_preserve_caller_classes() {
+        let themes = [("dark".to_string(), crate::themes::get("dracula").unwrap())]
+            .into_iter()
+            .collect();
+        let attrs = multi_themes_pre_attrs(
+            Some("dark"),
+            &themes,
+            None,
+            "--lumis",
+            &[("class".to_string(), "light card".into())],
+        );
+        assert_eq!(
+            attrs[0].1,
+            AttrValue::Value("lumis lumis-themes dark dracula light card".to_string())
+        );
+    }
+
+    #[test]
     fn a_pre_class_naming_a_theme_is_not_repeated() {
         let mut themes = std::collections::HashMap::new();
         themes.insert("dark".to_string(), crate::themes::get("dracula").unwrap());
 
-        let attrs = multi_themes_pre_attrs(Some("dark"), &themes, None, "--lumis", &[]);
+        let attrs = multi_themes_pre_attrs(Some("dracula"), &themes, None, "--lumis", &[]);
 
         assert_eq!(
             attrs[0].1,
-            AttrValue::Value("lumis lumis-themes dark".to_string())
+            AttrValue::Value("lumis lumis-themes dracula".to_string())
         );
     }
 
@@ -2140,7 +2184,9 @@ mod tests {
         let html = String::from_utf8(output).unwrap();
 
         assert!(
-            html.starts_with(r#"<pre class="lumis lumis-themes x&quot;&gt;&lt;script&gt; dark""#),
+            html.starts_with(
+                r#"<pre class="lumis lumis-themes x&quot;&gt;&lt;script&gt; quote-bearing""#
+            ),
             "unescaped class in {html}"
         );
         assert!(!html.contains("<script>"), "unescaped markup in {html}");
@@ -2398,7 +2444,10 @@ mod tests {
 
         let html = String::from_utf8(output).unwrap();
 
-        assert_classes(&html, &["lumis", "lumis-themes", "custom-pre", "light"]);
+        assert_classes(
+            &html,
+            &["lumis", "lumis-themes", "custom-pre", "github_light"],
+        );
         assert_eq!(
             attr_value(&html, "style"),
             "color:#1f2328; background-color:#ffffff;"
@@ -2431,7 +2480,13 @@ mod tests {
 
         assert_classes(
             &html,
-            &["lumis", "lumis-themes", "custom-pre", "light", "dark"],
+            &[
+                "lumis",
+                "lumis-themes",
+                "custom-pre",
+                "catppuccin_latte",
+                "catppuccin_mocha",
+            ],
         );
         assert_eq!(
             attr_value(&html, "style"),

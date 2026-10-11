@@ -307,9 +307,9 @@ defmodule Lumis.Formatter.HTML do
   @doc """
   Attributes for the `<pre>` tag used by a multi-theme block.
 
-  Carries `lumis`, `lumis-themes` and one class per theme name, so a stylesheet
-  can select the active theme, and the same `normal` colors
-  `span_multi_themes_attrs/1` writes per scope.
+  Carries `lumis`, `lumis-themes` and each theme's name as a class, along with
+  the same `normal` colors `span_multi_themes_attrs/1` writes per scope. Classes
+  identify the included themes; the keys in `:themes` name the CSS variables.
 
   ## Options
 
@@ -341,7 +341,7 @@ defmodule Lumis.Formatter.HTML do
   ## Example
 
       iex> Lumis.Formatter.HTML.open_multi_themes_pre_tag(themes: [light: "github_light"], default_theme: "light")
-      ~s|<pre class="lumis lumis-themes light" style="color:#1f2328; background-color:#ffffff;">|
+      ~s|<pre class="lumis lumis-themes github_light" style="color:#1f2328; background-color:#ffffff;">|
 
   """
   @spec open_multi_themes_pre_tag(keyword()) :: String.t()

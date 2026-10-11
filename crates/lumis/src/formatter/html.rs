@@ -477,7 +477,8 @@ pub fn open_pre_tag(
 ///
 /// Creates the opening `<pre>` tag used by `HtmlMultiThemes`, including the
 /// base `lumis lumis-themes` classes, one class per theme name, optional custom
-/// classes, and the theme foreground/background styles.
+/// classes, and the theme foreground/background styles. Theme names identify
+/// the included palettes; map keys name the CSS variables.
 ///
 /// # Arguments
 ///

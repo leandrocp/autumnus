@@ -209,10 +209,10 @@ Lumis leaves `color-scheme` unset so the output follows the page's theme. Use `l
 HTML Multi-Themes wraps each line in a span. Tokens carry CSS variables for each configured theme:
 
 ```html
-<pre class="lumis lumis-themes dark light" style="--lumis-light-bg:#eff1f5; --lumis-dark-bg:#303446;"><code class="language-javascript" translate="no" tabindex="0"><span class="l-line" data-line="1"><span style="--lumis-dark:#ca9ee6; --lumis-light:#8839ef;">const</span></span></code></pre>
+<pre class="lumis lumis-themes catppuccin_frappe catppuccin_latte" style="--lumis-light-bg:#eff1f5; --lumis-dark-bg:#303446;"><code class="language-javascript" translate="no" tabindex="0"><span class="l-line" data-line="1"><span style="--lumis-dark:#ca9ee6; --lumis-light:#8839ef;">const</span></span></code></pre>
 ```
 
-- `<pre class="lumis">` carries shared background and theme variables
+- `<pre>` carries `lumis`, `lumis-themes`, and the included themes' names as classes. Theme keys such as `light` and `dark` name the CSS variables; they are not added as classes. Custom `pre_class` / `preClass` values are appended as usual.
 - `<code class="language-*">` identifies the language and keeps the block focusable
 - `<span class="l-line" data-line="N">` wraps only a line's content
 - `<span class="l-line-number">` opens the line when `line_numbers` is on, see [Line Numbers](/recipes/line-numbers)

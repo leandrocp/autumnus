@@ -606,10 +606,11 @@ defmodule Lumis.LumisTest do
       html =
         Lumis.highlight!("value",
           formatter:
-            {:html_multi_themes, language: "elixir", themes: [dark: "dracula"], pre_class: "dark"}
+            {:html_multi_themes,
+             language: "elixir", themes: [dark: "dracula"], pre_class: "dracula"}
         )
 
-      assert html =~ ~s|class="lumis lumis-themes dark"|
+      assert html =~ ~s|class="lumis lumis-themes dracula"|
     end
   end
 
@@ -713,7 +714,7 @@ defmodule Lumis.LumisTest do
       assert_output(
         "test code",
         ~s"""
-        <pre class="lumis lumis-themes main" style="--lumis-main:#abb2bf; --lumis-main-bg:#282c34;"><code class="language-elixir" translate="no" tabindex="0"><span class="l-line" data-line="1"><span style="--lumis-main:#61afef; --lumis-main-font-style:normal; --lumis-main-font-weight:normal; --lumis-main-text-decoration:none;">test</span> <span style="--lumis-main:#e06c75; --lumis-main-font-style:normal; --lumis-main-font-weight:normal; --lumis-main-text-decoration:none;">code</span></span></code></pre>
+        <pre class="lumis lumis-themes onedark" style="--lumis-main:#abb2bf; --lumis-main-bg:#282c34;"><code class="language-elixir" translate="no" tabindex="0"><span class="l-line" data-line="1"><span style="--lumis-main:#61afef; --lumis-main-font-style:normal; --lumis-main-font-weight:normal; --lumis-main-text-decoration:none;">test</span> <span style="--lumis-main:#e06c75; --lumis-main-font-style:normal; --lumis-main-font-weight:normal; --lumis-main-text-decoration:none;">code</span></span></code></pre>
         """,
         formatter: {:html_multi_themes, language: "elixir", themes: [main: "onedark"]}
       )
@@ -744,7 +745,7 @@ defmodule Lumis.LumisTest do
     test "with pre_class option" do
       assert_contains(
         "test",
-        ~s|class="lumis lumis-themes custom-class main"|,
+        ~s|class="lumis lumis-themes custom-class onedark"|,
         formatter:
           {:html_multi_themes,
            language: "elixir", themes: [main: "onedark"], pre_class: "custom-class"}
@@ -787,7 +788,7 @@ defmodule Lumis.LumisTest do
       assert_output(
         "test code",
         ~s"""
-        <pre class="lumis lumis-themes main" style="--lumis-main:#abb2bf; --lumis-main-bg:#282c34;"><code class="language-elixir" translate="no" tabindex="0"><span class="l-line" data-line="1"><span style="--lumis-main:#61afef; --lumis-main-font-style:normal; --lumis-main-font-weight:normal; --lumis-main-text-decoration:none;">test</span> <span style="--lumis-main:#e06c75; --lumis-main-font-style:normal; --lumis-main-font-weight:normal; --lumis-main-text-decoration:none;">code</span></span></code></pre>
+        <pre class="lumis lumis-themes onedark" style="--lumis-main:#abb2bf; --lumis-main-bg:#282c34;"><code class="language-elixir" translate="no" tabindex="0"><span class="l-line" data-line="1"><span style="--lumis-main:#61afef; --lumis-main-font-style:normal; --lumis-main-font-weight:normal; --lumis-main-text-decoration:none;">test</span> <span style="--lumis-main:#e06c75; --lumis-main-font-style:normal; --lumis-main-font-weight:normal; --lumis-main-text-decoration:none;">code</span></span></code></pre>
         """,
         formatter: {:html_multi_themes, language: "elixir", themes: [main: theme]}
       )
