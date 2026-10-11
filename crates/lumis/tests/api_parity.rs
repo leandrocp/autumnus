@@ -157,26 +157,8 @@ fn exercised_entry_points() -> BTreeSet<&'static str> {
     .expect("highlight_iter_with_options succeeds");
     assert!(tokens > 0, "highlight_iter yielded no tokens");
 
-    assert_eq!(Language::guess(Some("main.rs"), "").id_name(), "rust");
-    assert!(
-        languages::available_languages()
-            .iter()
-            .any(|info| info.id == "rust"),
-        "available_languages does not list Rust"
-    );
-    assert!(
-        themes::available_themes().any(|theme| theme.name == "dracula"),
-        "available_themes does not list dracula"
-    );
-    assert_eq!(
-        Language::from_str("rust")
-            .expect("`rust` is in the catalog")
-            .info()
-            .id,
-        "rust"
-    );
-
-    assert!(themes::closest(&themes::TerminalColors::default()).is_none());
+    exercise_language_entry_points();
+    exercise_theme_entry_points();
 
     [
         "themes::closest",
@@ -193,6 +175,31 @@ fn exercised_entry_points() -> BTreeSet<&'static str> {
         "languages::Language::info",
     ]
     .into()
+}
+
+fn exercise_language_entry_points() {
+    assert_eq!(Language::guess(Some("main.rs"), "").id_name(), "rust");
+    assert!(
+        languages::available_languages()
+            .iter()
+            .any(|info| info.id == "rust"),
+        "available_languages does not list Rust"
+    );
+    assert_eq!(
+        Language::from_str("rust")
+            .expect("`rust` is in the catalog")
+            .info()
+            .id,
+        "rust"
+    );
+}
+
+fn exercise_theme_entry_points() {
+    assert!(
+        themes::available_themes().any(|theme| theme.name == "dracula"),
+        "available_themes does not list dracula"
+    );
+    assert!(themes::closest(&themes::TerminalColors::default()).is_none());
 }
 
 /// Every module-level `pub fn` a caller reaches first, and whether it carries
