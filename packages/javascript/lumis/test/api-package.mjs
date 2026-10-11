@@ -53,6 +53,18 @@ try {
       assert.match(result, /42/u);
     });
   }
+  await test("explicit client and node language modules use their corresponding roots", async () => {
+    const runtimes = [];
+    for (const name of ["client", "node"]) {
+      const root = await import(`@lumis-sh/lumis/${name}`);
+      const languages = await import(`@lumis-sh/lumis/${name}/languages`);
+      assert.equal(root.loadLanguages, languages.load);
+      assert.equal(root.configureWasmResolver, languages.configureWasmResolver);
+      assert.equal(root.loadedLanguages, languages.loaded);
+      runtimes.push(languages.load);
+    }
+    assert.notEqual(runtimes[0], runtimes[1]);
+  });
 } finally {
   rmSync(store, { recursive: true, force: true });
 }

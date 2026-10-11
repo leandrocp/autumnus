@@ -83,6 +83,17 @@
       "node": "./dist/languages.js",
       "import": "./dist/languages.js",
       "default": "./dist/languages.browser.js"
+    },
+    "./client/languages": {
+      "types": "./dist/languages.browser.d.ts",
+      "import": "./dist/languages.browser.js",
+      "default": "./dist/languages.browser.js"
+    },
+    "./node/languages": {
+      "types": "./dist/languages.d.ts",
+      "import": "./dist/languages.js",
+      "require": "./dist/languages.cjs",
+      "default": "./dist/languages.js"
     }
   },
   "files": [

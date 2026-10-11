@@ -49,6 +49,12 @@ These imports work in Node and browser bundlers. CommonJS uses
 by the root `highlight()`. Moving the import does not create another parser
 cache. Highlighter instances keep their own existing configuration.
 
+If you intentionally select a runtime with `@lumis-sh/lumis/client` or
+`@lumis-sh/lumis/node`, import its language helpers from
+`@lumis-sh/lumis/client/languages` or `@lumis-sh/lumis/node/languages` respectively.
+This keeps resolver configuration and highlighting on the same runtime even
+when your bundler's default condition selects the other one.
+
 Language types are also exported from `/languages`; theme types from `/themes`.
 Existing root type imports remain supported.
 

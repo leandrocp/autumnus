@@ -4,15 +4,15 @@ import { afterEach, describe, expect, it } from "vitest";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
+import { createHighlighter } from "@lumis-sh/lumis";
 import {
-  configureLanguagePackageResolver,
+  configurePackageResolver as configureLanguagePackageResolver,
   configureWasmResolver,
-  createHighlighter,
-} from "@lumis-sh/lumis";
+} from "@lumis-sh/lumis/languages";
 import {
-  configureLanguagePackageResolver as configureClientLanguagePackageResolver,
+  configurePackageResolver as configureClientLanguagePackageResolver,
   configureWasmResolver as configureClientWasmResolver,
-} from "@lumis-sh/lumis/client";
+} from "@lumis-sh/lumis/client/languages";
 import { bundledLanguages } from "@lumis-sh/lumis/bundles/web";
 import { htmlInline } from "@lumis-sh/lumis/formatters";
 import { configureLocalWasmResolver, ensureLocalParserWasmDataUrl } from "../../lumis/test/wasm.ts";

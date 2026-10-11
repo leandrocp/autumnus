@@ -6,11 +6,11 @@ import javascript from "../../lumis/langs/javascript.ts";
 import json from "../../lumis/langs/json.ts";
 import { configureLocalWasmResolver } from "../../lumis/test/wasm.ts";
 import markdownItLumis, { fromHighlighter } from "../src/index.js";
+import { createHighlighter } from "@lumis-sh/lumis";
 import {
-  configureLanguagePackageResolver,
+  configurePackageResolver as configureLanguagePackageResolver,
   configureWasmResolver,
-  createHighlighter,
-} from "@lumis-sh/lumis";
+} from "@lumis-sh/lumis/languages";
 import type { LanguageRef } from "@lumis-sh/lumis";
 import { htmlInline, htmlLinked, htmlMultiThemes, terminal } from "@lumis-sh/lumis/formatters";
 import { bundledLanguages } from "@lumis-sh/lumis/bundles/web";
