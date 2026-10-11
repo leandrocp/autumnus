@@ -195,7 +195,19 @@ set -euo pipefail
 cargo test -p lumis-core themes::choice
 cargo test -p lumis-cli terminal_colors::tests
 cargo test -p lumis-cli --test cli auto_theme_in_a_pseudoterminal
+cargo test -p lumis --no-default-features --features lang-rust --test api_parity
+pnpm --filter @lumis-sh/lumis run build
+pnpm --filter @lumis-sh/lumis exec vitest run test/theme-closest.test.ts test/api-parity.test.ts
+pnpm --filter @lumis-sh/lumis exec node --test test/theme-package.mjs
+(cd packages/elixir/lumis && LUMIS_BUILD=1 mix test test/theme_closest_test.exs test/api_parity_test.exs)
 '''
+
+[tasks.'test-theme-choice-browser']
+description = "Check the published theme matching module in browsers"
+run = """
+pnpm --filter @lumis-sh/lumis run build
+pnpm --filter @lumis-sh/lumis exec playwright test themes.spec.ts
+"""
 
 [tasks.'qa-html-lines']
 description = "Capture and compare HTML line screenshots across every in-repo runtime"

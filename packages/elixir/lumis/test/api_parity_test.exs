@@ -172,6 +172,11 @@ defmodule Lumis.ApiParityTest do
       assert Lumis.Languages.get("ex").id == "elixir"
     end
 
+    test "closest_theme" do
+      assert %Lumis.Theme{name: "modus_vivendi"} = Lumis.Theme.closest(%{background: "#000000"})
+      assert Lumis.Theme.closest(%{}) == nil
+    end
+
     test "the manifest claims exactly these" do
       claimed =
         manifest()
@@ -183,6 +188,7 @@ defmodule Lumis.ApiParityTest do
       assert claimed == [
                "available_languages",
                "available_themes",
+               "closest_theme",
                "guess",
                "highlight",
                "highlight_events",

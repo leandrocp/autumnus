@@ -11,7 +11,7 @@ use std::{collections::BTreeMap, fs, path::Path, str::FromStr};
 use derive_builder::Builder;
 
 mod choice;
-pub use choice::{choose_theme, TerminalColors};
+pub use choice::{closest, TerminalColors};
 
 /// Error type for theme operations.
 #[derive(Debug, Clone)]

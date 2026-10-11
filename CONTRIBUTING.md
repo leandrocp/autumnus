@@ -176,11 +176,13 @@ that the published bundle initializes Tree-sitter without reaching Node APIs.
 Automatic terminal theme selection has its own input/output contract in
 `fixtures/theme-choice-cases.json`. `fixtures/theme-choice-excluded.json` pins
 the monochrome themes excluded from automatic selection. Run the core checks
-and CLI terminal tests with `mise run test-theme-choice`. The CLI tests use
+and every runtime's fixture tests with `mise run test-theme-choice`. The CLI tests use
 Python 3's pseudo-terminal support on Unix to answer the actual color queries,
 including missing replies, pipes and HTML output. Response parsing is tested
-on every platform. Add this capability to `fixtures/api.json` before exposing
-it through another runtime.
+on every platform. The JavaScript and Elixir tests consume both fixtures unchanged;
+`fixtures/api.json` pins the public `closest` entry points. The JavaScript package
+checks also exercise its ESM and CommonJS exports. Run the browser check with
+`mise run test-theme-choice-browser`.
 
 ### The theme CSS option manifest
 

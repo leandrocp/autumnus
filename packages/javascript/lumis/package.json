@@ -69,6 +69,11 @@
       "types": "./dist/bundles/*.d.ts",
       "import": "./dist/bundles/*.js",
       "require": "./dist/bundles/*.cjs"
+    },
+    "./themes": {
+      "types": "./dist/themes.d.ts",
+      "import": "./dist/themes.js",
+      "require": "./dist/themes.cjs"
     }
   },
   "files": [

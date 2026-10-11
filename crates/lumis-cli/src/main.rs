@@ -1050,7 +1050,7 @@ fn guess_terminal_theme(terminal_output: bool) -> Result<&'static lumis_core::th
         anyhow::bail!("stdout is not a terminal");
     }
     let colors = terminal_colors::query()?;
-    lumis_core::themes::choose_theme(&colors)
+    lumis_core::themes::closest(&colors)
         .ok_or_else(|| anyhow::anyhow!("no suitable built-in theme matches the terminal colors"))
 }
 

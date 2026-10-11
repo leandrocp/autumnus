@@ -105,6 +105,7 @@ defmodule Lumis.Native do
   def language_info(_name), do: :erlang.nif_error(:nif_not_loaded)
   def available_themes, do: :erlang.nif_error(:nif_not_loaded)
   def get_theme(_name), do: :erlang.nif_error(:nif_not_loaded)
+  def closest_theme(_background, _foreground, _ansi), do: :erlang.nif_error(:nif_not_loaded)
   def build_theme_from_file(_path), do: :erlang.nif_error(:nif_not_loaded)
   def build_theme_from_json_string(_json_string), do: :erlang.nif_error(:nif_not_loaded)
   def theme_css_from_name(_name, _options), do: :erlang.nif_error(:nif_not_loaded)

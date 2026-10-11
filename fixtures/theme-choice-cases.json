@@ -1,5 +1,19 @@
 [
   {
+    "name": "contrast-floor-with-background-only",
+    "background": "#d7dfe4",
+    "foreground": null,
+    "ansi": null,
+    "expected": "neomodern_gyokuro_light"
+  },
+  {
+    "name": "contrast-floor-with-foreground",
+    "background": "#d7dfe4",
+    "foreground": "#728fa1",
+    "ansi": null,
+    "expected": "kanagawa_paper_light"
+  },
+  {
     "name": "black-background",
     "background": "#000000",
     "foreground": null,

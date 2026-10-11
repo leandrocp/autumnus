@@ -95,10 +95,14 @@ helpers in [custom formatters](docs/content/formatters/custom.mdx).
 
 ## Automatic terminal theme choice
 
-Automatic terminal theme choice lives in `lumis-core::themes::choose_theme`.
+Automatic terminal theme choice lives in `lumis-core::themes::closest`.
 The CLI gathers background, foreground and ANSI accent colors in one terminal
 exchange and passes those observations to the core. The selection rule is
 pinned by `fixtures/theme-choice-cases.json`; it does not depend on terminal I/O.
+Elixir calls the same function through its NIF. JavaScript exposes a synchronous
+`closest` through `@lumis-sh/lumis/themes`, using the normalized theme catalog
+and a port checked against the same cases and monochrome exclusions. That
+entry point has no native-addon dependency and works in browsers.
 
 ## Website rendering
 

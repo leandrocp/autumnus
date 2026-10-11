@@ -1,0 +1,81 @@
+---
+title: Match surrounding colors
+description: Find a readable built-in theme for a terminal or application's background and foreground colors.
+---
+
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+Use `closest` when your application knows its surrounding colors and needs a
+compatible highlighting theme. It returns a complete built-in theme, or nothing
+when no suitable match exists.
+
+<Tabs groupId="runtime" persist items={['JavaScript / TypeScript', 'Rust', 'Elixir', 'CLI']}>
+  <Tab value="JavaScript / TypeScript">
+
+```ts
+import * as themes from '@lumis-sh/lumis/themes';
+
+const theme = themes.closest({ background: '#000000' });
+console.log(theme?.name); // modus_vivendi
+```
+
+This synchronous API works in Node and browsers. The `/themes` entry point
+includes the built-in theme catalog. Import individual themes from
+`@lumis-sh/themes/<name>` when you already know which one you want.
+
+  </Tab>
+  <Tab value="Rust">
+
+```rust
+use lumis::themes::{self, TerminalColors};
+
+let mut colors = TerminalColors::default();
+colors.background = Some((0, 0, 0));
+let theme = themes::closest(&colors);
+assert_eq!(theme.map(|theme| theme.name.as_str()), Some("modus_vivendi"));
+```
+
+Existing callers of `choose_theme` should follow the
+[rename guide](/migrate/theme-matching).
+
+  </Tab>
+  <Tab value="Elixir">
+
+```elixir
+theme = Lumis.Theme.closest(%{background: "#000000"})
+theme.name #=> "modus_vivendi"
+```
+
+  </Tab>
+  <Tab value="CLI">
+
+```sh
+lumis highlight src/main.rs --theme auto
+```
+
+The CLI queries the terminal's colors and uses the same selection rules.
+
+  </Tab>
+</Tabs>
+
+## Inputs and no-match behavior
+
+Pass a background and, when available, a foreground and ANSI palette. JavaScript
+and Elixir accept six-digit RGB hex strings, with an optional `#`. Rust accepts
+RGB tuples. The ANSI palette contains 16 entries, with missing colors represented
+by `null`, `nil`, or `None`. Entries 1–6 affect matching.
+
+A missing background returns `undefined` in JavaScript, `nil` in Elixir, or
+`None` in Rust. A light/dark preference alone is insufficient: the matcher needs
+an actual background color. Foreground brightness determines light or dark
+appearance; without a distinct foreground, the matcher uses whichever of black
+and white contrasts better against the background.
+
+Candidates must have at least 3:1 text contrast against the supplied background.
+Monochrome themes are excluded. Without a foreground or ANSI accents, the
+closest background wins. With those inputs, nearby backgrounds compete by
+foreground similarity, then ANSI accent similarity, background distance, and
+theme name. A background too far from every eligible theme returns no match.
+
+Invalid hex strings and palettes with a length other than 16 raise `TypeError`
+in JavaScript or `ArgumentError` in Elixir.
