@@ -13,10 +13,7 @@ export * from "./language-api.js";
 /**
  * Load languages into the runtime `highlight()` uses, by name.
  *
- * This is the JavaScript / TypeScript spelling of `Lumis.Languages.load/1`:
- * it caches parser bytes and, on the native addon, their compiled
- * Wasmtime module. It keeps the languages in the default runtime so no later
- * call reloads them.
+ * Loaded parsers are cached in the default runtime for subsequent highlights.
  *
  * Accepts catalog names, aliases, and `bundle-<name>` tokens.
  *

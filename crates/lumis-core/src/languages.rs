@@ -378,9 +378,6 @@ macro_rules! define_languages {
 
         /// Every compiled-in language and what the catalog knows about it,
         /// sorted by id.
-        ///
-        /// Elixir's `Lumis.Languages.available/0` and JavaScript's
-        /// `languages.available()` return this same record.
         pub fn available_languages() -> Vec<LanguageInfo> {
             let mut languages: Vec<LanguageInfo> = Language::iter().map(|l| l.info()).collect();
             languages.sort_unstable_by_key(|language| language.id);

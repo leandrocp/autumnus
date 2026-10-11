@@ -980,9 +980,7 @@ function pushThemeCssVarsForAll(
 }
 
 /**
- * @deprecated Internal multi-themes plumbing, exported by accident; Rust keeps
- * its counterpart private. Use {@link spanMultiThemesAttrs}. Removed in the
- * next major.
+ * @deprecated Use {@link spanMultiThemesAttrs}. Removed in the next major.
  */
 export function appendThemeCssVars(
   cssVars: string[],
@@ -1014,9 +1012,7 @@ function pushNormalThemeVars(
 }
 
 /**
- * @deprecated Internal multi-themes plumbing, exported by accident; Rust keeps
- * its counterpart private. Use {@link openMultiThemesPreTag}. Removed in the
- * next major.
+ * @deprecated Use {@link openMultiThemesPreTag}. Removed in the next major.
  */
 export function buildNormalThemeVars(
   styles: string[],
@@ -1066,9 +1062,8 @@ function multiThemesPreStyle(options: {
 }
 
 /**
- * @deprecated Internal multi-themes plumbing, exported by accident; Rust keeps
- * its counterpart private. Use {@link openMultiThemesPreTag}, which builds the
- * whole tag. Removed in the next major.
+ * @deprecated Use {@link openMultiThemesPreTag}, which builds the whole tag.
+ * Removed in the next major.
  */
 export function buildPreThemeStyle(options: {
   themes: Record<string, Theme>;
@@ -1509,7 +1504,7 @@ export function formatHtmlLines(
  *
  * `spanAttrs` gets the language each scope carries. A rainbow bracket carries
  * none, so it gets the language of the stream's first scope, or `plaintext`
- * when there is none, the same as Rust's `render_lines_from_events`.
+ * when there is none.
  *
  * ```ts
  * renderLinesFromEvents('a\nb', events, (scope) => `class="${scope}"`)

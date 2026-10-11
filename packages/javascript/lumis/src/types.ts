@@ -466,9 +466,6 @@ export interface Annotation<T = unknown> {
 
 /**
  * Default bound on the query matches tree-sitter keeps in progress at once.
- *
- * Mirrors `DEFAULT_MATCH_LIMIT` in the Rust crate, which is the reference
- * implementation for every runtime.
  */
 export const DEFAULT_MATCH_LIMIT = 8192;
 
@@ -480,9 +477,6 @@ export const MAX_MATCH_LIMIT = 65536;
 
 /**
  * Default bound on how long one render may take, in milliseconds.
- *
- * Mirrors `DEFAULT_TIME_LIMIT` in the Rust crate, which is the reference
- * implementation for every runtime.
  */
 export const DEFAULT_TIME_LIMIT = 5000;
 

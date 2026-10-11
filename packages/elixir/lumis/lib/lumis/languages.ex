@@ -297,8 +297,7 @@ defmodule Lumis.Languages do
   resolve, `source` is checked for an Emacs mode header, a shebang, an HTML
   doctype or an XML declaration. Falls back to `"plaintext"`.
 
-  The counterpart of `languages::guess` in Rust and `languages.guess()` in
-  JavaScript. `Lumis.highlight/2` already calls this when no language is given;
+  `Lumis.highlight/2` already calls this when no language is given;
   reach for it directly to label a snippet before deciding what to do with it.
 
       "elixir" = Lumis.Languages.guess("lib/app.ex")

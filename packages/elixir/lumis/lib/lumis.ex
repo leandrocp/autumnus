@@ -1503,9 +1503,6 @@ defmodule Lumis do
   `source`. A language whose parser is not installed comes back as one plain
   `:source` event.
 
-  The counterpart of `highlight_events` in Rust and `highlightEvents()` in
-  JavaScript.
-
   ## Options
 
   See `t:highlight_events_options/0`.

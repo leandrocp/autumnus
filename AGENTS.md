@@ -351,7 +351,7 @@ Docs, specs, and examples are not cleanup work for later. They are part of the f
 
 - Keep README files, package docs, examples, and generated references consistent with the shipped behavior.
 - If a change affects public API, behavior, configuration, or generated outputs, update the relevant docs and examples in the same PR.
-- Significant breaking changes must add a migration guide under `docs/content/migrate/` (`/migrate` on the docs site). Explain what breaks and how to update existing code or configuration. Usage and reference pages describe the current behavior and link to the guide. Move existing upgrade instructions there rather than deleting them.
+- Add migration guides only when explicitly requested. Keep replacement guidance in code deprecation annotations. Usage and reference pages describe the current API.
 - Use the `humanizer` skill when writing or editing documentation.
 
 Prefer concrete explanations over marketing language. Show the real API. Keep examples runnable.
@@ -382,9 +382,9 @@ were Zig. Every sentence of it is bloat in a place with a low budget for it.
   binding crate's own doc comments, a commit message. `html_span_attrs` in
   `lumis_nif` explains the call-frequency split at length, correctly — that is a
   contributor's file.
-- **Cross-runtime pointers are not this.** "The counterpart of `Language::guess`
-  in Rust and `guessLanguage()` in JavaScript" helps someone moving between the
-  packages Lumis publishes, and stays.
+- **Keep API references specific to their runtime.** Describe the function
+  directly; omit comparisons to equivalent functions in other runtimes.
+  Cross-runtime API mappings belong in contributor documentation.
 
 This applies to every published surface: package docs, READMEs, `usage-rules.md`,
 and `docs/content/`. It came out of an ANSI helper module whose moduledoc opened
