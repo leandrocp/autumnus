@@ -94,7 +94,7 @@ defmodule Lumis.ScenarioBenchmark do
 
   defp initialize(workload) do
     Code.ensure_loaded!(Lumis.Native)
-    available = MapSet.new(Lumis.available_languages(), & &1.id)
+    available = MapSet.new(Lumis.Languages.available(), & &1.id)
 
     languages =
       workload

@@ -27,72 +27,135 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "browser": "./dist/index.browser.js",
-      "require": "./dist/index.cjs",
+      "browser": {
+        "types": "./dist/index.browser.d.ts",
+        "default": "./dist/index.browser.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      },
       "node": "./dist/index.js",
-      "import": "./dist/index.js",
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
       "default": "./dist/index.browser.js"
     },
     "./client": {
-      "types": "./dist/index.browser.d.ts",
-      "import": "./dist/index.browser.js",
+      "import": {
+        "types": "./dist/index.browser.d.ts",
+        "default": "./dist/index.browser.js"
+      },
       "default": "./dist/index.browser.js"
     },
     "./node": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      },
       "default": "./dist/index.js"
     },
     "./formatters": {
-      "types": "./dist/formatters.d.ts",
-      "import": "./dist/formatters.js",
-      "require": "./dist/formatters.cjs"
+      "import": {
+        "types": "./dist/formatters.d.ts",
+        "default": "./dist/formatters.js"
+      },
+      "require": {
+        "types": "./dist/formatters.d.cts",
+        "default": "./dist/formatters.cjs"
+      }
     },
     "./formatters/html": {
-      "types": "./dist/formatters/html.d.ts",
-      "import": "./dist/formatters/html.js",
-      "require": "./dist/formatters/html.cjs"
+      "import": {
+        "types": "./dist/formatters/html.d.ts",
+        "default": "./dist/formatters/html.js"
+      },
+      "require": {
+        "types": "./dist/formatters/html.d.cts",
+        "default": "./dist/formatters/html.cjs"
+      }
     },
     "./formatters/ansi": {
-      "types": "./dist/formatters/ansi.d.ts",
-      "import": "./dist/formatters/ansi.js",
-      "require": "./dist/formatters/ansi.cjs"
+      "import": {
+        "types": "./dist/formatters/ansi.d.ts",
+        "default": "./dist/formatters/ansi.js"
+      },
+      "require": {
+        "types": "./dist/formatters/ansi.d.cts",
+        "default": "./dist/formatters/ansi.cjs"
+      }
     },
     "./langs/*": {
-      "types": "./dist/langs/*.d.ts",
-      "import": "./dist/langs/*.js",
-      "require": "./dist/langs/*.cjs"
+      "import": {
+        "types": "./dist/langs/*.d.ts",
+        "default": "./dist/langs/*.js"
+      },
+      "require": {
+        "types": "./dist/langs/*.d.cts",
+        "default": "./dist/langs/*.cjs"
+      }
     },
     "./bundles/*": {
-      "types": "./dist/bundles/*.d.ts",
-      "import": "./dist/bundles/*.js",
-      "require": "./dist/bundles/*.cjs"
+      "import": {
+        "types": "./dist/bundles/*.d.ts",
+        "default": "./dist/bundles/*.js"
+      },
+      "require": {
+        "types": "./dist/bundles/*.d.cts",
+        "default": "./dist/bundles/*.cjs"
+      }
     },
     "./themes": {
-      "types": "./dist/themes.d.ts",
-      "browser": "./dist/themes.browser.js",
-      "import": "./dist/themes.js",
-      "require": "./dist/themes.cjs"
+      "browser": {
+        "types": "./dist/themes.browser.d.ts",
+        "default": "./dist/themes.browser.js"
+      },
+      "import": {
+        "types": "./dist/themes.d.ts",
+        "default": "./dist/themes.js"
+      },
+      "require": {
+        "types": "./dist/themes.d.cts",
+        "default": "./dist/themes.cjs"
+      }
     },
     "./languages": {
-      "types": "./dist/languages.d.ts",
-      "browser": "./dist/languages.browser.js",
-      "require": "./dist/languages.cjs",
+      "browser": {
+        "types": "./dist/languages.browser.d.ts",
+        "default": "./dist/languages.browser.js"
+      },
+      "require": {
+        "types": "./dist/languages.d.cts",
+        "default": "./dist/languages.cjs"
+      },
       "node": "./dist/languages.js",
-      "import": "./dist/languages.js",
+      "import": {
+        "types": "./dist/languages.d.ts",
+        "default": "./dist/languages.js"
+      },
       "default": "./dist/languages.browser.js"
     },
     "./client/languages": {
-      "types": "./dist/languages.browser.d.ts",
-      "import": "./dist/languages.browser.js",
+      "import": {
+        "types": "./dist/languages.browser.d.ts",
+        "default": "./dist/languages.browser.js"
+      },
       "default": "./dist/languages.browser.js"
     },
     "./node/languages": {
-      "types": "./dist/languages.d.ts",
-      "import": "./dist/languages.js",
-      "require": "./dist/languages.cjs",
+      "import": {
+        "types": "./dist/languages.d.ts",
+        "default": "./dist/languages.js"
+      },
+      "require": {
+        "types": "./dist/languages.d.cts",
+        "default": "./dist/languages.cjs"
+      },
       "default": "./dist/languages.js"
     }
   },
@@ -106,7 +169,7 @@
     "build:runtime-wasm": "tsx scripts/build-runtime-wasm.ts",
     "build:generate": "pnpm run build:runtime-wasm && pnpm run build:langs",
     "build:native": "cargo build -p lumis-js-native --release && tsx scripts/copy-native.ts",
-    "build": "pnpm run build:generate && tsup && tsup --config tsup.browser.config.ts && node scripts/patch-web-tree-sitter-bundle.mjs && node scripts/check-declarations.mjs",
+    "build": "pnpm run build:generate && tsup && tsup --config tsup.browser.config.ts && node scripts/patch-web-tree-sitter-bundle.mjs && node scripts/check-declarations.mjs && node scripts/check-package-types.mjs",
     "test": "vitest run --exclude test/conformance.test.ts --exclude test/query-compile.test.ts --exclude 'test/browser/**'",
     "test:queries": "vitest run test/query-compile.test.ts",
     "test:conformance": "vitest run test/conformance.test.ts",

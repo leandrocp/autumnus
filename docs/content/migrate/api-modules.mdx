@@ -58,6 +58,12 @@ when your bundler's default condition selects the other one.
 Language types are also exported from `/languages`; theme types from `/themes`.
 Existing root type imports remain supported.
 
+`languages.get` now follows Rust and Elixir: it accepts names, aliases,
+extensions such as `rs`, and paths such as `src/main.rs`. Empty input resolves
+to plaintext; unknown input returns `undefined`. This also applies to the
+deprecated `getLanguage` alias. Previously JavaScript only accepted IDs and
+aliases. Shared lookup cases cover the same inputs in all three runtimes.
+
 The `/themes` entry includes all built-in themes. For a fixed theme, keep using
 an individual import such as `@lumis-sh/themes/dracula` to avoid bundling the
 catalog.
@@ -97,6 +103,8 @@ Lumis.Theme.available()
 Replace `Lumis.available_languages/0`, `Lumis.loaded_languages/0`, and
 `Lumis.available_themes/0` with `Lumis.Languages.available/0`,
 `Lumis.Languages.loaded/0`, and `Lumis.Theme.available/0` respectively.
+The old functions emit compiler deprecation warnings. Projects using
+`--warnings-as-errors` must migrate those calls before upgrading.
 
   </Tab>
   <Tab value="Java">

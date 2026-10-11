@@ -5,6 +5,12 @@ import { htmlInline } from "@lumis-sh/lumis/formatters";
 import packageUrl from "@lumis-sh/wasm-json/lumis.json?url";
 import wasmUrl from "@lumis-sh/wasm-json/tree-sitter-json.wasm?url";
 
+declare global {
+  interface Window {
+    lookupInputs: string[];
+  }
+}
+
 languages.configurePackageResolver(() => new URL(packageUrl, location.href).href);
 languages.configureWasmResolver(() => new URL(wasmUrl, location.href).href);
 await languages.load(["json"]);
@@ -27,6 +33,7 @@ output.textContent = JSON.stringify({
   aliases: legacy.loadLanguages === languages.load && legacy.availableThemes === themes.available,
   guess: languages.guess("app.js"),
   language: languages.get("js")?.id,
+  lookup: window.lookupInputs.map((input) => languages.get(input)?.id ?? null),
   loaded: legacy.loadedLanguages().includes("json"),
   theme: themes.get("dracula")?.name,
   highlighted: rendered.includes("<span") && rendered.includes("42"),

@@ -316,11 +316,11 @@ defmodule Lumis.Languages do
   end
 
   @doc """
-  Looks one language up by id or alias, or returns `default`.
+  Looks up language metadata by name, alias, extension or path, or returns `default`.
 
   The same record `Lumis.Languages.available/0` returns one of, without scanning
-  the catalog, and resolving aliases the way highlighting does: `"js"` finds
-  JavaScript.
+  the catalog. `"js"` finds JavaScript, and `"rs"` or `"src/main.rs"` finds Rust.
+  Empty input resolves to plaintext.
 
       iex> Lumis.Languages.get("js").id
       "javascript"

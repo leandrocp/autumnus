@@ -1,4 +1,5 @@
 import { LANGUAGES } from "./generated/languages-meta.js";
+import { parseLanguageHint } from "./guess-language.js";
 import type { LanguageInfo, ThemeInfo } from "./types.js";
 
 export function normalizeLanguageName(value: string): string {
@@ -6,21 +7,19 @@ export function normalizeLanguageName(value: string): string {
 }
 
 /**
- * Look one language up by id or alias.
+ * Look up language metadata by name, alias, extension, or path.
+ * Empty input resolves to plaintext; unknown input returns undefined.
  *
  * ```ts
  * import { get } from '@lumis-sh/lumis/languages'
  * get('js')    // { id: 'javascript', name: 'JavaScript', ... }
+ * get('main.rs') // { id: 'rust', name: 'Rust', ... }
  * get('nope')  // undefined
  * ```
  */
-export function getLanguage(nameOrAlias: string): LanguageInfo | undefined {
-  const normalized = normalizeLanguageName(nameOrAlias.trim());
-  const language = LANGUAGES.find(
-    ({ id, aliases }) =>
-      normalizeLanguageName(id) === normalized ||
-      aliases.some((alias) => normalizeLanguageName(alias) === normalized),
-  );
+export function getLanguage(name: string): LanguageInfo | undefined {
+  const resolved = parseLanguageHint(name);
+  const language = LANGUAGES.find(({ id }) => id === resolved);
   return language && cloneLanguageInfo(language);
 }
 

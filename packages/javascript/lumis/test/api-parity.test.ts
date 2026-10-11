@@ -25,6 +25,10 @@ const manifest: Manifest = JSON.parse(
   readFileSync(new URL("../../../../fixtures/api.json", import.meta.url), "utf8"),
 );
 
+const lookupCases: { input: string; expected: string | null }[] = JSON.parse(
+  readFileSync(new URL("../../../../fixtures/language-lookup.json", import.meta.url), "utf8"),
+);
+
 /** The two published entries, each the `.` of a different condition. */
 const entries = {
   node: { root: nodeEntry, languages: nodeLanguages },
@@ -72,7 +76,18 @@ function sectionNames(section: Record<string, Record<string, string>>): string[]
 }
 
 describe("top-level API manifest", () => {
+  it("loads the shared language lookup corpus", () => {
+    expect(lookupCases.length).toBeGreaterThanOrEqual(24);
+  });
+
   for (const entry of ["node", "browser"] as const) {
+    it.each(lookupCases)(
+      `${entry} resolves language metadata for $input`,
+      ({ input, expected }) => {
+        expect(entries[entry].languages.get(input)?.id ?? null).toBe(expected);
+      },
+    );
+
     it(`${entry} exports every capability in the manifest`, () => {
       const exported = new Set(exportedNames(entry));
       const missing = requiredNames().filter((name) => !exported.has(name));

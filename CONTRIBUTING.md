@@ -226,7 +226,11 @@ needed, so neither can grow quietly.
 require the published aliases to retain `@deprecated` import guidance. Package
 tests exercise ESM, CommonJS, and browser module resolution and verify that
 loading through `/languages` warms the runtime used by root `highlight()`.
-Run `mise run test-api`; browser coverage runs with Playwright's `api.spec.ts`.
+`fixtures/language-lookup.json` pins lookup behavior against the same inputs in
+Rust, Elixir, Node and browsers. TypeScript consumer checks resolve the published
+exports in ESM and CommonJS under Node16 and NodeNext.
+Run `mise run test-api` for these checks and Playwright's API tests, including
+Vite prebundling against a packed consumer.
 
 `waived` is not empty here: Elixir has no flat `highlight_iter`, which is the gap
 [#1544](https://github.com/leandrocp/lumis/issues/1544) was opened about.

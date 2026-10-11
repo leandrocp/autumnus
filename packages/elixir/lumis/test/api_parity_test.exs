@@ -26,6 +26,25 @@ defmodule Lumis.ApiParityTest do
   """
   use ExUnit.Case, async: false
 
+  test "shared language lookup cases" do
+    cases =
+      Path.expand("../../../../fixtures/language-lookup.json", __DIR__)
+      |> File.read!()
+      |> Jason.decode!()
+
+    assert length(cases) >= 24
+
+    for %{"input" => input, "expected" => expected} <- cases do
+      actual =
+        case Lumis.Languages.get(input) do
+          nil -> nil
+          language -> language.id
+        end
+
+      assert actual == expected, inspect(input)
+    end
+  end
+
   @manifest_path Path.expand("../../../../fixtures/api.json", __DIR__)
   @external_resource @manifest_path
 

@@ -11,6 +11,9 @@ const require = createRequire(import.meta.url);
 const aliases = JSON.parse(
   readFileSync(new URL("../../../../fixtures/api.json", import.meta.url), "utf8"),
 ).deprecated.javascript;
+const lookupCases = JSON.parse(
+  readFileSync(new URL("../../../../fixtures/language-lookup.json", import.meta.url), "utf8"),
+);
 
 try {
   for (const format of ["esm", "cjs"]) {
@@ -21,6 +24,13 @@ try {
     const html = await load("@lumis-sh/lumis/formatters/html");
     const { htmlInline } = await load("@lumis-sh/lumis/formatters");
     const modules = { languages, themes, html };
+
+    await test(`${format} follows the shared language lookup contract`, () => {
+      assert.ok(lookupCases.length >= 24);
+      for (const { input, expected } of lookupCases) {
+        assert.equal(languages.get(input)?.id ?? null, expected, JSON.stringify(input));
+      }
+    });
 
     await test(`${format} preserves the published aliases and catalog APIs`, () => {
       for (const [name, replacement] of Object.entries(aliases)) {
@@ -53,18 +63,22 @@ try {
       assert.match(result, /42/u);
     });
   }
-  await test("explicit client and node language modules use their corresponding roots", async () => {
-    const runtimes = [];
-    for (const name of ["client", "node"]) {
-      const root = await import(`@lumis-sh/lumis/${name}`);
-      const languages = await import(`@lumis-sh/lumis/${name}/languages`);
-      assert.equal(root.loadLanguages, languages.load);
-      assert.equal(root.configureWasmResolver, languages.configureWasmResolver);
-      assert.equal(root.loadedLanguages, languages.loaded);
-      runtimes.push(languages.load);
-    }
-    assert.notEqual(runtimes[0], runtimes[1]);
-  });
+  for (const format of ["esm", "cjs"]) {
+    await test(`${format} explicit client and node modules use their corresponding roots`, async () => {
+      const load = format === "esm" ? (name) => import(name) : (name) => require(name);
+      const runtimes = [];
+      for (const name of ["client", "node"]) {
+        const root = await load(`@lumis-sh/lumis/${name}`);
+        const languages = await load(`@lumis-sh/lumis/${name}/languages`);
+        assert.equal(root.loadLanguages, languages.load);
+        assert.equal(root.configureWasmResolver, languages.configureWasmResolver);
+        assert.equal(root.loadedLanguages, languages.loaded);
+        assert.equal(root.withWasm, languages.withWasm);
+        runtimes.push(languages.load);
+      }
+      assert.notEqual(runtimes[0], runtimes[1]);
+    });
+  }
 } finally {
   rmSync(store, { recursive: true, force: true });
 }

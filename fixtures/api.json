@@ -1,15 +1,47 @@
 {
   "$comment": [
-    "The public highlighting, language and theme entry points for the in-repository library runtimes.",
-    "Rust and Elixir use snake_case; JavaScript uses camelCase. Qualified spellings put domain functions in their module.",
-    "JavaScript checks both Node and browser roots plus all language and theme module value exports in both directions.",
-    "Rust calls every listed capability and scans lib.rs and highlight.rs for unclassified functions. Elixir reflects on the root and resolves qualified module spellings.",
-    "Other module APIs are covered by their own manifests, including formatter-options.json and formatter-helpers.json.",
-    "deprecated maps a retained old spelling to its replacement. Compatibility tests check the aliases and their deprecation metadata.",
-    "Existing Rust Language methods and catalog functions remain supported alongside the shorter module functions.",
-    "Output contracts live in conformance, language-guess-cases.json, language-detection.json and theme-choice-cases.json.",
-    "Add capabilities here before implementing them and prove the runtime checks fail. runtime_only and waived entries require a reason.",
-    "The CLI exposes commands rather than library modules. The external Java binding is not scanned by these in-repository tests."
+    "The top-level entry points every runtime must present.",
+    "",
+    "`formatter-options.json` pins what the formatters ACCEPT and",
+    "`formatter-helpers.json` pins what a CUSTOM formatter can be built from.",
+    "This pins the functions a caller reaches FIRST, which nothing else checked:",
+    "Rust had `highlight_events` and JavaScript had `highlightEvents` while Elixir",
+    "could only get the event stream inside a custom formatter's `render/3`",
+    "(#1543). Nothing failed, because a function one runtime lacks raises no error",
+    "where it does exist.",
+    "",
+    "name is the canonical snake_case capability. JavaScript uses camelCase;",
+    "spelling records exceptions and qualified module names. A list means the",
+    "runtime splits a capability across several functions.",
+    "",
+    "The reverse check scans the surface a caller reaches first:",
+    "- Rust: module-level pub fn in crates/lumis/src/lib.rs and highlight.rs.",
+    "  #[doc(hidden)] is not public.",
+    "- JavaScript: the value exports of the Node and browser roots plus their",
+    "  language modules and the theme module. Types are erased.",
+    "- Elixir: the Lumis module exported functions. @doc false is not public;",
+    "  qualified spellings resolve the named module.",
+    "",
+    "Rust and Elixir domain capabilities outside those scanned surfaces are",
+    "also checked by being CALLED. The manifest need not classify every helper",
+    "in lumis::themes or Lumis.Languages.",
+    "",
+    "deprecated maps retained old names to replacements. Tests check callable",
+    "aliases and published deprecation metadata. Existing Rust Language methods",
+    "and catalog functions remain supported alongside the shorter module names.",
+    "",
+    "The CLI exposes commands rather than library modules; formatter-options.json",
+    "pins its flags. The external Java binding remains in scope for API parity,",
+    "but its separate repository is not scanned by these tests.",
+    "",
+    "Output contracts live in conformance fixtures, language-guess-cases.json,",
+    "language-detection.json, language-lookup.json and theme-choice-cases.json.",
+    "They pin behavior; this manifest pins whether the entry points exist.",
+    "",
+    "Add capabilities here before implementing them and watch the runtimes fail.",
+    "runtime_only records operations a runtime boundary dictates; waived records",
+    "missing capabilities. Both require reasons and checks that fail when an",
+    "entry outlives its reason, so neither can grow quietly."
   ],
   "capabilities": [
     {
@@ -85,7 +117,7 @@
     },
     {
       "name": "available_themes",
-      "$comment": "Every built-in theme's name and appearance.",
+      "$comment": "Enumerate built-in themes. Rust yields full Theme values; JavaScript and Elixir return names and appearances so listing does not load or copy the full catalog. Use get to retrieve a full theme.",
       "spelling": {
         "rust": [
           "themes::available",
@@ -97,7 +129,7 @@
     },
     {
       "name": "language_info",
-      "$comment": "One language looked up by id or alias, without scanning the catalog.",
+      "$comment": "Resolve names, aliases, extensions and paths using Rust Language::from_str. Empty input is plaintext; unknown input is absent. Shared cases: language-lookup.json.",
       "spelling": {
         "rust": [
           "languages::get",

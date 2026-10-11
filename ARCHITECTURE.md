@@ -406,7 +406,9 @@ Lumis.Languages.async_load(["rust", "javascript"])
 ```
 
 ```javascript
-loadLanguages(["rust", "javascript"]).catch(report)
+import { load } from "@lumis-sh/lumis/languages"
+
+load(["rust", "javascript"]).catch(report)
 ```
 
 For a separate build or operations step, the CLI is the one command:

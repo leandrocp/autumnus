@@ -27,7 +27,8 @@ pub fn guess(name: Option<&str>, source: &str) -> Language {
     Language::guess(name, source)
 }
 
-/// Look up language metadata by name, alias or path.
+/// Look up language metadata by name, alias, extension or path.
+/// Empty input resolves to plaintext; unknown input returns `None`.
 #[must_use]
 pub fn get(name: &str) -> Option<LanguageInfo> {
     name.parse::<Language>()
