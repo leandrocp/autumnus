@@ -87,14 +87,16 @@ returns `None` for an unknown language and an error for an unknown theme. The CL
 
 ```js
 import * as languages from '@lumis-sh/lumis/languages';
+import * as themes from '@lumis-sh/lumis/themes';
 
 // { id: 'javascript', name: 'JavaScript', ... }
 languages.get('js')
 languages.get('nope')  // undefined
+
+themes.get('catppuccin_frappe')
 ```
 
-Look up a theme by name with `themes.get('catppuccin_frappe')`. If you know the
-name ahead of time, an individual import keeps the rest of the catalog out of
+If you know the theme name ahead of time, an individual import keeps the rest of the catalog out of
 your bundle:
 
 ```js
