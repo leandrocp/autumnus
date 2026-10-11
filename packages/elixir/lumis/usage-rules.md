@@ -92,7 +92,7 @@ languages = Lumis.Languages.available()
 # Check if a language is supported
 Enum.any?(Lumis.Languages.available(), &(&1.id == "elixir"))
 
-# Look one up by id or alias, without scanning the catalog
+# Look one up by name, alias, extension, or path; empty input is plaintext
 Lumis.Languages.get("js")
 # Returns: %{id: "javascript", name: "JavaScript", ...}
 Lumis.Languages.get("not-a-language")
@@ -902,7 +902,7 @@ html = Lumis.highlight!(source, formatter: {MyFormatter, language: "elixir"})
 # Get all available languages
 [%{id: _} | _] = Lumis.Languages.available()
 
-# Get one language by id or alias
+# Get one language by name, alias, extension, or path
 %{id: "javascript"} = Lumis.Languages.get("js")
 
 # Get the ids loaded into this VM

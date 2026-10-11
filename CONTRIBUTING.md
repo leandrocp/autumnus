@@ -228,9 +228,11 @@ tests exercise ESM, CommonJS, and browser module resolution and verify that
 loading through `/languages` warms the runtime used by root `highlight()`.
 `fixtures/language-lookup.json` pins lookup behavior against the same inputs in
 Rust, Elixir, Node and browsers. TypeScript consumer checks resolve the published
-exports in ESM and CommonJS under Node16 and NodeNext.
+exports in ESM and CommonJS under Node16 and NodeNext, plus the browser and
+explicit client entries under bundler resolution with the browser condition.
 Run `mise run test-api` for these checks and Playwright's API tests, including
-Vite prebundling against a packed consumer.
+Vite prebundling against a packed consumer. The task installs the required
+Chromium, Firefox, and WebKit builds before running the browser tests.
 
 `waived` is not empty here: Elixir has no flat `highlight_iter`, which is the gap
 [#1544](https://github.com/leandrocp/lumis/issues/1544) was opened about.

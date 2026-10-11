@@ -16,6 +16,8 @@ on:
   push:
     branches: [main]
     paths:
+      - "fixtures/api.json"
+      - "fixtures/language-lookup.json"
       - "crates/**"
       - "queries/**"
       - "languages.toml"
@@ -30,6 +32,8 @@ on:
       - ".github/workflows/conformance.yml"
   pull_request:
     paths:
+      - "fixtures/api.json"
+      - "fixtures/language-lookup.json"
       - "crates/**"
       - "queries/**"
       - "languages.toml"

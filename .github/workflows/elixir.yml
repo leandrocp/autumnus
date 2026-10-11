@@ -8,12 +8,16 @@ on:
   push:
     branches: [ main ]
     paths:
+      - "fixtures/api.json"
+      - "fixtures/language-lookup.json"
       - "packages/elixir/lumis/**"
       - "packages/javascript/lumis/bundles/**"
       - "crates/lumis-wasm-runtime/**"
       - ".github/workflows/elixir.yml"
   pull_request:
     paths:
+      - "fixtures/api.json"
+      - "fixtures/language-lookup.json"
       - "packages/elixir/lumis/**"
       - "packages/javascript/lumis/bundles/**"
       - "crates/lumis-wasm-runtime/**"

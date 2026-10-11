@@ -64,6 +64,13 @@ to plaintext; unknown input returns `undefined`. This also applies to the
 deprecated `getLanguage` alias. Previously JavaScript only accepted IDs and
 aliases. Shared lookup cases cover the same inputs in all three runtimes.
 
+The shared hint parser also corrects `languages.guess`, its deprecated
+`guessLanguage` alias, and the `language` option used for highlighting. A path
+such as `src/rs` no longer treats its basename as a bare extension, and Unicode
+letters such as the Kelvin sign in `Kotlin` no longer fold to ASCII language
+names. These hints now follow Rust: they remain unresolved, allowing source
+content detection to run before falling back to plaintext.
+
 The `/themes` entry includes all built-in themes. For a fixed theme, keep using
 an individual import such as `@lumis-sh/themes/dracula` to avoid bundling the
 catalog.

@@ -212,6 +212,7 @@ pnpm --filter @lumis-sh/lumis run build
 pnpm --filter @lumis-sh/lumis exec vitest run test/api-parity.test.ts test/metadata.test.ts test/guess-language.test.ts test/load-languages.test.ts
 pnpm --filter @lumis-sh/lumis exec node --test test/api-package.mjs test/theme-package.mjs
 (cd packages/elixir/lumis && LUMIS_BUILD=1 mix test test/api_parity_test.exs test/lumis/languages_test.exs)
+pnpm --filter @lumis-sh/lumis exec playwright install chromium firefox webkit
 pnpm --filter @lumis-sh/lumis exec playwright test api.spec.ts api-published.spec.ts
 '''
 
