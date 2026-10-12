@@ -1,5 +1,5 @@
 /* token_flint_dark
- * revision: 1538e1eadcbc9eb465b33bab71eec48c8bed0b76
+ * revision: 3454326ab2c1a025e157e559ef8c6e3e2be01ef2
  */
 .lumis {
   color: #c3c8cc;
@@ -55,7 +55,7 @@
   color: #a9b98c;
 }
 .l-constant-macro {
-  color: #a9b98c;
+  color: #f8d28a;
   font-weight: bold;
 }
 .l-constructor {

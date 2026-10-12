@@ -1,7 +1,7 @@
 {
   "name": "token_flint_dark",
   "appearance": "dark",
-  "revision": "1538e1eadcbc9eb465b33bab71eec48c8bed0b76",
+  "revision": "3454326ab2c1a025e157e559ef8c6e3e2be01ef2",
   "highlights": {
     "attribute": {
       "fg": "#a2a9af"
@@ -53,7 +53,7 @@
       "fg": "#a9b98c"
     },
     "constant.macro": {
-      "fg": "#a9b98c",
+      "fg": "#f8d28a",
       "bold": true
     },
     "constructor": {

@@ -1,5 +1,5 @@
 /* monokai
- * revision: fca3943173f6026347f9ffc68baab39454446c3b
+ * revision: 759be78d722e306e4a3aac9cc0738f1be86a1ab8
  */
 .lumis {
   color: #f8f8f0;
@@ -310,6 +310,9 @@
 }
 .l-tag-builtin {
   color: #f8f8f0;
+}
+.l-tag-builtin-tsx {
+  color: #e95678;
 }
 .l-tag-delimiter {
   color: #f8f8f0;

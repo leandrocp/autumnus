@@ -1,5 +1,5 @@
 /* vague
- * revision: f9060fdaf7b20f68575d6f8214da6f1cf0c72825
+ * revision: 73f8aaa866bf3d14dd0b0ab9e48c11794c1cb7ab
  */
 .lumis {
   color: #cdcdcd;
@@ -192,6 +192,9 @@
 }
 .l-markup-italic {
   font-style: italic;
+}
+.l-markup-link {
+  color: #cdcdcd;
 }
 .l-markup-link-label {
   color: #e8b589;

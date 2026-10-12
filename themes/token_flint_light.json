@@ -1,7 +1,7 @@
 {
   "name": "token_flint_light",
   "appearance": "light",
-  "revision": "1538e1eadcbc9eb465b33bab71eec48c8bed0b76",
+  "revision": "3454326ab2c1a025e157e559ef8c6e3e2be01ef2",
   "highlights": {
     "attribute": {
       "fg": "#46515d"
@@ -53,7 +53,7 @@
       "fg": "#3d5902"
     },
     "constant.macro": {
-      "fg": "#3d5902",
+      "fg": "#6b4600",
       "bold": true
     },
     "constructor": {
