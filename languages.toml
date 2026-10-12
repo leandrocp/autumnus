@@ -249,9 +249,9 @@ globs = ["*.erb"]
 
 [parsers.erlang]
 git = "https://github.com/WhatsApp/tree-sitter-erlang.git"
-rev = "67e7f7f05baf492ca2a7c0d9538761b242d33d95"
+rev = "0386a11c835950f5e1ebfbcbf49863d8495de4e0"
 crate = "tree-sitter-erlang"
-version = "0.20.0"
+version = "0.21.0"
 aliases = ["erl-sh", "erlang-repl"]
 globs = ["*.erl", "*.app", "*.app.src", "*.es", "*.escript", "*.hrl", "*.xrl", "*.yrl", "Emakefile", "rebar.config"]
 
