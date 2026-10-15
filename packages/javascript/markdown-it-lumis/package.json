@@ -48,11 +48,11 @@
     "@microsoft/api-extractor": "^7.58.0",
     "@types/markdown-it": "^14.1.2",
     "markdown-it-attrs": "^5.0.1",
-    "oxfmt": "^0.71.0",
-    "oxlint": "1.86.0",
+    "oxfmt": "^0.72.0",
+    "oxlint": "1.87.0",
     "oxlint-tsgolint": "7.0.2003",
     "tsup": "^8.5.0",
-    "typescript": "^6.0.2",
+    "typescript": "^7.0.2",
     "vitest": "^5.0.2"
   },
   "peerDependencies": {
