@@ -67,6 +67,79 @@ defmodule Lumis.LanguagesTest do
     end
   end
 
+  @broken_node "definitely_not_a_json_node"
+
+  # `:failed_to_load_parser` told a caller "the parser could not be read or
+  # loaded" about a parser that had loaded, and dropped the Tree-sitter message
+  # naming the query that did not compile. Provoking that for real takes a
+  # parser package whose queries are broken, and the store reads its directories
+  # once per VM, so it is loaded in a VM of its own.
+  describe "a parser whose queries do not compile" do
+    @describetag :tmp_dir
+
+    test "load/1 returns :invalid_queries with Tree-sitter's message", %{tmp_dir: tmp_dir} do
+      {single, listed} =
+        load_with_broken_queries(tmp_dir, "json", """
+        {Lumis.Languages.load("json"), Lumis.Languages.load(["json", "plaintext"])}
+        """)
+
+      assert {:error, %Lumis.ParserError{} = error} = single
+      assert error.reason == :invalid_queries
+      assert error.language == "json"
+      assert error.package == "lumis_wasm_json"
+      assert error.detail =~ "Query error"
+      assert error.detail =~ @broken_node
+
+      # What a caller reads off `Exception.message/1`: the language, and the
+      # query that failed, rather than a bare atom to look up.
+      assert Exception.message(error) =~ "json"
+      assert Exception.message(error) =~ @broken_node
+
+      assert {:error, %{"json" => %Lumis.ParserError{reason: :invalid_queries}}} = listed
+    end
+  end
+
+  # Copies one staged fixture parser into `tmp_dir` with a highlights query that
+  # names a node its grammar does not have, then evaluates `expression` in a VM
+  # whose only parser directory is that copy. The result crosses back as an
+  # Erlang term, so the assertions run on the real structs.
+  defp load_with_broken_queries(tmp_dir, suffix, expression) do
+    staged = Path.join(Application.fetch_env!(:lumis, :data_dir), "parsers")
+    parsers = Path.join(tmp_dir, "parsers")
+    File.mkdir_p!(parsers)
+
+    for wasm <- Path.wildcard(Path.join(staged, "tree-sitter-#{suffix}-*.wasm")) do
+      File.cp!(wasm, Path.join(parsers, Path.basename(wasm)))
+    end
+
+    package = File.read!(Path.join(staged, "#{suffix}.lumis.json"))
+    start = ~s("highlights":")
+    assert package =~ start
+
+    File.write!(
+      Path.join(parsers, "#{suffix}.lumis.json"),
+      String.replace(package, start, start <> "(#{@broken_node}) @string\\n", global: false)
+    )
+
+    script = """
+    Application.put_env(:lumis, :parser_dirs, [#{inspect(parsers)}])
+    Application.put_env(:lumis, :data_dir, #{inspect(Path.join(tmp_dir, "data"))})
+    {:ok, _} = Application.ensure_all_started(:lumis)
+    result = #{expression}
+    IO.write("RESULT:" <> Base.encode64(:erlang.term_to_binary(result)))
+    """
+
+    {output, status} =
+      System.cmd("mix", ["run", "--no-start", "--no-compile", "-e", script],
+        env: [{"MIX_ENV", "test"}],
+        stderr_to_stdout: true
+      )
+
+    assert status == 0, output
+    assert [_, encoded] = Regex.run(~r/RESULT:([A-Za-z0-9+\/=]+)/, output), output
+    encoded |> Base.decode64!() |> :erlang.binary_to_term()
+  end
+
   test "loaded_languages lists what is in memory, not the catalog" do
     assert :ok = Lumis.Languages.load("json")
     loaded = Lumis.Languages.loaded()

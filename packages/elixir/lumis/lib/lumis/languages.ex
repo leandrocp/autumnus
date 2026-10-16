@@ -112,13 +112,17 @@ defmodule Lumis.Languages do
     * `:not_installed` — it is, but this project does not depend on its parser
     * `:failed_to_load_parser` — the parser could not be read or loaded
     * `:unknown_bundle` — no bundle by that name
+    * `%Lumis.ParserError{reason: :invalid_queries}` — the parser loaded, but
+      its queries do not compile against it; `:detail` has what Tree-sitter said
     * `%Lumis.ParserError{reason: :store_full}` — the parser is fine, and this
       process has no room for another one
 
-  The last is the exception `Lumis.highlight/2` answers with, rather than an
-  atom, because it is the one failure here that is not about the language named:
-  it loads on its own, retrying it cannot help, and `Exception.message/1` says
-  what does. See `Lumis.ParserError` for the reason itself.
+  The last two are the exceptions `Lumis.highlight/2` answers with, rather than
+  atoms. `:store_full` is the one failure here that is not about the language
+  named: it loads on its own, retrying it cannot help, and `Exception.message/1`
+  says what does. `:invalid_queries` is about the language, and Tree-sitter's
+  message in `:detail` names the query and its line. See `Lumis.ParserError` for
+  the reasons themselves.
 
   A single name answers with the reason itself; a list answers with a map from
   name to reason, so one failure never hides the others.
@@ -160,8 +164,9 @@ defmodule Lumis.Languages do
     end
   end
 
-  # Every other reason the NIF gives is already an atom. A full store arrives as
-  # the fields of a `Lumis.ParserError`, the same way a failed highlight's do.
+  # Every other reason the NIF gives is already an atom. A full store, or queries
+  # that do not compile, arrive as the fields of a `Lumis.ParserError`, the same
+  # way a failed highlight's do.
   defp describe_load({:error, {:parser, fields}}),
     do: {:error, Lumis.ParserError.from_nif(fields)}
 
@@ -176,7 +181,8 @@ defmodule Lumis.Languages do
   # Files one name's answer into the failures `load/1` has collected so far.
   # Named rather than inlined so the clause order can be tested: reaching the
   # map clause with a struct needs a Wasm store that is actually full, which
-  # costs a hundred parser compiles to arrange.
+  # costs a hundred parser compiles to arrange, or a parser package whose queries
+  # are broken, which needs a VM of its own.
   def collect_failure(failures, _name, :ok), do: failures
 
   # A bundle named inside a list reports its own members, not itself.

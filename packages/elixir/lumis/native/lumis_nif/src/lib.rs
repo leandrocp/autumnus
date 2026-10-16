@@ -94,12 +94,22 @@ struct Highlighted {
 /// as `Lumis.ParserError` instead — the same exception `Lumis.highlight/2`
 /// answers with, off the same `:store_full` reason — so the advice lives in one
 /// place for both entry points.
+///
+/// So are queries that do not compile. `:failed_to_load_parser` called that "the
+/// parser could not be read or loaded" when the parser had loaded and a query
+/// written against its grammar was what failed, and it dropped Tree-sitter's
+/// message, which names the line and the pattern. They come back as
+/// `:invalid_queries`, the reason `Lumis.highlight/2` gives for the same
+/// failure, with that message as the detail.
 enum LoadFailure {
     UnknownLanguage,
     NotInstalled,
     Parser,
     /// The language that was refused, plus what Tree-sitter said about it.
     StoreFull(String, String),
+    /// The language whose queries did not compile, plus what Tree-sitter said
+    /// about them.
+    Query(String, String),
 }
 
 impl Encoder for LoadFailure {
@@ -115,6 +125,11 @@ impl Encoder for LoadFailure {
                 ExParserFailure::new(language, store_full(), message.clone(), None),
             )
                 .encode(env),
+            Self::Query(language, message) => (
+                parser(),
+                ExParserFailure::new(language, invalid_queries(), message.clone(), None),
+            )
+                .encode(env),
         }
     }
 }
@@ -125,6 +140,9 @@ impl From<&RuntimeError> for LoadFailure {
             RuntimeError::LanguageNotLoaded(_) => Self::UnknownLanguage,
             RuntimeError::StoreFull { language, message } => {
                 Self::StoreFull(language.clone(), message.clone())
+            }
+            RuntimeError::Query { language, message } => {
+                Self::Query(language.clone(), message.clone())
             }
             _ => Self::Parser,
         }
@@ -1546,11 +1564,12 @@ fn html_utf8(output: Vec<u8>) -> NifResult<String> {
 
 #[cfg(test)]
 mod tests {
-    use super::HighlightEvent;
+    use super::{HighlightEvent, LoadFailure};
     use lumis_core::formatter::{Formatter, HtmlInlineBuilder};
     use lumis_core::languages::Language;
     use lumis_wasm_runtime::{
-        sha256_hex, LanguagePackage, PackagedLanguage, ParserMetadata, Runtime,
+        sha256_hex, LanguagePackage, LanguageSpec, PackagedLanguage, ParserMetadata, Runtime,
+        RuntimeError,
     };
     use std::collections::BTreeMap;
 
@@ -1629,5 +1648,51 @@ mod tests {
             !events.is_empty(),
             "highlighting an Elixir module produced no events"
         );
+    }
+
+    // The runtime's own error rather than a hand-built one, so this also pins
+    // that a query failing to compile is reported as `RuntimeError::Query` and
+    // not folded into `Parser` before the NIF sees it.
+    #[test]
+    fn test_load_failure_reports_queries_that_do_not_compile() {
+        let runtime = Runtime::with_worker_limit(1).unwrap();
+        let spec = LanguageSpec {
+            id: "json".into(),
+            aliases: Vec::new(),
+            grammar_name: "json".into(),
+            wasm: include_bytes!("../../../../../../fixtures/test-parsers/tree-sitter-json.wasm")
+                .to_vec(),
+            highlights: "(definitely_not_a_json_node) @string".into(),
+            injections: String::new(),
+            locals: String::new(),
+            brackets: String::new(),
+        };
+
+        let error = runtime
+            .load_language(spec)
+            .expect_err("a node the grammar does not have cannot compile");
+
+        // Not `LoadFailure::Parser`, which Elixir spells `:failed_to_load_parser`
+        // and which says nothing about queries.
+        match LoadFailure::from(&error) {
+            LoadFailure::Query(language, message) => {
+                assert_eq!(language, "json");
+                assert!(
+                    message.contains("definitely_not_a_json_node"),
+                    "Tree-sitter's message was dropped: {message}"
+                );
+            }
+            _ => panic!("expected LoadFailure::Query for {error:?}"),
+        }
+    }
+
+    #[test]
+    fn test_load_failure_keeps_a_parser_that_cannot_load_as_parser() {
+        let error = RuntimeError::Parser {
+            language: "json".into(),
+            message: "bad wasm".into(),
+        };
+
+        assert!(matches!(LoadFailure::from(&error), LoadFailure::Parser));
     }
 }
