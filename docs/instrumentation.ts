@@ -8,8 +8,8 @@ export async function register() {
   const setHeader = ServerResponse.prototype.setHeader;
 
   ServerResponse.prototype.setHeader = function (name, value) {
-    if (name.toLowerCase() === "vary") value = mergeVary(this.getHeader(name), value);
-    return setHeader.call(this, name, value);
+    const merged = name.toLowerCase() === "vary" ? mergeVary(this.getHeader(name), value) : value;
+    return setHeader.call(this, name, merged);
   };
 }
 
