@@ -682,7 +682,7 @@ mise run wasm-build {name}
 ```
 
 Check a built parser the way a release does. It must load, parse its sample,
-and run every query:
+and run every query, under both web-tree-sitter and Wasmtime:
 
 ```sh
 mise run wasm-check {name}
@@ -841,7 +841,9 @@ revision bump is validated before it is published rather than after.
   parser that fails to build fails its shard. Each of those three compiles to
   one lexer function of 650-800 KB, so each also runs in a process of its own.
   A failing batch fails its shard only after the shard's other batches have
-  run. No published package is consulted, so a parser bump is checked in its
+  run. Each shard then runs the same check through Wasmtime, which the Elixir
+  NIF, the native addon and the CLI load, because the two loaders do not always
+  agree on a grammar (#1738). No published package is consulted, so a parser bump is checked in its
   own pull request, before it is released.
 - **Conformance CI** builds the seventeen parsers the committed fixtures supply,
   stages them with `wasm-stage`, and points `LUMIS_DATA_DIR` at the result, so
@@ -871,7 +873,9 @@ pin. PHP once shipped through such a waiver while trapping on `samples/php.php`.
 The `wasm-release` workflow publishes to npm and Hex:
 
 1. **plan** — `mise run wasm-release-plan` works out, for every parser, the
-   version it resolves to and which registries are missing it.
+   version it resolves to and which registries are missing it. Beside it,
+   **query-check** compiles the Wasmtime half of `mise run wasm-check` once for
+   every pipeline.
 2. **One pipeline per parser** that anything is missing, from
    `wasm-release-parser.yml`. **build** compiles the grammar, runs
    `mise run wasm-check` against that build, and stages both packages at the

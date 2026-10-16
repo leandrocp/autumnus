@@ -357,6 +357,8 @@ echo ""
 
 echo "Compiling every query against its pinned grammar..."
 pnpm --filter @lumis-sh/lumis run test:queries
+# The same parsers through Wasmtime, which the NIF, the addon and the CLI load.
+cargo test -p lumis-wasm-runtime --test query_compile -- --ignored
 '''
 
 [tasks.'test-conformance']
@@ -969,7 +971,7 @@ cargo run -q --manifest-path crates/dev/Cargo.toml --no-default-features -- \
 '''
 
 [tasks.'wasm-check']
-description = "Check a built WASM parser: it loads, parses its sample and runs every query"
+description = "Check a built WASM parser: it loads, parses its sample and runs every query, in web-tree-sitter and Wasmtime"
 usage = '''
 arg "<parser>"
 '''
@@ -987,6 +989,13 @@ languages="$(awk -v parser="$wasm_name" '$2 == parser { print $1 }' <<<"$pairs" 
     exit 1
 }
 LUMIS_QUERY_LANGUAGES="$languages" pnpm --filter @lumis-sh/lumis run test:queries
+# The same parser through Wasmtime, which the NIF, the addon and the CLI load. A
+# release passes in the test binary wasm-release compiled once for every parser.
+if [ -n "${LUMIS_QUERY_CHECK:-}" ]; then
+    LUMIS_QUERY_LANGUAGES="$languages" "$LUMIS_QUERY_CHECK" --ignored
+else
+    LUMIS_QUERY_LANGUAGES="$languages" cargo test -q -p lumis-wasm-runtime --test query_compile -- --ignored
+fi
 '''
 
 [tasks.'wasm-publish-prepare']

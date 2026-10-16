@@ -16,6 +16,11 @@
  * `mise run wasm-check <parser>` checks one, and a release runs it before
  * publishing.
  *
+ * `crates/lumis-wasm-runtime/tests/query_compile.rs` checks the same parsers
+ * through Wasmtime, which the Elixir NIF, the native addon and the CLI load, and
+ * both tasks run it after this file. Passing here does not vouch for them there
+ * (#1738).
+ *
  * Not part of `pnpm test`. Every grammar this file loads stays compiled in V8
  * for the life of the process -- web-tree-sitter gives no way to free a
  * Language -- so running all 115 in one process exhausts a CI runner's memory.
