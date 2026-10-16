@@ -6,7 +6,7 @@ import { after, before, test } from "node:test";
 
 const require = createRequire(import.meta.url);
 const nextVersion = require("next/package.json").version;
-const varyHeaderTodo = nextVersion === "16.3.8" && "https://github.com/vercel/next.js/issues/85999";
+const varyHeaderTodo = nextVersion === "16.4.0" && "https://github.com/vercel/next.js/issues/85999";
 let server;
 const address = { origin: undefined };
 
