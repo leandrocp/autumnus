@@ -1,7 +1,7 @@
 {
   "name": "monokai_pro",
   "appearance": "dark",
-  "revision": "fca3943173f6026347f9ffc68baab39454446c3b",
+  "revision": "759be78d722e306e4a3aac9cc0738f1be86a1ab8",
   "highlights": {
     "attribute": {
       "fg": "#a9dc76"
@@ -312,6 +312,9 @@
     },
     "tag.builtin": {
       "fg": "#fff1f3"
+    },
+    "tag.builtin.tsx": {
+      "fg": "#fd6883"
     },
     "tag.delimiter": {
       "fg": "#fff1f3"
