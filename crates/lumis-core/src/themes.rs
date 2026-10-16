@@ -513,7 +513,7 @@ impl Theme {
         }
     }
 
-    #[deprecated(note = "use themes::CssBuilder instead")]
+    #[deprecated(since = "2.0.0", note = "use themes::CssBuilder instead")]
     pub fn css(&self, enable_italic: bool) -> String {
         CssBuilder::new(self).enable_italic(enable_italic).build()
     }

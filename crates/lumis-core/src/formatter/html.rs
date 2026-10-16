@@ -1162,7 +1162,7 @@ pub fn append_fragment(lines: &mut Vec<String>, fragment: &str) {
 }
 
 /// Escape text for use in HTML span content.
-#[deprecated(note = "use `escape(...)` instead")]
+#[deprecated(since = "3.0.0", note = "use `escape(...)` instead")]
 pub fn escape_fragment(text: &str) -> String {
     escape(text)
 }
@@ -1565,7 +1565,7 @@ fn ceil_char_boundary(source: &str, mut index: usize) -> usize {
 /// Deprecated: it records line offsets without closing and reopening the spans
 /// that cross a line boundary, so slicing the buffer at them yields lines whose
 /// tags do not nest. [`render_lines_from_events`] does the same job correctly.
-#[deprecated(note = "use `render_lines_from_events(...)` instead")]
+#[deprecated(since = "3.0.0", note = "use `render_lines_from_events(...)` instead")]
 pub fn render_events<T, F>(
     source: &str,
     events: &[crate::events::HighlightEvent<'_, T>],
@@ -1638,7 +1638,7 @@ where
 /// Iterator over rendered HTML lines.
 ///
 /// Deprecated: only useful for slicing what [`render_events`] returns.
-#[deprecated(note = "use `render_lines_from_events(...)` instead")]
+#[deprecated(since = "3.0.0", note = "use `render_lines_from_events(...)` instead")]
 pub fn lines_from_offsets<'a>(
     html: &'a [u8],
     line_offsets: &'a [u32],

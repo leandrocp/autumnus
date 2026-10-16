@@ -153,7 +153,7 @@ pub fn paint(text: &str, style: &Style) -> String {
 /// Wrap text with ANSI color codes based on a Style.
 ///
 /// Deprecated: use [`paint()`] instead.
-#[deprecated(note = "use `paint(...)` instead")]
+#[deprecated(since = "0.8.0", note = "use `paint(...)` instead")]
 pub fn wrap_with_ansi(text: &str, style: &Style) -> String {
     paint(text, style)
 }
@@ -214,7 +214,10 @@ impl Iterator for AnsiIterator {
 /// })
 /// .unwrap();
 /// ```
-#[deprecated(note = "use `highlight::highlight_iter(...)` with `ansi::paint(...)` instead")]
+#[deprecated(
+    since = "0.8.0",
+    note = "use `highlight::highlight_iter(...)` with `ansi::paint(...)` instead"
+)]
 pub fn highlight_iter_with_ansi(
     source: &str,
     language: Language,

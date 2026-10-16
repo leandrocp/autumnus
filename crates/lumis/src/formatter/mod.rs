@@ -209,7 +209,7 @@ pub use terminal::{Terminal, TerminalBuilder};
 pub mod bbcode;
 pub use bbcode::{BBCodeScoped, BBCodeScopedBuilder};
 
-#[deprecated(note = "use `formatters::html::HtmlElement` instead")]
+#[deprecated(since = "0.7.0", note = "use `formatters::html::HtmlElement` instead")]
 pub use lumis_core::formatter::HtmlElement;
 
 /// Trait for implementing custom syntax highlighting formatters.
