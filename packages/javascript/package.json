@@ -9,7 +9,7 @@
   "devDependencies": {
     "@microsoft/api-extractor": "^7.59.4",
     "oxfmt": "^0.72.0",
-    "smol-toml": "^1.9.0",
+    "smol-toml": "^1.9.1",
     "tsx": "^4.23.15"
   }
 }

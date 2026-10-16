@@ -50,13 +50,13 @@
   "devDependencies": {
     "@lumis-sh/lumis": "workspace:^",
     "@lumis-sh/themes": "workspace:^",
-    "@microsoft/api-extractor": "^7.58.0",
+    "@microsoft/api-extractor": "^7.59.4",
     "oxfmt": "^0.72.0",
     "oxlint": "1.87.0",
     "oxlint-tsgolint": "7.0.2003",
     "tsup": "^8.5.0",
-    "typescript": "^6.0.2",
-    "vite": "^8.0.3",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.4",
     "vitest": "^5.0.2"
   },
   "peerDependencies": {
