@@ -1090,7 +1090,7 @@ fn parse_themes_lua() -> Result<Vec<(String, String)>> {
             };
             let key_str = key.token().to_string();
 
-            if let Expression::String(token_ref) = value {
+            if let Expression::String(token_ref) = &**value {
                 if let TokenType::StringLiteral { literal, .. } = token_ref.token().token_type() {
                     match key_str.as_str() {
                         "name" => name = Some(literal.to_string()),
