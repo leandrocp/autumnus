@@ -108,7 +108,7 @@ jobs:
           cp "target/${{ matrix.target }}/release/${{ matrix.library }}" \
             "native-artifact/lumis-native.${{ matrix.package }}.node"
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: lumis-native-${{ matrix.package }}
           path: native-artifact/*.node
@@ -190,7 +190,7 @@ jobs:
             cp "target/${{ matrix.target }}/release/lumis" cli-artifact/lumis
           fi
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: lumis-cli-${{ matrix.package }}
           path: cli-artifact/*
@@ -234,7 +234,7 @@ jobs:
         with:
           version: 11.15.1
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: "lts/*"
           cache: "pnpm"
@@ -299,7 +299,7 @@ jobs:
 
       - name: Download native runtimes
         if: steps.pkg.outputs.filter == '@lumis-sh/lumis'
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           pattern: lumis-native-*
           path: native-artifacts
@@ -356,7 +356,7 @@ jobs:
 
       - name: Download CLI binaries
         if: steps.pkg.outputs.filter == '@lumis-sh/cli'
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           pattern: lumis-cli-*
           path: cli-artifacts
@@ -403,7 +403,7 @@ jobs:
       # bearing: the selector's optionalDependencies name the platform packages
       # and the main package's name the selector, so a dependency that is not on
       # the registry yet ships a tarball that cannot install.
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: npm-tarballs
           path: tarballs
@@ -429,12 +429,12 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: npm-tarballs
           path: tarballs
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: "lts/*"
           registry-url: "https://registry.npmjs.org"
