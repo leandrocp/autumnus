@@ -306,7 +306,7 @@
 
 #[path = "formatter/mod.rs"]
 pub mod formatters;
-#[deprecated(note = "use `formatters` instead")]
+#[deprecated(since = "0.7.0", note = "use `formatters` instead")]
 pub use formatters as formatter;
 pub mod highlight;
 pub mod languages;

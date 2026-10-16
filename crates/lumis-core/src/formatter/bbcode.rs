@@ -73,7 +73,7 @@ impl BBCodeScopedBuilder {
         self
     }
 
-    #[deprecated(note = "use `.language(...)` instead")]
+    #[deprecated(since = "0.1.0", note = "use `.language(...)` instead")]
     pub fn lang(&mut self, language: Language) -> &mut Self {
         self.language(language)
     }

@@ -384,7 +384,7 @@ macro_rules! define_languages {
             languages
         }
 
-        #[deprecated(note = "use `available_languages()`, which carries aliases and detection metadata")]
+        #[deprecated(since = "2.4.0", note = "use `available_languages()`, which carries aliases and detection metadata")]
         pub fn available_languages_map() -> HashMap<String, (String, Vec<String>)> {
             Language::iter()
                 .map(|language| {
