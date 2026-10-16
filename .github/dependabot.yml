@@ -126,6 +126,12 @@ updates:
       # Published from this repository. A bump here would be proposing a version
       # of ourselves.
       - dependency-name: "@lumis-sh/wasm-*"
+      # TypeScript 7 keeps the compiler API out of the `typescript` entry point,
+      # which tsup's declaration build and TypeDoc both call. Lift this when
+      # #1774 closes.
+      - dependency-name: "typescript"
+        update-types:
+          - "version-update:semver-major"
 
   # Both deployed sites, in one entry so a bump produces one commit and so one
   # pair of Vercel previews rather than two.
