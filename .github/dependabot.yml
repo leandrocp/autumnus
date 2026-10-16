@@ -76,37 +76,27 @@ updates:
         patterns:
           - "*"
 
-  # Every member of the pnpm workspace, not just its root. `packages/javascript`
+  # The whole pnpm workspace, from its root. Dependabot reads
+  # `pnpm-workspace.yaml` there and the `package.json` of every member it lists,
+  # and updates a member's manifest together with the one `pnpm-lock.yaml`. A
+  # package added to the workspace needs nothing here. `packages/javascript`
   # holds four devDependencies and the tooling scripts; the 118 dependencies
-  # that ship live in the members below, and this entry named only the root, so
-  # Dependabot had never seen one of them. `web-tree-sitter` sat pinned two
-  # patches behind in `lumis/package.json` the whole time, with patch updates
-  # allowed.
+  # that ship live in the other members, and while this entry named only
+  # `packages/javascript`, `web-tree-sitter` sat two patches behind in
+  # `lumis/package.json` with patch updates allowed.
   #
-  # One entry rather than one per member because they share a single
-  # `pnpm-lock.yaml` at the repository root. Separate entries would each rewrite
-  # that one file and conflict with each other.
+  # Only from the root. Pointed at a member, Dependabot finds the lockfile and
+  # `pnpm-workspace.yaml` in a parent directory, reads them as context and
+  # leaves them out of the change. Its pull requests edited `package.json`
+  # alone and failed `--frozen-lockfile` (#1711, #1772), and the update job
+  # failed with "Updating workspaces from inside a workspace subdirectory is not
+  # supported".
   #
-  # Not `/`, which is where that lockfile and `pnpm-workspace.yaml` live: there
-  # is no `package.json` there, so Dependabot would find no manifest to read.
-  # It resolves the root lockfile from a member instead.
-  #
-  # Listed one by one rather than globbed with `packages/javascript/*`, which
-  # also matches `scripts/`, a directory with no `package.json`. A configuration
-  # Dependabot rejects produces no updates and says so nowhere this repository
-  # looks, which is the failure this entry is fixing — so adding a package here
-  # is worth the manual step. `pnpm-workspace.yaml` lists the same set.
+  # The root `package.json` is there for this entry. Dependabot needs a manifest
+  # in the directory it starts from, and that manifest's `packageManager` picks
+  # the pnpm that rewrites the lockfile. It declares no dependencies.
   - package-ecosystem: "npm"
-    directories:
-      - "/packages/javascript"
-      - "/packages/javascript/cli"
-      - "/packages/javascript/lumis"
-      - "/packages/javascript/markdown-it-lumis"
-      - "/packages/javascript/react"
-      - "/packages/javascript/rehype-lumis"
-      - "/packages/javascript/themes"
-      - "/packages/javascript/vite"
-      - "/benchmarks/javascript"
+    directory: "/"
     schedule:
       interval: "weekly"
     cooldown:
@@ -156,10 +146,8 @@ updates:
 #
 # - The example apps under `packages/*/*/examples/`. They are illustrations to
 #   be copied, pinned to the versions their prose describes, and nothing builds
-#   them, so a bump there is churn without a signal. The lists above stop
-#   one directory short of them.
-# - The generated per-platform stubs under `*/npm/<target>/`, which the pnpm
-#   workspace includes but release tooling writes. They carry no dependencies.
+#   them, so a bump there is churn without a signal. The lists above and
+#   `pnpm-workspace.yaml` stop one directory short of them.
 # - `crates/autumnus`, a deprecated shim that commits no lockfile.
 #
 # A workspace member resolves against the root `pnpm-lock.yaml` and nothing
