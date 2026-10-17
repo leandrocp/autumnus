@@ -18,6 +18,7 @@ use std::time::{Duration, Instant};
 use xz2::write::XzEncoder;
 
 mod stress;
+mod wasi_sdk;
 
 #[derive(Parser)]
 #[command(version)]
@@ -3117,6 +3118,7 @@ struct WasmBuildContext<'a> {
     out_dir: &'a Path,
     log_dir: &'a Path,
     toolchain: &'a str,
+    wasi_sdk: &'a Path,
     rebuild: bool,
 }
 
@@ -3207,14 +3209,15 @@ fn build_parser_wasm(
     let build_log = context.log_dir.join(format!("{wasm_name}.log"));
     println!("* building wasm in {repo_dir}");
     println!("* build log: {}", build_log.display());
-    let succeeded = if let Ok(()) = build_repo_wasm(&repo_dir, &wasm_file, &build_log) {
-        fs::write(&build_id_file, &build_id)?;
-        println!("{wasm_path}");
-        true
-    } else {
-        println!("  ERROR: failed to build {parser_name}");
-        false
-    };
+    let succeeded =
+        if let Ok(()) = build_repo_wasm(&repo_dir, &wasm_file, &build_log, context.wasi_sdk) {
+            fs::write(&build_id_file, &build_id)?;
+            println!("{wasm_path}");
+            true
+        } else {
+            println!("  ERROR: failed to build {parser_name}");
+            false
+        };
 
     let _ = run_cmd_ok(&format!("rm -rf {clone_dir}"));
     Ok(succeeded)
@@ -3231,11 +3234,13 @@ fn build_wasm(name: &str) -> Result<()> {
     let mut built_wasm_names = HashSet::new();
     let mut failed = Vec::new();
     let toolchain = wasm_toolchain_id();
+    let wasi_sdk = wasi_sdk::ensure()?;
     let context = WasmBuildContext {
         tmp: &tmp,
         out_dir: &out_dir,
         log_dir: &log_dir,
         toolchain: &toolchain,
+        wasi_sdk: &wasi_sdk,
         rebuild: std::env::var("LUMIS_WASM_REBUILD").ok().as_deref() == Some("1"),
     };
 
@@ -3267,13 +3272,10 @@ fn build_wasm(name: &str) -> Result<()> {
     Ok(())
 }
 
-/// Identifies the toolchain a `.wasm` was produced by, which is the Tree-sitter
-/// CLI and nothing else. It compiles through a WASI SDK it downloads itself and
-/// pins per release, so its own version covers the compiler too. This used to
-/// name Emscripten as well, as a hedge against an input that might matter;
-/// nothing invokes `emcc` any more, so the hedge only recorded an empty string.
+/// The Tree-sitter CLI and the WASI SDK it compiles with.
 fn wasm_toolchain_id() -> String {
-    run_cmd("tree-sitter --version").unwrap_or_default()
+    let cli = run_cmd("tree-sitter --version").unwrap_or_default();
+    format!("{cli}\nwasi-sdk {}", wasi_sdk::VERSION)
 }
 
 fn wasm_build_id(
@@ -3296,8 +3298,13 @@ fn cached_parser_is_current(wasm_file: &Path, build_id_file: &Path, build_id: &s
         && fs::read_to_string(build_id_file).is_ok_and(|cached| cached == build_id)
 }
 
-fn build_repo_wasm(repo_dir: &str, wasm_file: &Path, build_log: &Path) -> Result<()> {
-    build_repo_wasm_with("tree-sitter", repo_dir, wasm_file, build_log)
+fn build_repo_wasm(
+    repo_dir: &str,
+    wasm_file: &Path,
+    build_log: &Path,
+    wasi_sdk: &Path,
+) -> Result<()> {
+    build_repo_wasm_with("tree-sitter", repo_dir, wasm_file, build_log, wasi_sdk)
 }
 
 /// Takes the compiler as an argument so a test can supply one whose exit status
@@ -3308,6 +3315,7 @@ fn build_repo_wasm_with(
     repo_dir: &str,
     wasm_file: &Path,
     build_log: &Path,
+    wasi_sdk: &Path,
 ) -> Result<()> {
     // Printed before the build rather than logged after it: a grammar large
     // enough to exhaust the runner takes the process down with it, and this
@@ -3319,6 +3327,7 @@ fn build_repo_wasm_with(
         .current_dir(repo_dir)
         .args(["build", "--wasm", "-o"])
         .arg(wasm_file)
+        .env("TREE_SITTER_WASI_SDK_PATH", wasi_sdk)
         .output()
         .with_context(|| format!("failed to run tree-sitter build in {repo_dir}"))?;
 
@@ -7188,7 +7197,9 @@ mod tests {
         let path = dir.join(format!("tree-sitter-stub-{code}"));
         fs::write(
             &path,
-            format!("#!/bin/sh\necho 'stub compiler' >&2\nprintf wasm > \"$4\"\nexit {code}\n"),
+            format!(
+                "#!/bin/sh\necho \"stub compiler, SDK $TREE_SITTER_WASI_SDK_PATH\" >&2\nprintf wasm > \"$4\"\nexit {code}\n"
+            ),
         )
         .unwrap();
         fs::set_permissions(&path, fs::Permissions::from_mode(0o755)).unwrap();
@@ -7211,6 +7222,7 @@ mod tests {
                 dir.to_str().unwrap(),
                 &dir.join("out.wasm"),
                 log,
+                &dir.join("wasi-sdk"),
             );
             let busy = result
                 .as_ref()
@@ -7261,6 +7273,26 @@ mod tests {
             "a zero exit status must succeed: {succeeded:?}"
         );
         assert!(built, "a successful build keeps its wasm");
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn a_build_compiles_with_the_pinned_wasi_sdk() {
+        let dir = std::env::temp_dir().join(format!("lumis-build-sdk-{}", std::process::id()));
+        fs::create_dir_all(&dir).unwrap();
+        let log = dir.join("build.log");
+        let stub = stub_tree_sitter(&dir, 0);
+
+        let built = build_with_stub(&stub, &dir, &log);
+        let output = fs::read_to_string(&log);
+        let _ = fs::remove_dir_all(&dir);
+
+        built.unwrap();
+        let expected = format!("SDK {}", dir.join("wasi-sdk").display());
+        assert!(
+            output.unwrap().contains(&expected),
+            "tree-sitter must be handed the pinned SDK, not left to fetch its own"
+        );
     }
 
     #[test]
