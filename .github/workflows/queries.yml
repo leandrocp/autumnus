@@ -21,7 +21,6 @@ on:
       - "packages/javascript/lumis/package.json"
       - "packages/javascript/lumis/test/query-compile.test.ts"
       - "packages/javascript/lumis/test/query-patterns.test.ts"
-      - "fixtures/parsers/**"
       - "packages/javascript/lumis/scripts/list-parsers.mjs"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
@@ -42,7 +41,6 @@ on:
       - "packages/javascript/lumis/package.json"
       - "packages/javascript/lumis/test/query-compile.test.ts"
       - "packages/javascript/lumis/test/query-patterns.test.ts"
-      - "fixtures/parsers/**"
       - "packages/javascript/lumis/scripts/list-parsers.mjs"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
@@ -105,9 +103,7 @@ jobs:
             startsWith(github.event.pull_request.head.ref, 'release/')) }}
     name: Compile queries (shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
-    # llvm takes about eight minutes to compile through the WASI SDK; vim and
-    # zsh are worse and are committed instead of built.
-    timeout-minutes: 45
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
@@ -177,12 +173,6 @@ jobs:
           failed=()
           while read -r parser; do
             [ -n "$parser" ] || continue
-            # Committed because a runner cannot carry the build; see
-            # fixtures/parsers/README.md for the measurements.
-            if [ -f "fixtures/parsers/$parser.wasm" ]; then
-              echo "using the committed $parser"
-              continue
-            fi
             mise run wasm-build "$parser" || failed+=("$parser")
           done < /tmp/shard-parsers.txt
           # A parser that fails to build fails its language in the next step,
@@ -195,10 +185,9 @@ jobs:
       # what has to be bounded is grammars per process, not per shard. Sharding
       # balances parser *count*, and shard 5 has repeatedly exhausted V8's zone
       # allocator because its ten grammars are unusually large. Run the shard in
-      # batches of four selected languages. The grammars in fixtures/parsers each
-      # compile to a single lexer function of 650-800 KB, and TurboFan's zone for
-      # one of them has exhausted a runner beside other grammars, so each runs
-      # alone.
+      # batches of four selected languages. llvm, vim and zsh each compile to a
+      # single lexer function of 650-800 KB, and TurboFan's zone for one of them
+      # has exhausted a runner beside other grammars, so each runs alone.
       - name: Compile queries for this shard
         run: |
           set -euo pipefail
@@ -215,13 +204,14 @@ jobs:
           }
           while read -r language; do
             [ -n "$language" ] || continue
-            parser="$(awk -v language="$language" '$1 == language { print $2 }' /tmp/pairs.txt)"
-            if [ -f "fixtures/parsers/$parser.wasm" ]; then
-              run_batch
-              batch=("$language")
-              run_batch
-              continue
-            fi
+            case "$language" in
+              llvm|vim|zsh)
+                run_batch
+                batch=("$language")
+                run_batch
+                continue
+                ;;
+            esac
             batch+=("$language")
             [ ${#batch[@]} -lt "$QUERY_BATCH" ] || run_batch
           done < /tmp/shard-languages.txt

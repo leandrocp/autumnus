@@ -350,7 +350,6 @@ echo "Building every parser from languages.toml..."
 (cd packages/javascript/lumis && node scripts/list-parsers.mjs --parsers) > /tmp/lumis-parsers.txt
 while read -r parser; do
     [ -n "$parser" ] || continue
-    [ -f "fixtures/parsers/$parser.wasm" ] && continue
     mise run wasm-build "$parser"
 done < /tmp/lumis-parsers.txt
 echo ""
@@ -925,7 +924,7 @@ cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- upgrade
 '''
 
 [tasks.'wasm-build']
-description = "Build WASM files for tree-sitter parsers (requires emscripten)"
+description = "Build WASM files for tree-sitter parsers"
 usage = '''
 arg "[name]"
 '''
@@ -982,8 +981,6 @@ pairs="$(node packages/javascript/lumis/scripts/list-parsers.mjs --pairs)"
 wasm_name="$(awk -v name="${usage_parser?}" '$1 == name || $2 == name { print $2; exit }' <<<"$pairs")"
 [ -n "$wasm_name" ] || { echo "unknown parser: ${usage_parser?}" >&2; exit 1; }
 languages="$(awk -v parser="$wasm_name" '$2 == parser { print $1 }' <<<"$pairs" | paste -sd, -)"
-# A release vouches for the parser it just built, so a copy committed under
-# fixtures/parsers must not answer for it.
 [ -f "tmp/wasm/build/$wasm_name.wasm" ] || {
     echo "$wasm_name is not in tmp/wasm/build; run mise run wasm-build $wasm_name" >&2
     exit 1

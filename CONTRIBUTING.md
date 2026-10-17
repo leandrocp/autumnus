@@ -832,14 +832,13 @@ atomic.
 CI builds parsers from `languages.toml` rather than taking them from npm, so a
 revision bump is validated before it is published rather than after.
 
-- **Queries CI** builds 110 of the 113 parsers across 12 shards and compiles
+- **Queries CI** builds every parser across 12 shards and compiles
   every processed query for all 115 language definitions against the grammar its
   language actually pins, then parses the language's `samples/` file. Each shard
   runs in fresh batches of four selected languages, so no process retains more
-  than four grammars. `llvm`, `vim` and `zsh` exceed a runner's memory and are
-  committed under `fixtures/parsers/` with their measured peak RSS. Any other
-  parser that fails to build fails its shard. Each of those three compiles to
-  one lexer function of 650-800 KB, so each also runs in a process of its own.
+  than four grammars. A parser that fails to build fails its shard. `llvm`,
+  `vim` and `zsh` each compile to one lexer function of 650-800 KB, so each also
+  runs in a process of its own.
   A failing batch fails its shard only after the shard's other batches have
   run. Each shard then runs the same check through Wasmtime, which the Elixir
   NIF, the native addon and the CLI load, because the two loaders do not always
@@ -861,10 +860,6 @@ That parser set comes from the fixture filenames, not from the languages named
 in the fixtures' expected events. A document can attempt a language that never
 appears in its output — every Lua comment injects the `comment` parser — and
 leaving it out sends the runtime to the network mid-suite.
-
-`fixtures/parsers/` records what these checks cannot build, and may only
-shrink: it holds a committed build for a grammar CI cannot compile.
-`tree-sitter-vim` needs 18.3 GB of memory against a runner's 16 GB.
 
 There is no waiver for a parser built from `languages.toml`. If it fails to
 load, crashes on its sample, or rejects a query, the revision is not ready to
