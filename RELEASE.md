@@ -54,11 +54,13 @@ that list changes. Nothing to bump and nothing to remember.
   or bundle on npm. That happens on the push to `main`, before any runtime release that
   reads the new format can ship, so the order takes care of itself. Let that WASM
   Release run finish before merging `npm-lumis`.
-- Hex gets a release only when its own package changes: a new parser or queries, a
-  new dependency in `mix.exs`, or a bundle's members. A format change that touches
-  only the npm entry leaves Hex on the version it has, so Hex and npm versions can
-  differ. When a format change does reach what Hex ships (`priv/parsers`, `mix.exs`,
-  the README), raise `HEX_FORMAT_VERSION` to the new `PACKAGE_FORMAT_VERSION` too.
+- Each registry is checked on its own. Hex gets a release only when its newest
+  release ships another definition (a new parser, queries or required grammar), read
+  from that release's `lumis.json`, or a bundle's members change. A format change that
+  touches only the npm entry leaves Hex on the version it has, so Hex and npm versions
+  can differ. When a format change does reach what Hex ships (`priv/parsers`,
+  `mix.exs`, the README), raise the `lumis-language-package-v3` tag in
+  `language_definition_hash` too, which republishes every parser on both.
 - An ordinary `0.26.x` WASM release needs no runtime release. Moving to a new
   Tree-sitter minor series in `mise.toml` does.
 - `parser-sizes.json` is measured off what is published, so it lags a parser

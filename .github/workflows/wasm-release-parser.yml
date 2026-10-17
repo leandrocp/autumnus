@@ -228,10 +228,8 @@ jobs:
           PARSER: ${{ inputs.parser }}
 
   # In parallel with npm, not after it. If npm fails where Hex succeeds, the
-  # next plan cannot find the definition on npm — the only registry it reads
-  # definitions from — so it takes the next patch, and Hex receives the same
-  # definition again under that version. One extra Hex release per run until
-  # npm catches up.
+  # next plan reads Hex's own release, finds the definition there, and hands
+  # npm alone that same version.
   publish-hex:
     needs: [build, fetch]
     if: >-

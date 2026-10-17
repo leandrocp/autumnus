@@ -904,31 +904,23 @@ receives that same version rather than a fresh one — which is what stops
 that did not change. Only a definition neither registry has seen takes the next
 patch, computed from both so one cannot hand out a version the other used.
 
-Both registries are read through their own interfaces: npm packuments for
-`definitionHash`, and `repo.hex.pm/versions` for Hex. The Hex one is fetched
-**once per plan** regardless of how many parsers it covers, because that file is
-the whole registry. The per-package API cannot serve this — it rate-limits at a
-hundred a minute, so a hundred and thirteen lookups fail partway through.
-
-**Only npm can recover a version.** A packument carries every version's
-`definitionHash`; the Hex registry file carries versions and nothing else. So
-the version a definition went out under is read from npm alone, which is sound
-only while Hex holds nothing npm does not. npm and Hex publish in parallel, so
-when npm fails and Hex does not, Hex is ahead: the next run reads the definition
-as unpublished, takes a fresh patch, and Hex receives the same definition again
-under it — one extra Hex release per run until npm has the definition.
-Publishing the failed version to npm by hand before the next run avoids it.
+**Each registry is asked about itself.** npm packuments carry every version's
+`definitionHash`. For Hex, `repo.hex.pm/versions` lists the versions, fetched
+**once per plan** because that file is the whole registry; the per-package API
+cannot serve this, since it rate-limits at a hundred a minute and a hundred and
+thirteen lookups fail partway through. The tarball of each parser's newest Hex
+release then supplies its definition from `priv/parsers/*.lumis.json`. So npm
+failing where Hex succeeded, or a packument that has not caught up with a
+publish yet, leaves Hex alone: npm receives the version Hex already has.
 
 **Hex gets a release only when its own package changes.** A Hex package is
 `priv/parsers`, a `mix.exs` and a README, so a format change that touches only
-the npm entry is no news to it. The plan compares the newest Hex release, through
-npm's metadata for the same version, with what it would stage: the definition,
-the `@lumis-sh/wasm-*` dependencies, and whether it was staged from a format
-older than `HEX_FORMAT_VERSION`. For a bundle it compares the dependency list,
-members and ranges. When nothing differs, Hex keeps the version it has, and its
-versions and npm's part ways until the next change that reaches it. A language's
-`requires` is part of its definition, so a new required grammar is a new version
-on both.
+the npm entry is no news to it. The plan compares the definition the newest Hex
+release ships with the one it would stage. For a bundle it compares the
+dependency list, members and ranges. When nothing differs, Hex keeps the version
+it has, and its versions and npm's part ways until the next change that reaches
+it. A language's `requires` is part of its definition, so a new required grammar
+is a new version on both.
 
 A run filtered to named parsers plans **no bundles**. A bundle depends on every
 parser it groups, and the ones it would be short of are exactly the ones the
@@ -984,12 +976,6 @@ staged with it, and a bundle from `wasm-bundle-<name>/package.json`.
 Hex publishes on every run of `WASM Release`, alongside npm. There is no input
 to set and no separate trigger: the plan decides, and a package already on Hex
 at its resolved version is simply not in it.
-
-**Publish a parser to npm before you publish it to Hex by hand.** The plan
-recovers a published version's definition from npm alone, so a definition Hex
-had first reads as unpublished, takes a fresh patch, and is released to Hex
-again unchanged on every run until npm has it. The workflow publishes the two in
-parallel and accepts that when npm fails; by hand there is no reason to.
 
 Nothing asks a registry whether a version is already there. The plan settled
 that, and Hex rejects a duplicate regardless, which is what makes a retry safe
