@@ -93,6 +93,7 @@ jobs:
           mise run langs-upgrade-queries default
           mise run langs-fetch-queries
           mise run langs-preprocess-queries
+          mise run docs-gen-languages-md
           git status --short
 
       - name: Create Pull Request
@@ -101,6 +102,8 @@ jobs:
           token: ${{ secrets.CI_TOKEN }}
           add-paths: |
             languages.toml
+            LANGUAGES.md
+            docs/content/reference/languages.md
             queries/upstream
             queries/processed
             queries/override

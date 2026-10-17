@@ -10,6 +10,8 @@ on:
     paths:
       - "queries/**"
       - "languages.toml"
+      - "LANGUAGES.md"
+      - "docs/content/reference/languages.md"
       - "crates/lumis-build/**"
       - "crates/dev/**"
       - "packages/javascript/package.json"
@@ -26,6 +28,8 @@ on:
     paths:
       - "queries/**"
       - "languages.toml"
+      - "LANGUAGES.md"
+      - "docs/content/reference/languages.md"
       - "crates/lumis-build/**"
       - "crates/dev/**"
       - "packages/javascript/package.json"
@@ -71,6 +75,13 @@ jobs:
         run: |
           cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- preprocess-queries
           git diff --exit-code -- queries/processed
+
+      # Both tables list every language's pinned revisions, so a revision bump
+      # that skips the generator leaves them pointing at the old one.
+      - name: The language tables are up to date
+        run: |
+          cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- gen-languages-md
+          git diff --exit-code -- LANGUAGES.md docs/content/reference/languages.md
 
       - name: Every predicate compiles under the regex crate
         run: cargo test -p lumis-build
