@@ -2396,7 +2396,16 @@ fn fetch_queries(name: &str) -> Result<()> {
     let tmp = tmpdir()?;
     let mut repo_clones: BTreeMap<String, String> = BTreeMap::new();
 
-    for query_name in query_names()? {
+    // Every parser, not only the directories already here, or a language whose
+    // directory is deleted is never fetched again. llvm was, by #508.
+    let mut fetch: BTreeSet<String> = query_names()?.into_iter().collect();
+    fetch.extend(
+        toml.parsers
+            .iter()
+            .map(|(lang, info)| query_source_name(lang, info).to_string()),
+    );
+
+    for query_name in fetch {
         if !name.is_empty() && query_name != name {
             continue;
         }
@@ -7349,6 +7358,56 @@ mod tests {
                 vec!["demo"]
             );
         });
+
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn fetch_queries_fetches_a_parser_without_a_query_directory() {
+        let root = unique_test_root();
+        let source = root.join("source");
+        let work = root.join("work");
+        fs::create_dir_all(source.join("queries/llvm")).expect("source should be created");
+        fs::create_dir_all(&work).expect("work directory should be created");
+        fs::write(
+            source.join("queries/llvm/highlights.scm"),
+            "(comment) @comment\n",
+        )
+        .expect("query should be written");
+        run_test_git(&source, &["init", "--quiet"]);
+        run_test_git(&source, &["add", "."]);
+        run_test_git(
+            &source,
+            &[
+                "-c",
+                "user.name=Lumis",
+                "-c",
+                "user.email=dev@lumis.sh",
+                "-c",
+                "commit.gpgsign=false",
+                "commit",
+                "--quiet",
+                "-m",
+                "queries",
+            ],
+        );
+        let rev = run_test_git(&source, &["rev-parse", "HEAD"]);
+        fs::write(
+            work.join("languages.toml"),
+            format!(
+                "[queries.default]\ngit = \"{}\"\nrev = \"{rev}\"\npath = \"queries\"\n\n[parsers.llvm]\n",
+                source.display()
+            ),
+        )
+        .expect("languages.toml should be written");
+
+        in_directory(&work, || fetch_queries("")).expect("queries should be fetched");
+
+        assert_eq!(
+            fs::read_to_string(work.join("queries/upstream/llvm/highlights.scm"))
+                .expect("llvm should be fetched"),
+            "(comment) @comment\n"
+        );
 
         let _ = fs::remove_dir_all(root);
     }
