@@ -104,82 +104,8 @@
 //!
 //! ## Languages available
 //!
-//! | Language | File Extensions |
-//! |----------|-----------------|
-//! | Angular | *.angular, component.html |
-//! | Assembly | *.s, *.asm, *.assembly |
-//! | Astro | *.astro |
-//! | Bash | *.bash, *.bats, *.cgi, *.command, *.env, *.fcgi, *.ksh, *.sh, *.sh.in, *.tmux, *.tool, *.zsh, .`bash_aliases`, .`bash_history`, .`bash_logout`, .`bash_profile`, .bashrc, .cshrc, .env, .env.example, .flaskenv, .kshrc, .login, .profile, .zlogin, .zlogout, .zprofile, .zshenv, .zshrc, 9fs, PKGBUILD, `bash_aliases`, `bash_logout`, `bash_profile`, bashrc, cshrc, ebuild, eclass, gradlew, kshrc, login, man, profile, zlogin, zlogout, zprofile, zshenv, zshrc |
-//! | C | *.c |
-//! | Caddy | Caddyfile |
-//! | `CMake` | *.cmake, *.cmake.in, CMakeLists.txt |
-//! | C++ | *.cc, *.cpp, *.h, *.hh, *.hpp, *.ino, *.cxx, *.cu, *.hxx |
-//! | CSS | *.css |
-//! | CSV | *.csv |
-//! | C# | *.cs |
-//! | Clojure | *.bb, *.boot, *.clj, *.cljc, *.clje, *.cljs, *.cljx, *.edn, *.joke, *.joker |
-//! | Comment | |
-//! | Common Lisp | *.lisp, *.lsp, *.asd |
-//! | Dart | *.dart |
-//! | Diff | *.diff |
-//! | Dockerfile | Dockerfile, dockerfile, docker, Containerfile, container, *.dockerfile, *.docker, *.container |
-//! | `EEx` | *.eex |
-//! | EJS | *.ejs |
-//! | ERB | *.erb |
-//! | Elixir | *.ex, *.exs |
-//! | Elm | *.elm |
-//! | Erlang | *.erl, *.app, *.app.src, *.es, *.escript, *.hrl, *.xrl, *.yrl, Emakefile, rebar.config |
-//! | Fish | *.fish |
-//! | F# | *.fs, *.fsx, *.fsi |
-//! | Gleam | *.gleam |
-//! | Glimmer | *.hbs, *.handlebars, *.html.handlebars, *.glimmer |
-//! | Go | *.go |
-//! | GraphQL | |
-//! | `HEEx` | *.heex, *.neex |
-//! | HTML | *.html, *.htm, *.xhtml |
-//! | Haskell | *.hs, *.hs-boot |
-//! | HCL | *.hcl, *.nomad, *.tf, *.tfvars, *.workflow |
-//! | `IEx` | *.iex |
-//! | JSON | *.json, *.avsc, *.geojson, *.gltf, *.har, *.ice, *.JSON-tmLanguage, *.jsonl, *.mcmeta, *.tfstate, *.tfstate.backup, *.topojson, *.webapp, *.webmanifest, .arcconfig, .auto-changelog, .c8rc, .htmlhintrc, .imgbotconfig, .nycrc, .tern-config, .tern-project, .watchmanconfig, Pipfile.lock, composer.lock, mcmod.info, flake.lock |
-//! | Java | *.java |
-//! | JavaScript | *.cjs, *.js, *.mjs, *.snap, *.jsx |
-//! | Kotlin | *.kt, *.ktm, *.kts |
-//! | LaTeX | *.aux, *.cls, *.sty, *.tex |
-//! | Liquid | *liquid |
-//! | LLVM | *.llvm, *.ll |
-//! | Lua | *.lua |
-//! | Make | *.mak, *.d, *.make, *.makefile, *.mk, *.mkfile, *.dsp, `BSDmakefile`, `GNUmakefile`, Kbuild, Makefile, MAKEFILE, Makefile.am, Makefile.boot, Makefile.frag, Makefile*.in, Makefile.inc, Makefile.wat, makefile, makefile.sco, mkfile |
-//! | Markdown | *.md, README, LICENSE |
-//! | Markdown Inline | |
-//! | Nix | *.nix |
-//! | OCaml | *.ml |
-//! | OCaml Interface | *.mli |
-//! | Objective-C | *.m, *.objc |
-//! | Perl | *.pm, *.pl, *.t |
-//! | PHP | *.php, *.phtml, *.php3, *.php4, *.php5, *.php7, *.phps |
-//! | Plain Text | |
-//! | PowerShell | *.ps1, *.psm1 |
-//! | Protocol Buffer | *.proto, *.protobuf, *.proto2, *.proto3 |
-//! | Python | *.py, *.py3, *.pyi, *.bzl, TARGETS, BUCK, DEPS |
-//! | R | *.R, *.r, *.rd, *.rsx, .Rprofile, expr-dist |
-//! | Regex | *.regex |
-//! | Ruby | *.rb, *.builder, *.spec, *.rake, Gemfile, Rakefile |
-//! | Rust | *.rs |
-//! | SCSS | *.scss |
-//! | SQL | *.sql, *.pgsql |
-//! | Scala | *.scala, *.sbt, *.sc |
-//! | Surface | *.surface, *.sface |
-//! | Svelte | *.svelte |
-//! | Swift | *.swift |
-//! | TOML | *.toml, Cargo.lock, Gopkg.lock, Pipfile, pdm.lock, poetry.lock, uv.lock |
-//! | TSX | *.tsx |
-//! | TypeScript | *.ts |
-//! | Typst | *.typ, *.typst |
-//! | Vim | *.vim, *.viml |
-//! | Vue | *.vue |
-//! | XML | *.ant, *.csproj, *.mjml, *.plist, *.resx, *.svg, *.ui, *.vbproj, *.xaml, *.xml, *.xsd, *.xsl, *.xslt, *.zcml, *.rng, App.config, nuget.config, packages.config, .classpath, .cproject, .project |
-//! | YAML | *.yaml, *.yml |
-//! | Zig | *.zig |
+//! See [Languages](https://docs.lumis.sh/reference/languages) for every supported
+//! language and the files each one detects.
 //!
 //! ## Themes available
 //!
