@@ -400,6 +400,14 @@ define_catalog! {
             aliases: [],
             package_name: "@lumis-sh/wasm-glsl"
         },
+        "groovy" => {
+            aliases: [],
+            package_name: "@lumis-sh/wasm-groovy"
+        },
+        "hurl" => {
+            aliases: [],
+            package_name: "@lumis-sh/wasm-hurl"
+        },
         "jinja" => {
             aliases: ["jinja2"],
             package_name: "@lumis-sh/wasm-jinja"
@@ -467,7 +475,7 @@ define_catalog! {
     },
     bundles: {
         "backend" => ["csharp", "elixir", "erlang", "go", "java", "javadoc", "javascript", "kotlin", "php", "protobuf", "python", "ruby", "rust", "scala", "sql", "typescript"],
-        "full" => ["angular", "asm", "astro", "bash", "c", "caddy", "clojure", "cmake", "comment", "commonlisp", "cpp", "csharp", "css", "csv", "dart", "diff", "dockerfile", "eex", "ejs", "elixir", "elm", "erb", "erlang", "fish", "fsharp", "gleam", "glimmer", "go", "graphql", "haskell", "hcl", "heex", "html", "http", "iex", "ini", "java", "javascript", "json", "julia", "kotlin", "latex", "liquid", "llvm", "lua", "make", "markdown", "markdown_inline", "mdx", "nix", "nushell", "objc", "ocaml", "ocaml_interface", "perl", "php", "powershell", "protobuf", "python", "r", "regex", "ruby", "rust", "scala", "scss", "sql", "surface", "svelte", "swift", "toml", "tsx", "typescript", "typst", "vim", "vue", "wat", "xml", "yaml", "zig", "arduino", "bicep", "dot", "editorconfig", "gitattributes", "javadoc", "jq", "kdl", "luadoc", "nim", "pascal", "puppet", "terraform", "toon", "wgsl", "zsh", "d", "fortran", "gitignore", "glsl", "jinja", "jinja_inline", "json5", "just", "matlab", "mermaid", "nginx", "prisma", "qmljs", "racket", "rst", "scheme", "solidity", "tcl", "vhdl"],
+        "full" => ["angular", "asm", "astro", "bash", "c", "caddy", "clojure", "cmake", "comment", "commonlisp", "cpp", "csharp", "css", "csv", "dart", "diff", "dockerfile", "eex", "ejs", "elixir", "elm", "erb", "erlang", "fish", "fsharp", "gleam", "glimmer", "go", "graphql", "haskell", "hcl", "heex", "html", "http", "iex", "ini", "java", "javascript", "json", "julia", "kotlin", "latex", "liquid", "llvm", "lua", "make", "markdown", "markdown_inline", "mdx", "nix", "nushell", "objc", "ocaml", "ocaml_interface", "perl", "php", "powershell", "protobuf", "python", "r", "regex", "ruby", "rust", "scala", "scss", "sql", "surface", "svelte", "swift", "toml", "tsx", "typescript", "typst", "vim", "vue", "wat", "xml", "yaml", "zig", "arduino", "bicep", "dot", "editorconfig", "gitattributes", "javadoc", "jq", "kdl", "luadoc", "nim", "pascal", "puppet", "terraform", "toon", "wgsl", "zsh", "d", "fortran", "gitignore", "glsl", "groovy", "hurl", "jinja", "jinja_inline", "json5", "just", "matlab", "mermaid", "nginx", "prisma", "qmljs", "racket", "rst", "scheme", "solidity", "tcl", "vhdl"],
         "system" => ["asm", "bash", "c", "cmake", "cpp", "go", "llvm", "make", "rust", "wat", "zig", "zsh"],
         "web" => ["css", "html", "javascript", "json", "tsx", "typescript"],
         "web-extra" => ["angular", "astro", "dart", "eex", "ejs", "elm", "erb", "glimmer", "graphql", "heex", "markdown", "markdown_inline", "mdx", "php", "prisma", "scss", "surface", "svelte", "vue", "xml"],

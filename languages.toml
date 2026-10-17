@@ -924,19 +924,19 @@ version = "0.2.0"
 display_name = "GLSL"
 globs = ["*.comp", "*.frag", "*.geom", "*.glsl", "*.tesc", "*.tese", "*.vert"]
 
-# [parsers.groovy]
-# git = "https://github.com/murtaza64/tree-sitter-groovy.git"
-# rev = "781d9cd1b482a70a6b27091e5c9e14bbcab3b768"
-# version = "0.0.1"
-# globs = ["*.gradle", "*.groovy", "Jenkinsfile"]
-# emacs = ["groovy"]
-# shebang = ["groovy"]
+[parsers.groovy]
+git = "https://github.com/murtaza64/tree-sitter-groovy.git"
+rev = "2a6ddd558b6aa39c5b77d8db9fe9baf817486b2c"
+version = "0.0.1"
+globs = ["*.gradle", "*.groovy", "Jenkinsfile"]
+emacs = ["groovy"]
+shebang = ["groovy"]
 
-# [parsers.hurl]
-# git = "https://github.com/pfeiferj/tree-sitter-hurl.git"
-# rev = "c9538dbb0f52f70896ee6ff56cd3ab6a8bfba57c"
-# version = "0.1.0"
-# globs = ["*.hurl"]
+[parsers.hurl]
+git = "https://github.com/pfeiferj/tree-sitter-hurl.git"
+rev = "597efbd7ce9a814bb058f48eabd055b1d1e12145"
+version = "1.7.0"
+globs = ["*.hurl"]
 
 [parsers.jinja]
 git = "https://github.com/cathaysia/tree-sitter-jinja.git"
