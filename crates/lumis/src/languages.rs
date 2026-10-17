@@ -106,6 +106,8 @@ unsafe extern "C" {
     fn tree_sitter_eex() -> *const ();
     #[cfg(feature = "lang-gitattributes")]
     fn tree_sitter_gitattributes() -> *const ();
+    #[cfg(feature = "lang-gitignore")]
+    fn tree_sitter_gitignore() -> *const ();
     #[cfg(feature = "lang-gleam")]
     fn tree_sitter_gleam() -> *const ();
     #[cfg(feature = "lang-glimmer")]
@@ -122,6 +124,10 @@ unsafe extern "C" {
     fn tree_sitter_jinja_inline() -> *const ();
     #[cfg(feature = "lang-jq")]
     fn tree_sitter_jq() -> *const ();
+    #[cfg(feature = "lang-json5")]
+    fn tree_sitter_json5() -> *const ();
+    #[cfg(feature = "lang-just")]
+    fn tree_sitter_just() -> *const ();
     #[cfg(feature = "lang-kdl")]
     fn tree_sitter_kdl() -> *const ();
     #[cfg(feature = "lang-kotlin")]
@@ -134,8 +140,12 @@ unsafe extern "C" {
     fn tree_sitter_luadoc() -> *const ();
     #[cfg(feature = "lang-dot")]
     fn tree_sitter_dot() -> *const ();
+    #[cfg(feature = "lang-mermaid")]
+    fn tree_sitter_mermaid() -> *const ();
     #[cfg(feature = "lang-nim")]
     fn tree_sitter_nim() -> *const ();
+    #[cfg(feature = "lang-prisma")]
+    fn tree_sitter_prisma() -> *const ();
     #[cfg(feature = "lang-protobuf")]
     fn tree_sitter_proto() -> *const ();
     #[cfg(feature = "lang-python")]
@@ -150,6 +160,8 @@ unsafe extern "C" {
     fn tree_sitter_surface() -> *const ();
     #[cfg(feature = "lang-svelte")]
     fn tree_sitter_svelte() -> *const ();
+    #[cfg(feature = "lang-tcl")]
+    fn tree_sitter_tcl() -> *const ();
     #[cfg(feature = "lang-terraform")]
     fn tree_sitter_terraform() -> *const ();
     #[cfg(feature = "lang-toon")]
@@ -243,6 +255,8 @@ impl LanguageConfig for Language {
             Language::FSharp => &FSHARP_CONFIG,
             #[cfg(feature = "lang-gitattributes")]
             Language::Gitattributes => &GITATTRIBUTES_CONFIG,
+            #[cfg(feature = "lang-gitignore")]
+            Language::GitIgnore => &GITIGNORE_CONFIG,
             #[cfg(feature = "lang-gleam")]
             Language::Gleam => &GLEAM_CONFIG,
             #[cfg(feature = "lang-glimmer")]
@@ -273,6 +287,8 @@ impl LanguageConfig for Language {
             Language::JavaScript => &JAVASCRIPT_CONFIG,
             #[cfg(feature = "lang-json")]
             Language::JSON => &JSON_CONFIG,
+            #[cfg(feature = "lang-json5")]
+            Language::JSON5 => &JSON5_CONFIG,
             #[cfg(feature = "lang-julia")]
             Language::Julia => &JULIA_CONFIG,
             #[cfg(feature = "lang-jinja")]
@@ -283,6 +299,8 @@ impl LanguageConfig for Language {
             Language::Javadoc => &JAVADOC_CONFIG,
             #[cfg(feature = "lang-jq")]
             Language::Jq => &JQ_CONFIG,
+            #[cfg(feature = "lang-just")]
+            Language::Just => &JUST_CONFIG,
             #[cfg(feature = "lang-kdl")]
             Language::Kdl => &KDL_CONFIG,
             #[cfg(feature = "lang-kotlin")]
@@ -313,6 +331,8 @@ impl LanguageConfig for Language {
             Language::MarkdownInline => &MARKDOWN_INLINE_CONFIG,
             #[cfg(feature = "lang-mdx")]
             Language::Mdx => &MDX_CONFIG,
+            #[cfg(feature = "lang-mermaid")]
+            Language::Mermaid => &MERMAID_CONFIG,
             #[cfg(feature = "lang-nginx")]
             Language::Nginx => &NGINX_CONFIG,
             #[cfg(feature = "lang-nim")]
@@ -329,6 +349,8 @@ impl LanguageConfig for Language {
             Language::Php => &PHP_CONFIG,
             #[cfg(feature = "lang-powershell")]
             Language::PowerShell => &POWERSHELL_CONFIG,
+            #[cfg(feature = "lang-prisma")]
+            Language::Prisma => &PRISMA_CONFIG,
             #[cfg(feature = "lang-protobuf")]
             Language::ProtoBuf => &PROTO_BUF_CONFIG,
             #[cfg(feature = "lang-puppet")]
@@ -367,6 +389,8 @@ impl LanguageConfig for Language {
             Language::Swift => &SWIFT_CONFIG,
             #[cfg(feature = "lang-systemverilog")]
             Language::SystemVerilog => &SYSTEMVERILOG_CONFIG,
+            #[cfg(feature = "lang-tcl")]
+            Language::Tcl => &TCL_CONFIG,
             #[cfg(feature = "lang-terraform")]
             Language::Terraform => &TERRAFORM_CONFIG,
             #[cfg(feature = "lang-toon")]
@@ -867,6 +891,22 @@ static GITATTRIBUTES_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(||
     config
 });
 
+#[cfg(feature = "lang-gitignore")]
+static GITIGNORE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_gitignore) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "gitignore",
+        GITIGNORE_HIGHLIGHTS,
+        GITIGNORE_INJECTIONS,
+        GITIGNORE_LOCALS,
+    )
+    .expect("failed to create gitignore highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
 #[cfg(feature = "lang-gleam")]
 static GLEAM_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_gleam) };
@@ -1087,6 +1127,22 @@ static JSON_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     config
 });
 
+#[cfg(feature = "lang-json5")]
+static JSON5_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_json5) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "json5",
+        JSON5_HIGHLIGHTS,
+        JSON5_INJECTIONS,
+        JSON5_LOCALS,
+    )
+    .expect("failed to create json5 highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
 #[cfg(feature = "lang-julia")]
 static JULIA_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
@@ -1157,6 +1213,22 @@ static JQ_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         JQ_LOCALS,
     )
     .expect("failed to create jq highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+#[cfg(feature = "lang-just")]
+static JUST_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_just) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "just",
+        JUST_HIGHLIGHTS,
+        JUST_INJECTIONS,
+        JUST_LOCALS,
+    )
+    .expect("failed to create just highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
@@ -1394,6 +1466,22 @@ static MDX_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     config
 });
 
+#[cfg(feature = "lang-mermaid")]
+static MERMAID_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_mermaid) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "mermaid",
+        MERMAID_HIGHLIGHTS,
+        MERMAID_INJECTIONS,
+        MERMAID_LOCALS,
+    )
+    .expect("failed to create mermaid highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
 #[cfg(feature = "lang-nim")]
 static NIM_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_nim) };
@@ -1492,6 +1580,22 @@ static POWERSHELL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         POWERSHELL_LOCALS,
     )
     .expect("failed to create poweshell highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+#[cfg(feature = "lang-prisma")]
+static PRISMA_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_prisma) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "prisma",
+        PRISMA_HIGHLIGHTS,
+        PRISMA_INJECTIONS,
+        PRISMA_LOCALS,
+    )
+    .expect("failed to create prisma highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
@@ -1782,6 +1886,22 @@ static SYSTEMVERILOG_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(||
         SYSTEMVERILOG_LOCALS,
     )
     .expect("failed to create systemverilog highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+#[cfg(feature = "lang-tcl")]
+static TCL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_tcl) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "tcl",
+        TCL_HIGHLIGHTS,
+        TCL_INJECTIONS,
+        TCL_LOCALS,
+    )
+    .expect("failed to create tcl highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
@@ -2083,11 +2203,7 @@ mod tests {
         }
     }
 
-    fn assert_language_sample_highlights(
-        lang: Language,
-        expected_name: &str,
-        sample_file: &str,
-    ) -> Vec<HighlightEvent> {
+    fn assert_language_sample_highlights(lang: Language, expected_name: &str, sample_file: &str) {
         let config = lang.config();
         let source =
             fs::read_to_string(samples_dir().join(sample_file)).expect("sample should exist");
@@ -2111,21 +2227,17 @@ mod tests {
             !rendered.is_empty(),
             "expected highlight events for {sample_file}"
         );
-        rendered
-    }
 
-    // A language with no grammar or no queries falls back to plain text, which
-    // still emits source events, so only a highlight shows it is wired up.
-    #[cfg(feature = "lang-llvm")]
-    #[test]
-    fn llvm_sample_is_highlighted() {
-        let events = assert_language_sample_highlights(Language::Llvm, "LLVM", "llvm.ll");
-        assert!(
-            events
-                .iter()
-                .any(|event| matches!(event, HighlightEvent::HighlightStart { .. })),
-            "expected highlights for llvm.ll"
-        );
+        // A language missing from `config()` falls back to plain text, which
+        // still emits source events, so only a highlight shows it is wired up.
+        if lang != Language::PlainText {
+            assert!(
+                rendered
+                    .iter()
+                    .any(|event| matches!(event, HighlightEvent::HighlightStart { .. })),
+                "expected highlights for {sample_file}"
+            );
+        }
     }
 
     fn sample_file_for_language_id(id: &str) -> Option<String> {
