@@ -124,15 +124,27 @@ const lumisBinary = resolve(
 // consumes a different theme format. Some colour differences are therefore about
 // the theme rather than the parse, and the page has to say so rather than let a
 // reader assume otherwise.
-// The version that actually rendered, not the range that selected it. The
-// comparison libraries float, so a specifier here would publish "shiki latest"
-// and leave a reader unable to tell what was measured.
+// The version that actually rendered, which has to be the exact version the
+// benchmark package declares. A tag or a range lets the lockfile move it while
+// that file stays the same, and pnpm re-resolves "latest" whenever it regenerates
+// the lockfile, so an unrelated dependency update would move the published
+// comparison.
 // Each is a direct dependency of the benchmark package, so pnpm links it into that
 // package's node_modules. Reading it there rather than resolving it also works for
 // a package whose `exports` leaves out its package.json, as @tanstack/highlight's do.
+const benchmarkPackage = JSON.parse(
+  await readFile(resolve(benchmarksDir, "javascript/package.json"), "utf8"),
+);
 const installedVersion = async (name) => {
   const manifest = resolve(benchmarksDir, "javascript/node_modules", name, "package.json");
-  return JSON.parse(await readFile(manifest, "utf8")).version;
+  const { version } = JSON.parse(await readFile(manifest, "utf8"));
+  const declared = benchmarkPackage.dependencies[name];
+  if (declared !== version) {
+    throw new Error(
+      `benchmarks/javascript/package.json declares ${name} as "${declared}" but ${version} rendered; pin it to the exact version`,
+    );
+  }
+  return version;
 };
 const benchmarkCargo = await readFile(resolve(benchmarksDir, "rust/Cargo.toml"), "utf8");
 const crateVersion = (name) =>
