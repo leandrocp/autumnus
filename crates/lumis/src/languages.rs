@@ -291,6 +291,8 @@ impl LanguageConfig for Language {
             Language::LaTeX => &LATEX_CONFIG,
             #[cfg(feature = "lang-liquid")]
             Language::Liquid => &LIQUID_CONFIG,
+            #[cfg(feature = "lang-llvm")]
+            Language::Llvm => &LLVM_CONFIG,
             #[cfg(feature = "lang-lua")]
             Language::Lua => &LUA_CONFIG,
             #[cfg(feature = "lang-luadoc")]
@@ -1222,6 +1224,20 @@ static LIQUID_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     config
 });
 
+#[cfg(feature = "lang-llvm")]
+static LLVM_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(tree_sitter_llvm::LANGUAGE),
+        "llvm",
+        LLVM_HIGHLIGHTS,
+        LLVM_INJECTIONS,
+        LLVM_LOCALS,
+    )
+    .expect("failed to create llvm highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
 #[cfg(feature = "lang-lua")]
 static LUA_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
@@ -1998,7 +2014,7 @@ static ZSH_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use lumis_wasm_runtime::tree_sitter_highlight::{Highlighter, Interrupt};
+    use lumis_wasm_runtime::tree_sitter_highlight::{HighlightEvent, Highlighter, Interrupt};
     use serde::Deserialize;
     use std::{fs, path::PathBuf};
 
@@ -2067,7 +2083,11 @@ mod tests {
         }
     }
 
-    fn assert_language_sample_highlights(lang: Language, expected_name: &str, sample_file: &str) {
+    fn assert_language_sample_highlights(
+        lang: Language,
+        expected_name: &str,
+        sample_file: &str,
+    ) -> Vec<HighlightEvent> {
         let config = lang.config();
         let source =
             fs::read_to_string(samples_dir().join(sample_file)).expect("sample should exist");
@@ -2090,6 +2110,21 @@ mod tests {
         assert!(
             !rendered.is_empty(),
             "expected highlight events for {sample_file}"
+        );
+        rendered
+    }
+
+    // A language with no grammar or no queries falls back to plain text, which
+    // still emits source events, so only a highlight shows it is wired up.
+    #[cfg(feature = "lang-llvm")]
+    #[test]
+    fn llvm_sample_is_highlighted() {
+        let events = assert_language_sample_highlights(Language::Llvm, "LLVM", "llvm.ll");
+        assert!(
+            events
+                .iter()
+                .any(|event| matches!(event, HighlightEvent::HighlightStart { .. })),
+            "expected highlights for llvm.ll"
         );
     }
 
