@@ -250,10 +250,11 @@ repository write access can publish*. That was equally true of `NPM_TOKEN`,
 which any branch's workflow could read, so this is not a new exposure — but it
 is not one trusted publishing removes either.
 
-What holds the line today is the `github.ref == 'refs/heads/main'` guard on the
-publishing jobs. Note what that is worth: `workflow_dispatch` runs the workflow
-file **from the ref you pick**, so the guard is only as good as the file on that
-branch. npm's third, optional claim is a GitHub **environment**, which would
+What holds the line today is the ref guard on the publishing jobs: `main`, or a
+release tag such as `wasm-bundles/v*`, which `release-tag.yml` pushes but anyone
+with write access can too. Note what that is worth: `workflow_dispatch` runs
+the workflow file **from the ref you pick**, so the guard is only as good as the
+file on that branch. npm's third, optional claim is a GitHub **environment**, which would
 move the check into repository settings where a branch cannot rewrite it. It is
 deliberately not used. Adding it later means revoking and re-adding all 142
 configurations, so it is a decision to revisit as a whole, not per package.
