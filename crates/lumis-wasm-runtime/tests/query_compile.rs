@@ -199,8 +199,7 @@ fn fixture_parsers_compile_their_queries_in_wasmtime() {
 }
 
 /// Every parser `languages.toml` pins, or those `LUMIS_QUERY_LANGUAGES` names,
-/// as `mise run wasm-build` built it. A grammar CI cannot build is checked as
-/// committed under `fixtures/parsers`, as the JavaScript half does.
+/// as `mise run wasm-build` built it.
 #[test]
 #[ignore = "needs built parsers: mise run test-queries"]
 fn built_parsers_compile_their_queries_in_wasmtime() {
@@ -226,10 +225,10 @@ fn built_parsers_compile_their_queries_in_wasmtime() {
             .iter()
             .filter(|parser| only.is_empty() || only.contains(&parser.id)),
         |parser| {
-            [root.join("tmp/wasm/build"), root.join("fixtures/parsers")]
-                .into_iter()
-                .map(|dir| dir.join(format!("{}.wasm", parser.wasm_name)))
-                .find(|path| path.exists())
+            let path = root
+                .join("tmp/wasm/build")
+                .join(format!("{}.wasm", parser.wasm_name));
+            path.exists().then_some(path)
         },
     );
 }

@@ -53,18 +53,10 @@ function wasmName(id: string, entry: ParserEntry): string {
   return entry.wasm_name ?? `tree-sitter-${id}`;
 }
 
-/**
- * The parser built from the revision `languages.toml` pins: the output of
- * `mise run wasm-build`, or the copy committed under `fixtures/parsers/` for a
- * grammar CI cannot build. A build wins, so a grammar that builds anywhere is
- * checked as built rather than as whatever was committed months ago.
- */
+/** The parser built from the revision `languages.toml` pins by `mise run wasm-build`. */
 function parserPath(id: string, entry: ParserEntry): string | undefined {
-  const parser = wasmName(id, entry);
-  return [
-    join(workspaceRoot, "tmp", "wasm", "build", `${parser}.wasm`),
-    join(workspaceRoot, "fixtures", "parsers", `${parser}.wasm`),
-  ].find((path) => existsSync(path));
+  const path = join(workspaceRoot, "tmp", "wasm", "build", `${wasmName(id, entry)}.wasm`);
+  return existsSync(path) ? path : undefined;
 }
 
 function queryPath(entry: ParserEntry, id: string, kind: string): string {
