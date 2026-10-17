@@ -3118,7 +3118,7 @@ struct WasmBuildContext<'a> {
     out_dir: &'a Path,
     log_dir: &'a Path,
     toolchain: &'a str,
-    wasi_sdk: &'a Path,
+    wasi_sdk: &'a dyn Fn() -> Result<PathBuf>,
     rebuild: bool,
 }
 
@@ -3153,6 +3153,8 @@ fn build_parser_wasm(
     let _ = fs::remove_file(&build_id_file);
     let _ = fs::remove_file(&wasm_file);
 
+    // Fetched here, not up front, so a run that reuses every parser downloads nothing.
+    let wasi_sdk = (context.wasi_sdk)()?;
     let clone_dir = format!("{}/tree-sitter-{parser_name}", context.tmp);
     println!("-> Building WASM for {parser_name} ...");
     println!("* cloning {git}");
@@ -3182,24 +3184,7 @@ fn build_parser_wasm(
     }
     if has_grammar_source || info.generate.unwrap_or(false) {
         if has_package_json {
-            let install_dir = if Path::new(&repo_dir).join("package.json").exists() {
-                &repo_dir
-            } else {
-                &metadata_dir
-            };
-            println!("* installing npm dependencies in {install_dir}");
-            // `npm ci` refuses to run when a grammar repository ships a
-            // `package-lock.json` that has drifted from its `package.json`, which
-            // several upstream grammars do. Fall back to `npm install` so the parser
-            // stays buildable instead of silently generating without dependencies.
-            let ci_failed = has_package_lock
-                && run_cmd_ok(&format!("cd {install_dir} && npm ci --ignore-scripts")).is_err();
-            if ci_failed {
-                println!("  npm ci failed, retrying with npm install");
-            }
-            if ci_failed || !has_package_lock {
-                let _ = run_cmd_ok(&format!("cd {install_dir} && npm install --ignore-scripts"));
-            }
+            install_npm_dependencies(&repo_dir, &metadata_dir, has_package_lock);
         }
         println!("* generating parser sources in {repo_dir}");
         let _ = run_cmd_ok(&format!("cd {repo_dir} && tree-sitter generate"));
@@ -3209,18 +3194,38 @@ fn build_parser_wasm(
     let build_log = context.log_dir.join(format!("{wasm_name}.log"));
     println!("* building wasm in {repo_dir}");
     println!("* build log: {}", build_log.display());
-    let succeeded =
-        if let Ok(()) = build_repo_wasm(&repo_dir, &wasm_file, &build_log, context.wasi_sdk) {
-            fs::write(&build_id_file, &build_id)?;
-            println!("{wasm_path}");
-            true
-        } else {
-            println!("  ERROR: failed to build {parser_name}");
-            false
-        };
+    let succeeded = if let Ok(()) = build_repo_wasm(&repo_dir, &wasm_file, &build_log, &wasi_sdk) {
+        fs::write(&build_id_file, &build_id)?;
+        println!("{wasm_path}");
+        true
+    } else {
+        println!("  ERROR: failed to build {parser_name}");
+        false
+    };
 
     let _ = run_cmd_ok(&format!("rm -rf {clone_dir}"));
     Ok(succeeded)
+}
+
+fn install_npm_dependencies(repo_dir: &str, metadata_dir: &str, has_package_lock: bool) {
+    let install_dir = if Path::new(repo_dir).join("package.json").exists() {
+        repo_dir
+    } else {
+        metadata_dir
+    };
+    println!("* installing npm dependencies in {install_dir}");
+    // `npm ci` refuses to run when a grammar repository ships a
+    // `package-lock.json` that has drifted from its `package.json`, which
+    // several upstream grammars do. Fall back to `npm install` so the parser
+    // stays buildable instead of silently generating without dependencies.
+    let ci_failed = has_package_lock
+        && run_cmd_ok(&format!("cd {install_dir} && npm ci --ignore-scripts")).is_err();
+    if ci_failed {
+        println!("  npm ci failed, retrying with npm install");
+    }
+    if ci_failed || !has_package_lock {
+        let _ = run_cmd_ok(&format!("cd {install_dir} && npm install --ignore-scripts"));
+    }
 }
 
 fn build_wasm(name: &str) -> Result<()> {
@@ -3234,13 +3239,12 @@ fn build_wasm(name: &str) -> Result<()> {
     let mut built_wasm_names = HashSet::new();
     let mut failed = Vec::new();
     let toolchain = wasm_toolchain_id();
-    let wasi_sdk = wasi_sdk::ensure()?;
     let context = WasmBuildContext {
         tmp: &tmp,
         out_dir: &out_dir,
         log_dir: &log_dir,
         toolchain: &toolchain,
-        wasi_sdk: &wasi_sdk,
+        wasi_sdk: &wasi_sdk::ensure,
         rebuild: std::env::var("LUMIS_WASM_REBUILD").ok().as_deref() == Some("1"),
     };
 
@@ -7293,6 +7297,62 @@ mod tests {
             output.unwrap().contains(&expected),
             "tree-sitter must be handed the pinned SDK, not left to fetch its own"
         );
+    }
+
+    const SDK_TEST_GIT: &str = "https://example.invalid/tree-sitter-x.git";
+
+    fn build_x_parser(dir: &Path, wasi_sdk: &dyn Fn() -> Result<PathBuf>) -> Result<bool> {
+        let context = WasmBuildContext {
+            tmp: dir.to_str().unwrap(),
+            out_dir: dir,
+            log_dir: dir,
+            toolchain: "toolchain",
+            wasi_sdk,
+            rebuild: false,
+        };
+        let info = ParserInfo {
+            rev: Some("abc".to_string()),
+            ..ParserInfo::default()
+        };
+        build_parser_wasm(&context, "x", "tree-sitter-x", &info, SDK_TEST_GIT)
+    }
+
+    #[test]
+    fn a_reused_parser_does_not_fetch_the_wasi_sdk() {
+        let dir = std::env::temp_dir().join(format!("lumis-reuse-sdk-{}", std::process::id()));
+        fs::create_dir_all(&dir).unwrap();
+        fs::write(dir.join("tree-sitter-x.wasm"), b"\0asm").unwrap();
+        fs::write(
+            dir.join("tree-sitter-x.build-id"),
+            wasm_build_id(SDK_TEST_GIT, "abc", None, false, "toolchain"),
+        )
+        .unwrap();
+        let fetches = std::cell::Cell::new(0);
+
+        let built = build_x_parser(&dir, &|| {
+            fetches.set(fetches.get() + 1);
+            bail!("no SDK in tests")
+        });
+        let _ = fs::remove_dir_all(&dir);
+
+        assert!(built.unwrap());
+        assert_eq!(fetches.get(), 0, "a cached parser compiles nothing");
+    }
+
+    #[test]
+    fn a_parser_that_compiles_fetches_the_wasi_sdk_first() {
+        let dir = std::env::temp_dir().join(format!("lumis-compile-sdk-{}", std::process::id()));
+        fs::create_dir_all(&dir).unwrap();
+        let fetches = std::cell::Cell::new(0);
+
+        let built = build_x_parser(&dir, &|| {
+            fetches.set(fetches.get() + 1);
+            bail!("no SDK in tests")
+        });
+        let _ = fs::remove_dir_all(&dir);
+
+        assert!(built.is_err(), "a failed SDK fetch must stop the run");
+        assert_eq!(fetches.get(), 1);
     }
 
     #[test]
