@@ -65,13 +65,7 @@ lumis = { path = "crates/lumis" }
 lumis-core = { path = "crates/lumis-core" }
 lumis-build = { path = "crates/lumis-build" }
 lumis-wasm-runtime = { path = "crates/lumis-wasm-runtime" }
-# tree-sitter 0.27.1's `WasmStore` copies only part of some grammars' supertype
-# tables, so the CLI, the Node addon and the Elixir NIF reject the csharp,
-# haskell and perl queries as "Impossible pattern" (#1738). The rev is
-# release-0.27's backport of the fix, tree-sitter/tree-sitter@fbfb07e, which no
-# release carries yet. Remove both entries once one does. tree-sitter-language
-# is patched too because the git tree-sitter takes it from its own repository,
-# and the grammar crates must link that same copy.
+# https://github.com/tree-sitter/tree-sitter/pull/6035
 tree-sitter = { git = "https://github.com/tree-sitter/tree-sitter", rev = "868eab666844fa42118af86e2893c104c50971cc" }
 tree-sitter-language = { git = "https://github.com/tree-sitter/tree-sitter", rev = "868eab666844fa42118af86e2893c104c50971cc" }
 
