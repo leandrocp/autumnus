@@ -23,6 +23,7 @@
 [
   "try"
   "catch"
+  "finally"
   "error"
 ] @keyword.exception
 
@@ -305,7 +306,10 @@ key: (identifier) @property
   (#eq? @keyword "as"))
 
 (command
-  "^" @punctuation.delimiter
+  [
+  "^"
+  "%"
+  ] @punctuation.delimiter
   head: (_) @function)
 
 "where" @function.builtin
