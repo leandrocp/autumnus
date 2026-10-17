@@ -97,6 +97,12 @@ enum Commands {
     StageHexWasm {
         name: String,
     },
+    /// Write a parser's `.wasm` from its Hex release, where `build-wasm` would.
+    FetchHexWasm {
+        name: String,
+        #[arg(long)]
+        version: String,
+    },
     /// Plan a release: the version each parser resolves to, and which
     /// registries are missing it. Emits JSON for the workflow matrix.
     WasmReleasePlan {
@@ -206,6 +212,7 @@ fn main() -> Result<()> {
         Commands::BuildWasm { name } => build_wasm(&name),
         Commands::StageWasm { name, version } => stage_wasm(&name, version.as_deref()),
         Commands::StageHexWasm { name } => stage_hex_wasm(&name),
+        Commands::FetchHexWasm { name, version } => fetch_hex_wasm(&name, &version),
         Commands::WasmReleasePlan { filter } => wasm_release_plan(&filter),
         Commands::StageHexBundle { name } => stage_hex_bundle(&name),
         Commands::StageTestParsers { out } => stage_test_parsers(Path::new(&out)),
@@ -4643,16 +4650,20 @@ fn fetch_packuments(packages: &[String]) -> Vec<Result<Option<Value>>> {
     fetch_each(packages, |agent, pkg| fetch_packument(agent, pkg))
 }
 
+fn registry_agent() -> ureq::Agent {
+    ureq::Agent::config_builder()
+        .timeout_global(Some(REGISTRY_TIMEOUT))
+        .build()
+        .into()
+}
+
 /// Each request is almost entirely round trip, so the whole catalog is worth
 /// fetching at once. Results come back in the order the items were given.
 fn fetch_each<T: Sync, R: Send>(
     items: &[T],
     fetch: impl Fn(&ureq::Agent, &T) -> R + Sync,
 ) -> Vec<R> {
-    let agent: ureq::Agent = ureq::Agent::config_builder()
-        .timeout_global(Some(REGISTRY_TIMEOUT))
-        .build()
-        .into();
+    let agent = registry_agent();
     let next = AtomicUsize::new(0);
     let mut fetched: Vec<(usize, R)> = thread::scope(|scope| {
         let workers: Vec<_> = (0..REGISTRY_CONCURRENCY.min(items.len()))
@@ -4720,6 +4731,9 @@ struct ReleasePlanEntry {
     version: String,
     npm: bool,
     hex: bool,
+    /// Hex already publishes this version, so npm is staged from its parser:
+    /// a rebuild need not reproduce it.
+    from_hex: bool,
 }
 
 /// Plan a release for every parser matching `filter`.
@@ -4871,6 +4885,7 @@ fn plan_parsers(
                 wasm_name,
                 npm_package,
                 hex_package,
+                from_hex: npm_needed && hex.contains(&version),
                 version,
                 npm: npm_needed,
                 hex: hex_needed,
@@ -4918,6 +4933,17 @@ fn fetch_hex_definitions(
 /// rate-limits. `repo.hex.pm` is a CDN, so a hundred tarballs cost bandwidth and
 /// nothing else.
 fn fetch_hex_definition(agent: &ureq::Agent, app: &str, version: &str) -> Result<Option<String>> {
+    read_hex_package(agent, app, version, hex_package_definition)
+}
+
+/// Read the Hex package `app` publishes at `version` with `read`, retrying
+/// like a packument fetch.
+fn read_hex_package<T>(
+    agent: &ureq::Agent,
+    app: &str,
+    version: &str,
+    read: impl Fn(&mut dyn std::io::Read) -> Result<T>,
+) -> Result<T> {
     let url = format!("https://repo.hex.pm/tarballs/{app}-{version}.tar");
     let mut last_error = None;
 
@@ -4926,8 +4952,8 @@ fn fetch_hex_definition(agent: &ureq::Agent, app: &str, version: &str) -> Result
             thread::sleep(Duration::from_millis(250 * u64::from(attempt)));
         }
         match agent.get(&url).call() {
-            Ok(mut response) => match hex_package_definition(response.body_mut().as_reader()) {
-                Ok(definition) => return Ok(definition),
+            Ok(mut response) => match read(&mut response.body_mut().as_reader()) {
+                Ok(read) => return Ok(read),
                 Err(err) => last_error = Some(err),
             },
             Err(err) => last_error = Some(err.into()),
@@ -4940,65 +4966,87 @@ fn fetch_hex_definition(agent: &ureq::Agent, app: &str, version: &str) -> Result
 
 /// The `definitionHash` in a Hex package, `None` for one staged before
 /// packages carried it.
-fn hex_package_definition(package: impl std::io::Read) -> Result<Option<String>> {
-    let contents = tar_entry(package, |name| name == "contents.tar.gz")?
-        .context("the Hex package has no contents.tar.gz")?;
-    let manifest = tar_entry(flate2::read::GzDecoder::new(contents.as_slice()), |name| {
-        name.starts_with("priv/parsers/") && name.ends_with(".lumis.json")
-    })?
-    .context("the Hex package ships no lumis.json")?;
-    let manifest: Value = serde_json::from_slice(&manifest).context("invalid lumis.json")?;
+fn hex_package_definition(package: &mut dyn std::io::Read) -> Result<Option<String>> {
+    let files = hex_parser_files(package, |path| path.ends_with(".lumis.json"))?;
+    let manifest = files
+        .values()
+        .next()
+        .context("the Hex package ships no lumis.json")?;
+    let manifest: Value = serde_json::from_slice(manifest).context("invalid lumis.json")?;
     Ok(manifest
         .get("definitionHash")
         .and_then(Value::as_str)
         .map(str::to_string))
 }
 
-/// The first file in a tar stream whose name `wanted` accepts.
-///
-/// A Hex package is a ustar archive with another inside it, and walking one
-/// needs only each header's name and size, so this reads those instead of
-/// taking a tar dependency, as `decode_hex_registry` does for protobuf. An
-/// entry it does not want is skipped by its size whatever its type, so
-/// long-name and PAX headers pass through.
-fn tar_entry(
-    mut tar: impl std::io::Read,
-    wanted: impl Fn(&str) -> bool,
-) -> Result<Option<Vec<u8>>> {
-    let mut header = [0u8; 512];
-    loop {
-        match tar.read_exact(&mut header) {
-            Err(err) if err.kind() == std::io::ErrorKind::UnexpectedEof => return Ok(None),
-            Err(err) => return Err(err.into()),
-            Ok(()) if header.iter().all(|&byte| byte == 0) => return Ok(None),
-            Ok(()) => {}
-        }
-        let field = |start: usize, end: usize| {
-            let field = &header[start..end];
-            String::from_utf8_lossy(
-                &field[..field.iter().position(|&b| b == 0).unwrap_or(field.len())],
-            )
-            .into_owned()
-        };
-        let size = u64::from_str_radix(field(124, 136).trim(), 8)
-            .context("a tar header carried no size")?;
-        let (prefix, name) = (field(345, 500), field(0, 100));
-        let name = if prefix.is_empty() {
-            name
-        } else {
-            format!("{prefix}/{name}")
-        };
+/// The parser a Hex package ships, checked against the `lumis.json` beside it.
+fn hex_package_parser(wasm_name: &str, package: &mut dyn std::io::Read) -> Result<Vec<u8>> {
+    let files = hex_parser_files(package, |path| {
+        Path::new(path)
+            .extension()
+            .is_some_and(|e| e == "json" || e == "wasm")
+    })?;
+    let file = |extension: &str| {
+        files
+            .iter()
+            .find(|(path, _)| path.ends_with(extension))
+            .map(|(_, bytes)| bytes)
+            .with_context(|| format!("the Hex package ships no {extension}"))
+    };
+    let manifest: LanguagePackage =
+        serde_json::from_slice(file(".lumis.json")?).context("invalid lumis.json")?;
+    let wasm = file(".wasm")?;
+    verify_staged_parser(wasm_name, wasm, &manifest)?;
+    Ok(wasm.clone())
+}
 
-        if wanted(&name) {
-            let mut entry = Vec::new();
-            (&mut tar).take(size).read_to_end(&mut entry)?;
-            return Ok(Some(entry));
+/// The files under `priv/parsers/` in a Hex package that `wanted` accepts, by
+/// path. A Hex package is a tar holding another, `contents.tar.gz`.
+fn hex_parser_files(
+    package: &mut dyn std::io::Read,
+    wanted: impl Fn(&str) -> bool,
+) -> Result<BTreeMap<String, Vec<u8>>> {
+    let mut package = tar::Archive::new(package);
+    for entry in package.entries()? {
+        let entry = entry?;
+        if entry.path()?.as_os_str() != "contents.tar.gz" {
+            continue;
         }
-        std::io::copy(
-            &mut (&mut tar).take(size.div_ceil(512) * 512),
-            &mut std::io::sink(),
-        )?;
+
+        let mut files = BTreeMap::new();
+        let mut contents = tar::Archive::new(flate2::read::GzDecoder::new(entry));
+        for file in contents.entries()? {
+            let mut file = file?;
+            let path = file.path()?.to_string_lossy().into_owned();
+            if path.starts_with("priv/parsers/") && wanted(&path) {
+                let mut bytes = Vec::new();
+                file.read_to_end(&mut bytes)?;
+                files.insert(path, bytes);
+            }
+        }
+        return Ok(files);
     }
+    bail!("the Hex package has no contents.tar.gz")
+}
+
+/// Put the parser Hex publishes at `version` where `build-wasm` writes one, so
+/// npm can be staged from Hex's bytes rather than a rebuild that may not
+/// reproduce them.
+fn fetch_hex_wasm(name: &str, version: &str) -> Result<()> {
+    let toml = read_languages_toml()?;
+    let (parser_name, info) = find_parser(&toml, name)?;
+    let default_wasm_name = format!("tree-sitter-{parser_name}");
+    let wasm_name = info.wasm_name.as_deref().unwrap_or(&default_wasm_name);
+
+    let wasm = read_hex_package(
+        &registry_agent(),
+        &hex_app_name(wasm_name),
+        version,
+        |package| hex_package_parser(wasm_name, package),
+    )?;
+    fs::create_dir_all("tmp/wasm/build")?;
+    fs::write(format!("tmp/wasm/build/{wasm_name}.wasm"), wasm)?;
+    Ok(())
 }
 
 /// The bundles Hex is missing.
@@ -6101,6 +6149,7 @@ mod hex_wasm_tests {
             !plan[0].hex,
             "Hex already ships this parser and these queries"
         );
+        assert!(!plan[0].from_hex, "Hex has no 0.26.4 to stage npm from");
     }
 
     /// Once npm has the new format, the parser is settled: planning it again
@@ -6134,8 +6183,9 @@ mod hex_wasm_tests {
 
     /// npm failed where Hex published, or npm has not caught up with a publish
     /// yet: Hex already ships the definition, so it gets nothing, and npm gets
-    /// the version Hex has rather than a fresh one. Reading Hex through npm
-    /// released the same definition to Hex again on every run.
+    /// the version Hex has rather than a fresh one, staged from Hex's parser.
+    /// Reading Hex through npm released the same definition to Hex again on
+    /// every run.
     #[test]
     fn a_definition_only_hex_has_goes_to_npm_alone() {
         let npm = json!({ "0.26.0": parser_version("c", PACKAGE_FORMAT_VERSION) });
@@ -6146,45 +6196,83 @@ mod hex_wasm_tests {
         assert_eq!(plan[0].version, "0.26.1", "npm receives Hex's version");
         assert!(plan[0].npm);
         assert!(!plan[0].hex, "Hex already ships this definition");
+        assert!(plan[0].from_hex, "a rebuild need not reproduce Hex's bytes");
     }
 
-    /// A ustar archive of `files`, as Hex builds one.
     fn tar_of(files: &[(&str, &[u8])]) -> Vec<u8> {
-        let mut tar = Vec::new();
-        for (name, bytes) in files {
-            let mut header = [0u8; 512];
-            header[..name.len()].copy_from_slice(name.as_bytes());
-            header[124..135].copy_from_slice(format!("{:011o}", bytes.len()).as_bytes());
-            tar.extend_from_slice(&header);
-            tar.extend_from_slice(bytes);
-            tar.resize(tar.len().div_ceil(512) * 512, 0);
+        let mut tar = tar::Builder::new(Vec::new());
+        for (path, bytes) in files {
+            let mut header = tar::Header::new_ustar();
+            header.set_size(bytes.len() as u64);
+            header.set_mode(0o644);
+            tar.append_data(&mut header, path, *bytes).unwrap();
         }
-        tar.extend_from_slice(&[0; 1024]);
-        tar
+        tar.into_inner().unwrap()
+    }
+
+    /// A Hex package of `files`: `contents.tar.gz` beside `VERSION`, as
+    /// `mix hex.build` writes one.
+    fn hex_package_of(files: &[(&str, &[u8])]) -> Vec<u8> {
+        let mut contents = flate2::write::GzEncoder::new(Vec::new(), flate2::Compression::fast());
+        contents.write_all(&tar_of(files)).unwrap();
+        tar_of(&[
+            ("VERSION", b"3"),
+            ("contents.tar.gz", &contents.finish().unwrap()),
+        ])
     }
 
     #[test]
     fn a_hex_package_definition_is_read_from_its_lumis_json() {
-        let contents = tar_of(&[
+        let package = hex_package_of(&[
             ("mix.exs", b"defmodule LumisWasmMarkdown.MixProject do end"),
             (
                 "priv/parsers/markdown.lumis.json",
                 br#"{"definitionHash":"d"}"#,
             ),
         ]);
-        let mut gzipped = flate2::write::GzEncoder::new(Vec::new(), flate2::Compression::fast());
-        gzipped.write_all(&contents).unwrap();
-        let package = tar_of(&[
-            ("VERSION", b"3"),
-            ("contents.tar.gz", &gzipped.finish().unwrap()),
-        ]);
 
         assert_eq!(
-            hex_package_definition(package.as_slice())
+            hex_package_definition(&mut package.as_slice())
                 .unwrap()
                 .as_deref(),
             Some("d")
         );
+    }
+
+    #[test]
+    fn a_hex_parser_must_match_its_lumis_json() {
+        let wasm = b"\0asm\x01\0\0\0";
+        let package = |sha256: &str| {
+            let manifest = json!({
+                "packageName": "@lumis-sh/wasm-markdown",
+                "version": "0.26.1",
+                "parser": {
+                    "name": "tree-sitter-markdown",
+                    "grammarName": "markdown",
+                    "upstreamVersion": "0.5.0",
+                    "revision": "abc",
+                    "sha256": sha256,
+                    "size": wasm.len(),
+                },
+                "languages": {},
+            });
+            hex_package_of(&[
+                (
+                    "priv/parsers/markdown.lumis.json",
+                    manifest.to_string().as_bytes(),
+                ),
+                ("priv/parsers/tree-sitter-markdown.wasm", wasm),
+            ])
+        };
+
+        let parser = hex_package_parser(
+            "tree-sitter-markdown",
+            &mut package(&sha256_hex(wasm)).as_slice(),
+        );
+        assert_eq!(parser.unwrap(), wasm);
+
+        let corrupt = hex_package_parser("tree-sitter-markdown", &mut package("0").as_slice());
+        assert!(corrupt.is_err(), "a parser its manifest disowns");
     }
 
     /// `@lumis-sh/wasm-bundle-web` staged with these dependencies.

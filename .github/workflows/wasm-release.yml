@@ -204,7 +204,7 @@ jobs:
           # whichever registries are missing it. Bundles carry no bytes, so they
           # are published rather than built.
           {
-            echo "parsers=$(echo "$plan" | jq -c '[.parsers[] | {parser: .wasm_name, version: .version, npm: .npm, hex: .hex, npm_package: .npm_package, app: .hex_package}]')"
+            echo "parsers=$(echo "$plan" | jq -c '[.parsers[] | {parser: .wasm_name, version: .version, npm: .npm, hex: .hex, from_hex: .from_hex, npm_package: .npm_package, app: .hex_package}]')"
             echo "bundles_npm=$(echo "$plan" | jq -c '[.bundles[] | select(.npm) | {bundle: .bundle, version: .version}]')"
             echo "bundles=$(echo "$plan" | jq -c '[.bundles[] | select(.hex) | {bundle: .bundle, app: .app, version: .version}]')"
             echo "any=$(echo "$plan" | jq -r '.parsers | length > 0')"
@@ -303,6 +303,7 @@ jobs:
       version: ${{ matrix.version }}
       npm: ${{ matrix.npm }}
       hex: ${{ matrix.hex }}
+      from_hex: ${{ matrix.from_hex }}
       npm_package: ${{ matrix.npm_package }}
       app: ${{ matrix.app }}
     secrets:

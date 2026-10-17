@@ -911,7 +911,8 @@ cannot serve this, since it rate-limits at a hundred a minute and a hundred and
 thirteen lookups fail partway through. The tarball of each parser's newest Hex
 release then supplies its definition from `priv/parsers/*.lumis.json`. So npm
 failing where Hex succeeded, or a packument that has not caught up with a
-publish yet, leaves Hex alone: npm receives the version Hex already has.
+publish yet, leaves Hex alone: npm receives the version Hex already has,
+staged from the parser in that release rather than a rebuild.
 
 **Hex gets a release only when its own package changes.** A Hex package is
 `priv/parsers`, a `mix.exs` and a README, so a format change that touches only
