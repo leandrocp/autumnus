@@ -99,6 +99,14 @@ fn check(parser: &Parser, wasm: &Path) -> Result<(), String> {
     let queries = workspace_root()
         .join("queries/processed")
         .join(&parser.query_name);
+    // Every other query is optional, but a language without highlights loads,
+    // highlights its sample and passes having compiled nothing.
+    if !queries.join("highlights.scm").exists() {
+        return Err(format!(
+            "no highlights query in queries/processed/{}",
+            parser.query_name
+        ));
+    }
     let query = |kind: &str| {
         let path = queries.join(format!("{kind}.scm"));
         if path.exists() {

@@ -129,6 +129,12 @@ describe("processed queries compile against their pinned grammar", () => {
         parser,
         `no parser built from languages.toml for ${id}; run mise run wasm-build ${wasmName(id, entry)}`,
       ).toBeDefined();
+      // Every other query is optional, but a language without highlights
+      // would pass having compiled nothing.
+      expect(
+        existsSync(queryPath(entry, id, "highlights")),
+        `no highlights query for ${id} in queries/processed`,
+      ).toBe(true);
       const grammar = await TSLanguage.load(readFileSync(parser!));
 
       const failures: string[] = [];
