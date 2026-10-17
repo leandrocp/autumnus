@@ -3,7 +3,8 @@ defmodule Lumis.ParserError do
   A language's parser could not be loaded.
 
   `Lumis.highlight/2` renders the document as plain text instead of returning it,
-  and `Lumis.Languages.load/1` returns it for `:store_full`.
+  and `Lumis.Languages.load/1` returns it for `:invalid_queries` and
+  `:store_full`.
 
   ## Reasons
 
