@@ -351,6 +351,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
+ "etcetera",
  "flate2",
  "full_moon",
  "glob",

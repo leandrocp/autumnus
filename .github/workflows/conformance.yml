@@ -129,8 +129,8 @@ jobs:
       # fixtures. That is what proves a parser built from languages.toml renders
       # byte-identically to the one the fixtures were generated with.
       # mise-action runs with install: false here, so the parser toolchain has
-      # to be asked for explicitly. The CLI is all of it: `tree-sitter build
-      # --wasm` compiles through its own WASI SDK.
+      # to be asked for explicitly. Only the CLI is needed: `build-wasm`
+      # downloads the WASI SDK itself.
       - name: Install the Tree-sitter CLI
         if: matrix.build-parsers
         run: mise install tree-sitter
@@ -149,14 +149,12 @@ jobs:
             wasm-parsers-${{ runner.os }}-conformance-
             wasm-parsers-${{ runner.os }}-
 
-      - name: Cache the Tree-sitter WASI SDK
+      - name: Cache the WASI SDK
         if: matrix.build-parsers
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: ~/.cache/tree-sitter
-          key: ${{ runner.os }}-tree-sitter-cli-${{ hashFiles('mise.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-tree-sitter-cli-
+          key: ${{ runner.os }}-wasi-sdk-${{ hashFiles('crates/dev/src/wasi_sdk.rs') }}
 
       - name: Build and stage the parsers the corpus uses
         if: matrix.build-parsers

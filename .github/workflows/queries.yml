@@ -145,13 +145,11 @@ jobs:
             wasm-parsers-${{ runner.os }}-queries-${{ matrix.shard }}-
             wasm-parsers-${{ runner.os }}-
 
-      - name: Cache the Tree-sitter WASI SDK
+      - name: Cache the WASI SDK
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: ~/.cache/tree-sitter
-          key: ${{ runner.os }}-tree-sitter-cli-${{ hashFiles('mise.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-tree-sitter-cli-
+          key: ${{ runner.os }}-wasi-sdk-${{ hashFiles('crates/dev/src/wasi_sdk.rs') }}
 
       - name: Select this shard
         run: |

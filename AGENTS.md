@@ -320,7 +320,9 @@ clang --target=wasm32-unknown-wasi -fPIC -shared -Os \
   -nostdlib -fno-exceptions -fvisibility=hidden -I . parser.c scanner.c
 ```
 
-Those flags are hardcoded. `TREE_SITTER_WASI_SDK_PATH` selects a different SDK directory and is the only knob; there is no `CFLAGS` escape hatch, and the SDK version is pinned per CLI release (`crates/loader/wasi-sdk-version`), so bumping `tree-sitter` in `mise.toml` can silently change the compiler.
+Those flags are hardcoded. `TREE_SITTER_WASI_SDK_PATH` selects a different SDK directory and is the only knob; there is no `CFLAGS` escape hatch. `dev build-wasm` uses it to pass the SDK pinned in `crates/dev/src/wasi_sdk.rs`.
+
+The WASI SDK that builds parsers is the one the Tree-sitter release in `Cargo.toml` pins (`crates/loader/wasi-sdk-version`), not the CLI's; bump them together.
 
 Emscripten did not stop mattering, it stopped mattering *here*, and upstream draws the line precisely ([maxbrunsfeld on #4393](https://github.com/tree-sitter/tree-sitter/pull/4393#issuecomment-2831035549)): it is still required to build the Tree-sitter **web binding**, the JavaScript-to-WASM glue published as `web-tree-sitter`, and it is not required to compile **parsers**.
 
