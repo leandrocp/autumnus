@@ -227,6 +227,54 @@ jobs:
           retention-days: 1
           if-no-files-found: error
 
+  # The Wasmtime half of `mise run wasm-check`, compiled once and handed to
+  # every parser job, as `plan` does with the dev tool. web-tree-sitter alone
+  # passed parsers whose queries the Elixir NIF, the native addon and the CLI
+  # reject (#1738).
+  #
+  # Built on a pull request too, and run there against the fixture parsers the
+  # way a parser job runs it, outside cargo, so neither first happens after a
+  # merge. The test reads the checkout it was compiled in, and every job here
+  # checks this repository out at the same path.
+  query-check:
+    if: >-
+      ${{ (github.ref == 'refs/heads/main' &&
+           !startsWith(github.event.head_commit.message, 'chore(release):')) ||
+          (github.event_name == 'pull_request' && !startsWith(github.head_ref, 'release/')) }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
+
+      - name: Cache Rust build artifacts
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          shared-key: wasm-release-query-check
+
+      # Stripped, because every parser job downloads it.
+      - name: Build the check
+        run: |
+          set -euo pipefail
+          bin=$(cargo test -q -p lumis-wasm-runtime --test query_compile --no-run --message-format=json |
+            jq -r 'select(.reason == "compiler-artifact" and .target.name == "query_compile") | .executable // empty')
+          [ -n "$bin" ] || { echo "cargo built no query_compile test" >&2; exit 1; }
+          strip -o "$RUNNER_TEMP/query_compile" "$bin"
+
+      - name: Check the fixture parsers with it
+        run: |
+          "$RUNNER_TEMP/query_compile" --exact fixture_parsers_compile_their_queries_in_wasmtime
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: query-check
+          path: ${{ runner.temp }}/query_compile
+          retention-days: 1
+          if-no-files-found: error
+
   # One pipeline per parser, in `wasm-release-parser.yml`: build once, then
   # publish to npm and Hex in parallel. A parser that fails stops its own
   # pipeline and nothing else.
@@ -238,7 +286,7 @@ jobs:
   # so this is what bounds how long a release takes; other workflows can queue
   # behind it meanwhile.
   release:
-    needs: plan
+    needs: [plan, query-check]
     if: needs.plan.outputs.any == 'true'
     name: ${{ matrix.parser }}
     permissions:

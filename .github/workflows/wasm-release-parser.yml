@@ -12,7 +12,8 @@ name: WASM Release Parser
 # neither publish job runs a grammar's C or any of this repository's tooling.
 #
 # Both staging jobs run the `dev` tool that `plan` compiled, rather than each
-# compiling it again.
+# compiling it again, and `build` runs the Wasmtime query check that
+# `query-check` compiled.
 #
 # npm checks a trusted publisher against the calling workflow, not this one, so
 # `wasm-release.yml` stays the workflow every parser package names.
@@ -83,12 +84,17 @@ jobs:
           name: dev
           path: ${{ runner.temp }}/bin
 
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: query-check
+          path: ${{ runner.temp }}/bin
+
       # Artifacts do not keep file modes. tree-sitter goes on PATH itself rather
       # than as a mise shim: it runs inside the grammar's clone, where no mise
       # config names it, which is why `mise run wasm-build` does the same.
       - name: Put the tools on PATH
         run: |
-          chmod +x "$RUNNER_TEMP/bin/dev"
+          chmod +x "$RUNNER_TEMP/bin/dev" "$RUNNER_TEMP/bin/query_compile"
           echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
           mise where tree-sitter >> "$GITHUB_PATH"
 
@@ -109,13 +115,15 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # The check Queries CI runs on a pull request, against the parser this job
-      # is about to stage. `wasm-publish` runs it too, so a parser published by
-      # hand is held to the same bar.
+      # The checks Queries CI runs on a pull request, under web-tree-sitter and
+      # then Wasmtime, against the parser this job is about to stage.
+      # `wasm-publish` runs them too, so a parser published by hand is held to
+      # the same bar.
       - name: Check the built parser
         run: mise run wasm-check "$PARSER"
         env:
           PARSER: ${{ inputs.parser }}
+          LUMIS_QUERY_CHECK: ${{ runner.temp }}/bin/query_compile
 
       - name: Stage both packages
         run: |
