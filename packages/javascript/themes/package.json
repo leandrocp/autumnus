@@ -50,12 +50,12 @@
     "prepack": "pnpm run build"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "^7.58.0",
+    "@microsoft/api-extractor": "^7.59.4",
     "oxfmt": "^0.72.0",
     "oxlint": "1.87.0",
     "oxlint-tsgolint": "7.0.2003",
     "tsup": "^8.5",
-    "tsx": "^4.21",
+    "tsx": "^4.23",
     "typescript": "^6.0"
   }
 }
