@@ -102,6 +102,24 @@ updates:
     cooldown:
       default-days: 7
     groups:
+      # The libraries lumis.sh/comparison renders, each at the current release
+      # the page promises, and the Catppuccin port most of them take colours
+      # from. They are pinned exactly, so only this group moves them. A bump
+      # changes the published comparison, so it gets its own pull request, where
+      # "Comparison assets are current" fails until
+      # `mise run -C benchmarks showcase-publish` runs on that branch and its
+      # output is committed. Dependabot puts a dependency in the first group that
+      # matches it, so this one stays above `dependencies`.
+      comparison:
+        patterns:
+          - "@catppuccin/highlightjs"
+          - "@speed-highlight/core"
+          - "@tanstack/highlight"
+          - "@wooorm/starry-night"
+          - "highlight.js"
+          - "prismjs"
+          - "shiki"
+          - "sugar-high"
       dependencies:
         patterns:
           - "*"

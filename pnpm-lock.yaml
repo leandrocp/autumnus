@@ -74,31 +74,31 @@ importers:
         specifier: 0.26.3
         version: 0.26.3(@lumis-sh/lumis@packages+javascript+lumis)
       '@speed-highlight/core':
-        specifier: latest
+        specifier: 2.1.0
         version: 2.1.0
       '@tanstack/highlight':
-        specifier: latest
+        specifier: 1.0.0
         version: 1.0.0
       '@wooorm/starry-night':
-        specifier: latest
+        specifier: 3.11.0
         version: 3.11.0
       hast-util-to-html:
         specifier: 9.0.5
         version: 9.0.5
       highlight.js:
-        specifier: latest
+        specifier: 11.12.0
         version: 11.12.0
       mitata:
         specifier: 1.0.34
         version: 1.0.34
       prismjs:
-        specifier: latest
+        specifier: 1.30.0
         version: 1.30.0
       shiki:
-        specifier: latest
+        specifier: 4.5.0
         version: 4.5.0
       sugar-high:
-        specifier: latest
+        specifier: 2.5.1
         version: 2.5.1
     devDependencies:
       oxfmt:

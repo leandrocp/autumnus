@@ -193,8 +193,9 @@ function highlightJsPalette(theme, stylesheet) {
     // Only highlight.js's diff classes paint a background.
     fill: (className) =>
       className === null ? "transparent" : declaration(`code .hljs-${className}`, "background"),
-    // These dependencies float like the other comparison libraries, so a token class
-    // a later release adds fails here rather than reaching the page uncoloured.
+    // Dependabot moves these to each new release like the other comparison libraries,
+    // so a token class a later release adds fails here rather than reaching the page
+    // uncoloured.
     assertMapped(library, tokens, highlightJsClasses) {
       const unmapped = tokens.filter((token) => !Object.hasOwn(highlightJsClasses, token));
       if (unmapped.length > 0) {
