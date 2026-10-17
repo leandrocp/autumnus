@@ -82,11 +82,13 @@ all-languages = [
     "lang-glsl",
     "lang-go",
     "lang-graphql",
+    "lang-groovy",
     "lang-haskell",
     "lang-hcl",
     "lang-heex",
     "lang-html",
     "lang-http",
+    "lang-hurl",
     "lang-iex",
     "lang-ini",
     "lang-java",
@@ -205,11 +207,13 @@ lang-glimmer = ["lumis-core/lang-glimmer"]
 lang-glsl = ["dep:tree-sitter-glsl", "lumis-core/lang-glsl"]
 lang-go = ["dep:tree-sitter-go", "lumis-core/lang-go"]
 lang-graphql = ["dep:tree-sitter-graphql", "lumis-core/lang-graphql"]
+lang-groovy = ["lumis-core/lang-groovy"]
 lang-haskell = ["lumis-core/lang-haskell"]
 lang-hcl = ["dep:tree-sitter-hcl", "lumis-core/lang-hcl"]
 lang-heex = ["dep:tree-sitter-heex", "lumis-core/lang-heex"]
 lang-html = ["lumis-core/lang-html"]
 lang-http = ["lumis-core/lang-http"]
+lang-hurl = ["lumis-core/lang-hurl"]
 lang-iex = ["lumis-core/lang-iex"]
 lang-ini = ["dep:tree-sitter-ini", "lumis-core/lang-ini"]
 lang-java = ["dep:tree-sitter-java", "lumis-core/lang-java"]

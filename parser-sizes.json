@@ -240,6 +240,12 @@
       "wasm": 64462,
       "memory": 33960
     },
+    "tree-sitter-groovy": {
+      "version": "0.26.1",
+      "download": 244587,
+      "wasm": 874913,
+      "memory": 786176
+    },
     "tree-sitter-haskell": {
       "version": "0.26.1",
       "download": 308975,
@@ -269,6 +275,12 @@
       "download": 35170,
       "wasm": 161008,
       "memory": 39724
+    },
+    "tree-sitter-hurl": {
+      "version": "0.26.0",
+      "download": 87046,
+      "wasm": 219316,
+      "memory": 68908
     },
     "tree-sitter-iex": {
       "version": "0.26.1",

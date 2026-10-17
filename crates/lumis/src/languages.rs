@@ -110,12 +110,16 @@ unsafe extern "C" {
     fn tree_sitter_gleam() -> *const ();
     #[cfg(feature = "lang-glimmer")]
     fn tree_sitter_glimmer() -> *const ();
+    #[cfg(feature = "lang-groovy")]
+    fn tree_sitter_groovy() -> *const ();
     #[cfg(feature = "lang-haskell")]
     fn tree_sitter_haskell() -> *const ();
     #[cfg(feature = "lang-html")]
     fn tree_sitter_html() -> *const ();
     #[cfg(feature = "lang-http")]
     fn tree_sitter_http() -> *const ();
+    #[cfg(feature = "lang-hurl")]
+    fn tree_sitter_hurl() -> *const ();
     #[cfg(feature = "lang-iex")]
     fn tree_sitter_iex() -> *const ();
     #[cfg(feature = "lang-jinja-inline")]
@@ -253,6 +257,8 @@ impl LanguageConfig for Language {
             Language::Go => &GO_CONFIG,
             #[cfg(feature = "lang-graphql")]
             Language::GraphQL => &GRAPHQL_CONFIG,
+            #[cfg(feature = "lang-groovy")]
+            Language::Groovy => &GROOVY_CONFIG,
             #[cfg(feature = "lang-haskell")]
             Language::Haskell => &HASKELL_CONFIG,
             #[cfg(feature = "lang-hcl")]
@@ -263,6 +269,8 @@ impl LanguageConfig for Language {
             Language::HTML => &HTML_CONFIG,
             #[cfg(feature = "lang-http")]
             Language::HTTP => &HTTP_CONFIG,
+            #[cfg(feature = "lang-hurl")]
+            Language::Hurl => &HURL_CONFIG,
             #[cfg(feature = "lang-iex")]
             Language::IEx => &IEX_CONFIG,
             #[cfg(feature = "lang-ini")]
@@ -939,6 +947,22 @@ static GRAPHQL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     config
 });
 
+#[cfg(feature = "lang-groovy")]
+static GROOVY_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_groovy) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "groovy",
+        GROOVY_HIGHLIGHTS,
+        GROOVY_INJECTIONS,
+        GROOVY_LOCALS,
+    )
+    .expect("failed to create groovy highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
 #[cfg(feature = "lang-haskell")]
 static HASKELL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_haskell) };
@@ -1009,6 +1033,22 @@ static HTTP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         HTTP_LOCALS,
     )
     .expect("failed to create http highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+#[cfg(feature = "lang-hurl")]
+static HURL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_hurl) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "hurl",
+        HURL_HIGHLIGHTS,
+        HURL_INJECTIONS,
+        HURL_LOCALS,
+    )
+    .expect("failed to create hurl highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
@@ -2268,6 +2308,8 @@ mod tests {
         test_go_config_loads => (Language::Go, "Go", "go.go");
         #[cfg(feature = "lang-graphql")]
         test_graphql_config_loads => (Language::GraphQL, "GraphQL", "graphql.graphql");
+        #[cfg(feature = "lang-groovy")]
+        test_groovy_config_loads => (Language::Groovy, "Groovy", "groovy.groovy");
         #[cfg(feature = "lang-haskell")]
         test_haskell_config_loads => (Language::Haskell, "Haskell", "haskell.hs");
         #[cfg(feature = "lang-hcl")]
@@ -2278,6 +2320,8 @@ mod tests {
         test_html_config_loads => (Language::HTML, "HTML", "html.html");
         #[cfg(feature = "lang-http")]
         test_http_config_loads => (Language::HTTP, "HTTP", "http.http");
+        #[cfg(feature = "lang-hurl")]
+        test_hurl_config_loads => (Language::Hurl, "Hurl", "hurl.hurl");
         #[cfg(feature = "lang-iex")]
         test_iex_config_loads => (Language::IEx, "IEx", "iex.iex");
         #[cfg(feature = "lang-ini")]
