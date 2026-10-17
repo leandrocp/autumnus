@@ -691,7 +691,7 @@ mise run wasm-check {name}
 `wasm-publish` runs this before staging, so a parser published by hand meets the
 same bar as one the workflow publishes.
 
-The compiler is the WASI SDK that `build-wasm` downloads into `~/.cache/tree-sitter` on first use and hands to `tree-sitter-cli`; Emscripten is not involved. You also need `git`, to fetch each grammar at the revision `languages.toml` pins, and `npm`, for the grammars whose parser is generated from `grammar.js`.
+The compiler is the WASI SDK that `build-wasm` downloads into `~/.cache/tree-sitter` the first time a parser compiles and hands to `tree-sitter-cli`; Emscripten is not involved. You also need `git`, to fetch each grammar at the revision `languages.toml` pins, and `npm`, for the grammars whose parser is generated from `grammar.js`.
 
 ### Running a runtime locally
 

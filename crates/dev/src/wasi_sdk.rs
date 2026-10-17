@@ -17,7 +17,7 @@ pub(crate) fn ensure() -> Result<PathBuf> {
         .cache_dir()
         .join("tree-sitter");
     let dir = cache.join(format!("wasi-sdk-{VERSION}"));
-    if dir.join("bin/clang").exists() {
+    if is_installed(&dir) {
         return Ok(dir);
     }
 
@@ -30,6 +30,10 @@ pub(crate) fn ensure() -> Result<PathBuf> {
     let archive = super::download_bytes(&ureq::Agent::new_with_defaults(), &url)?;
     install(&archive, sha256, platform, &dir)?;
     Ok(dir)
+}
+
+fn is_installed(dir: &Path) -> bool {
+    dir.join("bin/clang").exists()
 }
 
 fn host_archive() -> Result<(&'static str, &'static str)> {
@@ -79,7 +83,11 @@ fn install(archive: &[u8], sha256: &str, platform: &str, dir: &Path) -> Result<(
     }
 
     // Moved in whole, so an interrupted install never passes for an SDK.
-    fs::rename(&root, dir).with_context(|| format!("failed to move {}", root.display()))?;
+    // A concurrent install of the same archive may have won; its SDK serves.
+    let moved = fs::rename(&root, dir);
+    if moved.is_err() && !is_installed(dir) {
+        return moved.with_context(|| format!("failed to move {}", root.display()));
+    }
     fs::remove_dir_all(&staging)?;
     Ok(())
 }
@@ -144,6 +152,48 @@ mod tests {
         assert_eq!(header.unwrap(), b"header");
         assert_eq!(library.unwrap(), b"library");
         assert_eq!(left.unwrap(), 1, "the staging directory must be cleaned up");
+    }
+
+    #[test]
+    fn an_install_that_lost_the_race_accepts_the_winner() {
+        let root = scratch("race");
+        let dir = root.join("wasi-sdk");
+        let archive = sdk_archive();
+        let sha256 = super::super::sha256_hex(&archive);
+
+        let winner = install(&archive, &sha256, PLATFORM, &dir);
+        let loser = install(&archive, &sha256, PLATFORM, &dir);
+        let clang = dir.join("bin/clang").exists();
+        let left = fs::read_dir(&root).map(Iterator::count);
+        let _ = fs::remove_dir_all(&root);
+
+        winner.unwrap();
+        loser.unwrap();
+        assert!(clang);
+        assert_eq!(
+            left.unwrap(),
+            1,
+            "the loser must clean up its staging directory"
+        );
+    }
+
+    #[test]
+    fn a_target_that_is_not_an_sdk_is_still_an_error() {
+        let root = scratch("occupied");
+        let dir = root.join("wasi-sdk");
+        fs::create_dir_all(&dir).unwrap();
+        fs::write(dir.join("stray"), b"stray").unwrap();
+        let archive = sdk_archive();
+
+        let installed = install(
+            &archive,
+            &super::super::sha256_hex(&archive),
+            PLATFORM,
+            &dir,
+        );
+        let _ = fs::remove_dir_all(&root);
+
+        assert!(installed.is_err());
     }
 
     #[test]
