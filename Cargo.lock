@@ -3020,8 +3020,7 @@ checksum = "db97caf9d906fbde555dd62fa95ddba9eecfd14cb388e4f491a66d74cd5fb79a"
 [[package]]
 name = "tree-sitter"
 version = "0.27.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a5129de2ccc97808c4583d48f1fb44576d015cf241e432800572bda11ef30c3b"
+source = "git+https://github.com/tree-sitter/tree-sitter?rev=868eab666844fa42118af86e2893c104c50971cc#868eab666844fa42118af86e2893c104c50971cc"
 dependencies = [
  "cc",
  "regex",
@@ -3354,8 +3353,7 @@ dependencies = [
 [[package]]
 name = "tree-sitter-language"
 version = "0.1.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d0af592be68c579aa78a16846bd19422978c3c52e438523d45ff5d1bff1f9d4a"
+source = "git+https://github.com/tree-sitter/tree-sitter?rev=868eab666844fa42118af86e2893c104c50971cc#868eab666844fa42118af86e2893c104c50971cc"
 
 [[package]]
 name = "tree-sitter-llvm"

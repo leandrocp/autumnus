@@ -6,8 +6,9 @@
 //! tree-sitter 0.27's `WasmStore` copies only part of some grammars' supertype
 //! tables (#1738), so csharp, haskell and perl compile in the browser while the
 //! Elixir NIF, the native addon and the CLI reject their queries. Nothing
-//! noticed, because every query check ran under web-tree-sitter. They fail here
-//! until a tree-sitter release carries tree-sitter/tree-sitter@fbfb07e.
+//! noticed, because every query check ran under web-tree-sitter. The root
+//! `Cargo.toml` patches tree-sitter to the fix, tree-sitter/tree-sitter@fbfb07e,
+//! until a release carries it; without the patch, those three fail here.
 //!
 //! The fixture test runs with the rest of the suite. The built-parser one needs
 //! every parser built first, so it is ignored here: `mise run test-queries` and
