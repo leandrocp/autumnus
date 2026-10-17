@@ -32,7 +32,7 @@ path = "queries"
 [queries.nu]
 git = "https://github.com/nushell/tree-sitter-nu.git"
 rev = "4f577aaa735154f934594b598a69ed7b1b707cf6"
-path = "queries"
+path = "queries/nu"
 
 [queries.python]
 git = "https://github.com/tree-sitter/tree-sitter-python.git"
