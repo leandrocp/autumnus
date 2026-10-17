@@ -36,6 +36,10 @@ on:
         description: "Hex is missing this version"
         type: boolean
         required: true
+      from_hex:
+        description: "Hex already publishes this version, so `build` takes its parser"
+        type: boolean
+        required: true
       npm_package:
         type: string
         required: true
@@ -55,7 +59,9 @@ permissions:
 
 jobs:
   # Compiles the grammar once and stages both packages from that one `.wasm`,
-  # so both registries ship the same bytes.
+  # so both registries ship the same bytes. When Hex already publishes this
+  # version, npm is staged from Hex's parser instead, for the reason `fetch`
+  # does not rebuild.
   build:
     if: inputs.npm
     runs-on: ubuntu-latest
@@ -99,9 +105,17 @@ jobs:
           mise where tree-sitter >> "$GITHUB_PATH"
 
       - name: Build
+        if: ${{ !inputs.from_hex }}
         run: dev build-wasm "$PARSER"
         env:
           PARSER: ${{ inputs.parser }}
+
+      - name: Fetch the Hex parser
+        if: inputs.from_hex
+        run: dev fetch-hex-wasm "$PARSER" --version "$VERSION"
+        env:
+          PARSER: ${{ inputs.parser }}
+          VERSION: ${{ inputs.version }}
 
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
         with:
@@ -228,10 +242,8 @@ jobs:
           PARSER: ${{ inputs.parser }}
 
   # In parallel with npm, not after it. If npm fails where Hex succeeds, the
-  # next plan cannot find the definition on npm — the only registry it reads
-  # definitions from — so it takes the next patch, and Hex receives the same
-  # definition again under that version. One extra Hex release per run until
-  # npm catches up.
+  # next plan reads Hex's own release, finds the definition there, and hands
+  # npm alone that same version, staged from Hex's parser.
   publish-hex:
     needs: [build, fetch]
     if: >-

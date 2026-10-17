@@ -97,6 +97,12 @@ enum Commands {
     StageHexWasm {
         name: String,
     },
+    /// Write a parser's `.wasm` from its Hex release, where `build-wasm` would.
+    FetchHexWasm {
+        name: String,
+        #[arg(long)]
+        version: String,
+    },
     /// Plan a release: the version each parser resolves to, and which
     /// registries are missing it. Emits JSON for the workflow matrix.
     WasmReleasePlan {
@@ -206,6 +212,7 @@ fn main() -> Result<()> {
         Commands::BuildWasm { name } => build_wasm(&name),
         Commands::StageWasm { name, version } => stage_wasm(&name, version.as_deref()),
         Commands::StageHexWasm { name } => stage_hex_wasm(&name),
+        Commands::FetchHexWasm { name, version } => fetch_hex_wasm(&name, &version),
         Commands::WasmReleasePlan { filter } => wasm_release_plan(&filter),
         Commands::StageHexBundle { name } => stage_hex_bundle(&name),
         Commands::StageTestParsers { out } => stage_test_parsers(Path::new(&out)),
@@ -4551,16 +4558,15 @@ fn package_entry(
 }
 
 /// Bumped when a package's contents change in a way its definition hash does
-/// not see, so every parser is published again. 4: the JavaScript entry exports
-/// the language with its language package, so importing it is enough anywhere.
+/// not see, so every parser is published to npm again. 4: the JavaScript entry
+/// exports the language with its language package, so importing it is enough
+/// anywhere.
+///
+/// Hex does not see it: Hex is current while its newest release ships the
+/// definition. A format change that reaches the Hex package needs a new
+/// definition, which raising the `lumis-language-package-v3` tag in
+/// `language_definition_hash` gives every parser on both registries.
 const PACKAGE_FORMAT_VERSION: u32 = 4;
-
-/// The `PACKAGE_FORMAT_VERSION` at which what a Hex package ships last changed:
-/// `priv/parsers`, `mix.exs` or its README. A Hex release staged from an older
-/// format is published again; a newer format that only changed the npm entry,
-/// as 4 did, is not. Raise it to `PACKAGE_FORMAT_VERSION` whenever a format
-/// change reaches the Hex package.
-const HEX_FORMAT_VERSION: u32 = 3;
 
 /// The bundle counterpart of `PACKAGE_FORMAT_VERSION`, carried in a bundle's
 /// `package.json` as `lumis.bundleFormat`. 3: the bundle carries its module URL
@@ -4639,32 +4645,44 @@ fn fetch_packument(agent: &ureq::Agent, pkg: &str) -> Result<Option<Value>> {
         .with_context(|| format!("failed to query {pkg} on the npm registry"))
 }
 
-/// Each request is almost entirely round trip, so the whole catalog is worth
-/// fetching at once. Results come back in the order the packages were given.
+/// Results come back in the order the packages were given.
 fn fetch_packuments(packages: &[String]) -> Vec<Result<Option<Value>>> {
-    let agent: ureq::Agent = ureq::Agent::config_builder()
+    fetch_each(packages, |agent, pkg| fetch_packument(agent, pkg))
+}
+
+fn registry_agent() -> ureq::Agent {
+    ureq::Agent::config_builder()
         .timeout_global(Some(REGISTRY_TIMEOUT))
         .build()
-        .into();
+        .into()
+}
+
+/// Each request is almost entirely round trip, so the whole catalog is worth
+/// fetching at once. Results come back in the order the items were given.
+fn fetch_each<T: Sync, R: Send>(
+    items: &[T],
+    fetch: impl Fn(&ureq::Agent, &T) -> R + Sync,
+) -> Vec<R> {
+    let agent = registry_agent();
     let next = AtomicUsize::new(0);
-    let mut fetched: Vec<(usize, Result<Option<Value>>)> = thread::scope(|scope| {
-        let workers: Vec<_> = (0..REGISTRY_CONCURRENCY.min(packages.len()))
+    let mut fetched: Vec<(usize, R)> = thread::scope(|scope| {
+        let workers: Vec<_> = (0..REGISTRY_CONCURRENCY.min(items.len()))
             .map(|_| {
                 scope.spawn(|| {
                     let mut done = Vec::new();
                     loop {
                         let index = next.fetch_add(1, Ordering::Relaxed);
-                        let Some(pkg) = packages.get(index) else {
+                        let Some(item) = items.get(index) else {
                             return done;
                         };
-                        done.push((index, fetch_packument(&agent, pkg)));
+                        done.push((index, fetch(&agent, item)));
                     }
                 })
             })
             .collect();
         workers
             .into_iter()
-            .flat_map(|worker| worker.join().expect("npm registry worker panicked"))
+            .flat_map(|worker| worker.join().expect("registry worker panicked"))
             .collect()
     });
     fetched.sort_by_key(|(index, _)| *index);
@@ -4713,6 +4731,9 @@ struct ReleasePlanEntry {
     version: String,
     npm: bool,
     hex: bool,
+    /// Hex already publishes this version, so npm is staged from its parser:
+    /// a rebuild need not reproduce it.
+    from_hex: bool,
 }
 
 /// Plan a release for every parser matching `filter`.
@@ -4730,7 +4751,7 @@ struct ReleasePlanEntry {
 fn wasm_release_plan(filter: &str) -> Result<()> {
     let series = supported_tree_sitter_series()?;
     let toml = read_languages_toml()?;
-    let candidates = release_candidates(&toml, filter, &series)?;
+    let candidates = release_candidates(&toml, filter)?;
 
     let npm_packages: Vec<String> = candidates
         .iter()
@@ -4738,8 +4759,9 @@ fn wasm_release_plan(filter: &str) -> Result<()> {
         .collect();
     let packuments = fetch_packuments(&npm_packages);
     let registry = hex_registry()?;
+    let hex_definitions = fetch_hex_definitions(&candidates, &registry, &series);
 
-    let parsers = plan_parsers(candidates, packuments, &registry, &series)?;
+    let parsers = plan_parsers(candidates, packuments, hex_definitions, &registry, &series)?;
 
     let staged = staged_bundles()?;
     let bundle_packuments = fetch_packuments(
@@ -4774,19 +4796,14 @@ fn filter_parsers(filter: &str) -> HashSet<&str> {
 struct ReleaseCandidate {
     wasm_name: String,
     npm_package: String,
-    /// Its `definitionHash`: the parser, queries and languages it ships.
+    /// Its `definitionHash`: the parser, queries and languages it ships, and
+    /// the grammars they require.
     definition: String,
-    /// The `@lumis-sh/wasm-*` packages its languages require, by range.
-    dependencies: BTreeMap<String, String>,
 }
 
-/// Every parser matching `filter`, with the npm package, definition hash and
-/// dependencies that decide where it stands.
-fn release_candidates(
-    toml: &LanguagesToml,
-    filter: &str,
-    series: &str,
-) -> Result<Vec<ReleaseCandidate>> {
+/// Every parser matching `filter`, with the npm package and definition hash
+/// that decide where it stands.
+fn release_candidates(toml: &LanguagesToml, filter: &str) -> Result<Vec<ReleaseCandidate>> {
     let wanted = filter_parsers(filter);
 
     let mut seen = HashSet::new();
@@ -4802,13 +4819,10 @@ fn release_candidates(
         }
 
         let languages = packaged_languages(toml, wasm_name)?;
-        let npm_package = format!("@lumis-sh/wasm-{}", wasm_package_suffix(wasm_name));
-        let (dependencies, _) = required_packages(toml, &npm_package, &languages, series)?;
         candidates.push(ReleaseCandidate {
             wasm_name: wasm_name.to_string(),
             definition: language_definition_hash(toml, wasm_name, &languages)?,
-            npm_package,
-            dependencies,
+            npm_package: format!("@lumis-sh/wasm-{}", wasm_package_suffix(wasm_name)),
         });
     }
     Ok(candidates)
@@ -4816,50 +4830,64 @@ fn release_candidates(
 
 /// The parsers a registry is missing, and the version each resolves to.
 ///
-/// Hex is only missing a parser whose Hex package would differ from the one it
-/// has. A format change that reaches npm alone gives npm a new version and
-/// leaves Hex where it is: publishing a release with nothing new in it would
-/// cost everyone who updates their deps for no reason.
+/// Each registry is asked about itself: npm's packument for npm, and the
+/// newest Hex release's own `lumis.json` for Hex. Answering for Hex from npm
+/// read a release npm failed to publish as unpublished, so Hex received the
+/// same definition again under a fresh patch on every run until npm had it.
+///
+/// Hex is only missing a parser whose newest release ships another definition.
+/// A format change that reaches npm alone gives npm a new version and leaves
+/// Hex where it is: publishing a release with nothing new in it would cost
+/// everyone who updates their deps for no reason.
 fn plan_parsers(
     candidates: Vec<ReleaseCandidate>,
     packuments: Vec<Result<Option<Value>>>,
+    hex_definitions: Vec<Result<Option<String>>>,
     registry: &HashMap<String, Vec<String>>,
     series: &str,
 ) -> Result<Vec<ReleasePlanEntry>> {
     let mut parsers = Vec::new();
-    for (candidate, packument) in candidates.into_iter().zip(packuments) {
+    for ((candidate, packument), hex_definition) in
+        candidates.into_iter().zip(packuments).zip(hex_definitions)
+    {
         let packument = packument?;
         let ReleaseCandidate {
             wasm_name,
             npm_package,
             definition,
-            dependencies,
         } = candidate;
         let hex_package = hex_app_name(&wasm_name);
         let hex = registry.get(&hex_package).cloned().unwrap_or_default();
+        let hex_current = hex_definition?.as_deref() == Some(definition.as_str());
+        let on_npm = |version: &str| {
+            packument
+                .as_ref()
+                .and_then(|p| p.get("versions"))
+                .and_then(Value::as_object)
+                .is_some_and(|versions| versions.contains_key(version))
+        };
 
         let version = packument
             .as_ref()
             .and_then(|p| version_for_definition(p, &definition, series))
             // Published already: the registry that has it fixes the version,
             // and the other gets the same one.
+            .or_else(|| {
+                newest_in_series(&hex, series).filter(|newest| hex_current && !on_npm(newest))
+            })
             .unwrap_or_else(|| next_patch(series, packument.as_ref(), &hex));
 
-        let on_npm = packument
-            .as_ref()
-            .and_then(|p| p.get("versions"))
-            .and_then(Value::as_object)
-            .is_some_and(|versions| versions.contains_key(&version));
-        let hex_needed = !hex.contains(&version)
-            && !hex_is_current(packument.as_ref(), &hex, &definition, &dependencies, series);
+        let npm_needed = !on_npm(&version);
+        let hex_needed = !hex_current && !hex.contains(&version);
 
-        if !on_npm || hex_needed {
+        if npm_needed || hex_needed {
             parsers.push(ReleasePlanEntry {
                 wasm_name,
                 npm_package,
                 hex_package,
+                from_hex: npm_needed && hex.contains(&version),
                 version,
-                npm: !on_npm,
+                npm: npm_needed,
                 hex: hex_needed,
             });
         }
@@ -4867,44 +4895,158 @@ fn plan_parsers(
     Ok(parsers)
 }
 
-/// Whether the newest Hex release of a parser already ships `definition` with
-/// `dependencies`.
-///
-/// Read off npm, the way [`version_for_definition`] is: a Hex release is staged
-/// from the npm package of the same version, so that package's `lumis`
-/// metadata and dependencies describe it. Only the newest release counts, since
-/// that is the one a project updating its deps would get.
-fn hex_is_current(
-    packument: Option<&Value>,
-    hex: &[String],
-    definition: &str,
-    dependencies: &BTreeMap<String, String>,
-    series: &str,
-) -> bool {
-    let Some(newest) = hex
+/// The newest of `versions` in `series`: the release a project updating its
+/// deps would get.
+fn newest_in_series(versions: &[String], series: &str) -> Option<String> {
+    versions
         .iter()
         .filter(|version| patch_of(version, series).is_some())
         .max_by_key(|version| patch_of(version, series))
-    else {
-        return false;
-    };
-    let Some(manifest) = packument.and_then(|p| p.pointer(&format!("/versions/{newest}"))) else {
-        return false;
-    };
-    let meta = manifest.get("lumis");
+        .cloned()
+}
 
-    meta.and_then(|meta| meta.get("definitionHash"))
+/// The `definitionHash` each candidate's newest Hex release ships, or `None`
+/// when Hex has no release in `series`. Results come back in candidate order.
+fn fetch_hex_definitions(
+    candidates: &[ReleaseCandidate],
+    registry: &HashMap<String, Vec<String>>,
+    series: &str,
+) -> Vec<Result<Option<String>>> {
+    let releases: Vec<Option<(String, String)>> = candidates
+        .iter()
+        .map(|candidate| {
+            let app = hex_app_name(&candidate.wasm_name);
+            let newest = newest_in_series(registry.get(&app)?, series)?;
+            Some((app, newest))
+        })
+        .collect();
+    fetch_each(&releases, |agent, release| match release {
+        Some((app, version)) => fetch_hex_definition(agent, app, version),
+        None => Ok(None),
+    })
+}
+
+/// The `definitionHash` a Hex release ships in `priv/parsers/*.lumis.json`.
+///
+/// Read from the tarball because nothing else Hex serves carries it: the
+/// registry has versions and dependencies, and the API has neither and
+/// rate-limits. `repo.hex.pm` is a CDN, so a hundred tarballs cost bandwidth and
+/// nothing else.
+fn fetch_hex_definition(agent: &ureq::Agent, app: &str, version: &str) -> Result<Option<String>> {
+    read_hex_package(agent, app, version, hex_package_definition)
+}
+
+/// Read the Hex package `app` publishes at `version` with `read`, retrying
+/// like a packument fetch.
+fn read_hex_package<T>(
+    agent: &ureq::Agent,
+    app: &str,
+    version: &str,
+    read: impl Fn(&mut dyn std::io::Read) -> Result<T>,
+) -> Result<T> {
+    let url = format!("https://repo.hex.pm/tarballs/{app}-{version}.tar");
+    let mut last_error = None;
+
+    for attempt in 0..REGISTRY_ATTEMPTS {
+        if attempt > 0 {
+            thread::sleep(Duration::from_millis(250 * u64::from(attempt)));
+        }
+        match agent.get(&url).call() {
+            Ok(mut response) => match read(&mut response.body_mut().as_reader()) {
+                Ok(read) => return Ok(read),
+                Err(err) => last_error = Some(err),
+            },
+            Err(err) => last_error = Some(err.into()),
+        }
+    }
+
+    Err(last_error.expect("a failed attempt records its error"))
+        .with_context(|| format!("failed to read {app} {version} from Hex"))
+}
+
+/// The `definitionHash` in a Hex package, `None` for one staged before
+/// packages carried it.
+fn hex_package_definition(package: &mut dyn std::io::Read) -> Result<Option<String>> {
+    let files = hex_parser_files(package, |path| path.ends_with(".lumis.json"))?;
+    let manifest = files
+        .values()
+        .next()
+        .context("the Hex package ships no lumis.json")?;
+    let manifest: Value = serde_json::from_slice(manifest).context("invalid lumis.json")?;
+    Ok(manifest
+        .get("definitionHash")
         .and_then(Value::as_str)
-        == Some(definition)
-        && meta
-            .and_then(|meta| meta.get("treeSitter"))
-            .and_then(Value::as_str)
-            == Some(series)
-        && meta
-            .and_then(|meta| meta.get("formatVersion"))
-            .and_then(Value::as_u64)
-            .is_some_and(|format| format >= u64::from(HEX_FORMAT_VERSION))
-        && &wasm_requirements(manifest) == dependencies
+        .map(str::to_string))
+}
+
+/// The parser a Hex package ships, checked against the `lumis.json` beside it.
+fn hex_package_parser(wasm_name: &str, package: &mut dyn std::io::Read) -> Result<Vec<u8>> {
+    let files = hex_parser_files(package, |path| {
+        Path::new(path)
+            .extension()
+            .is_some_and(|e| e == "json" || e == "wasm")
+    })?;
+    let file = |extension: &str| {
+        files
+            .iter()
+            .find(|(path, _)| path.ends_with(extension))
+            .map(|(_, bytes)| bytes)
+            .with_context(|| format!("the Hex package ships no {extension}"))
+    };
+    let manifest: LanguagePackage =
+        serde_json::from_slice(file(".lumis.json")?).context("invalid lumis.json")?;
+    let wasm = file(".wasm")?;
+    verify_staged_parser(wasm_name, wasm, &manifest)?;
+    Ok(wasm.clone())
+}
+
+/// The files under `priv/parsers/` in a Hex package that `wanted` accepts, by
+/// path. A Hex package is a tar holding another, `contents.tar.gz`.
+fn hex_parser_files(
+    package: &mut dyn std::io::Read,
+    wanted: impl Fn(&str) -> bool,
+) -> Result<BTreeMap<String, Vec<u8>>> {
+    let mut package = tar::Archive::new(package);
+    for entry in package.entries()? {
+        let entry = entry?;
+        if entry.path()?.as_os_str() != "contents.tar.gz" {
+            continue;
+        }
+
+        let mut files = BTreeMap::new();
+        let mut contents = tar::Archive::new(flate2::read::GzDecoder::new(entry));
+        for file in contents.entries()? {
+            let mut file = file?;
+            let path = file.path()?.to_string_lossy().into_owned();
+            if path.starts_with("priv/parsers/") && wanted(&path) {
+                let mut bytes = Vec::new();
+                file.read_to_end(&mut bytes)?;
+                files.insert(path, bytes);
+            }
+        }
+        return Ok(files);
+    }
+    bail!("the Hex package has no contents.tar.gz")
+}
+
+/// Put the parser Hex publishes at `version` where `build-wasm` writes one, so
+/// npm can be staged from Hex's bytes rather than a rebuild that may not
+/// reproduce them.
+fn fetch_hex_wasm(name: &str, version: &str) -> Result<()> {
+    let toml = read_languages_toml()?;
+    let (parser_name, info) = find_parser(&toml, name)?;
+    let default_wasm_name = format!("tree-sitter-{parser_name}");
+    let wasm_name = info.wasm_name.as_deref().unwrap_or(&default_wasm_name);
+
+    let wasm = read_hex_package(
+        &registry_agent(),
+        &hex_app_name(wasm_name),
+        version,
+        |package| hex_package_parser(wasm_name, package),
+    )?;
+    fs::create_dir_all("tmp/wasm/build")?;
+    fs::write(format!("tmp/wasm/build/{wasm_name}.wasm"), wasm)?;
+    Ok(())
 }
 
 /// The bundles Hex is missing.
@@ -5074,15 +5216,6 @@ fn bundle_version_for_requirements(
 }
 
 /// The version a definition was published under on npm, if it was.
-///
-/// npm alone, because it is the only registry that can answer: a packument
-/// carries each version's `lumis` metadata, while Hex's registry file carries
-/// versions and nothing else. That makes the answer only as good as the
-/// invariant **Hex never holds a definition npm does not**. `wasm-release.yml`
-/// publishes the two in parallel, so it breaks whenever npm fails and Hex does
-/// not: the Hex-only definition then reads as unpublished, takes a fresh patch
-/// from `next_patch`, and is released to Hex again unchanged on every run until
-/// npm has it.
 fn version_for_definition(packument: &Value, expected: &str, series: &str) -> Option<String> {
     let versions = packument.get("versions")?.as_object()?;
     let prefix = format!("{series}.");
@@ -5959,37 +6092,29 @@ mod hex_wasm_tests {
         assert_eq!(filter_parsers(" json , elixir ").len(), 2);
     }
 
-    /// What npm holds for one parser version: its definition, format, and the
-    /// `@lumis-sh/wasm-*` packages it depends on.
-    fn parser_version(definition: &str, format: u32, dependencies: &[&str]) -> Value {
+    /// What npm holds for one parser version: its definition and format.
+    fn parser_version(definition: &str, format: u32) -> Value {
         json!({
             "lumis": {
                 "definitionHash": definition,
                 "treeSitter": "0.26",
                 "formatVersion": format,
             },
-            "dependencies": dependencies
-                .iter()
-                .map(|name| ((*name).to_string(), json!("^0.26.0")))
-                .collect::<serde_json::Map<_, _>>(),
         })
     }
 
-    /// Plans one parser, `@lumis-sh/wasm-markdown`, against npm and Hex as given.
+    /// Plans one parser, `@lumis-sh/wasm-markdown`, against npm and Hex as
+    /// given, where `hex_definition` is what Hex's newest release ships.
     fn plan_markdown(
         npm: Value,
         hex: &[&str],
+        hex_definition: Option<&str>,
         definition: &str,
-        dependencies: &[&str],
     ) -> Vec<ReleasePlanEntry> {
         let candidate = ReleaseCandidate {
             wasm_name: "tree-sitter-markdown".to_string(),
             npm_package: "@lumis-sh/wasm-markdown".to_string(),
             definition: definition.to_string(),
-            dependencies: dependencies
-                .iter()
-                .map(|name| ((*name).to_string(), "^0.26.0".to_string()))
-                .collect(),
         };
         let registry = HashMap::from([(
             "lumis_wasm_markdown".to_string(),
@@ -5998,6 +6123,7 @@ mod hex_wasm_tests {
         plan_parsers(
             vec![candidate],
             vec![Ok(Some(packument_of(npm)))],
+            vec![Ok(hex_definition.map(str::to_string))],
             &registry,
             "0.26",
         )
@@ -6012,9 +6138,9 @@ mod hex_wasm_tests {
     /// did, must not hand Hex a release with nothing new in it.
     #[test]
     fn an_npm_only_format_change_leaves_hex_alone() {
-        let npm = json!({ "0.26.3": parser_version("d", HEX_FORMAT_VERSION, &[]) });
+        let npm = json!({ "0.26.3": parser_version("d", PACKAGE_FORMAT_VERSION - 1) });
 
-        let plan = plan_markdown(npm, &["0.26.3"], "d", &[]);
+        let plan = plan_markdown(npm, &["0.26.3"], Some("d"), "d");
 
         assert_eq!(plan.len(), 1);
         assert_eq!(plan[0].version, "0.26.4");
@@ -6023,6 +6149,7 @@ mod hex_wasm_tests {
             !plan[0].hex,
             "Hex already ships this parser and these queries"
         );
+        assert!(!plan[0].from_hex, "Hex has no 0.26.4 to stage npm from");
     }
 
     /// Once npm has the new format, the parser is settled: planning it again
@@ -6030,37 +6157,122 @@ mod hex_wasm_tests {
     #[test]
     fn a_skipped_hex_version_stays_skipped() {
         let npm = json!({
-            "0.26.3": parser_version("d", HEX_FORMAT_VERSION, &[]),
-            "0.26.4": parser_version("d", PACKAGE_FORMAT_VERSION, &[]),
+            "0.26.3": parser_version("d", PACKAGE_FORMAT_VERSION - 1),
+            "0.26.4": parser_version("d", PACKAGE_FORMAT_VERSION),
         });
 
-        assert!(plan_markdown(npm, &["0.26.3"], "d", &[]).is_empty());
+        assert!(plan_markdown(npm, &["0.26.3"], Some("d"), "d").is_empty());
     }
 
     #[test]
     fn what_hex_ships_changing_publishes_to_hex() {
-        let npm = || json!({ "0.26.3": parser_version("d", HEX_FORMAT_VERSION, &[]) });
+        let npm = || json!({ "0.26.3": parser_version("d", PACKAGE_FORMAT_VERSION) });
 
-        let new_definition = plan_markdown(npm(), &["0.26.3"], "e", &[]);
+        let new_definition = plan_markdown(npm(), &["0.26.3"], Some("d"), "e");
         assert!(new_definition[0].hex, "new parser or queries");
 
-        let new_dependency =
-            plan_markdown(npm(), &["0.26.3"], "d", &["@lumis-sh/wasm-markdown_inline"]);
-        assert!(new_dependency[0].hex, "mix.exs gains a dependency");
-
-        let older_format = plan_markdown(
-            json!({ "0.26.3": parser_version("d", HEX_FORMAT_VERSION - 1, &[]) }),
-            &["0.26.3"],
-            "d",
-            &[],
-        );
+        let no_definition = plan_markdown(json!({}), &["0.26.3"], None, "d");
         assert!(
-            older_format[0].hex,
-            "staged before the Hex package last changed"
+            no_definition[0].hex,
+            "staged before packages carried a definition"
         );
 
-        let not_on_hex = plan_markdown(npm(), &[], "d", &[]);
+        let not_on_hex = plan_markdown(npm(), &[], None, "d");
         assert!(not_on_hex[0].hex, "Hex has no release at all");
+    }
+
+    /// npm failed where Hex published, or npm has not caught up with a publish
+    /// yet: Hex already ships the definition, so it gets nothing, and npm gets
+    /// the version Hex has rather than a fresh one, staged from Hex's parser.
+    /// Reading Hex through npm released the same definition to Hex again on
+    /// every run.
+    #[test]
+    fn a_definition_only_hex_has_goes_to_npm_alone() {
+        let npm = json!({ "0.26.0": parser_version("c", PACKAGE_FORMAT_VERSION) });
+
+        let plan = plan_markdown(npm, &["0.26.0", "0.26.1"], Some("d"), "d");
+
+        assert_eq!(plan.len(), 1);
+        assert_eq!(plan[0].version, "0.26.1", "npm receives Hex's version");
+        assert!(plan[0].npm);
+        assert!(!plan[0].hex, "Hex already ships this definition");
+        assert!(plan[0].from_hex, "a rebuild need not reproduce Hex's bytes");
+    }
+
+    fn tar_of(files: &[(&str, &[u8])]) -> Vec<u8> {
+        let mut tar = tar::Builder::new(Vec::new());
+        for (path, bytes) in files {
+            let mut header = tar::Header::new_ustar();
+            header.set_size(bytes.len() as u64);
+            header.set_mode(0o644);
+            tar.append_data(&mut header, path, *bytes).unwrap();
+        }
+        tar.into_inner().unwrap()
+    }
+
+    /// A Hex package of `files`: `contents.tar.gz` beside `VERSION`, as
+    /// `mix hex.build` writes one.
+    fn hex_package_of(files: &[(&str, &[u8])]) -> Vec<u8> {
+        let mut contents = flate2::write::GzEncoder::new(Vec::new(), flate2::Compression::fast());
+        contents.write_all(&tar_of(files)).unwrap();
+        tar_of(&[
+            ("VERSION", b"3"),
+            ("contents.tar.gz", &contents.finish().unwrap()),
+        ])
+    }
+
+    #[test]
+    fn a_hex_package_definition_is_read_from_its_lumis_json() {
+        let package = hex_package_of(&[
+            ("mix.exs", b"defmodule LumisWasmMarkdown.MixProject do end"),
+            (
+                "priv/parsers/markdown.lumis.json",
+                br#"{"definitionHash":"d"}"#,
+            ),
+        ]);
+
+        assert_eq!(
+            hex_package_definition(&mut package.as_slice())
+                .unwrap()
+                .as_deref(),
+            Some("d")
+        );
+    }
+
+    #[test]
+    fn a_hex_parser_must_match_its_lumis_json() {
+        let wasm = b"\0asm\x01\0\0\0";
+        let package = |sha256: &str| {
+            let manifest = json!({
+                "packageName": "@lumis-sh/wasm-markdown",
+                "version": "0.26.1",
+                "parser": {
+                    "name": "tree-sitter-markdown",
+                    "grammarName": "markdown",
+                    "upstreamVersion": "0.5.0",
+                    "revision": "abc",
+                    "sha256": sha256,
+                    "size": wasm.len(),
+                },
+                "languages": {},
+            });
+            hex_package_of(&[
+                (
+                    "priv/parsers/markdown.lumis.json",
+                    manifest.to_string().as_bytes(),
+                ),
+                ("priv/parsers/tree-sitter-markdown.wasm", wasm),
+            ])
+        };
+
+        let parser = hex_package_parser(
+            "tree-sitter-markdown",
+            &mut package(&sha256_hex(wasm)).as_slice(),
+        );
+        assert_eq!(parser.unwrap(), wasm);
+
+        let corrupt = hex_package_parser("tree-sitter-markdown", &mut package("0").as_slice());
+        assert!(corrupt.is_err(), "a parser its manifest disowns");
     }
 
     /// `@lumis-sh/wasm-bundle-web` staged with these dependencies.
