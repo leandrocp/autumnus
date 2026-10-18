@@ -114,6 +114,25 @@ enum Commands {
     StageHexBundle {
         name: String,
     },
+    /// Print the version a bundle release package (`npm-wasm-bundle-full`) takes
+    /// next, or nothing when its staged bundle matches `wasm-bundles.json`.
+    WasmBundlePlan {
+        package: String,
+    },
+    /// Record a bundle release package at `version` in `wasm-bundles.json`.
+    WasmBundlePrepare {
+        package: String,
+        version: semver::Version,
+    },
+    /// Fail unless every member of a bundle release package is on its registry.
+    WasmBundleCheck {
+        package: String,
+    },
+    /// Decide whether the tag of a bundle release package publishes. Emits JSON.
+    WasmBundlePublishPlan {
+        package: String,
+        version: String,
+    },
     /// Write the committed test parsers as a Lumis store directory.
     StageTestParsers {
         #[arg(default_value = "target/test-parsers")]
@@ -216,6 +235,12 @@ fn main() -> Result<()> {
         Commands::FetchHexWasm { name, version } => fetch_hex_wasm(&name, &version),
         Commands::WasmReleasePlan { filter } => wasm_release_plan(&filter),
         Commands::StageHexBundle { name } => stage_hex_bundle(&name),
+        Commands::WasmBundlePlan { package } => wasm_bundle_plan(&package),
+        Commands::WasmBundlePrepare { package, version } => wasm_bundle_prepare(&package, &version),
+        Commands::WasmBundleCheck { package } => wasm_bundle_check(&package),
+        Commands::WasmBundlePublishPlan { package, version } => {
+            wasm_bundle_publish_plan(&package, &version)
+        }
         Commands::StageTestParsers { out } => stage_test_parsers(Path::new(&out)),
         Commands::WasmNeeded { filter, force } => wasm_needed(&filter, &force),
         Commands::WasmMeta { name } => wasm_meta(&name),
@@ -4581,12 +4606,6 @@ fn package_entry(
 /// `language_definition_hash` gives every parser on both registries.
 const PACKAGE_FORMAT_VERSION: u32 = 4;
 
-/// The bundle counterpart of `PACKAGE_FORMAT_VERSION`, carried in a bundle's
-/// `package.json` as `lumis.bundleFormat`. 3: the bundle carries its module URL
-/// so Node can find its dependencies from any working directory. Must match
-/// `BUNDLE_FORMAT_VERSION` in `packages/javascript/scripts/build-wasm-bundles.ts`.
-const BUNDLE_FORMAT_VERSION: u32 = 3;
-
 const REGISTRY_CONCURRENCY: usize = 16;
 
 const REGISTRY_ATTEMPTS: u32 = 3;
@@ -4725,16 +4744,6 @@ fn definition_matches(meta: &Value, expected: &str, series: &str) -> bool {
         && meta.get("formatVersion").and_then(Value::as_u64) == Some(PACKAGE_FORMAT_VERSION.into())
 }
 
-/// A bundle missing from Hex.
-#[derive(Debug, serde::Serialize)]
-struct BundlePlanEntry {
-    bundle: String,
-    app: String,
-    version: String,
-    npm: bool,
-    hex: bool,
-}
-
 /// What a parser resolves to, and where it is missing.
 #[derive(Debug, serde::Serialize)]
 struct ReleasePlanEntry {
@@ -4776,27 +4785,11 @@ fn wasm_release_plan(filter: &str) -> Result<()> {
 
     let parsers = plan_parsers(candidates, packuments, hex_definitions, &registry, &series)?;
 
-    let staged = staged_bundles()?;
-    let bundle_packuments = fetch_packuments(
-        &staged
-            .iter()
-            .map(|bundle| format!("@lumis-sh/wasm-bundle-{}", bundle.name))
-            .collect::<Vec<_>>(),
-    );
-    let bundles = plan_bundles(&registry, filter, &staged, &bundle_packuments)?;
-
-    println!(
-        "{}",
-        serde_json::to_string(&json!({ "parsers": parsers, "bundles": bundles }))?
-    );
+    println!("{}", serde_json::to_string(&json!({ "parsers": parsers }))?);
     Ok(())
 }
 
 /// The parsers a filter names, empty when it names none.
-///
-/// One reader, because "is this run filtered?" is asked twice and a second
-/// spelling of it would let the parsers and the bundles disagree about the
-/// answer for the same input.
 fn filter_parsers(filter: &str) -> HashSet<&str> {
     filter
         .split(',')
@@ -5062,84 +5055,383 @@ fn fetch_hex_wasm(name: &str, version: &str) -> Result<()> {
     Ok(())
 }
 
-/// The bundles Hex is missing.
-///
-/// No build and no npm: bundles carry no bytes, and npm's are released by tag
-/// alongside the other JavaScript packages.
-///
-/// Nothing on a filtered run. A bundle depends on every parser it groups, so
-/// one published after a run that covered a subset has Hex dependencies that
-/// cannot resolve, and the parsers it is short of are exactly the ones the
-/// filter left out.
-fn plan_bundles(
-    registry: &HashMap<String, Vec<String>>,
-    filter: &str,
-    staged: &[StagedBundle],
-    packuments: &[Result<Option<Value>>],
-) -> Result<Vec<BundlePlanEntry>> {
-    if !filter_parsers(filter).is_empty() {
-        return Ok(Vec::new());
+/// Each bundle's latest release on each registry. Only `release-prepare` writes
+/// it, so merging a bundle's release pull request is what decides its version.
+const BUNDLE_RECORD: &str = "wasm-bundles.json";
+
+/// `wasm-bundles.json`, by registry and then bundle.
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+struct BundleRecord {
+    npm: BTreeMap<String, BundleRelease>,
+    hex: BTreeMap<String, BundleRelease>,
+}
+
+/// What a bundle went out as on one registry. It has no bytes, so its
+/// dependencies, and on npm its format, are its identity.
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct BundleRelease {
+    version: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    bundle_format: Option<u64>,
+    dependencies: BTreeMap<String, String>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum BundleRegistry {
+    Npm,
+    Hex,
+}
+
+impl std::fmt::Display for BundleRegistry {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self {
+            Self::Npm => "npm",
+            Self::Hex => "Hex",
+        })
+    }
+}
+
+/// A bundle's release package on one registry: `npm-wasm-bundle-<bundle>` or
+/// `hex-wasm-bundle-<bundle>`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct BundlePackage {
+    registry: BundleRegistry,
+    bundle: String,
+}
+
+impl BundlePackage {
+    fn parse(package: &str) -> Result<Self> {
+        let (registry, bundle) = if let Some(bundle) = package.strip_prefix("npm-wasm-bundle-") {
+            (BundleRegistry::Npm, bundle)
+        } else if let Some(bundle) = package.strip_prefix("hex-wasm-bundle-") {
+            (BundleRegistry::Hex, bundle)
+        } else {
+            bail!("{package} is not a bundle release package");
+        };
+        ensure!(!bundle.is_empty(), "{package} names no bundle");
+        Ok(Self {
+            registry,
+            bundle: bundle.to_string(),
+        })
     }
 
-    let mut bundles = Vec::new();
-    for (bundle, packument) in staged.iter().zip(packuments) {
-        let packument = match packument {
-            Ok(packument) => packument.as_ref(),
-            Err(error) => bail!(
-                "could not read @lumis-sh/wasm-bundle-{}: {error}",
-                bundle.name
-            ),
-        };
-        let app = format!("lumis_wasm_bundle_{}", bundle.name.replace('-', "_"));
-        let hex = registry.get(&app).cloned().unwrap_or_default();
-
-        let version = packument
-            .and_then(|p| bundle_version_for_requirements(p, &bundle.requirements))
-            // These members are published already: that version is the one, and
-            // the registry missing it gets the same one.
-            .unwrap_or_else(|| next_patch(BUNDLE_SERIES, packument, &hex));
-
-        let on_npm = packument
-            .and_then(|p| p.get("versions"))
-            .and_then(Value::as_object)
-            .is_some_and(|versions| versions.contains_key(&version));
-        let hex_needed = !hex.contains(&version)
-            && !hex_bundle_is_current(packument, &hex, &bundle.requirements);
-
-        if !on_npm || hex_needed {
-            bundles.push(BundlePlanEntry {
-                bundle: bundle.name.clone(),
-                app,
-                version,
-                npm: !on_npm,
-                hex: hex_needed,
-            });
+    /// The name the registry knows it by.
+    fn registry_name(&self) -> String {
+        match self.registry {
+            BundleRegistry::Npm => bundle_package(&self.bundle),
+            BundleRegistry::Hex => bundle_app(&self.bundle),
         }
     }
-    Ok(bundles)
+
+    fn releases<'a>(&self, record: &'a BundleRecord) -> &'a BTreeMap<String, BundleRelease> {
+        match self.registry {
+            BundleRegistry::Npm => &record.npm,
+            BundleRegistry::Hex => &record.hex,
+        }
+    }
+
+    fn recorded<'a>(&self, record: &'a BundleRecord) -> Option<&'a BundleRelease> {
+        self.releases(record).get(&self.bundle)
+    }
+
+    fn staged<'a>(&self, staged: &'a [StagedBundle]) -> Result<&'a StagedBundle> {
+        staged
+            .iter()
+            .find(|bundle| bundle.name == self.bundle)
+            .with_context(|| format!("no {} bundle is staged", self.bundle))
+    }
 }
 
-/// Whether the newest Hex release of a bundle already depends on
-/// `requirements`, members and ranges alike.
-///
-/// A Hex bundle is its `mix.exs` dependency list and a README, so those are
-/// all that can change it; `bundleFormat` describes the npm entry.
-fn hex_bundle_is_current(
-    packument: Option<&Value>,
-    hex: &[String],
-    requirements: &BTreeMap<String, String>,
-) -> bool {
-    hex.iter()
-        .filter(|version| patch_of(version, BUNDLE_SERIES).is_some())
-        .max_by_key(|version| patch_of(version, BUNDLE_SERIES))
-        .and_then(|newest| packument?.pointer(&format!("/versions/{newest}")))
-        .is_some_and(|manifest| &wasm_requirements(manifest) == requirements)
+fn read_bundle_record() -> Result<BundleRecord> {
+    let text = fs::read_to_string(BUNDLE_RECORD)
+        .with_context(|| format!("could not read {BUNDLE_RECORD}"))?;
+    serde_json::from_str(&text).with_context(|| format!("invalid {BUNDLE_RECORD}"))
 }
 
-/// Bundles version independently of the parsers they group: a bundle is a list
-/// of dependencies, not a Tree-sitter artifact, so it has no ABI series to
-/// track. `0.1` is where they started and nothing has needed a minor since.
-const BUNDLE_SERIES: &str = "0.1";
+fn bundle_package(name: &str) -> String {
+    format!("@lumis-sh/wasm-bundle-{name}")
+}
+
+fn bundle_app(name: &str) -> String {
+    format!("lumis_wasm_bundle_{}", name.replace('-', "_"))
+}
+
+/// The version `package` releases next, or `None` while its staged bundle is
+/// what its registry last got. One patch past the record and every version that
+/// registry has, so a release never reuses one.
+fn next_bundle_version(
+    package: &BundlePackage,
+    record: &BundleRecord,
+    staged: &[StagedBundle],
+    published: &[String],
+) -> Result<Option<semver::Version>> {
+    let recorded = package.recorded(record);
+    if let Some(release) = recorded {
+        if package
+            .staged(staged)?
+            .released_as(package.registry, release)?
+        {
+            return Ok(None);
+        }
+    }
+    let highest = recorded
+        .map(|release| &release.version)
+        .into_iter()
+        .chain(published)
+        .filter_map(|version| semver::Version::parse(version).ok())
+        .max();
+    Ok(Some(
+        highest.map_or(semver::Version::new(0, 1, 0), |version| {
+            semver::Version::new(version.major, version.minor, version.patch + 1)
+        }),
+    ))
+}
+
+/// The record after releasing `package` at `version`. Every other entry stays.
+fn prepare_bundle_record(
+    record: &BundleRecord,
+    package: &BundlePackage,
+    staged: &[StagedBundle],
+    version: &str,
+) -> Result<BundleRecord> {
+    let bundle = package.staged(staged)?;
+    if let Some(release) = package.recorded(record) {
+        if bundle.released_as(package.registry, release)? {
+            bail!(
+                "{} has not changed since {BUNDLE_RECORD} recorded {}",
+                package.registry_name(),
+                release.version
+            );
+        }
+    }
+    let mut prepared = record.clone();
+    let releases = match package.registry {
+        BundleRegistry::Npm => &mut prepared.npm,
+        BundleRegistry::Hex => &mut prepared.hex,
+    };
+    releases.insert(
+        package.bundle.clone(),
+        bundle.release(package.registry, version)?,
+    );
+    Ok(prepared)
+}
+
+/// Members of `release` that `registry` has no version of within the range it
+/// requires. `published` maps each member to that registry's versions of it.
+fn unpublished_members(
+    registry: BundleRegistry,
+    release: &BundleRelease,
+    published: &HashMap<String, Vec<String>>,
+) -> Result<Vec<String>> {
+    let mut missing = Vec::new();
+    for (member, range) in &release.dependencies {
+        let requirement = match registry {
+            BundleRegistry::Npm => semver::VersionReq::parse(range).map_err(anyhow::Error::from),
+            BundleRegistry::Hex => hex_version_req(range),
+        }
+        .with_context(|| format!("{member} requires {range}, which this cannot read"))?;
+        let satisfied = published
+            .get(member)
+            .into_iter()
+            .flatten()
+            .filter_map(|version| semver::Version::parse(version).ok())
+            .any(|version| requirement.matches(&version));
+        if !satisfied {
+            missing.push(format!("{member} {range}"));
+        }
+    }
+    Ok(missing)
+}
+
+/// What a requirement [`hex_requirement`] writes means, as a semver range.
+fn hex_version_req(requirement: &str) -> Result<semver::VersionReq> {
+    let range = if let Some(version) = requirement.strip_prefix("~> ") {
+        let parsed = semver::Version::parse(version)?;
+        format!(">={version}, <{}.{}.0", parsed.major, parsed.minor + 1)
+    } else if let Some(version) = requirement.strip_prefix("== ") {
+        format!("={version}")
+    } else if let Some((lower, upper)) = requirement
+        .strip_prefix(">= ")
+        .and_then(|bounds| bounds.split_once(" and < "))
+    {
+        format!(">={lower}, <{upper}")
+    } else {
+        bail!("{requirement} is not a Hex requirement this can read");
+    };
+    Ok(semver::VersionReq::parse(&range)?)
+}
+
+/// Whether the tag of `package` at `version` still has to publish. Fails while
+/// a member is missing on its registry, or the bundle no longer matches the
+/// release this commit records.
+fn bundle_publishes(
+    package: &BundlePackage,
+    version: &str,
+    record: &BundleRecord,
+    staged: &[StagedBundle],
+    published: &[String],
+    members: &HashMap<String, Vec<String>>,
+) -> Result<bool> {
+    let name = package.registry_name();
+    let release = package
+        .recorded(record)
+        .filter(|release| release.version == version)
+        .with_context(|| format!("{BUNDLE_RECORD} does not record {name} at {version}"))?;
+    if published.iter().any(|published| published == version) {
+        return Ok(false);
+    }
+    ensure!(
+        package
+            .staged(staged)?
+            .released_as(package.registry, release)?,
+        "{name} changed after {version} was prepared, so it is not published; \
+         the next release pull request takes it"
+    );
+    let missing = unpublished_members(package.registry, release, members)?;
+    ensure!(
+        missing.is_empty(),
+        "{name} {version} requires members {} does not have yet:\n  {}",
+        package.registry,
+        missing.join("\n  ")
+    );
+    Ok(true)
+}
+
+/// Every version `registry` has of each named package.
+fn registry_versions(
+    registry: BundleRegistry,
+    names: &[String],
+) -> Result<HashMap<String, Vec<String>>> {
+    match registry {
+        BundleRegistry::Npm => Ok(names.iter().cloned().zip(npm_versions(names)?).collect()),
+        BundleRegistry::Hex => {
+            let mut hex = hex_registry()?;
+            Ok(names
+                .iter()
+                .map(|name| (name.clone(), hex.remove(name).unwrap_or_default()))
+                .collect())
+        }
+    }
+}
+
+/// Every version npm has of each package, in the order given.
+fn npm_versions(packages: &[String]) -> Result<Vec<Vec<String>>> {
+    packages
+        .iter()
+        .zip(fetch_packuments(packages))
+        .map(|(package, packument)| {
+            let packument = packument.with_context(|| format!("could not read {package}"))?;
+            Ok(packument
+                .as_ref()
+                .and_then(|packument| packument.get("versions"))
+                .and_then(Value::as_object)
+                .map(|versions| versions.keys().cloned().collect())
+                .unwrap_or_default())
+        })
+        .collect()
+}
+
+/// The versions `package` itself has on its registry.
+fn bundle_versions(package: &BundlePackage) -> Result<Vec<String>> {
+    let name = package.registry_name();
+    Ok(
+        registry_versions(package.registry, std::slice::from_ref(&name))?
+            .remove(&name)
+            .unwrap_or_default(),
+    )
+}
+
+fn wasm_bundle_plan(package: &str) -> Result<()> {
+    let package = BundlePackage::parse(package)?;
+    let next = next_bundle_version(
+        &package,
+        &read_bundle_record()?,
+        &staged_bundles()?,
+        &bundle_versions(&package)?,
+    )?;
+    if let Some(next) = next {
+        eprintln!(
+            "{} differs from its recorded release",
+            package.registry_name()
+        );
+        println!("{next}");
+    }
+    Ok(())
+}
+
+fn wasm_bundle_prepare(package: &str, version: &semver::Version) -> Result<()> {
+    let record = prepare_bundle_record(
+        &read_bundle_record()?,
+        &BundlePackage::parse(package)?,
+        &staged_bundles()?,
+        &version.to_string(),
+    )?;
+    fs::write(BUNDLE_RECORD, serde_json::to_string_pretty(&record)? + "\n")?;
+    Ok(())
+}
+
+/// Fail until every member of `package`'s recorded release is on its registry.
+fn wasm_bundle_check(package: &str) -> Result<()> {
+    let package = BundlePackage::parse(package)?;
+    let record = read_bundle_record()?;
+    let name = package.registry_name();
+    let release = package
+        .recorded(&record)
+        .with_context(|| format!("{BUNDLE_RECORD} records no {name}"))?;
+    let members: Vec<String> = release.dependencies.keys().cloned().collect();
+    let missing = unpublished_members(
+        package.registry,
+        release,
+        &registry_versions(package.registry, &members)?,
+    )?;
+    ensure!(
+        missing.is_empty(),
+        "{name} {} requires members {} does not have yet:\n  {}",
+        release.version,
+        package.registry,
+        missing.join("\n  ")
+    );
+    println!(
+        "Every member of {name} {} is on {}",
+        release.version, package.registry
+    );
+    Ok(())
+}
+
+/// Print, as JSON, whether the tag of `package` at `version` publishes.
+fn wasm_bundle_publish_plan(package: &str, version: &str) -> Result<()> {
+    let package = BundlePackage::parse(package)?;
+    let record = read_bundle_record()?;
+    let members: Vec<String> = package
+        .recorded(&record)
+        .map(|release| release.dependencies.keys().cloned().collect())
+        .unwrap_or_default();
+    let publish = bundle_publishes(
+        &package,
+        version,
+        &record,
+        &staged_bundles()?,
+        &bundle_versions(&package)?,
+        &registry_versions(package.registry, &members)?,
+    )?;
+    if !publish {
+        eprintln!(
+            "{} {version} is already on {}",
+            package.registry_name(),
+            package.registry
+        );
+    }
+    println!(
+        "{}",
+        json!({
+            "bundle": package.bundle,
+            "app": bundle_app(&package.bundle),
+            "publish": publish,
+        })
+    );
+    Ok(())
+}
 
 /// Where `build:wasm-bundles` stages the npm packages it generates.
 ///
@@ -5155,9 +5447,38 @@ const NPM_BUNDLE_STAGE: &str = "tmp/wasm/npm";
 /// this reads what it wrote rather than working it out a second time.
 struct StagedBundle {
     name: String,
+    /// `lumis.bundleFormat`, which the generator raises when what a bundle
+    /// exports changes.
+    format: u64,
     /// npm dependencies with their ranges. A bundle *is* its dependency list,
     /// and its Hex `mix.exs` is written from it.
     requirements: BTreeMap<String, String>,
+}
+
+impl StagedBundle {
+    /// What releasing this bundle at `version` puts on `registry`. Hex gets the
+    /// requirements `stage-hex-bundle` writes, and no format.
+    fn release(&self, registry: BundleRegistry, version: &str) -> Result<BundleRelease> {
+        let (bundle_format, dependencies) = match registry {
+            BundleRegistry::Npm => (Some(self.format), self.requirements.clone()),
+            BundleRegistry::Hex => (
+                None,
+                self.requirements
+                    .iter()
+                    .map(|(package, range)| Ok((hex_member_app(package)?, hex_requirement(range)?)))
+                    .collect::<Result<_>>()?,
+            ),
+        };
+        Ok(BundleRelease {
+            version: version.to_string(),
+            bundle_format,
+            dependencies,
+        })
+    }
+
+    fn released_as(&self, registry: BundleRegistry, release: &BundleRelease) -> Result<bool> {
+        Ok(self.release(registry, &release.version)? == *release)
+    }
 }
 
 fn staged_bundles() -> Result<Vec<StagedBundle>> {
@@ -5173,8 +5494,13 @@ fn staged_bundles() -> Result<Vec<StagedBundle>> {
             .and_then(|dir| dir.to_str())
             .and_then(|dir| dir.strip_prefix("wasm-bundle-"))
             .with_context(|| format!("could not name the bundle at {}", path.display()))?;
+        let format = manifest
+            .pointer("/lumis/bundleFormat")
+            .and_then(Value::as_u64)
+            .with_context(|| format!("{} has no lumis.bundleFormat", path.display()))?;
         bundles.push(StagedBundle {
             name: name.to_string(),
+            format,
             requirements: wasm_requirements(&manifest),
         });
     }
@@ -5200,32 +5526,6 @@ fn wasm_requirements(manifest: &Value) -> BTreeMap<String, String> {
         .filter(|(name, _)| name.starts_with("@lumis-sh/wasm-"))
         .map(|(name, range)| (name.clone(), range.as_str().unwrap_or_default().to_string()))
         .collect()
-}
-
-/// The version a bundle's dependency list was published under on npm, if it
-/// was.
-///
-/// The bundle equivalent of `version_for_definition`. A parser identifies its
-/// content with a `definitionHash`; a bundle has no bytes to hash, so its
-/// dependency list, members and ranges, is the identity. Matching it against
-/// what npm published is what makes a membership or range change take a new
-/// version on its own, instead of waiting for someone to bump one by hand.
-fn bundle_version_for_requirements(
-    packument: &Value,
-    requirements: &BTreeMap<String, String>,
-) -> Option<String> {
-    let versions = packument.get("versions")?.as_object()?;
-    versions
-        .iter()
-        .filter(|(_, manifest)| {
-            &wasm_requirements(manifest) == requirements
-                && manifest
-                    .pointer("/lumis/bundleFormat")
-                    .and_then(Value::as_u64)
-                    == Some(BUNDLE_FORMAT_VERSION.into())
-        })
-        .map(|(version, _)| version.clone())
-        .max_by_key(|version| patch_of(version, "0.1").unwrap_or(0))
 }
 
 /// The version a definition was published under on npm, if it was.
@@ -5588,7 +5888,7 @@ fn stage_hex_bundle(name: &str) -> Result<()> {
         .with_context(|| format!("{manifest} has no description"))?;
     check_hex_description(&manifest, description)?;
 
-    let app_name = format!("lumis_wasm_bundle_{}", name.replace('-', "_"));
+    let app_name = bundle_app(name);
     let module_name = elixir_module_name(&app_name);
 
     let members = hex_dependencies(dependencies)?;
@@ -5674,19 +5974,22 @@ fn hex_dependencies(
 ) -> Result<Vec<(String, String)>> {
     let mut members = Vec::new();
     for (package_name, requirement) in dependencies {
-        let suffix = package_name
-            .strip_prefix("@lumis-sh/wasm-")
-            .with_context(|| format!("{package_name} is not a parser package"))?;
         let requirement = requirement
             .as_str()
             .with_context(|| format!("{package_name} has no version requirement"))?;
-        members.push((
-            format!("lumis_wasm_{}", suffix.replace('-', "_")),
-            hex_requirement(requirement)?,
-        ));
+        members.push((hex_member_app(package_name)?, hex_requirement(requirement)?));
     }
     members.sort();
     Ok(members)
+}
+
+/// The Hex application of a bundle member: `@lumis-sh/wasm-c-sharp` is
+/// `lumis_wasm_c_sharp`.
+fn hex_member_app(package_name: &str) -> Result<String> {
+    let suffix = package_name
+        .strip_prefix("@lumis-sh/wasm-")
+        .with_context(|| format!("{package_name} is not a parser package"))?;
+    Ok(format!("lumis_wasm_{}", suffix.replace('-', "_")))
 }
 
 /// A parser package's `mix.exs`, depending on what its npm counterpart does.
@@ -5927,103 +6230,363 @@ fn elixir_lumis_requirement() -> Result<String> {
 }
 
 #[cfg(test)]
-mod hex_wasm_tests {
+mod bundle_release_tests {
     use super::*;
 
-    fn bundle_packument(versions: &[(&str, &[&str])]) -> Value {
-        let published = versions
-            .iter()
-            .map(|(version, members)| {
-                let deps = members
-                    .iter()
-                    .map(|m| ((*m).to_string(), json!("^0.26.0")))
-                    .collect::<serde_json::Map<_, _>>();
-                (
-                    (*version).to_string(),
-                    json!({
-                        "dependencies": deps,
-                        "lumis": { "bundleFormat": BUNDLE_FORMAT_VERSION },
-                    }),
-                )
-            })
-            .collect::<serde_json::Map<_, _>>();
-        json!({ "versions": published })
+    const C: &str = "@lumis-sh/wasm-c";
+    const CSS: &str = "@lumis-sh/wasm-css";
+    const HURL: &str = "@lumis-sh/wasm-hurl";
+
+    fn package(name: &str) -> BundlePackage {
+        BundlePackage::parse(name).unwrap()
     }
 
-    /// A bundle has no bytes to hash, so its dependency list is its identity.
-    /// Finding the version that carries the current membership is what lets a
-    /// membership change publish itself.
+    fn staged(name: &str, members: &[&str]) -> StagedBundle {
+        StagedBundle {
+            name: name.to_string(),
+            format: 3,
+            requirements: members
+                .iter()
+                .map(|member| ((*member).to_string(), "^0.26.0".to_string()))
+                .collect(),
+        }
+    }
+
+    fn npm_release(version: &str, members: &[&str]) -> BundleRelease {
+        staged("", members)
+            .release(BundleRegistry::Npm, version)
+            .unwrap()
+    }
+
+    /// Spelled out rather than derived, so a wrong translation is caught here.
+    fn hex_release(version: &str, apps: &[&str]) -> BundleRelease {
+        BundleRelease {
+            version: version.to_string(),
+            bundle_format: None,
+            dependencies: apps
+                .iter()
+                .map(|app| ((*app).to_string(), "~> 0.26.0".to_string()))
+                .collect(),
+        }
+    }
+
+    fn record(npm: &[(&str, BundleRelease)], hex: &[(&str, BundleRelease)]) -> BundleRecord {
+        let entries = |releases: &[(&str, BundleRelease)]| {
+            releases
+                .iter()
+                .map(|(name, release)| ((*name).to_string(), release.clone()))
+                .collect()
+        };
+        BundleRecord {
+            npm: entries(npm),
+            hex: entries(hex),
+        }
+    }
+
+    fn versions(list: &[&str]) -> Vec<String> {
+        list.iter().map(|version| (*version).to_string()).collect()
+    }
+
+    fn next(
+        name: &str,
+        record: &BundleRecord,
+        staged: &[StagedBundle],
+        published: &[&str],
+    ) -> Option<String> {
+        next_bundle_version(&package(name), record, staged, &versions(published))
+            .unwrap()
+            .map(|version| version.to_string())
+    }
+
     #[test]
-    fn a_bundle_keeps_the_version_its_membership_was_published_under() {
-        let published = bundle_packument(&[
-            ("0.1.0", &["@lumis-sh/wasm-c"]),
-            ("0.1.1", &["@lumis-sh/wasm-c", "@lumis-sh/wasm-diff"]),
+    fn package_names_are_registry_then_bundle() {
+        assert_eq!(
+            package("npm-wasm-bundle-web-extra"),
+            BundlePackage {
+                registry: BundleRegistry::Npm,
+                bundle: "web-extra".to_string()
+            }
+        );
+        assert_eq!(
+            package("hex-wasm-bundle-full").registry_name(),
+            "lumis_wasm_bundle_full"
+        );
+        assert!(BundlePackage::parse("npm-lumis").is_err());
+    }
+
+    /// The registries are released apart: npm full went out at 0.1.4 while Hex
+    /// took 0.1.5 and 0.1.6, so each one's next version is past its own.
+    #[test]
+    fn each_registry_takes_one_patch_past_its_own_highest_version() {
+        let record = record(
+            &[("full", npm_release("0.1.4", &[C]))],
+            &[("full", hex_release("0.1.6", &["lumis_wasm_c"]))],
+        );
+        let grown = [staged("full", &[C, HURL])];
+
+        assert_eq!(
+            next("npm-wasm-bundle-full", &record, &grown, &["0.1.3", "0.1.4"]).as_deref(),
+            Some("0.1.5")
+        );
+        assert_eq!(
+            next(
+                "hex-wasm-bundle-full",
+                &record,
+                &grown,
+                &["0.1.2", "0.1.5", "0.1.6"]
+            )
+            .as_deref(),
+            Some("0.1.7")
+        );
+        assert_eq!(
+            next("npm-wasm-bundle-full", &record, &grown, &["0.1.4", "0.1.8"]).as_deref(),
+            Some("0.1.9"),
+            "a version the record never saw is still taken"
+        );
+        assert_eq!(
+            next("npm-wasm-bundle-full", &record, &grown, &["0.1.3"]).as_deref(),
+            Some("0.1.5"),
+            "a merged release that has not published yet still holds its version"
+        );
+        assert_eq!(
+            next(
+                "npm-wasm-bundle-web",
+                &record,
+                &[staged("web", &[CSS])],
+                &[]
+            )
+            .as_deref(),
+            Some("0.1.0")
+        );
+    }
+
+    /// Ten language merges are one release: a package changes when its bundle
+    /// differs from what its registry last got, however many pushes that took.
+    #[test]
+    fn a_package_changes_only_when_its_registry_would_get_something_else() {
+        let record = record(
+            &[("full", npm_release("0.1.4", &[C]))],
+            &[("full", hex_release("0.1.6", &["lumis_wasm_c"]))],
+        );
+        let same = [staged("full", &[C])];
+        assert_eq!(next("npm-wasm-bundle-full", &record, &same, &[]), None);
+        assert_eq!(
+            next("hex-wasm-bundle-full", &record, &same, &[]),
+            None,
+            "Hex is compared in the requirements it was given"
+        );
+
+        let mut reformatted = staged("full", &[C]);
+        reformatted.format = 4;
+        let reformatted = [reformatted];
+        assert!(next("npm-wasm-bundle-full", &record, &reformatted, &[]).is_some());
+        assert_eq!(
+            next("hex-wasm-bundle-full", &record, &reformatted, &[]),
+            None,
+            "the format is what the npm entry exports, which Hex does not ship"
+        );
+
+        let mut moved = staged("full", &[C]);
+        moved
+            .requirements
+            .insert(C.to_string(), "^0.27.0".to_string());
+        for bundle in [moved, staged("full", &[C, HURL])] {
+            let staged = [bundle];
+            assert!(next("npm-wasm-bundle-full", &record, &staged, &[]).is_some());
+            assert!(next("hex-wasm-bundle-full", &record, &staged, &[]).is_some());
+        }
+    }
+
+    #[test]
+    fn preparing_records_only_that_package() {
+        let record = record(
+            &[
+                ("full", npm_release("0.1.4", &[C])),
+                ("web", npm_release("0.1.3", &[CSS])),
+            ],
+            &[("full", hex_release("0.1.6", &["lumis_wasm_c"]))],
+        );
+        let staged = [staged("full", &[C, HURL]), staged("web", &[CSS])];
+
+        let prepared =
+            prepare_bundle_record(&record, &package("npm-wasm-bundle-full"), &staged, "0.1.5")
+                .unwrap();
+        let mut expected = record.clone();
+        expected
+            .npm
+            .insert("full".to_string(), npm_release("0.1.5", &[C, HURL]));
+        assert_eq!(prepared, expected);
+
+        let prepared = prepare_bundle_record(
+            &prepared,
+            &package("hex-wasm-bundle-full"),
+            &staged,
+            "0.1.7",
+        )
+        .unwrap();
+        assert_eq!(
+            prepared.hex["full"],
+            hex_release("0.1.7", &["lumis_wasm_c", "lumis_wasm_hurl"])
+        );
+        assert!(prepare_bundle_record(
+            &prepared,
+            &package("npm-wasm-bundle-full"),
+            &staged,
+            "0.1.6"
+        )
+        .is_err());
+    }
+
+    /// A bundle released ahead of its members cannot be installed, so the check
+    /// names each member its own registry is missing, and only that registry.
+    #[test]
+    fn a_member_missing_from_its_registry_fails_the_check() {
+        let mut published = HashMap::from([
+            (C.to_string(), versions(&["0.26.1"])),
+            (HURL.to_string(), versions(&["0.25.3"])),
+            ("lumis_wasm_c".to_string(), versions(&["0.26.1"])),
         ]);
-        let members = ranges(&["@lumis-sh/wasm-c", "@lumis-sh/wasm-diff"], "^0.26.0");
+        let npm = npm_release("0.1.5", &[C, HURL]);
+        let hex = hex_release("0.1.7", &["lumis_wasm_c", "lumis_wasm_hurl"]);
 
         assert_eq!(
-            bundle_version_for_requirements(&published, &members).as_deref(),
-            Some("0.1.1")
+            unpublished_members(BundleRegistry::Npm, &npm, &published).unwrap(),
+            ["@lumis-sh/wasm-hurl ^0.26.0"]
+        );
+        assert_eq!(
+            unpublished_members(BundleRegistry::Hex, &hex, &published).unwrap(),
+            ["lumis_wasm_hurl ~> 0.26.0"]
+        );
+
+        published.insert(HURL.to_string(), versions(&["0.25.3", "0.26.2"]));
+        published.insert("lumis_wasm_hurl".to_string(), versions(&["0.27.0"]));
+        assert_eq!(
+            unpublished_members(BundleRegistry::Npm, &npm, &published).unwrap(),
+            [] as [String; 0]
+        );
+        assert_eq!(
+            unpublished_members(BundleRegistry::Hex, &hex, &published).unwrap(),
+            ["lumis_wasm_hurl ~> 0.26.0"],
+            "0.27.0 is outside ~> 0.26.0"
         );
     }
 
-    /// Members at `range`, the way a staged bundle lists them.
-    fn ranges(members: &[&str], range: &str) -> BTreeMap<String, String> {
-        members
-            .iter()
-            .map(|member| ((*member).to_string(), range.to_string()))
-            .collect()
+    /// The Hex check reads the requirements `hex_requirement` writes, so each
+    /// has to mean what the npm range it came from means.
+    #[test]
+    fn a_hex_requirement_means_the_npm_range_it_was_written_from() {
+        let candidates = [
+            "0.0.3", "0.0.4", "0.26.0", "0.26.9", "0.27.0", "1.2.3", "1.2.9", "1.3.0", "2.0.0",
+        ];
+        // The semver crate reads a bare version as a caret; npm reads it as exact.
+        for (npm, meaning) in [
+            ("^0.0.3", "^0.0.3"),
+            ("^0.26.0", "^0.26.0"),
+            ("^1.2.3", "^1.2.3"),
+            ("~1.2.3", "~1.2.3"),
+            ("1.2.3", "=1.2.3"),
+        ] {
+            let npm_range = semver::VersionReq::parse(meaning).unwrap();
+            let hex_range = hex_version_req(&hex_requirement(npm).unwrap()).unwrap();
+            for candidate in candidates {
+                let version = semver::Version::parse(candidate).unwrap();
+                assert_eq!(
+                    hex_range.matches(&version),
+                    npm_range.matches(&version),
+                    "{npm} and {candidate}"
+                );
+            }
+        }
     }
 
-    /// Same members at a new Tree-sitter series is a new `mix.exs` and a new
-    /// entry point, so it is a new bundle.
+    /// Merging a release whose check is still red must not publish ahead of its
+    /// members, and a re-run once they are out publishes only what is missing.
     #[test]
-    fn a_range_change_matches_no_published_version() {
-        let published = bundle_packument(&[("0.1.1", &["@lumis-sh/wasm-c"])]);
+    fn the_tag_publishes_only_a_current_release_whose_members_are_out() {
+        let record = record(
+            &[("full", npm_release("0.1.5", &[C, HURL]))],
+            &[(
+                "full",
+                hex_release("0.1.7", &["lumis_wasm_c", "lumis_wasm_hurl"]),
+            )],
+        );
+        let staged = [staged("full", &[C, HURL])];
+        let mut members = HashMap::from([
+            (C.to_string(), versions(&["0.26.1"])),
+            ("lumis_wasm_c".to_string(), versions(&["0.26.1"])),
+            ("lumis_wasm_hurl".to_string(), versions(&["0.26.0"])),
+        ]);
+        let publishes = |name: &str, version: &str, published: &[&str], members: &_| {
+            bundle_publishes(
+                &package(name),
+                version,
+                &record,
+                &staged,
+                &versions(published),
+                members,
+            )
+        };
 
-        assert_eq!(
-            bundle_version_for_requirements(&published, &ranges(&["@lumis-sh/wasm-c"], "^0.27.0")),
-            None
+        let error = publishes("npm-wasm-bundle-full", "0.1.5", &["0.1.4"], &members)
+            .unwrap_err()
+            .to_string();
+        assert!(error.contains("@lumis-sh/wasm-hurl ^0.26.0"), "{error}");
+        assert!(publishes("hex-wasm-bundle-full", "0.1.7", &["0.1.6"], &members).unwrap());
+
+        members.insert(HURL.to_string(), versions(&["0.26.0"]));
+        assert!(publishes("npm-wasm-bundle-full", "0.1.5", &["0.1.4"], &members).unwrap());
+        assert!(!publishes("npm-wasm-bundle-full", "0.1.5", &["0.1.5"], &members).unwrap());
+        assert!(publishes("npm-wasm-bundle-full", "0.1.6", &[], &members).is_err());
+    }
+
+    /// `main` moved between the pull request's last update and its merge, so this
+    /// commit generates members the check never saw.
+    #[test]
+    fn a_bundle_that_no_longer_matches_its_release_is_not_published() {
+        let record = record(&[("full", npm_release("0.1.5", &[C]))], &[]);
+        let members = HashMap::from([(C.to_string(), versions(&["0.26.1"]))]);
+
+        let error = bundle_publishes(
+            &package("npm-wasm-bundle-full"),
+            "0.1.5",
+            &record,
+            &[staged("full", &[C, HURL])],
+            &[],
+            &members,
+        )
+        .unwrap_err()
+        .to_string();
+        assert!(
+            error.contains("changed after 0.1.5 was prepared"),
+            "{error}"
         );
     }
 
-    /// Same members, older contents: a bundle published before `bundleFormat`
-    /// exports parser URLs rather than languages, so it must not count as this one.
+    /// `release-version` reads the record with jq and `release-prepare` rewrites
+    /// it, so it stays in the form that writes, and both registries know every
+    /// bundle.
     #[test]
-    fn a_bundle_from_an_older_format_takes_a_new_version() {
-        let members = ranges(&["@lumis-sh/wasm-c"], "^0.26.0");
-        let published = json!({
-            "versions": {
-                "0.1.3": { "dependencies": { "@lumis-sh/wasm-c": "^0.26.0" } },
-            },
-        });
+    fn the_committed_record_is_what_prepare_writes() {
+        let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../wasm-bundles.json");
+        let text = fs::read_to_string(path).expect("wasm-bundles.json should be readable");
+        let record: BundleRecord =
+            serde_json::from_str(&text).expect("wasm-bundles.json should parse");
 
-        assert_eq!(bundle_version_for_requirements(&published, &members), None);
-    }
-
-    /// The case that shipped: `systemverilog` left `bundle-full` and nothing
-    /// republished, because the planner only asked whether the version existed.
-    #[test]
-    fn changed_membership_matches_no_published_version() {
-        let published = bundle_packument(&[(
-            "0.1.1",
-            &["@lumis-sh/wasm-c", "@lumis-sh/wasm-systemverilog"],
-        )]);
-        let members = ranges(&["@lumis-sh/wasm-c"], "^0.26.0");
-
-        assert_eq!(bundle_version_for_requirements(&published, &members), None);
-        // So it takes the next patch and publishes, rather than reporting
-        // nothing to do.
+        assert_eq!(serde_json::to_string_pretty(&record).unwrap() + "\n", text);
         assert_eq!(
-            next_patch(BUNDLE_SERIES, Some(&published), &["0.1.1".to_string()]),
-            "0.1.2"
+            record.npm.keys().collect::<Vec<_>>(),
+            record.hex.keys().collect::<Vec<_>>()
         );
+        for (name, release) in record.npm.iter().chain(&record.hex) {
+            semver::Version::parse(&release.version)
+                .unwrap_or_else(|_| panic!("{name} has version {:?}", release.version));
+        }
     }
+}
 
-    #[test]
-    fn a_bundle_npm_has_never_seen_starts_at_the_first_patch() {
-        assert_eq!(next_patch(BUNDLE_SERIES, None, &[]), "0.1.0");
-    }
+#[cfg(test)]
+mod hex_wasm_tests {
+    use super::*;
 
     fn packument(versions: &[(&str, &str)]) -> Value {
         json!({
@@ -6073,31 +6636,6 @@ mod hex_wasm_tests {
         assert_eq!(next_patch("0.26", None, &[]), "0.26.0");
     }
 
-    /// A bundle depends on every parser it groups, so one published after a run
-    /// that covered a subset has Hex dependencies that cannot resolve.
-    #[test]
-    fn a_filtered_run_plans_no_bundles() {
-        let registry = HashMap::new();
-        let staged = [staged_web(&[("@lumis-sh/wasm-css", "^0.26.0")])];
-        let packuments = vec![Ok(None)];
-
-        assert_eq!(
-            plan_bundles(&registry, "", &staged, &packuments)
-                .unwrap()
-                .len(),
-            1,
-            "neither registry has it, so an unfiltered run plans the one there is"
-        );
-        assert!(plan_bundles(&registry, "json", &staged, &packuments)
-            .unwrap()
-            .is_empty());
-        assert!(plan_bundles(&registry, "json,elixir", &staged, &packuments)
-            .unwrap()
-            .is_empty());
-    }
-
-    /// Both readers of the filter have to agree on what counts as filtered, or
-    /// a run can select every parser while planning no bundles.
     #[test]
     fn separators_alone_do_not_filter() {
         assert!(filter_parsers("").is_empty());
@@ -6286,48 +6824,6 @@ mod hex_wasm_tests {
 
         let corrupt = hex_package_parser("tree-sitter-markdown", &mut package("0").as_slice());
         assert!(corrupt.is_err(), "a parser its manifest disowns");
-    }
-
-    /// `@lumis-sh/wasm-bundle-web` staged with these dependencies.
-    fn staged_web(requirements: &[(&str, &str)]) -> StagedBundle {
-        let requirements = requirements
-            .iter()
-            .map(|(name, range)| ((*name).to_string(), (*range).to_string()))
-            .collect::<BTreeMap<_, _>>();
-        StagedBundle {
-            name: "web".to_string(),
-            requirements,
-        }
-    }
-
-    /// `bundleFormat` describes the npm entry. A Hex bundle is its dependency
-    /// list, so only a change to that list is news to Hex.
-    #[test]
-    fn a_bundle_format_change_leaves_hex_alone() {
-        let staged = [staged_web(&[("@lumis-sh/wasm-css", "^0.26.0")])];
-        let mut published = bundle_packument(&[("0.1.0", &["@lumis-sh/wasm-css"])]);
-        published["versions"]["0.1.0"]["lumis"]["bundleFormat"] = json!(BUNDLE_FORMAT_VERSION - 1);
-        let registry = HashMap::from([(
-            "lumis_wasm_bundle_web".to_string(),
-            vec!["0.1.0".to_string()],
-        )]);
-
-        let plan = plan_bundles(&registry, "", &staged, &[Ok(Some(published.clone()))]).unwrap();
-        assert_eq!(plan.len(), 1);
-        assert!(plan[0].npm);
-        assert!(!plan[0].hex);
-
-        let grown = [staged_web(&[
-            ("@lumis-sh/wasm-css", "^0.26.0"),
-            ("@lumis-sh/wasm-html", "^0.26.0"),
-        ])];
-        let plan = plan_bundles(&registry, "", &grown, &[Ok(Some(published.clone()))]).unwrap();
-        assert!(plan[0].hex, "a new member is a new mix.exs");
-
-        // Same members, a new Tree-sitter series: `~> 0.27.0` in mix.exs.
-        let moved = [staged_web(&[("@lumis-sh/wasm-css", "^0.27.0")])];
-        let plan = plan_bundles(&registry, "", &moved, &[Ok(Some(published))]).unwrap();
-        assert!(plan[0].hex, "a new range is a new mix.exs");
     }
 
     /// A version from another series is not a patch of this one.

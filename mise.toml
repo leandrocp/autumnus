@@ -1136,6 +1136,16 @@ npm-vite|packages/javascript/vite
 npm-react|packages/javascript/react
 npm-cli|packages/javascript/cli
 hex-lumis|packages/elixir/lumis
+npm-wasm-bundle-backend|wasm-bundles.json|languages.toml|packages/javascript/scripts/build-wasm-bundles.ts
+npm-wasm-bundle-full|wasm-bundles.json|languages.toml|packages/javascript/scripts/build-wasm-bundles.ts
+npm-wasm-bundle-system|wasm-bundles.json|languages.toml|packages/javascript/scripts/build-wasm-bundles.ts
+npm-wasm-bundle-web|wasm-bundles.json|languages.toml|packages/javascript/scripts/build-wasm-bundles.ts
+npm-wasm-bundle-web-extra|wasm-bundles.json|languages.toml|packages/javascript/scripts/build-wasm-bundles.ts
+hex-wasm-bundle-backend|wasm-bundles.json|languages.toml|packages/javascript/scripts/build-wasm-bundles.ts
+hex-wasm-bundle-full|wasm-bundles.json|languages.toml|packages/javascript/scripts/build-wasm-bundles.ts
+hex-wasm-bundle-system|wasm-bundles.json|languages.toml|packages/javascript/scripts/build-wasm-bundles.ts
+hex-wasm-bundle-web|wasm-bundles.json|languages.toml|packages/javascript/scripts/build-wasm-bundles.ts
+hex-wasm-bundle-web-extra|wasm-bundles.json|languages.toml|packages/javascript/scripts/build-wasm-bundles.ts
 TABLE
 '''
 
@@ -1152,6 +1162,7 @@ done < <(cargo run -q --manifest-path crates/dev/Cargo.toml --no-default-feature
 manifests=()
 while IFS='|' read -r package paths; do
     case "$package" in
+        npm-wasm-bundle-*) ;;
         npm-*) manifests+=("${paths%%|*}/package.json") ;;
     esac
 done < <(mise run release-packages)
@@ -1317,10 +1328,13 @@ fi
 IFS='|' read -r -a package_paths <<< "${entry#*|}"
 directory="${package_paths[0]}"
 
-case "${package%%-*}" in
-    cargo) sed -n 's/^version = "\([^"]*\)"$/\1/p' "$directory/Cargo.toml" | head -n1 ;;
-    npm) jq -r .version "$directory/package.json" ;;
-    hex) sed -n 's/^  @version "\([^"]*\)"$/\1/p' "$directory/mix.exs" | head -n1 ;;
+case "$package" in
+    npm-wasm-bundle-* | hex-wasm-bundle-*)
+        jq -r --arg registry "${package%%-*}" --arg bundle "${package#*-wasm-bundle-}" '.[$registry][$bundle].version' "$directory"
+        ;;
+    cargo-*) sed -n 's/^version = "\([^"]*\)"$/\1/p' "$directory/Cargo.toml" | head -n1 ;;
+    npm-*) jq -r .version "$directory/package.json" ;;
+    hex-*) sed -n 's/^  @version "\([^"]*\)"$/\1/p' "$directory/mix.exs" | head -n1 ;;
 esac
 '''
 
@@ -1335,6 +1349,20 @@ while IFS= read -r entry; do
     [ -n "$entry" ] || continue
     package="${entry%%|*}"
     IFS='|' read -r -a package_paths <<< "${entry#*|}"
+
+    case "$package" in
+        npm-wasm-bundle-* | hex-wasm-bundle-*)
+            if [ -z "${bundles_staged:-}" ]; then
+                pnpm --dir packages/javascript run build:wasm-bundles >&2
+                bundles_staged=1
+            fi
+            next="$(cargo run -q --manifest-path crates/dev/Cargo.toml -- wasm-bundle-plan "$package")"
+            if [ -n "$next" ]; then
+                printf '%s %s\n' "$package" "$next"
+            fi
+            continue
+            ;;
+    esac
 
     current="$(mise run release-version "$package")"
 
@@ -1435,6 +1463,15 @@ if [ -z "$entry" ]; then
     echo "Unknown package: $package" >&2
     exit 1
 fi
+
+case "$package" in
+    npm-wasm-bundle-* | hex-wasm-bundle-*)
+        pnpm --dir packages/javascript run build:wasm-bundles
+        cargo run -q --manifest-path crates/dev/Cargo.toml -- wasm-bundle-prepare "$package" "$version"
+        printf 'Prepared %s %s\n' "$package" "$version"
+        exit 0
+        ;;
+esac
 
 IFS='|' read -r -a package_paths <<< "${entry#*|}"
 directory="${package_paths[0]}"
