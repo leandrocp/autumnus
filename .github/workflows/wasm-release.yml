@@ -17,7 +17,7 @@ on:
   push:
     branches: [main]
     # Path filters do not apply to tags, which `release-tag.yml` pushes.
-    tags: ["wasm-bundles/v*"]
+    tags: ["npm-wasm-bundle-*/v*", "hex-wasm-bundle-*/v*"]
     paths:
       - "languages.toml"
       - "crates/dev/**"
@@ -268,12 +268,13 @@ jobs:
     secrets:
       HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
 
-  # The bundles' release pull request fails here until every member it requires
-  # is on both registries. Re-run it once the parsers it waits for are out.
-  bundles-check:
+  # A bundle's release pull request fails here until every member it requires
+  # is on that bundle's registry. Re-run it once the parsers it waits for are out.
+  bundle-check:
     if: >-
       ${{ github.event_name == 'pull_request' &&
-          github.head_ref == 'release/wasm-bundles' }}
+          (startsWith(github.head_ref, 'release/npm-wasm-bundle-') ||
+           startsWith(github.head_ref, 'release/hex-wasm-bundle-')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -290,17 +291,22 @@ jobs:
           shared-key: wasm-release-plan
 
       - name: Check every member is published
-        run: cargo run -q --manifest-path crates/dev/Cargo.toml -- wasm-bundles-check
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: cargo run -q --manifest-path crates/dev/Cargo.toml -- wasm-bundle-check "${BRANCH#release/}"
 
-  # Bundles publish only from the tag a merged `chore(release): wasm-bundles`
-  # pull request gets, at the versions `wasm-bundles.json` records.
-  bundles-plan:
-    if: startsWith(github.ref, 'refs/tags/wasm-bundles/v')
+  # Bundles publish only from the tag a merged release pull request gets. This
+  # fails while a member is missing on that registry; re-run it once it is out.
+  bundle-plan:
+    if: >-
+      ${{ startsWith(github.ref, 'refs/tags/npm-wasm-bundle-') ||
+          startsWith(github.ref, 'refs/tags/hex-wasm-bundle-') }}
     runs-on: ubuntu-latest
     outputs:
-      npm: ${{ steps.plan.outputs.npm }}
-      hex: ${{ steps.plan.outputs.hex }}
-      stale: ${{ steps.plan.outputs.stale }}
+      bundle: ${{ steps.plan.outputs.bundle }}
+      app: ${{ steps.plan.outputs.app }}
+      version: ${{ steps.plan.outputs.version }}
+      publish: ${{ steps.plan.outputs.publish }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -327,46 +333,33 @@ jobs:
           pnpm install --frozen-lockfile --ignore-scripts
           pnpm --dir packages/javascript run build:wasm-bundles
 
-      # Each registry is read on its own, so a re-run publishes only where the
-      # version is still missing.
-      - name: Plan the bundles
+      # A registry that already has the version publishes nothing, so a re-run
+      # never publishes twice.
+      - name: Plan the bundle
         id: plan
         run: |
           set -euo pipefail
+          package="${GITHUB_REF_NAME%/v*}"
+          version="${GITHUB_REF_NAME##*/v}"
           plan=$(cargo run -q --manifest-path crates/dev/Cargo.toml -- \
-            wasm-bundles-publish-plan "${GITHUB_REF_NAME#wasm-bundles/v}")
-          echo "$plan" | jq -r '.bundles[] | "\(.app) \(.version) npm=\(.npm) hex=\(.hex)"'
+            wasm-bundle-publish-plan "$package" "$version")
+          echo "$plan"
           {
-            echo "npm=$(echo "$plan" | jq -c '[.bundles[] | select(.npm) | {bundle: .bundle, version: .version}]')"
-            echo "hex=$(echo "$plan" | jq -c '[.bundles[] | select(.hex) | {bundle: .bundle, app: .app, version: .version}]')"
-            echo "stale=$(echo "$plan" | jq -c '.stale')"
+            echo "bundle=$(jq -r .bundle <<< "$plan")"
+            echo "app=$(jq -r .app <<< "$plan")"
+            echo "version=$version"
+            echo "publish=$(jq -r .publish <<< "$plan")"
           } >> "$GITHUB_OUTPUT"
 
-  # A bundle whose members changed between the pull request and its merge would
-  # publish members its check never saw. The next release pull request takes it.
-  bundles-stale:
-    needs: bundles-plan
-    if: needs.bundles-plan.outputs.stale != '[]'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Report the bundles left out
-        env:
-          STALE: ${{ needs.bundles-plan.outputs.stale }}
-        run: |
-          echo "::error::$(jq -r 'join(", ")' <<< "$STALE") changed after the release was prepared, so they were not published"
-          exit 1
-
-  publish-npm-bundles:
-    needs: bundles-plan
-    if: needs.bundles-plan.outputs.npm != '[]'
+  publish-npm-bundle:
+    needs: bundle-plan
+    if: >-
+      ${{ startsWith(github.ref, 'refs/tags/npm-wasm-bundle-') &&
+          needs.bundle-plan.outputs.publish == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
-    strategy:
-      fail-fast: false
-      matrix:
-        include: ${{ fromJson(needs.bundles-plan.outputs.npm) }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -391,26 +384,22 @@ jobs:
           pnpm --dir packages/javascript run build:wasm-bundles \
             --bundle "$BUNDLE" --version "$VERSION"
         env:
-          BUNDLE: ${{ matrix.bundle }}
-          VERSION: ${{ matrix.version }}
+          BUNDLE: ${{ needs.bundle-plan.outputs.bundle }}
+          VERSION: ${{ needs.bundle-plan.outputs.version }}
 
       - name: Publish to npm
         run: |
           cd -- "tmp/wasm/npm/wasm-bundle-$BUNDLE"
           npm publish --access public --provenance
         env:
-          BUNDLE: ${{ matrix.bundle }}
+          BUNDLE: ${{ needs.bundle-plan.outputs.bundle }}
 
-  # In parallel with the npm bundles, as a parser's Hex release is with its npm
-  # one.
-  publish-hex-bundles:
-    needs: bundles-plan
-    if: needs.bundles-plan.outputs.hex != '[]'
+  publish-hex-bundle:
+    needs: bundle-plan
+    if: >-
+      ${{ startsWith(github.ref, 'refs/tags/hex-wasm-bundle-') &&
+          needs.bundle-plan.outputs.publish == 'true' }}
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include: ${{ fromJson(needs.bundles-plan.outputs.hex) }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -456,14 +445,14 @@ jobs:
           cd -- "tmp/wasm/hex/$APP"
           mix deps.get
         env:
-          BUNDLE: ${{ matrix.bundle }}
-          APP: ${{ matrix.app }}
-          VERSION: ${{ matrix.version }}
+          BUNDLE: ${{ needs.bundle-plan.outputs.bundle }}
+          APP: ${{ needs.bundle-plan.outputs.app }}
+          VERSION: ${{ needs.bundle-plan.outputs.version }}
 
       - name: Publish the bundle to Hex
         run: |
           cd -- "tmp/wasm/hex/$APP"
           mix hex.publish package --yes
         env:
-          APP: ${{ matrix.app }}
+          APP: ${{ needs.bundle-plan.outputs.app }}
           HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
