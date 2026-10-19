@@ -118,25 +118,6 @@ impl Terminal {
         }
     }
 
-    fn active_style(&self, scope_stack: &[(usize, String)]) -> Option<Style> {
-        let theme = self.theme.as_ref()?;
-        let mut resolved = None;
-        for (scope_index, language) in scope_stack {
-            let scope = crate::highlights::HIGHLIGHT_NAMES
-                .get(*scope_index)
-                .copied()
-                .unwrap_or("");
-            if let Some(style) = theme.get_style(&format!("{scope}.{language}")) {
-                let mut style = style.clone();
-                if let Some(parent) = &resolved {
-                    style.inherit(parent);
-                }
-                resolved = Some(style);
-            }
-        }
-        resolved
-    }
-
     /// Paint one source event, padding each line it ends out to the width.
     ///
     /// Returns the width the current line has reached.
@@ -214,7 +195,7 @@ fn write_gutter(
 }
 
 struct RenderState<'a> {
-    scope_stack: Vec<(usize, String)>,
+    style_stack: Vec<Option<Style>>,
     line_width: usize,
     line_bg: Option<&'a str>,
     pending_number: Option<(usize, bool)>,
@@ -224,12 +205,30 @@ struct RenderState<'a> {
 impl<'a> RenderState<'a> {
     fn new(line_bg: Option<&'a str>) -> Self {
         Self {
-            scope_stack: Vec::new(),
+            style_stack: Vec::new(),
             line_width: 0,
             line_bg,
             pending_number: None,
             decorations: Vec::new(),
         }
+    }
+
+    fn start_scope(&mut self, theme: Option<&Theme>, scope_index: usize, language: &str) {
+        let scope = crate::highlights::HIGHLIGHT_NAMES
+            .get(scope_index)
+            .copied()
+            .unwrap_or("");
+        let mut style = theme
+            .and_then(|theme| theme.get_style(&format!("{scope}.{language}")))
+            .cloned();
+        if let Some(parent) = self.style_stack.last().and_then(Option::as_ref) {
+            if let Some(style) = &mut style {
+                style.inherit(parent);
+            } else {
+                style = Some(parent.clone());
+            }
+        }
+        self.style_stack.push(style);
     }
 
     fn start_decoration(
@@ -239,6 +238,7 @@ impl<'a> RenderState<'a> {
         highlight_bg: Option<&'a str>,
         gutter: Option<usize>,
         language: Language,
+        theme: Option<&Theme>,
     ) {
         self.decorations.push(decoration);
         match decoration {
@@ -254,9 +254,9 @@ impl<'a> RenderState<'a> {
                 self.line_width = 0;
                 self.pending_number = gutter.is_some().then_some((number, highlighted));
             }
-            Decoration::RainbowBracket { depth } => self
-                .scope_stack
-                .push((rainbow_scope_index(depth), language.id_name().to_string())),
+            Decoration::RainbowBracket { depth } => {
+                self.start_scope(theme, rainbow_scope_index(depth), language.id_name());
+            }
         }
     }
 
@@ -265,7 +265,7 @@ impl<'a> RenderState<'a> {
             self.decorations.pop(),
             Some(Decoration::RainbowBracket { .. })
         ) {
-            self.scope_stack.pop();
+            self.style_stack.pop();
         }
     }
 }
@@ -334,9 +334,9 @@ impl<T> Formatter<T> for Terminal {
                 HighlightEvent::Start {
                     scope_index,
                     language,
-                } => state.scope_stack.push((*scope_index, language.clone())),
+                } => state.start_scope(self.theme.as_ref(), *scope_index, language),
                 HighlightEvent::End => {
-                    state.scope_stack.pop();
+                    state.style_stack.pop();
                 }
                 HighlightEvent::DecorationStart { decoration } => {
                     state.start_decoration(
@@ -345,6 +345,7 @@ impl<T> Formatter<T> for Terminal {
                         highlight_bg,
                         gutter,
                         self.language,
+                        self.theme.as_ref(),
                     );
                 }
                 HighlightEvent::DecorationEnd => state.end_decoration(),
@@ -387,11 +388,10 @@ impl Terminal {
             )?;
             state.pending_number = None;
         }
-        let styled = self.active_style(&state.scope_stack);
         state.line_width = self.write_source(
             output,
             text,
-            styled.as_ref(),
+            state.style_stack.last().and_then(Option::as_ref),
             state.line_bg,
             state.line_width,
         )?;
