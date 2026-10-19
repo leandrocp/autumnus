@@ -360,6 +360,8 @@ Lumis.highlight!("defmodule App do\nend",
 
 `ANSI.paint/2` takes the `nil` that `style_for/2` returns for an unstyled scope
 and hands the text back unchanged, so there is no branch to write for it.
+This minimal example paints only the innermost scope; use `:terminal` when
+enclosing scopes should contribute their styles too.
 
 ## Highlight options
 
@@ -425,8 +427,15 @@ highlight_iter_with_options(
 
 ## Nested events instead of flat tokens
 
-`highlightIter` / `highlight_iter` hand you one callback per token. When the
-nesting matters — a `string` scope wrapping injected `tag` scopes inside a
+`highlightIter` / `highlight_iter` hand you one callback per token. Its scope
+and language identify the innermost open scope; its style combines all open
+scopes. Foreground, background, and underline style come from the innermost
+scope that sets each property. Bold, italic, and strikethrough accumulate;
+`false` does not clear an enclosing style. A scope with no theme entry inherits
+its enclosing style, so an unstyled variable inside a colored string keeps the
+string's color. The terminal formatter uses the same rule.
+
+When nesting matters — a `string` scope wrapping injected `tag` scopes inside a
 template literal — take the events instead. A `start` opens a scope, `source`
 events carry byte ranges, and `end` closes it. Annotations add their own
 start/end pairs, carrying your data and a resolved UTF-8 byte range. An invalid

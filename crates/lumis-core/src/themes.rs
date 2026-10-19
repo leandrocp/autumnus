@@ -842,6 +842,24 @@ impl Css<'_> {
 }
 
 impl Style {
+    /// Fill unset properties from an enclosing scope. False flags do not clear
+    /// enclosing attributes; the innermost non-empty underline style wins.
+    #[doc(hidden)]
+    pub fn inherit(&mut self, parent: &Self) {
+        if self.fg.is_none() {
+            self.fg.clone_from(&parent.fg);
+        }
+        if self.bg.is_none() {
+            self.bg.clone_from(&parent.bg);
+        }
+        self.bold |= parent.bold;
+        self.italic |= parent.italic;
+        self.text_decoration.strikethrough |= parent.text_decoration.strikethrough;
+        if self.text_decoration.underline == UnderlineStyle::None {
+            self.text_decoration.underline = parent.text_decoration.underline;
+        }
+    }
+
     pub fn css(&self, enable_italic: bool, separator: &str) -> String {
         let mut rules = Vec::new();
 

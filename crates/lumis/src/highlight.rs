@@ -93,12 +93,21 @@ use tree_sitter::{ParseOptions, Parser, Query};
 
 pub use crate::themes::{Style, TextDecoration, UnderlineStyle};
 
-fn resolve_style(theme: Option<&Theme>, scope: &str, language: &str) -> Style {
+fn resolve_style(
+    theme: Option<&Theme>,
+    scope: &str,
+    language: &str,
+    parent: Option<&Style>,
+) -> Style {
     let specialized_scope = format_smolstr!("{}.{}", scope, language);
-    theme
+    let mut style = theme
         .and_then(|t| t.get_style(&specialized_scope))
         .cloned()
-        .unwrap_or_default()
+        .unwrap_or_default();
+    if let Some(parent) = parent {
+        style.inherit(parent);
+    }
+    style
 }
 
 static DEFAULT_STYLE: LazyLock<Arc<Style>> = LazyLock::new(|| Arc::new(Style::default()));
@@ -540,13 +549,13 @@ impl Highlighter {
                     language,
                 } => {
                     let scope = HIGHLIGHT_NAMES[highlight.0];
-                    let specialized_scope = format_smolstr!("{}.{}", scope, language);
-                    let new_style = self
-                        .theme
-                        .as_ref()
-                        .and_then(|t| t.get_style(&specialized_scope))
-                        .map_or_else(|| Arc::clone(&DEFAULT_STYLE), |s| Arc::new(s.clone()));
-                    style_stack.push(new_style);
+                    let new_style = resolve_style(
+                        self.theme.as_ref(),
+                        scope,
+                        &language,
+                        style_stack.last().map(AsRef::as_ref),
+                    );
+                    style_stack.push(Arc::new(new_style));
                 }
                 HighlightEvent::Source { start, end } => {
                     let text = &source[start..end];
@@ -570,8 +579,9 @@ impl Highlighter {
 /// Flat token iteration with a callback.
 ///
 /// Walks the highlight events for `source` and calls `on_event_source` once per
-/// text segment, with the innermost scope and its resolved style, instead of
-/// returning the segments as a vector the way [`Highlighter::highlight`] does.
+/// text segment, with the innermost scope and the style inherited from all open
+/// scopes, instead of returning the segments as a vector the way
+/// [`Highlighter::highlight`] does.
 ///
 /// # Arguments
 ///
@@ -686,7 +696,12 @@ where
             } => {
                 let scope = HIGHLIGHT_NAMES.get(scope_index).copied().unwrap_or("");
                 let injected_language = Language::guess(Some(&lang), "");
-                let new_style = resolve_style(theme.as_ref(), scope, injected_language.id_name());
+                let new_style = resolve_style(
+                    theme.as_ref(),
+                    scope,
+                    injected_language.id_name(),
+                    style_stack.last(),
+                );
                 style_stack.push(new_style);
                 scope_stack.push(scope);
                 language_stack.push(injected_language);
@@ -723,7 +738,12 @@ where
                 decoration: Decoration::RainbowBracket { depth },
             } => {
                 let scope = rainbow_scope(depth);
-                style_stack.push(resolve_style(theme.as_ref(), scope, language.id_name()));
+                style_stack.push(resolve_style(
+                    theme.as_ref(),
+                    scope,
+                    language.id_name(),
+                    style_stack.last(),
+                ));
                 scope_stack.push(scope);
                 language_stack.push(language);
             }
@@ -1378,6 +1398,105 @@ mod tests {
 
         assert!(count > 0, "Expected at least some segments");
         assert!(has_colors, "Expected at least some segments with colors");
+    }
+
+    #[test]
+    fn nested_style_inheritance() {
+        use crate::formatters::{ansi, Formatter, TerminalBuilder};
+        use std::collections::BTreeMap;
+
+        #[derive(serde::Deserialize)]
+        struct Case {
+            name: String,
+            highlights: BTreeMap<String, Style>,
+            expected: Style,
+        }
+        #[derive(serde::Deserialize)]
+        struct Fixture {
+            source: String,
+            language: String,
+            cases: Vec<Case>,
+        }
+        let fixture: Fixture =
+            serde_json::from_str(include_str!("../../../fixtures/style-inheritance.json")).unwrap();
+        assert_eq!(fixture.cases.len(), 5);
+        let language = Language::guess(Some(&fixture.language), "");
+        for case in fixture.cases {
+            let theme = Theme {
+                highlights: case.highlights,
+                ..Default::default()
+            };
+            let mut tokens = Vec::new();
+            highlight_iter(
+                &fixture.source,
+                language,
+                Some(theme.clone()),
+                |text, lang, range, scope, style| {
+                    assert_eq!(&fixture.source[range], text);
+                    assert_eq!(lang, language);
+                    tokens.push((text.to_owned(), scope, style.clone()));
+                    Ok::<_, std::io::Error>(())
+                },
+            )
+            .unwrap();
+            let inner = tokens.iter().find(|token| token.0 == "x").unwrap();
+            assert_eq!(inner.1, "variable");
+            assert_eq!(inner.2, case.expected, "{}", case.name);
+            let outer = theme.get_style("string").unwrap();
+            assert_eq!(
+                &tokens.iter().find(|token| token.0 == "\"").unwrap().2,
+                outer
+            );
+            let outside = theme
+                .get_style("variable.python")
+                .cloned()
+                .unwrap_or_default();
+            assert_eq!(
+                tokens.last().unwrap().2,
+                outside,
+                "style leaked out of string"
+            );
+            assert_eq!(
+                tokens
+                    .iter()
+                    .map(|token| token.0.as_str())
+                    .collect::<String>(),
+                fixture.source
+            );
+
+            let highlighter = Highlighter::new(language, Some(theme.clone()));
+            let segments = highlighter.highlight(&fixture.source).unwrap();
+            assert_eq!(
+                segments
+                    .iter()
+                    .find(|(_, text)| *text == "x")
+                    .unwrap()
+                    .0
+                    .as_ref(),
+                &case.expected
+            );
+
+            let formatter = TerminalBuilder::new()
+                .language(language)
+                .theme(Some(theme))
+                .build()
+                .unwrap();
+            let mut output = Vec::new();
+            formatter
+                .render(
+                    &fixture.source,
+                    &highlight_events(&fixture.source, language).unwrap(),
+                    &mut output,
+                )
+                .unwrap();
+            assert!(
+                String::from_utf8(output)
+                    .unwrap()
+                    .contains(&ansi::paint("x", &case.expected)),
+                "{}",
+                case.name
+            );
+        }
     }
 
     fn iter_scopes(code: &str, options: HighlightOptions<'_, '_>) -> Vec<&'static str> {

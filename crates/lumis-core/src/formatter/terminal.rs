@@ -118,18 +118,23 @@ impl Terminal {
         }
     }
 
-    /// The theme style of the innermost open scope, if any.
-    fn active_style(&self, scope_stack: &[(usize, String)]) -> Option<&Style> {
-        let (scope_index, language) = scope_stack.last()?;
+    fn active_style(&self, scope_stack: &[(usize, String)]) -> Option<Style> {
         let theme = self.theme.as_ref()?;
-        let scope = crate::highlights::HIGHLIGHT_NAMES
-            .get(*scope_index)
-            .copied()
-            .unwrap_or("");
-
-        theme
-            .get_style(&format!("{scope}.{language}"))
-            .or_else(|| theme.get_style(scope))
+        let mut resolved = None;
+        for (scope_index, language) in scope_stack {
+            let scope = crate::highlights::HIGHLIGHT_NAMES
+                .get(*scope_index)
+                .copied()
+                .unwrap_or("");
+            if let Some(style) = theme.get_style(&format!("{scope}.{language}")) {
+                let mut style = style.clone();
+                if let Some(parent) = &resolved {
+                    style.inherit(parent);
+                }
+                resolved = Some(style);
+            }
+        }
+        resolved
     }
 
     /// Paint one source event, padding each line it ends out to the width.
@@ -383,8 +388,13 @@ impl Terminal {
             state.pending_number = None;
         }
         let styled = self.active_style(&state.scope_stack);
-        state.line_width =
-            self.write_source(output, text, styled, state.line_bg, state.line_width)?;
+        state.line_width = self.write_source(
+            output,
+            text,
+            styled.as_ref(),
+            state.line_bg,
+            state.line_width,
+        )?;
         Ok(())
     }
 }
