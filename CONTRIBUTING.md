@@ -34,19 +34,6 @@ mise run setup
 
 This installs the Rust, JS, and Elixir dependencies and checks the required tools.
 
-### Amp orbs
-
-`.agents/setup` prepares Debian 12 orbs with Node 24, stable Rust, Erlang/OTP 29,
-Elixir 1.20, Neovim, and the tools selected by `mise.toml`. These runtime choices
-apply only inside the orb; local development stays unpinned. Setup runs
-`mise run setup` with frozen JavaScript lockfiles and installs the browser test
-engines. Dependencies, generated assets, and compiler caches become part of
-Amp's project snapshot rather than being installed in every thread.
-
-Setup can run again on a restored snapshot. `.agents/resume` only refreshes
-mise's trust in the repository tasks; it does not install dependencies or start
-servers. Toolchains are available in non-interactive login shells too.
-
 ## Testing
 
 Run the standard Rust, Elixir, and JavaScript test suites with:
