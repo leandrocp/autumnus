@@ -9,6 +9,7 @@
 mise.local.toml
 .envrc
 .vite/
+/.amp/portals/
 /.claude/
 __pycache__/
 node_modules/
