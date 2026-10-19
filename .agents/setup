@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+repo_root="$PWD"
+
+step() {
+    local label="$1" start=$SECONDS
+    shift
+    printf '\n==> %s\n' "$label"
+    "$@"
+    printf '==> %s finished in %ss\n' "$label" "$((SECONDS - start))"
+}
+
+packages=(build-essential ca-certificates curl git jq libclang-dev libncurses6 libssl3 pkg-config unzip xz-utils)
+missing=()
+for package in "${packages[@]}"; do
+    if [[ "$(dpkg-query -W -f='${Status}' "$package" 2>/dev/null || true)" != "install ok installed" ]]; then
+        missing+=("$package")
+    fi
+done
+if ((${#missing[@]})); then
+    step "Refresh system package index" sudo apt-get update -qq
+    step "Install system dependencies" sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${missing[@]}"
+fi
+
+export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
+if ! command -v mise >/dev/null; then
+    step "Install mise" bash -c 'curl -fsSL https://mise.run | sh'
+fi
+
+step "Trust repository tasks" mise trust mise.toml
+step "Select precompiled OTP for Debian 12" mise settings set erlang.precompiled_os ubuntu-22.04
+step "Require precompiled OTP" mise settings set erlang.compile false
+step "Install orb toolchains" mise use --global node@24 rust@stable erlang@29 elixir@1.20-otp-29 neovim@stable
+step "Install repository and task tools" mise install --include-task-tools
+
+if ! mise exec -- corepack --version >/dev/null 2>&1; then
+    step "Install Corepack" mise exec -- npm install --global corepack
+fi
+step "Enable pinned package managers" mise exec -- corepack enable
+step "Cache workspace package manager" mise exec -- corepack install
+step "Cache docs package manager" mise exec -C docs -- corepack install
+
+# Upstream's Linux binary requires a newer glibc than Debian 12 provides.
+if ! mise exec -- tree-sitter --version >/dev/null 2>&1; then
+    tree_sitter_dir="$(mise where tree-sitter)"
+    step "Build the locked Tree-sitter CLI for Debian" mise exec -- cargo install --locked --version "$(mise current tree-sitter)" --target-dir "$HOME/.cache/tree-sitter-cli" --root "$tree_sitter_dir" tree-sitter-cli
+    ln -sf bin/tree-sitter "$tree_sitter_dir/tree-sitter"
+fi
+
+profile_marker="# Lumis orb toolchains"
+if ! grep -Fqx "$profile_marker" "$HOME/.bash_profile" 2>/dev/null; then
+    cat >> "$HOME/.bash_profile" <<EOF
+
+$profile_marker
+if [[ "\$PWD" == "$repo_root" || "\$PWD" == "$repo_root/"* ]]; then
+    export PATH="\$HOME/.local/bin:\$PATH"
+    eval "\$("\$HOME/.local/bin/mise" env --shell bash)"
+fi
+EOF
+fi
+
+step "Install Hex if missing" mise exec -- mix local.hex --force --if-missing
+step "Install Rebar if missing" mise exec -- mix local.rebar --force --if-missing
+
+step "Prepare workspace dependencies and generated assets" env CI=1 mise run setup
+browser_deps="$(mise exec -- packages/javascript/lumis/node_modules/.bin/playwright install-deps --dry-run chromium firefox webkit)" || browser_deps=""
+if [[ "$browser_deps" != "All system dependencies are installed." ]]; then
+    step "Install browser system dependencies" env DEBIAN_FRONTEND=noninteractive mise exec -- packages/javascript/lumis/node_modules/.bin/playwright install-deps chromium firefox webkit
+fi
+step "Install browser test engines" mise exec -- packages/javascript/lumis/node_modules/.bin/playwright install chromium firefox webkit
