@@ -1,5 +1,59 @@
 [
   {
+    "type": "argument_filter",
+    "named": true,
+    "fields": {
+      "filter_key": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "charsetDecode",
+            "named": false
+          },
+          {
+            "type": "charsetEncode",
+            "named": false
+          },
+          {
+            "type": "dateFormat",
+            "named": false
+          },
+          {
+            "type": "decode",
+            "named": false
+          },
+          {
+            "type": "format",
+            "named": false
+          },
+          {
+            "type": "jsonpath",
+            "named": false
+          },
+          {
+            "type": "toDate",
+            "named": false
+          },
+          {
+            "type": "urlQueryParam",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "quoted_string",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "assert",
     "named": true,
     "fields": {},
@@ -73,7 +127,7 @@
     },
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "comment",
@@ -201,7 +255,7 @@
     },
     "children": {
       "multiple": false,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "filename",
@@ -213,7 +267,18 @@
   {
     "type": "capture",
     "named": true,
-    "fields": {},
+    "fields": {
+      "modifier": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "redact",
+            "named": false
+          }
+        ]
+      }
+    },
     "children": {
       "multiple": true,
       "required": true,
@@ -284,14 +349,67 @@
     },
     "children": {
       "multiple": false,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "filename_password",
           "named": true
-        },
+        }
+      ]
+    }
+  },
+  {
+    "type": "certificate_attribute",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "certificate_query",
+    "named": true,
+    "fields": {
+      "query_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "certificate",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
         {
-          "type": "template",
+          "type": "certificate_attribute",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "client_key_option",
+    "named": true,
+    "fields": {
+      "option_key": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "key",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "value_string",
           "named": true
         }
       ]
@@ -317,7 +435,7 @@
       "required": true,
       "types": [
         {
-          "type": "quoted_string",
+          "type": "predicate_value",
           "named": true
         }
       ]
@@ -380,7 +498,37 @@
     }
   },
   {
-    "type": "digit",
+    "type": "count_option",
+    "named": true,
+    "fields": {
+      "option_key": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "count_option_key",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "integer",
+          "named": true
+        },
+        {
+          "type": "template",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "count_option_key",
     "named": true,
     "fields": {}
   },
@@ -424,11 +572,6 @@
     "fields": {}
   },
   {
-    "type": "duration_unit",
-    "named": true,
-    "fields": {}
-  },
-  {
     "type": "end_with_predicate",
     "named": true,
     "fields": {
@@ -453,6 +596,10 @@
         },
         {
           "type": "oneline_hex",
+          "named": true
+        },
+        {
+          "type": "oneline_string",
           "named": true
         },
         {
@@ -524,6 +671,10 @@
           "named": true
         },
         {
+          "type": "function",
+          "named": true
+        },
+        {
           "type": "variable_name",
           "named": true
         }
@@ -552,7 +703,18 @@
   {
     "type": "file_value",
     "named": true,
-    "fields": {},
+    "fields": {
+      "content_type": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "value_string",
+            "named": true
+          }
+        ]
+      }
+    },
     "children": {
       "multiple": false,
       "required": false,
@@ -588,7 +750,7 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": true,
+      "multiple": false,
       "required": true,
       "types": [
         {
@@ -603,16 +765,30 @@
     }
   },
   {
-    "type": "filename_escaped_char",
-    "named": true,
-    "fields": {}
-  },
-  {
     "type": "filename_password",
     "named": true,
     "fields": {},
     "children": {
       "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "filename_password_content",
+          "named": true
+        },
+        {
+          "type": "template",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "filename_password_content",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
       "required": true,
       "types": [
         {
@@ -627,19 +803,14 @@
     }
   },
   {
-    "type": "filename_password_escaped_char",
+    "type": "filename_password_text",
     "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": false,
-      "types": [
-        {
-          "type": "unicode_char",
-          "named": true
-        }
-      ]
-    }
+    "fields": {}
+  },
+  {
+    "type": "filename_text",
+    "named": true,
+    "fields": {}
   },
   {
     "type": "filter",
@@ -649,6 +820,10 @@
       "multiple": false,
       "required": true,
       "types": [
+        {
+          "type": "argument_filter",
+          "named": true
+        },
         {
           "type": "nth_filter",
           "named": true
@@ -662,6 +837,10 @@
           "named": true
         },
         {
+          "type": "replace_regex_filter",
+          "named": true
+        },
+        {
           "type": "simple_filter_key",
           "named": true
         },
@@ -671,25 +850,6 @@
         },
         {
           "type": "xpath_filter",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "float",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "fraction",
-          "named": true
-        },
-        {
-          "type": "integer",
           "named": true
         }
       ]
@@ -730,19 +890,9 @@
     }
   },
   {
-    "type": "fraction",
+    "type": "function",
     "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "digit",
-          "named": true
-        }
-      ]
-    }
+    "fields": {}
   },
   {
     "type": "greater_or_equal_predicate",
@@ -772,7 +922,15 @@
           "named": true
         },
         {
+          "type": "oneline_string",
+          "named": true
+        },
+        {
           "type": "quoted_string",
+          "named": true
+        },
+        {
+          "type": "template",
           "named": true
         }
       ]
@@ -806,7 +964,15 @@
           "named": true
         },
         {
+          "type": "oneline_string",
+          "named": true
+        },
+        {
           "type": "quoted_string",
+          "named": true
+        },
+        {
+          "type": "template",
           "named": true
         }
       ]
@@ -858,13 +1024,9 @@
     }
   },
   {
-    "type": "hexdigit",
-    "named": true,
-    "fields": {}
-  },
-  {
     "type": "hurl_file",
     "named": true,
+    "root": true,
     "fields": {},
     "children": {
       "multiple": true,
@@ -908,21 +1070,6 @@
     }
   },
   {
-    "type": "integer",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "digit",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "integer_option",
     "named": true,
     "fields": {
@@ -958,17 +1105,12 @@
     "fields": {}
   },
   {
-    "type": "invalid_quoted_string_escaped_char",
-    "named": true,
-    "fields": {}
-  },
-  {
     "type": "json_array",
     "named": true,
     "fields": {},
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "json_value",
@@ -981,61 +1123,6 @@
     "type": "json_boolean",
     "named": true,
     "fields": {}
-  },
-  {
-    "type": "json_digit",
-    "named": true,
-    "fields": {}
-  },
-  {
-    "type": "json_exponent",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "json_digit",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "json_fraction",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "json_digit",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "json_hexdigit",
-    "named": true,
-    "fields": {}
-  },
-  {
-    "type": "json_integer",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "json_digit",
-          "named": true
-        }
-      ]
-    }
   },
   {
     "type": "json_key_string",
@@ -1074,25 +1161,7 @@
   {
     "type": "json_number",
     "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "json_exponent",
-          "named": true
-        },
-        {
-          "type": "json_fraction",
-          "named": true
-        },
-        {
-          "type": "json_integer",
-          "named": true
-        }
-      ]
-    }
+    "fields": {}
   },
   {
     "type": "json_object",
@@ -1142,21 +1211,6 @@
         },
         {
           "type": "template",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "json_string_escaped_char",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": false,
-      "types": [
-        {
-          "type": "json_hexdigit",
           "named": true
         }
       ]
@@ -1267,11 +1321,6 @@
     }
   },
   {
-    "type": "key_string_escaped_char",
-    "named": true,
-    "fields": {}
-  },
-  {
     "type": "key_value",
     "named": true,
     "fields": {},
@@ -1279,18 +1328,6 @@
       "multiple": true,
       "required": true,
       "types": [
-        {
-          "type": "boolean",
-          "named": true
-        },
-        {
-          "type": "float",
-          "named": true
-        },
-        {
-          "type": "integer",
-          "named": true
-        },
         {
           "type": "key_string",
           "named": true
@@ -1330,7 +1367,15 @@
           "named": true
         },
         {
+          "type": "oneline_string",
+          "named": true
+        },
+        {
           "type": "quoted_string",
+          "named": true
+        },
+        {
+          "type": "template",
           "named": true
         }
       ]
@@ -1364,7 +1409,15 @@
           "named": true
         },
         {
+          "type": "oneline_string",
+          "named": true
+        },
+        {
           "type": "quoted_string",
+          "named": true
+        },
+        {
+          "type": "template",
           "named": true
         }
       ]
@@ -1389,6 +1442,10 @@
       "multiple": false,
       "required": true,
       "types": [
+        {
+          "type": "oneline_string",
+          "named": true
+        },
         {
           "type": "quoted_string",
           "named": true
@@ -1431,32 +1488,7 @@
   {
     "type": "multiline_string_content",
     "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": false,
-      "types": [
-        {
-          "type": "multiline_string_escaped_char",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "multiline_string_escaped_char",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": false,
-      "types": [
-        {
-          "type": "unicode_char",
-          "named": true
-        }
-      ]
-    }
+    "fields": {}
   },
   {
     "type": "multiline_string_type",
@@ -1564,6 +1596,10 @@
         {
           "type": "integer",
           "named": true
+        },
+        {
+          "type": "template",
+          "named": true
         }
       ]
     }
@@ -1642,21 +1678,6 @@
     }
   },
   {
-    "type": "oneline_string_escaped_char",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": false,
-      "types": [
-        {
-          "type": "unicode_char",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "oneline_string_text",
     "named": true,
     "fields": {}
@@ -1682,6 +1703,14 @@
           "named": true
         },
         {
+          "type": "client_key_option",
+          "named": true
+        },
+        {
+          "type": "count_option",
+          "named": true
+        },
+        {
           "type": "duration_option",
           "named": true
         },
@@ -1695,6 +1724,10 @@
         },
         {
           "type": "variable_option",
+          "named": true
+        },
+        {
+          "type": "verbosity_option",
           "named": true
         }
       ]
@@ -1841,7 +1874,15 @@
           "named": true
         },
         {
+          "type": "oneline_string",
+          "named": true
+        },
+        {
           "type": "quoted_string",
+          "named": true
+        },
+        {
+          "type": "regex",
           "named": true
         },
         {
@@ -1859,6 +1900,10 @@
       "multiple": false,
       "required": true,
       "types": [
+        {
+          "type": "certificate_query",
+          "named": true
+        },
         {
           "type": "cookie_query",
           "named": true
@@ -1967,19 +2012,9 @@
     }
   },
   {
-    "type": "quoted_string_escaped_char",
+    "type": "quoted_string_text",
     "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": false,
-      "types": [
-        {
-          "type": "unicode_char",
-          "named": true
-        }
-      ]
-    }
+    "fields": {}
   },
   {
     "type": "regex",
@@ -2090,6 +2125,36 @@
         "types": [
           {
             "type": "replace",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "quoted_string",
+          "named": true
+        },
+        {
+          "type": "regex",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "replace_regex_filter",
+    "named": true,
+    "fields": {
+      "filter_key": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "replaceRegex",
             "named": false
           }
         ]
@@ -2243,6 +2308,22 @@
         "required": true,
         "types": [
           {
+            "type": "base64Decode",
+            "named": false
+          },
+          {
+            "type": "base64Encode",
+            "named": false
+          },
+          {
+            "type": "base64UrlSafeDecode",
+            "named": false
+          },
+          {
+            "type": "base64UrlSafeEncode",
+            "named": false
+          },
+          {
             "type": "count",
             "named": false
           },
@@ -2255,11 +2336,7 @@
             "named": false
           },
           {
-            "type": "decode",
-            "named": false
-          },
-          {
-            "type": "format",
+            "type": "first",
             "named": false
           },
           {
@@ -2271,11 +2348,27 @@
             "named": false
           },
           {
-            "type": "toDate",
+            "type": "last",
+            "named": false
+          },
+          {
+            "type": "location",
+            "named": false
+          },
+          {
+            "type": "toFloat",
+            "named": false
+          },
+          {
+            "type": "toHex",
             "named": false
           },
           {
             "type": "toInt",
+            "named": false
+          },
+          {
+            "type": "toString",
             "named": false
           },
           {
@@ -2284,6 +2377,14 @@
           },
           {
             "type": "urlEncode",
+            "named": false
+          },
+          {
+            "type": "utf8Decode",
+            "named": false
+          },
+          {
+            "type": "utf8Encode",
             "named": false
           }
         ]
@@ -2311,6 +2412,10 @@
             "named": false
           },
           {
+            "type": "isDate",
+            "named": false
+          },
+          {
             "type": "isEmpty",
             "named": false
           },
@@ -2335,7 +2440,15 @@
             "named": false
           },
           {
+            "type": "isList",
+            "named": false
+          },
+          {
             "type": "isNumber",
+            "named": false
+          },
+          {
+            "type": "isObject",
             "named": false
           },
           {
@@ -2371,7 +2484,19 @@
             "named": false
           },
           {
+            "type": "ip",
+            "named": false
+          },
+          {
             "type": "md5",
+            "named": false
+          },
+          {
+            "type": "rawbytes",
+            "named": false
+          },
+          {
+            "type": "redirects",
             "named": false
           },
           {
@@ -2384,6 +2509,10 @@
           },
           {
             "type": "url",
+            "named": false
+          },
+          {
+            "type": "version",
             "named": false
           }
         ]
@@ -2444,6 +2573,10 @@
           "named": true
         },
         {
+          "type": "oneline_string",
+          "named": true
+        },
+        {
           "type": "quoted_string",
           "named": true
         }
@@ -2472,7 +2605,7 @@
     },
     "children": {
       "multiple": false,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "template",
@@ -2515,21 +2648,6 @@
     }
   },
   {
-    "type": "unicode_char",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "hexdigit",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "value_string",
     "named": true,
     "fields": {},
@@ -2568,21 +2686,6 @@
     }
   },
   {
-    "type": "value_string_escaped_char",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": false,
-      "types": [
-        {
-          "type": "unicode_char",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "value_string_text",
     "named": true,
     "fields": {}
@@ -2605,11 +2708,6 @@
         }
       ]
     }
-  },
-  {
-    "type": "variable_name",
-    "named": true,
-    "fields": {}
   },
   {
     "type": "variable_option",
@@ -2684,14 +2782,48 @@
           "named": true
         },
         {
-          "type": "key_string",
+          "type": "quoted_string",
           "named": true
         },
         {
-          "type": "quoted_string",
+          "type": "value_string",
           "named": true
         }
       ]
+    }
+  },
+  {
+    "type": "verbosity_option",
+    "named": true,
+    "fields": {
+      "level": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "brief",
+            "named": false
+          },
+          {
+            "type": "debug",
+            "named": false
+          },
+          {
+            "type": "verbose",
+            "named": false
+          }
+        ]
+      },
+      "option_key": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "verbosity",
+            "named": false
+          }
+        ]
+      }
     }
   },
   {
@@ -2708,6 +2840,14 @@
       "required": true,
       "types": [
         {
+          "type": "xml_comment",
+          "named": true
+        },
+        {
+          "type": "xml_doctype",
+          "named": true
+        },
+        {
           "type": "xml_prolog_tag",
           "named": true
         },
@@ -2719,19 +2859,111 @@
     }
   },
   {
+    "type": "xml_attribute",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "xml_attribute_value",
+          "named": true
+        },
+        {
+          "type": "xml_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "xml_close_tag",
     "named": true,
-    "fields": {}
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "xml_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "xml_doctype",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "xml_comment",
+          "named": true
+        },
+        {
+          "type": "xml_dtd_declaration",
+          "named": true
+        },
+        {
+          "type": "xml_dtd_string",
+          "named": true
+        },
+        {
+          "type": "xml_name",
+          "named": true
+        },
+        {
+          "type": "xml_parameter_entity_reference",
+          "named": true
+        },
+        {
+          "type": "xml_prolog_tag",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "xml_open_tag",
     "named": true,
-    "fields": {}
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "xml_attribute",
+          "named": true
+        },
+        {
+          "type": "xml_name",
+          "named": true
+        }
+      ]
+    }
   },
   {
-    "type": "xml_prolog_tag",
+    "type": "xml_self_closing_tag",
     "named": true,
-    "fields": {}
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "xml_attribute",
+          "named": true
+        },
+        {
+          "type": "xml_name",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "xml_tag",
@@ -2742,7 +2974,15 @@
       "required": true,
       "types": [
         {
+          "type": "xml_cdata",
+          "named": true
+        },
+        {
           "type": "xml_close_tag",
+          "named": true
+        },
+        {
+          "type": "xml_comment",
           "named": true
         },
         {
@@ -2751,6 +2991,10 @@
         },
         {
           "type": "xml_prolog_tag",
+          "named": true
+        },
+        {
+          "type": "xml_self_closing_tag",
           "named": true
         },
         {
@@ -2769,15 +3013,11 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": true,
+      "multiple": false,
       "required": true,
       "types": [
         {
-          "type": "template",
-          "named": true
-        },
-        {
-          "type": "value_string_text",
+          "type": "xml_value_string_text",
           "named": true
         }
       ]
@@ -2848,15 +3088,7 @@
     "named": false
   },
   {
-    "type": "#",
-    "named": false
-  },
-  {
     "type": "*",
-    "named": false
-  },
-  {
-    "type": "+",
     "named": false
   },
   {
@@ -2864,15 +3096,11 @@
     "named": false
   },
   {
-    "type": "-",
-    "named": false
-  },
-  {
-    "type": ".",
-    "named": false
-  },
-  {
     "type": "/",
+    "named": false
+  },
+  {
+    "type": "/>",
     "named": false
   },
   {
@@ -2888,15 +3116,15 @@
     "named": false
   },
   {
+    "type": "<!DOCTYPE",
+    "named": false
+  },
+  {
     "type": "</",
     "named": false
   },
   {
     "type": "<=",
-    "named": false
-  },
-  {
-    "type": "<?",
     "named": false
   },
   {
@@ -2916,10 +3144,6 @@
     "named": false
   },
   {
-    "type": "?>",
-    "named": false
-  },
-  {
     "type": "CONNECT",
     "named": false
   },
@@ -2928,7 +3152,7 @@
     "named": false
   },
   {
-    "type": "E",
+    "type": "Expire-Date",
     "named": false
   },
   {
@@ -2964,6 +3188,10 @@
     "named": false
   },
   {
+    "type": "Issuer",
+    "named": false
+  },
+  {
     "type": "LINK",
     "named": false
   },
@@ -2988,11 +3216,31 @@
     "named": false
   },
   {
+    "type": "PUBLIC",
+    "named": false
+  },
+  {
     "type": "PURGE",
     "named": false
   },
   {
     "type": "PUT",
+    "named": false
+  },
+  {
+    "type": "SYSTEM",
+    "named": false
+  },
+  {
+    "type": "Serial-Number",
+    "named": false
+  },
+  {
+    "type": "Start-Date",
+    "named": false
+  },
+  {
+    "type": "Subject",
     "named": false
   },
   {
@@ -3080,10 +3328,6 @@
     "named": false
   },
   {
-    "type": "b",
-    "named": false
-  },
-  {
     "type": "base64",
     "named": false
   },
@@ -3092,7 +3336,27 @@
     "named": false
   },
   {
+    "type": "base64Decode",
+    "named": false
+  },
+  {
+    "type": "base64Encode",
+    "named": false
+  },
+  {
+    "type": "base64UrlSafeDecode",
+    "named": false
+  },
+  {
+    "type": "base64UrlSafeEncode",
+    "named": false
+  },
+  {
     "type": "body",
+    "named": false
+  },
+  {
+    "type": "brief",
     "named": false
   },
   {
@@ -3108,8 +3372,21 @@
     "named": false
   },
   {
+    "type": "certificate",
+    "named": false
+  },
+  {
+    "type": "charsetDecode",
+    "named": false
+  },
+  {
+    "type": "charsetEncode",
+    "named": false
+  },
+  {
     "type": "comment",
-    "named": true
+    "named": true,
+    "extra": true
   },
   {
     "type": "compressed",
@@ -3136,11 +3413,19 @@
     "named": false
   },
   {
+    "type": "dateFormat",
+    "named": false
+  },
+  {
     "type": "daysAfterNow",
     "named": false
   },
   {
     "type": "daysBeforeNow",
+    "named": false
+  },
+  {
+    "type": "debug",
     "named": false
   },
   {
@@ -3152,12 +3437,16 @@
     "named": false
   },
   {
+    "type": "digest",
+    "named": false
+  },
+  {
     "type": "duration",
     "named": false
   },
   {
-    "type": "e",
-    "named": false
+    "type": "duration_unit",
+    "named": true
   },
   {
     "type": "endsWith",
@@ -3172,10 +3461,6 @@
     "named": false
   },
   {
-    "type": "f",
-    "named": false
-  },
-  {
     "type": "false",
     "named": false
   },
@@ -3184,15 +3469,27 @@
     "named": false
   },
   {
-    "type": "filename_password_text",
+    "type": "filename_escaped_char",
     "named": true
   },
   {
-    "type": "filename_text",
+    "type": "filename_password_escaped_char",
+    "named": true
+  },
+  {
+    "type": "first",
+    "named": false
+  },
+  {
+    "type": "float",
     "named": true
   },
   {
     "type": "format",
+    "named": false
+  },
+  {
+    "type": "getEnv",
     "named": false
   },
   {
@@ -3220,6 +3517,10 @@
     "named": false
   },
   {
+    "type": "hexdigit",
+    "named": true
+  },
+  {
     "type": "htmlEscape",
     "named": false
   },
@@ -3229,6 +3530,10 @@
   },
   {
     "type": "http1.0",
+    "named": false
+  },
+  {
+    "type": "http1.1",
     "named": false
   },
   {
@@ -3248,6 +3553,18 @@
     "named": false
   },
   {
+    "type": "integer",
+    "named": true
+  },
+  {
+    "type": "invalid_quoted_string_escaped_char",
+    "named": true
+  },
+  {
+    "type": "ip",
+    "named": false
+  },
+  {
     "type": "ipv4",
     "named": false
   },
@@ -3261,6 +3578,10 @@
   },
   {
     "type": "isCollection",
+    "named": false
+  },
+  {
+    "type": "isDate",
     "named": false
   },
   {
@@ -3288,7 +3609,15 @@
     "named": false
   },
   {
+    "type": "isList",
+    "named": false
+  },
+  {
     "type": "isNumber",
+    "named": false
+  },
+  {
+    "type": "isObject",
     "named": false
   },
   {
@@ -3304,6 +3633,10 @@
     "named": false
   },
   {
+    "type": "json_string_escaped_char",
+    "named": true
+  },
+  {
     "type": "jsonpath",
     "named": false
   },
@@ -3312,8 +3645,16 @@
     "named": false
   },
   {
+    "type": "key_string_escaped_char",
+    "named": true
+  },
+  {
     "type": "key_string_text",
     "named": true
+  },
+  {
+    "type": "last",
+    "named": false
   },
   {
     "type": "lessThan",
@@ -3336,10 +3677,6 @@
     "named": false
   },
   {
-    "type": "m",
-    "named": false
-  },
-  {
     "type": "matches",
     "named": false
   },
@@ -3356,11 +3693,7 @@
     "named": false
   },
   {
-    "type": "ms",
-    "named": false
-  },
-  {
-    "type": "n",
+    "type": "negotiate",
     "named": false
   },
   {
@@ -3376,6 +3709,14 @@
     "named": false
   },
   {
+    "type": "newDate",
+    "named": false
+  },
+  {
+    "type": "newUuid",
+    "named": false
+  },
+  {
     "type": "not",
     "named": false
   },
@@ -3388,8 +3729,16 @@
     "named": false
   },
   {
+    "type": "ntlm",
+    "named": false
+  },
+  {
     "type": "null",
     "named": false
+  },
+  {
+    "type": "oneline_string_escaped_char",
+    "named": true
   },
   {
     "type": "output",
@@ -3408,11 +3757,19 @@
     "named": false
   },
   {
-    "type": "quoted_string_text",
+    "type": "quoted_string_escaped_char",
     "named": true
   },
   {
-    "type": "r",
+    "type": "rawbytes",
+    "named": false
+  },
+  {
+    "type": "redact",
+    "named": false
+  },
+  {
+    "type": "redirects",
     "named": false
   },
   {
@@ -3432,6 +3789,14 @@
     "named": false
   },
   {
+    "type": "replaceRegex",
+    "named": false
+  },
+  {
+    "type": "resolve",
+    "named": false
+  },
+  {
     "type": "retry",
     "named": false
   },
@@ -3441,10 +3806,6 @@
   },
   {
     "type": "retry-max-count",
-    "named": false
-  },
-  {
-    "type": "s",
     "named": false
   },
   {
@@ -3468,11 +3829,15 @@
     "named": false
   },
   {
-    "type": "t",
+    "type": "toDate",
     "named": false
   },
   {
-    "type": "toDate",
+    "type": "toFloat",
+    "named": false
+  },
+  {
+    "type": "toHex",
     "named": false
   },
   {
@@ -3480,11 +3845,11 @@
     "named": false
   },
   {
-    "type": "true",
+    "type": "toString",
     "named": false
   },
   {
-    "type": "u",
+    "type": "true",
     "named": false
   },
   {
@@ -3504,15 +3869,43 @@
     "named": false
   },
   {
+    "type": "urlQueryParam",
+    "named": false
+  },
+  {
     "type": "user",
     "named": false
+  },
+  {
+    "type": "utf8Decode",
+    "named": false
+  },
+  {
+    "type": "utf8Encode",
+    "named": false
+  },
+  {
+    "type": "value_string_escaped_char",
+    "named": true
   },
   {
     "type": "variable",
     "named": false
   },
   {
+    "type": "variable_name",
+    "named": true
+  },
+  {
     "type": "verbose",
+    "named": false
+  },
+  {
+    "type": "verbosity",
+    "named": false
+  },
+  {
+    "type": "version",
     "named": false
   },
   {
@@ -3522,6 +3915,42 @@
   {
     "type": "xml",
     "named": false
+  },
+  {
+    "type": "xml_attribute_value",
+    "named": true
+  },
+  {
+    "type": "xml_cdata",
+    "named": true
+  },
+  {
+    "type": "xml_comment",
+    "named": true
+  },
+  {
+    "type": "xml_dtd_declaration",
+    "named": true
+  },
+  {
+    "type": "xml_dtd_string",
+    "named": true
+  },
+  {
+    "type": "xml_name",
+    "named": true
+  },
+  {
+    "type": "xml_parameter_entity_reference",
+    "named": true
+  },
+  {
+    "type": "xml_prolog_tag",
+    "named": true
+  },
+  {
+    "type": "xml_value_string_text",
+    "named": true
   },
   {
     "type": "xpath",

@@ -934,8 +934,8 @@ shebang = ["groovy"]
 
 [parsers.hurl]
 git = "https://github.com/pfeiferj/tree-sitter-hurl.git"
-rev = "597efbd7ce9a814bb058f48eabd055b1d1e12145"
-version = "1.7.0"
+rev = "3343774c9dff87570dd5d5b90d5e92405678d1d5"
+version = "1.8.0"
 globs = ["*.hurl"]
 
 [parsers.jinja]
