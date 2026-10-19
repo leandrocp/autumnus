@@ -41,7 +41,7 @@ path = "queries"
 
 [queries.sql]
 git = "https://github.com/derekstride/tree-sitter-sql.git"
-rev = "c2e1e08db1ea20dc23bdb8d228a81a8756e9c450"
+rev = "987a64a7b105e267b39725a81ad2db628dc3178c"
 path = "queries"
 
 [queries.wat]
