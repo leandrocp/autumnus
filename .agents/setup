@@ -65,7 +65,7 @@ step "Install Hex if missing" mise exec -- mix local.hex --force --if-missing
 step "Install Rebar if missing" mise exec -- mix local.rebar --force --if-missing
 
 step "Prepare workspace dependencies and generated assets" env CI=1 mise run setup
-browser_deps="$(mise exec -- packages/javascript/lumis/node_modules/.bin/playwright install-deps --dry-run chromium firefox webkit)"
+browser_deps="$(mise exec -- packages/javascript/lumis/node_modules/.bin/playwright install-deps --dry-run chromium firefox webkit)" || browser_deps=""
 if [[ "$browser_deps" != "All system dependencies are installed." ]]; then
     step "Install browser system dependencies" env DEBIAN_FRONTEND=noninteractive mise exec -- packages/javascript/lumis/node_modules/.bin/playwright install-deps chromium firefox webkit
 fi
