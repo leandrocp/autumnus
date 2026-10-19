@@ -21,7 +21,7 @@ import { normalizeLanguageName } from "./languages.js";
 import { composeAnnotations } from "../annotations.js";
 import { buildSourceIndex } from "../events.js";
 import { rainbowBracketScope } from "../decorations.js";
-import { getScopedThemeStyle } from "../formatter/html.js";
+import { resolveStackStyle } from "./style.js";
 import { LANGUAGE_LOADERS } from "../generated/language-loaders.js";
 import { guessLanguage } from "../guess-language.js";
 import { builtinFormatterKind } from "./builtin-formatter.js";
@@ -277,7 +277,7 @@ function emitToken(
     tokenLanguage,
     { start: event.start, end: event.end },
     scope,
-    scope.length > 0 ? getScopedThemeStyle(theme, scope, tokenLanguage) : undefined,
+    resolveStackStyle(theme, scopeStack),
   );
 }
 

@@ -12,8 +12,9 @@ import {
   lastLineNumber,
   rainbowBracketScope,
 } from "../decorations.js";
-import { encodeSource, decodeSourceSlice, getScopedThemeStyle, getThemeStyle } from "./html.js";
+import { encodeSource, decodeSourceSlice, getThemeStyle } from "./html.js";
 import { paint } from "./ansi-core.js";
+import { resolveStackStyle } from "../core/style.js";
 
 function fallbackBackground(formatter: TerminalFormatter): string | undefined {
   const background = formatter.background;
@@ -79,15 +80,6 @@ function splitInclusive(text: string): string[] {
   const result = segments.map((segment) => `${segment}\n`);
   if (last !== "") result.push(last);
   return result;
-}
-
-function activeStyle(
-  scopeStack: Array<{ scope: string; language: string }>,
-  theme: Theme | undefined,
-): HighlightStyle | undefined {
-  const active = scopeStack.at(-1);
-  if (!active || active.scope.length === 0) return undefined;
-  return getScopedThemeStyle(theme, active.scope, active.language);
 }
 
 // One segment of a source event, which is either a run of text or that run and
@@ -195,7 +187,7 @@ function writeSource(
 
   const painted = paintSource(
     text,
-    activeStyle(state.scopeStack, formatter.theme),
+    resolveStackStyle(formatter.theme, state.scopeStack),
     state.lineBg,
     formatter.width,
     state.lineWidth,
