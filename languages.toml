@@ -1030,9 +1030,9 @@ globs = ["*.rst"]
 
 [parsers.scheme]
 git = "https://github.com/6cdh/tree-sitter-scheme.git"
-rev = "1e4d38d650bf6b53930ec9d41a7000775c134039"
+rev = "d57f35ab002940f83d7451bc87928261a9c8beb2"
 crate = "tree-sitter-scheme"
-version = "0.24.7"
+version = "0.25.0"
 globs = ["*.scm", "*.sld", "*.ss"]
 shebang = ["guile", "scheme"]
 
