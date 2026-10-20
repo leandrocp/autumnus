@@ -106,28 +106,23 @@ entry point has no native-addon dependency and works in browsers.
 
 ## Elixir options
 
-Options cross the NIF boundary as the caller wrote them:
+`lumis_core::elixir`, behind the optional `rustler` feature, owns the BEAM
+types shared by `lumis_nif` and `mdex_native`. Lumis keeps its existing
+NimbleOptions validation, `rust_options!/1` conversion and derived NIF
+decoders. Its wire format and formatter helper APIs do not change.
+
+`ExLumisOptions::from_term` also reads options as callers write them, such as
 `[formatter: {:html_inline, theme: "dracula", highlight_lines: %{lines: [2..4]}}]`.
-`lumis_core::elixir`, behind `lumis-core`'s `rustler` feature, decodes them:
-`ExLumisOptions` for the whole keyword list, deprecated `:theme`, `:pre_class`
-and `:inline_style` included, and `ExFormatterOption` for a formatter alone. It
-fills in the defaults and raises `ArgumentError` naming the bad option, the
-valid ones and the closest match, with the value printed as `inspect/1` would.
-Two NIFs link it: `lumis_nif`, and `mdex_native`, which embeds Lumis to
-highlight Markdown code blocks and so needs no Elixir step to prepare options.
+mdex_native uses this entry point without installing `:lumis`. It accepts
+keyword lists, maps, deprecated options and the encoded fields older MDEx
+versions pass. Resolved themes and line-range structs decode directly; no
+Elixir reverse conversion or second theme lookup is needed.
 
-`Lumis` still validates options with NimbleOptions, which documents them and
-reports errors before the NIF call, but it no longer converts them. The
-`the NIF reads options as written` tests in `lumis_test.exs` render each
-formatter and each deprecated option both ways, through `Lumis.highlight/2` and
-straight through the NIF, and require the same output, so the Elixir defaults
-and the Rust ones cannot drift. A test also requires the NIF to accept every
-key in `Lumis.options_schema/0`.
-
-`Lumis.rust_options!/1` still returns Lumis 0.10's wire format, through
-`Lumis.LegacyOptions`, because MDEx 0.14.1 and mdex_native 0.2.10 call it and
-accept any later `:lumis` below 1.0. Nothing in Lumis reads that format. Delete
-it once those versions are out of use.
+The raw decoder permits repeated keys and nil optional fields. Invalid
+options raise `ArgumentError` naming the option and suggesting close matches.
+Error messages summarize containers and large binaries without traversing or
+copying them. mdex_native's integration fixtures compare raw and converted
+options through rendering, including modified custom themes.
 
 ## Website rendering
 
