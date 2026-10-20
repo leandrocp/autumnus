@@ -889,6 +889,17 @@ impl Css<'_> {
             }
         }
 
+        for kind in [DiffWordKind::Removed, DiffWordKind::Added] {
+            if let Some(style) = self.theme.diff_word_style(kind) {
+                rules.push(format!(
+                    "{}.{} {{\n  {}\n}}\n",
+                    self.scope_prefix(),
+                    kind.class(),
+                    style.css(self.enable_italic, "\n  ")
+                ));
+            }
+        }
+
         if self.layout {
             rules.push(self.layout());
         }

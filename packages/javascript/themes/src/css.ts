@@ -1,3 +1,4 @@
+import { diffWordClass, diffWordStyle } from "./diff-word-style.js";
 import type { StyleEntry, ThemeData } from "./types.js";
 
 /** Options for {@link buildCss}. */
@@ -58,7 +59,10 @@ export function buildCss(theme: ThemeData, options: BuildCssOptions = {}): strin
     rules.push(` {\n  ${scopeStyle}\n}\n`);
   }
 
-  rules.push(...scopeRules(theme, scope, enableItalic));
+  rules.push(
+    ...scopeRules(theme, scope, enableItalic),
+    ...diffWordRules(theme, scope, enableItalic),
+  );
   if (options.layout !== false) {
     rules.push(layoutRules(scope));
   }
@@ -110,6 +114,19 @@ function scopeRules(theme: ThemeData, scope: string, enableItalic: boolean): str
   }
 
   return rules;
+}
+
+// The background linked HTML gives a diff's changed words, which no theme
+// defines and is derived instead.
+function diffWordRules(theme: ThemeData, scope: string, enableItalic: boolean): string[] {
+  return (["removed", "added"] as const).flatMap((kind) => {
+    const style = diffWordStyle(theme, kind);
+    return style
+      ? [
+          `${scopePrefix(scope)}.${diffWordClass(kind)} {\n  ${renderStyle(style, enableItalic, "\n  ")}\n}\n`,
+        ]
+      : [];
+  });
 }
 
 // The classes `@lumis-sh/lumis` writes for the gutter. Kept in step with the
