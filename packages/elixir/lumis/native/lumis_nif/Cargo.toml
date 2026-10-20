@@ -50,4 +50,4 @@ too_many_lines = "allow"
 # `mise run elixir-nif-lock-check --fix` once lumis-core 4.1.0 is on crates.io.
 # `elixir-release.yml` refuses to publish while it is here.
 [patch.crates-io]
-lumis-core = { git = "https://github.com/leandrocp/lumis", rev = "937ed9dafab7663cf8d2cd302d495866cdae1f3e" }
+lumis-core = { git = "https://github.com/leandrocp/lumis", rev = "757c0e6ac3c655424554e4e28b1908de20198c54" }
