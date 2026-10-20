@@ -69,12 +69,15 @@
 use crate::languages::{bracket_query_for_language, Language, LanguageConfig};
 use crate::themes::Theme;
 use lumis_core::annotations::{compose_annotations, Annotation, AnnotationError};
-use lumis_core::decorations::{compose_rainbow_decorations, rainbow_scope};
+use lumis_core::decorations::{
+    compose_diff_word_decorations, compose_rainbow_decorations, rainbow_scope,
+};
 use lumis_core::events::{Decoration, HighlightEvent as CoreHighlightEvent};
 use lumis_core::highlights::HIGHLIGHT_NAMES;
 use lumis_wasm_runtime::brackets::{
     bracket_pairs_within, colorize_bracket_pairs, compile, RainbowRange,
 };
+use lumis_wasm_runtime::diff_words::{diff_word_ranges_in, DiffWordRange};
 use lumis_wasm_runtime::tree_sitter_highlight::{
     Deadline, HighlightEvent, Highlighter as TSHighlighter, Interrupt,
 };
@@ -127,6 +130,7 @@ static DEFAULT_STYLE: LazyLock<Arc<Style>> = LazyLock::new(|| Arc::new(Style::de
 pub struct HighlightOptions<'a, 'c, T = ()> {
     annotations: &'a [Annotation<T>],
     rainbow_brackets: bool,
+    word_diff: bool,
     budget: Budget,
     cancellation: Option<&'c AtomicUsize>,
 }
@@ -223,6 +227,7 @@ impl<T: PartialEq> PartialEq for HighlightOptions<'_, '_, T> {
     fn eq(&self, other: &Self) -> bool {
         self.annotations == other.annotations
             && self.rainbow_brackets == other.rainbow_brackets
+            && self.word_diff == other.word_diff
             && self.budget == other.budget
             && match (self.cancellation, other.cancellation) {
                 (Some(left), Some(right)) => std::ptr::eq(left, right),
@@ -254,6 +259,7 @@ impl HighlightOptions<'static, 'static> {
         Self {
             annotations: &[],
             rainbow_brackets: false,
+            word_diff: false,
             budget: Budget::new(),
             cancellation: None,
         }
@@ -266,6 +272,7 @@ impl<'c> HighlightOptions<'static, 'c> {
         HighlightOptions {
             annotations,
             rainbow_brackets: self.rainbow_brackets,
+            word_diff: self.word_diff,
             budget: self.budget,
             cancellation: self.cancellation,
         }
@@ -280,6 +287,21 @@ impl<'a, 'c, T> HighlightOptions<'a, 'c, T> {
     pub const fn rainbow_brackets(mut self, enabled: bool) -> Self {
         self.rainbow_brackets = enabled;
         self
+    }
+
+    /// Emit [`Decoration::DiffWord`] events around the words that changed
+    /// between a diff's removed lines and the added lines that replace them.
+    ///
+    /// Only a document highlighted as `diff` has changed words; any other
+    /// language ignores this. Built-in formatters give changed words a
+    /// stronger shade of the theme's `diff.minus` or `diff.plus` background.
+    pub const fn word_diff(mut self, enabled: bool) -> Self {
+        self.word_diff = enabled;
+        self
+    }
+
+    pub(crate) const fn word_diff_enabled(&self) -> bool {
+        self.word_diff
     }
 
     pub(crate) const fn annotation_items(&self) -> &'a [Annotation<T>] {
@@ -351,6 +373,7 @@ impl<'a, 'c, T> HighlightOptions<'a, 'c, T> {
         HighlightOptions {
             annotations: self.annotations,
             rainbow_brackets: self.rainbow_brackets,
+            word_diff: self.word_diff,
             budget: self.budget,
             cancellation: Some(flag),
         }
@@ -747,6 +770,18 @@ where
                 scope_stack.push(scope);
                 language_stack.push(language);
             }
+            // A changed word has no scope to report, so the token keeps its
+            // enclosing one. The copy is what its `DecorationEnd` pops.
+            CoreHighlightEvent::DecorationStart {
+                decoration: Decoration::DiffWord { .. },
+            } => {
+                let style = style_stack.last().cloned().unwrap_or_default();
+                let scope = scope_stack.last().copied().unwrap_or("");
+                let current_language = language_stack.last().copied().unwrap_or(language);
+                style_stack.push(style);
+                scope_stack.push(scope);
+                language_stack.push(current_language);
+            }
             // The flat token stream has no place to surface anything but a
             // scope and its text. Formatters take the composed stream instead.
             CoreHighlightEvent::AnnotationStart { .. }
@@ -932,6 +967,15 @@ where
     let core_events = collector.finish();
 
     let exceeded = ts_highlighter.exceeded_match_limit();
+    let core_events = if options.word_diff_enabled() && language == Language::Diff {
+        let ranges = query_diff_word_ranges(source, interrupt);
+        if let Some(error) = interrupt.stopped() {
+            return Err(highlight_error(error));
+        }
+        compose_diff_word_decorations(source, &core_events, &ranges)
+    } else {
+        core_events
+    };
     if !options.rainbow_brackets_enabled() {
         return Ok((core_events, exceeded));
     }
@@ -994,6 +1038,52 @@ fn apply_query_rainbow_brackets(
     )
 }
 
+/// Parse `source` as a diff again, inside the render's budget, and compare
+/// each run of removed and added lines.
+fn query_diff_word_ranges(source: &str, interrupt: Interrupt<'_>) -> Vec<DiffWordRange> {
+    let config = Language::Diff.config();
+    RAINBOW_PARSER.with(|parser| {
+        let mut parser = parser.borrow_mut();
+        let tree = parse_interruptible(&mut parser, &config.language, source, interrupt);
+        tree.map(|tree| diff_word_ranges_in(tree.root_node(), source))
+            .unwrap_or_default()
+    })
+}
+
+/// Parse with the render's interrupt, leaving the parser reusable either way.
+fn parse_interruptible(
+    parser: &mut Parser,
+    language: &tree_sitter::Language,
+    source: &str,
+    interrupt: Interrupt<'_>,
+) -> Option<tree_sitter::Tree> {
+    parser.set_language(language).ok()?;
+    let tree = parser.parse_with_options(
+        &mut |i, _| {
+            if i < source.len() {
+                &source.as_bytes()[i..]
+            } else {
+                &[]
+            }
+        },
+        None,
+        Some(ParseOptions::new().progress_callback(&mut |_| {
+            if interrupt.stopped().is_some() {
+                ControlFlow::Break(())
+            } else {
+                ControlFlow::Continue(())
+            }
+        })),
+    );
+    if tree.is_none() {
+        // A stopped parse leaves the parser holding this document, and
+        // tree-sitter resumes it on the next call unless it is reset. This
+        // parser is a thread-local reused by every render on this thread.
+        parser.reset();
+    }
+    tree
+}
+
 fn query_rainbow_ranges(
     source: &str,
     language: Language,
@@ -1002,34 +1092,12 @@ fn query_rainbow_ranges(
 ) -> (Vec<RainbowRange>, bool) {
     let config = language.config();
     let tree = RAINBOW_PARSER.with(|parser| {
-        let mut parser = parser.borrow_mut();
-        if parser.set_language(&config.language).is_err() {
-            return None;
-        }
-        let tree = parser.parse_with_options(
-            &mut |i, _| {
-                if i < source.len() {
-                    &source.as_bytes()[i..]
-                } else {
-                    &[]
-                }
-            },
-            None,
-            Some(ParseOptions::new().progress_callback(&mut |_| {
-                if interrupt.stopped().is_some() {
-                    ControlFlow::Break(())
-                } else {
-                    ControlFlow::Continue(())
-                }
-            })),
-        );
-        if tree.is_none() {
-            // A stopped parse leaves the parser holding this document, and
-            // tree-sitter resumes it on the next call unless it is reset. This
-            // parser is a thread-local reused by every render on this thread.
-            parser.reset();
-        }
-        tree
+        parse_interruptible(
+            &mut parser.borrow_mut(),
+            &config.language,
+            source,
+            interrupt,
+        )
     });
     let Some(tree) = tree else {
         return (Vec::new(), false);

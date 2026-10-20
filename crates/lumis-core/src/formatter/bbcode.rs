@@ -201,6 +201,9 @@ impl<T> Formatter<T> for BBCodeScoped {
                                 tag_name(rainbow_scope_index(*depth), self.language.id_name());
                             write!(output, "[{tag_name}]")?;
                         }
+                        Decoration::DiffWord { kind } => {
+                            write!(output, "[diff-word-{}]", kind.as_str())?;
+                        }
                     }
                 }
                 HighlightEvent::DecorationEnd => match decorations.pop() {
@@ -212,6 +215,9 @@ impl<T> Formatter<T> for BBCodeScoped {
                         let tag_name =
                             tag_name(rainbow_scope_index(depth), self.language.id_name());
                         write!(output, "[/{tag_name}]")?;
+                    }
+                    Some(Decoration::DiffWord { kind }) => {
+                        write!(output, "[/diff-word-{}]", kind.as_str())?;
                     }
                 },
                 // Caller annotations carry data this formatter has never seen.

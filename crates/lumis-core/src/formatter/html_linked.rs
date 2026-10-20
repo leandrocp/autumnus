@@ -182,6 +182,7 @@ impl HtmlLinked {
                 events,
                 self.language,
                 &|scope_index, _language| Self::span_attrs_from_index(scope_index),
+                &|kind| format!("class=\"{}\"", kind.class()),
             );
         }
 
@@ -214,6 +215,7 @@ impl HtmlLinked {
                 empty_style: None,
             },
             &|scope_index, _language| Self::span_attrs_from_index(scope_index),
+            &|kind| format!("class=\"{}\"", kind.class()),
         )?;
 
         crate::formatter::html::closing_tags(output)?;

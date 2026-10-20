@@ -10,9 +10,11 @@
 //! first, then the line decorations over the top.
 
 use super::{
-    compose_line_decorations, compose_rainbow_decorations, Decoration, LineSelection, RainbowRange,
+    compose_diff_word_decorations, compose_line_decorations, compose_rainbow_decorations,
+    Decoration, DiffWordKind, LineSelection, RainbowRange,
 };
 use crate::annotations::{compose_annotations, Annotation};
+use crate::diff_words::DiffWordRange;
 use crate::events::HighlightEvent;
 use crate::highlights::HIGHLIGHT_NAMES;
 use serde::Deserialize;
@@ -35,6 +37,8 @@ struct Case {
     annotations: Vec<CaseAnnotation>,
     #[serde(default)]
     rainbow_ranges: Vec<CaseRainbowRange>,
+    #[serde(default)]
+    diff_word_ranges: Vec<CaseDiffWordRange>,
     highlight_lines: Vec<LineSpec>,
     expected: String,
 }
@@ -59,6 +63,13 @@ struct CaseRainbowRange {
     start: usize,
     end: usize,
     depth: usize,
+}
+
+#[derive(Debug, Deserialize)]
+struct CaseDiffWordRange {
+    start: usize,
+    end: usize,
+    kind: String,
 }
 
 /// A 1-based line, or an inclusive range of them, the way every runtime's
@@ -136,7 +147,21 @@ fn compose<'a>(
             depth: range.depth,
         })
         .collect::<Vec<_>>();
-    let events = compose_rainbow_decorations(&case.source, &syntax_events(case), &ranges);
+    let diff_words = case
+        .diff_word_ranges
+        .iter()
+        .map(|range| DiffWordRange {
+            start: range.start,
+            end: range.end,
+            kind: match range.kind.as_str() {
+                "removed" => DiffWordKind::Removed,
+                "added" => DiffWordKind::Added,
+                other => panic!("unknown diff word kind {other:?}"),
+            },
+        })
+        .collect::<Vec<_>>();
+    let events = compose_diff_word_decorations(&case.source, &syntax_events(case), &diff_words);
+    let events = compose_rainbow_decorations(&case.source, &events, &ranges);
     let events = compose_annotations(&case.source, &events, annotations)
         .expect("fixture annotations resolve");
 
@@ -167,11 +192,13 @@ fn notation<T: std::fmt::Display>(events: &[HighlightEvent<'_, T>]) -> String {
                         highlighted,
                     } => format!("L+{number}{}", if *highlighted { "*" } else { "" }),
                     Decoration::RainbowBracket { depth } => format!("R+{depth}"),
+                    Decoration::DiffWord { kind } => format!("W+{}", kind.as_str()),
                 }
             }
             HighlightEvent::DecorationEnd => match decorations.pop() {
                 Some(Decoration::Line { .. }) => "L-".to_string(),
                 Some(Decoration::RainbowBracket { .. }) => "R-".to_string(),
+                Some(Decoration::DiffWord { .. }) => "W-".to_string(),
                 None => "D-".to_string(),
             },
         })
@@ -210,6 +237,8 @@ fn the_corpus_covers_the_shapes_composition_has_to_get_right() {
         "annotation/closed-and-reopened-across-a-newline",
         "rainbow/crosses-source-and-syntax-boundaries",
         "rainbow/composes-with-annotations-and-lines",
+        "diffword/crosses-source-and-syntax-boundaries",
+        "diffword/composes-with-rainbow-annotations-and-lines",
         "utf8/multibyte-lines",
         "highlight/overlapping-ranges-merge",
         "highlight/range-beyond-the-document",
@@ -286,15 +315,17 @@ fn every_line_is_balanced() {
                             assert_eq!(depth, 0, "{}: a line opened inside a scope", case.name);
                             lines += 1;
                         }
-                        Decoration::RainbowBracket { .. } => depth += 1,
+                        Decoration::RainbowBracket { .. } | Decoration::DiffWord { .. } => {
+                            depth += 1;
+                        }
                     }
                 }
                 HighlightEvent::DecorationEnd => match decorations.pop() {
                     Some(Decoration::Line { .. }) => {
                         assert_eq!(depth, 0, "{}: a line closed inside a scope", case.name);
                     }
-                    Some(Decoration::RainbowBracket { .. }) => {
-                        depth = depth.checked_sub(1).expect("unbalanced rainbow decoration");
+                    Some(Decoration::RainbowBracket { .. } | Decoration::DiffWord { .. }) => {
+                        depth = depth.checked_sub(1).expect("unbalanced span decoration");
                     }
                     None => panic!("{}: unmatched decoration end", case.name),
                 },

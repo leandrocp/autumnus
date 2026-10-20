@@ -1,0 +1,293 @@
+{
+  "ranges": [
+    {
+      "name": "one-word-per-side",
+      "diff": "-    File.write!(path, Jason.encode!(json))\n+    File.write!(path, JSON.encode!(json))",
+      "marked": [
+        [
+          "-",
+          23,
+          "Jason"
+        ],
+        [
+          "+",
+          67,
+          "JSON"
+        ]
+      ]
+    },
+    {
+      "name": "appended-text",
+      "diff": "-    tmp = System.tmp_dir!()\n+    tmp = System.tmp_dir!() |> Path.join(\"lumis\")",
+      "marked": [
+        [
+          "+",
+          57,
+          " |> Path.join(\"lumis\")"
+        ]
+      ]
+    },
+    {
+      "name": "single-space-joins-changes",
+      "diff": "-let a b = 1\n+let c d = 1",
+      "marked": [
+        [
+          "-",
+          5,
+          "a b"
+        ],
+        [
+          "+",
+          18,
+          "c d"
+        ]
+      ]
+    },
+    {
+      "name": "shared-word-keeps-changes-apart",
+      "diff": "-call(alpha, keep, beta)\n+call(gamma, keep, delta)",
+      "marked": [
+        [
+          "-",
+          6,
+          "alpha"
+        ],
+        [
+          "-",
+          19,
+          "beta"
+        ],
+        [
+          "+",
+          31,
+          "gamma"
+        ],
+        [
+          "+",
+          44,
+          "delta"
+        ]
+      ]
+    },
+    {
+      "name": "different-line-counts",
+      "diff": "-one(1)\n-two(2)\n+one(10)\n+inserted line\n+two(2)",
+      "marked": [
+        [
+          "-",
+          5,
+          "1"
+        ],
+        [
+          "+",
+          21,
+          "10"
+        ]
+      ]
+    },
+    {
+      "name": "added-line-without-partner",
+      "diff": "-  write!(path, Jason.encode!(json))\n+  write!(path, JSON.encode!(json))\n+  Logger.debug(\"wrote\")",
+      "marked": [
+        [
+          "-",
+          16,
+          "Jason"
+        ],
+        [
+          "+",
+          53,
+          "JSON"
+        ]
+      ]
+    },
+    {
+      "name": "pairs-with-the-resembling-line",
+      "diff": "-x = compute(a, b)\n+log(\"start\")\n+x = compute(a, c)",
+      "marked": [
+        [
+          "-",
+          16,
+          "b"
+        ],
+        [
+          "+",
+          49,
+          "c"
+        ]
+      ]
+    },
+    {
+      "name": "rewritten-line",
+      "diff": "-alpha beta gamma\n+delta epsilon zeta",
+      "marked": []
+    },
+    {
+      "name": "no-counterpart",
+      "diff": "-gone\n context\n+new",
+      "marked": []
+    },
+    {
+      "name": "added-before-removed",
+      "diff": "+new(1)\n-old(1)",
+      "marked": []
+    },
+    {
+      "name": "blank-row-ends-run",
+      "diff": "-x = 1\n\n+x = 2",
+      "marked": []
+    },
+    {
+      "name": "multibyte",
+      "diff": "-café = \"olá\"\n+café = \"tchau\"",
+      "marked": [
+        [
+          "-",
+          10,
+          "olá"
+        ],
+        [
+          "+",
+          26,
+          "tchau"
+        ]
+      ]
+    },
+    {
+      "name": "unicode-word-classes",
+      "diff": "-naïve_x = 1\n+naïve_y = 1",
+      "marked": [
+        [
+          "-",
+          1,
+          "naïve_x"
+        ],
+        [
+          "+",
+          15,
+          "naïve_y"
+        ]
+      ]
+    },
+    {
+      "name": "tie-equal-candidates",
+      "diff": "-a(1)\n-a(2)\n+a(3)",
+      "marked": [
+        [
+          "-",
+          9,
+          "2"
+        ],
+        [
+          "+",
+          15,
+          "3"
+        ]
+      ]
+    },
+    {
+      "name": "tie-swapped-tokens",
+      "diff": "-f(x, y)\n+f(y, x)",
+      "marked": [
+        [
+          "-",
+          3,
+          "x"
+        ],
+        [
+          "-",
+          6,
+          "y"
+        ],
+        [
+          "+",
+          12,
+          "y"
+        ],
+        [
+          "+",
+          15,
+          "x"
+        ]
+      ]
+    },
+    {
+      "name": "tie-repeated-token",
+      "diff": "-a a b\n+a b b",
+      "marked": [
+        [
+          "-",
+          3,
+          "a"
+        ],
+        [
+          "+",
+          10,
+          "b"
+        ]
+      ]
+    }
+  ],
+  "colors": [
+    {
+      "theme": "adwaita_dark",
+      "removed": "#63150f",
+      "added": "#00403a"
+    },
+    {
+      "theme": "catppuccin_latte",
+      "removed": "#ffb0b0",
+      "added": "#abe2a0"
+    },
+    {
+      "theme": "catppuccin_mocha",
+      "removed": "#592535",
+      "added": "#21421f"
+    },
+    {
+      "theme": "github_light",
+      "removed": "#e7867f",
+      "added": "#85b88b"
+    },
+    {
+      "theme": "gruvbox_dark",
+      "removed": "#a13038",
+      "added": "#464f00"
+    },
+    {
+      "theme": "material_lighter",
+      "removed": "#ffe0e1",
+      "added": "#bed1a2"
+    },
+    {
+      "theme": "mfd_gbl_light",
+      "removed": "#ff827b",
+      "added": "#4ad975"
+    },
+    {
+      "theme": "neosolarized2_light",
+      "removed": "#ffccc6",
+      "added": "#c0ebc7"
+    },
+    {
+      "theme": "solarized_autumn_light",
+      "removed": "#ffd6c9",
+      "added": "#cfde9a"
+    },
+    {
+      "theme": "solarized_osaka_light",
+      "removed": "#ffdddc",
+      "added": "#69e5df"
+    },
+    {
+      "theme": "tokyonight_day",
+      "removed": "#ffcfd9",
+      "added": "#b8f6ff"
+    },
+    {
+      "theme": "vscode_dark",
+      "removed": "#9e1b1d",
+      "added": "#637631"
+    }
+  ]
+}

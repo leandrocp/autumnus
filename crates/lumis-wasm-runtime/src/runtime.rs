@@ -1,6 +1,7 @@
 //! Wasmtime-backed Tree-sitter highlighting runtime.
 
-use lumis_core::decorations::compose_rainbow_decorations;
+use crate::diff_words::{diff_word_ranges_in, DIFF_GRAMMAR};
+use lumis_core::decorations::{compose_diff_word_decorations, compose_rainbow_decorations};
 use lumis_core::events::{Coalescing, HighlightEvent};
 use lumis_core::formatter::BudgetExhausted;
 use lumis_core::highlights::HIGHLIGHT_NAMES;
@@ -33,6 +34,9 @@ pub struct LanguageSpec {
 
 struct LoadedLanguage {
     highlight: HighlightConfiguration,
+    /// The grammar the parser was built from, which decides the node kinds a
+    /// tree has, whatever id the host loaded the language under.
+    grammar_name: String,
     brackets_source: String,
     brackets: OnceLock<Option<Query>>,
 }
@@ -570,6 +574,7 @@ impl Runtime {
             spec.id,
             Arc::new(LoadedLanguage {
                 highlight,
+                grammar_name: spec.grammar_name,
                 brackets_source: spec.brackets,
                 brackets: OnceLock::new(),
             }),
@@ -623,7 +628,7 @@ impl Runtime {
         injections: &str,
         locals: &str,
     ) -> Result<(), RuntimeError> {
-        let (id, language, brackets_source) = {
+        let (id, language, grammar_name, brackets_source) = {
             let catalog = self.catalog.read().expect("language catalog lock poisoned");
             let id = catalog
                 .aliases
@@ -637,6 +642,7 @@ impl Runtime {
             (
                 id,
                 loaded.highlight.language.clone(),
+                loaded.grammar_name.clone(),
                 loaded.brackets_source.clone(),
             )
         };
@@ -656,6 +662,7 @@ impl Runtime {
             id,
             Arc::new(LoadedLanguage {
                 highlight,
+                grammar_name,
                 brackets_source,
                 brackets: OnceLock::new(),
             }),
@@ -871,17 +878,15 @@ impl Runtime {
             collector.finish()
         };
 
-        if options.rainbow_brackets && budget != Some(BudgetExhausted::Time) {
-            collected = decorate_with_rainbow(
-                worker.highlighter.parser(),
-                &root,
-                source,
-                options.match_limit,
-                interrupt,
-                collected,
-                &mut budget,
-            )?;
-        }
+        collected = decorate(
+            worker.highlighter.parser(),
+            &root,
+            source,
+            options,
+            interrupt,
+            collected,
+            &mut budget,
+        )?;
 
         Ok(HighlightOutput {
             events: collected,
@@ -986,6 +991,61 @@ fn decorate_with_rainbow(
     Ok(compose_rainbow_decorations(source, &collected, &ranges))
 }
 
+/// Apply the decoration passes `options` asks for, each inside the budget.
+fn decorate(
+    parser: &mut Parser,
+    language: &LoadedLanguage,
+    source: &str,
+    options: &HighlightOptions,
+    interrupt: Interrupt<'_>,
+    mut collected: Vec<HighlightEvent<'static>>,
+    budget: &mut Option<BudgetExhausted>,
+) -> Result<Vec<HighlightEvent<'static>>, RuntimeError> {
+    if options.word_diff
+        && language.grammar_name == DIFF_GRAMMAR
+        && *budget != Some(BudgetExhausted::Time)
+    {
+        collected =
+            decorate_with_diff_words(parser, language, source, interrupt, collected, budget)?;
+    }
+    if options.rainbow_brackets && *budget != Some(BudgetExhausted::Time) {
+        collected = decorate_with_rainbow(
+            parser,
+            language,
+            source,
+            options.match_limit,
+            interrupt,
+            collected,
+            budget,
+        )?;
+    }
+    Ok(collected)
+}
+
+/// Decorate a diff's changed words, inside the same budget.
+///
+/// Like rainbow brackets this parses the document a second time, and a render
+/// that runs out here goes back plain.
+fn decorate_with_diff_words(
+    parser: &mut Parser,
+    language: &LoadedLanguage,
+    source: &str,
+    interrupt: Interrupt<'_>,
+    collected: Vec<HighlightEvent<'static>>,
+    budget: &mut Option<BudgetExhausted>,
+) -> Result<Vec<HighlightEvent<'static>>, RuntimeError> {
+    let tree = parse_root(parser, language, source, interrupt)?;
+    let Some(tree) = tree else {
+        *budget = Some(BudgetExhausted::Time);
+        return Ok(vec![HighlightEvent::Source {
+            start: 0,
+            end: source.len(),
+        }]);
+    };
+    let ranges = diff_word_ranges_in(tree.root_node(), source);
+    Ok(compose_diff_word_decorations(source, &collected, &ranges))
+}
+
 /// How a host handled a language named by an injection query.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum InjectionResolution {
@@ -1002,6 +1062,9 @@ pub enum InjectionResolution {
 pub struct HighlightOptions {
     /// Colourize matching bracket pairs in the root language.
     pub rainbow_brackets: bool,
+    /// Mark the words that changed between a diff's removed and added lines.
+    /// Only a `diff` root has any.
+    pub word_diff: bool,
     /// Descend into languages injected inside the document.
     pub injections: bool,
     /// Keep the tree parsed for each layer, for tools that inspect them.
@@ -1019,6 +1082,7 @@ impl Default for HighlightOptions {
     fn default() -> Self {
         Self {
             rainbow_brackets: false,
+            word_diff: false,
             injections: true,
             layers: false,
             match_limit: DEFAULT_MATCH_LIMIT,
@@ -1082,20 +1146,15 @@ fn engine_with_compile_cache(root: std::path::PathBuf) -> Result<Engine, wasmtim
     Engine::new(&config)
 }
 
-fn rainbow_ranges(
+/// Parse the whole document as the root language, with the render's interrupt.
+///
+/// `None` means the interrupt stopped the parse.
+fn parse_root(
     parser: &mut Parser,
     language: &LoadedLanguage,
     source: &str,
-    match_limit: u32,
     interrupt: Interrupt<'_>,
-) -> Result<(Vec<RainbowRange>, bool), RuntimeError> {
-    let query = language.brackets.get_or_init(|| {
-        crate::brackets::compile(&language.highlight.language, &language.brackets_source)
-    });
-    let Some(query) = query else {
-        return Ok((Vec::new(), false));
-    };
-
+) -> Result<Option<Tree>, RuntimeError> {
     // The highlight walk narrows this parser to each injection it parses and
     // leaves it on the last one, and `set_language` does not widen it again.
     parser
@@ -1131,6 +1190,26 @@ fn rainbow_ranges(
                 language.highlight.language_name.clone(),
             ));
         }
+        return Ok(None);
+    };
+    Ok(Some(tree))
+}
+
+fn rainbow_ranges(
+    parser: &mut Parser,
+    language: &LoadedLanguage,
+    source: &str,
+    match_limit: u32,
+    interrupt: Interrupt<'_>,
+) -> Result<(Vec<RainbowRange>, bool), RuntimeError> {
+    let query = language.brackets.get_or_init(|| {
+        crate::brackets::compile(&language.highlight.language, &language.brackets_source)
+    });
+    let Some(query) = query else {
+        return Ok((Vec::new(), false));
+    };
+
+    let Some(tree) = parse_root(parser, language, source, interrupt)? else {
         return Ok((Vec::new(), false));
     };
 
@@ -1213,6 +1292,7 @@ mod tests {
             "json".into(),
             Arc::new(LoadedLanguage {
                 highlight,
+                grammar_name: "json".into(),
                 brackets_source: String::new(),
                 brackets: OnceLock::new(),
             }),

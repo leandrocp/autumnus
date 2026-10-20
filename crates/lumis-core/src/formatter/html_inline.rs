@@ -4,7 +4,7 @@
 //! inline CSS styles for syntax highlighting, working from pre-computed highlight events.
 
 use super::{Formatter, HtmlElement};
-use crate::decorations::{LineSelection, SteppedLineRange};
+use crate::decorations::{DiffWordKind, LineSelection, SteppedLineRange};
 use crate::events::HighlightEvent;
 use crate::languages::Language;
 use crate::themes::Theme;
@@ -180,6 +180,14 @@ impl HtmlInline {
         )
     }
 
+    fn diff_word_attrs(&self, kind: DiffWordKind) -> String {
+        self.theme
+            .as_ref()
+            .and_then(|theme| theme.diff_word_style(kind))
+            .map(|style| format!("style=\"{}\"", style.css(self.italic, " ")))
+            .unwrap_or_default()
+    }
+
     fn line_number_attrs(&self, highlighted: bool) -> String {
         let scope = if highlighted {
             "line_number.highlighted"
@@ -256,6 +264,7 @@ impl HtmlInline {
                 events,
                 self.language,
                 &|scope_index, language| self.span_attrs_from_index(scope_index, language),
+                &|kind| self.diff_word_attrs(kind),
             );
         }
 
@@ -298,6 +307,7 @@ impl HtmlInline {
                 empty_style: Some(crate::formatter::html::LINE_LAYOUT),
             },
             &|scope_index, language| self.span_attrs_from_index(scope_index, language),
+            &|kind| self.diff_word_attrs(kind),
         )?;
 
         crate::formatter::html::closing_tags(output)?;

@@ -1,5 +1,5 @@
 {
-  "$comment": "Expected event streams for decoration composition. Rust is the reference; crates/lumis-core/src/decorations_parity.rs asserts it produces these, packages/javascript/lumis/test/decoration-composition.test.ts asserts the TypeScript port produces the same. Notation: L+N/L+N* opens a line decoration (starred when highlighted), L- closes it, R+depth/R- wraps a rainbow bracket, S:scope / E a syntax scope, T:start-end a source range, A+data@start-end / A- a caller annotation.",
+  "$comment": "Expected event streams for decoration composition. Rust is the reference; crates/lumis-core/src/decorations_parity.rs asserts it produces these, packages/javascript/lumis/test/decoration-composition.test.ts asserts the TypeScript port produces the same. Notation: L+N/L+N* opens a line decoration (starred when highlighted), L- closes it, R+depth/R- wraps a rainbow bracket, W+kind/W- wraps a changed diff word, S:scope / E a syntax scope, T:start-end a source range, A+data@start-end / A- a caller annotation.",
   "cases": [
     {
       "name": "scope/ends-at-newline",
@@ -274,6 +274,31 @@
       "annotations": [{ "start": 1, "end": 3, "data": "x" }],
       "highlightLines": [2],
       "expected": "L+1 T:0-1 A+x@1-3 T:1-2 A- L- L+2* A+x@1-3 R+6 T:2-3 R- A- L-"
+    },
+    {
+      "name": "diffword/crosses-source-and-syntax-boundaries",
+      "source": "ab",
+      "events": [
+        { "type": "start", "scope": "string", "language": "json" },
+        { "type": "source", "start": 0, "end": 1 },
+        { "type": "end" },
+        { "type": "start", "scope": "number", "language": "json" },
+        { "type": "source", "start": 1, "end": 2 },
+        { "type": "end" }
+      ],
+      "diffWordRanges": [{ "start": 0, "end": 2, "kind": "removed" }],
+      "highlightLines": [],
+      "expected": "L+1 S:string W+removed T:0-1 W- E S:number W+removed T:1-2 W- E L-"
+    },
+    {
+      "name": "diffword/composes-with-rainbow-annotations-and-lines",
+      "source": "a\n(b)",
+      "events": [{ "type": "source", "start": 0, "end": 5 }],
+      "diffWordRanges": [{ "start": 2, "end": 4, "kind": "added" }],
+      "rainbowRanges": [{ "start": 2, "end": 3, "depth": 0 }],
+      "annotations": [{ "start": 1, "end": 5, "data": "x" }],
+      "highlightLines": [2],
+      "expected": "L+1 T:0-1 A+x@1-5 T:1-2 A- L- L+2* A+x@1-5 W+added R+0 T:2-3 R- T:3-4 W- T:4-5 A- L-"
     },
     {
       "name": "utf8/multibyte-lines",
