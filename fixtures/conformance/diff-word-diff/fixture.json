@@ -1,0 +1,2055 @@
+{
+  "name": "diff-word-diff",
+  "language": "diff",
+  "theme": "dracula",
+  "wordDiff": true,
+  "events": [
+    {
+      "type": "start",
+      "scope": "function",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 0,
+      "end": 4
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 4,
+      "end": 5
+    },
+    {
+      "type": "start",
+      "scope": "variable.parameter",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 5,
+      "end": 10
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 10,
+      "end": 11
+    },
+    {
+      "type": "start",
+      "scope": "string.special.path",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 11,
+      "end": 66
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 66,
+      "end": 67
+    },
+    {
+      "type": "start",
+      "scope": "keyword",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 67,
+      "end": 72
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 72,
+      "end": 73
+    },
+    {
+      "type": "start",
+      "scope": "constant",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 73,
+      "end": 80
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 80,
+      "end": 82
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "constant",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 82,
+      "end": 89
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 89,
+      "end": 90
+    },
+    {
+      "type": "start",
+      "scope": "number",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 90,
+      "end": 96
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 96,
+      "end": 97
+    },
+    {
+      "type": "start",
+      "scope": "diff.minus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 97,
+      "end": 100
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 100,
+      "end": 101
+    },
+    {
+      "type": "start",
+      "scope": "string.special.path",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 101,
+      "end": 128
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 128,
+      "end": 129
+    },
+    {
+      "type": "start",
+      "scope": "diff.plus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 129,
+      "end": 132
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 132,
+      "end": 133
+    },
+    {
+      "type": "start",
+      "scope": "string.special.path",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 133,
+      "end": 160
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 160,
+      "end": 161
+    },
+    {
+      "type": "start",
+      "scope": "attribute",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 161,
+      "end": 211
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 211,
+      "end": 215
+    },
+    {
+      "type": "start",
+      "scope": "keyword.function",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 215,
+      "end": 218
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 218,
+      "end": 219
+    },
+    {
+      "type": "start",
+      "scope": "function",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 219,
+      "end": 223
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 223,
+      "end": 224
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 224,
+      "end": 230
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 230,
+      "end": 231
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 231,
+      "end": 232
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 232,
+      "end": 240
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 240,
+      "end": 241
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 241,
+      "end": 242
+    },
+    {
+      "type": "start",
+      "scope": "keyword",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 242,
+      "end": 244
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 244,
+      "end": 245
+    },
+    {
+      "type": "start",
+      "scope": "diff.minus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 245,
+      "end": 246
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 246,
+      "end": 250
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 250,
+      "end": 257
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 257,
+      "end": 258
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 258,
+      "end": 259
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 259,
+      "end": 260
+    },
+    {
+      "type": "start",
+      "scope": "module",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 260,
+      "end": 266
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 266,
+      "end": 267
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "function.call",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 267,
+      "end": 275
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 275,
+      "end": 277
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 277,
+      "end": 278
+    },
+    {
+      "type": "start",
+      "scope": "diff.plus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 278,
+      "end": 279
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 279,
+      "end": 283
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 283,
+      "end": 290
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 290,
+      "end": 291
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 291,
+      "end": 292
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 292,
+      "end": 293
+    },
+    {
+      "type": "start",
+      "scope": "module",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 293,
+      "end": 299
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 299,
+      "end": 300
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "function.call",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 300,
+      "end": 308
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 308,
+      "end": 310
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "decorationStart",
+      "decoration": {
+        "type": "diffWord",
+        "kind": "added"
+      }
+    },
+    {
+      "type": "source",
+      "start": 310,
+      "end": 311
+    },
+    {
+      "type": "decorationEnd"
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "elixir"
+    },
+    {
+      "type": "decorationStart",
+      "decoration": {
+        "type": "diffWord",
+        "kind": "added"
+      }
+    },
+    {
+      "type": "source",
+      "start": 311,
+      "end": 313
+    },
+    {
+      "type": "decorationEnd"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "decorationStart",
+      "decoration": {
+        "type": "diffWord",
+        "kind": "added"
+      }
+    },
+    {
+      "type": "source",
+      "start": 313,
+      "end": 314
+    },
+    {
+      "type": "decorationEnd"
+    },
+    {
+      "type": "start",
+      "scope": "module",
+      "language": "elixir"
+    },
+    {
+      "type": "decorationStart",
+      "decoration": {
+        "type": "diffWord",
+        "kind": "added"
+      }
+    },
+    {
+      "type": "source",
+      "start": 314,
+      "end": 318
+    },
+    {
+      "type": "decorationEnd"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "elixir"
+    },
+    {
+      "type": "decorationStart",
+      "decoration": {
+        "type": "diffWord",
+        "kind": "added"
+      }
+    },
+    {
+      "type": "source",
+      "start": 318,
+      "end": 319
+    },
+    {
+      "type": "decorationEnd"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "function.call",
+      "language": "elixir"
+    },
+    {
+      "type": "decorationStart",
+      "decoration": {
+        "type": "diffWord",
+        "kind": "added"
+      }
+    },
+    {
+      "type": "source",
+      "start": 319,
+      "end": 323
+    },
+    {
+      "type": "decorationEnd"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "elixir"
+    },
+    {
+      "type": "decorationStart",
+      "decoration": {
+        "type": "diffWord",
+        "kind": "added"
+      }
+    },
+    {
+      "type": "source",
+      "start": 323,
+      "end": 324
+    },
+    {
+      "type": "decorationEnd"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "string",
+      "language": "elixir"
+    },
+    {
+      "type": "decorationStart",
+      "decoration": {
+        "type": "diffWord",
+        "kind": "added"
+      }
+    },
+    {
+      "type": "source",
+      "start": 324,
+      "end": 331
+    },
+    {
+      "type": "decorationEnd"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "elixir"
+    },
+    {
+      "type": "decorationStart",
+      "decoration": {
+        "type": "diffWord",
+        "kind": "added"
+      }
+    },
+    {
+      "type": "source",
+      "start": 331,
+      "end": 332
+    },
+    {
+      "type": "decorationEnd"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 332,
+      "end": 338
+    },
+    {
+      "type": "start",
+      "scope": "module",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 338,
+      "end": 342
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 342,
+      "end": 343
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "function.call",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 343,
+      "end": 351
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 351,
+      "end": 352
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 352,
+      "end": 359
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 359,
+      "end": 360
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 360,
+      "end": 366
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 366,
+      "end": 370
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 370,
+      "end": 371
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 371,
+      "end": 372
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 372,
+      "end": 373
+    },
+    {
+      "type": "start",
+      "scope": "module",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 373,
+      "end": 377
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 377,
+      "end": 378
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "function.call",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 378,
+      "end": 382
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 382,
+      "end": 383
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 383,
+      "end": 390
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 390,
+      "end": 391
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 391,
+      "end": 392
+    },
+    {
+      "type": "start",
+      "scope": "string",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 392,
+      "end": 393
+    },
+    {
+      "type": "start",
+      "scope": "string.special",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 393,
+      "end": 395
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 395,
+      "end": 401
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "string.special",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 401,
+      "end": 402
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 402,
+      "end": 408
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 408,
+      "end": 409
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 409,
+      "end": 410
+    },
+    {
+      "type": "start",
+      "scope": "diff.minus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 410,
+      "end": 411
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 411,
+      "end": 415
+    },
+    {
+      "type": "start",
+      "scope": "module",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 415,
+      "end": 419
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 419,
+      "end": 420
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "function.call",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 420,
+      "end": 426
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 426,
+      "end": 427
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 427,
+      "end": 431
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 431,
+      "end": 432
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 432,
+      "end": 433
+    },
+    {
+      "type": "start",
+      "scope": "module",
+      "language": "elixir"
+    },
+    {
+      "type": "decorationStart",
+      "decoration": {
+        "type": "diffWord",
+        "kind": "removed"
+      }
+    },
+    {
+      "type": "source",
+      "start": 433,
+      "end": 438
+    },
+    {
+      "type": "decorationEnd"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 438,
+      "end": 439
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "function.call",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 439,
+      "end": 446
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 446,
+      "end": 447
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 447,
+      "end": 455
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 455,
+      "end": 457
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 457,
+      "end": 458
+    },
+    {
+      "type": "start",
+      "scope": "diff.plus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 458,
+      "end": 459
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 459,
+      "end": 463
+    },
+    {
+      "type": "start",
+      "scope": "module",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 463,
+      "end": 467
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 467,
+      "end": 468
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "function.call",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 468,
+      "end": 474
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 474,
+      "end": 475
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 475,
+      "end": 479
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 479,
+      "end": 480
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 480,
+      "end": 481
+    },
+    {
+      "type": "start",
+      "scope": "module",
+      "language": "elixir"
+    },
+    {
+      "type": "decorationStart",
+      "decoration": {
+        "type": "diffWord",
+        "kind": "added"
+      }
+    },
+    {
+      "type": "source",
+      "start": 481,
+      "end": 485
+    },
+    {
+      "type": "decorationEnd"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 485,
+      "end": 486
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "function.call",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 486,
+      "end": 493
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 493,
+      "end": 494
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 494,
+      "end": 502
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 502,
+      "end": 504
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 504,
+      "end": 505
+    },
+    {
+      "type": "start",
+      "scope": "diff.plus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 505,
+      "end": 506
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 506,
+      "end": 510
+    },
+    {
+      "type": "start",
+      "scope": "module",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 510,
+      "end": 516
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 516,
+      "end": 517
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "function.call",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 517,
+      "end": 522
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 522,
+      "end": 523
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "string",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 523,
+      "end": 530
+    },
+    {
+      "type": "start",
+      "scope": "string.special",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 530,
+      "end": 532
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 532,
+      "end": 536
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "string.special",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 536,
+      "end": 537
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 537,
+      "end": 538
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 538,
+      "end": 539
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 539,
+      "end": 540
+    },
+    {
+      "type": "start",
+      "scope": "diff.minus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 540,
+      "end": 541
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 541,
+      "end": 545
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 545,
+      "end": 550
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 550,
+      "end": 551
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 551,
+      "end": 552
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 552,
+      "end": 553
+    },
+    {
+      "type": "start",
+      "scope": "string",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 553,
+      "end": 554
+    },
+    {
+      "type": "decorationStart",
+      "decoration": {
+        "type": "diffWord",
+        "kind": "removed"
+      }
+    },
+    {
+      "type": "source",
+      "start": 554,
+      "end": 559
+    },
+    {
+      "type": "decorationEnd"
+    },
+    {
+      "type": "source",
+      "start": 559,
+      "end": 560
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 560,
+      "end": 561
+    },
+    {
+      "type": "start",
+      "scope": "diff.plus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 561,
+      "end": 562
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 562,
+      "end": 566
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 566,
+      "end": 571
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 571,
+      "end": 572
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 572,
+      "end": 573
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 573,
+      "end": 574
+    },
+    {
+      "type": "start",
+      "scope": "string",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 574,
+      "end": 575
+    },
+    {
+      "type": "decorationStart",
+      "decoration": {
+        "type": "diffWord",
+        "kind": "added"
+      }
+    },
+    {
+      "type": "source",
+      "start": 575,
+      "end": 581
+    },
+    {
+      "type": "decorationEnd"
+    },
+    {
+      "type": "source",
+      "start": 581,
+      "end": 582
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 582,
+      "end": 588
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 588,
+      "end": 589
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 589,
+      "end": 595
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 595,
+      "end": 596
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 596,
+      "end": 597
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 597,
+      "end": 603
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 603,
+      "end": 604
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 604,
+      "end": 605
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 605,
+      "end": 606
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 606,
+      "end": 607
+    },
+    {
+      "type": "start",
+      "scope": "module",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 607,
+      "end": 613
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 613,
+      "end": 614
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "function.call",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 614,
+      "end": 617
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 617,
+      "end": 618
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "string",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 618,
+      "end": 627
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 627,
+      "end": 628
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 628,
+      "end": 629
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 629,
+      "end": 630
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 630,
+      "end": 634
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "elixir"
+    },
+    {
+      "type": "source",
+      "start": 634,
+      "end": 636
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 636,
+      "end": 637
+    }
+  ]
+}

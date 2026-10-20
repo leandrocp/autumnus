@@ -1,0 +1,20 @@
+<pre class="lumis"><code class="language-diff" translate="no" tabindex="0"><span class="l-line" data-line="1"><span class="l-diff-minus"><span class="l-punctuation-special">---</span> <span class="l-string-special-path">a/config.py</span></span></span>
+<span class="l-line" data-line="2"><span class="l-diff-plus"><span class="l-punctuation-special">+++</span> <span class="l-string-special-path">b/config.py</span></span></span>
+<span class="l-line" data-line="3"><span class="l-attribute">@@ -1,14 +1,15 @@</span></span>
+<span class="l-line" data-line="4"> import os</span>
+<span class="l-line" data-line="5"><span class="l-diff-minus"><span class="l-punctuation-special">-</span>TIMEOUT = int(os.environ.get(&quot;<span class="l-diff-word-removed">TIMEOUT</span>&quot;, &quot;<span class="l-diff-word-removed">30</span>&quot;))</span></span>
+<span class="l-line" data-line="6"><span class="l-diff-plus"><span class="l-punctuation-special">+</span>TIMEOUT = int(os.environ.get(&quot;<span class="l-diff-word-added">APP_TIMEOUT</span>&quot;, &quot;<span class="l-diff-word-added">60</span>&quot;))</span></span>
+<span class="l-line" data-line="7"><span class="l-diff-minus"><span class="l-punctuation-special">-</span>one(<span class="l-diff-word-removed">1</span>)</span></span>
+<span class="l-line" data-line="8"><span class="l-diff-minus"><span class="l-punctuation-special">-</span>two(2)</span></span>
+<span class="l-line" data-line="9"><span class="l-diff-plus"><span class="l-punctuation-special">+</span>one(<span class="l-diff-word-added">10</span>)</span></span>
+<span class="l-line" data-line="10"><span class="l-diff-plus"><span class="l-punctuation-special">+</span>inserted_line = True</span></span>
+<span class="l-line" data-line="11"><span class="l-diff-plus"><span class="l-punctuation-special">+</span>two(2)</span></span>
+<span class="l-line" data-line="12"><span class="l-diff-minus"><span class="l-punctuation-special">-</span>alpha beta gamma</span></span>
+<span class="l-line" data-line="13"><span class="l-diff-plus"><span class="l-punctuation-special">+</span>delta epsilon zeta</span></span>
+<span class="l-line" data-line="14"><span class="l-diff-plus"><span class="l-punctuation-special">+</span>new_before(1)</span></span>
+<span class="l-line" data-line="15"><span class="l-diff-minus"><span class="l-punctuation-special">-</span>old_after(1)</span></span>
+<span class="l-line" data-line="16"><span class="l-diff-minus"><span class="l-punctuation-special">-</span>x = 1</span></span>
+<span class="l-line" data-line="17"></span>
+<span class="l-line" data-line="18"><span class="l-diff-plus"><span class="l-punctuation-special">+</span>x = 2</span></span>
+<span class="l-line" data-line="19"><span class="l-diff-minus"><span class="l-punctuation-special">-</span>name = &quot;<span class="l-diff-word-removed">café</span>&quot;</span></span>
+<span class="l-line" data-line="20"><span class="l-diff-plus"><span class="l-punctuation-special">+</span>name = &quot;<span class="l-diff-word-added">crème brûlée</span>&quot;</span></span></code></pre>
