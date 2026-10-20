@@ -40,7 +40,8 @@ jobs:
       # cannot depend on that, so the patch has to go before a release.
       - name: Refuse a patched NIF manifest
         run: |
-          if grep -q '^[[:space:]]*\[patch' packages/elixir/lumis/native/lumis_nif/Cargo.toml; then
+          has_patch=$(yq -p=toml -o=yaml 'has("patch")' packages/elixir/lumis/native/lumis_nif/Cargo.toml)
+          if [ "$has_patch" = true ]; then
             echo "packages/elixir/lumis/native/lumis_nif/Cargo.toml still has a [patch] table." >&2
             echo "Publish the crates it patches, remove it, then run mise run elixir-nif-lock-check --fix." >&2
             exit 1
