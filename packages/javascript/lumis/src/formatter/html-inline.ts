@@ -1,4 +1,5 @@
 import { mergeAttrs } from "../core/attr-merge.js";
+import { diffWordStyle, type DiffWordKind } from "../diff-word-style.js";
 import type {
   BudgetExhausted,
   HighlightEvent,
@@ -69,11 +70,16 @@ export function formatHtmlInline(
   budget?: BudgetExhausted,
 ): string {
   const openSpan = (span: HighlightSpan): string => openSpanTag(spanAttrs(span, formatter));
+  const openDiffWord = (kind: DiffWordKind): string => {
+    const css = styleToCss(diffWordStyle(formatter.theme, kind), { italic: formatter.italic });
+    return openSpanTag(css ? { style: css } : {});
+  };
   if (isInlineStructure(formatter.structure)) {
     return formatHtmlSpans(source, events, {
       language: formatter.language,
       theme: formatter.theme,
       openSpan,
+      openDiffWord,
     });
   }
 
@@ -94,6 +100,7 @@ export function formatHtmlInline(
     },
     emptyStyle: lineLayout,
     openSpan,
+    openDiffWord,
   });
 
   const pre = openPreTag({

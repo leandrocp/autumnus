@@ -6,6 +6,8 @@ const START_EVENT = 1;
 const END_EVENT = 2;
 const RAINBOW_START_EVENT = 3;
 const DECORATION_END_EVENT = 4;
+const DIFF_WORD_START_EVENT = 5;
+const DIFF_WORD_KINDS = ["removed", "added"] as const;
 const SOURCE_EVENT_BYTES = 8;
 const START_EVENT_HEADER_BYTES = 4;
 const decoder = new TextDecoder("utf-8", { fatal: true });
@@ -25,7 +27,33 @@ function requireBytes(offset: number, count: number, length: number): void {
  * - end    (2): no payload
  * - rainbow-bracket start (3): zero-based depth as u32 LE
  * - decoration end       (4): no payload
+ * - diff-word start      (5): side as u8, 0 removed and 1 added
  */
+// A decoration start's payload, appended to `events`. Returns the offset past it.
+function decodeDecorationStart(
+  tag: number,
+  view: DataView,
+  offset: number,
+  events: LumisHighlightEvent[],
+): number {
+  if (tag === RAINBOW_START_EVENT) {
+    requireBytes(offset, 4, view.byteLength);
+    events.push({
+      type: "decorationStart",
+      decoration: { type: "rainbowBracket", depth: view.getUint32(offset, true) },
+    });
+    return offset + 4;
+  }
+  if (tag === DIFF_WORD_START_EVENT) {
+    requireBytes(offset, 1, view.byteLength);
+    const kind = DIFF_WORD_KINDS[view.getUint8(offset)];
+    if (kind === undefined) throw new Error("Invalid native Lumis event buffer");
+    events.push({ type: "decorationStart", decoration: { type: "diffWord", kind } });
+    return offset + 1;
+  }
+  throw new Error(`Unknown native Lumis event tag ${tag}`);
+}
+
 export function decodeNativeEvents(data: Uint8Array): LumisHighlightEvent[] {
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
   const events: LumisHighlightEvent[] = [];
@@ -63,19 +91,11 @@ export function decodeNativeEvents(data: Uint8Array): LumisHighlightEvent[] {
       case END_EVENT:
         events.push({ type: "end" });
         break;
-      case RAINBOW_START_EVENT:
-        requireBytes(offset, 4, data.byteLength);
-        events.push({
-          type: "decorationStart",
-          decoration: { type: "rainbowBracket", depth: view.getUint32(offset, true) },
-        });
-        offset += 4;
-        break;
       case DECORATION_END_EVENT:
         events.push({ type: "decorationEnd" });
         break;
       default:
-        throw new Error(`Unknown native Lumis event tag ${tag}`);
+        offset = decodeDecorationStart(tag, view, offset, events);
     }
   }
 

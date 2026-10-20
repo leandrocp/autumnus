@@ -7,7 +7,9 @@ export type SerializableHighlightEvent =
   | { type: "end" }
   | {
       type: "decorationStart";
-      decoration: { type: "rainbowBracket"; depth: number };
+      decoration:
+        | { type: "rainbowBracket"; depth: number }
+        | { type: "diffWord"; kind: "removed" | "added" };
     }
   | { type: "decorationEnd" }
   | { type: "annotationStart"; range: HighlightRange; data: unknown }
@@ -24,6 +26,7 @@ export interface ConformanceFixture {
   theme: string;
   htmlMultiThemesOptions?: HtmlMultiThemesFixture;
   rainbowBrackets: boolean;
+  wordDiff: boolean;
   annotations?: FixtureAnnotation[];
   /** What the three HTML outputs write around the tokens. */
   structure: HtmlStructure;
@@ -53,6 +56,7 @@ interface FixtureMetadata {
   theme: string;
   htmlMultiThemes?: HtmlMultiThemesFixture;
   rainbowBrackets?: boolean;
+  wordDiff?: boolean;
   annotations?: FixtureAnnotation[];
   structure?: HtmlStructure;
   budget?: Budget;
@@ -77,6 +81,7 @@ export function loadConformanceFixtures(): ConformanceFixture[] {
           ...metadata,
           htmlMultiThemesOptions: metadata.htmlMultiThemes,
           rainbowBrackets: metadata.rainbowBrackets ?? false,
+          wordDiff: metadata.wordDiff ?? false,
           structure: metadata.structure ?? "block",
           source: readFileSync(new URL("source.txt", fixtureDir), "utf8"),
           htmlInline: readFileSync(new URL("html-inline.html", fixtureDir), "utf8"),

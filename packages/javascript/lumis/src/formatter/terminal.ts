@@ -15,6 +15,7 @@ import {
 import { encodeSource, decodeSourceSlice, getThemeStyle } from "./html.js";
 import { paint } from "./ansi-core.js";
 import { resolveStackStyle } from "../core/style.js";
+import { diffWordStyle } from "../diff-word-style.js";
 
 function fallbackBackground(formatter: TerminalFormatter): string | undefined {
   const background = formatter.background;
@@ -144,7 +145,7 @@ function paintSource(
 /** What the walk carries from one event to the next. */
 interface TerminalState {
   output: string;
-  scopeStack: Array<{ scope: string; language: string }>;
+  scopeStack: Array<{ scope: string; language: string; style?: HighlightStyle }>;
   decorations: Decoration[];
   /** The background the current line is painted with. */
   lineBg: string | undefined;
@@ -219,6 +220,14 @@ function startTerminalDecoration(
       : undefined;
     return;
   }
+  if (decoration.type === "diffWord") {
+    state.scopeStack.push({
+      scope: "",
+      language: formatterLanguage(formatter),
+      style: diffWordStyle(formatter.theme, decoration.kind),
+    });
+    return;
+  }
   state.scopeStack.push({
     scope: rainbowBracketScope(decoration.depth),
     language: formatterLanguage(formatter),
@@ -226,7 +235,8 @@ function startTerminalDecoration(
 }
 
 function endTerminalDecoration(state: TerminalState): void {
-  if (state.decorations.pop()?.type === "rainbowBracket") state.scopeStack.pop();
+  const decoration = state.decorations.pop();
+  if (decoration !== undefined && decoration.type !== "line") state.scopeStack.pop();
 }
 
 function applyTerminalEvent(

@@ -523,7 +523,7 @@ export function createNativeLanguagesModule(
     highlightEvents(
       source: string,
       language: LoadedLanguage,
-      options: { rainbowBrackets?: boolean; budget?: Budget } = {},
+      options: { rainbowBrackets?: boolean; wordDiff?: boolean; budget?: Budget } = {},
       report?: { budget?: BudgetExhausted },
     ): LumisHighlightEvent[] {
       rejectReentrantHighlight();
@@ -536,6 +536,7 @@ export function createNativeLanguagesModule(
         source,
         this.addonIdFor(language),
         options.rainbowBrackets ?? false,
+        options.wordDiff ?? false,
         options.budget,
         hasResolvers ? this.packageResolverCallback : undefined,
         hasResolvers ? this.wasmResolverCallback : undefined,
@@ -610,17 +611,27 @@ export function createNativeLanguagesModule(
       if (!this.canFormatNatively(language, canCallResolver)) return undefined;
 
       const rainbowBrackets = highlightOptions.rainbowBrackets;
+      const wordDiff = highlightOptions.wordDiff;
       const budget = highlightOptions.budget;
       assertBudget(budget);
 
       switch (builtin.kind) {
         case "html-inline":
-          return { ...nativeHtmlInlineFormatter(builtin.formatter, rainbowBrackets), budget };
+          return {
+            ...nativeHtmlInlineFormatter(builtin.formatter, rainbowBrackets),
+            wordDiff,
+            budget,
+          };
         case "html-linked":
-          return { ...nativeHtmlLinkedFormatter(builtin.formatter, rainbowBrackets), budget };
+          return {
+            ...nativeHtmlLinkedFormatter(builtin.formatter, rainbowBrackets),
+            wordDiff,
+            budget,
+          };
         case "bbcode-scoped":
           return {
             rainbowBrackets,
+            wordDiff,
             budget,
             kind: builtin.kind,
             options: { highlightLines: builtin.formatter.highlightLines },
@@ -628,6 +639,7 @@ export function createNativeLanguagesModule(
         case "terminal":
           return {
             rainbowBrackets,
+            wordDiff,
             budget,
             kind: builtin.kind,
             options: {

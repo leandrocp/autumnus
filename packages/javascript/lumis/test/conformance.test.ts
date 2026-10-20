@@ -112,7 +112,11 @@ beforeAll(async () => {
 const runtime = process.env.LUMIS_TEST_RUNTIME === "wasm" ? "web-tree-sitter" : undefined;
 
 describe.each(conformanceFixtures.map((f) => [f.name, f]))("%s", (_name, fixture) => {
-  const options = { rainbowBrackets: fixture.rainbowBrackets, budget: fixture.budget };
+  const options = {
+    rainbowBrackets: fixture.rainbowBrackets,
+    wordDiff: fixture.wordDiff,
+    budget: fixture.budget,
+  };
   const skipped = runtime && fixture.skip?.[runtime];
 
   beforeEach((context) => {

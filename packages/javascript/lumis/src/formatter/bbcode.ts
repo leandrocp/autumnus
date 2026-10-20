@@ -67,6 +67,10 @@ function appendDecorationStart(
     if (decoration.highlighted) parts.push(`[${HIGHLIGHTED_TAG}]`);
     return;
   }
+  if (decoration.type === "diffWord") {
+    parts.push(`[diff-word-${decoration.kind}]`);
+    return;
+  }
   const tagName = scopeToTagName(rainbowBracketScope(decoration.depth), documentLanguage);
   parts.push(`[${tagName}]`);
 }
@@ -85,6 +89,7 @@ function appendDecorationEnd(
     const tagName = scopeToTagName(rainbowBracketScope(decoration.depth), documentLanguage);
     parts.push(`[/${tagName}]`);
   }
+  if (decoration?.type === "diffWord") parts.push(`[/diff-word-${decoration.kind}]`);
 }
 
 function appendEvent(
