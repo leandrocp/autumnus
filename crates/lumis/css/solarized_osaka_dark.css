@@ -368,6 +368,12 @@
 .l-variable-typescript {
   color: #b28500;
 }
+.l-diff-word-removed {
+  background-color: #630d0c;
+}
+.l-diff-word-added {
+  background-color: #005b5f;
+}
 @layer lumis {
   pre.lumis > code {
     display: block;

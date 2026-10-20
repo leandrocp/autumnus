@@ -344,6 +344,12 @@
 .l-variable-parameter-builtin {
   color: #46515d;
 }
+.l-diff-word-removed {
+  background-color: #e8b3bc;
+}
+.l-diff-word-added {
+  background-color: #b9cea3;
+}
 @layer lumis {
   pre.lumis > code {
     display: block;

@@ -386,6 +386,12 @@
   color: #9aa6a1;
   font-weight: bold;
 }
+.l-diff-word-removed {
+  background-color: #672e36;
+}
+.l-diff-word-added {
+  background-color: #274b20;
+}
 @layer lumis {
   pre.lumis > code {
     display: block;

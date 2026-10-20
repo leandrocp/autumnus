@@ -452,6 +452,12 @@
 .l-variable-parameter-python {
   color: #7fdbca;
 }
+.l-diff-word-removed {
+  background-color: #4f1816;
+}
+.l-diff-word-added {
+  background-color: #003814;
+}
 @layer lumis {
   pre.lumis > code {
     display: block;

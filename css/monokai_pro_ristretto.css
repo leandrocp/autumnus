@@ -424,6 +424,12 @@
   color: #fc9867;
   font-style: italic;
 }
+.l-diff-word-removed {
+  background-color: #752338;
+}
+.l-diff-word-added {
+  background-color: #354e18;
+}
 @layer lumis {
   pre.lumis > code {
     display: block;
