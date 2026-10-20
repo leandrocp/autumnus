@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Word diff</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style>
+    pre.lumis { padding: 1rem; border-radius: 0.5rem; overflow-x: auto; }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 antialiased">
+  <main class="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-6 lg:px-8">
+    <nav class="flex items-center justify-between rounded-2xl border border-cyan-400/20 bg-slate-950/70 px-4 py-3 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur">
+      <a class="text-sm font-medium text-slate-200 transition-colors hover:text-white" href="/">All examples</a>
+      <span class="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-cyan-300">Option</span>
+    </nav>
+    <section class="rounded-[28px] border border-slate-800 bg-slate-950/70 p-6 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur md:p-8">
+      <p class="mb-3 text-[11px] uppercase tracking-[0.3em] text-cyan-300">Diff</p>
+      <h1 class="text-2xl font-semibold text-white mb-2">Word diff</h1>
+      <p class="text-slate-400 mb-6">
+        With <code>wordDiff: true</code>, a <code>diff</code> document also marks the words that changed between
+        removed lines and the added lines that replace them. The colour comes from the theme's diff colours.
+      </p>
+
+      <h2 class="text-lg font-medium text-blue-400 mt-8 mb-3">Without word diff</h2>
+      <div id="plain-output"></div>
+
+      <h2 class="text-lg font-medium text-blue-400 mt-8 mb-3">With word diff</h2>
+      <div id="word-diff-output"></div>
+
+      <h2 class="text-lg font-medium text-blue-400 mt-8 mb-3">Light theme</h2>
+      <div id="light-output"></div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { createHighlighter } from '@lumis-sh/lumis'
+    import { htmlInline } from '@lumis-sh/lumis/formatters'
+    import diff from '@lumis-sh/lumis/langs/diff'
+    import elixir from '@lumis-sh/lumis/langs/elixir'
+    import catppuccinMocha from '@lumis-sh/themes/catppuccin_mocha'
+    import githubLight from '@lumis-sh/themes/github_light'
+
+    const code = `diff --git a/lib/varsel/cve/cvelint.ex b/lib/varsel/cve/cvelint.ex
+--- a/lib/varsel/cve/cvelint.ex
++++ b/lib/varsel/cve/cvelint.ex
+@@ -44,6 +44,7 @@ defmodule Varsel.CVE.Cvelint do
+   def lint(cve_id, cve_json) do
+-    tmp_dir = System.tmp_dir!()
++    tmp_dir = System.tmp_dir!() |> Path.join("lumis")
+     File.mkdir_p!(tmp_dir)
+     path = Path.join(tmp_dir, "#{cve_id}.json")
+-    File.write!(path, Jason.encode!(cve_json))
++    File.write!(path, JSON.encode!(cve_json))
++    Logger.debug("wrote #{path}")
+`
+
+    // In the browser, the language named by the `+++` header has to be loaded up front.
+    const hl = await createHighlighter({ languages: [diff, elixir] })
+
+    document.getElementById('plain-output').innerHTML = hl.highlight(
+      code,
+      htmlInline({ language: diff, theme: catppuccinMocha })
+    )
+
+    document.getElementById('word-diff-output').innerHTML = hl.highlight(
+      code,
+      htmlInline({ language: diff, theme: catppuccinMocha }),
+      { wordDiff: true }
+    )
+
+    document.getElementById('light-output').innerHTML = hl.highlight(
+      code,
+      htmlInline({ language: diff, theme: githubLight }),
+      { wordDiff: true }
+    )
+  </script>
+</body>
+</html>
