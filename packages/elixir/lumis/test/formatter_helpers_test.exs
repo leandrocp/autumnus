@@ -101,6 +101,15 @@ defmodule Lumis.FormatterHelpersTest do
 
   defp event(%{"type" => "end"}), do: :end
 
+  defp event(%{
+         "type" => "decorationStart",
+         "decoration" => %{"type" => "diffWord", "kind" => kind}
+       }) do
+    {:decoration_start, %Lumis.Decoration.DiffWord{kind: String.to_existing_atom(kind)}}
+  end
+
+  defp event(%{"type" => "decorationEnd"}), do: :decoration_end
+
   defp rgb_string(nil), do: ""
   defp rgb_string({red, green, blue}), do: Enum.join([red, green, blue], ",")
 

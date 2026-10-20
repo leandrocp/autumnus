@@ -591,6 +591,22 @@ defmodule Lumis.Formatter.HTMLTest do
       assert HTML.render_lines_from_events("a", events, %{}) == ["<span>a</span>"]
     end
 
+    test "wraps a changed word in a bare span inside its enclosing scope" do
+      events = [
+        {:start, %{scope: "diff.plus", language: "diff"}},
+        {:source, %{start: 0, end: 2}},
+        {:decoration_start, %Lumis.Decoration.DiffWord{kind: :added}},
+        {:source, %{start: 2, end: 3}},
+        :decoration_end,
+        :end
+      ]
+
+      assert HTML.render_lines_from_events("+a2", events, %{
+               "diff.plus" => ~s|class="l-diff-plus"|
+             }) ==
+               [~s|<span class="l-diff-plus">+a<span>2</span></span>|]
+    end
+
     test "skips an event kind it has no markup for rather than raising" do
       events = [
         {:annotation_start, %{range: {0, 1}, data: %{anything: true}}},

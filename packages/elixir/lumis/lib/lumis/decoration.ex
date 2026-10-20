@@ -12,3 +12,21 @@ defmodule Lumis.Decoration.RainbowBracket do
 
   @type t :: %__MODULE__{depth: non_neg_integer()}
 end
+
+defmodule Lumis.Decoration.DiffWord do
+  @moduledoc """
+  Text that changed between a diff's removed lines and the added lines that
+  replace them.
+
+  Emitted only when a `diff` document is highlighted with `word_diff: true`.
+  `:removed` marks text only the removed lines have, `:added` text only the
+  added lines have. Built-in formatters give it a stronger shade of the theme's
+  `diff.minus` or `diff.plus` background.
+  """
+
+  @enforce_keys [:kind]
+  defstruct [:kind]
+
+  @type kind :: :removed | :added
+  @type t :: %__MODULE__{kind: kind()}
+end

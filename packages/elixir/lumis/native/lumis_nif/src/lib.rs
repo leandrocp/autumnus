@@ -9,6 +9,7 @@ use std::thread;
 
 use anyhow::{anyhow, Context, Result};
 use lumis_core::annotations::{compose_annotations, Annotation, AnnotationRange, Position};
+use lumis_core::decorations::DiffWordKind;
 use lumis_core::elixir::{
     attr_values, ex_attr_values, line_specs_contain, ExAttrValue, ExCssOptions, ExFormatterOption,
     ExLineSpec, ExStyle, ExTextDecoration, ExTheme,
@@ -61,6 +62,7 @@ enum WasmJob {
         source: String,
         language: String,
         rainbow_brackets: bool,
+        word_diff: bool,
         match_limit: u32,
         time_limit_ms: Option<u64>,
         reply: mpsc::SyncSender<Result<Highlighted, RuntimeError>>,
@@ -359,12 +361,14 @@ impl WasmExecutor {
                             source,
                             language,
                             rainbow_brackets,
+                            word_diff,
                             match_limit,
                             time_limit_ms,
                             reply,
                         } => {
                             let options = HighlightOptions {
                                 rainbow_brackets,
+                                word_diff,
                                 match_limit,
                                 time_limit_ms,
                                 ..HighlightOptions::default()
@@ -406,7 +410,7 @@ impl WasmExecutor {
         &self,
         source: &str,
         language: &str,
-        rainbow_brackets: bool,
+        decorations: Decorations,
         match_limit: u32,
         time_limit_ms: Option<u64>,
     ) -> Result<Highlighted, RuntimeError> {
@@ -415,7 +419,8 @@ impl WasmExecutor {
             .send(WasmJob::Highlight {
                 source: source.to_string(),
                 language: language.to_string(),
-                rainbow_brackets,
+                rainbow_brackets: decorations.rainbow_brackets,
+                word_diff: decorations.word_diff,
                 match_limit,
                 time_limit_ms,
                 reply,
@@ -467,6 +472,10 @@ rustler::atoms! {
     highlight_failed = "highlight",
     parse_failed = "parse",
     invalid_match_limit,
+
+    // `Lumis.Decoration.DiffWord` kinds.
+    removed,
+    added,
     runtime_atom = "runtime",
 }
 
@@ -480,6 +489,7 @@ pub struct ExOptions<'a> {
     pub formatter: ExFormatterOption,
     pub annotations: Vec<Term<'a>>,
     pub rainbow_brackets: bool,
+    pub word_diff: bool,
     pub budget: ExBudget,
 }
 
@@ -513,11 +523,46 @@ pub struct ExRainbowBracket {
     pub depth: usize,
 }
 
+#[derive(Clone, Debug, NifStruct)]
+#[module = "Lumis.Decoration.DiffWord"]
+pub struct ExDiffWord {
+    pub kind: Atom,
+}
+
+impl ExDiffWord {
+    fn new(kind: DiffWordKind) -> Self {
+        Self {
+            kind: match kind {
+                DiffWordKind::Removed => removed(),
+                DiffWordKind::Added => added(),
+            },
+        }
+    }
+
+    fn kind(&self) -> Option<DiffWordKind> {
+        if self.kind == removed() {
+            Some(DiffWordKind::Removed)
+        } else if self.kind == added() {
+            Some(DiffWordKind::Added)
+        } else {
+            None
+        }
+    }
+}
+
+/// The opt-in decorations a highlight composes into its syntax events.
+#[derive(Clone, Copy, Debug)]
+struct Decorations {
+    rainbow_brackets: bool,
+    word_diff: bool,
+}
+
 #[derive(Debug, NifMap)]
 pub struct ExEventOptions<'a> {
     pub language: Option<&'a str>,
     pub annotations: Vec<Term<'a>>,
     pub rainbow_brackets: bool,
+    pub word_diff: bool,
     pub budget: ExBudget,
 }
 
@@ -540,6 +585,7 @@ enum CollectedEvent<'a> {
     AnnotationStart(ExAnnotationStart<'a>),
     AnnotationEnd,
     DecorationStart(ExRainbowBracket),
+    DiffWordStart(ExDiffWord),
     DecorationEnd,
 }
 
@@ -556,6 +602,7 @@ impl<'a> CollectedEvent<'a> {
             Self::AnnotationStart(annotation) => (annotation_start(), annotation).encode(env),
             Self::AnnotationEnd => annotation_end().encode(env),
             Self::DecorationStart(decoration) => (decoration_start(), decoration).encode(env),
+            Self::DiffWordStart(decoration) => (decoration_start(), decoration).encode(env),
             Self::DecorationEnd => decoration_end().encode(env),
         }
     }
@@ -616,6 +663,9 @@ impl<'a> Formatter<Term<'a>> for EventFormatter<'a> {
                 HighlightEvent::DecorationStart {
                     decoration: Decoration::RainbowBracket { depth },
                 } => CollectedEvent::DecorationStart(ExRainbowBracket { depth: *depth }),
+                HighlightEvent::DecorationStart {
+                    decoration: Decoration::DiffWord { kind },
+                } => CollectedEvent::DiffWordStart(ExDiffWord::new(*kind)),
                 HighlightEvent::DecorationEnd => CollectedEvent::DecorationEnd,
                 // A kind this build predates: drop it rather than crossing the
                 // NIF boundary with a shape Elixir has no clause for.
@@ -707,7 +757,10 @@ pub(crate) fn highlight<'a>(
         env,
         source,
         language,
-        options.rainbow_brackets,
+        Decorations {
+            rainbow_brackets: options.rainbow_brackets,
+            word_diff: options.word_diff,
+        },
         options.budget.match_limit(),
         options.budget.time_limit_ms(),
     ) {
@@ -762,7 +815,7 @@ fn syntax_events<'a>(
     env: Env<'a>,
     source: &str,
     language: Language,
-    rainbow_brackets: bool,
+    decorations: Decorations,
     match_limit: u32,
     time_limit: Option<u64>,
 ) -> Result<(Highlighted, Option<ExParserFailure>), Term<'a>> {
@@ -776,7 +829,7 @@ fn syntax_events<'a>(
     match executor.highlight(
         source,
         language.id_name(),
-        rainbow_brackets,
+        decorations,
         match_limit,
         time_limit,
     ) {
@@ -804,7 +857,10 @@ pub(crate) fn highlight_events<'a>(
         env,
         source,
         language,
-        options.rainbow_brackets,
+        Decorations {
+            rainbow_brackets: options.rainbow_brackets,
+            word_diff: options.word_diff,
+        },
         options.budget.match_limit(),
         options.budget.time_limit_ms(),
     ) {
@@ -1494,14 +1550,19 @@ fn html_render_lines_from_events(
 ) -> Vec<String> {
     let mut scopes: Vec<String> = Vec::new();
     let mut decoded: Vec<HighlightEvent<'static>> = Vec::with_capacity(events.len());
+    // A rainbow bracket is rendered as the scope it cycles to, so its end closes
+    // a scope; a changed word stays a decoration and closes as one.
+    let mut open_decorations: Vec<HighlightEvent<'static>> = Vec::new();
 
     for event in events {
         // Decoded by hand rather than through a tagged enum so that an event
         // kind this build predates, or one carrying caller data, is skipped
         // instead of failing the whole render.
         if let Ok(atom) = event.decode::<rustler::Atom>() {
-            if atom == event_end() || atom == decoration_end() {
+            if atom == event_end() {
                 decoded.push(HighlightEvent::End);
+            } else if atom == decoration_end() {
+                decoded.push(open_decorations.pop().unwrap_or(HighlightEvent::End));
             }
             continue;
         }
@@ -1533,9 +1594,17 @@ fn html_render_lines_from_events(
                 });
             }
         } else if tag == decoration_start() {
+            if let Some(kind) = payload.decode::<ExDiffWord>().ok().and_then(|d| d.kind()) {
+                decoded.push(HighlightEvent::DecorationStart {
+                    decoration: Decoration::DiffWord { kind },
+                });
+                open_decorations.push(HighlightEvent::DecorationEnd);
+                continue;
+            }
             let Ok(decoration) = payload.decode::<ExRainbowBracket>() else {
                 continue;
             };
+            open_decorations.push(HighlightEvent::End);
             let scope = lumis_core::decorations::rainbow_scope(decoration.depth).to_string();
             let scope_index = scopes
                 .iter()
