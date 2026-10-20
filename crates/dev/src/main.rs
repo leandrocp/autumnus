@@ -172,6 +172,8 @@ enum Commands {
         default_theme: Option<String>,
         #[arg(long)]
         rainbow_brackets: bool,
+        #[arg(long)]
+        word_diff: bool,
         #[arg(long, value_enum, default_value_t)]
         structure: FixtureStructure,
     },
@@ -254,6 +256,7 @@ fn main() -> Result<()> {
             themes,
             default_theme,
             rainbow_brackets,
+            word_diff,
             structure,
         } => render_conformance(
             &source,
@@ -262,7 +265,9 @@ fn main() -> Result<()> {
             theme,
             themes,
             default_theme,
-            rainbow_brackets,
+            HighlightOptions::new()
+                .rainbow_brackets(rainbow_brackets)
+                .word_diff(word_diff),
             structure,
         ),
         Commands::DumpEvents { source, language } => dump_events(&source, &language),
@@ -294,7 +299,7 @@ fn render_conformance(
     theme: Option<String>,
     themes: Vec<String>,
     default_theme: Option<String>,
-    rainbow_brackets: bool,
+    options: HighlightOptions<'static, 'static>,
     structure: FixtureStructure,
 ) -> Result<()> {
     let language = parse_language(language)?;
@@ -307,8 +312,7 @@ fn render_conformance(
             theme,
             themes,
             default_theme,
-            rainbow_brackets,
-            lumis::Budget::new(),
+            options,
             structure,
             vec![],
         )?
@@ -343,6 +347,7 @@ enum SerializableHighlightEvent {
 #[serde(tag = "type", rename_all = "camelCase")]
 enum SerializableDecoration {
     RainbowBracket { depth: usize },
+    DiffWord { kind: String },
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
@@ -358,6 +363,7 @@ struct FixtureMetadata {
     language: String,
     theme: String,
     rainbow_brackets: bool,
+    word_diff: bool,
     annotations: Vec<FixtureAnnotation>,
     structure: FixtureStructure,
     html_multi_themes: Option<HtmlMultiThemesFixture>,
@@ -440,6 +446,8 @@ struct FixtureFile {
     // Omitted from the JSON when false so non-rainbow fixtures stay unchanged.
     #[serde(default, skip_serializing_if = "is_false")]
     rainbow_brackets: bool,
+    #[serde(default, skip_serializing_if = "is_false")]
+    word_diff: bool,
     #[serde(default, skip_serializing_if = "FixtureStructure::is_block")]
     structure: FixtureStructure,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -487,6 +495,13 @@ fn serialize_events<T: Serialize>(
                 decoration: lumis::decorations::Decoration::RainbowBracket { depth },
             } => SerializableHighlightEvent::DecorationStart {
                 decoration: SerializableDecoration::RainbowBracket { depth },
+            },
+            HighlightEvent::DecorationStart {
+                decoration: lumis::decorations::Decoration::DiffWord { kind },
+            } => SerializableHighlightEvent::DecorationStart {
+                decoration: SerializableDecoration::DiffWord {
+                    kind: kind.as_str().to_string(),
+                },
             },
             HighlightEvent::DecorationEnd => SerializableHighlightEvent::DecorationEnd,
             HighlightEvent::AnnotationStart { range, data } => {
@@ -550,8 +565,7 @@ fn render_html_multi_themes_fixture(
     language: Language,
     themes: Vec<String>,
     default_theme: Option<String>,
-    rainbow_brackets: bool,
-    budget: lumis::Budget,
+    options: HighlightOptions<'static, 'static>,
     structure: FixtureStructure,
     highlight_lines: Vec<usize>,
     output: &mut Vec<u8>,
@@ -589,14 +603,7 @@ fn render_html_multi_themes_fixture(
     }
 
     let formatter = builder.build().map_err(|e| anyhow::anyhow!("{e}"))?;
-    lumis::write_highlight_with_options(
-        output,
-        source,
-        formatter,
-        lumis::HighlightOptions::new()
-            .rainbow_brackets(rainbow_brackets)
-            .budget(budget),
-    )?;
+    lumis::write_highlight_with_options(output, source, formatter, options)?;
     Ok(())
 }
 
@@ -608,8 +615,7 @@ fn render_formatter_output(
     theme: Option<String>,
     themes: Vec<String>,
     default_theme: Option<String>,
-    rainbow_brackets: bool,
-    budget: lumis::Budget,
+    options: HighlightOptions<'static, 'static>,
     structure: FixtureStructure,
     highlight_lines: Vec<usize>,
 ) -> Result<String> {
@@ -625,14 +631,7 @@ fn render_formatter_output(
                 .theme(Some(theme))
                 .build()
                 .map_err(|e| anyhow::anyhow!("{e}"))?;
-            lumis::write_highlight_with_options(
-                &mut output,
-                source,
-                formatter,
-                lumis::HighlightOptions::new()
-                    .rainbow_brackets(rainbow_brackets)
-                    .budget(budget),
-            )?;
+            lumis::write_highlight_with_options(&mut output, source, formatter, options)?;
         }
         "html-linked" => {
             let formatter = lumis::HtmlLinkedBuilder::new()
@@ -640,14 +639,7 @@ fn render_formatter_output(
                 .structure(structure.into())
                 .build()
                 .map_err(|e| anyhow::anyhow!("{e}"))?;
-            lumis::write_highlight_with_options(
-                &mut output,
-                source,
-                formatter,
-                lumis::HighlightOptions::new()
-                    .rainbow_brackets(rainbow_brackets)
-                    .budget(budget),
-            )?;
+            lumis::write_highlight_with_options(&mut output, source, formatter, options)?;
         }
         "html-multi-themes" => {
             render_html_multi_themes_fixture(
@@ -655,8 +647,7 @@ fn render_formatter_output(
                 language,
                 themes,
                 default_theme,
-                rainbow_brackets,
-                budget,
+                options,
                 structure,
                 highlight_lines,
                 &mut output,
@@ -670,28 +661,14 @@ fn render_formatter_output(
                 .theme(Some(theme))
                 .build()
                 .map_err(|e| anyhow::anyhow!("{e}"))?;
-            lumis::write_highlight_with_options(
-                &mut output,
-                source,
-                formatter,
-                lumis::HighlightOptions::new()
-                    .rainbow_brackets(rainbow_brackets)
-                    .budget(budget),
-            )?;
+            lumis::write_highlight_with_options(&mut output, source, formatter, options)?;
         }
         "bbcode-scoped" => {
             let formatter = lumis::BBCodeScopedBuilder::new()
                 .language(language)
                 .build()
                 .map_err(|e| anyhow::anyhow!("{e}"))?;
-            lumis::write_highlight_with_options(
-                &mut output,
-                source,
-                formatter,
-                lumis::HighlightOptions::new()
-                    .rainbow_brackets(rainbow_brackets)
-                    .budget(budget),
-            )?;
+            lumis::write_highlight_with_options(&mut output, source, formatter, options)?;
         }
         other => bail!("unsupported formatter '{other}'"),
     }
@@ -703,6 +680,7 @@ fn fixture_outputs(source: &str, stored: &FixtureFile) -> Result<FixtureOutputs>
     let language = parse_language(&stored.language)?;
     let theme = stored.theme.as_str();
     let rainbow_brackets = stored.rainbow_brackets;
+    let word_diff = stored.word_diff;
     let structure = stored.structure;
     let html_multi_themes = stored.html_multi_themes.clone();
     let budget = stored.budget.map_or_else(lumis::Budget::new, Into::into);
@@ -719,8 +697,13 @@ fn fixture_outputs(source: &str, stored: &FixtureFile) -> Result<FixtureOutputs>
         HighlightOptions::new()
             .annotations(&annotations)
             .rainbow_brackets(rainbow_brackets)
+            .word_diff(word_diff)
             .budget(budget),
     )?;
+    let options = HighlightOptions::new()
+        .rainbow_brackets(rainbow_brackets)
+        .word_diff(word_diff)
+        .budget(budget);
     let (multi_themes, multi_default_theme, multi_highlight_lines) =
         html_multi_themes.as_ref().map_or_else(
             || {
@@ -747,6 +730,7 @@ fn fixture_outputs(source: &str, stored: &FixtureFile) -> Result<FixtureOutputs>
         language: language.id_name().to_string(),
         theme: theme.to_string(),
         rainbow_brackets,
+        word_diff,
         annotations: stored.annotations.clone(),
         structure,
         html_multi_themes,
@@ -764,8 +748,7 @@ fn fixture_outputs(source: &str, stored: &FixtureFile) -> Result<FixtureOutputs>
             Some(theme.to_string()),
             vec![],
             None,
-            rainbow_brackets,
-            budget,
+            options,
             structure,
             vec![],
         )?,
@@ -776,8 +759,7 @@ fn fixture_outputs(source: &str, stored: &FixtureFile) -> Result<FixtureOutputs>
             None,
             vec![],
             None,
-            rainbow_brackets,
-            budget,
+            options,
             structure,
             vec![],
         )?,
@@ -788,8 +770,7 @@ fn fixture_outputs(source: &str, stored: &FixtureFile) -> Result<FixtureOutputs>
             None,
             multi_themes,
             multi_default_theme,
-            rainbow_brackets,
-            budget,
+            options,
             structure,
             multi_highlight_lines,
         )?,
@@ -800,8 +781,7 @@ fn fixture_outputs(source: &str, stored: &FixtureFile) -> Result<FixtureOutputs>
             Some(theme.to_string()),
             vec![],
             None,
-            rainbow_brackets,
-            budget,
+            options,
             FixtureStructure::Block,
             vec![],
         )?,
@@ -812,8 +792,7 @@ fn fixture_outputs(source: &str, stored: &FixtureFile) -> Result<FixtureOutputs>
             None,
             vec![],
             None,
-            rainbow_brackets,
-            budget,
+            options,
             FixtureStructure::Block,
             vec![],
         )?,
@@ -853,6 +832,7 @@ fn verify_conformance(name: &str) -> Result<()> {
                 language: generated.metadata.language.clone(),
                 theme: generated.metadata.theme.clone(),
                 rainbow_brackets: generated.metadata.rainbow_brackets,
+                word_diff: generated.metadata.word_diff,
                 structure: generated.metadata.structure,
                 html_multi_themes: generated.metadata.html_multi_themes.clone(),
                 annotations: generated.metadata.annotations.clone(),
@@ -910,6 +890,7 @@ fn regen_conformance(name: &str) -> Result<()> {
                 language: generated.metadata.language,
                 theme: generated.metadata.theme,
                 rainbow_brackets: generated.metadata.rainbow_brackets,
+                word_diff: generated.metadata.word_diff,
                 structure: generated.metadata.structure,
                 html_multi_themes: generated.metadata.html_multi_themes,
                 annotations: generated.metadata.annotations,

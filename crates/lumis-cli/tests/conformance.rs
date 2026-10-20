@@ -33,6 +33,8 @@ struct FixtureMetadata {
     theme: String,
     #[serde(default, rename = "rainbowBrackets")]
     rainbow_brackets: bool,
+    #[serde(default, rename = "wordDiff")]
+    word_diff: bool,
     /// `--structure` for the three HTML formatters; absent means a block.
     #[serde(default)]
     structure: Option<String>,
@@ -105,6 +107,9 @@ fn run_highlight_source(fixture: &Fixture, formatter: &str, extra_args: &[&str])
 
     if fixture.metadata.rainbow_brackets {
         command.arg("--rainbow-brackets");
+    }
+    if fixture.metadata.word_diff {
+        command.arg("--word-diff");
     }
     if let Some(time_limit) = fixture.metadata.budget.time_limit {
         command
