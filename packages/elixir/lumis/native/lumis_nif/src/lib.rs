@@ -1,3 +1,6 @@
+// Rust tests exercise pure helpers; NIF registration requires the BEAM host.
+#![cfg_attr(test, allow(dead_code))]
+
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
 use std::io::Write;
@@ -467,6 +470,8 @@ rustler::atoms! {
     runtime_atom = "runtime",
 }
 
+// The BEAM supplies enif_* symbols when loading the NIF, not in a Rust test executable.
+#[cfg(not(test))]
 rustler::init!("Elixir.Lumis.Native");
 
 #[derive(Debug, NifMap)]
@@ -683,7 +688,7 @@ impl From<&catalog::LanguagePackageRef> for ExLanguagePackageRef<'static> {
     }
 }
 
-#[rustler::nif(schedule = "DirtyCpu")]
+#[cfg_attr(not(test), rustler::nif(schedule = "DirtyCpu"))]
 pub(crate) fn highlight<'a>(
     env: Env<'a>,
     source: &'a str,
@@ -783,7 +788,7 @@ fn syntax_events<'a>(
     }
 }
 
-#[rustler::nif(schedule = "DirtyCpu")]
+#[cfg_attr(not(test), rustler::nif(schedule = "DirtyCpu"))]
 pub(crate) fn highlight_events<'a>(
     env: Env<'a>,
     source: &'a str,
@@ -881,7 +886,7 @@ fn executor() -> Result<&'static WasmExecutor> {
 /// built. `Lumis.Application.configure_store/0` calls this ahead of every
 /// Elixir entry point that reaches the store, which can run before the
 /// application starts.
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn configure_store(data_dir: Option<String>, installed_dirs: Vec<String>) -> bool {
     let _settled = STORE_SETTLED.lock();
     if Lazy::get(&EXECUTOR).is_some() {
@@ -932,7 +937,7 @@ fn never_added(name: &str) -> bool {
 /// not pin it is an error. A language an *injection* names is content, and that
 /// one leaves its block plain instead — `ARCHITECTURE.md` calls that "a failure
 /// costs one block, not the document".
-#[rustler::nif(schedule = "DirtyCpu")]
+#[cfg_attr(not(test), rustler::nif(schedule = "DirtyCpu"))]
 fn load_language_by_name<'a>(env: Env<'a>, name: &str) -> Term<'a> {
     if never_added(name) {
         return (error(), LoadFailure::NotInstalled).encode(env);
@@ -949,24 +954,24 @@ fn load_language_by_name<'a>(env: Env<'a>, name: &str) -> Term<'a> {
 /// Dirty because the source is caller-supplied and unbounded: detection runs
 /// regexes over it, so a large document would hold a normal scheduler past the
 /// 1 ms budget.
-#[rustler::nif(schedule = "DirtyCpu")]
+#[cfg_attr(not(test), rustler::nif(schedule = "DirtyCpu"))]
 fn guess_language(name: Option<&str>, source: &str) -> &'static str {
     languages::Language::guess(name, source).id_name()
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn has_language(name: &str) -> bool {
     executor().is_ok_and(|executor| executor.runtime.has_language(name))
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn loaded_languages() -> Vec<String> {
     executor()
         .map(|executor| executor.runtime.loaded_languages())
         .unwrap_or_default()
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn language_package_refs() -> Vec<ExLanguagePackageRef<'static>> {
     catalog::LANGUAGES
         .iter()
@@ -985,12 +990,12 @@ fn language_package_refs() -> Vec<ExLanguagePackageRef<'static>> {
 /// what the range does: the catalog says `0.26`, which semver reads as
 /// `>=0.26.0, <0.27.0`, while Mix reads `~> 0.26` as `>= 0.26.0 and < 1.0.0`.
 /// Only `~> 0.26.0` is the bound the store enforces.
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn lowest_compatible_package_version() -> String {
     store::lowest_compatible_package_version()
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn language_bundles() -> HashMap<&'static str, Vec<&'static str>> {
     catalog::BUNDLES
         .iter()
@@ -998,7 +1003,7 @@ fn language_bundles() -> HashMap<&'static str, Vec<&'static str>> {
         .collect()
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn available_languages() -> Vec<ExLanguageInfo<'static>> {
     languages::available_languages()
         .into_iter()
@@ -1006,14 +1011,14 @@ fn available_languages() -> Vec<ExLanguageInfo<'static>> {
         .collect()
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn language_info(name: &str) -> Option<ExLanguageInfo<'static>> {
     name.parse::<languages::Language>()
         .ok()
         .map(|language| ExLanguageInfo::from(language.info()))
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn available_themes() -> Vec<ExThemeInfo<'static>> {
     // Rust's `available_themes` yields whole themes, which carry more than the
     // wire needs; the summary is built here rather than shipping 246 of them.
@@ -1023,7 +1028,7 @@ fn available_themes() -> Vec<ExThemeInfo<'static>> {
     summaries
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn closest_theme(
     background: Option<&str>,
     foreground: Option<&str>,
@@ -1048,7 +1053,7 @@ fn theme_color(hex: Option<&str>) -> NifResult<Option<(u8, u8, u8)>> {
         .transpose()
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn get_theme(name: &str) -> NifResult<ExTheme> {
     // Fast path: check if theme is already cached (read lock)
     {
@@ -1071,27 +1076,27 @@ fn get_theme(name: &str) -> NifResult<ExTheme> {
     Ok(ex_theme)
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn build_theme_from_file(path: &str) -> NifResult<ExTheme> {
     themes::from_file(path)
         .map(|theme| ExTheme::from(&theme))
         .map_err(|_e| Error::Atom("error"))
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn build_theme_from_json_string(json_string: &str) -> NifResult<ExTheme> {
     themes::from_json(json_string)
         .map(|theme| ExTheme::from(&theme))
         .map_err(|_e| Error::Atom("error"))
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn theme_css_from_name(name: &str, options: ExCssOptions) -> NifResult<String> {
     let theme = themes::get(name).map_err(|_e| Error::Atom("error"))?;
     Ok(build_theme_css(&theme, options))
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn theme_css_from_theme(theme: ExTheme, options: ExCssOptions) -> String {
     build_theme_css(&theme.into(), options)
 }
@@ -1110,27 +1115,27 @@ fn build_theme_css(theme: &themes::Theme, options: ExCssOptions) -> String {
     builder.build()
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn ansi_hex_to_rgb(hex: &str) -> Option<(u8, u8, u8)> {
     lumis_core::formatter::ansi::hex_to_rgb(hex)
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn ansi_rgb_to_ansi(r: u8, g: u8, b: u8, is_background: bool) -> String {
     lumis_core::formatter::ansi::rgb_to_ansi(r, g, b, is_background)
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn ansi_style_to_ansi(style: ExStyle) -> String {
     lumis_core::formatter::ansi::style_to_ansi(&style.into())
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn ansi_paint(text: &str, style: ExStyle) -> String {
     lumis_core::formatter::ansi::paint(text, &style.into())
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn ansi_reset() -> &'static str {
     lumis_core::formatter::ansi::ANSI_RESET
 }
@@ -1144,7 +1149,7 @@ fn ansi_reset() -> &'static str {
 /// scope up in `theme.highlights` itself gets a different answer than
 /// `:terminal` does. There are only ever 293 answers, so all of them come back
 /// at once and Elixir never resolves anything.
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn ansi_styles(theme: Option<ExTheme>, language: &str) -> HashMap<&'static str, ExStyle> {
     let Some(theme) = theme.map(themes::Theme::from) else {
         return HashMap::new();
@@ -1175,12 +1180,12 @@ fn ansi_styles(theme: Option<ExTheme>, language: &str) -> HashMap<&'static str, 
 /// document crosses the boundary as a call. The two things it calls once per
 /// token cross once per document as a table instead, because 5000 NIF calls to
 /// look up a constant is not what reusing the Rust core should cost.
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn html_escape(text: &str) -> String {
     lumis_core::formatter::html::escape(text)
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn html_escape_braces(text: &str) -> String {
     lumis_core::formatter::html::escape_braces(text)
 }
@@ -1189,7 +1194,7 @@ fn html_escape_braces(text: &str) -> String {
 ///
 /// `scope_to_class` is a lookup into two generated 293-row tables, so Elixir
 /// cannot spell it without copying them. The whole table crosses once instead.
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn html_classes() -> HashMap<&'static str, String> {
     lumis_core::highlights::HIGHLIGHT_NAMES
         .iter()
@@ -1203,7 +1208,7 @@ fn html_classes() -> HashMap<&'static str, String> {
 /// scope against a theme, and sending the theme across the boundary once per
 /// token to do that would cost more than the highlighting did. There are only
 /// ever 293 answers, so all of them come back at once.
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn html_span_attrs(
     theme: Option<ExTheme>,
     language: &str,
@@ -1248,7 +1253,7 @@ fn pre_attrs_impl(
     )
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn html_pre_attrs(
     pre_class: Option<String>,
     theme: Option<ExTheme>,
@@ -1257,7 +1262,7 @@ fn html_pre_attrs(
     ex_attr_values(pre_attrs_impl(pre_class, theme, attrs))
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn html_open_pre_tag(
     pre_class: Option<String>,
     theme: Option<ExTheme>,
@@ -1276,7 +1281,7 @@ fn code_attrs_impl(
     )
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn html_code_attrs(
     language: &str,
     attrs: Vec<(String, ExAttrValue)>,
@@ -1284,24 +1289,24 @@ fn html_code_attrs(
     ex_attr_values(code_attrs_impl(language, attrs))
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn html_open_code_tag(language: &str, attrs: Vec<(String, ExAttrValue)>) -> NifResult<String> {
     html_open_tag("code", code_attrs_impl(language, attrs))
 }
 
 /// Render any opening tag from attributes, so a custom Elixir formatter has the
 /// escaping renderer the `*_attrs` helpers are built for.
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn html_open_tag_from_attrs(name: &str, attrs: Vec<(String, ExAttrValue)>) -> NifResult<String> {
     html_open_tag(name, attr_values(attrs))
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn html_valid_attr_name(name: &str) -> bool {
     lumis_core::formatter::html::is_valid_attr_name(name)
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn html_closing_tags() -> NifResult<String> {
     let mut output = Vec::new();
     lumis_core::formatter::html::closing_tags(&mut output)
@@ -1309,7 +1314,7 @@ fn html_closing_tags() -> NifResult<String> {
     html_utf8(output)
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn html_wrap_line(
     line_number: usize,
     content: &str,
@@ -1324,27 +1329,27 @@ fn html_wrap_line(
     )
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn html_escape_attr(value: &str) -> String {
     lumis_core::formatter::html::escape_attr(value)
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn html_sanitize_theme_name(name: &str) -> String {
     lumis_core::formatter::html::sanitize_theme_name(name)
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn html_text_decoration(text_decoration: ExTextDecoration) -> &'static str {
     lumis_core::formatter::html::text_decoration(&text_decoration.into())
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn html_style_to_css(style: ExStyle, italic: bool, separator: &str) -> String {
     themes::Style::from(style).css(italic, separator)
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn html_close_pre_tag() -> NifResult<String> {
     let mut output = Vec::new();
     lumis_core::formatter::html::close_pre_tag(&mut output)
@@ -1352,7 +1357,7 @@ fn html_close_pre_tag() -> NifResult<String> {
     html_utf8(output)
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn html_close_code_tag() -> NifResult<String> {
     let mut output = Vec::new();
     lumis_core::formatter::html::close_code_tag(&mut output)
@@ -1365,7 +1370,7 @@ fn html_close_code_tag() -> NifResult<String> {
 /// The multi-theme counterpart of [`html_span_attrs`], split for the same
 /// reason: sending the whole theme set across the boundary once per token to
 /// resolve one scope would cost more than the highlighting did.
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn html_multi_themes_span_attrs(
     themes_map: HashMap<String, ExTheme>,
     default_theme: Option<String>,
@@ -1418,7 +1423,7 @@ fn multi_themes_pre_attrs_impl(
     )
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn html_multi_themes_pre_attrs(
     pre_class: Option<String>,
     themes_map: HashMap<String, ExTheme>,
@@ -1435,7 +1440,7 @@ fn html_multi_themes_pre_attrs(
     ))
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn html_open_multi_themes_pre_tag(
     pre_class: Option<String>,
     themes_map: HashMap<String, ExTheme>,
@@ -1455,12 +1460,12 @@ fn html_open_multi_themes_pre_tag(
     )
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn html_line_is_highlighted(lines: Vec<ExLineSpec>, line_number: usize) -> bool {
     line_specs_contain(&lines, line_number)
 }
 
-#[rustler::nif]
+#[cfg_attr(not(test), rustler::nif)]
 fn html_highlight_line_class(
     lines: Vec<ExLineSpec>,
     line_number: usize,
@@ -1481,7 +1486,7 @@ fn html_highlight_line_class(
 /// easy to get wrong. `attrs` is a table from [`html_span_attrs`] or
 /// [`html_multi_themes_span_attrs`], so the whole render costs one call rather
 /// than one per token.
-#[rustler::nif(schedule = "DirtyCpu")]
+#[cfg_attr(not(test), rustler::nif(schedule = "DirtyCpu"))]
 fn html_render_lines_from_events(
     source: &str,
     events: Vec<Term<'_>>,
