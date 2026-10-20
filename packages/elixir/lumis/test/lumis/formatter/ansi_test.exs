@@ -79,6 +79,34 @@ defmodule Lumis.Formatter.ANSITest do
     :ok
   end
 
+  test "terminal inherits nested styles per property" do
+    fixture =
+      "../../../../../../fixtures/style-inheritance.json"
+      |> Path.expand(__DIR__)
+      |> File.read!()
+      |> Jason.decode!()
+
+    assert length(fixture["cases"]) == 5
+
+    for test_case <- fixture["cases"] do
+      definition = %{
+        "name" => test_case["name"],
+        "appearance" => "dark",
+        "revision" => "test",
+        "highlights" => Map.put(test_case["highlights"], "expected", test_case["expected"])
+      }
+
+      {:ok, theme} = definition |> Jason.encode!() |> Theme.from_json()
+
+      output =
+        Lumis.highlight!(fixture["source"],
+          formatter: {:terminal, language: fixture["language"], theme: theme}
+        )
+
+      assert output =~ ANSI.paint("x", theme.highlights["expected"]), test_case["name"]
+    end
+  end
+
   test "hex_to_rgb/1 and rgb_to_ansi/4 compose into style_to_ansi/1" do
     assert {255, 121, 198} = rgb = ANSI.hex_to_rgb("#ff79c6")
     assert rgb == ANSI.hex_to_rgb("ff79c6")

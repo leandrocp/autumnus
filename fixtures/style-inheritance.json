@@ -1,0 +1,41 @@
+{
+  "source": "y = f\"{x}\" + z",
+  "language": "python",
+  "cases": [
+    {
+      "name": "missing inner scope",
+      "highlights": { "string": { "fg": "#98be65" } },
+      "expected": { "fg": "#98be65" }
+    },
+    {
+      "name": "empty inner scope",
+      "highlights": { "string": { "fg": "#98be65" }, "variable": {} },
+      "expected": { "fg": "#98be65" }
+    },
+    {
+      "name": "partial inner style and false flags",
+      "highlights": {
+        "string": { "fg": "#123456", "bg": "#234567", "bold": true, "underline": "wavy", "strikethrough": true },
+        "variable": { "italic": true, "bold": false, "underline": false, "strikethrough": false }
+      },
+      "expected": { "fg": "#123456", "bg": "#234567", "bold": true, "italic": true, "underline": "wavy", "strikethrough": true }
+    },
+    {
+      "name": "inner foreground and underline override independently",
+      "highlights": {
+        "string": { "fg": "#123456", "bg": "#234567", "italic": true, "underline": "wavy" },
+        "variable": { "fg": "#abcdef", "underline": "double" }
+      },
+      "expected": { "fg": "#abcdef", "bg": "#234567", "italic": true, "underline": "double" }
+    },
+    {
+      "name": "language-specific inner background",
+      "highlights": {
+        "string": { "fg": "#123456", "bg": "#234567", "italic": true },
+        "variable": { "fg": "#abcdef" },
+        "variable.python": { "bg": "#345678" }
+      },
+      "expected": { "fg": "#123456", "bg": "#345678", "italic": true }
+    }
+  ]
+}

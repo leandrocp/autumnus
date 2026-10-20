@@ -656,6 +656,8 @@ export interface Formatter<T = unknown> {
 
 /**
  * Called for each highlighted token in `highlightIter`.
+ * Scope and language identify the innermost scope. Style inherits unset
+ * properties from enclosing scopes; false flags do not clear enclosing attributes.
  *
  * ```ts
  * hl.highlightIter(source, javascript, dracula, (text, language, range, scope, style) => {

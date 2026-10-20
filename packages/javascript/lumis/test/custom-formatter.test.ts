@@ -1,10 +1,12 @@
 import { beforeAll, describe, expect, it } from "vitest";
 
 import dracula from "../../themes/dist/json/dracula.json";
+import inheritance from "../../../../fixtures/style-inheritance.json";
 import diff from "../langs/diff.ts";
 import json from "../langs/json.ts";
 import { createHighlighter, highlightEvents, highlightIter } from "../src/index.js";
-import { type Formatter, htmlInline } from "../src/formatters.js";
+import { type Formatter, htmlInline, terminal } from "../src/formatters.js";
+import { paint } from "../src/formatter/ansi.js";
 import {
   closingTags,
   openCodeTag,
@@ -13,10 +15,20 @@ import {
   renderLinesFromEvents,
   wrapLine,
 } from "../src/formatter/html.js";
-import type { Theme } from "../src/types.js";
+import type { HighlightStyle, Theme } from "../src/types.js";
 import { configureLocalWasmResolver } from "./wasm.js";
 
 const theme: Theme = dracula;
+
+function fixtureStyle(
+  style: Omit<HighlightStyle, "underline"> & { underline?: boolean | string },
+): HighlightStyle {
+  const { underline } = style;
+  if (typeof underline === "string" && underline !== "wavy" && underline !== "double") {
+    throw new Error(`Unexpected fixture underline: ${underline}`);
+  }
+  return { ...style, underline };
+}
 
 function collectScopes(source: string, language: Formatter["language"]): string[] {
   const scopes: string[] = [];
@@ -30,8 +42,54 @@ function collectScopes(source: string, language: Formatter["language"]): string[
 
 describe("custom formatter", () => {
   beforeAll(() => {
-    configureLocalWasmResolver(["diff", "json"]);
+    configureLocalWasmResolver(["diff", "json", "python"]);
   }, 120_000);
+
+  it("inherits nested styles per property without changing scopes or leaking to siblings", async () => {
+    const hl = await createHighlighter({ languages: [] });
+    await hl.loadLanguage(inheritance.language);
+    expect(inheritance.cases).toHaveLength(5);
+    for (const testCase of inheritance.cases) {
+      const inheritedTheme: Theme = {
+        name: testCase.name,
+        appearance: "dark",
+        highlights: Object.fromEntries(
+          Object.entries(testCase.highlights).map(([scope, style]) => [scope, fixtureStyle(style)]),
+        ),
+      };
+      const tokens: { text: string; scope: string; style: HighlightStyle | undefined }[] = [];
+      hl.highlightIter(
+        inheritance.source,
+        inheritance.language,
+        inheritedTheme,
+        (text, language, range, scope, style) => {
+          expect(inheritance.source.slice(range.start, range.end)).toBe(text);
+          expect(language).toBe(inheritance.language);
+          tokens.push({ text, scope, style });
+        },
+      );
+      expect(
+        tokens.find((token) => token.text === "x"),
+        testCase.name,
+      ).toEqual({
+        text: "x",
+        scope: "variable",
+        style: testCase.expected,
+      });
+      expect(tokens.find((token) => token.text === '"')?.style).toEqual(
+        inheritedTheme.highlights.string,
+      );
+      expect(tokens.at(-1)?.style).toEqual(
+        inheritedTheme.highlights["variable.python"] ?? inheritedTheme.highlights.variable,
+      );
+      expect(tokens.map((token) => token.text).join("")).toBe(inheritance.source);
+      const output = hl.highlight(
+        inheritance.source,
+        terminal({ language: inheritance.language, theme: inheritedTheme }),
+      );
+      expect(output, testCase.name).toContain(paint("x", fixtureStyle(testCase.expected)));
+    }
+  }, 30_000);
 
   it("flows through the public formatter contract using rendered lines", async () => {
     const hl = await createHighlighter({ languages: [json] });

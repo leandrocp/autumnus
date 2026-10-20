@@ -10,6 +10,106 @@ use std::{
     path::PathBuf,
 };
 
+#[test]
+fn nested_style_inheritance() {
+    use lumis::formatters::{ansi, Formatter};
+    use lumis::highlight::{highlight_events, highlight_iter, Highlighter};
+    use lumis::themes::{Style, Theme};
+
+    #[derive(Deserialize)]
+    struct Case {
+        name: String,
+        highlights: BTreeMap<String, Style>,
+        expected: Style,
+    }
+    #[derive(Deserialize)]
+    struct Fixture {
+        source: String,
+        language: String,
+        cases: Vec<Case>,
+    }
+    let fixture: Fixture =
+        serde_json::from_str(include_str!("../../../fixtures/style-inheritance.json")).unwrap();
+    assert_eq!(fixture.cases.len(), 5);
+    let language = Language::guess(Some(&fixture.language), "");
+    for case in fixture.cases {
+        let theme = Theme {
+            highlights: case.highlights,
+            ..Default::default()
+        };
+        let mut tokens = Vec::new();
+        highlight_iter(
+            &fixture.source,
+            language,
+            Some(theme.clone()),
+            |text, lang, range, scope, style| {
+                assert_eq!(&fixture.source[range], text);
+                assert_eq!(lang, language);
+                tokens.push((text.to_owned(), scope, style.clone()));
+                Ok::<_, std::io::Error>(())
+            },
+        )
+        .unwrap();
+        let inner = tokens.iter().find(|token| token.0 == "x").unwrap();
+        assert_eq!(inner.1, "variable");
+        assert_eq!(inner.2, case.expected, "{}", case.name);
+        let outer = theme.get_style("string").unwrap();
+        assert_eq!(
+            &tokens.iter().find(|token| token.0 == "\"").unwrap().2,
+            outer
+        );
+        let outside = theme
+            .get_style("variable.python")
+            .cloned()
+            .unwrap_or_default();
+        assert_eq!(
+            tokens.last().unwrap().2,
+            outside,
+            "style leaked out of string"
+        );
+        assert_eq!(
+            tokens
+                .iter()
+                .map(|token| token.0.as_str())
+                .collect::<String>(),
+            fixture.source
+        );
+
+        let highlighter = Highlighter::new(language, Some(theme.clone()));
+        let segments = highlighter.highlight(&fixture.source).unwrap();
+        assert_eq!(
+            segments
+                .iter()
+                .find(|(_, text)| *text == "x")
+                .unwrap()
+                .0
+                .as_ref(),
+            &case.expected
+        );
+
+        let formatter = TerminalBuilder::new()
+            .language(language)
+            .theme(Some(theme))
+            .build()
+            .unwrap();
+        let mut output = Vec::new();
+        formatter
+            .render(
+                &fixture.source,
+                &highlight_events(&fixture.source, language).unwrap(),
+                &mut output,
+            )
+            .unwrap();
+        assert!(
+            String::from_utf8(output)
+                .unwrap()
+                .contains(&ansi::paint("x", &case.expected)),
+            "{}",
+            case.name
+        );
+    }
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct FixtureMetadata {
