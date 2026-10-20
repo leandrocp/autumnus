@@ -1,15 +1,10 @@
-//! Lumis options as Elixir writes them.
+//! Shared BEAM types and option decoding for `lumis_nif` and `mdex_native`.
 //!
-//! The `:lumis` NIF and `mdex_native` both take Lumis options from the BEAM.
-//! These decoders read them in the shape a caller writes,
-//! `{:html_inline, theme: "dracula", highlight_lines: %{lines: [2..4]}}`, and
-//! fill in the defaults `Lumis` documents. Neither NIF needs an Elixir step to
-//! convert options first, so the two cannot drift apart.
-//!
-//! `Lumis` still validates options in Elixir, where `NimbleOptions` documents
-//! them and reports errors before anything crosses into Rust. A caller that
-//! skips that step gets the same checks here: an unknown option, or a value of
-//! the wrong type, raises an `ArgumentError` that names it.
+//! Derived decoders retain the wire format `Lumis.rust_options!/1` produces.
+//! [`ExLumisOptions`] also accepts options as callers write them, so an
+//! embedding NIF need not install the `:lumis` Elixir package. This raw path
+//! permits maps and omitted or nil optional fields; `Lumis` keeps its existing
+//! NimbleOptions validation and conversion unchanged.
 
 use crate::formatter::html::{is_valid_attr_name, AttrValue, HtmlAttrs, HtmlStructure};
 use crate::formatter::{
@@ -20,11 +15,10 @@ use crate::formatter::{
 use crate::{languages::Language, themes};
 use rustler::types::map::MapIterator;
 use rustler::{
-    Atom, Decoder, Encoder, Env, Error, NifMap, NifResult, NifStruct, NifUnitEnum, NifUntaggedEnum,
-    Term,
+    Atom, Decoder, Encoder, Env, Error, NifMap, NifResult, NifStruct, NifTaggedEnum, NifUnitEnum,
+    NifUntaggedEnum, Term,
 };
 use std::collections::HashMap;
-use std::fmt::Write;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, NifUnitEnum)]
 pub enum ExAppearance {
@@ -33,7 +27,7 @@ pub enum ExAppearance {
     Dark,
 }
 
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, NifUnitEnum)]
 pub enum ExHtmlStructure {
     #[default]
     Block,
@@ -95,7 +89,7 @@ pub fn ex_attr_values(attrs: HtmlAttrs) -> Vec<(String, ExAttrValue)> {
         .collect()
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, NifTaggedEnum)]
 pub enum ExFormatterOption {
     HtmlInline {
         structure: ExHtmlStructure,
@@ -144,7 +138,7 @@ pub enum ExFormatterOption {
     },
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, NifTaggedEnum)]
 pub enum ExTerminalBackground {
     Theme,
     String(String),
@@ -167,7 +161,7 @@ impl Default for ExFormatterOption {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, NifTaggedEnum)]
 pub enum ThemeOrString {
     Theme(ExTheme),
     String(String),
@@ -614,7 +608,8 @@ impl From<ExStyle> for themes::Style {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, NifStruct)]
+#[module = "Lumis.HTMLElement"]
 pub struct ExHtmlElement {
     pub open_tag: String,
     pub close_tag: String,
@@ -623,7 +618,7 @@ pub struct ExHtmlElement {
 /// A line to highlight: a line number, or an Elixir `Range` with its direction
 /// and step. Rust keeps a range as the arithmetic progression it is and clips
 /// it to the rendered document; it is never expanded into one entry per line.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, NifTaggedEnum)]
 pub enum ExLineSpec {
     Single(usize),
     Range {
@@ -642,7 +637,7 @@ impl ExLineSpec {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, NifTaggedEnum)]
 pub enum ExHtmlInlineHighlightLinesStyle {
     #[default]
     Theme,
@@ -651,26 +646,30 @@ pub enum ExHtmlInlineHighlightLinesStyle {
     },
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, NifStruct)]
+#[module = "Lumis.HTMLInlineHighlightLines"]
 pub struct ExHtmlInlineHighlightLines {
     pub lines: Vec<ExLineSpec>,
     pub style: Option<ExHtmlInlineHighlightLinesStyle>,
     pub class: Option<String>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, NifStruct)]
+#[module = "Lumis.HTMLLinkedHighlightLines"]
 pub struct ExHtmlLinkedHighlightLines {
     pub lines: Vec<ExLineSpec>,
     pub class: String,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, NifStruct)]
+#[module = "Lumis.TerminalHighlightLines"]
 pub struct ExTerminalHighlightLines {
     pub lines: Vec<ExLineSpec>,
     pub background: Option<String>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, NifStruct)]
+#[module = "Lumis.BBCodeHighlightLines"]
 pub struct ExBBCodeHighlightLines {
     pub lines: Vec<ExLineSpec>,
 }
@@ -721,18 +720,6 @@ impl From<ExHtmlElement> for HtmlElement {
 // `ArgumentError`, the exception a bad option raises everywhere else in `Lumis`.
 
 type Decoded<T> = Result<T, String>;
-
-impl<'a> Decoder<'a> for ExFormatterOption {
-    fn decode(term: Term<'a>) -> NifResult<Self> {
-        Self::from_term(term).map_err(argument_error)
-    }
-}
-
-impl<'a> Decoder<'a> for ExLineSpec {
-    fn decode(term: Term<'a>) -> NifResult<Self> {
-        line_spec(term).map_err(argument_error)
-    }
-}
 
 impl ExFormatterOption {
     /// Decodes a built-in formatter as Elixir writes it: `:html_inline`, or
@@ -1205,136 +1192,31 @@ fn atom_name(term: Term<'_>) -> Option<String> {
     }
 }
 
-/// `term` as Elixir's `inspect/1` would print it, close enough for an error
-/// message: a caller wrote `"yes"`, not `<<"yes">>`. Deep or long values are
-/// cut short.
+/// Never traverse a container or copy a large binary just to report an error.
+/// Even Rustler's `Term` debug formatter can scan an entire printable list.
 fn inspect(term: Term<'_>) -> String {
-    const LIMIT: usize = 200;
-
-    let mut out = String::new();
-    write_term(&mut out, term, 0);
-    if out.len() > LIMIT {
-        let mut end = LIMIT;
-        while !out.is_char_boundary(end) {
-            end -= 1;
+    if let Some(name) = atom_name(term) {
+        atom(&name)
+    } else if let Ok(binary) = term.decode::<rustler::Binary<'_>>() {
+        if binary.len() <= 80 {
+            if let Ok(string) = std::str::from_utf8(binary.as_slice()) {
+                return format!("{string:?}");
+            }
         }
-        out.truncate(end);
-        out.push_str("...");
-    }
-    out
-}
-
-fn write_term(out: &mut String, term: Term<'_>, depth: usize) {
-    if depth > 4 {
-        out.push_str("...");
+        format!("<binary of {} bytes>", binary.len())
+    } else if term.is_list() {
+        "[...]".to_string()
+    } else if term.is_map() {
+        "%{...}".to_string()
     } else if term.is_tuple() {
-        let elements = rustler::types::tuple::get_tuple(term).unwrap_or_default();
-        out.push('{');
-        write_sequence(out, elements.into_iter(), depth);
-        out.push('}');
-    } else if let Ok(elements) = term.decode::<Vec<Term<'_>>>() {
-        write_list(out, elements, depth);
-    } else if let Some(entries) = MapIterator::new(term) {
-        write_map(out, entries.collect(), depth);
-    } else {
-        write_scalar(out, term);
-    }
-}
-
-fn write_scalar(out: &mut String, term: Term<'_>) {
-    let written = if let Some(name) = atom_name(term) {
-        out.push_str(&atom(&name));
-        Ok(())
-    } else if let Some(string) = term
-        .is_binary()
-        .then(|| term.decode::<String>().ok())
-        .flatten()
-    {
-        write!(out, "{string:?}")
+        "{...}".to_string()
     } else if let Ok(integer) = term.decode::<i64>() {
-        write!(out, "{integer}")
+        integer.to_string()
     } else if let Ok(float) = term.decode::<f64>() {
-        write!(out, "{float:?}")
+        format!("{float:?}")
     } else {
-        write!(out, "{term:?}")
-    };
-    written.expect("writing to a String cannot fail");
-}
-
-fn write_list(out: &mut String, elements: Vec<Term<'_>>, depth: usize) {
-    out.push('[');
-    if is_keyword(&elements) {
-        write_pairs(out, elements.into_iter().filter_map(pair), depth);
-    } else {
-        write_sequence(out, elements.into_iter(), depth);
+        "<term>".to_string()
     }
-    out.push(']');
-}
-
-/// `%{...}`, or `%Module{...}` for a struct.
-fn write_map<'a>(out: &mut String, mut entries: Vec<(Term<'a>, Term<'a>)>, depth: usize) {
-    let module = entries
-        .iter()
-        .position(|(key, _)| atom_name(*key).as_deref() == Some("__struct__"))
-        .map(|index| entries.remove(index).1)
-        .and_then(atom_name);
-
-    out.push('%');
-    if let Some(module) = module {
-        out.push_str(&atom(&module));
-    }
-    out.push('{');
-    write_pairs(out, entries.into_iter(), depth);
-    out.push('}');
-}
-
-fn write_sequence<'a>(out: &mut String, elements: impl Iterator<Item = Term<'a>>, depth: usize) {
-    for (index, element) in elements.enumerate() {
-        if index > 0 {
-            out.push_str(", ");
-        }
-        write_term(out, element, depth + 1);
-    }
-}
-
-/// `key: value` for an atom key, `key => value` for anything else.
-fn write_pairs<'a>(
-    out: &mut String,
-    pairs: impl Iterator<Item = (Term<'a>, Term<'a>)>,
-    depth: usize,
-) {
-    for (index, (key, value)) in pairs.enumerate() {
-        if index > 0 {
-            out.push_str(", ");
-        }
-        if let Some(key) = keyword_key(key) {
-            out.push_str(&key);
-            out.push_str(": ");
-        } else {
-            write_term(out, key, depth + 1);
-            out.push_str(" => ");
-        }
-        write_term(out, value, depth + 1);
-    }
-}
-
-fn pair(term: Term<'_>) -> Option<(Term<'_>, Term<'_>)> {
-    term.decode().ok()
-}
-
-fn is_keyword(elements: &[Term<'_>]) -> bool {
-    !elements.is_empty()
-        && elements
-            .iter()
-            .all(|element| pair(*element).is_some_and(|(key, _)| keyword_key(key).is_some()))
-}
-
-/// How an atom key reads in `[key: value]`: `id`, or `"data id"` when quoted.
-/// `nil`, `true`, `false` and modules have no such form.
-fn keyword_key(key: Term<'_>) -> Option<String> {
-    atom_name(key)
-        .map(|name| atom(&name))
-        .and_then(|quoted| quoted.strip_prefix(':').map(str::to_string))
 }
 
 /// An atom as Elixir writes it: `nil`, `true` and `false` bare, a module as its
@@ -1451,6 +1333,10 @@ fn structure(term: Term<'_>) -> Decoded<ExHtmlStructure> {
 /// A theme name or a `%Lumis.Theme{}`. Names are matched case-insensitively,
 /// and a Helix-style name with spaces still finds its Neovim spelling.
 fn theme(term: Term<'_>) -> Decoded<ThemeOrString> {
+    if let Ok(theme) = term.decode::<ThemeOrString>() {
+        return Ok(theme);
+    }
+
     if term.is_binary() {
         let name = string(term)?;
         return Ok(ThemeOrString::String(name.to_lowercase().replace(' ', "")));
@@ -1473,6 +1359,14 @@ fn theme(term: Term<'_>) -> Decoded<ThemeOrString> {
 /// names or `%Lumis.Theme{}` structs. A name has to match a built-in theme
 /// exactly.
 fn named_themes(term: Term<'_>) -> Decoded<HashMap<String, ExTheme>> {
+    // Lumis has already resolved these names. Keep its structs, including
+    // caller modifications, instead of looking them up again.
+    if let Ok(themes) = term.decode::<HashMap<String, ExTheme>>() {
+        if !themes.is_empty() {
+            return Ok(themes);
+        }
+    }
+
     let fields = Fields::of(Some(term))?;
     if fields.entries.is_empty() {
         return Err("themes list cannot be empty".to_string());
@@ -1520,9 +1414,9 @@ fn attrs(term: Term<'_>) -> Decoded<Vec<(String, ExAttrValue)>> {
     pairs
         .into_iter()
         .map(|(name, value)| {
-            let name = atom_name(name).ok_or_else(|| {
-                format!("expected an atom attribute name, got: {}", inspect(name))
-            })?;
+            let name = atom_name(name)
+                .or_else(|| string(name).ok())
+                .ok_or_else(|| format!("expected an attribute name, got: {}", inspect(name)))?;
             if !is_valid_attr_name(&name) {
                 return Err(format!(
                     "`{name}` is not a name HTML can carry on an attribute"
@@ -1540,6 +1434,10 @@ fn attrs(term: Term<'_>) -> Decoded<Vec<(String, ExAttrValue)>> {
 }
 
 fn header(term: Term<'_>) -> Decoded<ExHtmlElement> {
+    if let Ok(header) = term.decode::<ExHtmlElement>() {
+        return Ok(header);
+    }
+
     let mut fields = Fields::of(Some(term))?;
     let open_tag = fields.optional("open_tag", string)?;
     let close_tag = fields.optional("close_tag", string)?;
@@ -1552,6 +1450,10 @@ fn header(term: Term<'_>) -> Decoded<ExHtmlElement> {
 }
 
 fn line_spec(term: Term<'_>) -> Decoded<ExLineSpec> {
+    if let Ok(line) = term.decode::<ExLineSpec>() {
+        return Ok(line);
+    }
+
     if term.is_integer() {
         return line_number(term).map(ExLineSpec::Single);
     }
@@ -1593,6 +1495,10 @@ fn lines(fields: &mut Fields<'_>) -> Decoded<Vec<ExLineSpec>> {
 }
 
 fn inline_highlight_lines(term: Term<'_>) -> Decoded<ExHtmlInlineHighlightLines> {
+    if let Ok(lines) = term.decode::<ExHtmlInlineHighlightLines>() {
+        return Ok(lines);
+    }
+
     let mut fields = Fields::of(Some(term))?;
     let lines = lines(&mut fields)?;
 
@@ -1623,6 +1529,10 @@ fn inline_highlight_lines(term: Term<'_>) -> Decoded<ExHtmlInlineHighlightLines>
 }
 
 fn linked_highlight_lines(term: Term<'_>) -> Decoded<ExHtmlLinkedHighlightLines> {
+    if let Ok(lines) = term.decode::<ExHtmlLinkedHighlightLines>() {
+        return Ok(lines);
+    }
+
     let mut fields = Fields::of(Some(term))?;
     let lines = lines(&mut fields)?;
     let class = fields
@@ -1634,6 +1544,10 @@ fn linked_highlight_lines(term: Term<'_>) -> Decoded<ExHtmlLinkedHighlightLines>
 }
 
 fn terminal_highlight_lines(term: Term<'_>) -> Decoded<ExTerminalHighlightLines> {
+    if let Ok(lines) = term.decode::<ExTerminalHighlightLines>() {
+        return Ok(lines);
+    }
+
     let mut fields = Fields::of(Some(term))?;
     let lines = lines(&mut fields)?;
     let background = fields.optional("background", string)?;
@@ -1643,6 +1557,10 @@ fn terminal_highlight_lines(term: Term<'_>) -> Decoded<ExTerminalHighlightLines>
 }
 
 fn bbcode_highlight_lines(term: Term<'_>) -> Decoded<ExBBCodeHighlightLines> {
+    if let Ok(lines) = term.decode::<ExBBCodeHighlightLines>() {
+        return Ok(lines);
+    }
+
     let mut fields = Fields::of(Some(term))?;
     let lines = lines(&mut fields)?;
     fields.finish()?;
@@ -1651,8 +1569,8 @@ fn bbcode_highlight_lines(term: Term<'_>) -> Decoded<ExBBCodeHighlightLines> {
 }
 
 fn terminal_background(term: Term<'_>) -> Decoded<ExTerminalBackground> {
-    if atom_name(term).as_deref() == Some("theme") {
-        return Ok(ExTerminalBackground::Theme);
+    if let Ok(background) = term.decode::<ExTerminalBackground>() {
+        return Ok(background);
     }
 
     string(term)
