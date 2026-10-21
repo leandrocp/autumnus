@@ -133,9 +133,26 @@ tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT
 
 locked_wasmtime() {
-    awk '/^name = "wasmtime"$/ { getline; gsub(/[version ="]/, ""); print; exit }' "$1"
+    python3 - "$1" <<'PY'
+import sys
+import tomllib
+
+with open(sys.argv[1], "rb") as lockfile:
+    packages = tomllib.load(lockfile).get("package", [])
+matches = [p for p in packages if p.get("name") == "wasmtime"]
+if len(matches) != 1 or not matches[0].get("version"):
+    sys.exit(f"{sys.argv[1]}: expected exactly one versioned wasmtime package")
+print(matches[0]["version"])
+PY
 }
 workspace_version="$(locked_wasmtime Cargo.lock)"
+standalone_version="$(locked_wasmtime "$nif_dir/Cargo.lock")"
+
+if [ "${usage_fix:-false}" != "true" ] && [ "$workspace_version" != "$standalone_version" ]; then
+    echo "wasmtime differs: workspace $workspace_version, packaged NIF $standalone_version" >&2
+    echo "Run: mise run elixir-nif-lock-check --fix. Do not tighten public dependency requirements." >&2
+    exit 1
+fi
 
 mkdir "$tmp_dir/lumis_nif"
 cp "$nif_dir/Cargo.toml" "$nif_dir/Cargo.lock" "$tmp_dir/lumis_nif"
