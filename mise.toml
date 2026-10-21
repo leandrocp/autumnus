@@ -94,24 +94,7 @@ echo "Installing docs site dependencies..."
 (cd docs && pnpm install)
 echo ""
 
-echo "Preprocessing shared queries..."
-mise run langs-preprocess-queries
-echo ""
-
-echo "Generating JS theme assets..."
-pnpm --filter @lumis-sh/themes run build
-echo ""
-
-echo "Generating JS language/runtime artifacts..."
-pnpm --filter @lumis-sh/lumis run build
-pnpm --dir packages/javascript run build:wasm-bundles
-echo ""
-
-echo "Building the packages whose examples import them by name..."
-pnpm --filter @lumis-sh/markdown-it-lumis run build
-pnpm --filter @lumis-sh/rehype-lumis run build
-pnpm --filter @lumis-sh/vite run build
-echo ""
+mise run --jobs 2 setup-assets
 
 echo "Fetching Elixir dependencies..."
 (cd packages/elixir/lumis && mix deps.get)
@@ -119,6 +102,32 @@ echo ""
 
 echo "Done."
 '''
+
+[tasks.'setup-assets']
+description = "Prepare shared queries and JavaScript development assets"
+depends = [
+    "langs-preprocess-queries",
+    "setup-js-themes",
+    "setup-js-integrations",
+    "setup-wasm-bundles",
+]
+
+[tasks.'setup-js-themes']
+description = "Build JavaScript theme modules, JSON and CSS"
+run = "pnpm --filter @lumis-sh/themes run build"
+
+[tasks.'setup-js-lumis']
+description = "Build JavaScript language and runtime artifacts"
+run = "pnpm --filter @lumis-sh/lumis run build"
+
+[tasks.'setup-js-integrations']
+description = "Build the packages whose examples import them by name"
+depends = ["setup-js-lumis"]
+run = "pnpm --recursive --workspace-concurrency=2 --filter @lumis-sh/markdown-it-lumis --filter @lumis-sh/rehype-lumis --filter @lumis-sh/vite run build"
+
+[tasks.'setup-wasm-bundles']
+description = "Generate JavaScript WASM bundle packages"
+run = "pnpm --dir packages/javascript run build:wasm-bundles"
 
 [tasks.'elixir-nif-lock-check']
 description = "Verify the packaged NIF crate resolves standalone with its lockfile"
