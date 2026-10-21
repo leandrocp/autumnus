@@ -137,6 +137,20 @@ describe("createHighlighter", () => {
     );
   });
 
+  it("identifies an unknown initial language without suggesting a bundle is required", async () => {
+    await expect(
+      createHighlighter({ languages: [{ id: "not-a-language", aliases: [] }] }),
+    ).rejects.toThrow('Unknown language "not-a-language"');
+  });
+
+  it("identifies an unknown language loaded later without suggesting a bundle is required", async () => {
+    const highlighter = await createHighlighter({ languages: [] });
+
+    await expect(highlighter.loadLanguage("not-a-language")).rejects.toThrow(
+      'Unknown language "not-a-language"',
+    );
+  });
+
   it.each([
     { id: "json", aliases: [], packageName: "" },
     { id: "json", aliases: [], highlights: "(string) @string" },
