@@ -88,19 +88,38 @@ function markEvent(
   return open;
 }
 
+// Every removed line resembles every added one, so pairing a run of them
+// compares all of them: seconds of work without a budget.
+function largeSide(marker: string): string {
+  return Array.from(
+    { length: 3000 },
+    (_, i) => `${marker}let value_${i} = compute(alpha, beta, gamma);\n`,
+  ).join("");
+}
+
 describe("changed words", () => {
   it("marks the words Rust marks", () => {
     expect(fixture.ranges.length).toBeGreaterThanOrEqual(16);
 
     for (const testCase of fixture.ranges) {
       const bytes = encoder.encode(testCase.diff);
-      const marked = diffWordRanges(bytes, lines(testCase.diff)).map((range): Marked => [
+      const marked = (diffWordRanges(bytes, lines(testCase.diff)) ?? []).map((range): Marked => [
         range.kind === "removed" ? "-" : "+",
         range.startByte,
         slice(bytes, range.startByte, range.endByte),
       ]);
       expect(marked, testCase.name).toEqual(testCase.marked);
     }
+  });
+
+  it("gives up inside a run when asked to stop", () => {
+    const source = "-a b c\n+a b d";
+    let calls = 0;
+    const ranges = diffWordRanges(encoder.encode(source), lines(source), () => {
+      calls += 1;
+      return calls > 1;
+    });
+    expect(ranges).toBeUndefined();
   });
 
   it("derives the backgrounds Rust derives, in both packages", () => {
@@ -150,6 +169,22 @@ describe("changed words", () => {
       const plain = hl.highlight(source, htmlLinked({ language: diff }));
       expect(plain).not.toContain("l-diff-word");
       expect(plain.replaceAll(/<[^>]+>/gu, "")).toBe(marked.replaceAll(/<[^>]+>/gu, ""));
+    });
+
+    it("compares a large run inside the time budget", () => {
+      const started = performance.now();
+      const html = hl.highlight(
+        `${largeSide("-")}${largeSide("+")}`,
+        htmlLinked({ language: diff }),
+        {
+          wordDiff: true,
+          budget: { timeLimit: 100 },
+        },
+      );
+
+      expect(performance.now() - started).toBeLessThan(1000);
+      expect(html).toContain('data-lumis-budget="time"');
+      expect(html).not.toContain("l-diff-word");
     });
 
     it("leaves other languages alone", () => {

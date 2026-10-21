@@ -16,11 +16,6 @@ use similar::algorithms::{lcs, Capture};
 use similar::DiffOp;
 use std::ops::Range;
 
-/// Runs larger than this on either side, in bytes of line content, are left
-/// unmarked. The comparison table grows with the product of both sides.
-#[doc(hidden)]
-pub const MAX_RUN_SIDE_BYTES: usize = 1000;
-
 /// One removed or added line, as the diff grammar marks it.
 #[doc(hidden)]
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -42,12 +37,19 @@ pub struct DiffWordRange {
     pub kind: DiffWordKind,
 }
 
-/// The changed ranges of every run in `lines`, in source order.
+/// The changed ranges of every run in `lines`, in source order, or `None`
+/// when `stop` asked to give up.
 ///
-/// `lines` must be in source order.
+/// `lines` must be in source order. Pairing a run compares every removed line
+/// with every added one, so its cost grows with the product of both sides;
+/// `stop` is consulted throughout and is what bounds it.
 #[doc(hidden)]
 #[must_use]
-pub fn diff_word_ranges(source: &str, lines: &[DiffLine]) -> Vec<DiffWordRange> {
+pub fn diff_word_ranges(
+    source: &str,
+    lines: &[DiffLine],
+    mut stop: impl FnMut() -> bool,
+) -> Option<Vec<DiffWordRange>> {
     let mut ranges = Vec::new();
     let mut start = 0;
     while start < lines.len() {
@@ -61,11 +63,12 @@ pub fn diff_word_ranges(source: &str, lines: &[DiffLine]) -> Vec<DiffWordRange> 
             source,
             &lines[start..split],
             &lines[split..end],
+            &mut stop,
             &mut ranges,
-        );
+        )?;
         start = end;
     }
-    ranges
+    Some(ranges)
 }
 
 fn run_end(lines: &[DiffLine], start: usize) -> usize {
@@ -102,15 +105,18 @@ struct Comparison {
     kept: usize,
 }
 
-fn diff_run(source: &str, removed: &[DiffLine], added: &[DiffLine], out: &mut Vec<DiffWordRange>) {
-    let side_bytes =
-        |lines: &[DiffLine]| -> usize { lines.iter().map(|line| line.content.len()).sum() };
-    if removed.is_empty()
-        || added.is_empty()
-        || side_bytes(removed) > MAX_RUN_SIDE_BYTES
-        || side_bytes(added) > MAX_RUN_SIDE_BYTES
-    {
-        return;
+fn diff_run(
+    source: &str,
+    removed: &[DiffLine],
+    added: &[DiffLine],
+    stop: &mut impl FnMut() -> bool,
+    out: &mut Vec<DiffWordRange>,
+) -> Option<()> {
+    if stop() {
+        return None;
+    }
+    if removed.is_empty() || added.is_empty() {
+        return Some(());
     }
 
     let tokenize_all = |lines: &[DiffLine]| -> Vec<Vec<Token>> {
@@ -124,7 +130,7 @@ fn diff_run(source: &str, removed: &[DiffLine], added: &[DiffLine], out: &mut Ve
 
     let mut removed_ranges = Vec::new();
     let mut added_ranges = Vec::new();
-    for (i, j, comparison) in pair_lines(source, &old, &new) {
+    for (i, j, comparison) in pair_lines(source, &old, &new, stop)? {
         mark_line(
             &old[i],
             &comparison.old_changed,
@@ -140,6 +146,7 @@ fn diff_run(source: &str, removed: &[DiffLine], added: &[DiffLine], out: &mut Ve
     }
     out.append(&mut removed_ranges);
     out.append(&mut added_ranges);
+    Some(())
 }
 
 /// Pair removed lines with added lines, in order, sharing the most tokens.
@@ -155,53 +162,66 @@ fn pair_lines(
     source: &str,
     old: &[Vec<Token>],
     new: &[Vec<Token>],
-) -> Vec<(usize, usize, Comparison)> {
+    stop: &mut impl FnMut() -> bool,
+) -> Option<Vec<(usize, usize, Comparison)>> {
     let (rows, columns) = (old.len(), new.len());
-    let mut comparisons: Vec<Option<Comparison>> = old
-        .iter()
-        .flat_map(|old_line| {
-            new.iter().map(move |new_line| {
-                let comparison = compare(source, old_line, new_line);
-                let qualifies = comparison.kept * 3 >= non_space(old_line)
-                    && comparison.kept * 3 >= non_space(new_line)
-                    && comparison.kept > 0;
-                qualifies.then_some(comparison)
-            })
-        })
-        .collect();
+    let old_words: Vec<usize> = old.iter().map(|line| non_space(line)).collect();
+    let new_words: Vec<usize> = new.iter().map(|line| non_space(line)).collect();
 
-    // `best[i][j]` is the most tokens the first `i` removed lines and the
-    // first `j` added lines can share.
-    let mut best = vec![vec![0usize; columns + 1]; rows + 1];
-    for i in 1..=rows {
-        for j in 1..=columns {
-            let paired = comparisons[(i - 1) * columns + j - 1]
-                .as_ref()
-                .map_or(0, |comparison| best[i - 1][j - 1] + comparison.kept);
-            best[i][j] = paired.max(best[i - 1][j]).max(best[i][j - 1]);
+    // `kept[i][j]` is the tokens removed line `i` and added line `j` share
+    // when they qualify as a pair, else 0. `best[i][j]` is the most tokens the
+    // first `i` removed lines and the first `j` added lines can share. Both are
+    // built a row at a time so `stop` bounds how large they get.
+    let mut kept = Vec::with_capacity(rows * columns);
+    let mut best = vec![0usize; columns + 1];
+    for (i, old_line) in old.iter().enumerate() {
+        if stop() {
+            return None;
+        }
+        let row = (i + 1) * (columns + 1);
+        best.push(0);
+        for (j, new_line) in new.iter().enumerate() {
+            // A line with no words shares none, so it never qualifies.
+            let shared = if old_words[i] == 0 || new_words[j] == 0 {
+                0
+            } else {
+                if stop() {
+                    return None;
+                }
+                compare(source, old_line, new_line).kept
+            };
+            let qualifies = shared > 0 && shared * 3 >= old_words[i] && shared * 3 >= new_words[j];
+            let shared = if qualifies { shared } else { 0 };
+            kept.push(shared);
+            let paired = if qualifies {
+                best[row - columns - 1 + j] + shared
+            } else {
+                0
+            };
+            let value = paired
+                .max(best[row - columns - 1 + j + 1])
+                .max(best[row + j]);
+            best.push(value);
         }
     }
 
+    let at = |i: usize, j: usize| best[i * (columns + 1) + j];
     let mut pairs = Vec::new();
     let (mut i, mut j) = (rows, columns);
     while i > 0 && j > 0 {
-        let index = (i - 1) * columns + j - 1;
-        let paired = comparisons[index]
-            .as_ref()
-            .is_some_and(|comparison| best[i][j] == best[i - 1][j - 1] + comparison.kept);
-        if paired {
-            let comparison = comparisons[index].take().expect("checked above");
-            pairs.push((i - 1, j - 1, comparison));
+        let shared = kept[(i - 1) * columns + j - 1];
+        if shared > 0 && at(i, j) == at(i - 1, j - 1) + shared {
+            pairs.push((i - 1, j - 1, compare(source, &old[i - 1], &new[j - 1])));
             i -= 1;
             j -= 1;
-        } else if best[i][j] == best[i - 1][j] {
+        } else if at(i, j) == at(i - 1, j) {
             i -= 1;
         } else {
             j -= 1;
         }
     }
     pairs.reverse();
-    pairs
+    Some(pairs)
 }
 
 fn non_space(tokens: &[Token]) -> usize {

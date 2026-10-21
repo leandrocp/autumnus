@@ -1,11 +1,5 @@
 import type { DiffWordKind } from "./diff-word-style.js";
 
-/**
- * Runs larger than this on either side, in bytes of line content, are left
- * unmarked. The comparison table grows with the product of both sides.
- */
-export const MAX_RUN_SIDE_BYTES = 1000;
-
 /** One removed or added line, as the diff grammar marks it. */
 export interface DiffLine {
   kind: DiffWordKind;
@@ -32,6 +26,8 @@ interface Token {
   class: TokenClass;
 }
 
+type Stop = () => boolean;
+
 interface Comparison {
   oldChanged: boolean[];
   newChanged: boolean[];
@@ -40,7 +36,9 @@ interface Comparison {
 }
 
 /**
- * The changed ranges of every run in `lines`, in source order.
+ * The changed ranges of every run in `lines`, in source order, or `undefined`
+ * when `stop` asked to give up. Pairing a run compares every removed line with
+ * every added one, so `stop` is consulted throughout and is what bounds it.
  *
  * The port of `diff_word_ranges` in `crates/lumis-core/src/diff_words.rs`;
  * `test/diff-words.test.ts` holds both to `fixtures/diff-words.json`. The
@@ -50,14 +48,17 @@ interface Comparison {
 export function diffWordRanges(
   sourceBytes: Uint8Array,
   lines: readonly DiffLine[],
-): DiffWordRange[] {
+  stop: Stop = () => false,
+): DiffWordRange[] | undefined {
   const ranges: DiffWordRange[] = [];
   let start = 0;
   while (start < lines.length) {
     const end = runEnd(lines, start);
     let split = start;
     while (split < end && lines[split]!.kind === "removed") split += 1;
-    diffRun(sourceBytes, lines.slice(start, split), lines.slice(split, end), ranges);
+    const ran = diffRun(sourceBytes, lines.slice(start, split), lines.slice(split, end), stop);
+    if (!ran) return undefined;
+    ranges.push(...ran);
     start = end;
   }
   return ranges;
@@ -79,30 +80,25 @@ function diffRun(
   sourceBytes: Uint8Array,
   removed: readonly DiffLine[],
   added: readonly DiffLine[],
-  out: DiffWordRange[],
-): void {
-  const sideBytes = (side: readonly DiffLine[]): number =>
-    side.reduce((total, line) => total + line.endByte - line.startByte, 0);
-  if (
-    removed.length === 0 ||
-    added.length === 0 ||
-    sideBytes(removed) > MAX_RUN_SIDE_BYTES ||
-    sideBytes(added) > MAX_RUN_SIDE_BYTES
-  ) {
-    return;
-  }
+  stop: Stop,
+): DiffWordRange[] | undefined {
+  if (stop()) return undefined;
+  if (removed.length === 0 || added.length === 0) return [];
 
-  const decoder = new TextDecoder();
+  // A leading U+FEFF is source text here, and the byte offsets count it.
+  const decoder = new TextDecoder("utf-8", { ignoreBOM: true });
   const old = removed.map((line) => tokenize(sourceBytes, line, decoder));
   const neu = added.map((line) => tokenize(sourceBytes, line, decoder));
 
   const removedRanges: DiffWordRange[] = [];
   const addedRanges: DiffWordRange[] = [];
-  for (const [i, j, comparison] of pairLines(old, neu)) {
+  const pairs = pairLines(old, neu, stop);
+  if (!pairs) return undefined;
+  for (const [i, j, comparison] of pairs) {
     markLine(old[i]!, comparison.oldChanged, "removed", removedRanges);
     markLine(neu[j]!, comparison.newChanged, "added", addedRanges);
   }
-  out.push(...removedRanges, ...addedRanges);
+  return [...removedRanges, ...addedRanges];
 }
 
 // Order-preserving pairing that shares the most tokens. Ties prefer pairing,
@@ -110,45 +106,83 @@ function diffRun(
 function pairLines(
   old: readonly Token[][],
   neu: readonly Token[][],
-): Array<[number, number, Comparison]> {
-  const rows = old.length;
-  const columns = neu.length;
-  const comparisons: Array<Comparison | undefined> = old.flatMap((oldLine) =>
-    neu.map((newLine) => {
-      const comparison = compare(oldLine, newLine);
-      const qualifies =
-        comparison.kept * 3 >= nonSpace(oldLine) &&
-        comparison.kept * 3 >= nonSpace(newLine) &&
-        comparison.kept > 0;
-      return qualifies ? comparison : undefined;
-    }),
-  );
+  stop: Stop,
+): Array<[number, number, Comparison]> | undefined {
+  const table = pairingTable(old, neu, stop);
+  return table && walkPairs(old, neu, table);
+}
 
-  const best = Array.from({ length: rows + 1 }, () => Array.from({ length: columns + 1 }, () => 0));
-  for (let i = 1; i <= rows; i += 1) {
-    for (let j = 1; j <= columns; j += 1) {
-      const comparison = comparisons[(i - 1) * columns + j - 1];
-      const paired = comparison ? best[i - 1]![j - 1]! + comparison.kept : 0;
-      best[i]![j] = Math.max(paired, best[i - 1]![j]!, best[i]![j - 1]!);
+interface PairingTable {
+  /** Tokens removed line `i` and added line `j` share when they qualify, else 0. */
+  kept: number[];
+  /** The most tokens the first `i` removed and first `j` added lines can share. */
+  best: number[];
+}
+
+// As in Rust, built a row at a time so `stop` bounds how large it gets.
+function pairingTable(
+  old: readonly Token[][],
+  neu: readonly Token[][],
+  stop: Stop,
+): PairingTable | undefined {
+  const width = neu.length + 1;
+  const newWords = neu.map((line) => nonSpace(line));
+  const kept: number[] = [];
+  const best: number[] = Array.from({ length: width }, () => 0);
+  for (const [i, oldLine] of old.entries()) {
+    if (stop()) return undefined;
+    const oldWords = nonSpace(oldLine);
+    const row = (i + 1) * width;
+    best.push(0);
+    for (const [j, newLine] of neu.entries()) {
+      const shared = sharedTokens(oldLine, oldWords, newLine, newWords[j]!, stop);
+      if (shared === undefined) return undefined;
+      kept.push(shared);
+      const paired = shared > 0 ? best[row - width + j]! + shared : 0;
+      best.push(Math.max(paired, best[row - width + j + 1]!, best[row + j]!));
     }
   }
+  return { kept, best };
+}
 
+// The tokens two lines share when each keeps at least a third of its words,
+// else 0. A line with no words shares none, so it is never compared.
+function sharedTokens(
+  oldLine: readonly Token[],
+  oldWords: number,
+  newLine: readonly Token[],
+  newWords: number,
+  stop: Stop,
+): number | undefined {
+  if (oldWords === 0 || newWords === 0) return 0;
+  if (stop()) return undefined;
+  const shared = compare(oldLine, newLine).kept;
+  return shared > 0 && shared * 3 >= oldWords && shared * 3 >= newWords ? shared : 0;
+}
+
+function walkPairs(
+  old: readonly Token[][],
+  neu: readonly Token[][],
+  { kept, best }: PairingTable,
+): Array<[number, number, Comparison]> {
+  const columns = neu.length;
+  const at = (i: number, j: number): number => best[i * (columns + 1) + j]!;
   const pairs: Array<[number, number, Comparison]> = [];
-  let i = rows;
+  let i = old.length;
   let j = columns;
   while (i > 0 && j > 0) {
-    const comparison = comparisons[(i - 1) * columns + j - 1];
-    if (comparison && best[i]![j] === best[i - 1]![j - 1]! + comparison.kept) {
-      pairs.push([i - 1, j - 1, comparison]);
+    const shared = kept[(i - 1) * columns + j - 1]!;
+    if (shared > 0 && at(i, j) === at(i - 1, j - 1) + shared) {
+      pairs.unshift([i - 1, j - 1, compare(old[i - 1]!, neu[j - 1]!)]);
       i -= 1;
       j -= 1;
-    } else if (best[i]![j] === best[i - 1]![j]) {
+    } else if (at(i, j) === at(i - 1, j)) {
       i -= 1;
     } else {
       j -= 1;
     }
   }
-  return pairs.toReversed();
+  return pairs;
 }
 
 function nonSpace(tokens: readonly Token[]): number {

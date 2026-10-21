@@ -1045,8 +1045,10 @@ fn query_diff_word_ranges(source: &str, interrupt: Interrupt<'_>) -> Vec<DiffWor
     RAINBOW_PARSER.with(|parser| {
         let mut parser = parser.borrow_mut();
         let tree = parse_interruptible(&mut parser, &config.language, source, interrupt);
-        tree.map(|tree| diff_word_ranges_in(tree.root_node(), source))
-            .unwrap_or_default()
+        tree.and_then(|tree| {
+            diff_word_ranges_in(tree.root_node(), source, || interrupt.stopped().is_some())
+        })
+        .unwrap_or_default()
     })
 }
 

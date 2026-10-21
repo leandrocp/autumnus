@@ -1042,8 +1042,19 @@ fn decorate_with_diff_words(
             end: source.len(),
         }]);
     };
-    let ranges = diff_word_ranges_in(tree.root_node(), source);
-    Ok(compose_diff_word_decorations(source, &collected, &ranges))
+    let ranges = diff_word_ranges_in(tree.root_node(), source, || interrupt.stopped().is_some());
+    match ranges {
+        Some(ranges) if interrupt.stopped().is_none() => {
+            Ok(compose_diff_word_decorations(source, &collected, &ranges))
+        }
+        _ => {
+            *budget = Some(BudgetExhausted::Time);
+            Ok(vec![HighlightEvent::Source {
+                start: 0,
+                end: source.len(),
+            }])
+        }
+    }
 }
 
 /// How a host handled a language named by an injection query.
@@ -1235,6 +1246,7 @@ fn rainbow_ranges(
 mod tests {
     use super::*;
     use crate::store::StoreConfig;
+    use std::fmt::Write as _;
     use std::sync::mpsc;
     use std::thread;
     use std::time::Duration;
@@ -1964,6 +1976,60 @@ mod tests {
                 .unwrap();
             assert!(!events.is_empty(), "highlighting produced no events");
         }
+    }
+
+    #[test]
+    fn word_diff_respects_the_time_budget() {
+        let runtime = Runtime::with_worker_limit(1).unwrap();
+        runtime
+            .load_language(LanguageSpec {
+                id: "diff".into(),
+                aliases: Vec::new(),
+                grammar_name: "diff".into(),
+                wasm: include_bytes!("../../../fixtures/test-parsers/tree-sitter-diff.wasm")
+                    .to_vec(),
+                highlights: "(addition) @diff.plus\n(deletion) @diff.minus".into(),
+                injections: String::new(),
+                locals: String::new(),
+                brackets: String::new(),
+            })
+            .unwrap();
+
+        // Every removed line resembles every added one, so pairing the run
+        // compares all of them: seconds of work without a budget.
+        let side = |marker: char| -> String {
+            (0..3000).fold(String::new(), |mut side, i| {
+                let _ = writeln!(side, "{marker}let value_{i} = compute(alpha, beta, gamma);");
+                side
+            })
+        };
+        let source = format!("{}{}", side('-'), side('+'));
+        let (sender, receiver) = mpsc::sync_channel(1);
+        let worker = thread::spawn(move || {
+            let started = Instant::now();
+            let output = runtime
+                .highlight_with(
+                    &source,
+                    "diff",
+                    &HighlightOptions {
+                        word_diff: true,
+                        time_limit_ms: Some(100),
+                        ..HighlightOptions::default()
+                    },
+                )
+                .unwrap();
+            sender.send((started.elapsed(), output)).unwrap();
+        });
+        let (elapsed, output) = receiver
+            .recv_timeout(Duration::from_secs(5))
+            .expect("a 100 ms word diff exceeded the five-second watchdog");
+        worker.join().unwrap();
+
+        assert!(
+            elapsed < Duration::from_millis(500),
+            "word diff took {elapsed:?}"
+        );
+        assert_eq!(output.budget, Some(BudgetExhausted::Time));
     }
 
     #[test]

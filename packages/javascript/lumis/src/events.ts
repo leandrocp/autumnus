@@ -1252,7 +1252,7 @@ function decorate(
   let decorated = events;
   if (options.wordDiff && language.definition.id === DIFF_LANGUAGE) {
     decorated = applyDiffWords(source, decorated, language, maps, budget);
-    if (budget.deadline?.expired) return undefined;
+    if (budget.deadline?.passed()) return undefined;
   }
   if (options.rainbowBrackets) {
     decorated = applyRainbowBrackets(source, decorated, language, maps, options.matchLimit, budget);
@@ -1278,16 +1278,25 @@ function applyDiffWords(
 
   try {
     const lines: DiffLine[] = [];
-    for (const node of tree.rootNode.descendantsOfType(["deletion", "addition"])) {
+    // A `\ No newline at end of file` marker is a `special` line between the
+    // lines it annotates, so rows skip it, as `changed_lines` does in Rust.
+    let markers = 0;
+    for (const node of tree.rootNode.descendantsOfType(["deletion", "addition", "special"])) {
+      if (node.type === "special") {
+        markers += 1;
+        continue;
+      }
       // The marker is one ASCII byte: `-`, `+`, `<` or `>`.
       lines.push({
         kind: node.type === "deletion" ? "removed" : "added",
-        row: node.startPosition.row,
+        row: node.startPosition.row - markers,
         startByte: nodeStartByte(node, maps) + 1,
         endByte: nodeEndByte(node, maps),
       });
     }
-    return composeDiffWordDecorations(events, diffWordRanges(maps.sourceBytes, lines), maps);
+    const stop = (): boolean => budget.deadline?.passed() ?? false;
+    const ranges = diffWordRanges(maps.sourceBytes, lines, stop);
+    return ranges ? composeDiffWordDecorations(events, ranges, maps) : events;
   } finally {
     tree.delete();
   }

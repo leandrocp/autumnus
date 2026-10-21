@@ -68,22 +68,37 @@ fn rust_marks_the_expected_words() {
     );
 
     for case in fixture.ranges {
-        let marked: Vec<(String, usize, String)> = diff_word_ranges(&case.diff, &lines(&case.diff))
-            .into_iter()
-            .map(|range| {
-                let side = match range.kind {
-                    DiffWordKind::Removed => "-",
-                    DiffWordKind::Added => "+",
-                };
-                (
-                    side.to_string(),
-                    range.start,
-                    case.diff[range.start..range.end].to_string(),
-                )
-            })
-            .collect();
+        let marked: Vec<(String, usize, String)> =
+            diff_word_ranges(&case.diff, &lines(&case.diff), || false)
+                .expect("never stopped")
+                .into_iter()
+                .map(|range| {
+                    let side = match range.kind {
+                        DiffWordKind::Removed => "-",
+                        DiffWordKind::Added => "+",
+                    };
+                    (
+                        side.to_string(),
+                        range.start,
+                        case.diff[range.start..range.end].to_string(),
+                    )
+                })
+                .collect();
         assert_eq!(marked, case.marked, "{}", case.name);
     }
+}
+
+/// The pairing grows with the product of a run's sides, so the caller's
+/// budget has to reach inside a run, not only between runs.
+#[test]
+fn stop_is_consulted_inside_a_run() {
+    let diff = "-a b c\n+a b d";
+    let mut calls = 0;
+    let ranges = diff_word_ranges(diff, &lines(diff), || {
+        calls += 1;
+        calls > 1
+    });
+    assert_eq!(ranges, None);
 }
 
 #[test]
