@@ -115,18 +115,20 @@ fn diff_run(
     if stop() {
         return None;
     }
-    if removed.is_empty() || added.is_empty() {
-        return Some(());
-    }
-
-    let tokenize_all = |lines: &[DiffLine]| -> Vec<Vec<Token>> {
+    // A line with no words never pairs. Leaving it out of the pairing table
+    // keeps a run of blank lines from filling it faster than `stop` is asked.
+    let tokenize_worded = |lines: &[DiffLine]| -> Vec<Vec<Token>> {
         lines
             .iter()
             .map(|line| tokenize(source, line.content.clone()))
+            .filter(|tokens| non_space(tokens) > 0)
             .collect()
     };
-    let old = tokenize_all(removed);
-    let new = tokenize_all(added);
+    let old = tokenize_worded(removed);
+    let new = tokenize_worded(added);
+    if old.is_empty() || new.is_empty() {
+        return Some(());
+    }
 
     let mut removed_ranges = Vec::new();
     let mut added_ranges = Vec::new();
@@ -181,15 +183,10 @@ fn pair_lines(
         let row = (i + 1) * (columns + 1);
         best.push(0);
         for (j, new_line) in new.iter().enumerate() {
-            // A line with no words shares none, so it never qualifies.
-            let shared = if old_words[i] == 0 || new_words[j] == 0 {
-                0
-            } else {
-                if stop() {
-                    return None;
-                }
-                compare(source, old_line, new_line).kept
-            };
+            if stop() {
+                return None;
+            }
+            let shared = compare(source, old_line, new_line).kept;
             let qualifies = shared > 0 && shared * 3 >= old_words[i] && shared * 3 >= new_words[j];
             let shared = if qualifies { shared } else { 0 };
             kept.push(shared);

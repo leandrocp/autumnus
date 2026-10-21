@@ -122,6 +122,22 @@ describe("changed words", () => {
     expect(ranges).toBeUndefined();
   });
 
+  // Blank lines skip the comparison, and with it the budget check inside it,
+  // so a run of them must not reach the pairing table at all.
+  it("keeps blank lines out of the pairing", () => {
+    const source = `${"-\n".repeat(5000)}-a b c\n${"+\n".repeat(5000)}+a b d`;
+    const bytes = encoder.encode(source);
+    let calls = 0;
+    const ranges = diffWordRanges(bytes, lines(source), () => {
+      calls += 1;
+      return calls > 100;
+    });
+    expect(ranges?.map((range) => slice(bytes, range.startByte, range.endByte))).toEqual([
+      "c",
+      "d",
+    ]);
+  });
+
   it("derives the backgrounds Rust derives, in both packages", () => {
     expect(fixture.colors.length).toBeGreaterThanOrEqual(12);
 

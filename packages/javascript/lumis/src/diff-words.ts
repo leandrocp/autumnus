@@ -83,12 +83,15 @@ function diffRun(
   stop: Stop,
 ): DiffWordRange[] | undefined {
   if (stop()) return undefined;
-  if (removed.length === 0 || added.length === 0) return [];
 
   // A leading U+FEFF is source text here, and the byte offsets count it.
   const decoder = new TextDecoder("utf-8", { ignoreBOM: true });
-  const old = removed.map((line) => tokenize(sourceBytes, line, decoder));
-  const neu = added.map((line) => tokenize(sourceBytes, line, decoder));
+  // As in Rust, a line with no words never pairs, so it stays out of the table.
+  const tokenizeWorded = (lines: readonly DiffLine[]): Token[][] =>
+    lines.map((line) => tokenize(sourceBytes, line, decoder)).filter((t) => nonSpace(t) > 0);
+  const old = tokenizeWorded(removed);
+  const neu = tokenizeWorded(added);
+  if (old.length === 0 || neu.length === 0) return [];
 
   const removedRanges: DiffWordRange[] = [];
   const addedRanges: DiffWordRange[] = [];
@@ -146,7 +149,7 @@ function pairingTable(
 }
 
 // The tokens two lines share when each keeps at least a third of its words,
-// else 0. A line with no words shares none, so it is never compared.
+// else 0.
 function sharedTokens(
   oldLine: readonly Token[],
   oldWords: number,
@@ -154,7 +157,6 @@ function sharedTokens(
   newWords: number,
   stop: Stop,
 ): number | undefined {
-  if (oldWords === 0 || newWords === 0) return 0;
   if (stop()) return undefined;
   const shared = compare(oldLine, newLine).kept;
   return shared > 0 && shared * 3 >= oldWords && shared * 3 >= newWords ? shared : 0;

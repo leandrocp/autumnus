@@ -101,6 +101,21 @@ fn stop_is_consulted_inside_a_run() {
     assert_eq!(ranges, None);
 }
 
+/// Blank lines skip the comparison, and with it the budget check inside it,
+/// so a run of them must not reach the pairing table at all.
+#[test]
+fn blank_lines_stay_out_of_the_pairing() {
+    let diff = format!("{}-a b c\n{}+a b d", "-\n".repeat(5000), "+\n".repeat(5000));
+    let mut calls = 0;
+    let ranges = diff_word_ranges(&diff, &lines(&diff), || {
+        calls += 1;
+        calls > 100
+    })
+    .expect("a blank run costs no budget");
+    let marked: Vec<&str> = ranges.iter().map(|r| &diff[r.start..r.end]).collect();
+    assert_eq!(marked, ["c", "d"]);
+}
+
 #[test]
 fn rust_derives_the_expected_backgrounds() {
     let fixture = fixture();
