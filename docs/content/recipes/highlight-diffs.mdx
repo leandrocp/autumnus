@@ -98,7 +98,8 @@ Rust load it on demand.
 
 A one-word edit to a long line is easy to miss when the whole line is green.
 Turn on word diff and Lumis also marks the words that differ between the removed
-lines and the added lines that replace them:
+lines and the added lines that replace them. It only works when the document is
+highlighted with the `diff` language; any other language ignores the option:
 
 <Tabs groupId="runtime" persist items={['JavaScript / TypeScript', 'Rust', 'Elixir', 'CLI']}>
   <Tab value="JavaScript / TypeScript">
@@ -154,7 +155,8 @@ lines JSON, crème and the appended pipe into Path.join have a stronger green
 one. The added Logger.debug line has no counterpart and keeps the plain line
 colour.](/img/diff-word-diff.png)
 
-Input is an ordinary unified diff, the kind `git diff` and `diff -u` print.
+Input is ordinary diff text, the kind `git diff`, `git format-patch`, `diff -u`
+and `diff` print.
 Git's own `--word-diff` output doesn't work: its `[-…-]{+…+}` markers can't be
 told apart from the same characters in code.
 

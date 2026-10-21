@@ -118,7 +118,8 @@ struct HighlightArgs {
     #[arg(long)]
     rainbow_brackets: bool,
 
-    /// In a diff, mark the words that changed between removed and added lines
+    /// Mark the words that changed between removed and added lines. Only
+    /// applies to the `diff` language
     #[arg(long)]
     word_diff: bool,
 

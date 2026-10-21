@@ -106,7 +106,7 @@ lumis highlight index.js \
 | Bound query matches | `--budget-match-limit` | `.budget(Budget::new().match_limit(...))` | `budget: [match_limit: ...]` | `budget: {matchLimit: ...}` | — |
 | Bound render time | `--budget-time-limit` | `.budget(Budget::new().time_limit(...))` | `budget: [time_limit: ...]` | `budget: {timeLimit: ...}` | — |
 | Color nested brackets | `--rainbow-brackets` | `.rainbow_brackets(true)` | `rainbow_brackets: true` | `rainbowBrackets: true` | — |
-| Mark changed words in a diff | `--word-diff` | `.word_diff(true)` | `word_diff: true` | `wordDiff: true` | — |
+| Mark changed words (`diff` language only) | `--word-diff` | `.word_diff(true)` | `word_diff: true` | `wordDiff: true` | — |
 | Compose your own ranges | — | `.annotations(&annotations)` | `annotations: [...]` | `annotations: [...]` | — |
 
 Both limits are one feature, so they sit under one `budget` option rather than
