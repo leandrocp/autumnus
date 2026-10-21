@@ -640,6 +640,7 @@ pub struct ExLanguageInfo<'a> {
     pub id: &'a str,
     pub name: &'a str,
     pub parser: Option<&'a str>,
+    pub package_name: Option<String>,
     pub aliases: Vec<&'a str>,
     pub extensions: Vec<&'a str>,
     pub globs: Vec<&'a str>,
@@ -653,6 +654,9 @@ impl From<languages::LanguageInfo> for ExLanguageInfo<'static> {
             id: language.id,
             name: language.name,
             parser: language.parser,
+            package_name: language
+                .parser
+                .map(|parser| format!("lumis_wasm_{}", parser.replace('-', "_"))),
             aliases: language.aliases.to_vec(),
             extensions: language.extensions,
             globs: language.globs.to_vec(),

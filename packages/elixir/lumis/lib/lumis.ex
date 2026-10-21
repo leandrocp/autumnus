@@ -1040,6 +1040,7 @@ defmodule Lumis do
           id: String.t(),
           name: String.t(),
           parser: String.t() | nil,
+          package_name: String.t() | nil,
           aliases: [String.t()],
           extensions: [String.t()],
           globs: [String.t()],

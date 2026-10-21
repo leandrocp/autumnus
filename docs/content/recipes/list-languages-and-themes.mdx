@@ -8,7 +8,7 @@ import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
 
 Language metadata includes `id`, `name`, `parser`, `aliases`, `extensions`,
 `globs`, Emacs modes and shebangs. Lists are sorted by id. JavaScript also
-includes the npm parser `packageName`.
+includes the npm parser `packageName`; Elixir includes the Hex `package_name`.
 
 `themes.available()` and `Lumis.Theme.available/0` return theme names and
 appearances. Rust's `themes::available()` returns complete themes. Use
@@ -186,15 +186,17 @@ Plaintext has `parser: None`.
 Lumis.Languages.get("ejs").parser
 # "embedded-template"
 
-parser = Lumis.Languages.get("ejs").parser
-"lumis_wasm_" <> String.replace(parser, "-", "_")
+Lumis.Languages.get("ejs").package_name
 # "lumis_wasm_embedded_template"
 
-Lumis.Languages.get("text").parser
+Lumis.Languages.get("mdx").package_name
+# "lumis_wasm_markdown"
+
+Lumis.Languages.get("text").package_name
 # nil
 ```
 
-Plaintext has `parser: nil` and needs no parser package.
+Plaintext has `parser: nil` and `package_name: nil`.
 
   </Tab>
 </Tabs>

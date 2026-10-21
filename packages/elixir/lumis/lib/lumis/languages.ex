@@ -42,6 +42,7 @@ defmodule Lumis.Languages do
         id: "elixir",
         name: "Elixir",
         parser: "elixir",
+        package_name: "lumis_wasm_elixir",
         aliases: [],
         extensions: ["*.ex", "*.exs"],
         globs: ["*.ex", "*.exs"],
