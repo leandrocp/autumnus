@@ -8,10 +8,10 @@
 
 import { pathToFileURL } from "node:url";
 
-import { javascript } from "@lumis-sh/wasm-javascript";
-import { createHighlighter, type Annotation, type HighlightEvent } from "@lumis-sh/lumis";
-import type { Formatter } from "@lumis-sh/lumis/formatters";
-import { escape, scopeToClass } from "@lumis-sh/lumis/formatters/html";
+import javascript from "../langs/javascript.ts";
+import { createHighlighter, type Annotation, type HighlightEvent } from "../src/index.ts";
+import type { Formatter } from "../src/formatters.ts";
+import { escape, scopeToClass } from "../src/formatter/html.ts";
 
 const SOURCE = 'let total = price + tax;\nlet label = "☕ café";\n\nlet net = total - fee;';
 
