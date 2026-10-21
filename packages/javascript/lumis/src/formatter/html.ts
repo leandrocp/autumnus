@@ -1312,8 +1312,9 @@ function startLineDecoration(
     return;
   }
   if (decoration.type === "diffWord") {
-    state.line += state.diffWordTags[decoration.kind] ??= context.openDiffWord(decoration.kind);
-    state.openScopes.push({ close: "</span>", language: state.language });
+    const open = (state.diffWordTags[decoration.kind] ??= context.openDiffWord(decoration.kind));
+    state.line += open;
+    state.openScopes.push({ close: open.length > 0 ? "</span>" : "", language: state.language });
     return;
   }
   openSpanEvent(state, context, {
