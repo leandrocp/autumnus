@@ -1012,6 +1012,23 @@ else
 fi
 '''
 
+[tasks.'wasm-check-bundler']
+description = "Install staged parser packages and the web bundle into a Vite 8 project, and highlight with them in Chromium"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+export PATH="$(mise where tree-sitter):$PATH"
+version="$(tree-sitter --version | sed -E 's/^tree-sitter ([0-9]+\.[0-9]+).*/\1/').0"
+pnpm --dir packages/javascript run build:wasm-bundles --bundle web
+members="$(jq -r '.dependencies | keys[] | sub("^@lumis-sh/wasm-"; "")' tmp/wasm/npm/wasm-bundle-web/package.json)"
+for parser in $(printf '%s\n' css markdown markdown_inline $members | sort -u); do
+    mise run wasm-build "$parser"
+    cargo run -q --manifest-path crates/dev/Cargo.toml -- stage-wasm "$parser" --version "$version"
+done
+pnpm --filter @lumis-sh/lumis run build
+pnpm --filter @lumis-sh/lumis exec playwright test -c playwright.staged.config.ts
+'''
+
 [tasks.'wasm-publish-prepare']
 description = "Stage a WASM package for inspection before publishing"
 usage = '''
