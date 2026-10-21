@@ -420,17 +420,10 @@ pub fn write_highlight_with_options<T, F>(
 where
     F: Formatter<T>,
 {
-    let syntax_options = HighlightOptions::new()
-        .rainbow_brackets(options.rainbow_brackets_enabled())
-        .budget(options.budget_value());
-    let syntax_options = match options.cancellation_flag() {
-        Some(flag) => syntax_options.cancellation(flag),
-        None => syntax_options,
-    };
     let (syntax_events, exceeded_match_limit) = match crate::highlight::highlight_events_for_render(
         source,
         formatter.language(),
-        syntax_options,
+        options.without_annotations(),
     ) {
         Ok(reported) => reported,
         // A render that ran out of time stopped part way through parsing or

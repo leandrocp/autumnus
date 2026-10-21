@@ -6,6 +6,7 @@ import { DEFAULT_MATCH_LIMIT, DEFAULT_TIME_LIMIT, MAX_MATCH_LIMIT } from "./type
 import type {
   Budget,
   BudgetExhausted,
+  HighlightOptions,
   LoadedLanguage,
   WasmLoadedLanguage,
   LumisHighlightEvent,
@@ -129,31 +130,43 @@ function buildUtf8OffsetMap(source: string): number[] {
 const warnedUnresolved = new Set<string>();
 
 /**
- * Mirrors `catalog::find` in `lumis-wasm-runtime`, which gates the same warning
- * on the Rust side.
- */
-const catalogNames = new Set(
-  LANGUAGES.flatMap(({ id, aliases }) => aliases.concat(id)).map((name) => name.toLowerCase()),
-);
-
-/**
- * Say so when a document named a language that is not loaded.
+ * Catalog id by lowercase name or alias. Mirrors `catalog::find` in
+ * `lumis-wasm-runtime`, which reports the same ids on the Rust side.
  *
  * An injection query can name something that is not a language at all: html
  * captures the raw `<script type=...>` value, so `type="module"` asks for
  * "module" and `type="importmap"` for "importmap", each just before a more
  * specific pattern injects javascript or json into the same block. Those blocks
- * do highlight, so naming the discarded value would warn about correct output.
+ * do highlight, so a name outside the catalog is not reported.
  */
-export function warnUnresolvedInjection(id: string, advice = "Load it up front."): void {
-  if (!catalogNames.has(id.toLowerCase())) return;
-  if (warnedUnresolved.has(id)) return;
-  warnedUnresolved.add(id);
-  console.warn(
-    `Lumis could not load "${id}", injected inside the document being highlighted. ` +
-      `${advice} ` +
-      "See https://docs.lumis.sh/languages",
-  );
+const catalogIds = new Map(
+  LANGUAGES.flatMap(({ id, aliases }) =>
+    aliases.concat(id).map((name) => [name.toLowerCase(), id] as const),
+  ),
+);
+
+/**
+ * Hand the catalog ids a call could not load to the caller's `onUnresolved`, or
+ * without one, warn the first time the process misses each.
+ * @internal
+ */
+export function reportUnresolved(
+  ids: readonly string[],
+  onUnresolved: HighlightOptions["onUnresolved"],
+  advice: (id: string) => string = () => "Load it up front.",
+): void {
+  for (const id of ids) {
+    if (onUnresolved) {
+      onUnresolved(id);
+    } else if (!warnedUnresolved.has(id)) {
+      warnedUnresolved.add(id);
+      console.warn(
+        `Lumis could not load "${id}", injected inside the document being highlighted. ` +
+          `${advice(id)} ` +
+          "See https://docs.lumis.sh/languages",
+      );
+    }
+  }
 }
 
 export function buildLineStartMap(source: string): number[] {
@@ -689,7 +702,8 @@ function injectedLayers(
 ): HighlightLayer[] {
   const injectedLanguage = runtime.getLoadedLanguage(languageName);
   if (!injectedLanguage) {
-    warnUnresolvedInjection(languageName);
+    const id = catalogIds.get(languageName.toLowerCase());
+    if (id) budget.unresolved.add(id);
     return [];
   }
   if (injectedLanguage.kind !== "wasm") return [];
@@ -990,10 +1004,14 @@ function deadlineIn(timeLimitMs: number): Deadline {
   return deadline;
 }
 
-/** What the walk has to report back about the limits it ran under. */
+/**
+ * What the walk has to report back: the limits it ran under, and the catalog
+ * ids of the injected languages it could not load.
+ */
 interface BudgetState {
   deadline?: Deadline;
   exceededMatchLimit: boolean;
+  unresolved: Set<string>;
 }
 
 function assertTimeLimit(timeLimit: number | undefined): void {
@@ -1017,7 +1035,7 @@ export function buildHighlightEventsWithSourceIndex(
   source: string,
   language: WasmLoadedLanguage,
   runtime: RuntimeLookup,
-  options: { rainbowBrackets?: boolean; budget?: Budget } = {},
+  options: Omit<HighlightOptions, "annotations"> = {},
 ): {
   events: LumisHighlightEvent[];
   sourceIndex: SourceIndex;
@@ -1033,8 +1051,10 @@ export function buildHighlightEventsWithSourceIndex(
   const budget: BudgetState = {
     deadline: timeLimit > 0 ? deadlineIn(timeLimit) : undefined,
     exceededMatchLimit: false,
+    unresolved: new Set(),
   };
   const layers = collectHighlightLayers(source, maps, runtime, language, 0, matchLimit, budget);
+  reportUnresolved([...budget.unresolved], options.onUnresolved);
 
   return finishHighlight(source, language, maps, matchLimit, budget, layers, options);
 }
@@ -1085,7 +1105,7 @@ export function buildHighlightEvents(
   source: string,
   language: WasmLoadedLanguage,
   runtime: RuntimeLookup,
-  options: { rainbowBrackets?: boolean; budget?: Budget } = {},
+  options: Omit<HighlightOptions, "annotations"> = {},
 ): LumisHighlightEvent[] {
   return buildHighlightEventsWithSourceIndex(source, language, runtime, options).events;
 }

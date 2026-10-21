@@ -439,6 +439,17 @@ defmodule Lumis do
       Both dimensions bound the same render, so they are one option. `nil`
       selects the default for either key.
       """
+    ],
+    on_unresolved: [
+      type: {:or, [{:fun, 1}, nil]},
+      default: nil,
+      doc: """
+      Called with the id of each language injected inside the document that
+      could not be loaded, once per language per call, before the result is
+      returned. The block it names stays plain:
+
+          on_unresolved: fn language -> send(self(), {:missing_parser, language}) end
+      """
     ]
   ]
 
@@ -1191,7 +1202,7 @@ defmodule Lumis do
 
       source
       |> Lumis.Native.highlight(rust_options!(options))
-      |> describe_highlight_result()
+      |> describe_highlight_result(Keyword.fetch!(options, :on_unresolved))
     else
       render_with_custom_formatter(source, formatter, formatter_options, options)
     end
@@ -1205,16 +1216,29 @@ defmodule Lumis do
   # The NIF fell back to plain text and hands over why. Logging it would repeat
   # on every render of every file in that language; `Lumis.Languages.load/1` is
   # where a caller asks whether a parser is there.
-  defp describe_highlight_result({:degraded, output, _failure}), do: {:ok, output}
+  defp describe_highlight_result({:ok, output, unresolved}, on_unresolved) do
+    report_unresolved(unresolved, on_unresolved)
+    {:ok, output}
+  end
 
-  defp describe_highlight_result({:degraded, language, events, _failure}),
+  defp describe_highlight_result({:ok, language, events, unresolved}, on_unresolved) do
+    report_unresolved(unresolved, on_unresolved)
+    {:ok, language, events}
+  end
+
+  defp describe_highlight_result({:degraded, output, _failure}, _on_unresolved), do: {:ok, output}
+
+  defp describe_highlight_result({:degraded, language, events, _failure}, _on_unresolved),
     do: {:ok, language, events}
 
-  defp describe_highlight_result({:error, {:render, fields}}) do
+  defp describe_highlight_result({:error, {:render, fields}}, _on_unresolved) do
     {:error, struct!(Lumis.RenderError, fields)}
   end
 
-  defp describe_highlight_result(other), do: other
+  defp describe_highlight_result(other, _on_unresolved), do: other
+
+  defp report_unresolved(_unresolved, nil), do: :ok
+  defp report_unresolved(unresolved, on_unresolved), do: Enum.each(unresolved, on_unresolved)
 
   @doc """
   Validates the given options against the options schema.
@@ -1250,6 +1274,7 @@ defmodule Lumis do
     options =
       options
       |> Keyword.delete(:language)
+      |> Keyword.delete(:on_unresolved)
 
     {theme, options} = Keyword.pop(options, :theme)
     theme = build_theme(theme || Keyword.get(formatter_opts, :theme))
@@ -1548,6 +1573,6 @@ defmodule Lumis do
         budget: budget_for_nif(Keyword.fetch!(options, :budget))
       })
 
-    describe_highlight_result(result)
+    describe_highlight_result(result, Keyword.fetch!(options, :on_unresolved))
   end
 end

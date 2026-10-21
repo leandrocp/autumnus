@@ -77,10 +77,12 @@ fn time_limit_ms(value: Option<u64>) -> Option<u64> {
     }
 }
 
-/// A highlight plus which limit bound it, if one did.
+/// A highlight plus which limit bound it, if one did, and the catalog ids of
+/// the injected languages it could not load.
 struct Highlighted {
     events: Vec<HighlightEvent<'static>>,
     budget: Option<BudgetExhausted>,
+    unresolved: Vec<String>,
 }
 
 /// Why a load failed, at the granularity Elixir matches on.
@@ -374,6 +376,7 @@ impl WasmExecutor {
                                     |output| Highlighted {
                                         events: output.events,
                                         budget: output.budget,
+                                        unresolved: output.unresolved,
                                     },
                                 ),
                             );
@@ -703,7 +706,14 @@ pub(crate) fn highlight<'a>(
         Err(message) => return Ok(render_failure(env, formatter_atom(), message)),
     };
 
-    let (Highlighted { events, budget }, degraded) = match syntax_events(
+    let (
+        Highlighted {
+            events,
+            budget,
+            unresolved,
+        },
+        degraded,
+    ) = match syntax_events(
         env,
         source,
         language,
@@ -738,7 +748,7 @@ pub(crate) fn highlight<'a>(
 
     match degraded {
         Some(failure) => Ok((degraded_atom(), output, failure).encode(env)),
-        None => Ok((ok(), output).encode(env)),
+        None => Ok((ok(), output, unresolved).encode(env)),
     }
 }
 
@@ -751,6 +761,7 @@ fn plain_text(source: &str) -> Highlighted {
             end: source.len(),
         }],
         budget: None,
+        unresolved: Vec::new(),
     }
 }
 
@@ -811,7 +822,9 @@ pub(crate) fn highlight_events<'a>(
         Ok(highlighted) => highlighted,
         Err(failure) => return Ok(failure),
     };
-    let events = highlighted.events;
+    let Highlighted {
+        events, unresolved, ..
+    } = highlighted;
     let events = match compose_annotations(source, &events, &annotations) {
         Ok(events) => events,
         Err(annotation_error) => {
@@ -839,7 +852,7 @@ pub(crate) fn highlight_events<'a>(
     // this call already has.
     match degraded {
         Some(failure) => Ok((degraded_atom(), language.id_name(), events, failure).encode(env)),
-        None => Ok((ok(), language.id_name(), events).encode(env)),
+        None => Ok((ok(), language.id_name(), events, unresolved).encode(env)),
     }
 }
 

@@ -53,11 +53,11 @@ describe("unavailable injected languages", () => {
   });
 
   it.each([
-    ["css", "@lumis-sh/wasm-css"],
-    ["ejs", "@lumis-sh/wasm-embedded-template"],
-    ["C++", "@lumis-sh/wasm-cpp"],
-    ["lua", "@lumis-sh/wasm-lua"],
-  ])("gives runtime-specific advice for %s", (language, packageName) => {
+    ["css", "css", "@lumis-sh/wasm-css"],
+    ["ejs", "ejs", "@lumis-sh/wasm-embedded-template"],
+    ["C++", "cpp", "@lumis-sh/wasm-cpp"],
+    ["lua", "lua", "@lumis-sh/wasm-lua"],
+  ])("gives runtime-specific advice for %s", (language, id, packageName) => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     try {
       const root = language === "css" ? "html" : "markdown";
@@ -73,7 +73,7 @@ describe("unavailable injected languages", () => {
       expect(output).toContain(plain);
       expect(warn).toHaveBeenCalledTimes(1);
       const warning = String(warn.mock.calls[0][0]);
-      expect(warning).toContain(`Lumis could not load "${language}"`);
+      expect(warning).toContain(`Lumis could not load "${id}"`);
       if (index.runtimeKind() === "native") {
         // oxlint-disable-next-line vitest/no-conditional-expect -- both runtimes assert their distinct installation/loading guidance.
         expect(warning).toContain(`install or update ${packageName}`);
@@ -107,5 +107,71 @@ describe("unavailable injected languages", () => {
     } finally {
       warn.mockRestore();
     }
+  });
+
+  it("hands each language to onUnresolved once per call instead of warning", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const source = "```golang\nx := 1\n```\n\n```go\ny := 2\n```\n";
+      const formatter = htmlLinked({ language: "markdown" });
+      const reported: string[][] = [];
+      for (let call = 0; call < 2; call += 1) {
+        const ids: string[] = [];
+        highlighter.highlight(source, formatter, {
+          onUnresolved: (id) => {
+            ids.push(id);
+          },
+        });
+        reported.push(ids);
+      }
+      const fromCustomFormatter: string[] = [];
+      highlighter.highlight(
+        source,
+        { language: "markdown", render: (text) => text },
+        {
+          onUnresolved: (id) => {
+            fromCustomFormatter.push(id);
+          },
+        },
+      );
+      const fromIter: string[] = [];
+      highlighter.highlightIter(source, "markdown", undefined, () => {}, {
+        onUnresolved: (id) => {
+          fromIter.push(id);
+        },
+      });
+
+      expect(reported).toEqual([["go"], ["go"]]);
+      expect(fromCustomFormatter).toEqual(["go"]);
+      expect(fromIter).toEqual(["go"]);
+      expect(warn).not.toHaveBeenCalled();
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
+  it("highlights a package installed after a miss once loadLanguage is called", async () => {
+    const source = "```python\nx = 1\n```\n";
+    const formatter = htmlLinked({ language: "markdown" });
+    const missed: string[] = [];
+    const before = highlighter.highlight(source, formatter, {
+      onUnresolved: (id) => {
+        missed.push(id);
+      },
+    });
+
+    installLocalPackages(project, ["python"]);
+    await highlighter.loadLanguage("python");
+    const after: string[] = [];
+    const output = highlighter.highlight(source, formatter, {
+      onUnresolved: (id) => {
+        after.push(id);
+      },
+    });
+
+    expect(missed).toEqual(["python"]);
+    expect(before).not.toContain('class="l-number"');
+    expect(after).toEqual([]);
+    expect(output).toContain('class="l-number"');
   });
 });

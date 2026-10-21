@@ -114,21 +114,34 @@ static DEFAULT_STYLE: LazyLock<Arc<Style>> = LazyLock::new(|| Arc::new(Style::de
 
 /// Options for one highlighting operation.
 ///
-/// `'a` is the annotation data's lifetime; `'c` is the cancellation flag's.
-/// Returned events borrow only the annotations, so they can outlive the flag.
+/// `'a` is the annotation data's lifetime; `'c` is the lifetime of the
+/// cancellation flag and the [`on_unresolved`](Self::on_unresolved) callback.
+/// Returned events borrow only the annotations, so they can outlive both.
 ///
 /// ```rust
 /// use lumis::highlight::HighlightOptions;
 ///
 /// let options = HighlightOptions::new().rainbow_brackets(true);
 /// ```
-#[derive(Debug)]
 #[must_use]
 pub struct HighlightOptions<'a, 'c, T = ()> {
     annotations: &'a [Annotation<T>],
     rainbow_brackets: bool,
     budget: Budget,
     cancellation: Option<&'c AtomicUsize>,
+    on_unresolved: Option<&'c dyn Fn(&str)>,
+}
+
+impl<T: std::fmt::Debug> std::fmt::Debug for HighlightOptions<'_, '_, T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("HighlightOptions")
+            .field("annotations", &self.annotations)
+            .field("rainbow_brackets", &self.rainbow_brackets)
+            .field("budget", &self.budget)
+            .field("cancellation", &self.cancellation)
+            .field("on_unresolved", &self.on_unresolved.map(|_| "Fn(&str)"))
+            .finish()
+    }
 }
 
 /// The work one render is allowed to do.
@@ -213,12 +226,13 @@ impl Default for Budget {
     }
 }
 
-/// Written out rather than derived only because of the cancellation flag:
-/// `AtomicUsize` has no equality, and comparing what two flags hold would
-/// answer a different question than the one asked, because a flag's value is
-/// whatever the caller last stored and can change between the two loads. Two
-/// options carry the same cancellation when they point at the same flag.
-/// Everything else compares by value, annotations included.
+/// Written out rather than derived because of the cancellation flag and the
+/// callback: `AtomicUsize` has no equality, and comparing what two flags hold
+/// would answer a different question than the one asked, because a flag's
+/// value is whatever the caller last stored and can change between the two
+/// loads. Two options carry the same cancellation when they point at the same
+/// flag, and the same callback when they point at the same closure. Everything
+/// else compares by value, annotations included.
 impl<T: PartialEq> PartialEq for HighlightOptions<'_, '_, T> {
     fn eq(&self, other: &Self) -> bool {
         self.annotations == other.annotations
@@ -226,6 +240,11 @@ impl<T: PartialEq> PartialEq for HighlightOptions<'_, '_, T> {
             && self.budget == other.budget
             && match (self.cancellation, other.cancellation) {
                 (Some(left), Some(right)) => std::ptr::eq(left, right),
+                (None, None) => true,
+                _ => false,
+            }
+            && match (self.on_unresolved, other.on_unresolved) {
+                (Some(left), Some(right)) => std::ptr::addr_eq(left, right),
                 (None, None) => true,
                 _ => false,
             }
@@ -256,6 +275,7 @@ impl HighlightOptions<'static, 'static> {
             rainbow_brackets: false,
             budget: Budget::new(),
             cancellation: None,
+            on_unresolved: None,
         }
     }
 }
@@ -268,6 +288,7 @@ impl<'c> HighlightOptions<'static, 'c> {
             rainbow_brackets: self.rainbow_brackets,
             budget: self.budget,
             cancellation: self.cancellation,
+            on_unresolved: self.on_unresolved,
         }
     }
 }
@@ -309,10 +330,6 @@ impl<'a, 'c, T> HighlightOptions<'a, 'c, T> {
         self.rainbow_brackets
     }
 
-    pub(crate) const fn budget_value(&self) -> Budget {
-        self.budget
-    }
-
     pub(crate) const fn match_limit_value(&self) -> u32 {
         self.budget.match_limit_value()
     }
@@ -347,17 +364,64 @@ impl<'a, 'c, T> HighlightOptions<'a, 'c, T> {
     pub const fn cancellation<'flag>(
         self,
         flag: &'flag AtomicUsize,
-    ) -> HighlightOptions<'a, 'flag, T> {
+    ) -> HighlightOptions<'a, 'flag, T>
+    where
+        'c: 'flag,
+    {
         HighlightOptions {
             annotations: self.annotations,
             rainbow_brackets: self.rainbow_brackets,
             budget: self.budget,
             cancellation: Some(flag),
+            on_unresolved: self.on_unresolved,
         }
     }
 
     pub(crate) const fn cancellation_flag(&self) -> Option<&'c AtomicUsize> {
         self.cancellation
+    }
+
+    /// Call `report` with each language injected inside the document that
+    /// could not be highlighted, because its grammar was not compiled in.
+    ///
+    /// `report` receives the language's catalog id, once per language per
+    /// call. The block it names comes back plain, as it does without this
+    /// option. A name an injection query captures that is not a language at
+    /// all, such as html's `<script type="module">`, is not reported.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use lumis::highlight::HighlightOptions;
+    /// use std::cell::RefCell;
+    ///
+    /// let unresolved = RefCell::new(Vec::new());
+    /// let report = |language: &str| unresolved.borrow_mut().push(language.to_string());
+    /// let options = HighlightOptions::new().on_unresolved(&report);
+    /// ```
+    pub const fn on_unresolved<'f>(self, report: &'f dyn Fn(&str)) -> HighlightOptions<'a, 'f, T>
+    where
+        'c: 'f,
+    {
+        HighlightOptions {
+            annotations: self.annotations,
+            rainbow_brackets: self.rainbow_brackets,
+            budget: self.budget,
+            cancellation: self.cancellation,
+            on_unresolved: Some(report),
+        }
+    }
+
+    /// The same options without annotations, for the syntax pass that runs
+    /// before they are composed in.
+    pub(crate) const fn without_annotations(&self) -> HighlightOptions<'static, 'c> {
+        HighlightOptions {
+            annotations: &[],
+            rainbow_brackets: self.rainbow_brackets,
+            budget: self.budget,
+            cancellation: self.cancellation,
+            on_unresolved: self.on_unresolved,
+        }
     }
 }
 
@@ -903,14 +967,25 @@ where
         interrupt = interrupt.deadline(at);
     }
 
+    let reported: RefCell<Vec<&'static str>> = RefCell::new(Vec::new());
     let events = ts_highlighter
         .highlight(config, source.as_bytes(), interrupt, |injected| {
             // An injected language forces its own `LazyLock` here, in the
             // middle of the walk. Same reasoning, same exemption: what the
             // document contains should not decide whether it fits its
-            // budget.
+            // budget. The caller's callback is exempt for the same reason.
             let started = Instant::now();
-            let config = injected_language(injected).map(|language| language.config());
+            let language = injected_language(injected);
+            if let Some(report) = options.on_unresolved {
+                if let Some(id) = unresolved_id(injected, language) {
+                    let mut reported = reported.borrow_mut();
+                    if !reported.contains(&id) {
+                        reported.push(id);
+                        report(id);
+                    }
+                }
+            }
+            let config = language.map(|language| language.config());
             if let Some(at) = deadline.as_ref() {
                 at.extend(started.elapsed());
             }
@@ -951,6 +1026,18 @@ where
     // query's exhaustion and not this one's would call a document complete that
     // lost brackets here.
     Ok((rainbow, exceeded || rainbow_exceeded))
+}
+
+/// The catalog id of an injected language that did not resolve to a compiled-in
+/// grammar, or `None` when it did or when `injected` names no language at all.
+///
+/// `Language::guess` turns a name it cannot parse into `PlainText`, so a parse
+/// failure is what marks a catalog language whose feature is off.
+fn unresolved_id(injected: &str, language: Option<Language>) -> Option<&'static str> {
+    if language.is_some() && injected.parse::<Language>().is_ok() {
+        return None;
+    }
+    lumis_wasm_runtime::catalog::find(injected).map(|entry| entry.id)
 }
 
 /// Highlight for a formatter, reporting whether the match limit bound it.

@@ -1,7 +1,6 @@
 import { LANGUAGES } from "../generated/languages-meta.js";
 import { cloneLanguageInfo } from "../catalog-metadata.js";
 import { LANGUAGE_LOADERS } from "../generated/language-loaders.js";
-import { EXACT_LANGUAGE_MAP } from "../generated/language-detection.js";
 import { LANGUAGE_PACKAGES } from "../generated/language-packages.js";
 import { LANGUAGE_PACKAGE_VERSION_RANGE } from "../generated/package-version-range.js";
 import type {
@@ -11,7 +10,6 @@ import type {
   NativeRuntimeInstance,
 } from "../native-binding.js";
 import type {
-  Budget,
   BudgetExhausted,
   Formatter,
   HighlightOptions,
@@ -29,7 +27,7 @@ import type {
 } from "../types.js";
 import { getBuiltinFormatter } from "./builtin-formatter.js";
 import { isInlineStructure } from "../formatter/html-structure.js";
-import { assertBudget, warnUnresolvedInjection } from "../events.js";
+import { assertBudget, reportUnresolved } from "../events.js";
 import { decodeNativeEvents } from "./native-event-codec.js";
 import { PLAINTEXT_LANG_ID } from "../types.js";
 import { DEFAULT_RESOLVER, normalizeLanguageName, notDeclared, verifyWasm } from "./languages.js";
@@ -199,7 +197,7 @@ function isImportedInstalled(
 export function createNativeLanguagesModule(
   binding: NativeBinding,
   resolvers: LanguagesModule,
-  resolveInstalledManifests?: () => Promise<Map<string, URL>>,
+  resolveInstalledManifests?: (refresh?: boolean) => Promise<Map<string, URL>>,
 ): LanguagesModule {
   let globalWasmResolver: WasmResolver | undefined;
   let globalLanguagePackageResolver: LanguagePackageResolver | undefined;
@@ -222,14 +220,15 @@ export function createNativeLanguagesModule(
 
   /**
    * Hand the addon the `lumis.json` of every package this project installed,
-   * and refresh the set when another imported package adds a search root.
+   * and refresh the set when another imported package adds a search root, or
+   * when `refresh` looks for a package installed since the last discovery.
    *
    * Those packages are the whole set Node loads from. The addon reads them
    * itself, because it loads a language injected inside a document during a
    * native walk, without coming back to JavaScript.
    */
-  function tellAddon(): Promise<Record<string, string> | undefined> {
-    const source = resolveInstalledManifests?.();
+  function tellAddon(refresh = false): Promise<Record<string, string> | undefined> {
+    const source = resolveInstalledManifests?.(refresh);
     if (installed && source === installedSource) return installed;
     installedSource = source;
     if (source) {
@@ -246,6 +245,19 @@ export function createNativeLanguagesModule(
       installed = Promise.resolve(undefined);
     }
     return installed;
+  }
+
+  /**
+   * Whether the project installed `packageName`, discovering the installed set
+   * again when it lacks it: the package may have been installed since.
+   */
+  async function isDeclared(
+    manifests: Record<string, string> | undefined,
+    packageName: string,
+  ): Promise<boolean> {
+    if (!manifests || manifests[packageName]) return true;
+    const refreshed = await tellAddon(true);
+    return !refreshed || Boolean(refreshed[packageName]);
   }
 
   function hasResolverOverride(state: NativeResolverState): boolean {
@@ -324,14 +336,16 @@ export function createNativeLanguagesModule(
       this.native = newNativeRuntime();
     }
 
-    private reportUnresolved(unresolved: string[]): void {
-      for (const id of unresolved) {
-        const languageId = EXACT_LANGUAGE_MAP[normalizeLanguageName(id)];
-        const packageName = languageId && LANGUAGE_PACKAGES[languageId];
-        if (packageName) {
-          warnUnresolvedInjection(id, `${notDeclared(packageName, packageName).message}.`);
-        }
-      }
+    private reportUnresolved(
+      unresolved: string[],
+      onUnresolved: HighlightOptions["onUnresolved"],
+    ): void {
+      reportUnresolved(unresolved, onUnresolved, (id) => {
+        const packageName = LANGUAGE_PACKAGES[id];
+        return packageName
+          ? `${notDeclared(packageName, packageName).message}.`
+          : "Load it up front.";
+      });
     }
 
     configureWasmResolver(fn: WasmResolver): void {
@@ -434,7 +448,9 @@ export function createNativeLanguagesModule(
 
       if (!(await this.isCallerResolved(opts, manifests))) {
         const packageName = opts.packageName!;
-        if (manifests && !manifests[packageName]) throw notDeclared(packageName, packageName);
+        if (!(await isDeclared(manifests, packageName))) {
+          throw notDeclared(packageName, packageName);
+        }
         this.native.loadLanguage(opts.definition.id);
         return { addonId: opts.definition.id, definition: opts.definition };
       }
@@ -523,7 +539,7 @@ export function createNativeLanguagesModule(
     highlightEvents(
       source: string,
       language: LoadedLanguage,
-      options: { rainbowBrackets?: boolean; budget?: Budget } = {},
+      options: Omit<HighlightOptions, "annotations"> = {},
       report?: { budget?: BudgetExhausted },
     ): LumisHighlightEvent[] {
       rejectReentrantHighlight();
@@ -540,7 +556,7 @@ export function createNativeLanguagesModule(
         hasResolvers ? this.packageResolverCallback : undefined,
         hasResolvers ? this.wasmResolverCallback : undefined,
       );
-      this.reportUnresolved(highlighted.unresolved);
+      this.reportUnresolved(highlighted.unresolved, options.onUnresolved);
       if (report) report.budget = highlighted.budget;
       return decodeNativeEvents(highlighted.events);
     }
@@ -570,7 +586,7 @@ export function createNativeLanguagesModule(
         hasResolvers ? this.packageResolverCallback : undefined,
         hasResolvers ? this.wasmResolverCallback : undefined,
       );
-      this.reportUnresolved(formatted.unresolved);
+      this.reportUnresolved(formatted.unresolved, options.onUnresolved);
       return formatted.output;
     }
 
@@ -589,7 +605,7 @@ export function createNativeLanguagesModule(
         this.addonIdFor(language),
         nativeFormatter,
       );
-      this.reportUnresolved(formatted.unresolved);
+      this.reportUnresolved(formatted.unresolved, options.onUnresolved);
       return formatted.output;
     }
 

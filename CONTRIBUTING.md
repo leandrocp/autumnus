@@ -240,6 +240,23 @@ Chromium, Firefox, and WebKit builds before running the browser tests.
 The CLI is not in this manifest. Its top level is a set of commands rather than
 functions, and the formatter option manifest already pins its flags.
 
+### The highlight option manifest
+
+`fixtures/highlight-options.json` pins the options one highlighting call takes
+beside its formatter: `annotations`, `rainbow_brackets`, `budget` and
+`on_unresolved`. Nothing checked them before `on_unresolved`, which every runtime
+computed and only JavaScript reported, as a once-per-process warning
+([#1731](https://github.com/leandrocp/lumis/issues/1731)).
+
+| Runtime | Test | How it checks |
+| --- | --- | --- |
+| Rust | `crates/lumis/tests/highlight_options.rs` | calls every setter by name, then parses `highlight.rs` for the public methods of `HighlightOptions` |
+| Elixir | `packages/elixir/lumis/test/highlight_options_test.exs` | reads the keys of `t:Lumis.highlight_events_options/0` off the typespec |
+| JavaScript | `packages/javascript/lumis/test/highlight-options.test.ts` | a `Required<HighlightOptions>` literal, so a missing or extra field fails type checking |
+
+Rust's `cancellation` is `runtime_only`, with its reason. The CLI is out of
+scope for the same reason as above.
+
 ## Linting
 
 ```sh

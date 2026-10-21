@@ -10,7 +10,6 @@ import { sha256 } from "@noble/hashes/sha2.js";
 import { HIGHLIGHT_NAMES } from "../highlights.js";
 import type { RuntimeEnvironment } from "../runtime/runtime.js";
 import type {
-  Budget,
   BudgetExhausted,
   CaptureMetadata,
   CompiledBracketConfig,
@@ -150,7 +149,7 @@ export interface RuntimeLike {
   highlightEvents(
     source: string,
     language: LoadedLanguage,
-    options?: { rainbowBrackets?: boolean; budget?: Budget },
+    options?: Omit<HighlightOptions, "annotations">,
     /**
      * Filled in with which limit bound the render, when one did. An out
      * parameter rather than a wider return type because every caller wants the
@@ -1498,7 +1497,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
     highlightEvents(
       source: string,
       language: LoadedLanguage,
-      options: { rainbowBrackets?: boolean; budget?: Budget } = {},
+      options: Omit<HighlightOptions, "annotations"> = {},
       report?: { budget?: BudgetExhausted },
     ): LumisHighlightEvent[] {
       if (language.kind === "plaintext") {

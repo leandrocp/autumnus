@@ -766,12 +766,12 @@ impl Runtime {
         // same block. Those blocks do highlight, so reporting the discarded
         // name would warn about output that is correct.
         let record_unresolved = |name: &str| {
-            if crate::catalog::find(name).is_none() {
+            let Some(entry) = crate::catalog::find(name) else {
                 return;
-            }
+            };
             let mut unresolved = unresolved.borrow_mut();
-            if !unresolved.iter().any(|existing| existing == name) {
-                unresolved.push(name.to_string());
+            if !unresolved.iter().any(|existing| existing == entry.id) {
+                unresolved.push(entry.id.to_string());
             }
         };
 
@@ -1032,9 +1032,10 @@ impl Default for HighlightOptions {
 pub struct HighlightOutput {
     pub events: Vec<HighlightEvent<'static>>,
     pub layers: Vec<crate::tree_sitter_highlight::ParsedLayer>,
-    /// Injected languages this walk found but could not load, so a caller that
-    /// resolves parsers itself can tell what the store could not reach. Empty
-    /// when everything the document named was available.
+    /// Catalog ids of the injected languages this walk found but could not
+    /// load, once each, so a caller that resolves parsers itself can tell what
+    /// the store could not reach. Empty when everything the document named was
+    /// available.
     pub unresolved: Vec<String>,
     /// Which limit bound this render, when one did. `Time` means `events` is
     /// the source text and nothing else, because a render stopped part way has
@@ -1711,7 +1712,7 @@ mod tests {
 
         let output = runtime
             .highlight_with(
-                r#"{"module":"a","importmap":"b","rust":"c"}"#,
+                r#"{"module":"a","importmap":"b","rust":"c","python3":"d","python":"e"}"#,
                 "json",
                 &HighlightOptions {
                     injections: true,
@@ -1728,9 +1729,9 @@ mod tests {
         );
         assert_eq!(
             output.unresolved,
-            vec!["rust".to_string()],
-            "a catalog language that could not be fetched is worth reporting; \
-             a name that is not a language at all is not"
+            vec!["rust".to_string(), "python".to_string()],
+            "a catalog language that could not be fetched is worth reporting, \
+             once and by its id; a name that is not a language at all is not"
         );
     }
 

@@ -1,0 +1,50 @@
+{
+  "$comment": [
+    "The per-call highlight options every runtime must accept.",
+    "",
+    "`formatter-options.json` pins what a formatter is BUILT with. This pins what",
+    "one highlighting call is GIVEN beside it: the options Rust's",
+    "`HighlightOptions`, JavaScript's `HighlightOptions` and Elixir's",
+    "`highlight_events_options` carry. Nothing checked them, so a per-call option",
+    "could reach one runtime and not the others. `on_unresolved` is why this",
+    "exists: Lumis computed the injected languages a call could not load in",
+    "every runtime, and only JavaScript reported them, as a once-per-process",
+    "warning (#1731).",
+    "",
+    "`name` is the canonical snake_case option. Rust and Elixir use it verbatim,",
+    "JavaScript camelCases it. The CLI exposes flags rather than a call, so it is",
+    "not covered here.",
+    "",
+    "Add an option here before implementing it and watch the runtimes fail.",
+    "`runtime_only` records options a runtime boundary dictates, with the reason;",
+    "`waived` records missing ones. The tests fail on an entry that outlives its",
+    "reason, so neither can grow quietly."
+  ],
+  "options": [
+    {
+      "name": "annotations",
+      "$comment": "Caller-provided semantic ranges composed into the event stream."
+    },
+    {
+      "name": "rainbow_brackets",
+      "$comment": "Decorate nested brackets with their depth."
+    },
+    {
+      "name": "budget",
+      "$comment": "Bound the render in query matches and in wall clock."
+    },
+    {
+      "name": "on_unresolved",
+      "$comment": "Called once per call for each catalog language injected inside the document that could not be loaded, with its catalog id. The block it names stays plain. JavaScript warns once per process for a language when no callback is given."
+    }
+  ],
+  "runtime_only": {
+    "$comment": "Options one runtime accepts because its boundary dictates it, each with the reason. The tests fail on a name the runtime no longer accepts.",
+    "rust": {
+      "cancellation": "Abandons a render when a caller-owned atomic flag is set, from another thread. JavaScript highlights synchronously on the calling thread, and Elixir's NIF bounds a render with `budget`, so neither has a second thread to set the flag from."
+    }
+  },
+  "waived": {
+    "$comment": "Options a runtime does not offer yet. Empty, and the tests fail on an entry that is no longer needed, so it can only shrink."
+  }
+}

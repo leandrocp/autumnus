@@ -127,9 +127,16 @@ async function discoverInstalledManifests(
   return manifests;
 }
 
-function resolveInstalledManifests(): Promise<Map<string, URL>> {
+/**
+ * The manifests of every installed language package, discovered once per
+ * working directory and set of package roots. `refresh` discovers again, for a
+ * package installed after the last discovery.
+ */
+function resolveInstalledManifests(refresh = false): Promise<Map<string, URL>> {
   const cwd = process.cwd();
-  if (installed?.cwd === cwd && installed.roots === packageRoots.size) return installed.manifests;
+  if (!refresh && installed?.cwd === cwd && installed.roots === packageRoots.size) {
+    return installed.manifests;
+  }
   const previous = installed?.manifests ?? Promise.resolve(new Map<string, URL>());
   const roots = [...packageRoots];
   const manifests = previous.then(async (known) => {
@@ -142,7 +149,10 @@ function resolveInstalledManifests(): Promise<Map<string, URL>> {
 }
 
 async function resolveInstalledManifest(packageName: string): Promise<URL | undefined> {
-  return (await resolveInstalledManifests()).get(packageName);
+  return (
+    (await resolveInstalledManifests()).get(packageName) ??
+    (await resolveInstalledManifests(true)).get(packageName)
+  );
 }
 
 export const nodeRuntime: RuntimeEnvironment = {

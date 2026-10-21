@@ -533,6 +533,20 @@ export interface HighlightOptions<T = unknown> {
    * ```
    */
   budget?: Budget;
+  /**
+   * Called with the id of each language injected inside the document that
+   * could not be loaded, once per language per call. The block it names stays
+   * plain.
+   *
+   * Without it, Lumis warns through `console.warn` the first time a language
+   * is missed in the process, and not again.
+   *
+   * ```ts
+   * const missing = new Set<string>();
+   * hl.highlight(source, "markdown", formatter, { onUnresolved: (id) => missing.add(id) });
+   * ```
+   */
+  onUnresolved?: (language: string) => void;
 }
 
 /**

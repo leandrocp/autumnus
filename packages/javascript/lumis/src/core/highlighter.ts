@@ -1,5 +1,4 @@
 import type {
-  Budget,
   BudgetExhausted,
   HighlightCallback,
   HighlightEvent,
@@ -244,6 +243,7 @@ function runHighlightIter(
   const events = runtime.highlightEvents(source, loaded, {
     rainbowBrackets: options.rainbowBrackets,
     budget: options.budget,
+    onUnresolved: options.onUnresolved,
   });
   const bytes = buildSourceIndex(source).sourceBytes;
   const scopeStack: ScopeLayer[] = [];
@@ -295,6 +295,7 @@ function runHighlightEvents<T>(
     {
       rainbowBrackets: options.rainbowBrackets,
       budget: options.budget,
+      onUnresolved: options.onUnresolved,
     },
     report,
   );
@@ -351,7 +352,7 @@ export function highlightIter(
 export function highlightEvents(
   source: string,
   language: LanguageRef | undefined,
-  options?: { rainbowBrackets?: boolean; budget?: Budget },
+  options?: Omit<HighlightOptions, "annotations">,
 ): LumisHighlightEvent[];
 export function highlightEvents<T>(
   source: string,

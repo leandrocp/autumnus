@@ -66,6 +66,59 @@ A language that cannot be loaded costs its own block, not the document. A
 thousand-line file still highlights when one fenced block names something the
 project never installed; that block stays plain.
 
+### Languages a document named but could not load
+
+Pass `on_unresolved` to learn which ones those were. It is called once per
+language per call, with the language's id from the
+[catalog](/reference/languages). A name that is not a language at all, such as
+the `module` in `<script type="module">`, is not reported.
+
+<Tabs groupId="runtime" persist items={['JavaScript / TypeScript', 'Rust', 'Elixir']}>
+  <Tab value="JavaScript / TypeScript">
+
+```js
+const missing = new Set();
+const html = hl.highlight(source, htmlInline({language: "markdown"}), {
+  onUnresolved: (id) => missing.add(id),
+});
+```
+
+Without `onUnresolved`, Lumis warns through `console.warn` the first time the
+process misses each language, and not again.
+
+  </Tab>
+  <Tab value="Rust">
+
+```rust
+use lumis::highlight::HighlightOptions;
+use std::cell::RefCell;
+
+let missing = RefCell::new(Vec::new());
+let report = |id: &str| missing.borrow_mut().push(id.to_string());
+let options = HighlightOptions::new().on_unresolved(&report);
+```
+
+In Rust that means a language whose Cargo feature is off.
+
+  </Tab>
+  <Tab value="Elixir">
+
+```elixir
+Lumis.highlight(source,
+  formatter: {:html_inline, language: "markdown"},
+  on_unresolved: fn id -> send(self(), {:missing_parser, id}) end
+)
+```
+
+  </Tab>
+</Tabs>
+
+A Node process that installs a parser package after a miss picks it up with
+`await hl.loadLanguage(id)`, or `languages.load([id])` for the shared runtime;
+every later document highlights that language. Highlighting alone does not look
+for packages installed since the last load, because it never waits on the file
+system.
+
 The cost is a Wasmtime compile: seven parsers take about 8 s to compile, against
 1.3 s once their compiled forms are stored. Registering an already-compiled
 parser is 3-15 ms, and about 0.3 ms after that. So the penalty is real but it is

@@ -188,6 +188,7 @@ defmodule Lumis.LumisTest do
   test "default_options/0" do
     assert [
              formatter: {:html_inline, formatter_opts},
+             on_unresolved: nil,
              budget: [match_limit: nil, time_limit: nil],
              rainbow_brackets: false,
              annotations: []
@@ -1332,6 +1333,7 @@ defmodule Lumis.LumisTest do
     test "validates valid options" do
       assert [
                formatter: {:html_inline, formatter_opts},
+               on_unresolved: nil,
                budget: [match_limit: nil, time_limit: nil],
                rainbow_brackets: false,
                annotations: []
@@ -1359,6 +1361,7 @@ defmodule Lumis.LumisTest do
     test "validates options with default values" do
       assert [
                formatter: {:html_inline, formatter_opts},
+               on_unresolved: nil,
                budget: [match_limit: nil, time_limit: nil],
                rainbow_brackets: false,
                annotations: []
@@ -1386,6 +1389,7 @@ defmodule Lumis.LumisTest do
     test "validates formatter options" do
       assert [
                formatter: {:html_inline, formatter_opts},
+               on_unresolved: nil,
                budget: [match_limit: nil, time_limit: nil],
                rainbow_brackets: false,
                annotations: []
@@ -1428,6 +1432,7 @@ defmodule Lumis.LumisTest do
                       theme: nil,
                       structure: :block
                     ]},
+                 on_unresolved: nil,
                  budget: [match_limit: nil, time_limit: nil],
                  rainbow_brackets: false,
                  annotations: [],
@@ -1446,6 +1451,7 @@ defmodule Lumis.LumisTest do
     test "copies deprecated language into formatter language" do
       assert [
                formatter: {:html_inline, formatter_opts},
+               on_unresolved: nil,
                budget: [match_limit: nil, time_limit: nil],
                rainbow_brackets: false,
                annotations: [],
@@ -1475,6 +1481,7 @@ defmodule Lumis.LumisTest do
       capture_io(:stderr, fn ->
         assert [
                  formatter: {:html_inline, formatter_opts},
+                 on_unresolved: nil,
                  budget: [match_limit: nil, time_limit: nil],
                  rainbow_brackets: false,
                  annotations: [],
