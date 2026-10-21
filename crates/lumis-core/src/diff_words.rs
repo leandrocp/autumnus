@@ -172,7 +172,7 @@ fn pair_lines(
     // when they qualify as a pair, else 0. `best[i][j]` is the most tokens the
     // first `i` removed lines and the first `j` added lines can share. Both are
     // built a row at a time so `stop` bounds how large they get.
-    let mut kept = Vec::with_capacity(rows * columns);
+    let mut kept = Vec::new();
     let mut best = vec![0usize; columns + 1];
     for (i, old_line) in old.iter().enumerate() {
         if stop() {

@@ -58,7 +58,7 @@ export function diffWordRanges(
     while (split < end && lines[split]!.kind === "removed") split += 1;
     const ran = diffRun(sourceBytes, lines.slice(start, split), lines.slice(split, end), stop);
     if (!ran) return undefined;
-    ranges.push(...ran);
+    for (const range of ran) ranges.push(range);
     start = end;
   }
   return ranges;
