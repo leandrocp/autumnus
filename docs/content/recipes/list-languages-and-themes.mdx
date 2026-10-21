@@ -6,8 +6,9 @@ description: Inspect available languages and themes across Lumis runtimes.
 import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
 
 
-A language is the same record everywhere, sorted by id: `id`, `name`,
-`aliases`, `extensions`, `globs`, `emacsModes` and `shebangs`.
+Language metadata includes `id`, `name`, `parser`, `aliases`, `extensions`,
+`globs`, Emacs modes and shebangs. Lists are sorted by id. JavaScript also
+includes the npm parser `packageName`.
 
 `themes.available()` and `Lumis.Theme.available/0` return theme names and
 appearances. Rust's `themes::available()` returns complete themes. Use
@@ -140,6 +141,60 @@ Lumis.Theme.get("catppuccin_frappe")
 lumis languages show js
 lumis themes show catppuccin_frappe
 ```
+
+  </Tab>
+</Tabs>
+
+## Find the parser package
+
+A language id is not always its parser name. EJS and ERB both use
+`embedded-template`; MDX uses `markdown`. Read `parser` rather than building a
+package name from the language id. This lookup does not load the parser.
+
+<Tabs groupId="runtime" persist items={['JavaScript / TypeScript', 'Rust', 'Elixir']}>
+  <Tab value="JavaScript / TypeScript">
+
+```js
+import * as languages from '@lumis-sh/lumis/languages';
+
+languages.get('ejs')?.parser      // 'embedded-template'
+languages.get('ejs')?.packageName // '@lumis-sh/wasm-embedded-template'
+languages.get('mdx')?.packageName // '@lumis-sh/wasm-markdown'
+languages.get('text')?.parser    // undefined
+```
+
+Plaintext has neither `parser` nor `packageName`.
+
+  </Tab>
+  <Tab value="Rust">
+
+```rust
+use lumis::languages;
+
+if let Some(language) = languages::get("ejs") {
+    assert_eq!(language.parser, Some("embedded-template"));
+}
+assert_eq!(languages::get("text").unwrap().parser, None);
+```
+
+Plaintext has `parser: None`.
+
+  </Tab>
+  <Tab value="Elixir">
+
+```elixir
+Lumis.Languages.get("ejs").parser
+# "embedded-template"
+
+parser = Lumis.Languages.get("ejs").parser
+"lumis_wasm_" <> String.replace(parser, "-", "_")
+# "lumis_wasm_embedded_template"
+
+Lumis.Languages.get("text").parser
+# nil
+```
+
+Plaintext has `parser: nil` and needs no parser package.
 
   </Tab>
 </Tabs>

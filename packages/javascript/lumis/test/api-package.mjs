@@ -26,9 +26,16 @@ try {
     const modules = { languages, themes, html };
 
     await test(`${format} follows the shared language lookup contract`, () => {
-      assert.ok(lookupCases.length >= 24);
-      for (const { input, expected } of lookupCases) {
-        assert.equal(languages.get(input)?.id ?? null, expected, JSON.stringify(input));
+      assert.ok(lookupCases.length >= 27);
+      for (const { input, expected, parser, packageName } of lookupCases) {
+        const language = languages.get(input);
+        assert.equal(language?.id ?? null, expected, JSON.stringify(input));
+        assert.equal(language?.parser ?? null, parser, JSON.stringify(input));
+        assert.equal(language?.packageName ?? null, packageName, JSON.stringify(input));
+        assert.deepEqual(
+          languages.available().find(({ id }) => id === expected),
+          language,
+        );
       }
     });
 

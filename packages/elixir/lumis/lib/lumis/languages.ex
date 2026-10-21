@@ -41,6 +41,7 @@ defmodule Lumis.Languages do
       %{
         id: "elixir",
         name: "Elixir",
+        parser: "elixir",
         aliases: [],
         extensions: ["*.ex", "*.exs"],
         globs: ["*.ex", "*.exs"],

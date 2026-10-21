@@ -1039,6 +1039,7 @@ defmodule Lumis do
   @type language_info :: %{
           id: String.t(),
           name: String.t(),
+          parser: String.t() | nil,
           aliases: [String.t()],
           extensions: [String.t()],
           globs: [String.t()],
