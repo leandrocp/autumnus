@@ -216,6 +216,6 @@
     "typescript": "^6.0.3",
     "vite": "^8.3.4",
     "vitest": "^5.0.2",
-    "web-tree-sitter": "0.26.13"
+    "web-tree-sitter": "0.27.1"
   }
 }

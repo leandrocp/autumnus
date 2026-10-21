@@ -112,6 +112,23 @@ test.describe("browser runtime", () => {
     }
   });
 
+  test("returns every render within the fixture's bound", () => {
+    const bounded = fixtureNames.flatMap((fixture) => {
+      const metadata: Pick<ConformanceFixture, "returnsWithin"> = JSON.parse(
+        readFixture(fixture, "fixture.json"),
+      );
+      return metadata.returnsWithin === undefined
+        ? []
+        : [[fixture, metadata.returnsWithin] as const];
+    });
+    expect(bounded.length).toBeGreaterThan(0);
+    for (const [fixture, returnsWithin] of bounded) {
+      for (const run of [result, reloadedResult]) {
+        expect(run.slowestRenders[fixture], fixture).toBeLessThanOrEqual(returnsWithin);
+      }
+    }
+  });
+
   test("supports a stateful custom formatter", () => {
     const custom = result.customFormatter;
 
