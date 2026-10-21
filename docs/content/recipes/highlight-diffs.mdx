@@ -164,9 +164,9 @@ Each run of removed lines followed by added lines is compared line by line.
 A removed line is paired with the added line it shares the most words with, in
 order, and only when each keeps at least a third of its words. A line with no
 such partner, like `Logger.debug` above, or one rewritten from scratch, marks
-nothing beyond its line colour. Comparing the lines counts against the
-highlight [budget](/advanced/budget), so a run too large to compare in time ends
-the render the way any other exhausted budget does.
+nothing beyond its line colour. A run over 1000 bytes on either side is left
+unmarked, and comparing the rest counts against the highlight
+[budget](/advanced/budget).
 
 Themes don't define a colour for changed words, so Lumis derives one from the
 theme's `diff.minus` and `diff.plus`: the same hue, a step lighter on a dark

@@ -41,8 +41,9 @@ pub struct DiffWordRange {
 /// when `stop` asked to give up.
 ///
 /// `lines` must be in source order. Pairing a run compares every removed line
-/// with every added one, so its cost grows with the product of both sides;
-/// `stop` is consulted throughout and is what bounds it.
+/// with every added one, so its cost grows with the product of both sides.
+/// A run over 1000 bytes a side is left unmarked, and `stop` is consulted
+/// throughout the rest.
 #[doc(hidden)]
 #[must_use]
 pub fn diff_word_ranges(
@@ -105,6 +106,15 @@ struct Comparison {
     kept: usize,
 }
 
+/// Runs larger than this on either side, in bytes of line content, are left
+/// unmarked. Comparing two lines builds a table as large as the product of
+/// their token counts, and it fills faster than `stop` can bound its memory.
+const MAX_RUN_SIDE_BYTES: usize = 1000;
+
+fn side_bytes(lines: &[DiffLine]) -> usize {
+    lines.iter().map(|line| line.content.len()).sum()
+}
+
 fn diff_run(
     source: &str,
     removed: &[DiffLine],
@@ -114,6 +124,9 @@ fn diff_run(
 ) -> Option<()> {
     if stop() {
         return None;
+    }
+    if side_bytes(removed) > MAX_RUN_SIDE_BYTES || side_bytes(added) > MAX_RUN_SIDE_BYTES {
+        return Some(());
     }
     // A line with no words never pairs. Leaving it out of the pairing table
     // keeps a run of blank lines from filling it faster than `stop` is asked.

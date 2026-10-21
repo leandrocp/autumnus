@@ -1979,7 +1979,7 @@ mod tests {
     }
 
     #[test]
-    fn word_diff_respects_the_time_budget() {
+    fn word_diff_leaves_a_run_over_the_size_cap_unmarked() {
         let runtime = Runtime::with_worker_limit(1).unwrap();
         runtime
             .load_language(LanguageSpec {
@@ -1996,7 +1996,7 @@ mod tests {
             .unwrap();
 
         // Every removed line resembles every added one, so pairing the run
-        // compares all of them: seconds of work without a budget.
+        // would compare all of them: seconds of work, were it not skipped.
         let side = |marker: char| -> String {
             (0..3000).fold(String::new(), |mut side, i| {
                 let _ = writeln!(side, "{marker}let value_{i} = compute(alpha, beta, gamma);");
@@ -2013,7 +2013,6 @@ mod tests {
                     "diff",
                     &HighlightOptions {
                         word_diff: true,
-                        time_limit_ms: Some(100),
                         ..HighlightOptions::default()
                     },
                 )
@@ -2022,14 +2021,14 @@ mod tests {
         });
         let (elapsed, output) = receiver
             .recv_timeout(Duration::from_secs(5))
-            .expect("a 100 ms word diff exceeded the five-second watchdog");
+            .expect("word diff exceeded the five-second watchdog");
         worker.join().unwrap();
 
         assert!(
-            elapsed < Duration::from_millis(500),
+            elapsed < Duration::from_secs(2),
             "word diff took {elapsed:?}"
         );
-        assert_eq!(output.budget, Some(BudgetExhausted::Time));
+        assert_eq!(output.budget, None);
     }
 
     #[test]

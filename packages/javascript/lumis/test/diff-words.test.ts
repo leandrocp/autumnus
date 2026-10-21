@@ -89,7 +89,7 @@ function markEvent(
 }
 
 // Every removed line resembles every added one, so pairing a run of them
-// compares all of them: seconds of work without a budget.
+// would compare all of them: seconds of work, were it not skipped.
 function largeSide(marker: string): string {
   return Array.from(
     { length: 3000 },
@@ -187,19 +187,16 @@ describe("changed words", () => {
       expect(plain.replaceAll(/<[^>]+>/gu, "")).toBe(marked.replaceAll(/<[^>]+>/gu, ""));
     });
 
-    it("compares a large run inside the time budget", () => {
+    it("leaves a run over the size cap unmarked", () => {
       const started = performance.now();
       const html = hl.highlight(
         `${largeSide("-")}${largeSide("+")}`,
         htmlLinked({ language: diff }),
-        {
-          wordDiff: true,
-          budget: { timeLimit: 100 },
-        },
+        { wordDiff: true },
       );
 
-      expect(performance.now() - started).toBeLessThan(1000);
-      expect(html).toContain('data-lumis-budget="time"');
+      expect(performance.now() - started).toBeLessThan(2000);
+      expect(html).not.toContain("data-lumis-budget");
       expect(html).not.toContain("l-diff-word");
     });
 

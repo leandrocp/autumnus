@@ -38,7 +38,8 @@ interface Comparison {
 /**
  * The changed ranges of every run in `lines`, in source order, or `undefined`
  * when `stop` asked to give up. Pairing a run compares every removed line with
- * every added one, so `stop` is consulted throughout and is what bounds it.
+ * every added one. A run over 1000 bytes a side is left unmarked, and `stop`
+ * is consulted throughout the rest.
  *
  * The port of `diff_word_ranges` in `crates/lumis-core/src/diff_words.rs`;
  * `test/diff-words.test.ts` holds both to `fixtures/diff-words.json`. The
@@ -76,6 +77,14 @@ function runEnd(lines: readonly DiffLine[], start: number): number {
   return end;
 }
 
+// As in Rust, runs larger than this on either side, in bytes of line content,
+// are left unmarked.
+const MAX_RUN_SIDE_BYTES = 1000;
+
+function sideBytes(lines: readonly DiffLine[]): number {
+  return lines.reduce((total, line) => total + line.endByte - line.startByte, 0);
+}
+
 function diffRun(
   sourceBytes: Uint8Array,
   removed: readonly DiffLine[],
@@ -83,6 +92,7 @@ function diffRun(
   stop: Stop,
 ): DiffWordRange[] | undefined {
   if (stop()) return undefined;
+  if (sideBytes(removed) > MAX_RUN_SIDE_BYTES || sideBytes(added) > MAX_RUN_SIDE_BYTES) return [];
 
   // A leading U+FEFF is source text here, and the byte offsets count it.
   const decoder = new TextDecoder("utf-8", { ignoreBOM: true });
