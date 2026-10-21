@@ -1,7 +1,15 @@
 import rehypeLumis from "@lumis-sh/rehype-lumis";
 import { htmlInline } from "@lumis-sh/lumis/formatters";
-import { bundledLanguages } from "@lumis-sh/lumis/bundles/web";
+import javascript from "@lumis-sh/wasm-javascript";
+import rust from "@lumis-sh/wasm-rust";
 import githubLight from "@lumis-sh/themes/github_light";
+
+function configuredRehypeLumis() {
+  return rehypeLumis.call(this, {
+    formatter: (language) => htmlInline({ language, theme: githubLight }),
+    languages: [javascript, rust],
+  });
+}
 
 export default {
   title: "Docusaurus + Lumis",
@@ -22,15 +30,7 @@ export default {
         docs: {
           routeBasePath: "/",
           sidebarPath: "./sidebars.js",
-          rehypePlugins: [
-            [
-              rehypeLumis,
-              {
-                formatter: (language) => htmlInline({ language, theme: githubLight }),
-                languages: [bundledLanguages],
-              },
-            ],
-          ],
+          rehypePlugins: [configuredRehypeLumis],
         },
         blog: false,
         theme: {

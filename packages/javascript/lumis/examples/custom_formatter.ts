@@ -1,5 +1,5 @@
-import { createHighlighter, highlightIter } from "../src/index.ts";
-import type { Formatter } from "../src/formatters.ts";
+import { createHighlighter, highlightIter } from "@lumis-sh/lumis";
+import type { Formatter } from "@lumis-sh/lumis/formatters";
 import {
   closingTags,
   escape,
@@ -8,9 +8,9 @@ import {
   openSpanTag,
   styleToCss,
   wrapLine,
-} from "../src/formatter/html.ts";
-import html from "../langs/html.ts";
-import javascript from "../langs/javascript.ts";
+} from "@lumis-sh/lumis/formatters/html";
+import { html } from "@lumis-sh/wasm-html";
+import { javascript } from "@lumis-sh/wasm-javascript";
 import dracula from "@lumis-sh/themes/dracula";
 
 class InteractiveDocsFormatter implements Formatter {

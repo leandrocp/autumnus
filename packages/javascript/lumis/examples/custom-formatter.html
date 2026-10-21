@@ -353,7 +353,7 @@
       <p class="eyebrow">Custom formatter</p>
       <h1>Interactive token inspector</h1>
       <p class="lede">
-        A custom formatter that calls <code>highlightIter()</code> inside <code>format()</code> to build
+        A custom formatter that calls <code>highlightIter()</code> inside <code>render()</code> to build
         annotated HTML with per-token metadata you can inspect, including injected-language tokens.
       </p>
       <div class="facts">
@@ -460,8 +460,9 @@
       styleToCss,
       wrapLine,
     } from '@lumis-sh/lumis/formatters/html'
-    import html from '@lumis-sh/lumis/langs/html'
-    import javascript from '@lumis-sh/lumis/langs/javascript'
+    import { html } from '@lumis-sh/wasm-html'
+    import { javascript } from '@lumis-sh/wasm-javascript'
+    import { regex } from '@lumis-sh/wasm-regex'
     import dracula from '@lumis-sh/themes/dracula'
 
     const source = `<article class="profile-card">
@@ -488,12 +489,12 @@ import {
   styleToCss,
   wrapLine,
 } from '@lumis-sh/lumis/formatters/html'
-import html from '@lumis-sh/lumis/langs/html'
+import { html } from '@lumis-sh/wasm-html'
 import dracula from '@lumis-sh/themes/dracula'
 
 const docsFormatter: Formatter = {
   language: html,
-  format(source) {
+  render(source) {
     let tokenId = 0
     const lines = ['']
 
@@ -534,7 +535,7 @@ const docsFormatter: Formatter = {
 
     const docsFormatter = {
       language: html,
-      format(source) {
+      render(source) {
         let tokenId = 0
         const lines = ['']
 
@@ -586,7 +587,7 @@ const docsFormatter: Formatter = {
     const tokenFg = document.getElementById('token-fg')
     const tokenBg = document.getElementById('token-bg')
 
-    const hl = await createHighlighter({ languages: [html, javascript] })
+    const hl = await createHighlighter({ languages: [html, javascript, regex] })
 
     formatterSourcePreview.innerHTML = hl.highlight(
       formatterSource,

@@ -10,9 +10,11 @@
     "@docusaurus/core": "^3.9.2",
     "@docusaurus/preset-classic": "^3.9.2",
     "@mdx-js/react": "^3.1.1",
-    "@lumis-sh/lumis": "^0.3.0",
-    "@lumis-sh/rehype-lumis": "^0.1.1",
-    "@lumis-sh/themes": "^0.0.3",
+    "@lumis-sh/lumis": "^0.9.4",
+    "@lumis-sh/rehype-lumis": "^0.3.0",
+    "@lumis-sh/themes": "^0.4.0",
+    "@lumis-sh/wasm-javascript": "^0.26.4",
+    "@lumis-sh/wasm-rust": "^0.26.5",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   }

@@ -53,6 +53,22 @@ then installs them with Lumis in a temporary consumer outside the workspace. It
 checks their published peer requirements and verifies that application-created
 formatters preserve code-block attributes through each integration.
 
+`mise run test-examples` installs every standalone JavaScript example in a
+temporary directory outside the workspace, overriding Lumis, themes, integrations
+and the native addon with locally built tarballs. Parser packages come from npm,
+as they do for someone running an example. The task checks that each example's
+declared version ranges accept the workspace versions, runs its render and build
+scripts, and compares rendered HTML with the checked-in `output.html` files.
+JavaScript CI runs this as a separate job.
+
+Refresh those HTML files with `mise run examples-regen`. Both tasks accept example
+paths relative to `packages/javascript` to narrow a run:
+
+```sh
+mise run test-examples react/examples/react
+mise run examples-regen lumis/examples/npm-wasm-node
+```
+
 Cross-runtime output compatibility and browser support have dedicated suites:
 
 ```sh

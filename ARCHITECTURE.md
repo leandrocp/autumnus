@@ -75,6 +75,12 @@ module-local registry; a second copy cannot recognize the application's
 formatters when rehype or markdown-it adds code-block attributes. Vite uses
 rehype for that step.
 
+The runnable examples remain standalone npm projects, outside the pnpm
+workspace. They declare their parser packages explicitly. `test-examples`
+installs isolated copies against packed workspace libraries and the local native
+addon, then builds or renders each project. The same runner regenerates the
+checked-in HTML through `examples-regen`.
+
 ## HTML line contract
 
 HTML formatters render content-only `span.l-line` elements, separated by LF text

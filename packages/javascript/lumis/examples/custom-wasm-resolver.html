@@ -18,7 +18,7 @@
     <section class="rounded-[28px] border border-slate-800 bg-slate-950/70 p-6 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur md:p-8">
       <p class="mb-3 text-[11px] uppercase tracking-[0.3em] text-cyan-300">WASM delivery</p>
       <h1 class="text-2xl font-semibold text-white mb-2">Custom WASM Resolver</h1>
-      <p class="text-slate-400 mb-6">Override where WASM binaries are fetched from — use a different CDN or serve them locally.</p>
+      <p class="text-slate-400 mb-6">Parsers normally come from imported npm packages. This example keeps the installed queries but explicitly fetches the matching parser from unpkg.</p>
       <div id="output"></div>
     </section>
   </main>
@@ -26,7 +26,7 @@
   <script type="module">
     import { createHighlighter } from '@lumis-sh/lumis'
     import { htmlInline } from '@lumis-sh/lumis/formatters'
-    import javascript from '@lumis-sh/lumis/langs/javascript'
+    import { javascript } from '@lumis-sh/wasm-javascript'
     import tokyonightMoon from '@lumis-sh/themes/tokyonight_moon'
 
     const output = document.getElementById('output')
@@ -50,9 +50,14 @@
     //   import * as languages from '@lumis-sh/lumis/languages';
     //   languages.configureWasmResolver((_language, wasm) => `/wasm/${wasm.name}.wasm`)
 
-    // Per-instance resolver: switch from the default jsDelivr resolver to unpkg
+    // Omit the imported WASM URL so the resolver, not the bundled asset, supplies the bytes.
+    const javascriptFromResolver = {
+      ...javascript,
+      wasm: undefined,
+    }
+
     const hl = await createHighlighter({
-      languages: [javascript],
+      languages: [javascriptFromResolver],
       wasmResolver: (_language, wasm) =>
         `https://unpkg.com/${wasm.packageName}@${wasm.version}/${wasm.name}.wasm`,
     })

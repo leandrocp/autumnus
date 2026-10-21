@@ -5,7 +5,8 @@ import { compile, run } from "@mdx-js/mdx";
 import * as runtime from "react/jsx-runtime";
 import rehypeLumis from "@lumis-sh/rehype-lumis";
 import { htmlInline } from "@lumis-sh/lumis/formatters";
-import { bundledLanguages } from "@lumis-sh/lumis/bundles/web";
+import javascript from "@lumis-sh/wasm-javascript";
+import rust from "@lumis-sh/wasm-rust";
 import githubLight from "@lumis-sh/themes/github_light";
 
 const source = `# Demo
@@ -30,7 +31,7 @@ const compiled = await compile(source, {
       rehypeLumis,
       {
         formatter: (language) => htmlInline({ language, theme: githubLight }),
-        languages: [bundledLanguages],
+        languages: [javascript, rust],
       },
     ],
   ],
