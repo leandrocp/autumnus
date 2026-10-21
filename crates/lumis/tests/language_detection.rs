@@ -16,6 +16,7 @@ struct DetectionCase {
 struct LookupCase {
     input: String,
     expected: Option<String>,
+    parser: Option<String>,
 }
 
 #[test]
@@ -23,11 +24,26 @@ fn shared_language_lookup_cases() {
     let cases: Vec<LookupCase> =
         serde_json::from_str(include_str!("../../../fixtures/language-lookup.json"))
             .expect("language lookup fixture parses");
-    assert!(cases.len() >= 24, "language lookup fixture looks truncated");
+    assert!(cases.len() >= 27, "language lookup fixture looks truncated");
 
     for case in cases {
-        let actual = languages::get(&case.input).map(|language| language.id);
-        assert_eq!(actual, case.expected.as_deref(), "{:?}", case.input);
+        let actual = languages::get(&case.input);
+        assert_eq!(
+            actual.as_ref().map(|language| language.id),
+            case.expected.as_deref(),
+            "{:?}",
+            case.input
+        );
+        assert_eq!(
+            actual.as_ref().and_then(|language| language.parser),
+            case.parser.as_deref(),
+            "{:?}",
+            case.input
+        );
+        let listed = languages::available()
+            .into_iter()
+            .find(|language| Some(language.id) == case.expected.as_deref());
+        assert_eq!(listed, actual, "{:?}", case.input);
     }
 }
 

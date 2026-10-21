@@ -33,7 +33,14 @@ output.textContent = JSON.stringify({
   aliases: legacy.loadLanguages === languages.load && legacy.availableThemes === themes.available,
   guess: languages.guess("app.js"),
   language: languages.get("js")?.id,
-  lookup: window.lookupInputs.map((input) => languages.get(input)?.id ?? null),
+  lookup: window.lookupInputs.map((input) => {
+    const language = languages.get(input);
+    return {
+      id: language?.id ?? null,
+      parser: language?.parser ?? null,
+      packageName: language?.packageName ?? null,
+    };
+  }),
   loaded: legacy.loadedLanguages().includes("json"),
   theme: themes.get("dracula")?.name,
   highlighted: rendered.includes("<span") && rendered.includes("42"),

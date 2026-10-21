@@ -129,7 +129,7 @@
     },
     {
       "name": "language_info",
-      "$comment": "Resolve names, aliases, extensions and paths using Rust Language::from_str. Empty input is plaintext; unknown input is absent. Shared cases: language-lookup.json.",
+      "$comment": "Resolve names, aliases, extensions and paths using Rust Language::from_str. Metadata includes the parser name, absent for plaintext; JavaScript also includes the npm packageName, and Elixir the Hex package_name. Empty input is plaintext; unknown input is absent. Shared cases: language-lookup.json.",
       "spelling": {
         "rust": [
           "languages::get",
