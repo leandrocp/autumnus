@@ -121,6 +121,8 @@ struct FixtureMetadata {
     #[serde(default)]
     rainbow_brackets: bool,
     #[serde(default)]
+    word_diff: bool,
+    #[serde(default)]
     annotations: Vec<FixtureAnnotation>,
     #[serde(default)]
     structure: FixtureStructure,
@@ -215,6 +217,7 @@ struct FixtureAnnotation {
 #[serde(tag = "type", rename_all = "camelCase")]
 enum SerializableDecoration {
     RainbowBracket { depth: usize },
+    DiffWord { kind: String },
 }
 
 struct Fixture {
@@ -280,6 +283,7 @@ fn check_events(fixture: &Fixture) {
             HighlightOptions::new()
                 .annotations(&annotations)
                 .rainbow_brackets(fixture.metadata.rainbow_brackets)
+                .word_diff(fixture.metadata.word_diff)
                 .budget(fixture.metadata.budget.into()),
         )
     })
@@ -302,6 +306,13 @@ fn check_events(fixture: &Fixture) {
                 decoration: lumis_core::events::Decoration::RainbowBracket { depth },
             } => SerializableHighlightEvent::DecorationStart {
                 decoration: SerializableDecoration::RainbowBracket { depth },
+            },
+            lumis_core::events::HighlightEvent::DecorationStart {
+                decoration: lumis_core::events::Decoration::DiffWord { kind },
+            } => SerializableHighlightEvent::DecorationStart {
+                decoration: SerializableDecoration::DiffWord {
+                    kind: kind.as_str().to_string(),
+                },
             },
             lumis_core::events::HighlightEvent::DecorationEnd => {
                 SerializableHighlightEvent::DecorationEnd
@@ -439,6 +450,7 @@ fn check_bbcode(fixture: &Fixture) {
 fn render_options(fixture: &Fixture) -> HighlightOptions<'static, 'static, ()> {
     HighlightOptions::new()
         .rainbow_brackets(fixture.metadata.rainbow_brackets)
+        .word_diff(fixture.metadata.word_diff)
         .budget(fixture.metadata.budget.into())
 }
 

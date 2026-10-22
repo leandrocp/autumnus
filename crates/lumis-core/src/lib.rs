@@ -6,6 +6,8 @@ pub mod annotations;
 #[doc(hidden)]
 pub mod decorations;
 #[doc(hidden)]
+pub mod diff_words;
+#[doc(hidden)]
 #[cfg(feature = "rustler")]
 pub mod elixir;
 #[doc(hidden)]

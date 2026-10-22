@@ -35,6 +35,7 @@ defmodule Lumis.Formatter do
           | {:annotation_start, %{range: {non_neg_integer(), non_neg_integer()}, data: data}}
           | :annotation_end
           | {:decoration_start, Lumis.Decoration.RainbowBracket.t()}
+          | {:decoration_start, Lumis.Decoration.DiffWord.t()}
           | :decoration_end
 
   @doc "Renders a unified event stream for `source`."

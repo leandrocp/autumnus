@@ -243,6 +243,7 @@ function runHighlightIter(
   const loaded = resolveLoadedLanguage(runtime, language);
   const events = runtime.highlightEvents(source, loaded, {
     rainbowBrackets: options.rainbowBrackets,
+    wordDiff: options.wordDiff,
     budget: options.budget,
   });
   const bytes = buildSourceIndex(source).sourceBytes;
@@ -294,6 +295,7 @@ function runHighlightEvents<T>(
     loaded,
     {
       rainbowBrackets: options.rainbowBrackets,
+      wordDiff: options.wordDiff,
       budget: options.budget,
     },
     report,
@@ -351,7 +353,7 @@ export function highlightIter(
 export function highlightEvents(
   source: string,
   language: LanguageRef | undefined,
-  options?: { rainbowBrackets?: boolean; budget?: Budget },
+  options?: { rainbowBrackets?: boolean; wordDiff?: boolean; budget?: Budget },
 ): LumisHighlightEvent[];
 export function highlightEvents<T>(
   source: string,

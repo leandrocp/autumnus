@@ -530,6 +530,12 @@ export interface HighlightOptions<T = unknown> {
   /** Render nested brackets with rainbow-bracket decorations. */
   rainbowBrackets?: boolean;
   /**
+   * In a document highlighted as `diff`, mark the words that changed between
+   * removed lines and the added lines that replace them. Other languages
+   * ignore it.
+   */
+  wordDiff?: boolean;
+  /**
    * Bound the work this render may do, in query matches and in wall clock:
    *
    * ```ts
@@ -574,6 +580,14 @@ export type Decoration =
       type: "rainbowBracket";
       /** Zero-based nesting depth, before built-ins cycle through six theme scopes. */
       depth: number;
+    }
+  | {
+      type: "diffWord";
+      /**
+       * Which side of a diff the text is on: words only the removed lines have,
+       * or words only the added lines have.
+       */
+      kind: "removed" | "added";
     };
 
 /** Syntax and Lumis-owned decoration events, before caller annotations are composed. */

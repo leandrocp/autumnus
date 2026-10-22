@@ -6,6 +6,7 @@ import type {
   LanguageRef,
   Theme,
 } from "../types.js";
+import type { DiffWordKind } from "../diff-word-style.js";
 import { formatHtmlLines } from "./html.js";
 
 /**
@@ -39,6 +40,7 @@ export function formatHtmlSpans(
     language: LanguageRef | undefined;
     theme: Theme | undefined;
     openSpan: (span: HighlightSpan, style: HighlightStyle | undefined) => string;
+    openDiffWord?: (kind: DiffWordKind) => string;
   },
 ): string {
   return formatHtmlLines(source, events, {

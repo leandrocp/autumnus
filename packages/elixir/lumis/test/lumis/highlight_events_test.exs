@@ -1,6 +1,7 @@
 defmodule Lumis.HighlightEventsTest do
   use ExUnit.Case, async: true
 
+  alias Lumis.Decoration.DiffWord
   alias Lumis.Decoration.RainbowBracket
 
   test "source events cover the source exactly, in order, inside balanced scopes" do
@@ -55,6 +56,36 @@ defmodule Lumis.HighlightEventsTest do
 
     refute Enum.any?(
              Lumis.highlight_events!(source, "elixir"),
+             &match?({:decoration_start, _}, &1)
+           )
+  end
+
+  test "word diff marks the words that changed between removed and added lines" do
+    source = "@@ -1 +1 @@\n-x = foo(1)\n+x = foo(2)\n"
+
+    changed =
+      source
+      |> Lumis.highlight_events!("diff", word_diff: true)
+      |> Enum.chunk_every(2, 1, :discard)
+      |> Enum.flat_map(fn
+        [{:decoration_start, %DiffWord{kind: kind}}, {:source, %{start: start, end: stop}}] ->
+          [{kind, binary_part(source, start, stop - start)}]
+
+        _pair ->
+          []
+      end)
+
+    assert changed == [removed: "1", added: "2"]
+
+    refute Enum.any?(
+             Lumis.highlight_events!(source, "diff"),
+             &match?({:decoration_start, _}, &1)
+           )
+  end
+
+  test "word diff leaves languages other than diff alone" do
+    refute Enum.any?(
+             Lumis.highlight_events!("x = foo(1)", "elixir", word_diff: true),
              &match?({:decoration_start, _}, &1)
            )
   end

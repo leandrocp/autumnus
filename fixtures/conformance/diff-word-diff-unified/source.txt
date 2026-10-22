@@ -1,0 +1,20 @@
+--- a/config.py
++++ b/config.py
+@@ -1,14 +1,15 @@
+ import os
+-TIMEOUT = int(os.environ.get("TIMEOUT", "30"))
++TIMEOUT = int(os.environ.get("APP_TIMEOUT", "60"))
+-one(1)
+-two(2)
++one(10)
++inserted_line = True
++two(2)
+-alpha beta gamma
++delta epsilon zeta
++new_before(1)
+-old_after(1)
+-x = 1
+
++x = 2
+-name = "café"
++name = "crème brûlée"

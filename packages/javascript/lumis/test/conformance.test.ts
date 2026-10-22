@@ -122,7 +122,11 @@ function renderWithin<T>(fixture: ConformanceFixture, render: () => T): T {
 }
 
 describe.each(conformanceFixtures.map((f) => [f.name, f]))("%s", (_name, fixture) => {
-  const options = { rainbowBrackets: fixture.rainbowBrackets, budget: fixture.budget };
+  const options = {
+    rainbowBrackets: fixture.rainbowBrackets,
+    wordDiff: fixture.wordDiff,
+    budget: fixture.budget,
+  };
   const skipped = runtime && fixture.skip?.[runtime];
   const highlight: Highlighter["highlight"] = (...args) =>
     renderWithin(fixture, () => highlighter.highlight(...args));

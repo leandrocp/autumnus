@@ -41,6 +41,8 @@ defmodule Lumis.ConformanceTest do
 
   defp rainbow_brackets(fixture), do: fixture["rainbowBrackets"] || false
 
+  defp word_diff(fixture), do: fixture["wordDiff"] || false
+
   defp structure(fixture), do: String.to_existing_atom(fixture["structure"] || "block")
 
   # An absent limit is `nil`, which keeps that limit's default.
@@ -77,6 +79,12 @@ defmodule Lumis.ConformanceTest do
     do: %{
       "type" => "decorationStart",
       "decoration" => %{"type" => "rainbowBracket", "depth" => depth}
+    }
+
+  defp serialize_event({:decoration_start, %Lumis.Decoration.DiffWord{kind: kind}}),
+    do: %{
+      "type" => "decorationStart",
+      "decoration" => %{"type" => "diffWord", "kind" => Atom.to_string(kind)}
     }
 
   defp serialize_event(:decoration_end), do: %{"type" => "decorationEnd"}
@@ -153,6 +161,7 @@ defmodule Lumis.ConformanceTest do
             Lumis.highlight_events!(fixture["source"], fixture["language"],
               annotations: annotations(fixture),
               rainbow_brackets: rainbow_brackets(fixture),
+              word_diff: word_diff(fixture),
               budget: budget(fixture)
             )
           end)
@@ -171,9 +180,10 @@ defmodule Lumis.ConformanceTest do
                 :html_inline,
                 language: fixture["language"],
                 structure: structure(fixture),
-                theme: fixture["theme"]
+                theme: conformance_theme(fixture["theme"])
               },
               rainbow_brackets: rainbow_brackets(fixture),
+              word_diff: word_diff(fixture),
               budget: budget(fixture)
             )
           end)
@@ -191,6 +201,7 @@ defmodule Lumis.ConformanceTest do
               formatter:
                 {:html_linked, language: fixture["language"], structure: structure(fixture)},
               rainbow_brackets: rainbow_brackets(fixture),
+              word_diff: word_diff(fixture),
               budget: budget(fixture)
             )
           end)
@@ -210,6 +221,7 @@ defmodule Lumis.ConformanceTest do
                 html_multi_themes_options(fixture)
               },
               rainbow_brackets: rainbow_brackets(fixture),
+              word_diff: word_diff(fixture),
               budget: budget(fixture)
             )
           end)
@@ -226,9 +238,10 @@ defmodule Lumis.ConformanceTest do
             Lumis.highlight!(fixture["source"],
               formatter: {
                 :terminal,
-                language: fixture["language"], theme: fixture["theme"]
+                language: fixture["language"], theme: conformance_theme(fixture["theme"])
               },
               rainbow_brackets: rainbow_brackets(fixture),
+              word_diff: word_diff(fixture),
               budget: budget(fixture)
             )
           end)
@@ -245,6 +258,7 @@ defmodule Lumis.ConformanceTest do
             Lumis.highlight!(fixture["source"],
               formatter: {:bbcode_scoped, language: fixture["language"]},
               rainbow_brackets: rainbow_brackets(fixture),
+              word_diff: word_diff(fixture),
               budget: budget(fixture)
             )
           end)

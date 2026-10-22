@@ -273,7 +273,10 @@ pub mod annotations {
 /// number and whether the caller asked for it to be highlighted, and the
 /// matching [`DecorationEnd`](events::HighlightEvent::DecorationEnd) closes it.
 /// A rainbow bracket instead carries its real zero-based nesting depth; the
-/// built-in formatters cycle that value through their six theme scopes.
+/// built-in formatters cycle that value through their six theme scopes. A
+/// changed word in a diff, emitted when
+/// [`HighlightOptions::word_diff`](crate::HighlightOptions::word_diff) is on,
+/// carries the [`DiffWordKind`](decorations::DiffWordKind) side it is on.
 ///
 /// ```rust
 /// use lumis::decorations::Decoration;
@@ -291,6 +294,7 @@ pub mod annotations {
 /// ));
 /// ```
 pub mod decorations {
+    pub use lumis_core::decorations::DiffWordKind;
     pub use lumis_core::events::Decoration;
 }
 
@@ -422,6 +426,7 @@ where
 {
     let syntax_options = HighlightOptions::new()
         .rainbow_brackets(options.rainbow_brackets_enabled())
+        .word_diff(options.word_diff_enabled())
         .budget(options.budget_value());
     let syntax_options = match options.cancellation_flag() {
         Some(flag) => syntax_options.cancellation(flag),

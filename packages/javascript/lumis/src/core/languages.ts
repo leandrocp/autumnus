@@ -150,7 +150,7 @@ export interface RuntimeLike {
   highlightEvents(
     source: string,
     language: LoadedLanguage,
-    options?: { rainbowBrackets?: boolean; budget?: Budget },
+    options?: { rainbowBrackets?: boolean; wordDiff?: boolean; budget?: Budget },
     /**
      * Filled in with which limit bound the render, when one did. An out
      * parameter rather than a wider return type because every caller wants the
@@ -1498,7 +1498,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
     highlightEvents(
       source: string,
       language: LoadedLanguage,
-      options: { rainbowBrackets?: boolean; budget?: Budget } = {},
+      options: { rainbowBrackets?: boolean; wordDiff?: boolean; budget?: Budget } = {},
       report?: { budget?: BudgetExhausted },
     ): LumisHighlightEvent[] {
       if (language.kind === "plaintext") {

@@ -4,7 +4,7 @@
 
 use crate::decorations::{
     compose_line_decorations, compose_line_decorations_into, rainbow_scope_index, Decoration,
-    LineSelection,
+    DiffWordKind, LineSelection,
 };
 use crate::events::HighlightEvent;
 use crate::languages::Language;
@@ -322,7 +322,7 @@ fn push_default_inline_styles(inline_styles: &mut Vec<String>, style: &Style, it
 fn push_other_theme_css_vars(
     css_vars: &mut Vec<String>,
     themes: &std::collections::HashMap<String, Theme>,
-    specialized_scope: &str,
+    style_of: StyleOf<'_>,
     css_variable_prefix: &str,
     skipped_theme: Option<&str>,
 ) {
@@ -330,8 +330,8 @@ fn push_other_theme_css_vars(
         if skipped_theme == Some(theme_name) {
             continue;
         }
-        if let Some(style) = themes[theme_name].get_style(specialized_scope) {
-            push_theme_css_vars(css_vars, css_variable_prefix, theme_name, style);
+        if let Some(style) = style_of(&themes[theme_name]) {
+            push_theme_css_vars(css_vars, css_variable_prefix, theme_name, &style);
         }
     }
 }
@@ -356,6 +356,34 @@ pub fn span_multi_themes_attrs(
         scope.to_string()
     };
 
+    multi_themes_attrs(
+        scope,
+        &|theme| theme.get_style(&specialized_scope).cloned(),
+        themes,
+        default_theme,
+        css_variable_prefix,
+        italic,
+        include_highlights,
+    )
+}
+
+/// How one theme styles the span being written.
+type StyleOf<'a> = &'a dyn Fn(&Theme) -> Option<Style>;
+
+/// [`span_multi_themes_attrs`] for a span whose style is not a scope's.
+pub(crate) fn multi_themes_attrs(
+    label: &str,
+    style_of: StyleOf<'_>,
+    themes: &std::collections::HashMap<String, Theme>,
+    default_theme: Option<&str>,
+    css_variable_prefix: &str,
+    italic: bool,
+    include_highlights: bool,
+) -> String {
+    if themes.is_empty() {
+        return String::new();
+    }
+
     let mut inline_styles = Vec::new();
     let mut css_vars = Vec::new();
 
@@ -365,7 +393,7 @@ pub fn span_multi_themes_attrs(
                 &mut inline_styles,
                 &mut css_vars,
                 themes,
-                &specialized_scope,
+                style_of,
                 css_variable_prefix,
                 italic,
             );
@@ -374,25 +402,21 @@ pub fn span_multi_themes_attrs(
             &mut inline_styles,
             &mut css_vars,
             themes,
-            &specialized_scope,
+            style_of,
             css_variable_prefix,
             default_name,
             italic,
         ),
-        None => push_other_theme_css_vars(
-            &mut css_vars,
-            themes,
-            &specialized_scope,
-            css_variable_prefix,
-            None,
-        ),
+        None => {
+            push_other_theme_css_vars(&mut css_vars, themes, style_of, css_variable_prefix, None);
+        }
     }
 
     if inline_styles.is_empty() && css_vars.is_empty() {
         return String::new();
     }
 
-    render_style_attrs(&inline_styles, &css_vars, scope, include_highlights)
+    render_style_attrs(&inline_styles, &css_vars, label, include_highlights)
 }
 
 /// `light-dark()` takes its inline styles from the two themes named `light` and
@@ -402,17 +426,15 @@ fn push_light_dark_styles(
     inline_styles: &mut Vec<String>,
     css_vars: &mut Vec<String>,
     themes: &std::collections::HashMap<String, Theme>,
-    specialized_scope: &str,
+    style_of: StyleOf<'_>,
     css_variable_prefix: &str,
     italic: bool,
 ) {
     let (Some(light_theme), Some(dark_theme)) = (themes.get("light"), themes.get("dark")) else {
         return;
     };
-    let (Some(light_style), Some(dark_style)) = (
-        light_theme.get_style(specialized_scope),
-        dark_theme.get_style(specialized_scope),
-    ) else {
+    let (Some(light_style), Some(dark_style)) = (style_of(light_theme), style_of(dark_theme))
+    else {
         return;
     };
 
@@ -420,8 +442,8 @@ fn push_light_dark_styles(
         inline_styles,
         css_vars,
         css_variable_prefix,
-        light_style,
-        dark_style,
+        &light_style,
+        &dark_style,
         italic,
     );
 }
@@ -432,7 +454,7 @@ fn push_named_default_styles(
     inline_styles: &mut Vec<String>,
     css_vars: &mut Vec<String>,
     themes: &std::collections::HashMap<String, Theme>,
-    specialized_scope: &str,
+    style_of: StyleOf<'_>,
     css_variable_prefix: &str,
     default_name: &str,
     italic: bool,
@@ -441,15 +463,15 @@ fn push_named_default_styles(
         return;
     };
 
-    if let Some(style) = default_theme_obj.get_style(specialized_scope) {
-        push_default_inline_styles(inline_styles, style, italic);
-        push_default_theme_css_vars(css_vars, css_variable_prefix, default_name, style);
+    if let Some(style) = style_of(default_theme_obj) {
+        push_default_inline_styles(inline_styles, &style, italic);
+        push_default_theme_css_vars(css_vars, css_variable_prefix, default_name, &style);
     }
 
     push_other_theme_css_vars(
         css_vars,
         themes,
-        specialized_scope,
+        style_of,
         css_variable_prefix,
         Some(default_name),
     );
@@ -1214,6 +1236,7 @@ where
             LineFragment::SpanOpen(scope_index, language) => {
                 line.push_str(&open_span(&span_attrs(scope_index, language)));
             }
+            LineFragment::DiffWordOpen(_) => line.push_str("<span>"),
             LineFragment::SpanClose => line.push_str("</span>"),
         },
     );
@@ -1255,6 +1278,8 @@ pub(crate) enum LineFragment<'a> {
     Text(&'a str),
     /// A syntax or built-in decoration scope begins.
     SpanOpen(usize, &'a str),
+    /// A changed word in a diff begins.
+    DiffWordOpen(DiffWordKind),
     /// The innermost syntax or built-in decoration scope ends.
     SpanClose,
 }
@@ -1318,11 +1343,14 @@ impl LineEventWalk {
                         rainbow_scope_index(*depth),
                         decoration_language,
                     )),
+                    Decoration::DiffWord { kind } => on_fragment(LineFragment::DiffWordOpen(*kind)),
                 }
             }
             HighlightEvent::DecorationEnd => match decorations.pop() {
                 Some(Decoration::Line { .. }) => on_fragment(LineFragment::Close),
-                Some(Decoration::RainbowBracket { .. }) => on_fragment(LineFragment::SpanClose),
+                Some(Decoration::RainbowBracket { .. } | Decoration::DiffWord { .. }) => {
+                    on_fragment(LineFragment::SpanClose);
+                }
                 None => {}
             },
             HighlightEvent::Start {
@@ -1393,7 +1421,9 @@ pub(crate) fn write_html_lines<T>(
     events: &[HighlightEvent<'_, T>],
     lines: &HtmlLines<'_>,
     span_attrs: &dyn Fn(usize, &str) -> String,
+    diff_word_attrs: &dyn Fn(DiffWordKind) -> String,
 ) -> io::Result<()> {
+    let mut diff_word = [None, None];
     let plain_tag = LineTag::new(None, None, lines.numbered, false, lines.line_number_attrs);
     let empty_tag = LineTag::new(
         None,
@@ -1456,6 +1486,14 @@ pub(crate) fn write_html_lines<T>(
                     write!(output, "<span {attrs}>")
                 }
             }
+            LineFragment::DiffWordOpen(kind) => {
+                let attrs = diff_word[kind as usize].get_or_insert_with(|| diff_word_attrs(kind));
+                if attrs.is_empty() {
+                    output.write_all(b"<span>")
+                } else {
+                    write!(output, "<span {attrs}>")
+                }
+            }
             LineFragment::Close if !wrapped => Ok(()),
             LineFragment::Close | LineFragment::SpanClose => output.write_all(b"</span>"),
         };
@@ -1476,6 +1514,7 @@ pub(crate) fn write_html_spans<T>(
     events: &[HighlightEvent<'_, T>],
     language: Language,
     span_attrs: &dyn Fn(usize, &str) -> String,
+    diff_word_attrs: &dyn Fn(DiffWordKind) -> String,
 ) -> io::Result<()> {
     write_html_lines(
         output,
@@ -1493,6 +1532,7 @@ pub(crate) fn write_html_spans<T>(
             empty_style: None,
         },
         span_attrs,
+        diff_word_attrs,
     )
 }
 
@@ -1697,7 +1737,15 @@ mod tests {
             highlighted_style: None,
             empty_style: None,
         };
-        write_html_lines(&mut output, source, events, &lines, &|_, _| String::new()).unwrap();
+        write_html_lines(
+            &mut output,
+            source,
+            events,
+            &lines,
+            &|_, _| String::new(),
+            &|_| String::new(),
+        )
+        .unwrap();
 
         String::from_utf8(output).expect("the formatter writes UTF-8")
     }
@@ -1786,7 +1834,15 @@ mod tests {
             let span_attrs = |_: usize, _: &str| "class=\"scope\"".to_string();
             let mut html = Vec::new();
 
-            write_html_spans(&mut html, source, &events, Language::PlainText, &span_attrs).unwrap();
+            write_html_spans(
+                &mut html,
+                source,
+                &events,
+                Language::PlainText,
+                &span_attrs,
+                &|_| String::new(),
+            )
+            .unwrap();
 
             assert_str_eq!(
                 String::from_utf8(html).unwrap(),
@@ -1811,9 +1867,14 @@ mod tests {
         ];
         let mut html = Vec::new();
 
-        write_html_spans(&mut html, source, &events, Language::PlainText, &|_, _| {
-            "class=\"scope\"".to_string()
-        })
+        write_html_spans(
+            &mut html,
+            source,
+            &events,
+            Language::PlainText,
+            &|_, _| "class=\"scope\"".to_string(),
+            &|_| String::new(),
+        )
         .unwrap();
 
         assert_str_eq!(
@@ -1854,6 +1915,7 @@ mod tests {
                 empty_style: None,
             },
             &|_, _| "class=\"scope\"".to_string(),
+            &|_| String::new(),
         )
         .unwrap();
 
@@ -1910,7 +1972,15 @@ mod tests {
             empty_style: None,
         };
 
-        write_html_lines(&mut output, source, &events, &lines, &|_, _| String::new()).unwrap();
+        write_html_lines(
+            &mut output,
+            source,
+            &events,
+            &lines,
+            &|_, _| String::new(),
+            &|_| String::new(),
+        )
+        .unwrap();
 
         let html = String::from_utf8(output).unwrap();
         assert!(html.contains(

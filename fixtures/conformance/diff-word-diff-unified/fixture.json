@@ -1,0 +1,739 @@
+{
+  "name": "diff-word-diff-unified",
+  "language": "diff",
+  "theme": "dracula",
+  "wordDiff": true,
+  "events": [
+    {
+      "type": "start",
+      "scope": "diff.minus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 0,
+      "end": 3
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 3,
+      "end": 4
+    },
+    {
+      "type": "start",
+      "scope": "string.special.path",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 4,
+      "end": 15
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 15,
+      "end": 16
+    },
+    {
+      "type": "start",
+      "scope": "diff.plus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 16,
+      "end": 19
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 19,
+      "end": 20
+    },
+    {
+      "type": "start",
+      "scope": "string.special.path",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 20,
+      "end": 31
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 31,
+      "end": 32
+    },
+    {
+      "type": "start",
+      "scope": "attribute",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 32,
+      "end": 49
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 49,
+      "end": 61
+    },
+    {
+      "type": "start",
+      "scope": "diff.minus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 61,
+      "end": 62
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 62,
+      "end": 92
+    },
+    {
+      "type": "decorationStart",
+      "decoration": {
+        "type": "diffWord",
+        "kind": "removed"
+      }
+    },
+    {
+      "type": "source",
+      "start": 92,
+      "end": 99
+    },
+    {
+      "type": "decorationEnd"
+    },
+    {
+      "type": "source",
+      "start": 99,
+      "end": 103
+    },
+    {
+      "type": "decorationStart",
+      "decoration": {
+        "type": "diffWord",
+        "kind": "removed"
+      }
+    },
+    {
+      "type": "source",
+      "start": 103,
+      "end": 105
+    },
+    {
+      "type": "decorationEnd"
+    },
+    {
+      "type": "source",
+      "start": 105,
+      "end": 108
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 108,
+      "end": 109
+    },
+    {
+      "type": "start",
+      "scope": "diff.plus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 109,
+      "end": 110
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 110,
+      "end": 140
+    },
+    {
+      "type": "decorationStart",
+      "decoration": {
+        "type": "diffWord",
+        "kind": "added"
+      }
+    },
+    {
+      "type": "source",
+      "start": 140,
+      "end": 151
+    },
+    {
+      "type": "decorationEnd"
+    },
+    {
+      "type": "source",
+      "start": 151,
+      "end": 155
+    },
+    {
+      "type": "decorationStart",
+      "decoration": {
+        "type": "diffWord",
+        "kind": "added"
+      }
+    },
+    {
+      "type": "source",
+      "start": 155,
+      "end": 157
+    },
+    {
+      "type": "decorationEnd"
+    },
+    {
+      "type": "source",
+      "start": 157,
+      "end": 160
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 160,
+      "end": 161
+    },
+    {
+      "type": "start",
+      "scope": "diff.minus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 161,
+      "end": 162
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 162,
+      "end": 166
+    },
+    {
+      "type": "decorationStart",
+      "decoration": {
+        "type": "diffWord",
+        "kind": "removed"
+      }
+    },
+    {
+      "type": "source",
+      "start": 166,
+      "end": 167
+    },
+    {
+      "type": "decorationEnd"
+    },
+    {
+      "type": "source",
+      "start": 167,
+      "end": 168
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 168,
+      "end": 169
+    },
+    {
+      "type": "start",
+      "scope": "diff.minus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 169,
+      "end": 170
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 170,
+      "end": 176
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 176,
+      "end": 177
+    },
+    {
+      "type": "start",
+      "scope": "diff.plus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 177,
+      "end": 178
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 178,
+      "end": 182
+    },
+    {
+      "type": "decorationStart",
+      "decoration": {
+        "type": "diffWord",
+        "kind": "added"
+      }
+    },
+    {
+      "type": "source",
+      "start": 182,
+      "end": 184
+    },
+    {
+      "type": "decorationEnd"
+    },
+    {
+      "type": "source",
+      "start": 184,
+      "end": 185
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 185,
+      "end": 186
+    },
+    {
+      "type": "start",
+      "scope": "diff.plus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 186,
+      "end": 187
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 187,
+      "end": 207
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 207,
+      "end": 208
+    },
+    {
+      "type": "start",
+      "scope": "diff.plus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 208,
+      "end": 209
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 209,
+      "end": 215
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 215,
+      "end": 216
+    },
+    {
+      "type": "start",
+      "scope": "diff.minus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 216,
+      "end": 217
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 217,
+      "end": 233
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 233,
+      "end": 234
+    },
+    {
+      "type": "start",
+      "scope": "diff.plus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 234,
+      "end": 235
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 235,
+      "end": 253
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 253,
+      "end": 254
+    },
+    {
+      "type": "start",
+      "scope": "diff.plus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 254,
+      "end": 255
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 255,
+      "end": 268
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 268,
+      "end": 269
+    },
+    {
+      "type": "start",
+      "scope": "diff.minus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 269,
+      "end": 270
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 270,
+      "end": 282
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 282,
+      "end": 283
+    },
+    {
+      "type": "start",
+      "scope": "diff.minus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 283,
+      "end": 284
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 284,
+      "end": 289
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 289,
+      "end": 291
+    },
+    {
+      "type": "start",
+      "scope": "diff.plus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 291,
+      "end": 292
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 292,
+      "end": 297
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 297,
+      "end": 298
+    },
+    {
+      "type": "start",
+      "scope": "diff.minus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 298,
+      "end": 299
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 299,
+      "end": 307
+    },
+    {
+      "type": "decorationStart",
+      "decoration": {
+        "type": "diffWord",
+        "kind": "removed"
+      }
+    },
+    {
+      "type": "source",
+      "start": 307,
+      "end": 312
+    },
+    {
+      "type": "decorationEnd"
+    },
+    {
+      "type": "source",
+      "start": 312,
+      "end": 313
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 313,
+      "end": 314
+    },
+    {
+      "type": "start",
+      "scope": "diff.plus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 314,
+      "end": 315
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 315,
+      "end": 323
+    },
+    {
+      "type": "decorationStart",
+      "decoration": {
+        "type": "diffWord",
+        "kind": "added"
+      }
+    },
+    {
+      "type": "source",
+      "start": 323,
+      "end": 338
+    },
+    {
+      "type": "decorationEnd"
+    },
+    {
+      "type": "source",
+      "start": 338,
+      "end": 339
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 339,
+      "end": 340
+    }
+  ]
+}

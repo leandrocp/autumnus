@@ -1,5 +1,10 @@
 import type { Node, Point, QueryCapture, QueryMatch, Range } from "web-tree-sitter";
-import { composeRainbowDecorations, type RainbowRange } from "./decorations.js";
+import {
+  composeDiffWordDecorations,
+  composeRainbowDecorations,
+  type RainbowRange,
+} from "./decorations.js";
+import { diffWordRanges, type DiffLine } from "./diff-words.js";
 import { LANGUAGES } from "./generated/languages-meta.js";
 import { languageIdForFilename } from "./guess-language.js";
 import { DEFAULT_MATCH_LIMIT, DEFAULT_TIME_LIMIT, MAX_MATCH_LIMIT } from "./types.js";
@@ -1015,7 +1020,7 @@ export function buildHighlightEventsWithSourceIndex(
   source: string,
   language: WasmLoadedLanguage,
   runtime: RuntimeLookup,
-  options: { rainbowBrackets?: boolean; budget?: Budget } = {},
+  options: { rainbowBrackets?: boolean; wordDiff?: boolean; budget?: Budget } = {},
 ): {
   events: LumisHighlightEvent[];
   sourceIndex: SourceIndex;
@@ -1042,8 +1047,9 @@ export function buildHighlightEventsWithSourceIndex(
 // there is no tree left to highlight from; the text is still the caller's
 // document, so it goes back whole and unhighlighted.
 //
-// The deadline is read twice because rainbow brackets parse and query the
-// document a second time, and that pass can be the one that runs out.
+// The deadline is read again after each decoration pass, because word diff and
+// rainbow brackets parse the document a second time, and that pass can be the
+// one that runs out.
 function finishHighlight(
   source: string,
   language: WasmLoadedLanguage,
@@ -1051,7 +1057,7 @@ function finishHighlight(
   matchLimit: number,
   budget: BudgetState,
   layers: HighlightLayer[],
-  options: { rainbowBrackets?: boolean },
+  options: { rainbowBrackets?: boolean; wordDiff?: boolean },
 ): { events: LumisHighlightEvent[]; sourceIndex: SourceIndex; budget?: BudgetExhausted } {
   const plain = (): {
     events: LumisHighlightEvent[];
@@ -1065,12 +1071,12 @@ function finishHighlight(
 
   if (budget.deadline?.expired) return plain();
 
-  const nested = buildNestedEvents(layers, maps);
-  let events: LumisHighlightEvent[] = nested;
-  if (options.rainbowBrackets) {
-    events = applyRainbowBrackets(source, nested, language, maps, matchLimit, budget);
-    if (budget.deadline?.expired) return plain();
-  }
+  const events = decorate(source, buildNestedEvents(layers, maps), language, maps, {
+    ...options,
+    matchLimit,
+    budget,
+  });
+  if (!events) return plain();
 
   return {
     events,
@@ -1083,7 +1089,7 @@ export function buildHighlightEvents(
   source: string,
   language: WasmLoadedLanguage,
   runtime: RuntimeLookup,
-  options: { rainbowBrackets?: boolean; budget?: Budget } = {},
+  options: { rainbowBrackets?: boolean; wordDiff?: boolean; budget?: Budget } = {},
 ): LumisHighlightEvent[] {
   return buildHighlightEventsWithSourceIndex(source, language, runtime, options).events;
 }
@@ -1214,7 +1220,7 @@ function colorizeBracketPairs(pairs: BracketPair[]): RainbowRange[] {
 
 function applyRainbowBrackets(
   source: string,
-  events: HighlightEvent[],
+  events: readonly LumisHighlightEvent[],
   language: WasmLoadedLanguage,
   maps: SourceMaps,
   matchLimit: number,
@@ -1222,6 +1228,76 @@ function applyRainbowBrackets(
 ): LumisHighlightEvent[] {
   const ranges = queryRainbowBracketRanges(source, language, maps, matchLimit, budget);
   return composeRainbowDecorations(events, ranges, maps);
+}
+
+const DIFF_LANGUAGE = "diff";
+
+// The decoration passes `options` asks for, or `undefined` when one ran out of
+// time. The port of `decorate` in `crates/lumis-wasm-runtime/src/runtime.rs`.
+function decorate(
+  source: string,
+  events: LumisHighlightEvent[],
+  language: WasmLoadedLanguage,
+  maps: SourceMaps,
+  options: {
+    rainbowBrackets?: boolean;
+    wordDiff?: boolean;
+    matchLimit: number;
+    budget: BudgetState;
+  },
+): LumisHighlightEvent[] | undefined {
+  const { budget } = options;
+  let decorated = events;
+  if (options.wordDiff && language.definition.id === DIFF_LANGUAGE) {
+    decorated = applyDiffWords(source, decorated, language, maps, budget);
+    if (budget.deadline?.passed()) return undefined;
+  }
+  if (options.rainbowBrackets) {
+    decorated = applyRainbowBrackets(source, decorated, language, maps, options.matchLimit, budget);
+    if (budget.deadline?.expired) return undefined;
+  }
+  return decorated;
+}
+
+// Changed words parse the diff a second time, inside the budget like rainbow
+// brackets. Lines are taken wherever the grammar put them: only a whole
+// `diff --git` block nests them in `changes`, and a `diff -u` hunk or a quoted
+// snippet leaves them at the top level.
+function applyDiffWords(
+  source: string,
+  events: LumisHighlightEvent[],
+  language: WasmLoadedLanguage,
+  maps: SourceMaps,
+  budget: BudgetState,
+): LumisHighlightEvent[] {
+  const progressCallback = budget.deadline ? () => budget.deadline?.passed() ?? false : undefined;
+  const tree = parseWithin(language, source, budget, undefined, progressCallback);
+  if (!tree) return events;
+
+  try {
+    const lines: DiffLine[] = [];
+    // A `\ No newline at end of file` marker is a `special` line between the
+    // lines it annotates, so rows skip it, as `changed_lines` does in Rust.
+    let markers = 0;
+    for (const node of tree.rootNode.descendantsOfType(["deletion", "addition", "special"])) {
+      if (node.type === "special") {
+        markers += 1;
+        continue;
+      }
+      // The marker is one ASCII byte: `-`, `+`, `<` or `>`.
+      lines.push({
+        kind: node.type === "deletion" ? "removed" : "added",
+        row: node.startPosition.row - markers,
+        startByte: nodeStartByte(node, maps) + 1,
+        endByte: nodeEndByte(node, maps),
+      });
+    }
+    const stop = (): boolean => budget.deadline?.passed() ?? false;
+    const ranges = diffWordRanges(maps.sourceBytes, lines, stop);
+    return ranges ? composeDiffWordDecorations(events, ranges, maps) : events;
+  } finally {
+    tree.delete();
+  }
 }
 
 interface LayerState extends HighlightLayer {

@@ -1,0 +1,7 @@
+--- a/version.txt
++++ b/version.txt
+@@ -1 +1 @@
+-version = 1.4.2
+\ No newline at end of file
++version = 1.5.0
+\ No newline at end of file

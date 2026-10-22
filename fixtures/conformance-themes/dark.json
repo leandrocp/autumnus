@@ -24,6 +24,14 @@
     },
     "punctuation.delimiter": {
       "fg": "#bbbbbb"
+    },
+    "diff.minus": {
+      "fg": "#ff7b72",
+      "bg": "#3c1618"
+    },
+    "diff.plus": {
+      "fg": "#7ee787",
+      "bg": "#12261e"
     }
   }
 }

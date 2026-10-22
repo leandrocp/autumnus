@@ -69,6 +69,7 @@ interface CorpusFixture {
   /** Root plus every injected language, taken from the expected events. */
   languages: string[];
   rainbowBrackets: boolean;
+  wordDiff: boolean;
   annotations?: FixtureAnnotation[];
   /** What the three HTML outputs write around the tokens. */
   structure: HtmlStructure;
@@ -105,6 +106,7 @@ function loadCorpus(): CorpusFixture[] {
         language: string;
         theme: string;
         rainbowBrackets?: boolean;
+        wordDiff?: boolean;
         annotations?: FixtureAnnotation[];
         structure?: HtmlStructure;
         budget?: Budget;
@@ -123,6 +125,7 @@ function loadCorpus(): CorpusFixture[] {
         language: parsed.language,
         languages: [...languages],
         rainbowBrackets: parsed.rainbowBrackets ?? false,
+        wordDiff: parsed.wordDiff ?? false,
         annotations: parsed.annotations,
         structure: parsed.structure ?? "block",
         budget: parsed.budget,
@@ -358,7 +361,7 @@ async function run(): Promise<void> {
   };
 
   const render = (fixture: CorpusFixture): FixtureOutput => {
-    const { source, language, rainbowBrackets, structure, budget } = fixture;
+    const { source, language, rainbowBrackets, wordDiff, structure, budget } = fixture;
     const highlight: typeof highlighter.highlight = (...args) =>
       timed(fixture, () => highlighter.highlight(...args));
     const theme = getTheme(fixture.theme);
@@ -374,7 +377,7 @@ async function run(): Promise<void> {
         )
       : { main: theme };
 
-    const options = { rainbowBrackets, budget };
+    const options = { rainbowBrackets, wordDiff, budget };
 
     return {
       htmlInline: highlight(source, htmlInline({ language, structure, theme }), options),
@@ -401,7 +404,11 @@ async function run(): Promise<void> {
   const fixtureEvents: Record<string, HighlightEvent[]> = {};
   for (const fixture of corpus) {
     fixtures[fixture.name] = render(fixture);
-    const options = { rainbowBrackets: fixture.rainbowBrackets, budget: fixture.budget };
+    const options = {
+      rainbowBrackets: fixture.rainbowBrackets,
+      wordDiff: fixture.wordDiff,
+      budget: fixture.budget,
+    };
     timed(fixture, () =>
       highlighter.highlight(
         fixture.source,

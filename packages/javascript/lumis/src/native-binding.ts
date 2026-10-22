@@ -57,6 +57,7 @@ interface NativeBudget {
 
 interface NativeFormatterBase {
   rainbowBrackets?: boolean;
+  wordDiff?: boolean;
   budget?: NativeBudget;
 }
 
@@ -100,6 +101,7 @@ interface NativeRuntimeInstance {
     source: string,
     language: string,
     rainbowBrackets?: boolean,
+    wordDiff?: boolean,
     budget?: NativeBudget,
     packageResolver?: (packageName: string) => string | undefined,
     wasmResolver?: (language: string, wasmJson: string) => string | undefined,

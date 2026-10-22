@@ -137,6 +137,7 @@ describe("native runtime", () => {
       '{"answer": 42}',
       "json",
       false,
+      false,
       undefined,
       () => {},
       () => {},
@@ -172,6 +173,7 @@ describe("native runtime", () => {
     const highlighted = runtime.highlightEvents(
       source,
       "markdown",
+      false,
       false,
       undefined,
       localLanguagePackageResolver,
@@ -349,10 +351,10 @@ describe("native adapter routing", () => {
       .createRuntime({ wasmResolver: () => new URL("file:///unused") })
       .highlightEvents("{}", loaded);
 
-    expect(highlightEvents.mock.calls[0].slice(3)).toEqual([undefined, undefined, undefined]);
-    expect(highlightEvents.mock.calls[1][4]).toBeTypeOf("function");
+    expect(highlightEvents.mock.calls[0].slice(4)).toEqual([undefined, undefined, undefined]);
     expect(highlightEvents.mock.calls[1][5]).toBeTypeOf("function");
-    const packageResolver = highlightEvents.mock.calls[1][4] as (
+    expect(highlightEvents.mock.calls[1][6]).toBeTypeOf("function");
+    const packageResolver = highlightEvents.mock.calls[1][5] as (
       packageName: string,
     ) => string | undefined;
     // A WASM resolver alone does not say where packages come from, so the addon

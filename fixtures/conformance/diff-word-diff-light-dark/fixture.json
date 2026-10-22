@@ -1,0 +1,116 @@
+{
+  "name": "diff-word-diff-light-dark",
+  "language": "diff",
+  "theme": "dark",
+  "wordDiff": true,
+  "structure": "inline",
+  "htmlMultiThemes": {
+    "themes": {
+      "dark": "dark",
+      "light": "light"
+    },
+    "defaultTheme": "light-dark()"
+  },
+  "events": [
+    {
+      "type": "start",
+      "scope": "attribute",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 0,
+      "end": 15
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 15,
+      "end": 29
+    },
+    {
+      "type": "start",
+      "scope": "diff.minus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 29,
+      "end": 30
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 30,
+      "end": 58
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 58,
+      "end": 59
+    },
+    {
+      "type": "start",
+      "scope": "diff.plus",
+      "language": "diff"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "diff"
+    },
+    {
+      "type": "source",
+      "start": 59,
+      "end": 60
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 60,
+      "end": 87
+    },
+    {
+      "type": "decorationStart",
+      "decoration": {
+        "type": "diffWord",
+        "kind": "added"
+      }
+    },
+    {
+      "type": "source",
+      "start": 87,
+      "end": 98
+    },
+    {
+      "type": "decorationEnd"
+    },
+    {
+      "type": "source",
+      "start": 98,
+      "end": 99
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 99,
+      "end": 103
+    }
+  ]
+}

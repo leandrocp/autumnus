@@ -12,13 +12,18 @@ function inheritStyle(style: HighlightStyle, parent: HighlightStyle): HighlightS
   };
 }
 
+/**
+ * The style of the innermost layer, inheriting what each enclosing one leaves
+ * unset. A layer carrying its own `style`, such as a diff's changed word, uses
+ * it instead of looking its scope up.
+ */
 export function resolveStackStyle(
   theme: Theme | undefined,
-  scopes: readonly { scope: string; language: string }[],
+  scopes: readonly { scope: string; language: string; style?: HighlightStyle }[],
 ): HighlightStyle | undefined {
   let resolved: HighlightStyle | undefined;
-  for (const { scope, language } of scopes) {
-    const style = getScopedThemeStyle(theme, scope, language);
+  for (const layer of scopes) {
+    const style = layer.style ?? getScopedThemeStyle(theme, layer.scope, layer.language);
     if (!style) continue;
     resolved = resolved ? inheritStyle(style, resolved) : style;
   }

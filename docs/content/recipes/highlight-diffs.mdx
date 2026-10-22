@@ -93,3 +93,84 @@ In the browser, load the inner language up front along with `diff`.
 `web-tree-sitter` cannot fetch a parser inside a synchronous walk, so a language
 first named by a diff header has to already be there. Node, the CLI, Elixir and
 Rust load it on demand.
+
+## Mark the words that changed
+
+A one-word edit to a long line is easy to miss when the whole line is green.
+Turn on word diff and Lumis also marks the words that differ between the removed
+lines and the added lines that replace them. It only works when the document is
+highlighted with the `diff` language; any other language ignores the option:
+
+<Tabs groupId="runtime" persist items={['JavaScript / TypeScript', 'Rust', 'Elixir', 'CLI']}>
+  <Tab value="JavaScript / TypeScript">
+
+```js
+const output = hl.highlight(
+  source,
+  htmlInline({language: diff, theme: frappe}),
+  {wordDiff: true},
+)
+```
+
+  </Tab>
+  <Tab value="Rust">
+
+```rust
+let html = highlight_with_options(
+    source,
+    HtmlInlineBuilder::new()
+        .language(Language::Diff)
+        .theme(Some(themes::get("catppuccin_frappe").unwrap()))
+        .build()
+        .unwrap(),
+    HighlightOptions::new().word_diff(true),
+);
+```
+
+  </Tab>
+  <Tab value="Elixir">
+
+```elixir
+Lumis.highlight!(source,
+  word_diff: true,
+  formatter:
+    {:html_inline,
+     language: "diff", theme: "catppuccin_frappe"}
+)
+```
+
+  </Tab>
+  <Tab value="CLI">
+
+```sh
+git diff | lumis highlight -l diff --word-diff
+```
+
+  </Tab>
+</Tabs>
+
+![A git diff of an Elixir file with word diff on: on the removed lines, Jason and
+café have a stronger red background than the rest of the line, and on the added
+lines JSON, crème and the appended pipe into Path.join have a stronger green
+one. The added Logger.debug line has no counterpart and keeps the plain line
+colour.](/img/diff-word-diff.png)
+
+Input is ordinary diff text, the kind `git diff`, `git format-patch`, `diff -u`
+and `diff` print.
+Git's own `--word-diff` output doesn't work: its `[-…-]{+…+}` markers can't be
+told apart from the same characters in code.
+
+Each run of removed lines followed by added lines is compared line by line.
+A removed line is paired with the added line it shares the most words with, in
+order, and only when each keeps at least a third of its words. A line with no
+such partner, like `Logger.debug` above, or one rewritten from scratch, marks
+nothing beyond its line colour. A run over 1000 bytes on either side is left
+unmarked, and comparing the rest counts against the highlight
+[budget](/advanced/budget).
+
+Themes don't define a colour for changed words, so Lumis derives one from the
+theme's `diff.minus` and `diff.plus`: the same hue, a step lighter on a dark
+theme and darker on a light one. The HTML inline, multi-theme and terminal
+formatters apply it directly. HTML linked writes `l-diff-word-removed` and
+`l-diff-word-added` classes for your stylesheet to style. BBCode
+writes `[diff-word-removed]` and `[diff-word-added]` tags.
