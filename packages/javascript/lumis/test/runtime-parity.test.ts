@@ -208,6 +208,8 @@ describe("runtime parity", () => {
     const highlights = source.languages.comment.highlights;
     const { Language: TreeSitterLanguage } = await import("web-tree-sitter");
     const load = vi.spyOn(TreeSitterLanguage, "load");
+    const loadSync = vi.spyOn(TreeSitterLanguage, "loadSync");
+    const loads = () => load.mock.calls.length + loadSync.mock.calls.length;
     const moduleExports = vi.spyOn(WebAssembly.Module, "exports");
     const create = (id: string, packageName: string, grammarName: string) =>
       index.createHighlighter({
@@ -222,7 +224,7 @@ describe("runtime parity", () => {
       });
 
     try {
-      const loadsBefore = load.mock.calls.length;
+      const loadsBefore = loads();
       const exportsBefore = moduleExports.mock.calls.length;
       const firstError = await rejectedError(
         create("wrong-grammar-first", "@test/wrong-grammar-first", "not_comment"),
@@ -238,7 +240,7 @@ describe("runtime parity", () => {
       }
       if (index.runtimeKind() === "wasm") {
         // oxlint-disable-next-line vitest/no-conditional-expect -- only the Wasm runtime uses the web-tree-sitter load/export counters.
-        expect(load.mock.calls.length - loadsBefore).toBe(0);
+        expect(loads() - loadsBefore).toBe(0);
         // oxlint-disable-next-line vitest/no-conditional-expect -- only the Wasm runtime uses the web-tree-sitter load/export counters.
         expect(moduleExports.mock.calls.length - exportsBefore).toBe(0);
       }
@@ -247,12 +249,13 @@ describe("runtime parity", () => {
       expect(corrected.languages).toContain("wrong-grammar-first");
       if (index.runtimeKind() === "wasm") {
         // oxlint-disable-next-line vitest/no-conditional-expect -- only the Wasm runtime uses the web-tree-sitter load/export counters.
-        expect(load.mock.calls.length - loadsBefore).toBe(1);
+        expect(loads() - loadsBefore).toBe(1);
         // oxlint-disable-next-line vitest/no-conditional-expect -- only the Wasm runtime uses the web-tree-sitter load/export counters.
         expect(moduleExports.mock.calls.length - exportsBefore).toBe(0);
       }
     } finally {
       load.mockRestore();
+      loadSync.mockRestore();
       moduleExports.mockRestore();
     }
   }, 30_000);
@@ -270,9 +273,11 @@ describe("runtime parity", () => {
     const languageId = "non-function-grammar";
     const { Language: TreeSitterLanguage } = await import("web-tree-sitter");
     const load = vi.spyOn(TreeSitterLanguage, "load");
+    const loadSync = vi.spyOn(TreeSitterLanguage, "loadSync");
+    const loads = () => load.mock.calls.length + loadSync.mock.calls.length;
 
     try {
-      const loadsBefore = load.mock.calls.length;
+      const loadsBefore = loads();
       const error = await rejectedError(
         index.createHighlighter({
           languages: [{ id: languageId, aliases: [], packageName, wasm: parserBytes }],
@@ -288,10 +293,11 @@ describe("runtime parity", () => {
       expect(error.message).toMatch(/parser grammar/u);
       if (index.runtimeKind() === "wasm") {
         // oxlint-disable-next-line vitest/no-conditional-expect -- only the Wasm runtime uses the web-tree-sitter load/export counters.
-        expect(load.mock.calls.length - loadsBefore).toBe(0);
+        expect(loads() - loadsBefore).toBe(0);
       }
     } finally {
       load.mockRestore();
+      loadSync.mockRestore();
     }
   }, 30_000);
 

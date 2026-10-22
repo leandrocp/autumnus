@@ -283,8 +283,8 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Install Chromium
-        run: pnpm --filter @lumis-sh/lumis exec playwright install --with-deps chromium
+      - name: Install Chromium and WebKit
+        run: pnpm --filter @lumis-sh/lumis exec playwright install --with-deps chromium webkit
 
       - run: mise run wasm-check-bundler
 

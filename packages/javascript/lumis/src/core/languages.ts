@@ -511,10 +511,16 @@ function packagedLanguage(
   );
 }
 
+type TreeSitterLanguageCtor = typeof import("web-tree-sitter").Language;
+
 let treeSitterPromise: Promise<typeof import("web-tree-sitter")> | undefined;
+let treeSitterModule: typeof import("web-tree-sitter") | undefined;
 
 async function loadTreeSitter(): Promise<typeof import("web-tree-sitter")> {
-  treeSitterPromise ??= import("web-tree-sitter");
+  treeSitterPromise ??= import("web-tree-sitter").then((module) => {
+    treeSitterModule = module;
+    return module;
+  });
   return treeSitterPromise;
 }
 
@@ -542,13 +548,16 @@ async function sha256Hex(data: Uint8Array): Promise<string> {
   // it is 1.3 ms against 35.9 ms, and this runs on every load, cache hits too.
   if (!globalThis.crypto?.subtle) return hex(sha256(data));
 
-  const bytes =
-    data.buffer instanceof ArrayBuffer &&
+  return hex(new Uint8Array(await globalThis.crypto.subtle.digest("SHA-256", ownedBuffer(data))));
+}
+
+/** The bytes as an `ArrayBuffer` of their own, copied only when they are a view into more. */
+function ownedBuffer(data: Uint8Array): ArrayBuffer {
+  return data.buffer instanceof ArrayBuffer &&
     data.byteOffset === 0 &&
     data.byteLength === data.buffer.byteLength
-      ? data.buffer
-      : data.slice().buffer;
-  return hex(new Uint8Array(await globalThis.crypto.subtle.digest("SHA-256", bytes)));
+    ? data.buffer
+    : data.slice().buffer;
 }
 
 type ParserGrammar = { ok: true; name: string } | { ok: false; detail: string };
@@ -569,7 +578,31 @@ async function handedParser(bytes: Uint8Array): Promise<ParserBytes> {
 
 interface CachedParserModule {
   grammar?: ParserGrammar;
-  language?: Promise<Language>;
+  /** The instantiated parser, once one load succeeded. */
+  language?: Language;
+  /** An asynchronous instantiation still running. */
+  loading?: Promise<Language>;
+  /** Why instantiating these bytes failed, kept so the same bytes are not linked twice. */
+  failure?: { error: unknown };
+}
+
+/**
+ * The largest module a browser main thread may compile and instantiate
+ * synchronously. Chromium throws a `RangeError` from `new WebAssembly.Module`
+ * and `new WebAssembly.Instance` above 8 MiB; Firefox and WebKit do not, but
+ * there is no way to ask, so every runtime takes the asynchronous path above it.
+ */
+const SYNC_INSTANTIATE_LIMIT = 8 * 1024 * 1024;
+
+/**
+ * A language whose package is resolved and whose parser is instantiated, so
+ * making it ready in a runtime is synchronous: compile its queries and create
+ * a parser.
+ */
+interface PreparedLanguage {
+  definition: LanguageDefinition;
+  digest: string;
+  resolved: ResolvedLanguagePackage;
 }
 
 /** The first four bytes of every WebAssembly module: `\0asm`. */
@@ -1035,24 +1068,70 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
   const moduleCache = createSharedRuntimeCache();
   const parserModules = new Map<string, CachedParserModule>();
 
+  // Languages some runtime here prepared from their catalog package's own
+  // parser, by every name they answer to. A runtime with no resolver of its own
+  // can finish one mid-walk without fetching anything; one with a resolver
+  // never reads or writes this, because its caller said where parsers come from.
+  const injectable = new Map<string, PreparedLanguage>();
+
+  function shareInjectable(prepared: PreparedLanguage): void {
+    for (const name of [prepared.definition.id, ...prepared.definition.aliases]) {
+      injectable.set(normalizeLanguageName(name), prepared);
+    }
+  }
+
   // One tree-sitter Language per parser digest, shared across every language the
   // parser serves. web-tree-sitter cannot reclaim a failed dynamic-linker load,
-  // so retaining the rejection keeps identical bad bytes from growing its global
+  // so retaining the failure keeps identical bad bytes from growing its global
   // store.
-  async function loadParserLanguage(
-    Language: Awaited<ReturnType<typeof loadTreeSitter>>["Language"],
-    parser: ParserBytes,
-    packaged: { wasm: WasmRef; grammarName: string },
-  ) {
-    let parserModule = parserModules.get(parser.digest);
+  function parserModuleFor(digest: string): CachedParserModule {
+    let parserModule = parserModules.get(digest);
     if (!parserModule) {
       parserModule = {};
-      parserModules.set(parser.digest, parserModule);
+      parserModules.set(digest, parserModule);
+    }
+    return parserModule;
+  }
+
+  function instantiateParserSync(
+    Language: TreeSitterLanguageCtor,
+    parserModule: CachedParserModule,
+    bytes: Uint8Array,
+  ): Language {
+    try {
+      parserModule.language = Language.loadSync(new WebAssembly.Module(ownedBuffer(bytes)));
+      return parserModule.language;
+    } catch (error) {
+      parserModule.failure = { error };
+      throw error;
+    }
+  }
+
+  async function loadParserLanguage(
+    Language: TreeSitterLanguageCtor,
+    parser: ParserBytes,
+    packaged: { wasm: WasmRef; grammarName: string },
+  ): Promise<Language> {
+    const parserModule = parserModuleFor(parser.digest);
+    requireParserGrammar(parserModule, parser.bytes, packaged.wasm, packaged.grammarName);
+    if (parserModule.language) return parserModule.language;
+    if (parserModule.failure) throw parserModule.failure.error;
+    if (parserModule.loading) return parserModule.loading;
+    if (parser.bytes.byteLength <= SYNC_INSTANTIATE_LIMIT) {
+      return instantiateParserSync(Language, parserModule, parser.bytes);
     }
 
-    requireParserGrammar(parserModule, parser.bytes, packaged.wasm, packaged.grammarName);
-    parserModule.language ??= Language.load(parser.bytes);
-    return parserModule.language;
+    parserModule.loading = Language.load(parser.bytes).then(
+      (language) => {
+        parserModule.language = language;
+        return language;
+      },
+      (error: unknown) => {
+        parserModule.failure = { error };
+        throw error;
+      },
+    );
+    return parserModule.loading;
   }
 
   class HighlighterRuntime implements RuntimeLike {
@@ -1320,7 +1399,12 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
       return installed ? { definition: opts.definition, packageName: opts.packageName } : opts;
     }
 
-    private async createLoadedLanguage(input: LoadLanguageOptions): Promise<LoadedLanguage> {
+    /**
+     * Everything asynchronous about loading a language: its package resolved,
+     * its parser read and instantiated. What is left, {@link finishLanguage},
+     * is synchronous.
+     */
+    private async prepareLanguage(input: LoadLanguageOptions): Promise<PreparedLanguage> {
       await this.initParser();
       const opts = await this.resolveImportedLanguage(input);
 
@@ -1341,9 +1425,36 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
       }
 
       const parserWasm = await this.readParserWasm(resolved, packaged.wasm, opts.definition.id);
+      const { Language } = await loadTreeSitter();
+      await loadParserLanguage(Language, parserWasm, packaged);
 
-      const { Language, Parser, Query } = await loadTreeSitter();
-      const language = await loadParserLanguage(Language, parserWasm, packaged);
+      return { definition: packaged.definition, digest: parserWasm.digest, resolved: packaged };
+    }
+
+    /**
+     * Whether a prepared language is its catalog package's own parser, reached
+     * without a caller's resolver, so any runtime that also uses no resolver of
+     * its own would have loaded exactly this.
+     */
+    private isCanonicalParser({ definition, digest, resolved }: PreparedLanguage): boolean {
+      return (
+        !this.callerResolved &&
+        digest === resolved.wasm.sha256 &&
+        LANGUAGE_PACKAGES[normalizeLanguageName(definition.id)] === resolved.wasm.packageName
+      );
+    }
+
+    private finishLanguage(
+      prepared: PreparedLanguage,
+      { Parser, Query }: typeof import("web-tree-sitter"),
+    ): LoadedLanguage {
+      const existing = this.loadedLanguages.get(prepared.definition.id);
+      if (existing) return existing;
+
+      const language = parserModules.get(prepared.digest)?.language;
+      if (!language) throw new Error(`Parser for "${prepared.definition.id}" is not instantiated`);
+
+      const { resolved } = prepared;
       const config = compileHighlightConfig(
         language,
         Query,
@@ -1363,7 +1474,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
 
       const loaded: LoadedLanguage = {
         kind: "wasm",
-        definition: resolved.definition,
+        definition: prepared.definition,
         parser,
         language,
         config,
@@ -1374,9 +1485,34 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
         );
       }
 
-      this.loadedLanguages.set(resolved.definition.id, loaded);
-      this.registerLanguage(resolved.definition);
+      this.loadedLanguages.set(prepared.definition.id, loaded);
+      this.registerLanguage(prepared.definition);
       return loaded;
+    }
+
+    private async createLoadedLanguage(input: LoadLanguageOptions): Promise<LoadedLanguage> {
+      const prepared = await this.prepareLanguage(input);
+      const loaded = this.finishLanguage(prepared, await loadTreeSitter());
+      // Shared only once its queries compiled, so a walk elsewhere never retries a broken one.
+      if (this.isCanonicalParser(prepared)) shareInjectable(prepared);
+      return loaded;
+    }
+
+    /**
+     * An injected language this runtime has not loaded, made ready inside the
+     * walk when another runtime in this realm already prepared its canonical
+     * parser. Fetching is the only asynchronous step, so once the bytes are
+     * here nothing has to wait.
+     */
+    loadInjectedLanguage(nameOrAlias: string): LoadedLanguage | undefined {
+      if (this.callerResolved || !treeSitterModule) return undefined;
+      const prepared = injectable.get(normalizeLanguageName(nameOrAlias));
+      if (!prepared) return undefined;
+      try {
+        return this.finishLanguage(prepared, treeSitterModule);
+      } catch {
+        return undefined;
+      }
     }
 
     configureWasmResolver(fn: WasmResolver): void {

@@ -118,11 +118,18 @@ Three rules hold that together, and a change that breaks any of them is wrong:
   parsers are the `@lumis-sh/wasm-*` packages it installed, which the addon
   reads directly because only Node can find them.
 
-Browsers are the exception, and only because loading is asynchronous there:
-`web-tree-sitter` cannot load a parser inside a synchronous walk, so an
-injected language has to be loaded before the document mentioning it. Node uses
-the native addon precisely so it does not inherit that limit. Do not "fix" the
-browser by making the other runtimes match it.
+Browsers are the exception, and only because *fetching* is asynchronous there.
+Instantiating a parser is not: once its bytes are in memory,
+`new WebAssembly.Module` plus `Language.loadSync` takes a few milliseconds, so a
+browser walk does descend into an injected language that some highlighter on the
+page already loaded from that language's own package. What it cannot do is
+resolve a package or download a parser it has never seen, so a language nothing
+on the page has loaded still has to be loaded before the document mentioning
+it. Chromium also refuses a synchronous compile over 8 MiB on the main thread,
+so the few parsers above that (F#, Nim, SystemVerilog; see `parser-sizes.json`)
+always load asynchronously. Node uses the native addon precisely so it does not
+inherit any of this. Do not "fix" the browser by making the other runtimes match
+it.
 
 `ARCHITECTURE.md` has the full reasoning, including why pre-loading is an
 optimization rather than a requirement. A cold parser costs a download and then

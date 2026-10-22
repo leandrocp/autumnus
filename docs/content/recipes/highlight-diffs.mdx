@@ -89,9 +89,9 @@ From the `+++` path, matched against the same file name globs that
 Lumis has no language for, including `/dev/null`, leaves the hunk uncoloured but
 still marks its added and removed lines.
 
-In the browser, load the inner language up front along with `diff`.
-`web-tree-sitter` cannot fetch a parser inside a synchronous walk, so a language
-first named by a diff header has to already be there. Node, the CLI, Elixir and
+In the browser, load the inner language up front along with `diff`. A browser
+cannot download a parser in the middle of highlighting, so a language first
+named by a diff header has to already be loaded on the page. Node, the CLI, Elixir and
 Rust load it on demand.
 
 ## Mark the words that changed

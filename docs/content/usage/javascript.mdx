@@ -350,9 +350,8 @@ owned by JavaScript itself, such as a `blob:` URL, cannot be opened from Rust;
 include that language in `createHighlighter({languages: [...]})` or call
 `loadLanguage()` first so JavaScript resolves it before the synchronous walk.
 
-In a browser, one-pass loading does not happen: loading is asynchronous there
-and cannot run inside a synchronous walk, so import and load every
-participating language yourself:
+In a browser, a parser cannot be downloaded in the middle of highlighting, so
+import and load every participating language yourself:
 
 ```ts
 import css from "@lumis-sh/wasm-css";
@@ -372,6 +371,13 @@ const htmlOutput = hl.highlight(
 Languages from a bundle package such as `@lumis-sh/wasm-bundle-web` are
 registered but not loaded. Call `hl.loadLanguage()` for each one the document
 uses before highlighting it.
+
+A language only has to be loaded once per page. A highlighter without
+`wasmResolver` or `languagePackageResolver` of its own also highlights an
+injected block in any language another highlighter on the page loaded from its
+package, so a page that loads `rust` for one highlighter gets Rust fences in a
+Markdown-only highlighter as well. One that sets a resolver uses only what it
+loaded itself.
 
 See [On demand](/languages#on-demand).
 

@@ -19,6 +19,12 @@ import type {
 
 interface RuntimeLookup {
   getLoadedLanguage(nameOrAlias: string): LoadedLanguage | undefined;
+  /**
+   * A language an injection names, made ready without leaving the walk when
+   * the runtime can do that synchronously. Absent means only what is already
+   * loaded counts.
+   */
+  loadInjectedLanguage?(nameOrAlias: string): LoadedLanguage | undefined;
 }
 
 interface HighlightCapture {
@@ -690,7 +696,7 @@ function injectedLayers(
   matchLimit: number,
   budget: BudgetState,
 ): HighlightLayer[] {
-  const injectedLanguage = runtime.getLoadedLanguage(languageName);
+  const injectedLanguage = resolveInjectedLanguage(runtime, languageName, budget);
   if (!injectedLanguage) {
     warnUnresolvedInjection(languageName);
     return [];
@@ -708,6 +714,24 @@ function injectedLayers(
     ranges,
     language.definition.id,
   );
+}
+
+// Loading is not charged to the document: whatever a mid-walk load costs is
+// given back to the deadline, as the Rust walk does.
+function resolveInjectedLanguage(
+  runtime: RuntimeLookup,
+  languageName: string,
+  budget: BudgetState,
+): LoadedLanguage | undefined {
+  const loaded = runtime.getLoadedLanguage(languageName);
+  if (loaded || !runtime.loadInjectedLanguage) return loaded;
+
+  const started = Date.now();
+  try {
+    return runtime.loadInjectedLanguage(languageName);
+  } finally {
+    budget.deadline?.extend(Date.now() - started);
+  }
 }
 
 // The end byte of each match's `@local.definition.value` capture, indexed by
@@ -979,12 +1003,17 @@ interface Deadline {
   passed: () => boolean;
   /** Whether it ever ran out, which is what the caller is asking. */
   expired: boolean;
+  /** Push the deadline back by time spent on something not charged to the render. */
+  extend: (ms: number) => void;
 }
 
 function deadlineIn(timeLimitMs: number): Deadline {
-  const at = Date.now() + timeLimitMs;
+  let at = Date.now() + timeLimitMs;
   const deadline: Deadline = {
     expired: false,
+    extend: (ms) => {
+      at += ms;
+    },
     passed: () => {
       if (!deadline.expired && Date.now() >= at) deadline.expired = true;
       return deadline.expired;
