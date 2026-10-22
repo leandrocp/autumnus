@@ -20,15 +20,19 @@ on:
       - ".oxfmtrc.json"
       - ".oxlintrc.json"
       - "Cargo.toml"
+      - "THEMES.md"
       - "benchmarks/rust/**"
       - "crates/autumnus/**"
       - "crates/dev/**"
+      - "crates/lumis-core/themes/NOTICE.md"
       - "crates/lumis-wasm-runtime/src/catalog.rs"
+      - "docs/content/reference/themes.md"
       - "languages.toml"
       - "mise.toml"
       - "neovim.yml"
       - "pnpm-lock.yaml"
       - "selene.toml"
+      - "themes/**"
   pull_request:
     paths:
       - "**/*.cjs"
@@ -43,15 +47,19 @@ on:
       - ".oxfmtrc.json"
       - ".oxlintrc.json"
       - "Cargo.toml"
+      - "THEMES.md"
       - "benchmarks/rust/**"
       - "crates/autumnus/**"
       - "crates/dev/**"
+      - "crates/lumis-core/themes/NOTICE.md"
       - "crates/lumis-wasm-runtime/src/catalog.rs"
+      - "docs/content/reference/themes.md"
       - "languages.toml"
       - "mise.toml"
       - "neovim.yml"
       - "pnpm-lock.yaml"
       - "selene.toml"
+      - "themes/**"
   workflow_dispatch:
 
 permissions:
@@ -132,6 +140,7 @@ jobs:
       - run: cargo fmt --manifest-path crates/autumnus/Cargo.toml --check
       - run: cargo fmt --manifest-path crates/dev/Cargo.toml --check
       - run: cargo test --manifest-path crates/dev/Cargo.toml --no-default-features
+      - run: cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- gen-themes-md --check
       # Each of these is its own workspace, so it carries its own `[lints]`
       # table; Cargo cannot inherit one across workspaces. Nothing else compiles
       # them, so without these steps nothing reports on them at all.

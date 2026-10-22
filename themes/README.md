@@ -2,7 +2,7 @@
 
 All themes are sourced from the Neovim community.
 
-All rights belongs to the original authors and contributors.
+All rights belongs to the original authors and contributors. [`NOTICE.md`](NOTICE.md) lists each theme's source, pinned commit, license and copyright.
 
 ## Generating Themes
 

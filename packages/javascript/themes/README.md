@@ -26,6 +26,10 @@ https://unpkg.com/@lumis-sh/themes/dist/json/dracula.json
 
 Use `buildCss(theme, options)` to build a stylesheet you can inline or scope. The CSS builder guide is at [docs.lumis.sh](https://docs.lumis.sh).
 
+## License
+
+The package is MIT. Each theme keeps the license of the Neovim plugin it was extracted from; `dist/NOTICE.md` lists the source, pinned commit, license and copyright notice for every theme.
+
 ## Browse
 
 - CSS: https://unpkg.com/browse/@lumis-sh/themes/dist/css/

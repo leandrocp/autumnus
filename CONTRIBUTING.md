@@ -425,6 +425,7 @@ These files drive code generation, builds, detection metadata, and theme extract
 | [`highlights.toml`](highlights.toml) | Tree-sitter highlight scope names |
 | [`languages.toml`](languages.toml) | Parser metadata, query sources, language bundles, feature flags |
 | [`themes/themes.lua`](themes/themes.lua) | Theme definitions from Neovim colorscheme sources |
+| [`themes/licenses.toml`](themes/licenses.toml) | License and copyright of every theme source, rendered into `themes/NOTICE.md` |
 
 ### highlights.toml
 
@@ -1024,6 +1025,18 @@ Themes are extracted from Neovim colorscheme plugins. Each theme is a JSON file 
 }
 ```
 
+1. Record the plugin's license in `themes/licenses.toml`, read from the license
+   file at the commit the theme will be extracted from. Add an entry for each
+   `dependencies` URL too. A plugin without a license is recorded as
+   `license = "NONE"`.
+
+```toml
+[sources."https://github.com/author/theme-repo"]
+license = "MIT"
+license_file = "LICENSE"
+copyright = ["Copyright (c) 2024 Author"]
+```
+
 1. Generate the JSON file and sync package outputs:
 
 ```sh
@@ -1059,3 +1072,13 @@ mise run css-gen
 
 Theme generation keeps the previous revision when an upstream commit produces
 identical theme data, so revision-only changes do not create update PRs.
+
+### Theme licenses
+
+`mise run docs-gen-themes-md` writes `THEMES.md`, the docs reference page and
+`themes/NOTICE.md`, which lists each theme's source, pinned commit, license and
+copyright. `crates/lumis-core` and `@lumis-sh/themes` ship a copy of the notice.
+`mise run themes-check-notices` fails when a theme or dependency URL has no entry
+in `themes/licenses.toml`, when an entry is no longer used, or when a generated
+file is stale. A revision bump does not re-read the license, so check the
+license file again when an update PR moves a theme to a new commit.

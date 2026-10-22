@@ -18,6 +18,7 @@ use std::time::{Duration, Instant};
 use xz2::write::XzEncoder;
 
 mod stress;
+mod theme_licenses;
 mod wasi_sdk;
 
 #[derive(Parser)]
@@ -37,7 +38,11 @@ enum Commands {
     SyncThemes,
     SyncCss,
     ListThemes,
-    GenThemesMd,
+    GenThemesMd {
+        /// Fail if a generated listing or notice is stale instead of writing it.
+        #[arg(long)]
+        check: bool,
+    },
     LangsList,
     UpgradeParsers {
         #[arg(default_value = "")]
@@ -222,7 +227,7 @@ fn main() -> Result<()> {
         Commands::SyncThemes => sync_themes(),
         Commands::SyncCss => sync_css(),
         Commands::ListThemes => list_themes(),
-        Commands::GenThemesMd => gen_themes_md(),
+        Commands::GenThemesMd { check } => gen_themes_md(check),
         Commands::LangsList => langs_list(),
         Commands::UpgradeParsers { name } => upgrade_parsers(&name),
         Commands::FetchParsers { name } => fetch_parsers(&name),
@@ -1081,10 +1086,16 @@ fn sync_css() -> Result<()> {
     Ok(())
 }
 
-/// Extract (name, url) pairs from themes/themes.lua using `full_moon` AST parsing.
-fn parse_themes_lua() -> Result<Vec<(String, String)>> {
+/// A theme definition from themes/themes.lua.
+struct ThemeDefinition {
+    name: String,
+    url: String,
+    dependencies: Vec<String>,
+}
+
+/// Extract theme definitions from themes/themes.lua using `full_moon` AST parsing.
+fn parse_themes_lua() -> Result<Vec<ThemeDefinition>> {
     use full_moon::ast::{Expression, Field, LastStmt};
-    use full_moon::tokenizer::TokenType;
 
     let source = fs::read_to_string("themes/themes.lua")?;
     let ast = full_moon::parse(&source).map_err(|e| anyhow::anyhow!("Lua parse error: {e:?}"))?;
@@ -1105,63 +1116,93 @@ fn parse_themes_lua() -> Result<Vec<(String, String)>> {
 
     // Each field in the outer table is a theme entry (NoKey variant)
     for field in outer.fields() {
-        let Field::NoKey(expr) = field else {
-            continue;
-        };
-        let Expression::TableConstructor(inner) = expr else {
+        let Field::NoKey(Expression::TableConstructor(inner)) = field else {
             continue;
         };
 
         let mut name = None;
         let mut url = None;
+        let mut dependencies = Vec::new();
 
         for inner_field in inner.fields() {
             let Field::NameKey { key, value, .. } = inner_field else {
                 continue;
             };
-            let key_str = key.token().to_string();
 
-            if let Expression::String(token_ref) = &**value {
-                if let TokenType::StringLiteral { literal, .. } = token_ref.token().token_type() {
-                    match key_str.as_str() {
-                        "name" => name = Some(literal.to_string()),
-                        "url" => url = Some(literal.to_string()),
-                        _ => {}
-                    }
+            match (key.token().to_string().as_str(), &**value) {
+                ("name", value) => name = lua_string_literal(value),
+                ("url", value) => url = lua_string_literal(value),
+                ("dependencies", Expression::TableConstructor(deps)) => {
+                    dependencies = deps
+                        .fields()
+                        .iter()
+                        .filter_map(|dep| match dep {
+                            Field::NoKey(value) => lua_string_literal(value),
+                            _ => None,
+                        })
+                        .collect();
                 }
+                _ => {}
             }
         }
 
-        if let (Some(n), Some(u)) = (name, url) {
-            entries.push((n, u));
+        if let (Some(name), Some(url)) = (name, url) {
+            entries.push(ThemeDefinition {
+                name,
+                url,
+                dependencies,
+            });
         }
     }
 
     Ok(entries)
 }
 
+fn lua_string_literal(expr: &full_moon::ast::Expression) -> Option<String> {
+    use full_moon::tokenizer::TokenType;
+
+    let full_moon::ast::Expression::String(token_ref) = expr else {
+        return None;
+    };
+    match token_ref.token().token_type() {
+        TokenType::StringLiteral { literal, .. } => Some(literal.to_string()),
+        _ => None,
+    }
+}
+
 fn list_themes() -> Result<()> {
     let mut entries = parse_themes_lua()?;
-    entries.sort_by(|a, b| a.0.cmp(&b.0));
+    entries.sort_by(|a, b| a.name.cmp(&b.name));
 
-    for (name, _) in &entries {
-        println!("{name}");
+    for entry in &entries {
+        println!("{}", entry.name);
     }
     Ok(())
 }
 
-fn gen_themes_md() -> Result<()> {
+fn gen_themes_md(check: bool) -> Result<()> {
     let mut entries = parse_themes_lua()?;
-    entries.sort_by(|a, b| a.0.cmp(&b.0));
+    entries.sort_by(|a, b| a.name.cmp(&b.name));
+
+    let licenses = theme_licenses::read("themes/licenses.toml")?;
+    let themes = theme_licenses::resolve(&entries, &licenses, Path::new("themes"))?;
 
     let mut table_lines = vec![
-        "| Theme | Repository |".to_string(),
-        "|-------|------------|".to_string(),
+        "| Theme | Repository | License |".to_string(),
+        "|-------|------------|---------|".to_string(),
     ];
 
-    for (name, url) in &entries {
-        let repo_name = url.strip_prefix("https://github.com/").unwrap_or(url);
-        table_lines.push(format!("| `{name}` | [{repo_name}]({url}) |"));
+    for theme in &themes {
+        let repo_name = theme
+            .url
+            .strip_prefix("https://github.com/")
+            .unwrap_or(theme.url);
+        table_lines.push(format!(
+            "| `{}` | [{repo_name}]({}) | {} |",
+            theme.name,
+            theme.url,
+            theme_licenses::license_label(&theme.license.license)
+        ));
     }
 
     let mut themes_md = vec![
@@ -1169,11 +1210,11 @@ fn gen_themes_md() -> Result<()> {
         String::new(),
         "> This file is auto-generated by `mise run docs-gen-themes-md`. Do not edit.".to_string(),
         String::new(),
+        "Each theme keeps the license of the plugin it was extracted from. See [`themes/NOTICE.md`](themes/NOTICE.md) for the pinned commits and copyright notices.".to_string(),
+        String::new(),
     ];
     themes_md.extend(table_lines.clone());
     themes_md.push(String::new());
-
-    fs::write("THEMES.md", themes_md.join("\n"))?;
 
     let mut docs_md = vec![
         "---".to_string(),
@@ -1201,12 +1242,45 @@ fn gen_themes_md() -> Result<()> {
         "For usage examples, see [Themes](/themes) and [CSS Theme Files](/themes/css-files)."
             .to_string(),
         String::new(),
+        "Each theme keeps the license of the plugin it was extracted from. [`themes/NOTICE.md`](https://github.com/leandrocp/lumis/blob/main/themes/NOTICE.md) lists the pinned commit, license and copyright notice for every theme.".to_string(),
+        String::new(),
     ];
     docs_md.extend(table_lines);
     docs_md.push(String::new());
 
-    fs::write("docs/content/reference/themes.md", docs_md.join("\n"))?;
-    println!("Generated THEMES.md with {} themes", entries.len());
+    let notice = theme_licenses::render_notice(&themes, &entries, &licenses);
+
+    let outputs = [
+        ("THEMES.md", themes_md.join("\n")),
+        ("docs/content/reference/themes.md", docs_md.join("\n")),
+        ("themes/NOTICE.md", notice.clone()),
+        ("crates/lumis-core/themes/NOTICE.md", notice),
+    ];
+
+    if check {
+        let stale: Vec<&str> = outputs
+            .iter()
+            .filter(|(path, content)| fs::read_to_string(path).ok().as_deref() != Some(content))
+            .map(|(path, _)| *path)
+            .collect();
+        ensure!(
+            stale.is_empty(),
+            "stale theme listings: {}; run `mise run docs-gen-themes-md`",
+            stale.join(", ")
+        );
+        println!(
+            "Verified theme listings and notices for {} themes",
+            themes.len()
+        );
+    } else {
+        for (path, content) in &outputs {
+            fs::write(path, content)?;
+        }
+        println!(
+            "Generated THEMES.md and themes/NOTICE.md with {} themes",
+            themes.len()
+        );
+    }
     Ok(())
 }
 
