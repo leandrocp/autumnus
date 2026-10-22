@@ -5899,6 +5899,11 @@ fn stage_hex_bundle(name: &str) -> Result<()> {
         .and_then(serde_json::Value::as_str)
         .with_context(|| format!("{manifest} has no description"))?;
     check_hex_description(&manifest, description)?;
+    ensure_series_requirements(
+        name,
+        &wasm_requirements(&npm),
+        &supported_tree_sitter_series()?,
+    )?;
 
     let app_name = bundle_app(name);
     let module_name = elixir_module_name(&app_name);
