@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && node scripts/check-agent-discovery.mjs && node scripts/check-markdown-negotiation.mjs && node scripts/check-installers.mjs && vite build",
+    "build": "tsc --noEmit && node scripts/check-agent-discovery.mjs && node scripts/comparison-markdown.mjs && node scripts/check-markdown-negotiation.mjs && node scripts/check-installers.mjs && vite build",
+    "check:comparison-markdown": "node scripts/comparison-markdown.mjs",
     "check:discovery": "node scripts/check-agent-discovery.mjs",
     "check:installers": "node scripts/check-installers.mjs",
     "check:markdown": "node scripts/check-markdown-negotiation.mjs",

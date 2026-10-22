@@ -113,6 +113,7 @@ updates:
       comparison:
         patterns:
           - "@catppuccin/highlightjs"
+          - "@pierre/highlights"
           - "@speed-highlight/core"
           - "@tanstack/highlight"
           - "@wooorm/starry-night"

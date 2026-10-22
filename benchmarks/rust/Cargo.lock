@@ -612,6 +612,7 @@ name = "lumis-benchmarks"
 version = "0.0.0"
 dependencies = [
  "criterion",
+ "libc",
  "lumis",
  "serde",
  "serde_json",

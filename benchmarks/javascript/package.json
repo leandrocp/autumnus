@@ -34,6 +34,7 @@
     "@lumis-sh/wasm-ruby": "0.26.4",
     "@lumis-sh/wasm-rust": "0.26.5",
     "@lumis-sh/wasm-tsx": "0.26.3",
+    "@pierre/highlights": "0.2.0",
     "@speed-highlight/core": "2.1.0",
     "@tanstack/highlight": "1.1.0",
     "@wooorm/starry-night": "3.11.0",

@@ -32,7 +32,12 @@ for (const document of documents) {
     await writeFile(fragment, library.fragment(output, document, theme));
 
     const stats = await measureCall(() => library.highlight(source, document, theme));
-    results.push({ document: document.id, implementation: library.id, totalNs: stats.p50 });
+    results.push({
+      document: document.id,
+      implementation: library.id,
+      totalNs: stats.p50,
+      samples: stats.samples.length,
+    });
     console.log(
       `${document.id} · ${implementationById(library.id).label}: ` +
         `${(stats.p50 / 1e6).toFixed(2)} ms`,
@@ -42,5 +47,9 @@ for (const document of documents) {
 dispose();
 
 await mkdir(dirname(outputPath), { recursive: true });
-await writeFile(outputPath, `${JSON.stringify({ results }, null, 2)}\n`);
+// The published report names the runtime that ran these, so the run records it.
+await writeFile(
+  outputPath,
+  `${JSON.stringify({ run: { node: process.version }, results }, null, 2)}\n`,
+);
 console.log(outputPath);

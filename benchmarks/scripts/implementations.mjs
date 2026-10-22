@@ -14,6 +14,7 @@ export const implementations = [
   // scenario suite does not. Every scenario highlights Rust, which TanStack
   // Highlight does not support, and the suite has no runner for the others yet.
   { id: "tanstack-highlight", label: "TanStack Highlight", runner: "mitata", benchmark: false },
+  { id: "pierre-highlights", label: "Highlights", runner: "mitata", benchmark: false },
   { id: "sugar-high", label: "Sugar High", runner: "mitata", benchmark: false },
   { id: "prism", label: "Prism", runner: "mitata", benchmark: false },
   { id: "speed-highlight", label: "speed-highlight", runner: "mitata", benchmark: false },

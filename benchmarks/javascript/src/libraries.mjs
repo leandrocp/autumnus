@@ -1,20 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import highlightJs from "highlight.js";
-import { createHighlighter as createShikiHighlighter } from "shiki";
-import { createOnigurumaEngine } from "shiki/engine/oniguruma";
-import { createHighlighter as createTanStackHighlighter } from "@tanstack/highlight/core";
-import * as tanStackLanguages from "@tanstack/highlight/languages";
-import { createThemeCss, themeTokenClasses } from "@tanstack/highlight/theme";
-import { highlight as highlightSugarHigh } from "sugar-high";
-import { SugarHigh } from "sugar-high/core";
-import { lang as sugarHighLanguage } from "sugar-high/lang";
-import Prism from "prismjs";
-import loadPrismLanguages from "prismjs/components/index.js";
-import { highlightHTML as highlightSpeedHighlight } from "@speed-highlight/core";
-import { all as starryNightGrammars, createStarryNight } from "@wooorm/starry-night";
-import { toHtml } from "hast-util-to-html";
 
 // speed-highlight names its grammars after file extensions and renders a name it
 // cannot load as plain text, so the name is given here. It has no TSX grammar, and
@@ -22,7 +8,9 @@ import { toHtml } from "hast-util-to-html";
 const speedHighlightLanguages = { html: "html", rust: "rs", go: "go", markdown: "md", tsx: "ts" };
 
 /**
- * The libraries the comparison sets beside Lumis, each built once.
+ * The libraries the comparison sets beside Lumis. Each one imports and builds
+ * only itself, so a process that loads one holds none of the others, which is
+ * what lets the memory pass measure a library on its own.
  *
  * `highlight` is the library's own call, and the only work the comparison
  * times, so the time on the page is the time to produce the output beside it.
@@ -30,103 +18,132 @@ const speedHighlightLanguages = { html: "html", rust: "rs", go: "go", markdown: 
  * `fragment` wraps that output for the page: the theme's stylesheet, and the
  * element the library leaves its caller to write.
  */
-export async function loadLibraries({ assetsDir, documents, themes }) {
-  const shiki = await createShikiHighlighter({
-    langs: [...new Set(documents.map((document) => document.language))],
-    themes: themes.map((theme) => theme.shiki),
-    engine: createOnigurumaEngine(import("shiki/wasm")),
-  });
-  const highlightJsThemes = new Map(
-    await Promise.all(
-      themes.map(async (theme) => [
-        theme.id,
-        await readFile(fileURLToPath(import.meta.resolve(theme.highlightJs)), "utf8"),
-      ]),
-    ),
-  );
-  // Like highlight.js, TanStack Highlight, Prism and starry-night get every language
-  // they ship, so a README fence they can read is highlighted rather than left plain.
-  const tanStack = createTanStackHighlighter({ languages: Object.values(tanStackLanguages) });
-  loadPrismLanguages();
-  const starryNight = await createStarryNight(starryNightGrammars);
-  const starryNightStylesheet = await readFile(
-    fileURLToPath(import.meta.resolve("@wooorm/starry-night/style/core")),
-    "utf8",
-  );
-  // speed-highlight's default theme colours every token class its grammars emit, so
-  // it is the list a theme has to cover.
-  const speedHighlightTokens = [
-    ...new Set(
-      Array.from(
-        (
-          await readFile(
-            fileURLToPath(import.meta.resolve("@speed-highlight/core/themes/default.css")),
-            "utf8",
-          )
-        ).matchAll(/\.shj-syn-([a-z]+)/gu),
-        ([, token]) => token,
-      ),
-    ),
-  ];
-  const styles = new Map(
-    await Promise.all(
-      themes.map(async (theme) => {
-        const palette = highlightJsPalette(theme, highlightJsThemes.get(theme.id));
-        return [
-          theme.id,
-          {
-            tanStack: createThemeCss({
-              themes: [{ selector: ":root", theme: tanStackTheme(theme, palette) }],
-            }),
-            sugarHigh: sugarHighCss(palette),
-            prism: await readFile(resolve(assetsDir, theme.prism), "utf8"),
-            speedHighlight: speedHighlightCss(palette, speedHighlightTokens),
-            starryNight: starryNightCss(palette, starryNightStylesheet),
-          },
-        ];
-      }),
-    ),
-  );
-
-  const libraries = [
-    {
-      id: "shiki",
+const loaders = {
+  async shiki({ documents, themes }) {
+    const [{ createHighlighter }, { createOnigurumaEngine }] = await Promise.all([
+      import("shiki"),
+      import("shiki/engine/oniguruma"),
+    ]);
+    const shiki = await createHighlighter({
+      langs: [...new Set(documents.map((document) => document.language))],
+      themes: themes.map((theme) => theme.shiki),
+      engine: createOnigurumaEngine(import("shiki/wasm")),
+    });
+    return {
       highlight: (source, document, theme) =>
         shiki.codeToHtml(source, { lang: document.language, theme: theme.shiki }),
       fragment: (output) => output,
-    },
-    {
-      id: "highlight-js",
+      dispose: () => shiki.dispose(),
+    };
+  },
+
+  async "highlight-js"({ themes }) {
+    const { default: highlightJs } = await import("highlight.js");
+    const stylesheets = await highlightJsStylesheets(themes);
+    return {
       highlight: (source, document) =>
         highlightJs.highlight(source, { language: document.language }).value,
       fragment: (output, document, theme) =>
-        `<style>${highlightJsThemes.get(theme.id)}</style>` +
+        `<style>${stylesheets.get(theme.id)}</style>` +
         `<pre><code class="hljs language-${document.language}">${output}</code></pre>`,
-    },
-    // A language TanStack Highlight lacks comes back as plain text under its
-    // fallback name. That is no output to compare, so it counts as no grammar, and
-    // the document has to have declared it unsupported. The same goes for every
-    // library below that has no grammar for the document.
-    {
-      id: "tanstack-highlight",
+    };
+  },
+
+  // Highlights ships Catppuccin ports of its own. Its output is a view into its
+  // WebAssembly memory that the next call overwrites, so decoding it is part of
+  // producing the HTML and is timed with the call.
+  async "pierre-highlights"({ themes }) {
+    const [{ codeToHtml, isSupportedLanguage }, bundledThemes] = await Promise.all([
+      import("@pierre/highlights"),
+      import("@pierre/highlights/themes"),
+    ]);
+    const decoder = new TextDecoder();
+    const highlightsThemes = new Map(
+      themes.map((theme) => {
+        const highlightsTheme = bundledThemes[theme.pierreHighlights];
+        if (!highlightsTheme) {
+          throw new Error(`@pierre/highlights has no ${theme.pierreHighlights} theme`);
+        }
+        return [theme.id, highlightsTheme];
+      }),
+    );
+    return {
+      highlight: (source, document, theme) =>
+        isSupportedLanguage(document.language)
+          ? decoder.decode(
+              codeToHtml(source, {
+                lang: document.language,
+                theme: highlightsThemes.get(theme.id),
+              }),
+            )
+          : undefined,
+      fragment: (output) => output,
+    };
+  },
+
+  // A language TanStack Highlight lacks comes back as plain text under its
+  // fallback name. That is no output to compare, so it counts as no grammar, and
+  // the document has to have declared it unsupported. The same goes for every
+  // library below that has no grammar for the document.
+  async "tanstack-highlight"({ themes }) {
+    const [{ createHighlighter }, languages, { createThemeCss, themeTokenClasses }] =
+      await Promise.all([
+        import("@tanstack/highlight/core"),
+        import("@tanstack/highlight/languages"),
+        import("@tanstack/highlight/theme"),
+      ]);
+    // Like highlight.js, TanStack Highlight, Prism and starry-night get every
+    // language they ship, so a README fence they can read is highlighted rather
+    // than left plain.
+    const tanStack = createHighlighter({ languages: Object.values(languages) });
+    const styles = await stylesFor(themes, (theme, palette) =>
+      createThemeCss({
+        themes: [{ selector: ":root", theme: tanStackTheme(theme, palette, themeTokenClasses) }],
+      }),
+    );
+    return {
       highlight(source, document) {
         const result = tanStack.highlight(source, { lang: document.language });
         return result.lang === document.language ? result.html : undefined;
       },
-      fragment: (output, document, theme) =>
-        `<style>${styles.get(theme.id).tanStack}</style>${output}`,
-    },
-    {
-      id: "sugar-high",
+      fragment: (output, document, theme) => `<style>${styles.get(theme.id)}</style>${output}`,
+    };
+  },
+
+  async "sugar-high"({ themes }) {
+    const [{ highlight }, { SugarHigh }, { lang: sugarHighLanguage }] = await Promise.all([
+      import("sugar-high"),
+      import("sugar-high/core"),
+      import("sugar-high/lang"),
+    ]);
+    const styles = await stylesFor(themes, (_theme, palette) =>
+      sugarHighCss(palette, SugarHigh.TokenTypes),
+    );
+    return {
       highlight(source, document) {
         const lang = sugarHighLanguage(document.language);
-        return lang ? highlightSugarHigh(source, { lang }) : undefined;
+        return lang ? highlight(source, { lang }) : undefined;
       },
       fragment: (output, document, theme) =>
-        `<style>${styles.get(theme.id).sugarHigh}</style><pre><code>${output}</code></pre>`,
-    },
-    {
-      id: "prism",
+        `<style>${styles.get(theme.id)}</style><pre><code>${output}</code></pre>`,
+    };
+  },
+
+  async prism({ assetsDir, themes }) {
+    const [{ default: Prism }, { default: loadPrismLanguages }] = await Promise.all([
+      import("prismjs"),
+      import("prismjs/components/index.js"),
+    ]);
+    loadPrismLanguages();
+    const styles = new Map(
+      await Promise.all(
+        themes.map(async (theme) => [
+          theme.id,
+          await readFile(resolve(assetsDir, theme.prism), "utf8"),
+        ]),
+      ),
+    );
+    return {
       highlight(source, document) {
         const grammar = Prism.languages[document.language];
         return grammar ? Prism.highlight(source, grammar, document.language) : undefined;
@@ -134,38 +151,101 @@ export async function loadLibraries({ assetsDir, documents, themes }) {
       fragment(output, document, theme) {
         const prismClass = `language-${document.language}`;
         return (
-          `<style>${styles.get(theme.id).prism}</style>` +
+          `<style>${styles.get(theme.id)}</style>` +
           `<pre class="${prismClass}"><code class="${prismClass}">${output}</code></pre>`
         );
       },
-    },
-    {
-      id: "speed-highlight",
+    };
+  },
+
+  async "speed-highlight"({ themes }) {
+    const { highlightHTML } = await import("@speed-highlight/core");
+    // speed-highlight's default theme colours every token class its grammars emit,
+    // so it is the list a theme has to cover.
+    const tokens = [
+      ...new Set(
+        Array.from(
+          (await readPackageFile("@speed-highlight/core/themes/default.css")).matchAll(
+            /\.shj-syn-([a-z]+)/gu,
+          ),
+          ([, token]) => token,
+        ),
+      ),
+    ];
+    const styles = await stylesFor(themes, (_theme, palette) => speedHighlightCss(palette, tokens));
+    return {
       highlight(source, document) {
         const lang = speedHighlightLanguages[document.language];
-        return lang ? highlightSpeedHighlight(source, lang, { block: false }) : undefined;
+        return lang ? highlightHTML(source, lang, { block: false }) : undefined;
       },
       fragment: (output, document, theme) =>
-        `<style>${styles.get(theme.id).speedHighlight}</style>` +
+        `<style>${styles.get(theme.id)}</style>` +
         `<pre class="shj-lang-${speedHighlightLanguages[document.language]}"><code>${output}</code></pre>`,
-    },
-    {
-      id: "starry-night",
+    };
+  },
+
+  async "starry-night"({ themes }) {
+    const [{ all, createStarryNight }, { toHtml }] = await Promise.all([
+      import("@wooorm/starry-night"),
+      import("hast-util-to-html"),
+    ]);
+    const starryNight = await createStarryNight(all);
+    const stylesheet = await readPackageFile("@wooorm/starry-night/style/core");
+    const styles = await stylesFor(themes, (_theme, palette) =>
+      starryNightCss(palette, stylesheet),
+    );
+    return {
       highlight(source, document) {
         const scope = starryNight.flagToScope(document.language);
         return scope ? toHtml(starryNight.highlight(source, scope)) : undefined;
       },
       fragment: (output, document, theme) =>
-        `<style>${styles.get(theme.id).starryNight}</style><pre><code>${output}</code></pre>`,
-    },
-  ];
+        `<style>${styles.get(theme.id)}</style><pre><code>${output}</code></pre>`,
+    };
+  },
+};
 
+/** The id of every library `loadLibraries` can load. */
+export const libraryIds = Object.keys(loaders);
+
+/**
+ * Builds the libraries named by `ids`, every one of them by default.
+ */
+export async function loadLibraries({ assetsDir, documents, themes, ids = libraryIds }) {
+  const libraries = [];
+  for (const id of ids) {
+    const load = loaders[id];
+    if (!load) throw new Error(`no comparison library is named ${id}`);
+    libraries.push({ id, ...(await load({ assetsDir, documents, themes })) });
+  }
   return {
     libraries,
     dispose() {
-      shiki.dispose();
+      for (const library of libraries) library.dispose?.();
     },
   };
+}
+
+async function readPackageFile(specifier) {
+  return readFile(fileURLToPath(import.meta.resolve(specifier)), "utf8");
+}
+
+async function highlightJsStylesheets(themes) {
+  return new Map(
+    await Promise.all(
+      themes.map(async (theme) => [theme.id, await readPackageFile(theme.highlightJs)]),
+    ),
+  );
+}
+
+async function stylesFor(themes, style) {
+  const stylesheets = await highlightJsStylesheets(themes);
+  return new Map(
+    themes.map((theme) => [
+      theme.id,
+      style(theme, highlightJsPalette(theme, stylesheets.get(theme.id))),
+    ]),
+  );
 }
 
 // TanStack Highlight, Sugar High, speed-highlight and starry-night ship no
@@ -205,7 +285,7 @@ function highlightJsPalette(theme, stylesheet) {
   };
 }
 
-function tanStackTheme(theme, palette) {
+function tanStackTheme(theme, palette, themeTokenClasses) {
   const highlightJsClasses = {
     attr: "attr",
     "code-inline": "code",
@@ -256,7 +336,7 @@ function tanStackTheme(theme, palette) {
 }
 
 // Sugar High colours each token through a `--sh-<type>` custom property.
-function sugarHighCss(palette) {
+function sugarHighCss(palette, tokenTypes) {
   const highlightJsClasses = {
     // Whitespace, which it wraps in spans of its own.
     break: null,
@@ -276,8 +356,8 @@ function sugarHighCss(palette) {
     sign: "punctuation",
     string: "string",
   };
-  palette.assertMapped("Sugar High", SugarHigh.TokenTypes, highlightJsClasses);
-  const properties = SugarHigh.TokenTypes.map(
+  palette.assertMapped("Sugar High", tokenTypes, highlightJsClasses);
+  const properties = tokenTypes.map(
     (token) => `--sh-${token}:${palette.colour(highlightJsClasses[token])}`,
   );
 
