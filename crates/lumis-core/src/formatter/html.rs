@@ -7,6 +7,7 @@ use crate::decorations::{
     LineSelection,
 };
 use crate::events::HighlightEvent;
+use crate::highlights::HIGHLIGHT_NAMES;
 use crate::languages::Language;
 use crate::themes::{Style, TextDecoration, Theme, UnderlineStyle};
 use std::fmt::Write as _;
@@ -1522,13 +1523,17 @@ pub(crate) fn write_html_spans<T>(
 /// The opening `<span>` of every scope this document has opened.
 ///
 /// A document reopens the same scope on every line it crosses and once per
-/// token besides, so each tag is rendered once and then copied. Scope indices
-/// are small and dense, so they index a vector directly, and a scope carries
-/// few languages, so the language match is a scan of that short list rather
-/// than a hash of a string this never stores twice.
+/// token besides, so each tag is rendered once and then copied. Known scope
+/// indices are small and dense, so they index a vector directly, and a scope
+/// carries few languages, so the language match is a scan of that short list
+/// rather than a hash of a string this never stores twice.
+///
+/// Events can come from a custom formatter, so any other index is caller data
+/// and goes to a map instead of growing the vector up to it.
 #[derive(Default)]
 struct SpanAttrCache {
     entries: Vec<Vec<(String, Vec<u8>)>>,
+    unknown: std::collections::HashMap<usize, Vec<(String, Vec<u8>)>>,
 }
 
 impl SpanAttrCache {
@@ -1538,10 +1543,14 @@ impl SpanAttrCache {
         language: &str,
         span_attrs: &dyn Fn(usize, &str) -> String,
     ) -> &[u8] {
-        if scope_index >= self.entries.len() {
-            self.entries.resize_with(scope_index + 1, Vec::new);
-        }
-        let languages = &mut self.entries[scope_index];
+        let languages = if scope_index < HIGHLIGHT_NAMES.len() {
+            if scope_index >= self.entries.len() {
+                self.entries.resize_with(scope_index + 1, Vec::new);
+            }
+            &mut self.entries[scope_index]
+        } else {
+            self.unknown.entry(scope_index).or_default()
+        };
         let found = languages
             .iter()
             .position(|(known, _)| known == language)
@@ -1821,6 +1830,40 @@ mod tests {
                 render_lines_from_events(source, &events, span_attrs).join("\n")
             );
         }
+    }
+
+    #[test]
+    fn inline_spans_accept_a_scope_index_outside_the_known_scopes() {
+        let source = "ab";
+        let events: [HighlightEvent<'_, ()>; 6] = [
+            HighlightEvent::Start {
+                scope_index: usize::MAX,
+                language: "text".to_string(),
+            },
+            HighlightEvent::Source { start: 0, end: 1 },
+            HighlightEvent::End,
+            HighlightEvent::Start {
+                scope_index: HIGHLIGHT_NAMES.len(),
+                language: "text".to_string(),
+            },
+            HighlightEvent::Source { start: 1, end: 2 },
+            HighlightEvent::End,
+        ];
+        let mut html = Vec::new();
+
+        write_html_spans(
+            &mut html,
+            source,
+            &events,
+            Language::PlainText,
+            &|index, _| format!("data-scope=\"{}\"", index == usize::MAX),
+        )
+        .unwrap();
+
+        assert_str_eq!(
+            String::from_utf8(html).unwrap(),
+            "<span data-scope=\"true\">a</span><span data-scope=\"false\">b</span>"
+        );
     }
 
     #[test]
