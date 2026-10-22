@@ -7,10 +7,10 @@ import {
   type LanguagesToml,
   type ParserEntry,
 } from "../lumis/scripts/languages-toml.js";
+import { languagePackageVersionRange } from "../lumis/scripts/package-version-range.js";
 
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
 const LANGUAGES_TOML = path.join(WORKSPACE_ROOT, "languages.toml");
-const LUMIS_PACKAGE_JSON = path.resolve(import.meta.dirname, "../lumis/package.json");
 /// Bundles are generated, never committed. They carry no code of their own —
 /// a manifest, an import list and a README, all derivable from languages.toml —
 /// so a copy in the tree is a second source of truth that goes stale the moment
@@ -36,21 +36,6 @@ const BUNDLE_FORMAT_VERSION = 3;
 function readLanguagesToml(): LanguagesToml {
   const text = fs.readFileSync(LANGUAGES_TOML, "utf-8");
   return parseLanguagesToml(parseToml(text));
-}
-
-function treeSitterCompatRange(): string {
-  const packageJson: { devDependencies?: Record<string, string>; version?: string } = JSON.parse(
-    fs.readFileSync(LUMIS_PACKAGE_JSON, "utf-8"),
-  );
-  // A dev dependency: tsup inlines it into `dist`.
-  const spec = packageJson.devDependencies?.["web-tree-sitter"];
-  const match = spec?.match(/(\d+\.\d+)/u);
-
-  if (!match) {
-    throw new Error("Could not determine web-tree-sitter compatibility from package.json");
-  }
-
-  return `^${match[1]}.0`;
 }
 
 /** The first Lumis that reads a bundle's default export. */
@@ -100,7 +85,7 @@ function writeBundlePackage(
   );
 
   const dependencyPackages = unique(Object.values(wasmPackagesByLanguage)).sort();
-  const wasmVersionRange = treeSitterCompatRange();
+  const wasmVersionRange = `^${languagePackageVersionRange()}.0`;
   const lumisVersion = lumisVersionRange();
   const publishedPackages = new Set(dependencyPackages);
 

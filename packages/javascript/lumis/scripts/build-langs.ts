@@ -11,6 +11,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { parse as parseToml } from "smol-toml";
 import { parseLanguagesToml, type LanguagesToml } from "./languages-toml.js";
+import { languagePackageVersionRange } from "./package-version-range.js";
 import type { LanguageInfo } from "../src/types.js";
 
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../../..");
@@ -19,26 +20,10 @@ const GENERATED_DIR = path.resolve(import.meta.dirname, "../src/generated");
 const BUNDLES_DIR = path.resolve(import.meta.dirname, "../bundles");
 
 const LANGUAGES_TOML = path.join(WORKSPACE_ROOT, "languages.toml");
-const CATALOG_RS = path.join(WORKSPACE_ROOT, "crates/lumis-wasm-runtime/src/catalog.rs");
 
 function readLanguagesToml(): LanguagesToml {
   const text = fs.readFileSync(LANGUAGES_TOML, "utf-8");
   return parseLanguagesToml(parseToml(text));
-}
-
-// `mise run langs-gen-catalog` derives this from the Tree-sitter series pinned in
-// mise.toml and writes it into the generated Rust catalog. Reading it back keeps
-// one implementation rather than a second pin parser that could disagree about
-// which series a runtime supports.
-function languagePackageVersionRange(): string {
-  const source = fs.readFileSync(CATALOG_RS, "utf-8");
-  const range = /package_version_range:\s*"([^"]+)"/u.exec(source)?.[1];
-  if (!range) {
-    throw new Error(
-      `no package version range found in ${CATALOG_RS}; run mise run langs-gen-catalog`,
-    );
-  }
-  return range;
 }
 
 function normalizeShebangCommand(command: string): string {

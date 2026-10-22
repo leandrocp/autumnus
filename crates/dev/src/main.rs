@@ -5487,10 +5487,12 @@ fn staged_bundles() -> Result<Vec<StagedBundle>> {
             .pointer("/lumis/bundleFormat")
             .and_then(Value::as_u64)
             .with_context(|| format!("{} has no lumis.bundleFormat", path.display()))?;
+        let requirements = wasm_requirements(&manifest);
+        ensure_series_requirements(name, &requirements, &supported_tree_sitter_series()?)?;
         bundles.push(StagedBundle {
             name: name.to_string(),
             format,
-            requirements: wasm_requirements(&manifest),
+            requirements,
         });
     }
 
@@ -5503,6 +5505,27 @@ fn staged_bundles() -> Result<Vec<StagedBundle>> {
 
     bundles.sort_by(|a, b| a.name.cmp(&b.name));
     Ok(bundles)
+}
+
+/// Parser packages are published per Tree-sitter series, so a bundle requiring
+/// any other range names parsers the runtimes refuse to load.
+fn ensure_series_requirements(
+    bundle: &str,
+    requirements: &BTreeMap<String, String>,
+    series: &str,
+) -> Result<()> {
+    let expected = format!("^{series}.0");
+    let wrong: Vec<String> = requirements
+        .iter()
+        .filter(|(_, range)| **range != expected)
+        .map(|(member, range)| format!("{member} {range}"))
+        .collect();
+    ensure!(
+        wrong.is_empty(),
+        "the staged {bundle} bundle must require {expected}, the series mise.toml pins:\n  {}",
+        wrong.join("\n  ")
+    );
+    Ok(())
 }
 
 /// The `@lumis-sh/wasm-*` entries of `dependencies`, with their ranges.
