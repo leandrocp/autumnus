@@ -107,6 +107,12 @@ to `^<version>`, including when a 0.x minor release no longer fits the old range
 The updater uses only Node's standard library, so release preparation needs no
 JavaScript dependency install for this step. Example lockfiles remain untracked.
 
+When Lumis crosses a minor version before 1.0, publish compatible integrations
+in the order above before recommending the updated examples. Their published
+peer ranges may still require the previous Lumis minor, even while workspace
+tests pass. The example CI job tests workspace tarballs, not that transitional
+mix of published versions.
+
 ### Changelog template
 
 `release-prepare` uses git-cliff 2.14.2 with the shared
