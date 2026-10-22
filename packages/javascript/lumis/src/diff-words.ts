@@ -1,4 +1,4 @@
-import type { DiffWordKind } from "./diff-word-style.js";
+import type { DiffWordKind } from "./decorations.js";
 
 /** One removed or added line, as the diff grammar marks it. */
 export interface DiffLine {

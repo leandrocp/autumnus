@@ -317,7 +317,7 @@ describe("formatter shared helpers", () => {
       ],
       jsonLang,
       undefined,
-      { openSpan: () => "", openDiffWord: () => "" },
+      { openSpan: () => "" },
     );
 
     expect(lines).toEqual(["a\n", "b"]);

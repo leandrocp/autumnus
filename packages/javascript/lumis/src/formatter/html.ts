@@ -12,8 +12,7 @@ import type {
   SyntaxHighlightEvent,
   Theme,
 } from "../types.js";
-import { LineSelection, composeLineDecorations, rainbowBracketScope } from "../decorations.js";
-import type { DiffWordKind } from "../diff-word-style.js";
+import { LineSelection, composeLineDecorations, decorationScope } from "../decorations.js";
 import { HIGHLIGHT_NAMES } from "../highlights.js";
 import { sanitizeThemeName } from "../themes.js";
 import { mergeAttrs, mergeClasses } from "../core/attr-merge.js";
@@ -1209,8 +1208,6 @@ interface LineRenderOptions {
   formatText?: (text: string) => string;
   openSpan: (span: HighlightSpan, style: HighlightStyle | undefined) => string;
   closeSpan?: (span: HighlightSpan, style: HighlightStyle | undefined) => string;
-  /** The open tag of a diff's changed word. Defaults to a bare `<span>`. */
-  openDiffWord?: (kind: DiffWordKind) => string;
   /**
    * Replace a `plaintext` starting language with the language of the first scope
    * that holds text. Rust's line walks keep the starting language for rainbow
@@ -1238,8 +1235,6 @@ interface LineRenderState {
    * line.
    */
   tags: Map<string, { open: string; close: string }>;
-  /** A changed word's open tag, resolved once per side. */
-  diffWordTags: Partial<Record<DiffWordKind, string>>;
 }
 
 interface LineRenderContext {
@@ -1248,7 +1243,6 @@ interface LineRenderContext {
   formatText: (text: string) => string;
   openSpan: (span: HighlightSpan, style: HighlightStyle | undefined) => string;
   closeSpan: (span: HighlightSpan, style: HighlightStyle | undefined) => string;
-  openDiffWord: (kind: DiffWordKind) => string;
   inferLanguage: boolean;
   onLine: (
     content: string,
@@ -1311,14 +1305,8 @@ function startLineDecoration(
     state.ending = "";
     return;
   }
-  if (decoration.type === "diffWord") {
-    const open = (state.diffWordTags[decoration.kind] ??= context.openDiffWord(decoration.kind));
-    state.line += open;
-    state.openScopes.push({ close: open.length > 0 ? "</span>" : "", language: state.language });
-    return;
-  }
   openSpanEvent(state, context, {
-    scope: rainbowBracketScope(decoration.depth),
+    scope: decorationScope(decoration),
     language: state.language,
   });
 }
@@ -1386,7 +1374,6 @@ function renderDecoratedLines(
     formatText: options.formatText ?? escape,
     openSpan: options.openSpan,
     closeSpan: options.closeSpan ?? (() => "</span>"),
-    openDiffWord: options.openDiffWord ?? (() => "<span>"),
     inferLanguage: options.inferLanguage ?? false,
     onLine,
   };
@@ -1398,7 +1385,6 @@ function renderDecoratedLines(
     language,
     openScopes: [],
     tags: new Map(),
-    diffWordTags: {},
   };
 
   for (const event of composed) {
@@ -1463,7 +1449,6 @@ export function formatHtmlLines(
     highlightedAttrs: { className?: string; style?: string };
     emptyStyle?: string;
     openSpan: (span: HighlightSpan, style: HighlightStyle | undefined) => string;
-    openDiffWord?: (kind: DiffWordKind) => string;
   },
 ): string {
   const sourceBytes = encodeSource(source);
@@ -1479,7 +1464,7 @@ export function formatHtmlLines(
     composed,
     formatter.theme,
     formatter.language ? languageId(formatter.language) : "plaintext",
-    { openSpan: formatter.openSpan, openDiffWord: formatter.openDiffWord },
+    { openSpan: formatter.openSpan },
     (content, decoration) => {
       if (decoration.number > lineCount) return;
       if (!wrapped) {

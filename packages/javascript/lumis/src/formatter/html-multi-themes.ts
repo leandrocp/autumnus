@@ -1,5 +1,4 @@
 import { mergeAttrs } from "../core/attr-merge.js";
-import { diffWordClass, diffWordStyle, type DiffWordKind } from "../diff-word-style.js";
 import type {
   BudgetExhausted,
   HighlightEvent,
@@ -26,27 +25,6 @@ function spanAttrs(span: HighlightSpan, formatter: HtmlMultiThemesFormatter): Ht
     language: span.language,
     scope: span.scope,
     themes: formatter.themes,
-    defaultTheme: formatter.defaultTheme,
-    cssVariablePrefix: formatter.cssVariablePrefix,
-    italic: formatter.italic,
-    includeHighlights: formatter.includeHighlights,
-  });
-}
-
-// A changed word's style is derived rather than looked up, so each theme is
-// handed to the span helper as one carrying only that style, under the class
-// linked HTML would use.
-function diffWordAttrs(kind: DiffWordKind, formatter: HtmlMultiThemesFormatter): HtmlAttrs {
-  const scope = diffWordClass(kind);
-  const themes = Object.fromEntries(
-    Object.entries(formatter.themes).map(([name, theme]) => {
-      const style = diffWordStyle(theme, kind);
-      return [name, theme && { ...theme, highlights: style ? { [scope]: style } : {} }];
-    }),
-  );
-  return spanMultiThemesAttrs({
-    scope,
-    themes,
     defaultTheme: formatter.defaultTheme,
     cssVariablePrefix: formatter.cssVariablePrefix,
     italic: formatter.italic,
@@ -104,13 +82,11 @@ export function formatHtmlMultiThemes(
 ): string {
   const theme = formatter.defaultTheme ? formatter.themes[formatter.defaultTheme] : undefined;
   const openSpan = (span: HighlightSpan): string => openSpanTag(spanAttrs(span, formatter));
-  const openDiffWord = (kind: DiffWordKind): string => openSpanTag(diffWordAttrs(kind, formatter));
   if (isInlineStructure(formatter.structure)) {
     return formatHtmlSpans(source, events, {
       language: formatter.language,
       theme,
       openSpan,
-      openDiffWord,
     });
   }
 
@@ -131,7 +107,6 @@ export function formatHtmlMultiThemes(
     },
     emptyStyle: lineLayout,
     openSpan,
-    openDiffWord,
   });
 
   const pre = openMultiThemesPreTag({

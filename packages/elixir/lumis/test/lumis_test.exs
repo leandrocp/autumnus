@@ -540,9 +540,9 @@ defmodule Lumis.LumisTest do
 
       result = Lumis.highlight!(source, formatter: formatter, word_diff: true)
 
-      assert result =~ ~s|<span class="l-diff-word-removed">1</span>|
-      assert result =~ ~s|<span class="l-diff-word-added">2</span>|
-      refute Lumis.highlight!(source, formatter: formatter) =~ "l-diff-word"
+      assert result =~ ~s|<span class="l-diff-minus-word">1</span>|
+      assert result =~ ~s|<span class="l-diff-plus-word">2</span>|
+      refute Lumis.highlight!(source, formatter: formatter) =~ ~r/l-diff-(minus|plus)-word/
     end
   end
 

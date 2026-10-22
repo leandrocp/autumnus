@@ -1,4 +1,3 @@
-import { diffWordClass, type DiffWordKind } from "../diff-word-style.js";
 import type {
   BudgetExhausted,
   HighlightEvent,
@@ -21,10 +20,6 @@ function openSpan(span: HighlightSpan): string {
   return openSpanTag({ class: scopeToClass(span.scope) });
 }
 
-function openDiffWord(kind: DiffWordKind): string {
-  return openSpanTag({ class: diffWordClass(kind) });
-}
-
 export function formatHtmlLinked(
   source: string,
   events: readonly HighlightEvent[],
@@ -36,7 +31,6 @@ export function formatHtmlLinked(
       language: formatter.language,
       theme: undefined,
       openSpan,
-      openDiffWord,
     });
   }
 
@@ -48,7 +42,6 @@ export function formatHtmlLinked(
     lineNumberAttrs: { regular: {}, highlighted: {} },
     highlightedAttrs: { className: formatter.highlightLines?.class ?? "l-highlighted" },
     openSpan,
-    openDiffWord,
   });
 
   const pre = openPreTag({

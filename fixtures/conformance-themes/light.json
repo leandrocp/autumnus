@@ -30,9 +30,15 @@
       "fg": "#82071e",
       "bg": "#ffebe9"
     },
+    "diff.minus.word": {
+      "bg": "#ffb8b6"
+    },
     "diff.plus": {
       "fg": "#116329",
       "bg": "#dafbe1"
+    },
+    "diff.plus.word": {
+      "bg": "#a9e1b0"
     }
   }
 }

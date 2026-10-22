@@ -758,9 +758,14 @@ where
                 }
             }
             CoreHighlightEvent::DecorationStart {
-                decoration: Decoration::RainbowBracket { depth },
+                decoration:
+                    decoration @ (Decoration::RainbowBracket { .. } | Decoration::DiffWord { .. }),
             } => {
-                let scope = rainbow_scope(depth);
+                let scope = match decoration {
+                    Decoration::DiffWord { kind } => kind.scope(),
+                    Decoration::RainbowBracket { depth } => rainbow_scope(depth),
+                    _ => unreachable!("matched above"),
+                };
                 style_stack.push(resolve_style(
                     theme.as_ref(),
                     scope,
@@ -769,18 +774,6 @@ where
                 ));
                 scope_stack.push(scope);
                 language_stack.push(language);
-            }
-            // A changed word has no scope to report, so the token keeps its
-            // enclosing one. The copy is what its `DecorationEnd` pops.
-            CoreHighlightEvent::DecorationStart {
-                decoration: Decoration::DiffWord { .. },
-            } => {
-                let style = style_stack.last().cloned().unwrap_or_default();
-                let scope = scope_stack.last().copied().unwrap_or("");
-                let current_language = language_stack.last().copied().unwrap_or(language);
-                style_stack.push(style);
-                scope_stack.push(scope);
-                language_stack.push(current_language);
             }
             // The flat token stream has no place to surface anything but a
             // scope and its text. Formatters take the composed stream instead.

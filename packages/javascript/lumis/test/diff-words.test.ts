@@ -1,25 +1,18 @@
 /**
  * The TypeScript half of the changed-word parity check.
  *
- * `fixtures/diff-words.json` holds the words each diff marks and the
- * background each theme derives for them. `crates/lumis-core/tests/diff_words.rs`
- * asserts Rust produces them; this asserts both JavaScript copies do too, and
- * that a highlighted diff carries them on whichever runtime Node picked.
+ * `fixtures/diff-words.json` holds the words each diff marks.
+ * `crates/lumis-core/tests/diff_words.rs` asserts Rust marks them; this asserts
+ * JavaScript does too, and that a highlighted diff carries them on whichever
+ * runtime Node picked.
  */
 import { readFileSync } from "node:fs";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import diff from "../langs/diff.ts";
 import javascript from "../langs/javascript.ts";
-import { diffWordStyle as themesDiffWordStyle } from "../../themes/src/diff-word-style.js";
-import { diffWordStyle } from "../src/diff-word-style.js";
 import { diffWordRanges, type DiffLine } from "../src/diff-words.js";
-import {
-  createHighlighter,
-  type HighlightEvent,
-  type Highlighter,
-  type Theme,
-} from "../src/index.js";
+import { createHighlighter, type HighlightEvent, type Highlighter } from "../src/index.js";
 import { htmlLinked, type Formatter } from "../src/formatters.js";
 import { configureLocalWasmResolver } from "./wasm.js";
 
@@ -27,7 +20,6 @@ type Marked = [side: "-" | "+", startByte: number, text: string];
 
 const fixture: {
   ranges: Array<{ name: string; diff: string; marked: Marked[] }>;
-  colors: Array<{ theme: string; removed: string; added: string }>;
 } = JSON.parse(
   readFileSync(new URL("../../../../fixtures/diff-words.json", import.meta.url), "utf8"),
 );
@@ -139,20 +131,6 @@ describe("changed words", () => {
     ]);
   });
 
-  it("derives the backgrounds Rust derives, in both packages", () => {
-    expect(fixture.colors.length).toBeGreaterThanOrEqual(12);
-
-    for (const testCase of fixture.colors) {
-      const theme: Theme = JSON.parse(
-        readFileSync(new URL(`../../../../themes/${testCase.theme}.json`, import.meta.url), "utf8"),
-      );
-      for (const derive of [diffWordStyle, themesDiffWordStyle]) {
-        expect(derive(theme, "removed")?.bg, testCase.theme).toBe(testCase.removed);
-        expect(derive(theme, "added")?.bg, testCase.theme).toBe(testCase.added);
-      }
-    }
-  });
-
   describe("in a highlighted diff", () => {
     let hl: Highlighter;
     const header = "@@ -1,9 +1,9 @@\n";
@@ -182,11 +160,11 @@ describe("changed words", () => {
       const source = `${header}-    File.write!(path, Jason.encode!(json))\n+    File.write!(path, JSON.encode!(json))\n`;
 
       const marked = hl.highlight(source, htmlLinked({ language: diff }), { wordDiff: true });
-      expect(marked).toContain('<span class="l-diff-word-removed">Jason</span>');
-      expect(marked).toContain('<span class="l-diff-word-added">JSON</span>');
+      expect(marked).toContain('<span class="l-diff-minus-word">Jason</span>');
+      expect(marked).toContain('<span class="l-diff-plus-word">JSON</span>');
 
       const plain = hl.highlight(source, htmlLinked({ language: diff }));
-      expect(plain).not.toContain("l-diff-word");
+      expect(plain).not.toMatch(/l-diff-(minus|plus)-word/u);
       expect(plain.replaceAll(/<[^>]+>/gu, "")).toBe(marked.replaceAll(/<[^>]+>/gu, ""));
     });
 
@@ -200,7 +178,7 @@ describe("changed words", () => {
 
       expect(performance.now() - started).toBeLessThan(2000);
       expect(html).not.toContain("data-lumis-budget");
-      expect(html).not.toContain("l-diff-word");
+      expect(html).not.toMatch(/l-diff-(minus|plus)-word/u);
     });
 
     it("leaves other languages alone", () => {

@@ -64,8 +64,14 @@
     "diff.minus": {
       "bg": "#edc9cd"
     },
+    "diff.minus.word": {
+      "bg": "#e29ea7"
+    },
     "diff.plus": {
       "bg": "#dad9b3"
+    },
+    "diff.plus.word": {
+      "bg": "#bdba75"
     },
     "function": {
       "fg": "#5a418a"

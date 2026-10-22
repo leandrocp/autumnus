@@ -20,7 +20,7 @@ import type { LanguagePackageResolver, RuntimeLike, WasmResolver } from "./langu
 import { normalizeLanguageName } from "./languages.js";
 import { composeAnnotations } from "../annotations.js";
 import { buildSourceIndex } from "../events.js";
-import { rainbowBracketScope } from "../decorations.js";
+import { decorationScope } from "../decorations.js";
 import { resolveStackStyle } from "./style.js";
 import { LANGUAGE_LOADERS } from "../generated/language-loaders.js";
 import { guessLanguage } from "../guess-language.js";
@@ -222,13 +222,15 @@ function applyIteratorLayerEvent(
       break;
     case "decorationStart":
       decorations.push(event.decoration);
-      if (event.decoration.type === "rainbowBracket") {
-        scopeStack.push({ scope: rainbowBracketScope(event.decoration.depth), language });
+      if (event.decoration.type !== "line") {
+        scopeStack.push({ scope: decorationScope(event.decoration), language });
       }
       break;
-    case "decorationEnd":
-      if (decorations.pop()?.type === "rainbowBracket") scopeStack.pop();
+    case "decorationEnd": {
+      const decoration = decorations.pop();
+      if (decoration !== undefined && decoration.type !== "line") scopeStack.pop();
       break;
+    }
   }
 }
 

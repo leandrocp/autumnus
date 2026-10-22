@@ -1,9 +1,8 @@
 //! Rust's half of the changed-word parity check.
 //!
-//! `fixtures/diff-words.json` holds the words each diff marks and the
-//! background each theme derives for them. This asserts Rust produces them;
-//! `packages/javascript/lumis/test/diff-words.test.ts` asserts the browser
-//! port does too.
+//! `fixtures/diff-words.json` holds the words each diff marks. This asserts
+//! Rust marks them; `packages/javascript/lumis/test/diff-words.test.ts` asserts
+//! the browser port does too.
 
 use lumis_core::decorations::DiffWordKind;
 use lumis_core::diff_words::{diff_word_ranges, DiffLine};
@@ -13,7 +12,6 @@ use std::path::PathBuf;
 #[derive(Deserialize)]
 struct Fixture {
     ranges: Vec<RangeCase>,
-    colors: Vec<ColorCase>,
 }
 
 #[derive(Deserialize)]
@@ -21,13 +19,6 @@ struct RangeCase {
     name: String,
     diff: String,
     marked: Vec<(String, usize, String)>,
-}
-
-#[derive(Deserialize)]
-struct ColorCase {
-    theme: String,
-    removed: String,
-    added: String,
 }
 
 fn fixture() -> Fixture {
@@ -114,31 +105,4 @@ fn blank_lines_stay_out_of_the_pairing() {
     .expect("a blank run costs no budget");
     let marked: Vec<&str> = ranges.iter().map(|r| &diff[r.start..r.end]).collect();
     assert_eq!(marked, ["c", "d"]);
-}
-
-#[test]
-fn rust_derives_the_expected_backgrounds() {
-    let fixture = fixture();
-    assert!(
-        fixture.colors.len() >= 12,
-        "corpus shrank to {}",
-        fixture.colors.len()
-    );
-
-    for case in fixture.colors {
-        let theme = lumis_core::themes::get(&case.theme).expect("bundled theme");
-        let background = |kind| theme.diff_word_style(kind).and_then(|style| style.bg);
-        assert_eq!(
-            background(DiffWordKind::Removed).as_deref(),
-            Some(case.removed.as_str()),
-            "{}",
-            case.theme
-        );
-        assert_eq!(
-            background(DiffWordKind::Added).as_deref(),
-            Some(case.added.as_str()),
-            "{}",
-            case.theme
-        );
-    }
 }

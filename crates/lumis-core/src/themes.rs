@@ -4,7 +4,6 @@
 //! Themes define colors and styling for different syntax elements like keywords,
 //! strings, comments, etc.
 
-use crate::decorations::DiffWordKind;
 use crate::formatter::html::{HIGHLIGHTED_LINE_NUMBER_CLASS, LINE_NUMBER_CLASS};
 use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, fs, path::Path, str::FromStr};
@@ -558,56 +557,6 @@ impl Theme {
         }
     }
 
-    /// The background of words that changed on one side of a diff.
-    ///
-    /// No colorscheme defines one, so it is derived from the theme's own
-    /// `diff.minus` or `diff.plus` color: the same hue, a step lighter than
-    /// the line's background on a dark theme and darker on a light one, and
-    /// the other way when that step would leave the text under 3:1 contrast.
-    /// The step is taken in OKLCH so it looks the same size in every hue.
-    #[doc(hidden)]
-    #[must_use]
-    pub fn diff_word_style(&self, kind: DiffWordKind) -> Option<Style> {
-        const STEP: f64 = 0.10;
-        let dark = self.appearance == Appearance::Dark;
-        let normal = self.get_style("normal");
-        let (normal_bg, normal_fg) = if dark {
-            ("#1e1e1e", "#d4d4d4")
-        } else {
-            ("#ffffff", "#1f1f1f")
-        };
-        let background = Rgb::parse(
-            normal
-                .and_then(|style| style.bg.as_deref())
-                .unwrap_or(normal_bg),
-        )?;
-        let text = Rgb::parse(
-            normal
-                .and_then(|style| style.fg.as_deref())
-                .unwrap_or(normal_fg),
-        )?;
-
-        let line = self.highlights.get(kind.line_scope())?;
-        let line_bg = line.bg.as_deref().map_or(Some(background), Rgb::parse)?;
-        let hue_source = line.fg.as_deref().map_or(Some(line_bg), Rgb::parse)?;
-
-        let (lightness, base_chroma, _) = line_bg.oklch();
-        let (_, accent_chroma, hue) = hue_source.oklch();
-        let chroma = (base_chroma + 0.04).max((accent_chroma * 0.6).min(0.12));
-        let shade = |step: f64| Rgb::from_oklch((lightness + step).clamp(0.12, 0.97), chroma, hue);
-
-        let step = if dark { STEP } else { -STEP };
-        let mut word = shade(step);
-        if text.contrast(word) < 3.0 && text.contrast(line_bg) >= 3.0 {
-            word = shade(-step);
-        }
-
-        Some(Style {
-            bg: Some(word.hex()),
-            ..Style::default()
-        })
-    }
-
     pub fn fg(&self) -> Option<&str> {
         self.get_style("normal").and_then(|s| s.fg.as_deref())
     }
@@ -632,100 +581,6 @@ impl Theme {
         } else {
             Some(rules.join(separator))
         }
-    }
-}
-
-/// An sRGB color with channels in `0.0..=1.0`, for deriving theme colors.
-///
-/// Written out rather than taken from a color crate because the browser port
-/// has to land on the same hex digits, and that means reproducing every
-/// constant and rounding step; a crate keeps those internal.
-#[derive(Clone, Copy)]
-struct Rgb([f64; 3]);
-
-impl Rgb {
-    fn parse(hex: &str) -> Option<Self> {
-        let digits = hex.strip_prefix('#').filter(|digits| digits.len() == 6)?;
-        let channel = |at: usize| {
-            u8::from_str_radix(digits.get(at..at + 2)?, 16)
-                .ok()
-                .map(|value| f64::from(value) / 255.0)
-        };
-        Some(Self([channel(0)?, channel(2)?, channel(4)?]))
-    }
-
-    fn hex(self) -> String {
-        #[expect(
-            clippy::cast_sign_loss,
-            reason = "the channel is clamped to 0..=255 first"
-        )]
-        let [red, green, blue] = self
-            .0
-            .map(|channel| (channel.clamp(0.0, 1.0) * 255.0).round() as u8);
-        format!("#{red:02x}{green:02x}{blue:02x}")
-    }
-
-    fn linear(self) -> [f64; 3] {
-        self.0.map(|c| {
-            if c <= 0.04045 {
-                c / 12.92
-            } else {
-                ((c + 0.055) / 1.055).powf(2.4)
-            }
-        })
-    }
-
-    /// WCAG 2.1 contrast ratio.
-    fn contrast(self, other: Self) -> f64 {
-        let luminance = |color: Self| {
-            let [r, g, b] = color.linear();
-            0.2126 * r + 0.7152 * g + 0.0722 * b
-        };
-        let (a, b) = (luminance(self), luminance(other));
-        (a.max(b) + 0.05) / (a.min(b) + 0.05)
-    }
-
-    /// Lightness, chroma and hue in radians, through Björn Ottosson's Oklab.
-    fn oklch(self) -> (f64, f64, f64) {
-        let [red, green, blue] = self.linear();
-        let long =
-            (0.412_221_470_8 * red + 0.536_332_536_3 * green + 0.051_445_992_9 * blue).cbrt();
-        let medium =
-            (0.211_903_498_2 * red + 0.680_699_545_1 * green + 0.107_396_956_6 * blue).cbrt();
-        let short =
-            (0.088_302_461_9 * red + 0.281_718_837_6 * green + 0.629_978_700_5 * blue).cbrt();
-        let lightness = 0.210_454_255_3 * long + 0.793_617_785_0 * medium - 0.004_072_046_8 * short;
-        let green_red = 1.977_998_495_1 * long - 2.428_592_205_0 * medium + 0.450_593_709_9 * short;
-        let blue_yellow =
-            0.025_904_037_1 * long + 0.782_771_766_2 * medium - 0.808_675_766_0 * short;
-        (
-            lightness,
-            green_red.hypot(blue_yellow),
-            blue_yellow.atan2(green_red),
-        )
-    }
-
-    fn from_oklch(lightness: f64, chroma: f64, hue: f64) -> Self {
-        let (green_red, blue_yellow) = (chroma * hue.cos(), chroma * hue.sin());
-        let long =
-            (lightness + 0.396_337_777_4 * green_red + 0.215_803_757_3 * blue_yellow).powi(3);
-        let medium =
-            (lightness - 0.105_561_345_8 * green_red - 0.063_854_172_8 * blue_yellow).powi(3);
-        let short =
-            (lightness - 0.089_484_177_5 * green_red - 1.291_485_548_0 * blue_yellow).powi(3);
-        let linear = [
-            4.076_741_662_1 * long - 3.307_711_591_3 * medium + 0.230_969_929_2 * short,
-            -1.268_438_004_6 * long + 2.609_757_401_1 * medium - 0.341_319_396_5 * short,
-            -0.004_196_086_3 * long - 0.703_418_614_7 * medium + 1.707_614_701_0 * short,
-        ];
-        Self(linear.map(|channel| {
-            let channel = channel.clamp(0.0, 1.0);
-            if channel <= 0.003_130_8 {
-                12.92 * channel
-            } else {
-                1.055 * channel.powf(1.0 / 2.4) - 0.055
-            }
-        }))
     }
 }
 
@@ -885,17 +740,6 @@ impl Css<'_> {
                     self.scope_prefix(),
                     self.selector(scope),
                     style_css
-                ));
-            }
-        }
-
-        for kind in [DiffWordKind::Removed, DiffWordKind::Added] {
-            if let Some(style) = self.theme.diff_word_style(kind) {
-                rules.push(format!(
-                    "{}.{} {{\n  {}\n}}\n",
-                    self.scope_prefix(),
-                    kind.class(),
-                    style.css(self.enable_italic, "\n  ")
                 ));
             }
         }
@@ -1286,29 +1130,33 @@ mod tests {
         }
     }
 
-    /// No colorscheme defines a changed-word color, so every bundled theme
-    /// relies on the derived one, and it has to differ from the line under it.
+    /// Theme extraction writes both changed-word scopes, and each has to stand
+    /// out from the diff line under it.
     #[test]
-    fn every_bundled_theme_derives_a_visible_diff_word_background() {
+    fn every_bundled_theme_has_a_visible_diff_word_background() {
+        use crate::decorations::DiffWordKind;
+
         let themes: Vec<_> = available_themes().collect();
         assert!(themes.len() > 200, "found only {} themes", themes.len());
 
         for theme in themes {
             for kind in [DiffWordKind::Removed, DiffWordKind::Added] {
+                let scope = kind.scope();
                 let word = theme
-                    .diff_word_style(kind)
-                    .and_then(|style| style.bg)
-                    .unwrap_or_else(|| panic!("{}: no {} background", theme.name, kind.as_str()));
-                let line = theme.highlights[kind.line_scope()]
+                    .highlights
+                    .get(scope)
+                    .and_then(|style| style.bg.as_deref())
+                    .unwrap_or_else(|| panic!("{}: no {scope} background", theme.name));
+                let line_scope = scope.trim_end_matches(".word");
+                let line = theme.highlights[line_scope]
                     .bg
                     .as_deref()
                     .or_else(|| theme.bg());
                 assert_ne!(
-                    Some(word.as_str()),
+                    Some(word),
                     line,
-                    "{}: the {} word is the line's color",
-                    theme.name,
-                    kind.as_str()
+                    "{}: {scope} is the color of {line_scope}",
+                    theme.name
                 );
             }
         }

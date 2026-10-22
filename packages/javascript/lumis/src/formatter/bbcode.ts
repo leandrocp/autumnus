@@ -1,5 +1,5 @@
 import type { BBCodeScopedFormatter, Decoration, HighlightEvent } from "../types.js";
-import { LineSelection, composeLineDecorations, rainbowBracketScope } from "../decorations.js";
+import { LineSelection, composeLineDecorations, decorationScope } from "../decorations.js";
 import { decodeSourceSlice, encodeSource } from "./html.js";
 
 /**
@@ -67,12 +67,7 @@ function appendDecorationStart(
     if (decoration.highlighted) parts.push(`[${HIGHLIGHTED_TAG}]`);
     return;
   }
-  if (decoration.type === "diffWord") {
-    parts.push(`[diff-word-${decoration.kind}]`);
-    return;
-  }
-  const tagName = scopeToTagName(rainbowBracketScope(decoration.depth), documentLanguage);
-  parts.push(`[${tagName}]`);
+  parts.push(`[${scopeToTagName(decorationScope(decoration), documentLanguage)}]`);
 }
 
 function appendDecorationEnd(
@@ -85,11 +80,9 @@ function appendDecorationEnd(
     if (decoration.highlighted) parts.push(`[/${HIGHLIGHTED_TAG}]`);
     return;
   }
-  if (decoration?.type === "rainbowBracket") {
-    const tagName = scopeToTagName(rainbowBracketScope(decoration.depth), documentLanguage);
-    parts.push(`[/${tagName}]`);
+  if (decoration !== undefined) {
+    parts.push(`[/${scopeToTagName(decorationScope(decoration), documentLanguage)}]`);
   }
-  if (decoration?.type === "diffWord") parts.push(`[/diff-word-${decoration.kind}]`);
 }
 
 function appendEvent(
