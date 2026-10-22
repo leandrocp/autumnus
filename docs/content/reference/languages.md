@@ -191,7 +191,7 @@ can appear. Languages that inject nothing are not listed.
 | go | comment, regex | no |
 | graphql | comment | no |
 | groovy | comment | no |
-| haskell | comment, css, graphql, html, javascript, json, python, typescript | yes |
+| haskell | comment, css, graphql, html, javascript, json, python, sql, typescript | yes |
 | hcl | comment | yes |
 | heex | comment, elixir | no |
 | html | comment, css, javascript, json, python, regex, toml | yes |
@@ -201,7 +201,7 @@ can appear. Languages that inject nothing are not listed.
 | ini | comment | no |
 | java | comment, javadoc | no |
 | javadoc | html, markdown_inline | yes |
-| javascript | angular, comment, css, glimmer, graphql, html, regex | yes |
+| javascript | angular, comment, css, glimmer, graphql, html, regex, sql | yes |
 | jinja | comment, jinja_inline | no |
 | jinja_inline | comment | no |
 | jq | comment, regex | no |
@@ -236,12 +236,12 @@ can appear. Languages that inject nothing are not listed.
 | protobuf | comment | no |
 | puppet | comment, regex | no |
 | python | comment, regex | no |
-| qmljs | angular, comment, css, glimmer, graphql, html, regex | yes |
+| qmljs | angular, comment, css, glimmer, graphql, html, regex, sql | yes |
 | r | comment | no |
 | racket | comment | no |
 | rst | comment, csv, latex, python | yes |
 | ruby | comment, regex | yes |
-| rust | comment, regex | yes |
+| rust | comment, html, json, regex, xml | no |
 | scala | comment | no |
 | scheme | comment | no |
 | scss | comment | no |
@@ -254,12 +254,12 @@ can appear. Languages that inject nothing are not listed.
 | tcl | comment | no |
 | terraform | comment | yes |
 | toml | comment | no |
-| tsx | angular, comment, css, glimmer, graphql, html, regex | yes |
-| typescript | angular, comment, css, glimmer, graphql, html, regex | yes |
+| tsx | angular, comment, css, glimmer, graphql, html, regex, sql | yes |
+| typescript | angular, comment, css, glimmer, graphql, html, regex, sql | yes |
 | typst | comment | yes |
 | vhdl | comment | no |
 | vim | comment, lua, python, regex, ruby | no |
-| vue | comment, css, javascript, json, regex, scss, typescript | yes |
+| vue | comment, css, javascript, json, regex, scss, tsx, typescript | yes |
 | wgsl | comment | no |
 | xml | comment, css, javascript, sql | no |
 | yaml | bash, comment | no |

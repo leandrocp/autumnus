@@ -2846,7 +2846,9 @@ fn name_list_cell(values: &[&str]) -> String {
 fn injected_languages(query: &str, own: &str) -> (Vec<&'static str>, bool) {
     // Parsed with the query grammar rather than the target language's, which
     // `crates/dev` does not build. Comments are syntax here, so a commented-out
-    // injection is not counted.
+    // injection is not counted. Pattern 0 is a `#set!` naming the language,
+    // pattern 1 an `#eq?` or `#any-of?` pinning a captured one to fixed names,
+    // pattern 2 any capture that takes the language from the document.
     static PATTERNS: std::sync::LazyLock<tree_sitter::Query> = std::sync::LazyLock::new(|| {
         tree_sitter::Query::new(
             &tree_sitter_tsquery::LANGUAGE.into(),
@@ -2858,9 +2860,16 @@ fn injected_languages(query: &str, own: &str) -> (Vec<&'static str>, bool) {
                 . (identifier) @_key (#eq? @_key "injection.language")
                 . (string (string_content) @fixed)))
 
+            (predicate
+              name: (identifier) @_test (#any-of? @_test "eq" "any-of")
+              type: (predicate_type) @_question (#eq? @_question "?")
+              parameters: (parameters
+                . (capture name: (identifier) @_key (#eq? @_key "injection.language"))
+                (string (string_content) @fixed)))
+
             (capture
-              name: (identifier) @from_document
-              (#any-of? @from_document "injection.language" "injection.filename"))
+              name: (identifier) @captured
+              (#any-of? @captured "injection.language" "injection.filename"))
             "#,
         )
         .expect("valid query")
@@ -2872,26 +2881,49 @@ fn injected_languages(query: &str, own: &str) -> (Vec<&'static str>, bool) {
         .expect("query grammar loads");
     let tree = parser.parse(query, None).expect("query parses");
     let fixed = PATTERNS.capture_index_for_name("fixed").expect("capture");
+    let captured = PATTERNS
+        .capture_index_for_name("captured")
+        .expect("capture");
 
     let mut ids = Vec::new();
-    let mut from_document = false;
+    let mut pinned = HashSet::new();
+    let mut from_document = HashSet::new();
     let mut cursor = tree_sitter::QueryCursor::new();
     let mut matches = cursor.matches(&PATTERNS, tree.root_node(), query.as_bytes());
     while let Some(found) = tree_sitter::StreamingIterator::next(&mut matches) {
-        let mut names = found.nodes_for_capture_index(fixed).peekable();
-        if names.peek().is_none() {
-            from_document = true;
+        for node in found.nodes_for_capture_index(fixed) {
+            if found.pattern_index == 1 {
+                pinned.insert(top_level_pattern(node));
+            }
+            if let Some(entry) = lumis_wasm_runtime::catalog::find(&query[node.byte_range()]) {
+                ids.push(entry.id);
+            }
         }
-        ids.extend(
-            names
-                .filter_map(|node| lumis_wasm_runtime::catalog::find(&query[node.byte_range()]))
-                .map(|entry| entry.id)
-                .filter(|id| *id != own),
-        );
+        for node in found.nodes_for_capture_index(captured) {
+            let in_predicate = node
+                .parent()
+                .and_then(|capture| capture.parent())
+                .is_some_and(|parent| parent.kind() == "parameters");
+            if !in_predicate {
+                from_document.insert(top_level_pattern(node));
+            }
+        }
     }
+    ids.retain(|id| *id != own);
     ids.sort_unstable();
     ids.dedup();
-    (ids, from_document)
+    (ids, from_document.difference(&pinned).next().is_some())
+}
+
+/// The id of the pattern `node` belongs to: the query's top-level child above it.
+fn top_level_pattern(mut node: tree_sitter::Node<'_>) -> usize {
+    while let Some(parent) = node.parent() {
+        if parent.parent().is_none() {
+            break;
+        }
+        node = parent;
+    }
+    node.id()
 }
 
 /// The table of what each language can inject, for a project choosing which
@@ -8481,6 +8513,26 @@ mod tests {
 
         let fenced = r"(fenced_code_block (info_string (language) @injection.language) (code_fence_content) @injection.content)";
         assert_eq!(injected_languages(fenced, "markdown"), (vec![], true));
+
+        // Pinned by a predicate to names the query lists, so not open-ended.
+        let pinned = r#"
+((call (member) @injection.language (template) @injection.content)
+  (#eq? @injection.language "sql"))
+((macro (identifier) @injection.language (tokens) @injection.content)
+  (#any-of? @injection.language "html" "json" "pug"))
+"#;
+        assert_eq!(
+            injected_languages(pinned, "javascript"),
+            (vec!["html", "json", "sql"], false)
+        );
+
+        // `#match?` and `#not-any-of?` leave the name open.
+        let open = r#"
+((call (identifier) @injection.language (template) @injection.content)
+  (#match? @injection.language "^[a-z]+$")
+  (#not-any-of? @injection.language "svg" "css"))
+"#;
+        assert_eq!(injected_languages(open, "javascript"), (vec![], true));
     }
 
     #[test]
