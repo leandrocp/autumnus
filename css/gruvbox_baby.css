@@ -346,6 +346,12 @@
 .l-variable-rust {
   color: #ebdbb2;
 }
+.l-diff-word-removed {
+  background-color: #573835;
+}
+.l-diff-word-added {
+  background-color: #294a30;
+}
 @layer lumis {
   pre.lumis > code {
     display: block;

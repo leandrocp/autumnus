@@ -416,6 +416,12 @@
 .l-variable-sql {
   color: #023b95;
 }
+.l-diff-word-removed {
+  background-color: #ffb1a9;
+}
+.l-diff-word-added {
+  background-color: #aaddae;
+}
 @layer lumis {
   pre.lumis > code {
     display: block;

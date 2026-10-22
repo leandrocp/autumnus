@@ -11,6 +11,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 
 import diff from "../langs/diff.ts";
 import javascript from "../langs/javascript.ts";
+import { diffWordStyle as themesDiffWordStyle } from "../../themes/src/diff-word-style.js";
 import { diffWordStyle } from "../src/diff-word-style.js";
 import { diffWordRanges, type DiffLine } from "../src/diff-words.js";
 import {
@@ -145,8 +146,10 @@ describe("changed words", () => {
       const theme: Theme = JSON.parse(
         readFileSync(new URL(`../../../../themes/${testCase.theme}.json`, import.meta.url), "utf8"),
       );
-      expect(diffWordStyle(theme, "removed")?.bg, testCase.theme).toBe(testCase.removed);
-      expect(diffWordStyle(theme, "added")?.bg, testCase.theme).toBe(testCase.added);
+      for (const derive of [diffWordStyle, themesDiffWordStyle]) {
+        expect(derive(theme, "removed")?.bg, testCase.theme).toBe(testCase.removed);
+        expect(derive(theme, "added")?.bg, testCase.theme).toBe(testCase.added);
+      }
     }
   });
 

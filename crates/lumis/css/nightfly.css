@@ -437,6 +437,12 @@
 .l-variable-vim {
   color: #7fdbca;
 }
+.l-diff-word-removed {
+  background-color: #5a0007;
+}
+.l-diff-word-added {
+  background-color: #1f3300;
+}
 @layer lumis {
   pre.lumis > code {
     display: block;
