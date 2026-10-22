@@ -143,21 +143,21 @@
       }
     },
     "system": {
-      "version": "0.1.3",
+      "version": "0.1.4",
       "bundleFormat": 3,
       "dependencies": {
-        "@lumis-sh/wasm-asm": "^0.26.0",
-        "@lumis-sh/wasm-bash": "^0.26.0",
-        "@lumis-sh/wasm-c": "^0.26.0",
-        "@lumis-sh/wasm-cmake": "^0.26.0",
-        "@lumis-sh/wasm-cpp": "^0.26.0",
-        "@lumis-sh/wasm-go": "^0.26.0",
-        "@lumis-sh/wasm-llvm": "^0.26.0",
-        "@lumis-sh/wasm-make": "^0.26.0",
-        "@lumis-sh/wasm-rust": "^0.26.0",
-        "@lumis-sh/wasm-wat": "^0.26.0",
-        "@lumis-sh/wasm-zig": "^0.26.0",
-        "@lumis-sh/wasm-zsh": "^0.26.0"
+        "@lumis-sh/wasm-asm": "^0.27.0",
+        "@lumis-sh/wasm-bash": "^0.27.0",
+        "@lumis-sh/wasm-c": "^0.27.0",
+        "@lumis-sh/wasm-cmake": "^0.27.0",
+        "@lumis-sh/wasm-cpp": "^0.27.0",
+        "@lumis-sh/wasm-go": "^0.27.0",
+        "@lumis-sh/wasm-llvm": "^0.27.0",
+        "@lumis-sh/wasm-make": "^0.27.0",
+        "@lumis-sh/wasm-rust": "^0.27.0",
+        "@lumis-sh/wasm-wat": "^0.27.0",
+        "@lumis-sh/wasm-zig": "^0.27.0",
+        "@lumis-sh/wasm-zsh": "^0.27.0"
       }
     },
     "web": {
