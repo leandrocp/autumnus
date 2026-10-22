@@ -110,12 +110,18 @@ enum Commands {
         #[arg(default_value = "")]
         filter: String,
     },
-    /// Write the Hex meta-package for a bundle, from the npm bundle beside it.
+    /// Write the npm package of a bundle, or of every bundle, from languages.toml.
+    StageNpmBundle {
+        name: Option<String>,
+        #[arg(long, default_value = NPM_BUNDLE_STAGE)]
+        out: String,
+    },
+    /// Write the Hex meta-package for a bundle from languages.toml.
     StageHexBundle {
         name: String,
     },
     /// Print the version a bundle release package (`npm-wasm-bundle-full`) takes
-    /// next, or nothing when its staged bundle matches `wasm-bundles.json`.
+    /// next, or nothing when its bundle matches `wasm-bundles.json`.
     WasmBundlePlan {
         package: String,
     },
@@ -236,6 +242,9 @@ fn main() -> Result<()> {
         Commands::StageHexWasm { name } => stage_hex_wasm(&name),
         Commands::FetchHexWasm { name, version } => fetch_hex_wasm(&name, &version),
         Commands::WasmReleasePlan { filter } => wasm_release_plan(&filter),
+        Commands::StageNpmBundle { name, out } => {
+            stage_npm_bundles(name.as_deref(), Path::new(&out))
+        }
         Commands::StageHexBundle { name } => stage_hex_bundle(&name),
         Commands::WasmBundlePlan { package } => wasm_bundle_plan(&package),
         Commands::WasmBundlePrepare { package, version } => wasm_bundle_prepare(&package, &version),
@@ -3028,15 +3037,35 @@ fn gen_languages_md() -> Result<()> {
     Ok(())
 }
 
-fn gen_language_catalog(check: bool) -> Result<()> {
-    let toml = read_languages_toml()?;
-    let document = read_languages_toml_edit()?;
-    let parser_order = document["parsers"]
+/// Parser ids in the order languages.toml declares them.
+fn parser_order(document: &toml_edit::DocumentMut) -> Result<Vec<String>> {
+    Ok(document["parsers"]
         .as_table()
         .context("languages.toml must contain a parsers table")?
         .iter()
         .map(|(id, _)| id.to_string())
-        .collect::<Vec<_>>();
+        .collect())
+}
+
+/// The languages `bundle` groups. `exclude` only applies to `"all"`: an explicit
+/// list already says what it wants.
+fn bundle_language_ids(name: &str, bundle: &BundleInfo, order: &[String]) -> Result<Vec<String>> {
+    match &bundle.parsers {
+        BundleParsers::List(ids) => Ok(ids.clone()),
+        BundleParsers::All(value) if value == "all" => Ok(order
+            .iter()
+            .filter(|id| !bundle.exclude.contains(id))
+            .cloned()
+            .collect()),
+        BundleParsers::All(value) => {
+            bail!("unsupported bundle parsers value for '{name}': {value}")
+        }
+    }
+}
+
+fn gen_language_catalog(check: bool) -> Result<()> {
+    let toml = read_languages_toml()?;
+    let parser_order = parser_order(&read_languages_toml_edit()?)?;
     let path = "crates/lumis-wasm-runtime/src/catalog.rs";
     let package_version_range = supported_tree_sitter_series()?;
     let output = render_language_catalog(
@@ -3100,20 +3129,7 @@ fn render_language_catalog(
     lines.push("    bundles: {".to_string());
 
     for (bundle_name, bundle) in bundles {
-        let members = match &bundle.parsers {
-            BundleParsers::List(names) => names.clone(),
-            BundleParsers::All(value) => {
-                if value != "all" {
-                    bail!("unsupported bundle parsers value for '{bundle_name}': {value}");
-                }
-                parser_order
-                    .iter()
-                    .filter(|name| !bundle.exclude.contains(name))
-                    .cloned()
-                    .collect()
-            }
-        };
-        let rendered = members
+        let rendered = bundle_language_ids(bundle_name, bundle, parser_order)?
             .iter()
             .map(|name| format!("{name:?}"))
             .collect::<Vec<_>>()
@@ -5124,11 +5140,11 @@ impl BundlePackage {
         self.releases(record).get(&self.bundle)
     }
 
-    fn staged<'a>(&self, staged: &'a [StagedBundle]) -> Result<&'a StagedBundle> {
-        staged
+    fn definition<'a>(&self, bundles: &'a [Bundle]) -> Result<&'a Bundle> {
+        bundles
             .iter()
             .find(|bundle| bundle.name == self.bundle)
-            .with_context(|| format!("no {} bundle is staged", self.bundle))
+            .with_context(|| format!("languages.toml declares no {} bundle", self.bundle))
     }
 }
 
@@ -5146,20 +5162,20 @@ fn bundle_app(name: &str) -> String {
     format!("lumis_wasm_bundle_{}", name.replace('-', "_"))
 }
 
-/// The version `package` releases next, or `None` while its staged bundle is
-/// what its registry last got. One patch past the record and every version that
+/// The version `package` releases next, or `None` while its bundle is what its
+/// registry last got. One patch past the record and every version that
 /// registry has, so a release never reuses one.
 fn next_bundle_version(
     package: &BundlePackage,
     record: &BundleRecord,
-    staged: &[StagedBundle],
+    bundles: &[Bundle],
     published: &[String],
 ) -> Result<Option<semver::Version>> {
     let recorded = package.recorded(record);
     if let Some(release) = recorded {
         if package
-            .staged(staged)?
-            .released_as(package.registry, release)?
+            .definition(bundles)?
+            .released_as(package.registry, release)
         {
             return Ok(None);
         }
@@ -5181,12 +5197,12 @@ fn next_bundle_version(
 fn prepare_bundle_record(
     record: &BundleRecord,
     package: &BundlePackage,
-    staged: &[StagedBundle],
+    bundles: &[Bundle],
     version: &str,
 ) -> Result<BundleRecord> {
-    let bundle = package.staged(staged)?;
+    let bundle = package.definition(bundles)?;
     if let Some(release) = package.recorded(record) {
-        if bundle.released_as(package.registry, release)? {
+        if bundle.released_as(package.registry, release) {
             bail!(
                 "{} has not changed since {BUNDLE_RECORD} recorded {}",
                 package.registry_name(),
@@ -5201,7 +5217,7 @@ fn prepare_bundle_record(
     };
     releases.insert(
         package.bundle.clone(),
-        bundle.release(package.registry, version)?,
+        bundle.release(package.registry, version),
     );
     Ok(prepared)
 }
@@ -5258,7 +5274,7 @@ fn bundle_publishes(
     package: &BundlePackage,
     version: &str,
     record: &BundleRecord,
-    staged: &[StagedBundle],
+    bundles: &[Bundle],
     published: &[String],
     members: &HashMap<String, Vec<String>>,
 ) -> Result<bool> {
@@ -5272,8 +5288,8 @@ fn bundle_publishes(
     }
     ensure!(
         package
-            .staged(staged)?
-            .released_as(package.registry, release)?,
+            .definition(bundles)?
+            .released_as(package.registry, release),
         "{name} changed after {version} was prepared, so it is not published; \
          the next release pull request takes it"
     );
@@ -5336,7 +5352,7 @@ fn wasm_bundle_plan(package: &str) -> Result<()> {
     let next = next_bundle_version(
         &package,
         &read_bundle_record()?,
-        &staged_bundles()?,
+        &bundles()?,
         &bundle_versions(&package)?,
     )?;
     if let Some(next) = next {
@@ -5353,7 +5369,7 @@ fn wasm_bundle_prepare(package: &str, version: &semver::Version) -> Result<()> {
     let record = prepare_bundle_record(
         &read_bundle_record()?,
         &BundlePackage::parse(package)?,
-        &staged_bundles()?,
+        &bundles()?,
         &version.to_string(),
     )?;
     fs::write(BUNDLE_RECORD, serde_json::to_string_pretty(&record)? + "\n")?;
@@ -5400,7 +5416,7 @@ fn wasm_bundle_publish_plan(package: &str, version: &str) -> Result<()> {
         &package,
         version,
         &record,
-        &staged_bundles()?,
+        &bundles()?,
         &bundle_versions(&package)?,
         &registry_versions(package.registry, &members)?,
     )?;
@@ -5422,7 +5438,7 @@ fn wasm_bundle_publish_plan(package: &str, version: &str) -> Result<()> {
     Ok(())
 }
 
-/// Where `build:wasm-bundles` stages the npm packages it generates.
+/// Where `stage-npm-bundle` writes the npm packages.
 ///
 /// Bundles are not committed. They carry no code of their own — a manifest, an
 /// import list and a README, all derivable from languages.toml — so a copy in
@@ -5430,91 +5446,218 @@ fn wasm_bundle_publish_plan(package: &str, version: &str) -> Result<()> {
 /// membership changes without someone bumping a version by hand.
 const NPM_BUNDLE_STAGE: &str = "tmp/wasm/npm";
 
-/// A staged bundle: what it is called and which parser packages it groups.
-///
-/// The generator is the only thing that decides membership, in one place, and
-/// this reads what it wrote rather than working it out a second time.
-struct StagedBundle {
+/// `lumis.bundleFormat`, raised when what an npm bundle's entry exports changes
+/// so every npm bundle releases again. Hex ships no entry, so it has no format.
+/// 3: the bundle carries its module URL so Node can find its dependencies from
+/// any working directory.
+const NPM_BUNDLE_FORMAT: u64 = 3;
+
+/// The first Lumis that reads a bundle's default export.
+const LUMIS_READS_BUNDLE: &str = ">=0.9.0";
+
+/// A bundle as languages.toml declares it, at the series mise.toml pins. Each
+/// registry's package is written from this, and neither reads the other's.
+struct Bundle {
     name: String,
-    /// `lumis.bundleFormat`, which the generator raises when what a bundle
-    /// exports changes.
     format: u64,
-    /// npm dependencies with their ranges. A bundle *is* its dependency list,
-    /// and its Hex `mix.exs` is written from it.
-    requirements: BTreeMap<String, String>,
+    series: String,
+    /// What the npm entry exports, in declaration order.
+    languages: Vec<BundleLanguage>,
 }
 
-impl StagedBundle {
-    /// What releasing this bundle at `version` puts on `registry`. Hex gets the
-    /// requirements `stage-hex-bundle` writes, and no format.
-    fn release(&self, registry: BundleRegistry, version: &str) -> Result<BundleRelease> {
+struct BundleLanguage {
+    id: String,
+    aliases: Vec<String>,
+    wasm_name: String,
+}
+
+impl Bundle {
+    /// What releasing this bundle at `version` puts on `registry`.
+    fn release(&self, registry: BundleRegistry, version: &str) -> BundleRelease {
+        let members = self
+            .languages
+            .iter()
+            .map(|language| language.wasm_name.as_str())
+            .collect::<BTreeSet<_>>();
+        let series = &self.series;
         let (bundle_format, dependencies) = match registry {
-            BundleRegistry::Npm => (Some(self.format), self.requirements.clone()),
+            BundleRegistry::Npm => (
+                Some(self.format),
+                members
+                    .into_iter()
+                    .map(|wasm_name| (npm_package_name(wasm_name), format!("^{series}.0")))
+                    .collect(),
+            ),
             BundleRegistry::Hex => (
                 None,
-                self.requirements
-                    .iter()
-                    .map(|(package, range)| Ok((hex_member_app(package)?, hex_requirement(range)?)))
-                    .collect::<Result<_>>()?,
+                members
+                    .into_iter()
+                    .map(|wasm_name| (hex_app_name(wasm_name), format!("~> {series}.0")))
+                    .collect(),
             ),
         };
-        Ok(BundleRelease {
+        BundleRelease {
             version: version.to_string(),
             bundle_format,
             dependencies,
+        }
+    }
+
+    fn released_as(&self, registry: BundleRegistry, release: &BundleRelease) -> bool {
+        self.release(registry, &release.version) == *release
+    }
+}
+
+fn bundle_description(name: &str) -> String {
+    format!("Lumis WASM {name} language bundle")
+}
+
+fn bundles() -> Result<Vec<Bundle>> {
+    let toml = read_languages_toml()?;
+    let order = parser_order(&read_languages_toml_edit()?)?;
+    let series = supported_tree_sitter_series()?;
+    toml.bundles
+        .iter()
+        .map(|(name, bundle)| {
+            let languages = bundle_language_ids(name, bundle, &order)?
+                .into_iter()
+                .map(|id| {
+                    let info = toml.parsers.get(&id).with_context(|| {
+                        format!("bundle '{name}' references unknown parser '{id}'")
+                    })?;
+                    Ok(BundleLanguage {
+                        wasm_name: info
+                            .wasm_name
+                            .clone()
+                            .unwrap_or_else(|| format!("tree-sitter-{id}")),
+                        aliases: info.aliases.clone(),
+                        id,
+                    })
+                })
+                .collect::<Result<_>>()?;
+            Ok(Bundle {
+                name: name.clone(),
+                format: NPM_BUNDLE_FORMAT,
+                series: series.clone(),
+                languages,
+            })
         })
-    }
-
-    fn released_as(&self, registry: BundleRegistry, release: &BundleRelease) -> Result<bool> {
-        Ok(self.release(registry, &release.version)? == *release)
-    }
-}
-
-fn staged_bundles() -> Result<Vec<StagedBundle>> {
-    let pattern = format!("{NPM_BUNDLE_STAGE}/wasm-bundle-*/package.json");
-    let mut bundles = Vec::new();
-    for entry in glob::glob(&pattern)? {
-        let path = entry?;
-        let manifest: Value = serde_json::from_slice(&fs::read(&path)?)
-            .with_context(|| format!("invalid package.json at {}", path.display()))?;
-        let name = path
-            .parent()
-            .and_then(|dir| dir.file_name())
-            .and_then(|dir| dir.to_str())
-            .and_then(|dir| dir.strip_prefix("wasm-bundle-"))
-            .with_context(|| format!("could not name the bundle at {}", path.display()))?;
-        let format = manifest
-            .pointer("/lumis/bundleFormat")
-            .and_then(Value::as_u64)
-            .with_context(|| format!("{} has no lumis.bundleFormat", path.display()))?;
-        bundles.push(StagedBundle {
-            name: name.to_string(),
-            format,
-            requirements: wasm_requirements(&manifest),
-        });
-    }
-
-    if bundles.is_empty() {
-        bail!(
-            "no bundles staged under {NPM_BUNDLE_STAGE}. \
-             Run `pnpm --dir packages/javascript run build:wasm-bundles` first."
-        );
-    }
-
-    bundles.sort_by(|a, b| a.name.cmp(&b.name));
-    Ok(bundles)
-}
-
-/// The `@lumis-sh/wasm-*` entries of `dependencies`, with their ranges.
-fn wasm_requirements(manifest: &Value) -> BTreeMap<String, String> {
-    manifest
-        .get("dependencies")
-        .and_then(Value::as_object)
-        .into_iter()
-        .flatten()
-        .filter(|(name, _)| name.starts_with("@lumis-sh/wasm-"))
-        .map(|(name, range)| (name.clone(), range.as_str().unwrap_or_default().to_string()))
         .collect()
+}
+
+fn find_bundle(name: &str) -> Result<Bundle> {
+    bundles()?
+        .into_iter()
+        .find(|bundle| bundle.name == name)
+        .with_context(|| format!("languages.toml declares no {name} bundle"))
+}
+
+/// The version `registry` last released `bundle` at, which the tag being
+/// published is. A bundle never released stages as 0.0.0, which nothing
+/// publishes because the plan requires a recorded release.
+fn recorded_bundle_version(registry: BundleRegistry, bundle: &str) -> Result<String> {
+    let record = read_bundle_record()?;
+    let releases = match registry {
+        BundleRegistry::Npm => &record.npm,
+        BundleRegistry::Hex => &record.hex,
+    };
+    Ok(releases
+        .get(bundle)
+        .map_or_else(|| "0.0.0".to_string(), |release| release.version.clone()))
+}
+
+/// `web-extra` as `webExtra`, the name the README imports the bundle as.
+fn bundle_variable(name: &str) -> String {
+    let mut parts = name.split('-');
+    let first = parts.next().unwrap_or_default().to_string();
+    parts.fold(first, |mut variable, part| {
+        let mut chars = part.chars();
+        if let Some(initial) = chars.next() {
+            variable.extend(initial.to_uppercase());
+            variable.push_str(chars.as_str());
+        }
+        variable
+    })
+}
+
+fn npm_package_name(wasm_name: &str) -> String {
+    format!("@lumis-sh/wasm-{}", wasm_package_suffix(wasm_name))
+}
+
+/// Write the npm package of every bundle, or only of `only`, under `out`.
+fn stage_npm_bundles(only: Option<&str>, out: &Path) -> Result<()> {
+    let bundles = match only {
+        Some(name) => vec![find_bundle(name)?],
+        None => bundles()?,
+    };
+    for bundle in &bundles {
+        let version = recorded_bundle_version(BundleRegistry::Npm, &bundle.name)?;
+        stage_npm_bundle(bundle, &version, out)?;
+    }
+    Ok(())
+}
+
+fn stage_npm_bundle(bundle: &Bundle, version: &str, out: &Path) -> Result<()> {
+    let dir = out.join(format!("wasm-bundle-{}", bundle.name));
+    let _ = fs::remove_dir_all(&dir);
+    fs::create_dir_all(&dir)?;
+
+    let entries = bundle
+        .languages
+        .iter()
+        .map(|language| {
+            let id = serde_json::to_string(&language.id)?;
+            Ok(format!(
+                "  {id}: lazy({id}, {}, () => import({}).then((m) => m[{id}])),",
+                serde_json::to_string(&language.aliases)?,
+                serde_json::to_string(&npm_package_name(&language.wasm_name))?,
+            ))
+        })
+        .collect::<Result<Vec<_>>>()?
+        .join("\n");
+    let release = bundle.release(BundleRegistry::Npm, version);
+    let package_name = bundle_package(&bundle.name);
+    let package = render_template(
+        "templates/wasm/bundle.package.json.template",
+        &[
+            ("package_name", &package_name),
+            ("version", version),
+            ("description", &bundle_description(&bundle.name)),
+            ("bundle_format", &bundle.format.to_string()),
+            ("lumis_range", LUMIS_READS_BUNDLE),
+            (
+                "dependencies",
+                &serde_json::to_string(&release.dependencies)?,
+            ),
+        ],
+    )?;
+    let readme = render_template(
+        "templates/wasm/npm.bundle.README.md.template",
+        &[
+            ("package_name", &package_name),
+            ("bundle_name", &bundle.name),
+            ("variable", &bundle_variable(&bundle.name)),
+        ],
+    )?;
+    for (file, contents) in [
+        (
+            "index.js",
+            render_template(
+                "templates/wasm/bundle.index.js.template",
+                &[("entries", &entries)],
+            )?,
+        ),
+        (
+            "index.d.ts",
+            render_template("templates/wasm/bundle.index.d.ts.template", &[])?,
+        ),
+        ("package.json", package),
+        ("README.md", readme),
+    ] {
+        fs::write(dir.join(file), contents)?;
+    }
+    println!("{package_name} {version} -> {}", dir.display());
+    Ok(())
 }
 
 /// The version a definition was published under on npm, if it was.
@@ -5838,60 +5981,33 @@ fn stage_hex_wasm(name: &str) -> Result<()> {
     Ok(())
 }
 
-/// Write the Hex meta-package for the `name` bundle.
-///
-/// Members and version both come from `packages/javascript/wasm-bundle-<name>`,
-/// the npm package generated from `languages.toml`, rather than being read from
-/// the TOML again. One source means the two registries cannot disagree about
-/// what a bundle contains or what version it is — which is the whole point of a
-/// bundle, since a project adds one instead of naming languages itself.
+/// Write the Hex meta-package for a bundle at the version `wasm-bundles.json`
+/// records for Hex.
 ///
 /// No bytes. `bundle_full` would be on the order of 100 MB as a single package
 /// and is a few hundred bytes as a list of dependencies.
 ///
 /// # Errors
-/// Fails when the npm bundle has not been generated, or names a package no
-/// parser in `languages.toml` produces.
+/// Fails when languages.toml declares no such bundle, or its description is one
+/// Hex would refuse.
 fn stage_hex_bundle(name: &str) -> Result<()> {
-    let npm_dir = format!("{NPM_BUNDLE_STAGE}/wasm-bundle-{name}");
-    let manifest = format!("{npm_dir}/package.json");
-    if !Path::new(&manifest).exists() {
-        bail!(
-            "ERROR: {manifest} not found. Run \
-             `pnpm --dir packages/javascript run build:wasm-bundles --version <version>` first."
-        );
-    }
-
-    let npm: serde_json::Value = serde_json::from_slice(&fs::read(&manifest)?)?;
-    let version = npm
-        .get("version")
-        .and_then(serde_json::Value::as_str)
-        .with_context(|| format!("{manifest} has no version"))?;
-    let dependencies = npm
-        .get("dependencies")
-        .and_then(serde_json::Value::as_object)
-        .with_context(|| format!("{manifest} has no dependencies"))?;
-    let description = npm
-        .get("description")
-        .and_then(serde_json::Value::as_str)
-        .with_context(|| format!("{manifest} has no description"))?;
-    check_hex_description(&manifest, description)?;
-
+    let bundle = find_bundle(name)?;
+    let version = recorded_bundle_version(BundleRegistry::Hex, name)?;
     let app_name = bundle_app(name);
-    let module_name = elixir_module_name(&app_name);
+    let description = bundle_description(name);
+    check_hex_description(&app_name, &description)?;
 
-    let members = hex_dependencies(dependencies)?;
-
+    let members = bundle.release(BundleRegistry::Hex, &version).dependencies;
     let deps = members
         .iter()
         .map(|(app, requirement)| format!("      {{:{app}, \"{requirement}\"}}"))
         .collect::<Vec<_>>()
         .join(",\n");
-    let languages = members
-        .iter()
-        .map(|(app, _)| app.trim_start_matches("lumis_wasm_"))
-        .collect::<Vec<_>>();
-    let languages_text = languages.join(", ");
+    let languages_text = members
+        .keys()
+        .map(|app| app.trim_start_matches("lumis_wasm_"))
+        .collect::<Vec<_>>()
+        .join(", ");
 
     let out = format!("tmp/wasm/hex/{app_name}");
     let _ = fs::remove_dir_all(&out);
@@ -5903,7 +6019,7 @@ fn stage_hex_bundle(name: &str) -> Result<()> {
         "templates/wasm/hex.bundle.README.md.template",
         &[
             ("app_name", &app_name),
-            ("hex_requirement", &hex_series_requirement(version)?),
+            ("hex_requirement", &hex_series_requirement(&version)?),
             ("lumis_requirement", &elixir_lumis_requirement()?),
             ("languages_text", &languages_text),
         ],
@@ -5913,10 +6029,10 @@ fn stage_hex_bundle(name: &str) -> Result<()> {
     let mix = render_template(
         "templates/wasm/bundle.mix.exs.template",
         &[
-            ("module_name", &module_name),
+            ("module_name", &elixir_module_name(&app_name)),
             ("app_name", &app_name),
-            ("hex_version", version),
-            ("description", description),
+            ("hex_version", &version),
+            ("description", &description),
             ("deps", &deps),
         ],
     )?;
@@ -5948,9 +6064,8 @@ fn check_hex_description(manifest: &str, description: &str) -> Result<()> {
     Ok(())
 }
 
-/// The `lumis_wasm_*` dependencies meaning what an npm package's
-/// `@lumis-sh/wasm-*` ones mean: a bundle's members, or the grammars a parser
-/// package's languages require.
+/// The `lumis_wasm_*` dependencies meaning what an npm parser package's
+/// `@lumis-sh/wasm-*` ones mean: the grammars its languages require.
 ///
 /// Sorted, because the generated `mix.exs` is read by people and a JSON object's
 /// order is not something to inherit.
@@ -6230,21 +6345,36 @@ mod bundle_release_tests {
         BundlePackage::parse(name).unwrap()
     }
 
-    fn staged(name: &str, members: &[&str]) -> StagedBundle {
-        StagedBundle {
+    /// `members` are npm package names; each exports one language of its name.
+    fn bundle(name: &str, members: &[&str]) -> Bundle {
+        Bundle {
             name: name.to_string(),
             format: 3,
-            requirements: members
+            series: "0.26".to_string(),
+            languages: members
                 .iter()
-                .map(|member| ((*member).to_string(), "^0.26.0".to_string()))
+                .map(|member| {
+                    let id = member.strip_prefix("@lumis-sh/wasm-").unwrap();
+                    BundleLanguage {
+                        id: id.to_string(),
+                        aliases: Vec::new(),
+                        wasm_name: format!("tree-sitter-{id}"),
+                    }
+                })
                 .collect(),
         }
     }
 
+    /// Spelled out rather than derived, so a wrong translation is caught here.
     fn npm_release(version: &str, members: &[&str]) -> BundleRelease {
-        staged("", members)
-            .release(BundleRegistry::Npm, version)
-            .unwrap()
+        BundleRelease {
+            version: version.to_string(),
+            bundle_format: Some(3),
+            dependencies: members
+                .iter()
+                .map(|member| ((*member).to_string(), "^0.26.0".to_string()))
+                .collect(),
+        }
     }
 
     /// Spelled out rather than derived, so a wrong translation is caught here.
@@ -6279,10 +6409,10 @@ mod bundle_release_tests {
     fn next(
         name: &str,
         record: &BundleRecord,
-        staged: &[StagedBundle],
+        bundles: &[Bundle],
         published: &[&str],
     ) -> Option<String> {
-        next_bundle_version(&package(name), record, staged, &versions(published))
+        next_bundle_version(&package(name), record, bundles, &versions(published))
             .unwrap()
             .map(|version| version.to_string())
     }
@@ -6311,7 +6441,7 @@ mod bundle_release_tests {
             &[("full", npm_release("0.1.4", &[C]))],
             &[("full", hex_release("0.1.6", &["lumis_wasm_c"]))],
         );
-        let grown = [staged("full", &[C, HURL])];
+        let grown = [bundle("full", &[C, HURL])];
 
         assert_eq!(
             next("npm-wasm-bundle-full", &record, &grown, &["0.1.3", "0.1.4"]).as_deref(),
@@ -6341,7 +6471,7 @@ mod bundle_release_tests {
             next(
                 "npm-wasm-bundle-web",
                 &record,
-                &[staged("web", &[CSS])],
+                &[bundle("web", &[CSS])],
                 &[]
             )
             .as_deref(),
@@ -6357,7 +6487,7 @@ mod bundle_release_tests {
             &[("full", npm_release("0.1.4", &[C]))],
             &[("full", hex_release("0.1.6", &["lumis_wasm_c"]))],
         );
-        let same = [staged("full", &[C])];
+        let same = [bundle("full", &[C])];
         assert_eq!(next("npm-wasm-bundle-full", &record, &same, &[]), None);
         assert_eq!(
             next("hex-wasm-bundle-full", &record, &same, &[]),
@@ -6365,7 +6495,7 @@ mod bundle_release_tests {
             "Hex is compared in the requirements it was given"
         );
 
-        let mut reformatted = staged("full", &[C]);
+        let mut reformatted = bundle("full", &[C]);
         reformatted.format = 4;
         let reformatted = [reformatted];
         assert!(next("npm-wasm-bundle-full", &record, &reformatted, &[]).is_some());
@@ -6375,14 +6505,12 @@ mod bundle_release_tests {
             "the format is what the npm entry exports, which Hex does not ship"
         );
 
-        let mut moved = staged("full", &[C]);
-        moved
-            .requirements
-            .insert(C.to_string(), "^0.27.0".to_string());
-        for bundle in [moved, staged("full", &[C, HURL])] {
-            let staged = [bundle];
-            assert!(next("npm-wasm-bundle-full", &record, &staged, &[]).is_some());
-            assert!(next("hex-wasm-bundle-full", &record, &staged, &[]).is_some());
+        let mut moved = bundle("full", &[C]);
+        moved.series = "0.27".to_string();
+        for bundle in [moved, bundle("full", &[C, HURL])] {
+            let bundles = [bundle];
+            assert!(next("npm-wasm-bundle-full", &record, &bundles, &[]).is_some());
+            assert!(next("hex-wasm-bundle-full", &record, &bundles, &[]).is_some());
         }
     }
 
@@ -6395,10 +6523,10 @@ mod bundle_release_tests {
             ],
             &[("full", hex_release("0.1.6", &["lumis_wasm_c"]))],
         );
-        let staged = [staged("full", &[C, HURL]), staged("web", &[CSS])];
+        let bundles = [bundle("full", &[C, HURL]), bundle("web", &[CSS])];
 
         let prepared =
-            prepare_bundle_record(&record, &package("npm-wasm-bundle-full"), &staged, "0.1.5")
+            prepare_bundle_record(&record, &package("npm-wasm-bundle-full"), &bundles, "0.1.5")
                 .unwrap();
         let mut expected = record.clone();
         expected
@@ -6409,7 +6537,7 @@ mod bundle_release_tests {
         let prepared = prepare_bundle_record(
             &prepared,
             &package("hex-wasm-bundle-full"),
-            &staged,
+            &bundles,
             "0.1.7",
         )
         .unwrap();
@@ -6420,7 +6548,7 @@ mod bundle_release_tests {
         assert!(prepare_bundle_record(
             &prepared,
             &package("npm-wasm-bundle-full"),
-            &staged,
+            &bundles,
             "0.1.6"
         )
         .is_err());
@@ -6499,7 +6627,7 @@ mod bundle_release_tests {
                 hex_release("0.1.7", &["lumis_wasm_c", "lumis_wasm_hurl"]),
             )],
         );
-        let staged = [staged("full", &[C, HURL])];
+        let bundles = [bundle("full", &[C, HURL])];
         let mut members = HashMap::from([
             (C.to_string(), versions(&["0.26.1"])),
             ("lumis_wasm_c".to_string(), versions(&["0.26.1"])),
@@ -6510,7 +6638,7 @@ mod bundle_release_tests {
                 &package(name),
                 version,
                 &record,
-                &staged,
+                &bundles,
                 &versions(published),
                 members,
             )
@@ -6539,7 +6667,7 @@ mod bundle_release_tests {
             &package("npm-wasm-bundle-full"),
             "0.1.5",
             &record,
-            &[staged("full", &[C, HURL])],
+            &[bundle("full", &[C, HURL])],
             &[],
             &members,
         )
@@ -6915,13 +7043,8 @@ mod hex_wasm_tests {
         assert!(check_hex_description("a/package.json", &"é".repeat(300)).is_ok());
     }
 
-    /// The npm bundle is the same package, and already carries the text. A
-    /// second one generated here is a second thing to keep in step.
-    ///
-    /// Bundles are generated rather than committed, so there are no manifests
-    /// on disk to read. What is fixed is the template `build-wasm-bundles.ts`
-    /// writes, and the names it writes it for — so this checks the text Hex
-    /// will actually receive, for every bundle languages.toml declares.
+    /// Checks the text Hex will receive, for every bundle languages.toml
+    /// declares.
     #[test]
     fn every_bundle_description_is_one_hex_accepts() {
         let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../languages.toml");
@@ -6935,11 +7058,7 @@ mod hex_wasm_tests {
         );
 
         for name in toml.bundles.keys() {
-            // Kept in step with `writeBundlePackage` by hand. The alternative
-            // is reading a generated manifest, which means this test passes or
-            // fails on whether someone ran pnpm first.
-            let description = format!("Lumis WASM {name} language bundle");
-            check_hex_description(&format!("wasm-bundle-{name}"), &description)
+            check_hex_description(&bundle_app(name), &bundle_description(name))
                 .expect("a bundle description Hex would reject cannot be staged");
         }
     }
