@@ -140,8 +140,17 @@ defmodule Lumis.Languages do
           | {:error, :unknown_bundle | failure()}
           | {:error, %{String.t() => :unknown_bundle | failure()}}
   def load(names) when is_list(names) do
+    {languages, others} = Enum.split_with(names, &language_name?/1)
+
     failures =
-      Enum.reduce(names, %{}, fn name, failures ->
+      languages
+      |> load_languages_by_name()
+      |> Enum.reduce(%{}, fn {name, result}, failures ->
+        collect_failure(failures, name, result)
+      end)
+
+    failures =
+      Enum.reduce(others, failures, fn name, failures ->
         collect_failure(failures, name, load(name))
       end)
 
@@ -177,6 +186,28 @@ defmodule Lumis.Languages do
   defp load_language_by_name(name) do
     Lumis.Application.configure_store()
     Native.load_language_by_name(name)
+  end
+
+  # A name that loads one language, rather than a bundle or plaintext. These
+  # load together, so their queries compile in parallel.
+  defp language_name?(name) when is_binary(name) or is_atom(name) do
+    to_string(name) not in @plaintext_names and bundle_members(name) == :not_a_bundle
+  end
+
+  defp language_name?(_name), do: false
+
+  defp load_languages_by_name([]), do: []
+
+  defp load_languages_by_name(names) do
+    Lumis.Application.configure_store()
+
+    results =
+      names
+      |> Enum.map(&to_string/1)
+      |> Native.load_languages_by_name()
+      |> Enum.map(&describe_load/1)
+
+    Enum.zip(names, results)
   end
 
   @doc false

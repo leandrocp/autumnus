@@ -58,6 +58,10 @@ enum WasmJob {
         name: String,
         reply: mpsc::SyncSender<Result<(), RuntimeError>>,
     },
+    LoadNamedAll {
+        names: Vec<String>,
+        reply: mpsc::SyncSender<Vec<Result<(), RuntimeError>>>,
+    },
     Highlight {
         source: String,
         language: String,
@@ -357,6 +361,9 @@ impl WasmExecutor {
                         WasmJob::LoadNamed { name, reply } => {
                             let _ = reply.send(runtime.load_named_language(&name));
                         }
+                        WasmJob::LoadNamedAll { names, reply } => {
+                            let _ = reply.send(runtime.load_named_languages(&names));
+                        }
                         WasmJob::Highlight {
                             source,
                             language,
@@ -403,6 +410,25 @@ impl WasmExecutor {
         match result.recv().map_err(|_| LoadFailure::Parser)? {
             Ok(()) => Ok(()),
             Err(error) => Err(LoadFailure::from(&error)),
+        }
+    }
+
+    /// [`Self::load_named_language`] for several names, whose queries compile
+    /// in parallel. One result per name, in order.
+    fn load_named_languages(&self, names: Vec<String>) -> Vec<Result<(), LoadFailure>> {
+        let count = names.len();
+        let (reply, result) = mpsc::sync_channel(1);
+        let results = self
+            .sender
+            .send(WasmJob::LoadNamedAll { names, reply })
+            .ok()
+            .and_then(|()| result.recv().ok());
+        match results {
+            Some(results) => results
+                .iter()
+                .map(|result| result.as_ref().map_err(LoadFailure::from).copied())
+                .collect(),
+            None => (0..count).map(|_| Err(LoadFailure::Parser)).collect(),
         }
     }
 
@@ -1011,6 +1037,37 @@ fn load_language_by_name<'a>(env: Env<'a>, name: &str) -> Term<'a> {
         Ok(()) => ok().encode(env),
         Err(failure) => (error(), failure).encode(env),
     }
+}
+
+/// [`load_language_by_name`] for a list, answering `:ok` or `{:error, reason}`
+/// per name, in order. Loading a list together lets its queries compile in
+/// parallel, which is most of what a language costs to load.
+#[cfg_attr(not(test), rustler::nif(schedule = "DirtyCpu"))]
+fn load_languages_by_name(env: Env<'_>, names: Vec<String>) -> Term<'_> {
+    let (absent, present): (Vec<_>, Vec<_>) = names
+        .into_iter()
+        .enumerate()
+        .partition(|(_, name)| never_added(name));
+    let (indices, present): (Vec<usize>, Vec<String>) = present.into_iter().unzip();
+    let loaded = match executor() {
+        Ok(executor) => executor.load_named_languages(present),
+        Err(_) => indices.iter().map(|_| Err(LoadFailure::Parser)).collect(),
+    };
+
+    let mut answers: Vec<(usize, Result<(), LoadFailure>)> = absent
+        .into_iter()
+        .map(|(index, _)| (index, Err(LoadFailure::NotInstalled)))
+        .chain(indices.into_iter().zip(loaded))
+        .collect();
+    answers.sort_by_key(|(index, _)| *index);
+    answers
+        .into_iter()
+        .map(|(_, answer)| match answer {
+            Ok(()) => ok().encode(env),
+            Err(failure) => (error(), failure).encode(env),
+        })
+        .collect::<Vec<_>>()
+        .encode(env)
 }
 
 /// Dirty because the source is caller-supplied and unbounded: detection runs

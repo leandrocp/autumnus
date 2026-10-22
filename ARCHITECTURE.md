@@ -329,6 +329,17 @@ compiled forms. Registering an already-compiled parser is 3-15 ms, and about
 warm, and why `load` still exists: to move both costs off a user's first
 request, not to gate anything.
 
+Once a parser is warm, most of what remains is compiling its queries, and Tree-sitter
+spends nearly all of that analysing the grammar's parse table. That work is
+independent per language, so `Runtime::load_languages` and
+`Runtime::load_named_languages` add parser modules to the shared store one at a
+time, which a `WasmStore` requires, then compile the queries of the whole batch in
+parallel outside the store's lock. Each host loads through these entry points when
+it already holds a list: `createHighlighter`'s initial languages in Node, through an
+async addon task off the JavaScript thread, and `Lumis.Languages.load/1` with a
+list in Elixir. A language an injection names still loads by itself, during the
+walk that found it.
+
 In Elixir it is cheaper still, because loading is global to the VM. One
 `Runtime` lives in the NIF, so the first process to need a language pays, and
 every process after it does not.

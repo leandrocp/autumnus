@@ -89,6 +89,11 @@ export interface NativeLanguageSpec {
 interface NativeRuntimeInstance {
   /** Load a catalog language from the installed package that ships it. */
   loadLanguage(id: string): void;
+  /**
+   * Load several catalog languages off the JavaScript thread. One entry per
+   * id: `null` when it loaded, otherwise why it did not.
+   */
+  loadLanguages(ids: string[]): Promise<Array<string | null>>;
   loadLanguagePackage(
     id: string,
     expectedPackageName: string,
@@ -178,6 +183,7 @@ function isNativeBinding(value: unknown): value is NativeBinding {
     ]) &&
     hasFunctions(prototype, [
       "loadLanguage",
+      "loadLanguages",
       "loadLanguagePackage",
       "loadLanguageDefinition",
       "hasLanguage",
