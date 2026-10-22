@@ -116,6 +116,9 @@ importers:
       oxfmt:
         specifier: ^0.73.0
         version: 0.73.0
+      semver:
+        specifier: 7.8.5
+        version: 7.8.5
       smol-toml:
         specifier: ^1.9.1
         version: 1.9.1

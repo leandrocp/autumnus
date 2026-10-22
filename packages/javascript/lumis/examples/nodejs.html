@@ -75,13 +75,13 @@
   <script type="module">
     import { createHighlighter } from '@lumis-sh/lumis'
     import { htmlInline } from '@lumis-sh/lumis/formatters'
-    import javascript from '@lumis-sh/lumis/langs/javascript'
-    import bash from '@lumis-sh/lumis/langs/bash'
+    import { javascript } from '@lumis-sh/wasm-javascript'
+    import { bash } from '@lumis-sh/wasm-bash'
     import githubDark from '@lumis-sh/themes/github_dark'
 
     const scriptCode = `import { createHighlighter } from '@lumis-sh/lumis'
 import { htmlInline } from '@lumis-sh/lumis/formatters'
-import typescript from '@lumis-sh/lumis/langs/typescript'
+import { typescript } from '@lumis-sh/wasm-typescript'
 import dracula from '@lumis-sh/themes/dracula'
 import { writeFile } from 'node:fs/promises'
 

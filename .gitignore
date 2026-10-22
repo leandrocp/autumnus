@@ -13,6 +13,8 @@ mise.local.toml
 /.claude/
 __pycache__/
 node_modules/
+packages/javascript/*/examples/**/package-lock.json
+packages/javascript/*/examples/**/npm-shrinkwrap.json
 benchmarks/elixir/_build/
 benchmarks/elixir/deps/
 benchmarks/rust/target/

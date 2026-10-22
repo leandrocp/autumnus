@@ -395,6 +395,25 @@ pnpm --filter @lumis-sh/react run build
 node packages/javascript/scripts/test-integration-packages.mjs
 '''
 
+[tasks.'build-examples-deps']
+description = "Build the workspace packages used by standalone JavaScript examples"
+depends = ["test-integration-packages"]
+run = "pnpm --filter @lumis-sh/lumis run build:native"
+
+[tasks.'test-example-versions']
+description = "Check release updates to standalone example dependency ranges"
+run = "node --test packages/javascript/scripts/update-example-versions.test.mjs"
+
+[tasks.'test-examples']
+description = "Install and build every standalone JavaScript example against workspace packages"
+depends = ["build-examples-deps", "test-example-versions"]
+run = "node packages/javascript/scripts/test-examples.mjs"
+
+[tasks.'examples-regen']
+description = "Regenerate JavaScript example HTML and verify standalone builds"
+depends = ["build-examples-deps"]
+run = "node packages/javascript/scripts/test-examples.mjs --update"
+
 [tasks.'test-queries']
 description = "Compile every processed query against a parser built from languages.toml"
 run = '''
@@ -1598,6 +1617,10 @@ if [ "$(mise run release-version "$package")" != "$version" ]; then
             python3 -c 'from pathlib import Path; import re, sys; path = Path(sys.argv[1]); version = sys.argv[2]; content = path.read_text(); content = re.sub(r"@version \"[^\"]+\"", f"@version \"{version}\"", content, count=1); path.write_text(content)' "$directory/mix.exs" "$version"
             ;;
     esac
+fi
+
+if [ "${package%%-*}" = "npm" ]; then
+    node packages/javascript/scripts/update-example-versions.mjs "$directory"
 fi
 
 if [ "$package" = "npm-lumis" ]; then

@@ -101,9 +101,9 @@
   <script type="module">
     import { createHighlighter } from '@lumis-sh/lumis'
     import { htmlInline, htmlLinked } from '@lumis-sh/lumis/formatters'
-    import html from '@lumis-sh/lumis/langs/html'
-    import css from '@lumis-sh/lumis/langs/css'
-    import javascript from '@lumis-sh/lumis/langs/javascript'
+    import { html } from '@lumis-sh/wasm-html'
+    import { css } from '@lumis-sh/wasm-css'
+    import { javascript } from '@lumis-sh/wasm-javascript'
     import dracula from '@lumis-sh/themes/dracula'
 
     const code = `<!doctype html>

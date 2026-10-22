@@ -5,7 +5,8 @@ import { renderToPipeableStream } from "react-dom/server";
 import { MarkdownAsync } from "react-markdown";
 import rehypeLumis from "@lumis-sh/rehype-lumis";
 import { htmlInline } from "@lumis-sh/lumis/formatters";
-import { bundledLanguages } from "@lumis-sh/lumis/bundles/web";
+import javascript from "@lumis-sh/wasm-javascript";
+import rust from "@lumis-sh/wasm-rust";
 import githubLight from "@lumis-sh/themes/github_light";
 
 const source = `# Demo
@@ -35,7 +36,7 @@ const html = await new Promise((resolve, reject) => {
             rehypeLumis,
             {
               formatter: (language) => htmlInline({ language, theme: githubLight }),
-              languages: [bundledLanguages],
+              languages: [javascript, rust],
             },
           ],
         ],
