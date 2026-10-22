@@ -11,10 +11,11 @@
 //! nesting depth. Built-in formatters can render both without disguising either
 //! one as a syntax capture.
 
-use crate::annotations::{compose_annotations_innermost, Annotation, ResolvedAnnotation};
+use crate::annotations::{compose_annotations_innermost, Annotation};
 use crate::diff_words::DiffWordRange;
 use crate::events::HighlightEvent;
 use crate::highlights::HIGHLIGHT_NAMES;
+use std::borrow::Cow;
 use std::ops::{Range, RangeInclusive};
 use std::sync::LazyLock;
 
@@ -399,41 +400,31 @@ impl LineCursor<'_> {
     }
 }
 
-/// One layer held open across a line boundary.
-enum OpenLayer<'a, T> {
-    Syntax {
-        scope_index: usize,
-        language: String,
-    },
-    Annotation(ResolvedAnnotation<'a, T>),
-    Decoration(Decoration),
-}
+/// One layer held open across a line boundary: the event that opened it,
+/// which is also what reopens it on the next line.
+struct OpenLayer<'e, 'a, T>(&'e HighlightEvent<'a, T>);
 
-impl<'a, T> OpenLayer<'a, T> {
-    fn open_event(&self) -> HighlightEvent<'a, T> {
-        match self {
-            Self::Syntax {
-                scope_index,
-                language,
-            } => HighlightEvent::Start {
-                scope_index: *scope_index,
-                language: language.clone(),
-            },
-            Self::Annotation(annotation) => HighlightEvent::AnnotationStart {
-                range: annotation.range.clone(),
-                data: annotation.data,
-            },
-            Self::Decoration(decoration) => HighlightEvent::DecorationStart {
-                decoration: *decoration,
-            },
-        }
+impl<'a, T> OpenLayer<'_, 'a, T> {
+    fn closes(&self, event: &HighlightEvent<'a, T>) -> bool {
+        matches!(
+            (self.0, event),
+            (HighlightEvent::Start { .. }, HighlightEvent::End)
+                | (
+                    HighlightEvent::AnnotationStart { .. },
+                    HighlightEvent::AnnotationEnd
+                )
+                | (
+                    HighlightEvent::DecorationStart { .. },
+                    HighlightEvent::DecorationEnd
+                )
+        )
     }
 
     fn close_event(&self) -> HighlightEvent<'a, T> {
-        match self {
-            Self::Syntax { .. } => HighlightEvent::End,
-            Self::Annotation(_) => HighlightEvent::AnnotationEnd,
-            Self::Decoration(_) => HighlightEvent::DecorationEnd,
+        match self.0 {
+            HighlightEvent::AnnotationStart { .. } => HighlightEvent::AnnotationEnd,
+            HighlightEvent::DecorationStart { .. } => HighlightEvent::DecorationEnd,
+            _ => HighlightEvent::End,
         }
     }
 }
@@ -462,7 +453,9 @@ pub(crate) fn compose_line_decorations<'a, T>(
     // One decoration pair per line, plus a close and reopen of every layer that
     // crosses one. The syntax events themselves pass through.
     let mut output = Vec::with_capacity(events.len() + 2);
-    compose_line_decorations_into(source, events, selection, &mut |event| output.push(event));
+    compose_line_decorations_into(source, events, selection, &mut |event| {
+        output.push(event.into_owned());
+    });
     output
 }
 
@@ -470,20 +463,22 @@ pub(crate) fn compose_line_decorations<'a, T>(
 ///
 /// The composed stream is the same size as the input, so a formatter that
 /// materializes it holds the whole document's events twice. Handing each event
-/// to `emit` as it is composed is what lets one be written and dropped.
-pub(crate) fn compose_line_decorations_into<'a, T>(
+/// to `emit` as it is composed is what lets one be written and dropped. Events
+/// that pass through, and the scopes reopened on each line, are lent from
+/// `events` rather than cloned, because cloning a `Start` copies its language.
+pub(crate) fn compose_line_decorations_into<'e, 'a, T>(
     source: &str,
-    events: &[HighlightEvent<'a, T>],
+    events: &'e [HighlightEvent<'a, T>],
     selection: &LineSelection,
-    emit: &mut dyn FnMut(HighlightEvent<'a, T>),
+    emit: &mut dyn FnMut(Cow<'e, HighlightEvent<'a, T>>),
 ) {
     let output = &mut Emit(emit);
-    let mut layers: Vec<OpenLayer<'a, T>> = Vec::new();
+    let mut layers: Vec<OpenLayer<'e, 'a, T>> = Vec::new();
     let mut cursor = selection.cursor();
     let mut line = 1usize;
     let mut pending = false;
 
-    output.push(line_start(line, &mut cursor));
+    output.owned(line_start(line, &mut cursor));
 
     for event in events {
         if pending
@@ -502,22 +497,13 @@ pub(crate) fn compose_line_decorations_into<'a, T>(
         }
 
         match event {
-            HighlightEvent::Start {
-                scope_index,
-                language,
+            HighlightEvent::Start { .. }
+            | HighlightEvent::AnnotationStart { .. }
+            | HighlightEvent::DecorationStart {
+                decoration: Decoration::RainbowBracket { .. } | Decoration::DiffWord { .. },
             } => {
-                output.push(event.clone());
-                layers.push(OpenLayer::Syntax {
-                    scope_index: *scope_index,
-                    language: language.clone(),
-                });
-            }
-            HighlightEvent::AnnotationStart { range, data } => {
-                output.push(event.clone());
-                layers.push(OpenLayer::Annotation(ResolvedAnnotation {
-                    range: range.clone(),
-                    data: *data,
-                }));
+                output.lent(event);
+                layers.push(OpenLayer(event));
             }
             HighlightEvent::Source { start, end } => {
                 pending = split_source(
@@ -530,14 +516,10 @@ pub(crate) fn compose_line_decorations_into<'a, T>(
                     &mut cursor,
                 );
             }
-            HighlightEvent::DecorationStart { decoration } => match decoration {
-                Decoration::RainbowBracket { .. } | Decoration::DiffWord { .. } => {
-                    output.push(event.clone());
-                    layers.push(OpenLayer::Decoration(*decoration));
-                }
-                // A stream that already carries lines is re-composed, not nested.
-                Decoration::Line { .. } => {}
-            },
+            // A stream that already carries lines is re-composed, not nested.
+            HighlightEvent::DecorationStart {
+                decoration: Decoration::Line { .. },
+            } => {}
             HighlightEvent::End | HighlightEvent::AnnotationEnd | HighlightEvent::DecorationEnd => {
                 close_layer(output, &mut layers, event, pending);
             }
@@ -549,15 +531,19 @@ pub(crate) fn compose_line_decorations_into<'a, T>(
     if !pending {
         close_layers(output, &layers);
     }
-    output.push(HighlightEvent::DecorationEnd);
+    output.owned(HighlightEvent::DecorationEnd);
 }
 
 /// A sink the composer pushes to, so one walk serves both entry points.
-struct Emit<'e, 'a, T>(&'e mut dyn FnMut(HighlightEvent<'a, T>));
+struct Emit<'s, 'e, 'a, T>(&'s mut dyn FnMut(Cow<'e, HighlightEvent<'a, T>>));
 
-impl<'a, T> Emit<'_, 'a, T> {
-    fn push(&mut self, event: HighlightEvent<'a, T>) {
-        (self.0)(event);
+impl<'e, 'a, T> Emit<'_, 'e, 'a, T> {
+    fn owned(&mut self, event: HighlightEvent<'a, T>) {
+        (self.0)(Cow::Owned(event));
+    }
+
+    fn lent(&mut self, event: &'e HighlightEvent<'a, T>) {
+        (self.0)(Cow::Borrowed(event));
     }
 }
 
@@ -570,40 +556,29 @@ fn line_start<'a, T>(line: usize, cursor: &mut LineCursor<'_>) -> HighlightEvent
     }
 }
 
-fn close_layers<'a, T>(output: &mut Emit<'_, 'a, T>, layers: &[OpenLayer<'a, T>]) {
+fn close_layers<'e, 'a, T>(output: &mut Emit<'_, 'e, 'a, T>, layers: &[OpenLayer<'e, 'a, T>]) {
     for layer in layers.iter().rev() {
-        output.push(layer.close_event());
+        output.owned(layer.close_event());
     }
 }
 
-fn close_layer<'a, T>(
-    output: &mut Emit<'_, 'a, T>,
-    layers: &mut Vec<OpenLayer<'a, T>>,
-    event: &HighlightEvent<'a, T>,
+fn close_layer<'e, 'a, T>(
+    output: &mut Emit<'_, 'e, 'a, T>,
+    layers: &mut Vec<OpenLayer<'e, 'a, T>>,
+    event: &'e HighlightEvent<'a, T>,
     pending: bool,
 ) {
-    if matches!(
-        (layers.last(), event),
-        (Some(OpenLayer::Syntax { .. }), HighlightEvent::End)
-            | (
-                Some(OpenLayer::Annotation(_)),
-                HighlightEvent::AnnotationEnd
-            )
-            | (
-                Some(OpenLayer::Decoration(_)),
-                HighlightEvent::DecorationEnd
-            )
-    ) {
+    if layers.last().is_some_and(|layer| layer.closes(event)) {
         layers.pop();
         if !pending {
-            output.push(event.clone());
+            output.lent(event);
         }
     }
 }
 
-fn reopen_layers<'a, T>(output: &mut Emit<'_, 'a, T>, layers: &[OpenLayer<'a, T>]) {
+fn reopen_layers<'e, 'a, T>(output: &mut Emit<'_, 'e, 'a, T>, layers: &[OpenLayer<'e, 'a, T>]) {
     for layer in layers {
-        output.push(layer.open_event());
+        output.lent(layer.0);
     }
 }
 
@@ -612,12 +587,12 @@ fn reopen_layers<'a, T>(output: &mut Emit<'_, 'a, T>, layers: &[OpenLayer<'a, T>
 /// The newline stays inside the line it ends, so concatenating the `Source`
 /// events of the composed stream still reproduces the source exactly.
 /// Returns whether the layers are held closed at a trailing newline.
-fn split_source<'a, T>(
-    output: &mut Emit<'_, 'a, T>,
+fn split_source<'e, 'a, T>(
+    output: &mut Emit<'_, 'e, 'a, T>,
     source: &str,
     start: usize,
     end: usize,
-    layers: &[OpenLayer<'a, T>],
+    layers: &[OpenLayer<'e, 'a, T>],
     line: &mut usize,
     cursor: &mut LineCursor<'_>,
 ) -> bool {
@@ -633,15 +608,15 @@ fn split_source<'a, T>(
         };
 
         let line_end = cursor_offset + newline + 1;
-        output.push(HighlightEvent::Source {
+        output.owned(HighlightEvent::Source {
             start: cursor_offset,
             end: line_end,
         });
         close_layers(output, layers);
-        output.push(HighlightEvent::DecorationEnd);
+        output.owned(HighlightEvent::DecorationEnd);
 
         *line += 1;
-        output.push(line_start(*line, cursor));
+        output.owned(line_start(*line, cursor));
 
         cursor_offset = line_end;
         if cursor_offset == end {
@@ -651,7 +626,7 @@ fn split_source<'a, T>(
     }
 
     if cursor_offset < end {
-        output.push(HighlightEvent::Source {
+        output.owned(HighlightEvent::Source {
             start: cursor_offset,
             end,
         });
