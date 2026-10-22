@@ -232,10 +232,17 @@ jobs:
       # exchanges the workflow's OIDC identity for a short-lived publish token,
       # which works because this package names `wasm-release.yml` as a trusted
       # publisher — `mise run npm-trust`.
+      #
+      # A rejected exchange is logged only at `verbose` and the PUT then goes
+      # out anonymously, so the console shows a bare E404. The reason is in
+      # the debug log.
       - name: Publish to npm
         run: |
           cd -- "publish/$PARSER"
-          npm publish --access public --provenance
+          npm publish --access public --provenance || {
+              grep -h ' oidc ' ~/.npm/_logs/*-debug-0.log >&2 || true
+              exit 1
+          }
         env:
           PARSER: ${{ inputs.parser }}
 
