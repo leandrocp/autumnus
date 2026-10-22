@@ -77,9 +77,11 @@ rehype for that step.
 
 The runnable examples remain standalone npm projects, outside the pnpm
 workspace. They declare their parser packages explicitly. `test-examples`
-installs isolated copies against packed workspace libraries and the local native
-addon, then builds or renders each project. The same runner regenerates the
-checked-in HTML through `examples-regen`.
+uses npm to install isolated copies against packed workspace libraries and the
+local native addon, then builds or renders each project. Example npm lockfiles
+are untracked; CI checks fresh resolutions, not a separate pnpm installation path.
+The same runner creates or refreshes the checked-in HTML through `examples-regen`.
+Npm release preparation updates example dependency ranges to the released version.
 
 ## HTML line contract
 

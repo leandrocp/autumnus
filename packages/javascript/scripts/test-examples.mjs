@@ -36,8 +36,8 @@ function readJson(path) {
   return JSON.parse(readFileSync(path, "utf8"));
 }
 
-function run(args, cwd) {
-  execFileSync("pnpm", args, {
+function run(command, args, cwd) {
+  execFileSync(command, args, {
     cwd,
     stdio: "inherit",
     timeout: 600_000,
@@ -49,7 +49,7 @@ function pack(directory) {
   const source = join(javascriptDir, directory);
   const manifest = readJson(join(source, "package.json"));
   const tarball = join(project, `${manifest.name.replaceAll("/", "-")}.tgz`);
-  run(["--config.ignore-scripts=true", "pack", "--out", tarball], source);
+  run("pnpm", ["--config.ignore-scripts=true", "pack", "--out", tarball], source);
   return { ...manifest, spec: `file:${tarball}` };
 }
 
@@ -75,13 +75,24 @@ function checkRender(source, consumer) {
   const html = readFileSync(output, "utf8");
   assert.match(html, /<span[^>]*style="[^"]*color:/u, `${source} did not highlight tokens`);
   const snapshot = join(source, "output.html");
-  assert.ok(existsSync(snapshot), `${source} must check in its rendered output`);
   if (values.update) copyFileSync(output, snapshot);
-  else assert.equal(html, readFileSync(snapshot, "utf8"), `${source}: run mise run examples-regen`);
+  else {
+    assert.ok(existsSync(snapshot), `${source}: run mise run examples-regen`);
+    assert.equal(html, readFileSync(snapshot, "utf8"), `${source}: run mise run examples-regen`);
+  }
 }
 
 function testExample(example, localPackages) {
   const source = join(javascriptDir, example);
+  const lockfiles = execFileSync(
+    "git",
+    ["ls-files", "--", "package-lock.json", "npm-shrinkwrap.json"],
+    {
+      cwd: source,
+      encoding: "utf8",
+    },
+  );
+  assert.equal(lockfiles, "", `${example}: keep npm lockfiles untracked`);
   const manifest = readJson(join(source, "package.json"));
   checkDependencies(manifest, localPackages);
   if (existsSync(join(source, "output.html"))) {
@@ -100,31 +111,27 @@ function testExample(example, localPackages) {
         ".output",
         ".data",
         "output.html",
+        "package-lock.json",
+        "npm-shrinkwrap.json",
       ].includes(basename(path)) &&
       (path === source || !existsSync(join(path, "package.json"))),
   });
-  manifest.packageManager = readJson(join(javascriptDir, "package.json")).packageManager;
+  for (const dependencies of [manifest.dependencies, manifest.devDependencies]) {
+    for (const pkg of localPackages) {
+      if (dependencies?.[pkg.name] !== undefined) dependencies[pkg.name] = pkg.spec;
+    }
+  }
+  manifest.overrides = {
+    ...manifest.overrides,
+    ...Object.fromEntries(localPackages.map((pkg) => [pkg.name, pkg.spec])),
+  };
   writeFileSync(join(consumer, "package.json"), JSON.stringify(manifest));
-  writeFileSync(
-    join(consumer, "pnpm-workspace.yaml"),
-    JSON.stringify({
-      overrides: Object.fromEntries(localPackages.map((pkg) => [pkg.name, pkg.spec])),
-      allowBuilds: {
-        "@parcel/watcher": true,
-        "better-sqlite3": true,
-        "core-js": true,
-        "core-js-pure": true,
-        esbuild: true,
-        sharp: true,
-      },
-    }),
-  );
   console.log(`\n=== ${example} ===`);
-  run(["install", "--no-frozen-lockfile", "--prefer-offline"], consumer);
+  run("npm", ["install", "--prefer-offline", "--no-audit", "--no-fund"], consumer);
   const scripts = ["render", "build"].filter((name) => manifest.scripts?.[name]);
   assert.ok(scripts.length > 0, `${example} has no build or render script`);
   for (const script of scripts) {
-    run(["run", script], consumer);
+    run("npm", ["run", script], consumer);
     if (script === "render") checkRender(source, consumer);
   }
   rmSync(consumer, { recursive: true, force: true });

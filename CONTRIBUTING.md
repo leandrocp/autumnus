@@ -54,14 +54,17 @@ checks their published peer requirements and verifies that application-created
 formatters preserve code-block attributes through each integration.
 
 `mise run test-examples` installs every standalone JavaScript example in a
-temporary directory outside the workspace, overriding Lumis, themes, integrations
+temporary directory outside the workspace with npm, overriding Lumis, themes, integrations
 and the native addon with locally built tarballs. Parser packages come from npm,
 as they do for someone running an example. The task checks that each example's
 declared version ranges accept the workspace versions, runs its render and build
 scripts, and compares rendered HTML with the checked-in `output.html` files.
-JavaScript CI runs this as a separate job.
+JavaScript CI runs this as a separate job. Keep example npm lockfiles untracked:
+the harness rejects committed lockfiles and resolves the declared ranges afresh,
+so it catches upstream dependency incompatibilities too. Local npm installs can
+keep their ignored lockfiles.
 
-Refresh those HTML files with `mise run examples-regen`. Both tasks accept example
+Create or refresh those HTML files with `mise run examples-regen`. Both tasks accept example
 paths relative to `packages/javascript` to narrow a run:
 
 ```sh

@@ -102,6 +102,10 @@ The subject must be `chore(release): <package> <version>` and nothing else, bar 
 
 Review every file `release-prepare` touches. Crate releases rewrite dependent
 manifests too — see [Crate version requirements](#crate-version-requirements).
+Npm library releases also update their dependency ranges in standalone examples
+to `^<version>`, including when a 0.x minor release no longer fits the old range.
+The updater uses only Node's standard library, so release preparation needs no
+JavaScript dependency install for this step. Example lockfiles remain untracked.
 
 ### Changelog template
 

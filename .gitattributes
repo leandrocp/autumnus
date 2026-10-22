@@ -37,6 +37,7 @@ packages/elixir/lumis/priv/static/css/*.css linguist-generated
 themes/*.json linguist-generated
 
 # Generated test and website artifacts.
+# Example npm lockfiles stay untracked; output.html snapshots remain committed.
 packages/javascript/*/examples/**/output.html linguist-generated
 fixtures/conformance/**/bbcode.txt linguist-generated
 fixtures/conformance/**/fixture.json linguist-generated
