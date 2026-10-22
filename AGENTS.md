@@ -67,6 +67,16 @@ Do not hand-roll infrastructure that a standard library or maintained crate/pack
 - Custom code is justified only when available libraries cannot express the required behavior. Document that gap and test the compatibility boundary.
 - Delegate package discovery and version-range resolution to the package registry and CDN. Lumis validates the resolved result and caches it; it does not implement another package manager.
 
+### Parse structured text with a parser, not a regex
+
+Do not use regular expressions to read anything that has a grammar: Tree-sitter queries, source code, TOML, JSON, HTML, Markdown, manifests. A regex matches text, not structure, so it cannot see comments, strings, nesting or line breaks, and it is wrong in ways that pass review.
+
+- **Tree-sitter queries are parsed with `tree-sitter-tsquery`**, the query grammar, which needs no grammar for the language the query targets. `crates/dev`'s injections table is the model.
+- **Everything else uses its established parser**: `toml`, `serde_json`, `syn`, a Tree-sitter grammar. If none exists, write a small tokenizer and test it, rather than a pattern.
+- **Regex stays where it is the specified semantics**: `#match?` predicates are regexes by definition, and `crates/lumis-build` translates Lua patterns into them. That is evaluating a regex, not parsing with one.
+
+This is written down because it shipped in a PR. The first version of the language catalog's Injections table read `#set! injection.language "..."` with a regex. c's query has its `asm` injection commented out pending a parser, and the regex counted it anyway, so seven languages listed an injection that never happens. Nothing failed: a wrong row in a generated table raises no error.
+
 ### Keep environment variables few, and resolve each one once
 
 An environment variable is global mutable state that no signature declares and no type checks. Prefer a function argument, a `mise` task `env`, a config file, or a CLI flag with clap's `env()` attribute, which puts the variable in `--help` for free. `LUMIS_DATA_DIR` and `LUMIS_CONFIG` are declared that way in `crates/lumis-cli/src/main.rs` and are the pattern to copy.
