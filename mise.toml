@@ -114,15 +114,56 @@ depends = [
 
 [tasks.'setup-js-themes']
 description = "Build JavaScript theme modules, JSON and CSS"
+sources = [
+    "pnpm-lock.yaml",
+    "themes/*.json",
+    "css/*.css",
+    "packages/javascript/themes/{package.json,tsconfig.json,tsup.config.ts}",
+    "packages/javascript/themes/{src,scripts}/**",
+]
+outputs = [
+    "packages/javascript/themes/dist/index.js",
+    "packages/javascript/themes/dist/index.cjs",
+]
 run = "pnpm --filter @lumis-sh/themes run build"
 
 [tasks.'setup-js-lumis']
 description = "Build JavaScript language and runtime artifacts"
+sources = [
+    "pnpm-lock.yaml",
+    ".oxfmtrc.json",
+    "languages.toml",
+    "themes/*.json",
+    "fixtures/api.json",
+    "crates/lumis-wasm-runtime/src/catalog.rs",
+    "packages/javascript/themes/scripts/read-themes.ts",
+    "packages/javascript/themes/src/types.ts",
+    "packages/javascript/lumis/{package.json,tsconfig.json,tsconfig.build.json,tsup.config.ts,tsup.browser.config.ts}",
+    "packages/javascript/lumis/{src,scripts}/**",
+    "!packages/javascript/lumis/src/generated/**",
+    "!packages/javascript/lumis/src/tree-sitter-wasm.ts",
+    "packages/javascript/lumis/test/public-api-types.ts",
+]
+outputs = [
+    "packages/javascript/lumis/dist/index.js",
+    "packages/javascript/lumis/dist/index.cjs",
+    "packages/javascript/lumis/dist/index.browser.js",
+]
 run = "pnpm --filter @lumis-sh/lumis run build"
 
 [tasks.'setup-js-integrations']
 description = "Build the packages whose examples import them by name"
 depends = ["setup-js-lumis"]
+sources = [
+    "pnpm-lock.yaml",
+    "packages/javascript/{markdown-it-lumis,rehype-lumis,vite}/{package.json,tsconfig.json,tsup.config.ts}",
+    "packages/javascript/{markdown-it-lumis,rehype-lumis,vite}/src/**",
+]
+outputs = [
+    "packages/javascript/markdown-it-lumis/dist/index.js",
+    "packages/javascript/rehype-lumis/dist/index.js",
+    "packages/javascript/vite/dist/index.js",
+]
 run = "pnpm --recursive --workspace-concurrency=2 --filter @lumis-sh/markdown-it-lumis --filter @lumis-sh/rehype-lumis --filter @lumis-sh/vite run build"
 
 [tasks.'setup-wasm-bundles']
