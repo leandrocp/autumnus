@@ -68,9 +68,15 @@
       "fg": "#eb6f92",
       "bg": "#43293a"
     },
+    "diff.minus.word": {
+      "bg": "#763447"
+    },
     "diff.plus": {
       "fg": "#9ccfd8",
       "bg": "#333c48"
+    },
+    "diff.plus.word": {
+      "bg": "#21606a"
     },
     "function": {
       "fg": "#ebbcba"

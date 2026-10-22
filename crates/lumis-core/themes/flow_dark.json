@@ -59,8 +59,14 @@
       "fg": "#db7079",
       "bg": "#412528"
     },
+    "diff.minus.word": {
+      "bg": "#330009"
+    },
     "diff.plus": {
       "bg": "#284125"
+    },
+    "diff.plus.word": {
+      "bg": "#32612d"
     },
     "function": {
       "fg": "#70afdb"
