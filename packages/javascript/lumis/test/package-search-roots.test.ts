@@ -29,9 +29,18 @@ function linkPackage(parent: string, language: string, directory: string): void 
 beforeAll(() => {
   installLocalPackages(project, ["json", "html"]);
   execFileSync(
-    process.execPath,
-    ["--import", "tsx", "scripts/build-wasm-bundles.ts", "--out", bundles],
-    { cwd: resolve(cwd, "..") },
+    "cargo",
+    [
+      "run",
+      "-q",
+      "--manifest-path",
+      "crates/dev/Cargo.toml",
+      "--",
+      "stage-npm-bundle",
+      "--out",
+      bundles,
+    ],
+    { cwd: resolve(cwd, "../../..") },
   );
   const full = join(bundles, "wasm-bundle-full");
   for (const language of ["lua", "comment", "css"]) {

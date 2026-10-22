@@ -1,0 +1,4 @@
+import type { LanguageBundle } from '@lumis-sh/lumis'
+
+declare const bundle: LanguageBundle
+export default bundle

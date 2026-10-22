@@ -448,7 +448,7 @@ All language metadata lives in `languages.toml`. It is consumed by:
 - `crates/lumis-cli/build.rs`: reads `queries/processed/` to embed query constants
 - `crates/lumis-core/build.rs`: generates the `Language` enum and Rust detection metadata
 - `packages/javascript/lumis/scripts/build-langs.ts`: generates `packages/javascript/lumis/langs/*.ts`, bundles, and JS detection and loader metadata
-- `packages/javascript/scripts/build-wasm-bundles.ts`: generates the `@lumis-sh/wasm-bundle-*` packages into `tmp/wasm/npm/` at publish time. They are not committed: a bundle is a manifest and an import list derived from `languages.toml`, so a copy in the tree is a second source of truth that goes stale whenever membership changes
+- `cargo run --manifest-path crates/dev/Cargo.toml -- stage-npm-bundle`: generates the `@lumis-sh/wasm-bundle-*` packages into `tmp/wasm/npm/` at publish time. They are not committed: a bundle is a manifest and an import list derived from `languages.toml`, so a copy in the tree is a second source of truth that goes stale whenever membership changes
 - CI workflows: build WASMs and update parser and query revisions
 
 Bundle definitions also live here under `[bundles.*]`.
@@ -977,17 +977,20 @@ The layouts differ because each runtime reads its own: npm ships
 resolves. The parser file is byte-identical either way.
 
 Bundles are meta-packages: dependencies on every language they group, and no
-bytes at all. Members come from the npm bundle staged beside them, so the two
-registries cannot disagree about what a bundle contains.
+bytes at all. `crates/dev` writes each registry's package from the bundle
+`languages.toml` declares and the Tree-sitter series `mise.toml` pins. Neither
+registry's package is read to build the other's, so the two cannot disagree
+about what a bundle contains, and neither can require a series no parser is
+published under.
 
 ```bash
 mise run wasm-hex-bundle-stage web
 mise run wasm-hex-bundle-publish web
 ```
 
-Versions are read from the npm package rather than recomputed — a parser takes
-the version from the `lumis.json` staged with it, and a bundle from
-`wasm-bundle-<name>/package.json`, which the Hex tag run stages at the Hex version.
+A parser takes its Hex version from the `lumis.json` staged with it. A bundle
+takes the version `wasm-bundles.json` records for that registry, which is the
+version its tag publishes.
 
 Parsers publish to Hex on every run of `WASM Release`, alongside npm. There is
 no input to set and no separate trigger: the plan decides, and a package already

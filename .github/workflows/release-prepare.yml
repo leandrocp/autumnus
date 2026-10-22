@@ -123,14 +123,6 @@ jobs:
 
       - uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
-        if: contains(matrix.release.package, '-wasm-bundle-')
-        with:
-          version: 11.15.1
-
-      - if: contains(matrix.release.package, '-wasm-bundle-')
-        run: pnpm install --frozen-lockfile --ignore-scripts
-
       # Only crate and bundle releases build `crates/dev`. Caching the other jobs
       # would store an empty target directory under the same key.
       - name: Cache Rust dependencies

@@ -1,0 +1,12 @@
+const lazy = (id, aliases, load) => Object.assign(load, { id, aliases })
+
+/**
+ * Every language in this bundle, each loaded from its package the first time
+ * it is used. Pass it to `createHighlighter({ languages })`.
+ */
+const bundle = {
+  [Symbol.for('@lumis-sh/package-url')]: import.meta.url,
+{entries}
+}
+
+export default bundle
