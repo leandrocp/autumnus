@@ -58,14 +58,8 @@
     "diff.minus": {
       "fg": "#d32752"
     },
-    "diff.minus.word": {
-      "bg": "#ffb8c2"
-    },
     "diff.plus": {
       "fg": "#239549"
-    },
-    "diff.plus.word": {
-      "bg": "#afeaba"
     },
     "error": {
       "fg": "#ff0000"

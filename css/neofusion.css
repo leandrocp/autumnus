@@ -68,14 +68,8 @@
 .l-diff-minus {
   background-color: #722529;
 }
-.l-diff-minus-word {
-  background-color: #a13038;
-}
 .l-diff-plus {
   background-color: #5f6e29;
-}
-.l-diff-plus-word {
-  background-color: #425300;
 }
 .l-function {
   color: #35b5ff;
@@ -355,6 +349,12 @@
 }
 .l-variable-parameter-builtin {
   color: #fd5e3a;
+}
+.l-diff-word-removed {
+  background-color: #a13038;
+}
+.l-diff-word-added {
+  background-color: #425300;
 }
 @layer lumis {
   pre.lumis > code {

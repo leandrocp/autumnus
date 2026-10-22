@@ -66,14 +66,8 @@
       "bg": "#28143f",
       "strikethrough": true
     },
-    "diff.minus.word": {
-      "bg": "#00406b"
-    },
     "diff.plus": {
       "bg": "#123314"
-    },
-    "diff.plus.word": {
-      "bg": "#14521b"
     },
     "function": {
       "fg": "#66d9ef"

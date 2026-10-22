@@ -60,15 +60,9 @@
       "bg": "#43343e",
       "bold": true
     },
-    "diff.minus.word": {
-      "bg": "#6c4560"
-    },
     "diff.plus": {
       "bg": "#3d4745",
       "bold": true
-    },
-    "diff.plus.word": {
-      "bg": "#3b6a62"
     },
     "function": {
       "fg": "#88c0d0"

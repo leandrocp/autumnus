@@ -62,15 +62,9 @@
       "fg": "#f66151",
       "bg": "#fcfcfc"
     },
-    "diff.minus.word": {
-      "bg": "#ffbfb1"
-    },
     "diff.plus": {
       "fg": "#33b2a4",
       "bg": "#fcfcfc"
-    },
-    "diff.plus.word": {
-      "bg": "#aaeae0"
     },
     "error": {
       "fg": "#e01b24"
