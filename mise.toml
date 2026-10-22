@@ -36,7 +36,7 @@ check_tree_sitter_cli() {
     fi
 
     local version raw_version major minor
-    raw_version="$("$binary" --version 2>/dev/null)"
+    raw_version="$("$binary" --version 2>/dev/null)" || raw_version="unavailable"
     version="${raw_version#tree-sitter }"
     version="${version%% *}"
 
