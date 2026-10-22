@@ -2836,6 +2836,72 @@ fn name_list_cell(values: &[&str]) -> String {
     values.join(", ")
 }
 
+/// Languages that a language's injections query names, and whether it also takes
+/// a language from the document, such as a Markdown fence's info string.
+///
+/// Read from the processed query, where `; inherits:` is already flattened, so
+/// tsx lists what it gets from typescript and ecma. Names resolve to catalog ids
+/// and the language itself is left out. A name outside the catalog is dropped:
+/// no package could supply it.
+fn injected_languages(query: &str, own: &str) -> (Vec<&'static str>, bool) {
+    static FIXED: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
+        regex::Regex::new(r#"#set!\s+injection\.language\s+"([^"]+)""#).expect("valid regex")
+    });
+    static FROM_DOCUMENT: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
+        regex::Regex::new(r"@injection\.(?:language|filename)\b").expect("valid regex")
+    });
+
+    let mut ids: Vec<&'static str> = FIXED
+        .captures_iter(query)
+        .filter_map(|captures| lumis_wasm_runtime::catalog::find(&captures[1]))
+        .map(|entry| entry.id)
+        .filter(|id| *id != own)
+        .collect();
+    ids.sort_unstable();
+    ids.dedup();
+    (ids, FROM_DOCUMENT.is_match(query))
+}
+
+/// The table of what each language can inject, for a project choosing which
+/// parser packages to install alongside it.
+fn injections_section(toml: &LanguagesToml) -> Vec<String> {
+    let mut lines = vec![
+        String::new(),
+        "## Injections".to_string(),
+        String::new(),
+        "A language can highlight another inside it, such as CSS in an HTML `<style>`.".to_string(),
+        "Each needs its own parser installed, or that block stays plain. **Injects** lists"
+            .to_string(),
+        "the languages a query always names; **From the document** means it also takes a"
+            .to_string(),
+        "language from the source, such as a Markdown fence's info string, so any language"
+            .to_string(),
+        "can appear. Languages that inject nothing are not listed.".to_string(),
+        String::new(),
+        "| Language | Injects | From the document |".to_string(),
+        "|----------|---------|-------------------|".to_string(),
+    ];
+
+    for (lang, info) in &toml.parsers {
+        let query = fs::read_to_string(format!(
+            "queries/processed/{}/injections.scm",
+            query_source_name(lang, info)
+        ))
+        .unwrap_or_default();
+        let (ids, from_document) = injected_languages(&query, lang);
+        if ids.is_empty() && !from_document {
+            continue;
+        }
+        let from_document = if from_document { "yes" } else { "no" };
+        lines.push(format!(
+            "| {lang} | {} | {from_document} |",
+            name_list_cell(&ids)
+        ));
+    }
+
+    lines
+}
+
 /// The globs that name a bare extension, e.g. `*.rs`.
 ///
 /// `Language::extensions` in `lumis-core` selects them the same way, so the
@@ -2926,6 +2992,8 @@ fn gen_languages_md() -> Result<()> {
             "| {lang} | {aliases_col} | {extensions_col} | {parser_link} | {vendored} | {version_col} | {query_col} | {npm_col} | {hex_col} | {size_col} | {memory_col} |"
         ));
     }
+
+    table_lines.extend(injections_section(&toml));
 
     if !toml.bundles.is_empty() {
         table_lines.push(String::new());
@@ -8357,6 +8425,25 @@ mod tests {
         // reordering it: that is the order `lumis languages show` prints.
         assert_eq!(name_list_cell(&["zsh", "sh"]), "zsh, sh");
         assert_eq!(name_list_cell(&[]), "—");
+    }
+
+    #[test]
+    fn injected_languages_resolves_aliases_and_flags_names_from_the_document() {
+        let query = r#"
+((comment) @injection.content (#set! injection.language "comment"))
+((x) @injection.content (#set! injection.language "python3"))
+((y) @injection.content (#set! injection.language "python"))
+((z) @injection.content (#set! injection.language "markdown"))
+((w) @injection.content (#set! injection.language "not-a-language"))
+"#;
+
+        assert_eq!(
+            injected_languages(query, "markdown"),
+            (vec!["comment", "python"], false)
+        );
+
+        let fenced = r"(fenced_code_block (info_string (language) @injection.language) (code_fence_content) @injection.content)";
+        assert_eq!(injected_languages(fenced, "markdown"), (vec![], true));
     }
 
     #[test]

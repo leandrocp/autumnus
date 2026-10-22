@@ -144,6 +144,128 @@ spends the budget.
 | zig | — | *.zig | [tree-sitter-zig](https://crates.io/crates/tree-sitter-zig/1.1.2) | no | `1.1.2` | [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter/tree/d3e4a28b63961ba972b0945d66c73b6eec969953) `d3e4a28` | [@lumis-sh/wasm-zig](https://www.npmjs.com/package/@lumis-sh/wasm-zig) | [lumis_wasm_zig](https://hex.pm/packages/lumis_wasm_zig) | 682 KB | 661 KB |
 | zsh | — | *.zsh | [tree-sitter-zsh](https://crates.io/crates/tree-sitter-zsh/0.63.4) | no | `0.63.4` | [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter/tree/d3e4a28b63961ba972b0945d66c73b6eec969953) `d3e4a28` | [@lumis-sh/wasm-zsh](https://www.npmjs.com/package/@lumis-sh/wasm-zsh) | [lumis_wasm_zsh](https://hex.pm/packages/lumis_wasm_zsh) | 4.5 MB | 3.8 MB |
 
+## Injections
+
+A language can highlight another inside it, such as CSS in an HTML `<style>`.
+Each needs its own parser installed, or that block stays plain. **Injects** lists
+the languages a query always names; **From the document** means it also takes a
+language from the source, such as a Markdown fence's info string, so any language
+can appear. Languages that inject nothing are not listed.
+
+| Language | Injects | From the document |
+|----------|---------|-------------------|
+| angular | comment, css, javascript, json, regex | yes |
+| arduino | asm, comment | yes |
+| asm | comment | no |
+| astro | comment, css, javascript, json, regex, scss, typescript | yes |
+| bash | comment, regex | yes |
+| bicep | comment | no |
+| c | asm, comment | no |
+| caddy | comment | no |
+| clojure | comment | no |
+| cmake | comment | no |
+| commonlisp | comment | no |
+| cpp | asm, comment | yes |
+| csharp | comment | no |
+| css | comment | no |
+| d | asm, comment | no |
+| dart | comment | no |
+| diff | comment | yes |
+| dockerfile | bash, comment | no |
+| dot | comment, html | no |
+| editorconfig | comment | no |
+| eex | elixir | no |
+| ejs | html, ruby | no |
+| elixir | comment, eex, heex, javascript, json, lua, markdown, python, regex, sql, surface, svelte, vue, zig | no |
+| elm | comment, glsl | no |
+| erb | html, ruby | no |
+| erlang | comment | no |
+| fish | comment | no |
+| fortran | comment | no |
+| fsharp | comment, xml | no |
+| gitattributes | comment | no |
+| gitignore | comment | no |
+| gleam | markdown | no |
+| glimmer | comment | no |
+| glsl | asm, comment | no |
+| go | comment, regex | no |
+| graphql | comment | no |
+| groovy | comment | no |
+| haskell | comment, css, graphql, html, javascript, json, python, typescript | yes |
+| hcl | comment | yes |
+| heex | comment, elixir | no |
+| html | comment, css, javascript, json, python, regex, toml | yes |
+| http | comment, graphql, javascript, json, xml | yes |
+| hurl | comment, json, xml | yes |
+| iex | elixir | no |
+| ini | comment | no |
+| java | comment, javadoc | no |
+| javadoc | html, markdown_inline | yes |
+| javascript | angular, comment, css, glimmer, graphql, html, regex | yes |
+| jinja | comment, jinja_inline | no |
+| jinja_inline | comment | no |
+| jq | comment, regex | no |
+| json | comment | no |
+| json5 | comment | no |
+| julia | bash, comment, markdown, regex | no |
+| just | bash, comment, javascript, python, regex | yes |
+| kdl | comment | no |
+| kotlin | comment, regex | no |
+| latex | c, comment, lua, python | yes |
+| liquid | comment, css, html, javascript, json, yaml | no |
+| llvm | comment | no |
+| lua | c, comment, luadoc, vim | no |
+| make | bash | no |
+| markdown | html, markdown_inline, toml, yaml | yes |
+| markdown_inline | html, latex | no |
+| matlab | comment | no |
+| mdx | html, javascript, markdown_inline, toml, yaml | yes |
+| mermaid | comment | no |
+| nginx | comment | no |
+| nim | markdown, markdown_inline, regex | yes |
+| nix | bash | yes |
+| nushell | comment, regex | no |
+| objc | asm, comment | no |
+| ocaml | comment | no |
+| ocaml_interface | comment | no |
+| pascal | asm, comment | no |
+| perl | comment | yes |
+| php | bash, regex | yes |
+| powershell | comment, regex | no |
+| prisma | comment | no |
+| protobuf | comment | no |
+| puppet | comment, regex | no |
+| python | comment, regex | no |
+| qmljs | angular, comment, css, glimmer, graphql, html, regex | yes |
+| r | comment | no |
+| racket | comment | no |
+| rst | comment, csv, latex, python | yes |
+| ruby | comment, regex | yes |
+| rust | comment, regex | yes |
+| scala | comment | no |
+| scheme | comment | no |
+| scss | comment | no |
+| solidity | comment | no |
+| sql | comment | no |
+| surface | comment, elixir | no |
+| svelte | comment, css, javascript, json, regex, scss, typescript | yes |
+| swift | comment, regex | no |
+| systemverilog | comment | no |
+| tcl | comment | no |
+| terraform | comment | yes |
+| toml | comment | no |
+| tsx | angular, comment, css, glimmer, graphql, html, regex | yes |
+| typescript | angular, comment, css, glimmer, graphql, html, regex | yes |
+| typst | comment | yes |
+| vhdl | comment | no |
+| vim | comment, lua, python, regex, ruby | no |
+| vue | comment, css, javascript, json, regex, scss, typescript | yes |
+| wgsl | comment | no |
+| xml | comment, css, javascript, sql | no |
+| yaml | bash, comment | no |
+| zig | asm, comment | no |
+| zsh | comment, regex | yes |
+
 ## Bundles
 
 | Bundle | Languages |
