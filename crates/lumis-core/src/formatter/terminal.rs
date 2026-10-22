@@ -263,8 +263,7 @@ impl<'a> RenderState<'a> {
                 self.start_scope(theme, rainbow_scope_index(depth), language.id_name());
             }
             Decoration::DiffWord { kind } => {
-                let style = theme.and_then(|theme| theme.diff_word_style(kind));
-                self.push_style(style);
+                self.start_scope(theme, kind.scope_index(), language.id_name());
             }
         }
     }

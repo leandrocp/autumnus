@@ -4,7 +4,7 @@
 
 use crate::decorations::{
     compose_line_decorations, compose_line_decorations_into, rainbow_scope_index, Decoration,
-    DiffWordKind, LineSelection,
+    LineSelection,
 };
 use crate::events::HighlightEvent;
 use crate::languages::Language;
@@ -1236,7 +1236,6 @@ where
             LineFragment::SpanOpen(scope_index, language) => {
                 line.push_str(&open_span(&span_attrs(scope_index, language)));
             }
-            LineFragment::DiffWordOpen(_) => line.push_str("<span>"),
             LineFragment::SpanClose => line.push_str("</span>"),
         },
     );
@@ -1278,8 +1277,6 @@ pub(crate) enum LineFragment<'a> {
     Text(&'a str),
     /// A syntax or built-in decoration scope begins.
     SpanOpen(usize, &'a str),
-    /// A changed word in a diff begins.
-    DiffWordOpen(DiffWordKind),
     /// The innermost syntax or built-in decoration scope ends.
     SpanClose,
 }
@@ -1343,7 +1340,10 @@ impl LineEventWalk {
                         rainbow_scope_index(*depth),
                         decoration_language,
                     )),
-                    Decoration::DiffWord { kind } => on_fragment(LineFragment::DiffWordOpen(*kind)),
+                    Decoration::DiffWord { kind } => on_fragment(LineFragment::SpanOpen(
+                        kind.scope_index(),
+                        decoration_language,
+                    )),
                 }
             }
             HighlightEvent::DecorationEnd => match decorations.pop() {
@@ -1421,9 +1421,7 @@ pub(crate) fn write_html_lines<T>(
     events: &[HighlightEvent<'_, T>],
     lines: &HtmlLines<'_>,
     span_attrs: &dyn Fn(usize, &str) -> String,
-    diff_word_attrs: &dyn Fn(DiffWordKind) -> String,
 ) -> io::Result<()> {
-    let mut diff_word = [None, None];
     let plain_tag = LineTag::new(None, None, lines.numbered, false, lines.line_number_attrs);
     let empty_tag = LineTag::new(
         None,
@@ -1486,14 +1484,6 @@ pub(crate) fn write_html_lines<T>(
                     write!(output, "<span {attrs}>")
                 }
             }
-            LineFragment::DiffWordOpen(kind) => {
-                let attrs = diff_word[kind as usize].get_or_insert_with(|| diff_word_attrs(kind));
-                if attrs.is_empty() {
-                    output.write_all(b"<span>")
-                } else {
-                    write!(output, "<span {attrs}>")
-                }
-            }
             LineFragment::Close if !wrapped => Ok(()),
             LineFragment::Close | LineFragment::SpanClose => output.write_all(b"</span>"),
         };
@@ -1514,7 +1504,6 @@ pub(crate) fn write_html_spans<T>(
     events: &[HighlightEvent<'_, T>],
     language: Language,
     span_attrs: &dyn Fn(usize, &str) -> String,
-    diff_word_attrs: &dyn Fn(DiffWordKind) -> String,
 ) -> io::Result<()> {
     write_html_lines(
         output,
@@ -1532,7 +1521,6 @@ pub(crate) fn write_html_spans<T>(
             empty_style: None,
         },
         span_attrs,
-        diff_word_attrs,
     )
 }
 
@@ -1737,15 +1725,7 @@ mod tests {
             highlighted_style: None,
             empty_style: None,
         };
-        write_html_lines(
-            &mut output,
-            source,
-            events,
-            &lines,
-            &|_, _| String::new(),
-            &|_| String::new(),
-        )
-        .unwrap();
+        write_html_lines(&mut output, source, events, &lines, &|_, _| String::new()).unwrap();
 
         String::from_utf8(output).expect("the formatter writes UTF-8")
     }
@@ -1834,15 +1814,7 @@ mod tests {
             let span_attrs = |_: usize, _: &str| "class=\"scope\"".to_string();
             let mut html = Vec::new();
 
-            write_html_spans(
-                &mut html,
-                source,
-                &events,
-                Language::PlainText,
-                &span_attrs,
-                &|_| String::new(),
-            )
-            .unwrap();
+            write_html_spans(&mut html, source, &events, Language::PlainText, &span_attrs).unwrap();
 
             assert_str_eq!(
                 String::from_utf8(html).unwrap(),
@@ -1867,14 +1839,9 @@ mod tests {
         ];
         let mut html = Vec::new();
 
-        write_html_spans(
-            &mut html,
-            source,
-            &events,
-            Language::PlainText,
-            &|_, _| "class=\"scope\"".to_string(),
-            &|_| String::new(),
-        )
+        write_html_spans(&mut html, source, &events, Language::PlainText, &|_, _| {
+            "class=\"scope\"".to_string()
+        })
         .unwrap();
 
         assert_str_eq!(
@@ -1915,7 +1882,6 @@ mod tests {
                 empty_style: None,
             },
             &|_, _| "class=\"scope\"".to_string(),
-            &|_| String::new(),
         )
         .unwrap();
 
@@ -1972,15 +1938,7 @@ mod tests {
             empty_style: None,
         };
 
-        write_html_lines(
-            &mut output,
-            source,
-            &events,
-            &lines,
-            &|_, _| String::new(),
-            &|_| String::new(),
-        )
-        .unwrap();
+        write_html_lines(&mut output, source, &events, &lines, &|_, _| String::new()).unwrap();
 
         let html = String::from_utf8(output).unwrap();
         assert!(html.contains(

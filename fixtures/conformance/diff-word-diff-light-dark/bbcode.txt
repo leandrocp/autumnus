@@ -1,5 +1,5 @@
 [attribute-diff]@@ -1,3 +1,3 @@[/attribute-diff]
  fn main() {
 [diff-minus-diff][punctuation-special-diff]-[/punctuation-special-diff]    let total = price + tax;[/diff-minus-diff]
-[diff-plus-diff][punctuation-special-diff]+[/punctuation-special-diff]    let total = price + tax[diff-word-added] + shipping[/diff-word-added];[/diff-plus-diff]
+[diff-plus-diff][punctuation-special-diff]+[/punctuation-special-diff]    let total = price + tax[diff-plus-word-diff] + shipping[/diff-plus-word-diff];[/diff-plus-diff]
  }

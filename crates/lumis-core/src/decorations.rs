@@ -98,22 +98,29 @@ impl DiffWordKind {
         }
     }
 
-    /// The class linked HTML marks this side with.
+    /// The theme scope built-in formatters style this side with.
     #[doc(hidden)]
     #[must_use]
-    pub const fn class(self) -> &'static str {
+    pub const fn scope(self) -> &'static str {
         match self {
-            Self::Removed => "l-diff-word-removed",
-            Self::Added => "l-diff-word-added",
+            Self::Removed => "diff.minus.word",
+            Self::Added => "diff.plus.word",
         }
     }
 
-    /// The diff line scope whose colors this side is derived from.
-    pub(crate) const fn line_scope(self) -> &'static str {
-        match self {
-            Self::Removed => "diff.minus",
-            Self::Added => "diff.plus",
-        }
+    /// The index of [`scope`](Self::scope) in the highlight names.
+    #[doc(hidden)]
+    #[must_use]
+    pub fn scope_index(self) -> usize {
+        static INDICES: LazyLock<[usize; 2]> = LazyLock::new(|| {
+            [DiffWordKind::Removed, DiffWordKind::Added].map(|kind| {
+                HIGHLIGHT_NAMES
+                    .iter()
+                    .position(|candidate| *candidate == kind.scope())
+                    .expect("highlights.toml names both diff word scopes")
+            })
+        });
+        INDICES[self as usize]
     }
 }
 

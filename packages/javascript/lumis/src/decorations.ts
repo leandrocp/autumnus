@@ -25,6 +25,21 @@ export function rainbowBracketScope(depth: number): string {
   return RAINBOW_BRACKET_SCOPES[normalized % RAINBOW_BRACKET_SCOPES.length]!;
 }
 
+/** The side of a diff a changed word is on. */
+export type DiffWordKind = Extract<Decoration, { type: "diffWord" }>["kind"];
+
+/** The theme scope built-in formatters style a changed word with. */
+export function diffWordScope(kind: DiffWordKind): string {
+  return kind === "removed" ? "diff.minus.word" : "diff.plus.word";
+}
+
+/** The theme scope built-in formatters style a non-line decoration with. */
+export function decorationScope(decoration: Exclude<Decoration, { type: "line" }>): string {
+  return decoration.type === "diffWord"
+    ? diffWordScope(decoration.kind)
+    : rainbowBracketScope(decoration.depth);
+}
+
 /** One parsed bracket byte range before it is composed into the event stream. */
 export interface RainbowRange {
   startByte: number;

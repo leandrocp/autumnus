@@ -2,11 +2,11 @@
 [diff-plus-diff][punctuation-special-diff]+++[/punctuation-special-diff] [string-special-path-diff]b/config.py[/string-special-path-diff][/diff-plus-diff]
 [attribute-diff]@@ -1,14 +1,15 @@[/attribute-diff]
  import os
-[diff-minus-diff][punctuation-special-diff]-[/punctuation-special-diff]TIMEOUT = int(os.environ.get("[diff-word-removed]TIMEOUT[/diff-word-removed]", "[diff-word-removed]30[/diff-word-removed]"))[/diff-minus-diff]
-[diff-plus-diff][punctuation-special-diff]+[/punctuation-special-diff]TIMEOUT = int(os.environ.get("[diff-word-added]APP_TIMEOUT[/diff-word-added]", "[diff-word-added]60[/diff-word-added]"))[/diff-plus-diff]
-[diff-minus-diff][punctuation-special-diff]-[/punctuation-special-diff]one([diff-word-removed]1[/diff-word-removed])[/diff-minus-diff]
+[diff-minus-diff][punctuation-special-diff]-[/punctuation-special-diff]TIMEOUT = int(os.environ.get("[diff-minus-word-diff]TIMEOUT[/diff-minus-word-diff]", "[diff-minus-word-diff]30[/diff-minus-word-diff]"))[/diff-minus-diff]
+[diff-plus-diff][punctuation-special-diff]+[/punctuation-special-diff]TIMEOUT = int(os.environ.get("[diff-plus-word-diff]APP_TIMEOUT[/diff-plus-word-diff]", "[diff-plus-word-diff]60[/diff-plus-word-diff]"))[/diff-plus-diff]
+[diff-minus-diff][punctuation-special-diff]-[/punctuation-special-diff]one([diff-minus-word-diff]1[/diff-minus-word-diff])[/diff-minus-diff]
 [diff-minus-diff][punctuation-special-diff]-[/punctuation-special-diff]two(2)[/diff-minus-diff]
-[diff-plus-diff][punctuation-special-diff]+[/punctuation-special-diff]one([diff-word-added]10[/diff-word-added])[/diff-plus-diff]
+[diff-plus-diff][punctuation-special-diff]+[/punctuation-special-diff]one([diff-plus-word-diff]10[/diff-plus-word-diff])[/diff-plus-diff]
 [diff-plus-diff][punctuation-special-diff]+[/punctuation-special-diff]inserted_line = True[/diff-plus-diff]
 [diff-plus-diff][punctuation-special-diff]+[/punctuation-special-diff]two(2)[/diff-plus-diff]
 [diff-minus-diff][punctuation-special-diff]-[/punctuation-special-diff]alpha beta gamma[/diff-minus-diff]
@@ -16,5 +16,5 @@
 [diff-minus-diff][punctuation-special-diff]-[/punctuation-special-diff]x = 1[/diff-minus-diff]
 
 [diff-plus-diff][punctuation-special-diff]+[/punctuation-special-diff]x = 2[/diff-plus-diff]
-[diff-minus-diff][punctuation-special-diff]-[/punctuation-special-diff]name = "[diff-word-removed]café[/diff-word-removed]"[/diff-minus-diff]
-[diff-plus-diff][punctuation-special-diff]+[/punctuation-special-diff]name = "[diff-word-added]crème brûlée[/diff-word-added]"[/diff-plus-diff]
+[diff-minus-diff][punctuation-special-diff]-[/punctuation-special-diff]name = "[diff-minus-word-diff]café[/diff-minus-word-diff]"[/diff-minus-diff]
+[diff-plus-diff][punctuation-special-diff]+[/punctuation-special-diff]name = "[diff-plus-word-diff]crème brûlée[/diff-plus-word-diff]"[/diff-plus-diff]
