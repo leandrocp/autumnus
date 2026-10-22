@@ -221,9 +221,18 @@ cannot run in CI, under a pipe, or with its output redirected to a file.
 Expect to answer the challenge several times. npm's approval lasts about five
 minutes and the calls are spaced two seconds apart as npm asks, so a full pass
 over 142 packages outlives it. The task notices and re-prompts rather than
-failing.
+failing. The approval covers only the command that asked for it, so the read
+after the prompt gets through only when npm's authentication page was told to
+skip two-factor for the next few minutes; choose that, or the task stops.
 
-Two traps:
+Three traps:
+
+- **A configuration nothing publishes through expires after 48 hours.** npm
+  still lists it, and `npm trust list` shows no status, but every exchange
+  against it fails and the PUT answers `404 Not Found`. Only the package's
+  settings page says *Expired*. The task flags any configuration that no
+  published version used, with the `npm trust revoke` command to clear it;
+  rerun the task afterwards and let a release publish within two days.
 
 - **`--allow-publish` has to be explicit.** Configurations created after
   3 September 2026 default to `npm stage publish`, and that date has passed.

@@ -1275,6 +1275,7 @@ filter="${usage_package:-}"
 added=0
 present=0
 unpublished=0
+unvalidated=0
 
 # Read to the end before visiting anything, so the loop that calls npm leaves
 # the terminal on stdin: npm's 2FA prompt reads from there, and a loop fed by a
@@ -1316,6 +1317,12 @@ for entry in "${packages[@]}"; do
         listing="$(npm trust list "$package" --json 2>/dev/null || true)"
     fi
 
+    if jq -es 'any(.[]; .error.code == "EOTP")' >/dev/null <<< "$listing"; then
+        echo "npm asked for two-factor authentication again for $package." >&2
+        echo "Rerun, and on npm's authentication page choose to skip two-factor for the next few minutes." >&2
+        exit 1
+    fi
+
     # A trusted publisher is stored on the package record, so there is nowhere
     # to put one until the package exists. Its first release has to go out some
     # other way, and the rest of the catalog is still worth visiting.
@@ -1331,9 +1338,20 @@ for entry in "${packages[@]}"; do
         exit 1
     fi
 
-    if jq -es --arg file "$workflow" 'any(.[]; .file == $file)' >/dev/null <<< "$listing"; then
-        echo "$package already names $workflow"
+    configured="$(jq -rs --arg file "$workflow" '.[] | arrays[], objects | select(.file == $file) | .id' <<< "$listing")"
+    if [ -n "$configured" ]; then
+        validated="$(curl -fsS "https://registry.npmjs.org/${package/\//%2f}" \
+            | jq -r '[.versions[]._npmUser.trustedPublisher?.oidcConfigId? // empty] | unique[]')"
+        unused="$(grep -vxFf <(printf '%s\n' "$validated") <<< "$configured" || true)"
         present=$((present + 1))
+        if [ -z "$unused" ]; then
+            echo "$package already names $workflow"
+        else
+            echo "$package names $workflow in a configuration nothing has published through, so npm expires it 48 hours after creation"
+            echo "  if https://www.npmjs.com/package/$package/access says Expired, revoke it and rerun:"
+            printf '  npm trust revoke %s --id=%s\n' $(sed "s|^|$package |" <<< "$unused")
+            unvalidated=$((unvalidated + 1))
+        fi
         continue
     fi
 
@@ -1346,7 +1364,7 @@ for entry in "${packages[@]}"; do
     sleep 2
 done
 
-echo "added $added, already present $present, not published $unpublished"
+echo "added $added, already present $present ($unvalidated never published through it), not published $unpublished"
 '''
 
 [tasks.'release-needed']
