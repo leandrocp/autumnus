@@ -90,10 +90,19 @@ The optional `budget` field (`timeLimit` in milliseconds, `matchLimit`) applies
 to the event checks and to every formatter, in every runtime. A time-limit
 fixture needs a source that takes far longer than its limit on the fastest
 runtime: `json-budget-time-limit` is 10,000 unclosed brackets, which take about
-90 ms on a release build, against a 1 ms limit. The optional `skip` field maps a
-runtime that cannot run the fixture yet to the reason. Only `web-tree-sitter`,
-which covers the JavaScript Wasm and browser suites, reads it.
-`conformance-regen` preserves both fields.
+90 ms on a release build, against a 1 ms limit.
+
+The optional `returnsWithin` field is how many milliseconds any one render may
+take once its language is loaded. Every runner times each events check and
+formatter against it, so the corpus pins when a render stops as well as what it
+returns. `elixir-budget-time-limit-operator-chain` takes about 30 s unbounded and
+has to return within 3 s under a 100 ms limit. Keep the bound wide enough for a
+loaded CI runner and far below the unbounded time, so a runtime that stops
+honouring the limit still fails.
+
+The optional `skip` field maps a runtime that cannot run the fixture yet to the
+reason. Only `web-tree-sitter`, which covers the JavaScript Wasm and browser
+suites, reads it. `conformance-regen` preserves all three fields.
 
 ### Generated HTML and CSS
 

@@ -49,6 +49,22 @@ defmodule Lumis.ConformanceTest do
     [time_limit: budget["timeLimit"], match_limit: budget["matchLimit"]]
   end
 
+  # Languages are loaded in `setup_all`, so the time is the render's alone.
+  defp render_within(fixture, render) do
+    case fixture["returnsWithin"] do
+      nil ->
+        render.()
+
+      limit ->
+        {micros, output} = :timer.tc(render)
+
+        assert micros <= limit * 1000,
+               "render returned after #{div(micros, 1000)} ms, past its #{limit} ms bound"
+
+        output
+    end
+  end
+
   defp serialize_event({:start, %{scope: scope, language: language}}),
     do: %{"type" => "start", "scope" => scope, "language" => language}
 
@@ -133,11 +149,13 @@ defmodule Lumis.ConformanceTest do
         fixture = load_fixture(unquote(name))
 
         events =
-          Lumis.highlight_events!(fixture["source"], fixture["language"],
-            annotations: annotations(fixture),
-            rainbow_brackets: rainbow_brackets(fixture),
-            budget: budget(fixture)
-          )
+          render_within(fixture, fn ->
+            Lumis.highlight_events!(fixture["source"], fixture["language"],
+              annotations: annotations(fixture),
+              rainbow_brackets: rainbow_brackets(fixture),
+              budget: budget(fixture)
+            )
+          end)
 
         assert Enum.map(events, &serialize_event/1) == fixture["events"]
       end
@@ -146,67 +164,92 @@ defmodule Lumis.ConformanceTest do
       test "html_inline" do
         fixture = load_fixture(unquote(name))
 
-        assert Lumis.highlight!(fixture["source"],
-                 formatter: {
-                   :html_inline,
-                   language: fixture["language"],
-                   structure: structure(fixture),
-                   theme: fixture["theme"]
-                 },
-                 rainbow_brackets: rainbow_brackets(fixture),
-                 budget: budget(fixture)
-               ) == fixture["htmlInline"]
+        output =
+          render_within(fixture, fn ->
+            Lumis.highlight!(fixture["source"],
+              formatter: {
+                :html_inline,
+                language: fixture["language"],
+                structure: structure(fixture),
+                theme: fixture["theme"]
+              },
+              rainbow_brackets: rainbow_brackets(fixture),
+              budget: budget(fixture)
+            )
+          end)
+
+        assert output == fixture["htmlInline"]
       end
 
       @tag fixture: name
       test "html_linked" do
         fixture = load_fixture(unquote(name))
 
-        assert Lumis.highlight!(fixture["source"],
-                 formatter:
-                   {:html_linked, language: fixture["language"], structure: structure(fixture)},
-                 rainbow_brackets: rainbow_brackets(fixture),
-                 budget: budget(fixture)
-               ) == fixture["htmlLinked"]
+        output =
+          render_within(fixture, fn ->
+            Lumis.highlight!(fixture["source"],
+              formatter:
+                {:html_linked, language: fixture["language"], structure: structure(fixture)},
+              rainbow_brackets: rainbow_brackets(fixture),
+              budget: budget(fixture)
+            )
+          end)
+
+        assert output == fixture["htmlLinked"]
       end
 
       @tag fixture: name
       test "html_multi_themes" do
         fixture = load_fixture(unquote(name))
 
-        assert Lumis.highlight!(fixture["source"],
-                 formatter: {
-                   :html_multi_themes,
-                   html_multi_themes_options(fixture)
-                 },
-                 rainbow_brackets: rainbow_brackets(fixture),
-                 budget: budget(fixture)
-               ) == fixture["htmlMultiThemes"]
+        output =
+          render_within(fixture, fn ->
+            Lumis.highlight!(fixture["source"],
+              formatter: {
+                :html_multi_themes,
+                html_multi_themes_options(fixture)
+              },
+              rainbow_brackets: rainbow_brackets(fixture),
+              budget: budget(fixture)
+            )
+          end)
+
+        assert output == fixture["htmlMultiThemes"]
       end
 
       @tag fixture: name
       test "terminal" do
         fixture = load_fixture(unquote(name))
 
-        assert Lumis.highlight!(fixture["source"],
-                 formatter: {
-                   :terminal,
-                   language: fixture["language"], theme: fixture["theme"]
-                 },
-                 rainbow_brackets: rainbow_brackets(fixture),
-                 budget: budget(fixture)
-               ) == fixture["terminal"]
+        output =
+          render_within(fixture, fn ->
+            Lumis.highlight!(fixture["source"],
+              formatter: {
+                :terminal,
+                language: fixture["language"], theme: fixture["theme"]
+              },
+              rainbow_brackets: rainbow_brackets(fixture),
+              budget: budget(fixture)
+            )
+          end)
+
+        assert output == fixture["terminal"]
       end
 
       @tag fixture: name
       test "bbcode_scoped" do
         fixture = load_fixture(unquote(name))
 
-        assert Lumis.highlight!(fixture["source"],
-                 formatter: {:bbcode_scoped, language: fixture["language"]},
-                 rainbow_brackets: rainbow_brackets(fixture),
-                 budget: budget(fixture)
-               ) == fixture["bbcode"]
+        output =
+          render_within(fixture, fn ->
+            Lumis.highlight!(fixture["source"],
+              formatter: {:bbcode_scoped, language: fixture["language"]},
+              rainbow_brackets: rainbow_brackets(fixture),
+              budget: budget(fixture)
+            )
+          end)
+
+        assert output == fixture["bbcode"]
       end
     end
   end
