@@ -157,17 +157,17 @@ For a global install:
 <span class="th-token th-heading">### [Rust](https://crates.io/crates/lumis)</span>
 
 <span class="th-token th-meta">```rust</span>
-<span class="th-token th-code-inline">use lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
+<span class="th-token th-keyword">use</span><span class="th-token th-code-inline"> lumis</span><span class="th-token th-operator">::</span><span class="th-token th-code-inline">{highlight, </span><span class="th-token th-type">HtmlInlineBuilder</span><span class="th-token th-code-inline">, languages</span><span class="th-token th-operator">::</span><span class="th-token th-type">Language</span><span class="th-token th-code-inline">, themes};
 
-let theme = themes::get(&quot;dracula&quot;).unwrap();
+</span><span class="th-token th-keyword">let</span><span class="th-token th-code-inline"> theme </span><span class="th-token th-operator">=</span><span class="th-token th-code-inline"> themes</span><span class="th-token th-operator">::</span><span class="th-token th-function">get</span><span class="th-token th-code-inline">(</span><span class="th-token th-string">&quot;dracula&quot;</span><span class="th-token th-code-inline">).</span><span class="th-token th-function">unwrap</span><span class="th-token th-code-inline">();
 
-let formatter = HtmlInlineBuilder::new()
-    .language(Language::Javascript)
-    .theme(Some(theme))
-    .build()
-    .unwrap();
+</span><span class="th-token th-keyword">let</span><span class="th-token th-code-inline"> formatter </span><span class="th-token th-operator">=</span><span class="th-token th-code-inline"> </span><span class="th-token th-type">HtmlInlineBuilder</span><span class="th-token th-operator">::</span><span class="th-token th-function">new</span><span class="th-token th-code-inline">()
+    .</span><span class="th-token th-function">language</span><span class="th-token th-code-inline">(</span><span class="th-token th-type">Language</span><span class="th-token th-operator">::</span><span class="th-token th-type">Javascript</span><span class="th-token th-code-inline">)
+    .</span><span class="th-token th-function">theme</span><span class="th-token th-code-inline">(</span><span class="th-token th-type">Some</span><span class="th-token th-code-inline">(theme))
+    .</span><span class="th-token th-function">build</span><span class="th-token th-code-inline">()
+    .</span><span class="th-token th-function">unwrap</span><span class="th-token th-code-inline">();
 
-let html = highlight(&quot;const x = 1&quot;, formatter);
+</span><span class="th-token th-keyword">let</span><span class="th-token th-code-inline"> html </span><span class="th-token th-operator">=</span><span class="th-token th-code-inline"> </span><span class="th-token th-function">highlight</span><span class="th-token th-code-inline">(</span><span class="th-token th-string">&quot;const x = 1&quot;</span><span class="th-token th-code-inline">, formatter);
 </span><span class="th-token th-meta">```
 </span>
 <span class="th-token th-heading">### [JavaScript](https://www.npmjs.com/package/@lumis-sh/lumis)</span>
@@ -216,19 +216,19 @@ See <span class="th-token th-link">[Elixir integration](https://lumis.sh/docs/us
 By <span class="th-token th-link">[@andreaTP](https://github.com/andreaTP)</span>. More details at https://chicory.dev/blog/syntax-highlight
 
 <span class="th-token th-meta">```java</span>
-<span class="th-token th-code-inline">import io.roastedroot.lumis4j.core.Lumis;
-import io.roastedroot.lumis4j.core.Lang;
-import io.roastedroot.lumis4j.core.Theme;
+<span class="th-token th-keyword">import</span><span class="th-token th-code-inline"> io.roastedroot.lumis4j.core.Lumis;
+</span><span class="th-token th-keyword">import</span><span class="th-token th-code-inline"> io.roastedroot.lumis4j.core.Lang;
+</span><span class="th-token th-keyword">import</span><span class="th-token th-code-inline"> io.roastedroot.lumis4j.core.Theme;
 
-var lumis = Lumis.builder().build();
+</span><span class="th-token th-keyword">var</span><span class="th-token th-code-inline"> lumis </span><span class="th-token th-operator">=</span><span class="th-token th-code-inline"> </span><span class="th-token th-type">Lumis</span><span class="th-token th-code-inline">.</span><span class="th-token th-function">builder</span><span class="th-token th-code-inline">().</span><span class="th-token th-function">build</span><span class="th-token th-code-inline">();
 
-var highlighter = lumis.highlighter()
-    .withLang(Lang.JAVASCRIPT)
-    .withTheme(Theme.DRACULA)
-    .build();
+</span><span class="th-token th-keyword">var</span><span class="th-token th-code-inline"> highlighter </span><span class="th-token th-operator">=</span><span class="th-token th-code-inline"> lumis.</span><span class="th-token th-function">highlighter</span><span class="th-token th-code-inline">()
+    .</span><span class="th-token th-function">withLang</span><span class="th-token th-code-inline">(</span><span class="th-token th-type">Lang</span><span class="th-token th-code-inline">.</span><span class="th-token th-property">JAVASCRIPT</span><span class="th-token th-code-inline">)
+    .</span><span class="th-token th-function">withTheme</span><span class="th-token th-code-inline">(</span><span class="th-token th-type">Theme</span><span class="th-token th-code-inline">.</span><span class="th-token th-property">DRACULA</span><span class="th-token th-code-inline">)
+    .</span><span class="th-token th-function">build</span><span class="th-token th-code-inline">();
 
-var result = highlighter.highlight(&quot;const x = 1&quot;);
-System.out.println(result.string());
+</span><span class="th-token th-keyword">var</span><span class="th-token th-code-inline"> result </span><span class="th-token th-operator">=</span><span class="th-token th-code-inline"> highlighter.</span><span class="th-token th-function">highlight</span><span class="th-token th-code-inline">(</span><span class="th-token th-string">&quot;const x = 1&quot;</span><span class="th-token th-code-inline">);
+</span><span class="th-token th-type">System</span><span class="th-token th-code-inline">.</span><span class="th-token th-property">out</span><span class="th-token th-code-inline">.</span><span class="th-token th-function">println</span><span class="th-token th-code-inline">(result.</span><span class="th-token th-function">string</span><span class="th-token th-code-inline">());
 </span><span class="th-token th-meta">```
 </span>
 <span class="th-token th-heading">## Documentation</span>
