@@ -77,8 +77,8 @@ importers:
         specifier: 2.1.0
         version: 2.1.0
       '@tanstack/highlight':
-        specifier: 1.0.0
-        version: 1.0.0
+        specifier: 1.1.0
+        version: 1.1.0
       '@wooorm/starry-night':
         specifier: 3.11.0
         version: 3.11.0
@@ -98,8 +98,8 @@ importers:
         specifier: 4.5.0
         version: 4.5.0
       sugar-high:
-        specifier: 2.5.1
-        version: 2.5.1
+        specifier: 2.6.0
+        version: 2.6.0
     devDependencies:
       oxfmt:
         specifier: ^0.73.0
@@ -1578,8 +1578,8 @@ packages:
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
-  '@tanstack/highlight@1.0.0':
-    resolution: {integrity: sha512-nrg2iZSQUZlDZGTPKh/CNlg6Orm3vFHIaIi/9DqPC1rUpfe/M6rD2iokrckWTc2Z5jYDz185BK76GUh9VIjQRw==}
+  '@tanstack/highlight@1.1.0':
+    resolution: {integrity: sha512-mDn/fhny+WgSVHUH0sAcARlSfbXCQJWebu2NRmCOcD+3I4/73m2D9rcMISgIiXJrhl1vyk9hmAJn7sSnWAbfvQ==}
     engines: {node: '>=18'}
 
   '@types/argparse@1.0.38':
@@ -2500,13 +2500,8 @@ packages:
     engines: {node: '>=16 || 14 >=14.17'}
     hasBin: true
 
-  sugar-high@2.5.1:
-    resolution: {integrity: sha512-Skhak2gN96Ywvkdwi8q3kmCmV4rbBTUuYOd71ilxao8wZ1G3O87zofSxl1FogNyeTT2bHC5NMfEEm6/i7Pc8SA==}
-    peerDependencies:
-      gpu-lexer: '>=0.0.2'
-    peerDependenciesMeta:
-      gpu-lexer:
-        optional: true
+  sugar-high@2.6.0:
+    resolution: {integrity: sha512-G2xyakJ3Zk7Ja6Cw6mnWlkekllsgHrz14T/QXWYF4qmo64Ca96qt3YHAGIjgjLoCjhs1ZjjAGcrFjwmAxFlbXA==}
 
   supports-color@8.1.1:
     resolution: {integrity: sha512-MpUEN2OodtUzxvKQl72cUF7RQ5EiHsGvSsVG0ia9c5RbWGL2CI4C7EpPS8UTBIplnlzZiNuV56w+FuNxy3ty2Q==}
@@ -3468,7 +3463,7 @@ snapshots:
   '@standard-schema/spec@1.1.0':
     optional: true
 
-  '@tanstack/highlight@1.0.0': {}
+  '@tanstack/highlight@1.1.0': {}
 
   '@types/argparse@1.0.38': {}
 
@@ -4571,7 +4566,7 @@ snapshots:
       tinyglobby: 0.2.17
       ts-interface-checker: 0.1.13
 
-  sugar-high@2.5.1: {}
+  sugar-high@2.6.0: {}
 
   supports-color@8.1.1:
     dependencies:
