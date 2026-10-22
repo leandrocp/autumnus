@@ -58,6 +58,11 @@
 //   `injection.language` capture it is an alternative to, and is the only reason this file
 //   references `lumis_core`. Upstream has no equivalent, so the diff hunk injection queries
 //   cannot work without it.
+// - The combined-injections query is a `deep_clone` of the main query with every pattern but
+//   the combined injections disabled, where upstream compiles `injection_query` a second time.
+//   Injections come first in the concatenated source, so their pattern and capture indices are
+//   the same in both. Almost all of `Query::new` is `ts_query__analyze_patterns` walking the
+//   grammar's parse table, so the second compile was a fifth of Elixir's load (107 ms to 88 ms).
 // - A module-level `allow` holds the workspace lint levels off this file. Upstream is not
 //   written to them, and restyling it to satisfy `clippy::pedantic` would grow the diff for
 //   nothing. Lumis code in here is still reviewed against those lints by hand.
@@ -1218,7 +1223,10 @@ impl HighlightConfiguration {
                 .any(|setting| &*setting.key == "injection.combined")
         });
         let combined_injections_query = if has_combined_queries {
-            let mut combined_injections_query = Query::new(&language, injection_query)?;
+            let mut combined_injections_query = query.deep_clone();
+            for pattern_index in locals_pattern_index..query.pattern_count() {
+                combined_injections_query.disable_pattern(pattern_index);
+            }
             for pattern_index in 0..locals_pattern_index {
                 let combined = query
                     .property_settings(pattern_index)
