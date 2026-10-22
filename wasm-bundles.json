@@ -356,14 +356,14 @@
       }
     },
     "web": {
-      "version": "0.1.2",
+      "version": "0.1.3",
       "dependencies": {
-        "lumis_wasm_css": "~> 0.26.0",
-        "lumis_wasm_html": "~> 0.26.0",
-        "lumis_wasm_javascript": "~> 0.26.0",
-        "lumis_wasm_json": "~> 0.26.0",
-        "lumis_wasm_tsx": "~> 0.26.0",
-        "lumis_wasm_typescript": "~> 0.26.0"
+        "lumis_wasm_css": "~> 0.27.0",
+        "lumis_wasm_html": "~> 0.27.0",
+        "lumis_wasm_javascript": "~> 0.27.0",
+        "lumis_wasm_json": "~> 0.27.0",
+        "lumis_wasm_tsx": "~> 0.27.0",
+        "lumis_wasm_typescript": "~> 0.27.0"
       }
     },
     "web-extra": {
