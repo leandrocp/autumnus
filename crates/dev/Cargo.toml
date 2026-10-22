@@ -49,6 +49,8 @@ sha2 = "0.11"
 tar = "0.4"
 toml = "1.1"
 toml_edit = "0.25"
+tree-sitter = "0.27.1"
+tree-sitter-tsquery = "0.8.0"
 ureq = "3"
 xz2 = "0.1"
 

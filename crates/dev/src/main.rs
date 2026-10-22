@@ -2844,22 +2844,54 @@ fn name_list_cell(values: &[&str]) -> String {
 /// and the language itself is left out. A name outside the catalog is dropped:
 /// no package could supply it.
 fn injected_languages(query: &str, own: &str) -> (Vec<&'static str>, bool) {
-    static FIXED: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
-        regex::Regex::new(r#"#set!\s+injection\.language\s+"([^"]+)""#).expect("valid regex")
-    });
-    static FROM_DOCUMENT: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
-        regex::Regex::new(r"@injection\.(?:language|filename)\b").expect("valid regex")
+    // Parsed with the query grammar rather than the target language's, which
+    // `crates/dev` does not build. Comments are syntax here, so a commented-out
+    // injection is not counted.
+    static PATTERNS: std::sync::LazyLock<tree_sitter::Query> = std::sync::LazyLock::new(|| {
+        tree_sitter::Query::new(
+            &tree_sitter_tsquery::LANGUAGE.into(),
+            r#"
+            (predicate
+              name: (identifier) @_set (#eq? @_set "set")
+              type: (predicate_type) @_bang (#eq? @_bang "!")
+              parameters: (parameters
+                . (identifier) @_key (#eq? @_key "injection.language")
+                . (string (string_content) @fixed)))
+
+            (capture
+              name: (identifier) @from_document
+              (#any-of? @from_document "injection.language" "injection.filename"))
+            "#,
+        )
+        .expect("valid query")
     });
 
-    let mut ids: Vec<&'static str> = FIXED
-        .captures_iter(query)
-        .filter_map(|captures| lumis_wasm_runtime::catalog::find(&captures[1]))
-        .map(|entry| entry.id)
-        .filter(|id| *id != own)
-        .collect();
+    let mut parser = tree_sitter::Parser::new();
+    parser
+        .set_language(&tree_sitter_tsquery::LANGUAGE.into())
+        .expect("query grammar loads");
+    let tree = parser.parse(query, None).expect("query parses");
+    let fixed = PATTERNS.capture_index_for_name("fixed").expect("capture");
+
+    let mut ids = Vec::new();
+    let mut from_document = false;
+    let mut cursor = tree_sitter::QueryCursor::new();
+    let mut matches = cursor.matches(&PATTERNS, tree.root_node(), query.as_bytes());
+    while let Some(found) = tree_sitter::StreamingIterator::next(&mut matches) {
+        let mut names = found.nodes_for_capture_index(fixed).peekable();
+        if names.peek().is_none() {
+            from_document = true;
+        }
+        ids.extend(
+            names
+                .filter_map(|node| lumis_wasm_runtime::catalog::find(&query[node.byte_range()]))
+                .map(|entry| entry.id)
+                .filter(|id| *id != own),
+        );
+    }
     ids.sort_unstable();
     ids.dedup();
-    (ids, FROM_DOCUMENT.is_match(query))
+    (ids, from_document)
 }
 
 /// The table of what each language can inject, for a project choosing which
@@ -8435,11 +8467,16 @@ mod tests {
 ((y) @injection.content (#set! injection.language "python"))
 ((z) @injection.content (#set! injection.language "markdown"))
 ((w) @injection.content (#set! injection.language "not-a-language"))
+; (#set! injection.language "rust") is commented out
+((v) @injection.content
+  (#set!
+    injection.language
+    "json"))
 "#;
 
         assert_eq!(
             injected_languages(query, "markdown"),
-            (vec!["comment", "python"], false)
+            (vec!["comment", "json", "python"], false)
         );
 
         let fenced = r"(fenced_code_block (info_string (language) @injection.language) (code_fence_content) @injection.content)";

@@ -155,20 +155,20 @@ can appear. Languages that inject nothing are not listed.
 | Language | Injects | From the document |
 |----------|---------|-------------------|
 | angular | comment, css, javascript, json, regex | yes |
-| arduino | asm, comment | yes |
+| arduino | comment | yes |
 | asm | comment | no |
 | astro | comment, css, javascript, json, regex, scss, typescript | yes |
 | bash | comment, regex | yes |
 | bicep | comment | no |
-| c | asm, comment | no |
+| c | comment | no |
 | caddy | comment | no |
 | clojure | comment | no |
 | cmake | comment | no |
 | commonlisp | comment | no |
-| cpp | asm, comment | yes |
+| cpp | comment | yes |
 | csharp | comment | no |
 | css | comment | no |
-| d | asm, comment | no |
+| d | comment | no |
 | dart | comment | no |
 | diff | comment | yes |
 | dockerfile | bash, comment | no |
@@ -187,7 +187,7 @@ can appear. Languages that inject nothing are not listed.
 | gitignore | comment | no |
 | gleam | markdown | no |
 | glimmer | comment | no |
-| glsl | asm, comment | no |
+| glsl | comment | no |
 | go | comment, regex | no |
 | graphql | comment | no |
 | groovy | comment | no |
@@ -225,7 +225,7 @@ can appear. Languages that inject nothing are not listed.
 | nim | markdown, markdown_inline, regex | yes |
 | nix | bash | yes |
 | nushell | comment, regex | no |
-| objc | asm, comment | no |
+| objc | comment | no |
 | ocaml | comment | no |
 | ocaml_interface | comment | no |
 | pascal | asm, comment | no |
@@ -263,7 +263,7 @@ can appear. Languages that inject nothing are not listed.
 | wgsl | comment | no |
 | xml | comment, css, javascript, sql | no |
 | yaml | bash, comment | no |
-| zig | asm, comment | no |
+| zig | comment | no |
 | zsh | comment, regex | yes |
 
 ## Bundles
