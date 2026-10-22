@@ -74,9 +74,15 @@
   color: #ff6a69;
   background-color: #2f1a1d;
 }
+.l-diff-minus-word {
+  background-color: #671a1d;
+}
 .l-diff-plus {
   color: #09b43a;
   background-color: #0a2516;
+}
+.l-diff-plus-word {
+  background-color: #004604;
 }
 .l-function {
   color: #dbb7ff;

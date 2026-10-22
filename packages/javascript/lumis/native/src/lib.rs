@@ -1,4 +1,5 @@
 use base64::Engine as _;
+use lumis_core::decorations::DiffWordKind;
 use lumis_core::events::{Decoration, HighlightEvent};
 use lumis_core::formatter::bbcode::{BBCodeScoped, HighlightLines as BBCodeHighlightLines};
 use lumis_core::formatter::html::{AttrValue, HtmlStructure};
@@ -210,6 +211,7 @@ impl NativeBudget {
 #[napi(object)]
 pub struct NativeFormatter {
     pub rainbow_brackets: Option<bool>,
+    pub word_diff: Option<bool>,
     pub budget: Option<NativeBudget>,
     pub kind: String,
     pub options: serde_json::Value,
@@ -571,6 +573,7 @@ const START_EVENT: u8 = 1;
 const END_EVENT: u8 = 2;
 const RAINBOW_START_EVENT: u8 = 3;
 const DECORATION_END_EVENT: u8 = 4;
+const DIFF_WORD_START_EVENT: u8 = 5;
 
 fn inline_highlight_lines(value: JsHighlightLines) -> InlineHighlightLines {
     InlineHighlightLines {
@@ -599,9 +602,13 @@ fn render_formatter(
         &runtime,
         &source,
         &runtime_language,
-        formatter.rainbow_brackets.unwrap_or(false),
-        formatter.budget.unwrap_or_default().match_limit(),
-        formatter.budget.unwrap_or_default().time_limit_ms(),
+        &HighlightOptions {
+            rainbow_brackets: formatter.rainbow_brackets.unwrap_or(false),
+            word_diff: formatter.word_diff.unwrap_or(false),
+            match_limit: formatter.budget.unwrap_or_default().match_limit(),
+            time_limit_ms: formatter.budget.unwrap_or_default().time_limit_ms(),
+            ..HighlightOptions::default()
+        },
         &internal_ids,
     )
     .map_err(|error| publicize_parse_failure(error, &public_ids))?;
@@ -749,10 +756,19 @@ fn encode_events(events: &[HighlightEvent<'_>]) -> Result<Buffer> {
                 output.push(RAINBOW_START_EVENT);
                 output.extend_from_slice(&depth.to_le_bytes());
             }
+            HighlightEvent::DecorationStart {
+                decoration: Decoration::DiffWord { kind },
+            } => {
+                output.push(DIFF_WORD_START_EVENT);
+                output.push(match kind {
+                    DiffWordKind::Removed => 0,
+                    DiffWordKind::Added => 1,
+                });
+            }
             HighlightEvent::DecorationEnd => output.push(DECORATION_END_EVENT),
             _ => {
                 return Err(native_error(
-                    "the native event protocol only supports syntax and rainbow-bracket events",
+                    "the native event protocol only supports syntax and Lumis decoration events",
                 ));
             }
         }
@@ -798,9 +814,7 @@ fn highlight_events(
     runtime: &Runtime,
     source: &str,
     language: &str,
-    rainbow_brackets: bool,
-    match_limit: u32,
-    time_limit: Option<u64>,
+    options: &HighlightOptions,
     internal_ids: &HashMap<String, String>,
 ) -> std::result::Result<HighlightedEvents, RuntimeError> {
     if language == "plaintext" {
@@ -814,25 +828,15 @@ fn highlight_events(
         ));
     }
 
-    let output = runtime.highlight_with_resolver(
-        source,
-        language,
-        &HighlightOptions {
-            rainbow_brackets,
-            match_limit,
-            time_limit_ms: time_limit,
-            ..HighlightOptions::default()
-        },
-        |injected| {
-            internal_ids
-                .get(&injected.to_ascii_lowercase())
-                .cloned()
-                .map_or_else(
-                    || installed_injection(runtime, injected),
-                    InjectionResolution::Loaded,
-                )
-        },
-    )?;
+    let output = runtime.highlight_with_resolver(source, language, options, |injected| {
+        internal_ids
+            .get(&injected.to_ascii_lowercase())
+            .cloned()
+            .map_or_else(
+                || installed_injection(runtime, injected),
+                InjectionResolution::Loaded,
+            )
+    })?;
     Ok((output.events, output.unresolved, output.budget))
 }
 
@@ -1226,6 +1230,7 @@ impl NativeRuntime {
         source: String,
         language: String,
         rainbow_brackets: Option<bool>,
+        word_diff: Option<bool>,
         budget: Option<NativeBudget>,
         package_resolver: Option<PackageResolverFunction<'_>>,
         wasm_resolver: Option<WasmResolverFunction<'_>>,
@@ -1239,6 +1244,7 @@ impl NativeRuntime {
                 &language,
                 &HighlightOptions {
                     rainbow_brackets: rainbow_brackets.unwrap_or(false),
+                    word_diff: word_diff.unwrap_or(false),
                     match_limit: budget.unwrap_or_default().match_limit(),
                     time_limit_ms: budget.unwrap_or_default().time_limit_ms(),
                     ..HighlightOptions::default()
@@ -1298,6 +1304,7 @@ impl NativeRuntime {
                 &language,
                 &HighlightOptions {
                     rainbow_brackets: formatter.rainbow_brackets.unwrap_or(false),
+                    word_diff: formatter.word_diff.unwrap_or(false),
                     match_limit: formatter.budget.unwrap_or_default().match_limit(),
                     time_limit_ms: formatter.budget.unwrap_or_default().time_limit_ms(),
                     ..HighlightOptions::default()

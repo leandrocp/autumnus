@@ -55,9 +55,25 @@ describe("native event codec", () => {
     },
   );
 
+  it("decodes both sides of a changed word", () => {
+    expect(decodeNativeEvents(new Uint8Array([5, 0, 4, 5, 1, 4]))).toEqual([
+      { type: "decorationStart", decoration: { type: "diffWord", kind: "removed" } },
+      { type: "decorationEnd" },
+      { type: "decorationStart", decoration: { type: "diffWord", kind: "added" } },
+      { type: "decorationEnd" },
+    ]);
+  });
+
+  it.each([new Uint8Array([5]), new Uint8Array([5, 2])])(
+    "rejects a changed word without a known side",
+    (encoded) => {
+      expect(() => decodeNativeEvents(encoded)).toThrow("Invalid native Lumis event buffer");
+    },
+  );
+
   it("rejects unknown event tags", () => {
-    expect(() => decodeNativeEvents(new Uint8Array([5]))).toThrow(
-      "Unknown native Lumis event tag 5",
+    expect(() => decodeNativeEvents(new Uint8Array([6]))).toThrow(
+      "Unknown native Lumis event tag 6",
     );
   });
 

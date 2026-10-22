@@ -118,6 +118,11 @@ struct HighlightArgs {
     #[arg(long)]
     rainbow_brackets: bool,
 
+    /// Mark the words that changed between removed and added lines. Only
+    /// applies to the `diff` language
+    #[arg(long)]
+    word_diff: bool,
+
     /// Query matches tree-sitter keeps in progress at once, 1 to 65536
     #[arg(
         long,
@@ -1163,6 +1168,7 @@ fn dump_events(
         &source,
         dump_language(lang)?,
         false,
+        false,
         DEFAULT_MATCH_LIMIT,
         DEFAULT_TIME_LIMIT,
     )?
@@ -1676,6 +1682,7 @@ fn do_highlight(reg: &registry::Registry, args: HighlightArgs, verbose: bool) ->
             &source,
             lang.id_name(),
             args.rainbow_brackets,
+            args.word_diff,
             args.budget_match_limit,
             args.budget_time_limit,
         )?
@@ -2169,6 +2176,7 @@ fn highlight_to_events(
     source: &str,
     lang_name: &str,
     rainbow_brackets: bool,
+    word_diff: bool,
     match_limit: u32,
     time_limit: u64,
 ) -> Result<(Vec<HighlightEvent>, Option<BudgetExhausted>)> {
@@ -2177,6 +2185,7 @@ fn highlight_to_events(
         lang_name,
         &HighlightOptions {
             rainbow_brackets,
+            word_diff,
             match_limit,
             time_limit_ms: (time_limit > 0).then_some(time_limit),
             ..HighlightOptions::default()
@@ -2234,6 +2243,7 @@ mod tests {
             &reg,
             source,
             "html",
+            false,
             false,
             DEFAULT_MATCH_LIMIT,
             DEFAULT_TIME_LIMIT,

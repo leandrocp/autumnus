@@ -70,8 +70,14 @@
 .l-diff-minus {
   color: #590008;
 }
+.l-diff-minus-word {
+  background-color: #ffc7c1;
+}
 .l-diff-plus {
   color: #005523;
+}
+.l-diff-plus-word {
+  background-color: #bbe5c2;
 }
 .l-function {
   color: #383838;

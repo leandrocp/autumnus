@@ -22,7 +22,7 @@
 #![cfg(feature = "lang-rust")]
 #![allow(deprecated)]
 
-use lumis::decorations::Decoration;
+use lumis::decorations::{Decoration, DiffWordKind};
 use lumis::events::HighlightEvent;
 use lumis::highlights::HIGHLIGHT_NAMES;
 use lumis::themes::{Style, TextDecoration, Theme, UnderlineStyle};
@@ -173,6 +173,7 @@ enum ContractEvent {
 #[serde(tag = "type", rename_all = "camelCase")]
 enum ContractDecoration {
     RainbowBracket { depth: usize },
+    DiffWord { kind: String },
 }
 
 #[derive(Debug, Deserialize)]
@@ -353,6 +354,17 @@ fn contract_events(events: &[ContractEvent]) -> Vec<HighlightEvent<'_, ()>> {
                 decoration: ContractDecoration::RainbowBracket { depth },
             } => HighlightEvent::DecorationStart {
                 decoration: Decoration::RainbowBracket { depth: *depth },
+            },
+            ContractEvent::DecorationStart {
+                decoration: ContractDecoration::DiffWord { kind },
+            } => HighlightEvent::DecorationStart {
+                decoration: Decoration::DiffWord {
+                    kind: match kind.as_str() {
+                        "removed" => DiffWordKind::Removed,
+                        "added" => DiffWordKind::Added,
+                        other => panic!("unknown diff word kind {other:?}"),
+                    },
+                },
             },
             ContractEvent::DecorationEnd => HighlightEvent::DecorationEnd,
         })

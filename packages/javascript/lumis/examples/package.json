@@ -12,6 +12,8 @@
     "@lumis-sh/themes": "^0.4.0",
     "@lumis-sh/wasm-bash": "^0.26.6",
     "@lumis-sh/wasm-css": "^0.26.4",
+    "@lumis-sh/wasm-diff": "^0.26.5",
+    "@lumis-sh/wasm-elixir": "^0.26.8",
     "@lumis-sh/wasm-embedded-template": "^0.26.4",
     "@lumis-sh/wasm-html": "^0.26.4",
     "@lumis-sh/wasm-javascript": "^0.26.4",

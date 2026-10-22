@@ -1,0 +1,16 @@
+diff --git a/lib/varsel/cve/cvelint.ex b/lib/varsel/cve/cvelint.ex
+index fe1839d..f02b17e 100644
+--- a/lib/varsel/cve/cvelint.ex
++++ b/lib/varsel/cve/cvelint.ex
+@@ -44,9 +44,10 @@ defmodule Varsel.CVE.Cvelint do
+   def lint(cve_id, cve_json) do
+-    tmp_dir = System.tmp_dir!()
++    tmp_dir = System.tmp_dir!() |> Path.join("lumis")
+     File.mkdir_p!(tmp_dir)
+     path = Path.join(tmp_dir, "#{cve_id}.json")
+-    File.write!(path, Jason.encode!(cve_json))
++    File.write!(path, JSON.encode!(cve_json))
++    Logger.debug("wrote #{path}")
+-    label = "café"
++    label = "crème"
+     {output, status} = System.cmd("cvelint", [path])

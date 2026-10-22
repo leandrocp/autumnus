@@ -339,6 +339,104 @@ local function is_incomplete_plugin_dir(plugin_path)
 	return true
 end
 
+local function parse_hex(hex)
+	local red, green, blue = hex:match("^#(%x%x)(%x%x)(%x%x)$")
+	if not red then
+		return nil
+	end
+	return { tonumber(red, 16) / 255, tonumber(green, 16) / 255, tonumber(blue, 16) / 255 }
+end
+
+local function to_hex(color)
+	local digits = {}
+	for i, channel in ipairs(color) do
+		digits[i] = string.format("%02x", math.floor(math.min(math.max(channel, 0), 1) * 255 + 0.5))
+	end
+	return "#" .. table.concat(digits)
+end
+
+local function to_linear(color)
+	local linear = {}
+	for i, channel in ipairs(color) do
+		linear[i] = channel <= 0.04045 and channel / 12.92 or ((channel + 0.055) / 1.055) ^ 2.4
+	end
+	return linear
+end
+
+-- WCAG 2.1 contrast ratio.
+local function contrast(left, right)
+	local function luminance(color)
+		local linear = to_linear(color)
+		return 0.2126 * linear[1] + 0.7152 * linear[2] + 0.0722 * linear[3]
+	end
+	local a, b = luminance(left), luminance(right)
+	return (math.max(a, b) + 0.05) / (math.min(a, b) + 0.05)
+end
+
+-- Lightness, chroma and hue in radians, through Björn Ottosson's Oklab.
+local function to_oklch(color)
+	local red, green, blue = unpack(to_linear(color))
+	local long = (0.4122214708 * red + 0.5363325363 * green + 0.0514459929 * blue) ^ (1 / 3)
+	local medium = (0.2119034982 * red + 0.6806995451 * green + 0.1073969566 * blue) ^ (1 / 3)
+	local short = (0.0883024619 * red + 0.2817188376 * green + 0.6299787005 * blue) ^ (1 / 3)
+	local lightness = 0.2104542553 * long + 0.7936177850 * medium - 0.0040720468 * short
+	local green_red = 1.9779984951 * long - 2.4285922050 * medium + 0.4505937099 * short
+	local blue_yellow = 0.0259040371 * long + 0.7827717662 * medium - 0.8086757660 * short
+	return lightness, math.sqrt(green_red * green_red + blue_yellow * blue_yellow), math.atan2(blue_yellow, green_red)
+end
+
+local function from_oklch(lightness, chroma, hue)
+	local green_red, blue_yellow = chroma * math.cos(hue), chroma * math.sin(hue)
+	local long = lightness + 0.3963377774 * green_red + 0.2158037573 * blue_yellow
+	local medium = lightness - 0.1055613458 * green_red - 0.0638541728 * blue_yellow
+	local short = lightness - 0.0894841775 * green_red - 1.2914855480 * blue_yellow
+	long, medium, short = long * long * long, medium * medium * medium, short * short * short
+	local color = {
+		4.0767416621 * long - 3.3077115913 * medium + 0.2309699292 * short,
+		-1.2684380046 * long + 2.6097574011 * medium - 0.3413193965 * short,
+		-0.0041960863 * long - 0.7034186147 * medium + 1.7076147010 * short,
+	}
+	for i, channel in ipairs(color) do
+		channel = math.min(math.max(channel, 0), 1)
+		color[i] = channel <= 0.0031308 and 12.92 * channel or 1.055 * channel ^ (1 / 2.4) - 0.055
+	end
+	return color
+end
+
+-- Neovim has no group for the words that changed inside a diff line, so
+-- `diff.minus.word` and `diff.plus.word` are derived from the theme's own
+-- `diff.minus` and `diff.plus`: the same hue, a step lighter than the line's
+-- background on a dark theme and darker on a light one, and the other way when
+-- that step would leave the text under 3:1 contrast. The step is taken in OKLCH
+-- so it looks the same size in every hue.
+local function add_diff_word_styles(highlights, appearance)
+	local dark = appearance == "dark"
+	local normal = highlights["normal"] or {}
+	local background = parse_hex(normal.bg or (dark and "#1e1e1e" or "#ffffff"))
+	local text = parse_hex(normal.fg or (dark and "#d4d4d4" or "#1f1f1f"))
+
+	for _, line_scope in ipairs({ "diff.minus", "diff.plus" }) do
+		local line = highlights[line_scope]
+		if line and background and text then
+			local line_bg = line.bg and parse_hex(line.bg) or background
+			local hue_source = line.fg and parse_hex(line.fg) or line_bg
+			local lightness, base_chroma = to_oklch(line_bg)
+			local _, accent_chroma, hue = to_oklch(hue_source)
+			local chroma = math.max(base_chroma + 0.04, math.min(accent_chroma * 0.6, 0.12))
+			local function shade(step)
+				return from_oklch(math.min(math.max(lightness + step, 0.12), 0.97), chroma, hue)
+			end
+
+			local step = dark and 0.10 or -0.10
+			local word = shade(step)
+			if contrast(text, word) < 3 and contrast(text, line_bg) >= 3 then
+				word = shade(-step)
+			end
+			highlights[line_scope .. ".word"] = { bg = to_hex(word) }
+		end
+	end
+end
+
 local function extract_colorscheme_colors(theme)
 	local colorscheme_name = vim.g.colors_name
 	local appearance = vim.o.background
@@ -402,6 +500,8 @@ local function extract_colorscheme_colors(theme)
 			end
 		end
 	end
+
+	add_diff_word_styles(highlights, appearance)
 
 	local output_file = script_dir .. "/" .. theme.name .. ".json"
 	local theme_data = {

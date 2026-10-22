@@ -1,0 +1,20 @@
+# {package_name}
+
+Lumis WASM {bundle_name} language bundle.
+
+## Install
+
+```sh
+npm install @lumis-sh/lumis {package_name}
+```
+
+## Usage
+
+The package exports the bundle, in Node and in a browser. Each language loads from its package the first time it is used:
+
+```ts
+import { createHighlighter } from '@lumis-sh/lumis'
+import {variable} from '{package_name}'
+
+const highlighter = await createHighlighter({ languages: [{variable}] })
+```

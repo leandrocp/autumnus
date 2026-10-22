@@ -218,9 +218,14 @@ impl<'a> RenderState<'a> {
             .get(scope_index)
             .copied()
             .unwrap_or("");
-        let mut style = theme
+        let style = theme
             .and_then(|theme| theme.get_style(&format!("{scope}.{language}")))
             .cloned();
+        self.push_style(style);
+    }
+
+    /// Push `style` over whatever encloses it.
+    fn push_style(&mut self, mut style: Option<Style>) {
         if let Some(parent) = self.style_stack.last().and_then(Option::as_ref) {
             if let Some(style) = &mut style {
                 style.inherit(parent);
@@ -257,13 +262,16 @@ impl<'a> RenderState<'a> {
             Decoration::RainbowBracket { depth } => {
                 self.start_scope(theme, rainbow_scope_index(depth), language.id_name());
             }
+            Decoration::DiffWord { kind } => {
+                self.start_scope(theme, kind.scope_index(), language.id_name());
+            }
         }
     }
 
     fn end_decoration(&mut self) {
         if matches!(
             self.decorations.pop(),
-            Some(Decoration::RainbowBracket { .. })
+            Some(Decoration::RainbowBracket { .. } | Decoration::DiffWord { .. })
         ) {
             self.style_stack.pop();
         }

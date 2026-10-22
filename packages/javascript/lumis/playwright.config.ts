@@ -3,7 +3,7 @@ import { defineConfig } from "@playwright/test";
 export default defineConfig({
   testDir: "./test/browser",
   testMatch: "*.spec.ts",
-  testIgnore: "stress.spec.ts",
+  testIgnore: ["stress.spec.ts", "staged-packages.spec.ts"],
   timeout: 30_000,
   expect: {
     timeout: 10_000,

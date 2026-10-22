@@ -12,9 +12,10 @@
 //! one as a syntax capture.
 
 use crate::annotations::{compose_annotations_innermost, Annotation, ResolvedAnnotation};
+use crate::diff_words::DiffWordRange;
 use crate::events::HighlightEvent;
 use crate::highlights::HIGHLIGHT_NAMES;
-use std::ops::RangeInclusive;
+use std::ops::{Range, RangeInclusive};
 use std::sync::LazyLock;
 
 /// Scope names used to render rainbow brackets in built-in formatters.
@@ -70,6 +71,57 @@ pub enum Decoration {
         /// through their six theme scopes.
         depth: usize,
     },
+    /// Text that changed between a diff's removed lines and the added lines
+    /// that replace them.
+    DiffWord {
+        /// Which side of the change the text is on.
+        kind: DiffWordKind,
+    },
+}
+
+/// The side of a diff a [`Decoration::DiffWord`] marks.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum DiffWordKind {
+    /// Text only the removed lines have.
+    Removed,
+    /// Text only the added lines have.
+    Added,
+}
+
+impl DiffWordKind {
+    /// `"removed"` or `"added"`.
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Removed => "removed",
+            Self::Added => "added",
+        }
+    }
+
+    /// The theme scope built-in formatters style this side with.
+    #[doc(hidden)]
+    #[must_use]
+    pub const fn scope(self) -> &'static str {
+        match self {
+            Self::Removed => "diff.minus.word",
+            Self::Added => "diff.plus.word",
+        }
+    }
+
+    /// The index of [`scope`](Self::scope) in the highlight names.
+    #[doc(hidden)]
+    #[must_use]
+    pub fn scope_index(self) -> usize {
+        static INDICES: LazyLock<[usize; 2]> = LazyLock::new(|| {
+            [DiffWordKind::Removed, DiffWordKind::Added].map(|kind| {
+                HIGHLIGHT_NAMES
+                    .iter()
+                    .position(|candidate| *candidate == kind.scope())
+                    .expect("highlights.toml names both diff word scopes")
+            })
+        });
+        INDICES[self as usize]
+    }
 }
 
 /// A rainbow-bracket range before it is composed into the event stream.
@@ -94,29 +146,62 @@ pub fn rainbow_scope(depth: usize) -> &'static str {
 }
 
 /// Compose rainbow-bracket ranges into a syntax event stream.
-///
-/// The range walk is the annotation composer: it splits source events and
-/// closes and reopens any syntax layer a range crosses. The temporary
-/// annotation payload is immediately materialized as an owned decoration, so
-/// nothing in the returned stream borrows `ranges`.
 #[doc(hidden)]
 pub fn compose_rainbow_decorations(
     source: &str,
     events: &[HighlightEvent<'_, ()>],
     ranges: &[RainbowRange],
 ) -> Vec<HighlightEvent<'static, ()>> {
-    let annotations = ranges
-        .iter()
-        .map(|range| {
-            Annotation::new(
+    compose_innermost_decorations(
+        source,
+        events,
+        ranges.iter().map(|range| {
+            (
                 range.start..range.end,
                 Decoration::RainbowBracket { depth: range.depth },
             )
-            .expect("rainbow ranges are ordered parser byte ranges")
+        }),
+    )
+}
+
+/// Compose changed-word ranges into a syntax event stream.
+#[doc(hidden)]
+pub fn compose_diff_word_decorations(
+    source: &str,
+    events: &[HighlightEvent<'_, ()>],
+    ranges: &[DiffWordRange],
+) -> Vec<HighlightEvent<'static, ()>> {
+    compose_innermost_decorations(
+        source,
+        events,
+        ranges.iter().map(|range| {
+            (
+                range.start..range.end,
+                Decoration::DiffWord { kind: range.kind },
+            )
+        }),
+    )
+}
+
+/// Compose decorations inside the syntax layers they cross.
+///
+/// The range walk is the annotation composer: it splits source events and
+/// closes and reopens any syntax layer a range crosses. The temporary
+/// annotation payload is immediately materialized as an owned decoration, so
+/// nothing in the returned stream borrows the ranges.
+fn compose_innermost_decorations(
+    source: &str,
+    events: &[HighlightEvent<'_, ()>],
+    ranges: impl Iterator<Item = (Range<usize>, Decoration)>,
+) -> Vec<HighlightEvent<'static, ()>> {
+    let annotations = ranges
+        .map(|(range, decoration)| {
+            Annotation::new(range, decoration)
+                .expect("decoration ranges are ordered parser byte ranges")
         })
         .collect::<Vec<_>>();
     let composed = compose_annotations_innermost(source, events, &annotations)
-        .expect("rainbow ranges come from this parsed source");
+        .expect("decoration ranges come from this parsed source");
 
     composed
         .into_iter()
@@ -408,7 +493,7 @@ pub(crate) fn compose_line_decorations_into<'a, T>(
                     | HighlightEvent::AnnotationStart { .. }
                     | HighlightEvent::Source { .. }
                     | HighlightEvent::DecorationStart {
-                        decoration: Decoration::RainbowBracket { .. }
+                        decoration: Decoration::RainbowBracket { .. } | Decoration::DiffWord { .. }
                     }
             )
         {
@@ -446,7 +531,7 @@ pub(crate) fn compose_line_decorations_into<'a, T>(
                 );
             }
             HighlightEvent::DecorationStart { decoration } => match decoration {
-                Decoration::RainbowBracket { .. } => {
+                Decoration::RainbowBracket { .. } | Decoration::DiffWord { .. } => {
                     output.push(event.clone());
                     layers.push(OpenLayer::Decoration(*decoration));
                 }

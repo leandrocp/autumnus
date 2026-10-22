@@ -104,6 +104,8 @@ defmodule Lumis.LumisTest do
     assert by_id["elixir"] == %{
              id: "elixir",
              name: "Elixir",
+             parser: "elixir",
+             package_name: "lumis_wasm_elixir",
              aliases: [],
              extensions: ["*.ex", "*.exs"],
              globs: ["*.ex", "*.exs"],
@@ -118,6 +120,8 @@ defmodule Lumis.LumisTest do
     assert by_id["plaintext"] == %{
              id: "plaintext",
              name: "Plain Text",
+             parser: nil,
+             package_name: nil,
              aliases: ["text", "txt", "plain"],
              extensions: [],
              globs: [],
@@ -189,6 +193,7 @@ defmodule Lumis.LumisTest do
     assert [
              formatter: {:html_inline, formatter_opts},
              budget: [match_limit: nil, time_limit: nil],
+             word_diff: false,
              rainbow_brackets: false,
              annotations: []
            ] =
@@ -527,6 +532,17 @@ defmodule Lumis.LumisTest do
                )
 
       assert result =~ ~s|<pre class="lumis custom-class"|
+    end
+
+    test "word_diff marks changed words with their side's class" do
+      source = "@@ -1 +1 @@\n-x = foo(1)\n+x = foo(2)\n"
+      formatter = {:html_linked, language: "diff"}
+
+      result = Lumis.highlight!(source, formatter: formatter, word_diff: true)
+
+      assert result =~ ~s|<span class="l-diff-minus-word">1</span>|
+      assert result =~ ~s|<span class="l-diff-plus-word">2</span>|
+      refute Lumis.highlight!(source, formatter: formatter) =~ ~r/l-diff-(minus|plus)-word/
     end
   end
 
@@ -1333,6 +1349,7 @@ defmodule Lumis.LumisTest do
       assert [
                formatter: {:html_inline, formatter_opts},
                budget: [match_limit: nil, time_limit: nil],
+               word_diff: false,
                rainbow_brackets: false,
                annotations: []
              ] =
@@ -1360,6 +1377,7 @@ defmodule Lumis.LumisTest do
       assert [
                formatter: {:html_inline, formatter_opts},
                budget: [match_limit: nil, time_limit: nil],
+               word_diff: false,
                rainbow_brackets: false,
                annotations: []
              ] =
@@ -1387,6 +1405,7 @@ defmodule Lumis.LumisTest do
       assert [
                formatter: {:html_inline, formatter_opts},
                budget: [match_limit: nil, time_limit: nil],
+               word_diff: false,
                rainbow_brackets: false,
                annotations: []
              ] =
@@ -1429,6 +1448,7 @@ defmodule Lumis.LumisTest do
                       structure: :block
                     ]},
                  budget: [match_limit: nil, time_limit: nil],
+                 word_diff: false,
                  rainbow_brackets: false,
                  annotations: [],
                  theme: "dracula",
@@ -1447,6 +1467,7 @@ defmodule Lumis.LumisTest do
       assert [
                formatter: {:html_inline, formatter_opts},
                budget: [match_limit: nil, time_limit: nil],
+               word_diff: false,
                rainbow_brackets: false,
                annotations: [],
                language: "rust"
@@ -1476,6 +1497,7 @@ defmodule Lumis.LumisTest do
         assert [
                  formatter: {:html_inline, formatter_opts},
                  budget: [match_limit: nil, time_limit: nil],
+                 word_diff: false,
                  rainbow_brackets: false,
                  annotations: [],
                  language: "elixir"

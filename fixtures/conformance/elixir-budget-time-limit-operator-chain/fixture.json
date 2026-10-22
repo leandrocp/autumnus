@@ -1,0 +1,16 @@
+{
+  "name": "elixir-budget-time-limit-operator-chain",
+  "language": "elixir",
+  "theme": "dracula",
+  "budget": {
+    "timeLimit": 100
+  },
+  "returnsWithin": 3000,
+  "events": [
+    {
+      "type": "source",
+      "start": 0,
+      "end": 40004
+    }
+  ]
+}

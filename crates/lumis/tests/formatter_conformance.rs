@@ -8,6 +8,7 @@ use std::{
     collections::{BTreeMap, HashMap},
     fs,
     path::PathBuf,
+    time::{Duration, Instant},
 };
 
 #[test]
@@ -120,6 +121,8 @@ struct FixtureMetadata {
     #[serde(default)]
     rainbow_brackets: bool,
     #[serde(default)]
+    word_diff: bool,
+    #[serde(default)]
     annotations: Vec<FixtureAnnotation>,
     #[serde(default)]
     structure: FixtureStructure,
@@ -127,6 +130,8 @@ struct FixtureMetadata {
     html_multi_themes: Option<HtmlMultiThemesFixture>,
     #[serde(default)]
     budget: FixtureBudget,
+    /// The milliseconds any one render may take once the language is loaded.
+    returns_within: Option<u64>,
     events: Vec<SerializableHighlightEvent>,
 }
 
@@ -212,6 +217,7 @@ struct FixtureAnnotation {
 #[serde(tag = "type", rename_all = "camelCase")]
 enum SerializableDecoration {
     RainbowBracket { depth: usize },
+    DiffWord { kind: String },
 }
 
 struct Fixture {
@@ -270,14 +276,17 @@ fn check_events(fixture: &Fixture) {
                 .unwrap()
         })
         .collect();
-    let events = highlight_events_with_options(
-        &fixture.source,
-        lang,
-        HighlightOptions::new()
-            .annotations(&annotations)
-            .rainbow_brackets(fixture.metadata.rainbow_brackets)
-            .budget(fixture.metadata.budget.into()),
-    )
+    let events = render_within(fixture, || {
+        highlight_events_with_options(
+            &fixture.source,
+            lang,
+            HighlightOptions::new()
+                .annotations(&annotations)
+                .rainbow_brackets(fixture.metadata.rainbow_brackets)
+                .word_diff(fixture.metadata.word_diff)
+                .budget(fixture.metadata.budget.into()),
+        )
+    })
     .expect("events should build");
     let serialized = events
         .into_iter()
@@ -297,6 +306,13 @@ fn check_events(fixture: &Fixture) {
                 decoration: lumis_core::events::Decoration::RainbowBracket { depth },
             } => SerializableHighlightEvent::DecorationStart {
                 decoration: SerializableDecoration::RainbowBracket { depth },
+            },
+            lumis_core::events::HighlightEvent::DecorationStart {
+                decoration: lumis_core::events::Decoration::DiffWord { kind },
+            } => SerializableHighlightEvent::DecorationStart {
+                decoration: SerializableDecoration::DiffWord {
+                    kind: kind.as_str().to_string(),
+                },
             },
             lumis_core::events::HighlightEvent::DecorationEnd => {
                 SerializableHighlightEvent::DecorationEnd
@@ -325,12 +341,11 @@ fn check_html_inline(fixture: &Fixture) {
         .theme(Some(theme))
         .build()
         .unwrap();
+    let html = render_within(fixture, || {
+        lumis::highlight_with_options(&fixture.source, fmt, render_options(fixture))
+    });
     assert_eq!(
-        normalize_newlines(&lumis::highlight_with_options(
-            &fixture.source,
-            fmt,
-            render_options(fixture),
-        )),
+        normalize_newlines(&html),
         normalize_newlines(&fixture.html_inline)
     );
 }
@@ -343,8 +358,10 @@ fn check_html_linked(fixture: &Fixture) {
         .build()
         .unwrap();
     let mut out = Vec::new();
-    lumis::write_highlight_with_options(&mut out, &fixture.source, fmt, render_options(fixture))
-        .unwrap();
+    render_within(fixture, || {
+        lumis::write_highlight_with_options(&mut out, &fixture.source, fmt, render_options(fixture))
+    })
+    .unwrap();
     assert_eq!(
         normalize_newlines(&String::from_utf8(out).unwrap()),
         normalize_newlines(&fixture.html_linked)
@@ -387,8 +404,10 @@ fn check_html_multi_themes(fixture: &Fixture) {
         .build()
         .unwrap();
     let mut out = Vec::new();
-    lumis::write_highlight_with_options(&mut out, &fixture.source, fmt, render_options(fixture))
-        .unwrap();
+    render_within(fixture, || {
+        lumis::write_highlight_with_options(&mut out, &fixture.source, fmt, render_options(fixture))
+    })
+    .unwrap();
     assert_eq!(
         normalize_newlines(&String::from_utf8(out).unwrap()),
         normalize_newlines(&fixture.html_multi_themes)
@@ -404,8 +423,10 @@ fn check_terminal(fixture: &Fixture) {
         .build()
         .unwrap();
     let mut out = Vec::new();
-    lumis::write_highlight_with_options(&mut out, &fixture.source, fmt, render_options(fixture))
-        .unwrap();
+    render_within(fixture, || {
+        lumis::write_highlight_with_options(&mut out, &fixture.source, fmt, render_options(fixture))
+    })
+    .unwrap();
     assert_eq!(
         normalize_newlines(&String::from_utf8(out).unwrap()),
         normalize_newlines(&fixture.terminal)
@@ -416,8 +437,10 @@ fn check_bbcode(fixture: &Fixture) {
     let lang: Language = fixture.metadata.language.parse().unwrap();
     let fmt = BBCodeScopedBuilder::new().language(lang).build().unwrap();
     let mut out = Vec::new();
-    lumis::write_highlight_with_options(&mut out, &fixture.source, fmt, render_options(fixture))
-        .unwrap();
+    render_within(fixture, || {
+        lumis::write_highlight_with_options(&mut out, &fixture.source, fmt, render_options(fixture))
+    })
+    .unwrap();
     assert_eq!(
         normalize_newlines(&String::from_utf8(out).unwrap()),
         normalize_newlines(&fixture.bbcode)
@@ -427,7 +450,27 @@ fn check_bbcode(fixture: &Fixture) {
 fn render_options(fixture: &Fixture) -> HighlightOptions<'static, 'static, ()> {
     HighlightOptions::new()
         .rainbow_brackets(fixture.metadata.rainbow_brackets)
+        .word_diff(fixture.metadata.word_diff)
         .budget(fixture.metadata.budget.into())
+}
+
+/// Runs one render of the fixture, held to its `returnsWithin` when it has one.
+/// The language is loaded first, because loading is not part of a render.
+fn render_within<T>(fixture: &Fixture, render: impl FnOnce() -> T) -> T {
+    let Some(limit) = fixture.metadata.returns_within else {
+        return render();
+    };
+    let lang: Language = fixture.metadata.language.parse().unwrap();
+    highlight_events_with_options("", lang, HighlightOptions::new()).unwrap();
+
+    let started = Instant::now();
+    let output = render();
+    let elapsed = started.elapsed();
+    assert!(
+        elapsed <= Duration::from_millis(limit),
+        "render returned after {elapsed:?}, past its {limit} ms bound"
+    );
+    output
 }
 
 fn normalize_newlines(value: &str) -> String {

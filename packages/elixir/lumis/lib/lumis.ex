@@ -400,6 +400,15 @@ defmodule Lumis do
       default: false,
       doc: "Render nested brackets with rainbow bracket decorations."
     ],
+    word_diff: [
+      type: :boolean,
+      default: false,
+      doc: """
+      In a document highlighted as `diff`, mark the words that changed between
+      removed lines and the added lines that replace them. Other languages ignore
+      it.
+      """
+    ],
     budget: [
       type: :keyword_list,
       default: [],
@@ -1039,6 +1048,8 @@ defmodule Lumis do
   @type language_info :: %{
           id: String.t(),
           name: String.t(),
+          parser: String.t() | nil,
+          package_name: String.t() | nil,
           aliases: [String.t()],
           extensions: [String.t()],
           globs: [String.t()],
@@ -1545,6 +1556,7 @@ defmodule Lumis do
         language: language,
         annotations: Keyword.fetch!(options, :annotations),
         rainbow_brackets: Keyword.fetch!(options, :rainbow_brackets),
+        word_diff: Keyword.fetch!(options, :word_diff),
         budget: budget_for_nif(Keyword.fetch!(options, :budget))
       })
 

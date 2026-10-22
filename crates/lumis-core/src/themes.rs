@@ -1130,6 +1130,38 @@ mod tests {
         }
     }
 
+    /// Theme extraction writes both changed-word scopes, and each has to stand
+    /// out from the diff line under it.
+    #[test]
+    fn every_bundled_theme_has_a_visible_diff_word_background() {
+        use crate::decorations::DiffWordKind;
+
+        let themes: Vec<_> = available_themes().collect();
+        assert!(themes.len() > 200, "found only {} themes", themes.len());
+
+        for theme in themes {
+            for kind in [DiffWordKind::Removed, DiffWordKind::Added] {
+                let scope = kind.scope();
+                let word = theme
+                    .highlights
+                    .get(scope)
+                    .and_then(|style| style.bg.as_deref())
+                    .unwrap_or_else(|| panic!("{}: no {scope} background", theme.name));
+                let line_scope = scope.trim_end_matches(".word");
+                let line = theme.highlights[line_scope]
+                    .bg
+                    .as_deref()
+                    .or_else(|| theme.bg());
+                assert_ne!(
+                    Some(word),
+                    line,
+                    "{}: {scope} is the color of {line_scope}",
+                    theme.name
+                );
+            }
+        }
+    }
+
     #[test]
     fn test_css_builder_can_disable_italic() {
         let json = r#"{"name": "test", "appearance": "dark", "revision": "3e976b4", "highlights": {"keyword": {"fg": "blue", "italic": true}}}"#;

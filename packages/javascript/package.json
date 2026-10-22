@@ -3,12 +3,9 @@
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.15.1",
-  "scripts": {
-    "build:wasm-bundles": "tsx scripts/build-wasm-bundles.ts"
-  },
   "devDependencies": {
     "@microsoft/api-extractor": "^7.59.4",
-    "oxfmt": "^0.72.0",
+    "oxfmt": "^0.73.0",
     "semver": "7.8.5",
     "smol-toml": "^1.9.1",
     "tsx": "^4.23.15"

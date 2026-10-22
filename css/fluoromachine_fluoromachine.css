@@ -78,8 +78,14 @@
 .l-diff-minus {
   color: #fe4450;
 }
+.l-diff-minus-word {
+  background-color: #5d0210;
+}
 .l-diff-plus {
   color: #72f1b8;
+}
+.l-diff-plus-word {
+  background-color: #003f1a;
 }
 .l-function {
   color: #ffcc00;

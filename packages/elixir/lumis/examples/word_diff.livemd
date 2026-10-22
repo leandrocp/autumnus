@@ -1,0 +1,52 @@
+# Word Diff
+
+```elixir
+Mix.install([
+  {:lumis, "~> 0.9"},
+  {:lumis_wasm_diff, "~> 0.26.0"},
+  {:lumis_wasm_elixir, "~> 0.26.0"}
+])
+```
+
+`lumis_wasm_diff` carries the diff grammar. `lumis_wasm_elixir` colours the hunks,
+because the `+++` header names an `.ex` file.
+
+## Example
+
+With `word_diff: true`, a `diff` document also marks the words that changed between
+removed lines and the added lines that replace them. The colour comes from the
+theme's diff colours. `Logger.debug` has no removed line to pair with, so it keeps
+the plain line colour.
+
+```elixir
+diff = ~S'''
+diff --git a/lib/varsel/cve/cvelint.ex b/lib/varsel/cve/cvelint.ex
+--- a/lib/varsel/cve/cvelint.ex
++++ b/lib/varsel/cve/cvelint.ex
+@@ -44,6 +44,7 @@ defmodule Varsel.CVE.Cvelint do
+   def lint(cve_id, cve_json) do
+-    tmp_dir = System.tmp_dir!()
++    tmp_dir = System.tmp_dir!() |> Path.join("lumis")
+     File.mkdir_p!(tmp_dir)
+     path = Path.join(tmp_dir, "#{cve_id}.json")
+-    File.write!(path, Jason.encode!(cve_json))
++    File.write!(path, JSON.encode!(cve_json))
++    Logger.debug("wrote #{path}")
+'''
+
+Lumis.highlight!(diff,
+  word_diff: true,
+  formatter: {:html_inline, language: "diff", theme: "catppuccin_mocha"}
+)
+```
+
+## In the terminal
+
+```elixir
+diff
+|> Lumis.highlight!(
+  word_diff: true,
+  formatter: {:terminal, language: "diff", theme: "catppuccin_mocha"}
+)
+|> IO.puts()
+```

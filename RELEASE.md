@@ -66,7 +66,7 @@ the next release pull request picks the bundle up.
   `crates/dev`, and merging it republishes every parser on npm. That happens on the
   push to `main`, before any runtime release that reads the new format can ship, so
   the order takes care of itself. Let that WASM Release run finish before merging
-  `npm-lumis`. Bumping `BUNDLE_FORMAT_VERSION` in `build-wasm-bundles.ts` puts every
+  `npm-lumis`. Bumping `NPM_BUNDLE_FORMAT` in `crates/dev` puts every
   npm bundle in the next release pull requests instead.
 - Each registry is checked on its own. Hex gets a parser release only when its newest
   release ships another definition (a new parser, queries or required grammar), read

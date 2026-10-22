@@ -12,7 +12,7 @@ import type {
   SyntaxHighlightEvent,
   Theme,
 } from "../types.js";
-import { LineSelection, composeLineDecorations, rainbowBracketScope } from "../decorations.js";
+import { LineSelection, composeLineDecorations, decorationScope } from "../decorations.js";
 import { HIGHLIGHT_NAMES } from "../highlights.js";
 import { sanitizeThemeName } from "../themes.js";
 import { mergeAttrs, mergeClasses } from "../core/attr-merge.js";
@@ -1306,7 +1306,7 @@ function startLineDecoration(
     return;
   }
   openSpanEvent(state, context, {
-    scope: rainbowBracketScope(decoration.depth),
+    scope: decorationScope(decoration),
     language: state.language,
   });
 }
@@ -1315,7 +1315,7 @@ function endLineDecoration(state: LineRenderState, context: LineRenderContext): 
   const decoration = state.decorations.pop();
   if (decoration?.type === "line") {
     context.onLine(state.line, state.decoration, state.ending);
-  } else if (decoration?.type === "rainbowBracket") {
+  } else if (decoration !== undefined) {
     state.line += state.openScopes.pop()?.close ?? "";
   }
 }

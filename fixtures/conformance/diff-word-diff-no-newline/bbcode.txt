@@ -1,0 +1,7 @@
+[diff-minus-diff][punctuation-special-diff]---[/punctuation-special-diff] [string-special-path-diff]a/version.txt[/string-special-path-diff][/diff-minus-diff]
+[diff-plus-diff][punctuation-special-diff]+++[/punctuation-special-diff] [string-special-path-diff]b/version.txt[/string-special-path-diff][/diff-plus-diff]
+[attribute-diff]@@ -1 +1 @@[/attribute-diff]
+[diff-minus-diff][punctuation-special-diff]-[/punctuation-special-diff]version = 1.[diff-minus-word-diff]4[/diff-minus-word-diff].[diff-minus-word-diff]2[/diff-minus-word-diff][/diff-minus-diff]
+\ No newline at end of file
+[diff-plus-diff][punctuation-special-diff]+[/punctuation-special-diff]version = 1.[diff-plus-word-diff]5[/diff-plus-word-diff].[diff-plus-word-diff]0[/diff-plus-word-diff][/diff-plus-diff]
+\ No newline at end of file

@@ -934,8 +934,8 @@ opts = Lumis.default_options()
 
 ## Options Reference
 
-`highlight/2` takes four options: `:formatter`, plus `:rainbow_brackets`,
-`:budget` and `:annotations`, which belong beside `:formatter` rather than
+`highlight/2` takes five options: `:formatter`, plus `:rainbow_brackets`,
+`:word_diff`, `:budget` and `:annotations`, which belong beside `:formatter` rather than
 inside its option list. Unset, a budget key uses the built-in bound — 5000 ms
 and 8192 in-progress query matches.
 
@@ -943,6 +943,10 @@ and 8192 in-progress query matches.
 [
   # Color nested brackets by depth (default: false)
   rainbow_brackets: true,
+
+  # In a `diff`, mark the words that changed between removed and added lines
+  # (default: false; other languages ignore it)
+  word_diff: true,
 
   # Bound one render (default: [time_limit: nil, match_limit: nil])
   budget: [time_limit: 2_000, match_limit: 16_384],

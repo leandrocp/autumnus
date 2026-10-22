@@ -83,7 +83,11 @@ export function formatHtmlMultiThemes(
   const theme = formatter.defaultTheme ? formatter.themes[formatter.defaultTheme] : undefined;
   const openSpan = (span: HighlightSpan): string => openSpanTag(spanAttrs(span, formatter));
   if (isInlineStructure(formatter.structure)) {
-    return formatHtmlSpans(source, events, { language: formatter.language, theme, openSpan });
+    return formatHtmlSpans(source, events, {
+      language: formatter.language,
+      theme,
+      openSpan,
+    });
   }
 
   const lineLayout = "display: inline-block; width: 100%; min-height: 1lh; vertical-align: top;";

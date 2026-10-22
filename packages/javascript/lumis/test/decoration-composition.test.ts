@@ -16,9 +16,11 @@ import { composeAnnotations } from "../src/annotations.js";
 import {
   LineSelection,
   composeLineDecorations,
+  composeDiffWordDecorations,
   composeRainbowDecorations,
   type RainbowRange,
 } from "../src/decorations.js";
+import type { DiffWordRange } from "../src/diff-words.js";
 import { buildSourceIndex } from "../src/events.js";
 import type { Annotation, HighlightEvent, LineSpec, SyntaxHighlightEvent } from "../src/types.js";
 
@@ -28,6 +30,7 @@ interface Case {
   events: SyntaxHighlightEvent[];
   annotations?: Array<{ start: number; end: number; data: string }>;
   rainbowRanges?: Array<{ start: number; end: number; depth: number }>;
+  diffWordRanges?: Array<{ start: number; end: number; kind: "removed" | "added" }>;
   highlightLines: LineSpec[];
   expected: string;
 }
@@ -45,8 +48,17 @@ function compose(testCase: Case): HighlightEvent<string>[] {
     data: annotation.data,
   }));
   const sourceIndex = buildSourceIndex(testCase.source);
-  const decorated = composeRainbowDecorations(
+  const diffWords = composeDiffWordDecorations(
     testCase.events,
+    (testCase.diffWordRanges ?? []).map((range): DiffWordRange => ({
+      startByte: range.start,
+      endByte: range.end,
+      kind: range.kind,
+    })),
+    sourceIndex,
+  );
+  const decorated = composeRainbowDecorations(
+    diffWords,
     (testCase.rainbowRanges ?? []).map((range): RainbowRange => ({
       startByte: range.start,
       endByte: range.end,
@@ -102,13 +114,15 @@ function decorationStartNotation(
   decoration: Extract<HighlightEvent, { type: "decorationStart" }>["decoration"],
 ): string {
   if (decoration.type === "rainbowBracket") return `R+${decoration.depth}`;
+  if (decoration.type === "diffWord") return `W+${decoration.kind}`;
   return `L+${decoration.number}${decoration.highlighted ? "*" : ""}`;
 }
 
 function decorationEndNotation(
   decoration: Extract<HighlightEvent, { type: "decorationStart" }>["decoration"] | undefined,
 ): string {
-  return decoration?.type === "rainbowBracket" ? "R-" : "L-";
+  if (decoration?.type === "rainbowBracket") return "R-";
+  return decoration?.type === "diffWord" ? "W-" : "L-";
 }
 
 describe("line decoration composition parity", () => {
@@ -137,6 +151,8 @@ describe("line decoration composition parity", () => {
       "annotation/closed-and-reopened-across-a-newline",
       "rainbow/crosses-source-and-syntax-boundaries",
       "rainbow/composes-with-annotations-and-lines",
+      "diffword/crosses-source-and-syntax-boundaries",
+      "diffword/composes-with-rainbow-annotations-and-lines",
       "utf8/multibyte-lines",
       "highlight/overlapping-ranges-merge",
       "highlight/range-beyond-the-document",

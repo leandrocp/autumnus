@@ -1,4 +1,5 @@
 import { composeAnnotationsInnermost } from "./annotations.js";
+import type { DiffWordRange } from "./diff-words.js";
 import type { SourceIndex } from "./events.js";
 import type {
   Annotation,
@@ -24,6 +25,21 @@ export function rainbowBracketScope(depth: number): string {
   return RAINBOW_BRACKET_SCOPES[normalized % RAINBOW_BRACKET_SCOPES.length]!;
 }
 
+/** The side of a diff a changed word is on. */
+export type DiffWordKind = Extract<Decoration, { type: "diffWord" }>["kind"];
+
+/** The theme scope built-in formatters style a changed word with. */
+export function diffWordScope(kind: DiffWordKind): string {
+  return kind === "removed" ? "diff.minus.word" : "diff.plus.word";
+}
+
+/** The theme scope built-in formatters style a non-line decoration with. */
+export function decorationScope(decoration: Exclude<Decoration, { type: "line" }>): string {
+  return decoration.type === "diffWord"
+    ? diffWordScope(decoration.kind)
+    : rainbowBracketScope(decoration.depth);
+}
+
 /** One parsed bracket byte range before it is composed into the event stream. */
 export interface RainbowRange {
   startByte: number;
@@ -37,12 +53,39 @@ export function composeRainbowDecorations(
   ranges: readonly RainbowRange[],
   sourceIndex: SourceIndex,
 ): LumisHighlightEvent[] {
-  if (ranges.length === 0) return [...events];
+  return composeInnermostDecorations(
+    events,
+    ranges.map((range) => ({
+      range: { type: "offset", start: range.startByte, end: range.endByte },
+      data: { type: "rainbowBracket", depth: range.depth },
+    })),
+    sourceIndex,
+  );
+}
 
-  const annotations: Annotation<Decoration>[] = ranges.map((range) => ({
-    range: { type: "offset", start: range.startByte, end: range.endByte },
-    data: { type: "rainbowBracket", depth: range.depth },
-  }));
+/** Compose a diff's changed words into the stream as Lumis-owned decorations. */
+export function composeDiffWordDecorations(
+  events: readonly LumisHighlightEvent[],
+  ranges: readonly DiffWordRange[],
+  sourceIndex: SourceIndex,
+): LumisHighlightEvent[] {
+  return composeInnermostDecorations(
+    events,
+    ranges.map((range) => ({
+      range: { type: "offset", start: range.startByte, end: range.endByte },
+      data: { type: "diffWord", kind: range.kind },
+    })),
+    sourceIndex,
+  );
+}
+
+function composeInnermostDecorations(
+  events: readonly LumisHighlightEvent[],
+  annotations: readonly Annotation<Decoration>[],
+  sourceIndex: SourceIndex,
+): LumisHighlightEvent[] {
+  if (annotations.length === 0) return [...events];
+
   const composed = composeAnnotationsInnermost(events, annotations, sourceIndex);
   const output: LumisHighlightEvent[] = [];
 

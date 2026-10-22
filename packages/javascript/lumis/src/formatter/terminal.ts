@@ -9,8 +9,8 @@ import {
   LineSelection,
   composeLineDecorations,
   gutterWidth,
+  decorationScope,
   lastLineNumber,
-  rainbowBracketScope,
 } from "../decorations.js";
 import { encodeSource, decodeSourceSlice, getThemeStyle } from "./html.js";
 import { paint } from "./ansi-core.js";
@@ -220,13 +220,14 @@ function startTerminalDecoration(
     return;
   }
   state.scopeStack.push({
-    scope: rainbowBracketScope(decoration.depth),
+    scope: decorationScope(decoration),
     language: formatterLanguage(formatter),
   });
 }
 
 function endTerminalDecoration(state: TerminalState): void {
-  if (state.decorations.pop()?.type === "rainbowBracket") state.scopeStack.pop();
+  const decoration = state.decorations.pop();
+  if (decoration !== undefined && decoration.type !== "line") state.scopeStack.pop();
 }
 
 function applyTerminalEvent(

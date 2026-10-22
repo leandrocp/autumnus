@@ -1,6 +1,7 @@
 //! Wasmtime-backed Tree-sitter highlighting runtime.
 
-use lumis_core::decorations::compose_rainbow_decorations;
+use crate::diff_words::{diff_word_ranges_in, DIFF_GRAMMAR};
+use lumis_core::decorations::{compose_diff_word_decorations, compose_rainbow_decorations};
 use lumis_core::events::{Coalescing, HighlightEvent};
 use lumis_core::formatter::BudgetExhausted;
 use lumis_core::highlights::HIGHLIGHT_NAMES;
@@ -33,6 +34,9 @@ pub struct LanguageSpec {
 
 struct LoadedLanguage {
     highlight: HighlightConfiguration,
+    /// The grammar the parser was built from, which decides the node kinds a
+    /// tree has, whatever id the host loaded the language under.
+    grammar_name: String,
     brackets_source: String,
     brackets: OnceLock<Option<Query>>,
 }
@@ -570,6 +574,7 @@ impl Runtime {
             spec.id,
             Arc::new(LoadedLanguage {
                 highlight,
+                grammar_name: spec.grammar_name,
                 brackets_source: spec.brackets,
                 brackets: OnceLock::new(),
             }),
@@ -623,7 +628,7 @@ impl Runtime {
         injections: &str,
         locals: &str,
     ) -> Result<(), RuntimeError> {
-        let (id, language, brackets_source) = {
+        let (id, language, grammar_name, brackets_source) = {
             let catalog = self.catalog.read().expect("language catalog lock poisoned");
             let id = catalog
                 .aliases
@@ -637,6 +642,7 @@ impl Runtime {
             (
                 id,
                 loaded.highlight.language.clone(),
+                loaded.grammar_name.clone(),
                 loaded.brackets_source.clone(),
             )
         };
@@ -656,6 +662,7 @@ impl Runtime {
             id,
             Arc::new(LoadedLanguage {
                 highlight,
+                grammar_name,
                 brackets_source,
                 brackets: OnceLock::new(),
             }),
@@ -871,17 +878,15 @@ impl Runtime {
             collector.finish()
         };
 
-        if options.rainbow_brackets && budget != Some(BudgetExhausted::Time) {
-            collected = decorate_with_rainbow(
-                worker.highlighter.parser(),
-                &root,
-                source,
-                options.match_limit,
-                interrupt,
-                collected,
-                &mut budget,
-            )?;
-        }
+        collected = decorate(
+            worker.highlighter.parser(),
+            &root,
+            source,
+            options,
+            interrupt,
+            collected,
+            &mut budget,
+        )?;
 
         Ok(HighlightOutput {
             events: collected,
@@ -986,6 +991,72 @@ fn decorate_with_rainbow(
     Ok(compose_rainbow_decorations(source, &collected, &ranges))
 }
 
+/// Apply the decoration passes `options` asks for, each inside the budget.
+fn decorate(
+    parser: &mut Parser,
+    language: &LoadedLanguage,
+    source: &str,
+    options: &HighlightOptions,
+    interrupt: Interrupt<'_>,
+    mut collected: Vec<HighlightEvent<'static>>,
+    budget: &mut Option<BudgetExhausted>,
+) -> Result<Vec<HighlightEvent<'static>>, RuntimeError> {
+    if options.word_diff
+        && language.grammar_name == DIFF_GRAMMAR
+        && *budget != Some(BudgetExhausted::Time)
+    {
+        collected =
+            decorate_with_diff_words(parser, language, source, interrupt, collected, budget)?;
+    }
+    if options.rainbow_brackets && *budget != Some(BudgetExhausted::Time) {
+        collected = decorate_with_rainbow(
+            parser,
+            language,
+            source,
+            options.match_limit,
+            interrupt,
+            collected,
+            budget,
+        )?;
+    }
+    Ok(collected)
+}
+
+/// Decorate a diff's changed words, inside the same budget.
+///
+/// Like rainbow brackets this parses the document a second time, and a render
+/// that runs out here goes back plain.
+fn decorate_with_diff_words(
+    parser: &mut Parser,
+    language: &LoadedLanguage,
+    source: &str,
+    interrupt: Interrupt<'_>,
+    collected: Vec<HighlightEvent<'static>>,
+    budget: &mut Option<BudgetExhausted>,
+) -> Result<Vec<HighlightEvent<'static>>, RuntimeError> {
+    let tree = parse_root(parser, language, source, interrupt)?;
+    let Some(tree) = tree else {
+        *budget = Some(BudgetExhausted::Time);
+        return Ok(vec![HighlightEvent::Source {
+            start: 0,
+            end: source.len(),
+        }]);
+    };
+    let ranges = diff_word_ranges_in(tree.root_node(), source, || interrupt.stopped().is_some());
+    match ranges {
+        Some(ranges) if interrupt.stopped().is_none() => {
+            Ok(compose_diff_word_decorations(source, &collected, &ranges))
+        }
+        _ => {
+            *budget = Some(BudgetExhausted::Time);
+            Ok(vec![HighlightEvent::Source {
+                start: 0,
+                end: source.len(),
+            }])
+        }
+    }
+}
+
 /// How a host handled a language named by an injection query.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum InjectionResolution {
@@ -1002,6 +1073,9 @@ pub enum InjectionResolution {
 pub struct HighlightOptions {
     /// Colourize matching bracket pairs in the root language.
     pub rainbow_brackets: bool,
+    /// Mark the words that changed between a diff's removed and added lines.
+    /// Only a `diff` root has any.
+    pub word_diff: bool,
     /// Descend into languages injected inside the document.
     pub injections: bool,
     /// Keep the tree parsed for each layer, for tools that inspect them.
@@ -1019,6 +1093,7 @@ impl Default for HighlightOptions {
     fn default() -> Self {
         Self {
             rainbow_brackets: false,
+            word_diff: false,
             injections: true,
             layers: false,
             match_limit: DEFAULT_MATCH_LIMIT,
@@ -1082,20 +1157,15 @@ fn engine_with_compile_cache(root: std::path::PathBuf) -> Result<Engine, wasmtim
     Engine::new(&config)
 }
 
-fn rainbow_ranges(
+/// Parse the whole document as the root language, with the render's interrupt.
+///
+/// `None` means the interrupt stopped the parse.
+fn parse_root(
     parser: &mut Parser,
     language: &LoadedLanguage,
     source: &str,
-    match_limit: u32,
     interrupt: Interrupt<'_>,
-) -> Result<(Vec<RainbowRange>, bool), RuntimeError> {
-    let query = language.brackets.get_or_init(|| {
-        crate::brackets::compile(&language.highlight.language, &language.brackets_source)
-    });
-    let Some(query) = query else {
-        return Ok((Vec::new(), false));
-    };
-
+) -> Result<Option<Tree>, RuntimeError> {
     // The highlight walk narrows this parser to each injection it parses and
     // leaves it on the last one, and `set_language` does not widen it again.
     parser
@@ -1131,6 +1201,26 @@ fn rainbow_ranges(
                 language.highlight.language_name.clone(),
             ));
         }
+        return Ok(None);
+    };
+    Ok(Some(tree))
+}
+
+fn rainbow_ranges(
+    parser: &mut Parser,
+    language: &LoadedLanguage,
+    source: &str,
+    match_limit: u32,
+    interrupt: Interrupt<'_>,
+) -> Result<(Vec<RainbowRange>, bool), RuntimeError> {
+    let query = language.brackets.get_or_init(|| {
+        crate::brackets::compile(&language.highlight.language, &language.brackets_source)
+    });
+    let Some(query) = query else {
+        return Ok((Vec::new(), false));
+    };
+
+    let Some(tree) = parse_root(parser, language, source, interrupt)? else {
         return Ok((Vec::new(), false));
     };
 
@@ -1156,6 +1246,7 @@ fn rainbow_ranges(
 mod tests {
     use super::*;
     use crate::store::StoreConfig;
+    use std::fmt::Write as _;
     use std::sync::mpsc;
     use std::thread;
     use std::time::Duration;
@@ -1213,6 +1304,7 @@ mod tests {
             "json".into(),
             Arc::new(LoadedLanguage {
                 highlight,
+                grammar_name: "json".into(),
                 brackets_source: String::new(),
                 brackets: OnceLock::new(),
             }),
@@ -1884,6 +1976,59 @@ mod tests {
                 .unwrap();
             assert!(!events.is_empty(), "highlighting produced no events");
         }
+    }
+
+    #[test]
+    fn word_diff_leaves_a_run_over_the_size_cap_unmarked() {
+        let runtime = Runtime::with_worker_limit(1).unwrap();
+        runtime
+            .load_language(LanguageSpec {
+                id: "diff".into(),
+                aliases: Vec::new(),
+                grammar_name: "diff".into(),
+                wasm: include_bytes!("../../../fixtures/test-parsers/tree-sitter-diff.wasm")
+                    .to_vec(),
+                highlights: "(addition) @diff.plus\n(deletion) @diff.minus".into(),
+                injections: String::new(),
+                locals: String::new(),
+                brackets: String::new(),
+            })
+            .unwrap();
+
+        // Every removed line resembles every added one, so pairing the run
+        // would compare all of them: seconds of work, were it not skipped.
+        let side = |marker: char| -> String {
+            (0..3000).fold(String::new(), |mut side, i| {
+                let _ = writeln!(side, "{marker}let value_{i} = compute(alpha, beta, gamma);");
+                side
+            })
+        };
+        let source = format!("{}{}", side('-'), side('+'));
+        let (sender, receiver) = mpsc::sync_channel(1);
+        let worker = thread::spawn(move || {
+            let started = Instant::now();
+            let output = runtime
+                .highlight_with(
+                    &source,
+                    "diff",
+                    &HighlightOptions {
+                        word_diff: true,
+                        ..HighlightOptions::default()
+                    },
+                )
+                .unwrap();
+            sender.send((started.elapsed(), output)).unwrap();
+        });
+        let (elapsed, output) = receiver
+            .recv_timeout(Duration::from_secs(5))
+            .expect("word diff exceeded the five-second watchdog");
+        worker.join().unwrap();
+
+        assert!(
+            elapsed < Duration::from_secs(2),
+            "word diff took {elapsed:?}"
+        );
+        assert_eq!(output.budget, None);
     }
 
     #[test]

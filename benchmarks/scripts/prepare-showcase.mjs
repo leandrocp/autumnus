@@ -36,7 +36,7 @@ const documents = [
       "https://github.com/BurntSushi/ripgrep/blob/4649aa9700619f94cf9c66876e9549d83420e16c/crates/searcher/src/searcher/mod.rs",
     injections: ["Comment"],
     load: ["rust", "comment"],
-    unsupported: ["tanstack-highlight"],
+    unsupported: [],
   },
   {
     id: "livebook",

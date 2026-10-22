@@ -310,7 +310,9 @@ describe("formatter shared helpers", () => {
       "a\nb",
       [
         { type: "start", scope: "string", language: "json" },
+        { type: "decorationStart", decoration: { type: "diffWord", kind: "added" } },
         { type: "source", start: 0, end: 3 },
+        { type: "decorationEnd" },
         { type: "end" },
       ],
       jsonLang,

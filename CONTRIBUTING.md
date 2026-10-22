@@ -34,6 +34,12 @@ mise run setup
 
 This installs the Rust, JS, and Elixir dependencies and checks the required tools.
 
+Setup runs independent asset builds with two mise workers. It builds Lumis before
+its integrations; pnpm builds Vite after rehype. The theme, Lumis and integration
+builds declare their inputs, so a rerun skips any whose inputs have not changed
+since its last build. `mise run --force setup-js-integrations` rebuilds Lumis and
+its integrations regardless.
+
 ## Testing
 
 Run the standard Rust, Elixir, and JavaScript test suites with:
@@ -105,10 +111,19 @@ The optional `budget` field (`timeLimit` in milliseconds, `matchLimit`) applies
 to the event checks and to every formatter, in every runtime. A time-limit
 fixture needs a source that takes far longer than its limit on the fastest
 runtime: `json-budget-time-limit` is 10,000 unclosed brackets, which take about
-90 ms on a release build, against a 1 ms limit. The optional `skip` field maps a
-runtime that cannot run the fixture yet to the reason. Only `web-tree-sitter`,
-which covers the JavaScript Wasm and browser suites, reads it.
-`conformance-regen` preserves both fields.
+90 ms on a release build, against a 1 ms limit.
+
+The optional `returnsWithin` field is how many milliseconds any one render may
+take once its language is loaded. Every runner times each events check and
+formatter against it, so the corpus pins when a render stops as well as what it
+returns. `elixir-budget-time-limit-operator-chain` takes about 30 s unbounded and
+has to return within 3 s under a 100 ms limit. Keep the bound wide enough for a
+loaded CI runner and far below the unbounded time, so a runtime that stops
+honouring the limit still fails.
+
+The optional `skip` field maps a runtime that cannot run the fixture yet to the
+reason. Only `web-tree-sitter`, which covers the JavaScript Wasm and browser
+suites, reads it. `conformance-regen` preserves all three fields.
 
 ### Generated HTML and CSS
 
@@ -454,7 +469,7 @@ All language metadata lives in `languages.toml`. It is consumed by:
 - `crates/lumis-cli/build.rs`: reads `queries/processed/` to embed query constants
 - `crates/lumis-core/build.rs`: generates the `Language` enum and Rust detection metadata
 - `packages/javascript/lumis/scripts/build-langs.ts`: generates `packages/javascript/lumis/langs/*.ts`, bundles, and JS detection and loader metadata
-- `packages/javascript/scripts/build-wasm-bundles.ts`: generates the `@lumis-sh/wasm-bundle-*` packages into `tmp/wasm/npm/` at publish time. They are not committed: a bundle is a manifest and an import list derived from `languages.toml`, so a copy in the tree is a second source of truth that goes stale whenever membership changes
+- `cargo run --manifest-path crates/dev/Cargo.toml -- stage-npm-bundle`: generates the `@lumis-sh/wasm-bundle-*` packages into `tmp/wasm/npm/` at publish time. They are not committed: a bundle is a manifest and an import list derived from `languages.toml`, so a copy in the tree is a second source of truth that goes stale whenever membership changes
 - CI workflows: build WASMs and update parser and query revisions
 
 Bundle definitions also live here under `[bundles.*]`.
@@ -710,6 +725,16 @@ mise run wasm-check {name}
 `wasm-publish` runs this before staging, so a parser published by hand meets the
 same bar as one the workflow publishes.
 
+A package finds its parser relative to its own module, so a page loads it only
+if the bundler ships the parser where that URL points. This stages `css`,
+`markdown` (which requires `markdown_inline`) and every member of the `web`
+bundle, installs them as tarballs into a Vite 8 project, and highlights one of
+each through the dev server and `vite build` in Chromium:
+
+```sh
+mise run wasm-check-bundler
+```
+
 The compiler is the WASI SDK that `build-wasm` downloads into `~/.cache/tree-sitter` the first time a parser compiles and hands to `tree-sitter-cli`; Emscripten is not involved. You also need `git`, to fetch each grammar at the revision `languages.toml` pins, and `npm`, for the grammars whose parser is generated from `grammar.js`.
 
 ### Running a runtime locally
@@ -889,7 +914,9 @@ The `wasm-release` workflow publishes to npm and Hex:
 1. **plan** — `mise run wasm-release-plan` works out, for every parser, the
    version it resolves to and which registries are missing it. Beside it,
    **query-check** compiles the Wasmtime half of `mise run wasm-check` once for
-   every pipeline.
+   every pipeline, and **bundler-check** runs `mise run wasm-check-bundler`, so
+   a template change Vite cannot follow stops the release. Both also run on a
+   pull request.
 2. **One pipeline per parser** that anything is missing, from
    `wasm-release-parser.yml`. **build** compiles the grammar, runs
    `mise run wasm-check` against that build, and stages both packages at the
@@ -971,17 +998,20 @@ The layouts differ because each runtime reads its own: npm ships
 resolves. The parser file is byte-identical either way.
 
 Bundles are meta-packages: dependencies on every language they group, and no
-bytes at all. Members come from the npm bundle staged beside them, so the two
-registries cannot disagree about what a bundle contains.
+bytes at all. `crates/dev` writes each registry's package from the bundle
+`languages.toml` declares and the Tree-sitter series `mise.toml` pins. Neither
+registry's package is read to build the other's, so the two cannot disagree
+about what a bundle contains, and neither can require a series no parser is
+published under.
 
 ```bash
 mise run wasm-hex-bundle-stage web
 mise run wasm-hex-bundle-publish web
 ```
 
-Versions are read from the npm package rather than recomputed — a parser takes
-the version from the `lumis.json` staged with it, and a bundle from
-`wasm-bundle-<name>/package.json`, which the Hex tag run stages at the Hex version.
+A parser takes its Hex version from the `lumis.json` staged with it. A bundle
+takes the version `wasm-bundles.json` records for that registry, which is the
+version its tag publishes.
 
 Parsers publish to Hex on every run of `WASM Release`, alongside npm. There is
 no input to set and no separate trigger: the plan decides, and a package already

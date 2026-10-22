@@ -25,7 +25,12 @@ const manifest: Manifest = JSON.parse(
   readFileSync(new URL("../../../../fixtures/api.json", import.meta.url), "utf8"),
 );
 
-const lookupCases: { input: string; expected: string | null }[] = JSON.parse(
+const lookupCases: {
+  input: string;
+  expected: string | null;
+  parser: string | null;
+  packageName: string | null;
+}[] = JSON.parse(
   readFileSync(new URL("../../../../fixtures/language-lookup.json", import.meta.url), "utf8"),
 );
 
@@ -77,14 +82,19 @@ function sectionNames(section: Record<string, Record<string, string>>): string[]
 
 describe("top-level API manifest", () => {
   it("loads the shared language lookup corpus", () => {
-    expect(lookupCases.length).toBeGreaterThanOrEqual(24);
+    expect(lookupCases.length).toBeGreaterThanOrEqual(27);
   });
 
   for (const entry of ["node", "browser"] as const) {
     it.each(lookupCases)(
       `${entry} resolves language metadata for $input`,
-      ({ input, expected }) => {
-        expect(entries[entry].languages.get(input)?.id ?? null).toBe(expected);
+      ({ input, expected, parser, packageName }) => {
+        const language = entries[entry].languages.get(input);
+        const listed = entries[entry].languages.available().find(({ id }) => id === expected);
+        expect(language?.id ?? null).toBe(expected);
+        expect(language?.parser ?? null).toBe(parser);
+        expect(language?.packageName ?? null).toBe(packageName);
+        expect(listed).toEqual(language);
       },
     );
 

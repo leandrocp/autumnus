@@ -201,6 +201,10 @@ impl<T> Formatter<T> for BBCodeScoped {
                                 tag_name(rainbow_scope_index(*depth), self.language.id_name());
                             write!(output, "[{tag_name}]")?;
                         }
+                        Decoration::DiffWord { kind } => {
+                            let tag_name = tag_name(kind.scope_index(), self.language.id_name());
+                            write!(output, "[{tag_name}]")?;
+                        }
                     }
                 }
                 HighlightEvent::DecorationEnd => match decorations.pop() {
@@ -211,6 +215,10 @@ impl<T> Formatter<T> for BBCodeScoped {
                     Some(Decoration::RainbowBracket { depth }) => {
                         let tag_name =
                             tag_name(rainbow_scope_index(depth), self.language.id_name());
+                        write!(output, "[/{tag_name}]")?;
+                    }
+                    Some(Decoration::DiffWord { kind }) => {
+                        let tag_name = tag_name(kind.scope_index(), self.language.id_name());
                         write!(output, "[/{tag_name}]")?;
                     }
                 },

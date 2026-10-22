@@ -61,7 +61,7 @@
     {
       "id": "sugar-high",
       "label": "Sugar High",
-      "version": "sugar-high 2.5.1",
+      "version": "sugar-high 2.6.0",
       "theme": "@catppuccin/highlightjs 1.0.1 colours, mapped onto its token classes by this repository"
     },
     {
@@ -73,7 +73,7 @@
     {
       "id": "tanstack-highlight",
       "label": "TanStack Highlight",
-      "version": "@tanstack/highlight 1.0.0",
+      "version": "@tanstack/highlight 1.1.0",
       "theme": "@catppuccin/highlightjs 1.0.1 colours, mapped onto its token classes by this repository"
     }
   ],
@@ -99,7 +99,7 @@
         "shiki": 5887,
         "speed-highlight": 3415,
         "starry-night": 3487,
-        "sugar-high": 7318,
+        "sugar-high": 7297,
         "syntect": 6718,
         "tanstack-highlight": 1881
       },
@@ -129,8 +129,8 @@
           "frappe": "4051966247aa032ae1c54b5bdb3ed347b8406c3a48b45354065b70fd41d2e153"
         },
         "sugar-high": {
-          "latte": "b003e6c5f299b07c20052ce20d8d4b06d54be8d650611c3a661c0f006c1b5651",
-          "frappe": "d5892c4c8425ea67efcad12b89effe87f7e4d8828537cd88b4d60e00ec91a826"
+          "latte": "92c266701b2dab42bd27d7899d2ddcb5fadf539cfbf39de8adaab132ad30efa6",
+          "frappe": "582bf6476460c61d1c1a0ddb95d13423600461a52a84c58a0a14577cff06be11"
         },
         "syntect": {
           "latte": "c2236b9ba19832fe7b6d9b03e820d5006be57ad6e0951a0c2a54132f3881b258",
@@ -153,9 +153,7 @@
       "injections": [
         "Comment"
       ],
-      "unsupported": [
-        "tanstack-highlight"
-      ],
+      "unsupported": [],
       "tokens": {
         "lumis": 4521,
         "highlight-js": 1304,
@@ -164,7 +162,8 @@
         "speed-highlight": 2421,
         "starry-night": 2508,
         "sugar-high": 8614,
-        "syntect": 4157
+        "syntect": 4157,
+        "tanstack-highlight": 1960
       },
       "outputSha256": {
         "lumis": {
@@ -198,6 +197,10 @@
         "syntect": {
           "latte": "110f01482dc0547cc8bfee2f6e174b770da32c9315b7342d9b558fab643a9e20",
           "frappe": "426103f386c9d2c1f8bb582677365b43b263ee1fc332d1331f09ba16c2e5fe13"
+        },
+        "tanstack-highlight": {
+          "latte": "8d20640abd8ddc716fd151392abe528e99577196edff36fb9291c6d1d2ebbf73",
+          "frappe": "9ed4a3f99432dc9c12d090fc82fbfd59dde676e1233b164f359e171ffe2aff79"
         }
       }
     },
@@ -341,7 +344,7 @@
         "starry-night": 567,
         "sugar-high": 385,
         "syntect": 839,
-        "tanstack-highlight": 166
+        "tanstack-highlight": 266
       },
       "outputSha256": {
         "lumis": {
@@ -377,8 +380,8 @@
           "frappe": "8ec7a9935e1bdcf2dcaccc3991d316964d3aed560f63bf43817124e27299044d"
         },
         "tanstack-highlight": {
-          "latte": "2eb84b4f8b8c51879bc82bd36f0f3b4c6ce5dd82af8a1dc2a52602388ba2b5fd",
-          "frappe": "82b2d88052fb94e78c86a186e0420dd8694b79b727242cf8046431cc69f98007"
+          "latte": "4a10a9c3d09319259e26f3034adf64125516fd4ae3757d69fbfab5fb3e207304",
+          "frappe": "3a011263d7f397b60a35e796644a7834b3431019ae29d4b695f39572bbba29a3"
         }
       }
     },

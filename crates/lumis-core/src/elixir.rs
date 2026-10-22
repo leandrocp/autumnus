@@ -782,6 +782,7 @@ pub struct ExLumisOptions<'a> {
     /// The formatter's `:language`, else the deprecated top-level one.
     pub language: Option<String>,
     pub rainbow_brackets: bool,
+    pub word_diff: bool,
     pub annotations: Vec<Term<'a>>,
     /// `:budget`'s `:time_limit`, in milliseconds. `nil` selects the default.
     pub time_limit: Option<u64>,
@@ -810,6 +811,7 @@ impl<'a> ExLumisOptions<'a> {
         let deprecated_pre_class = fields.optional("pre_class", string)?;
         let inline_style = fields.optional("inline_style", boolean)?;
         let rainbow_brackets = fields.flag("rainbow_brackets")?;
+        let word_diff = fields.flag("word_diff")?;
         let annotations = fields.optional("annotations", list)?.unwrap_or_default();
         let (time_limit, match_limit) = fields.optional("budget", budget)?.unwrap_or_default();
         fields.finish()?;
@@ -822,6 +824,7 @@ impl<'a> ExLumisOptions<'a> {
             ),
             language: formatter_language.or(language),
             rainbow_brackets,
+            word_diff,
             annotations,
             time_limit,
             match_limit,

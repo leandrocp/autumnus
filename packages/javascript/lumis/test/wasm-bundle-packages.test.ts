@@ -11,12 +11,25 @@ const root = resolve(import.meta.dirname, "../../../..");
 const config = parseLanguagesToml(parseToml(readFileSync(join(root, "languages.toml"), "utf8")));
 const bundles = Object.entries(config.bundles ?? {});
 const out = mkdtempSync(join(tmpdir(), "lumis-wasm-bundles-"));
+const series = /^tree-sitter = "(\d+\.\d+)"$/mu.exec(
+  readFileSync(join(root, "mise.toml"), "utf8"),
+)?.[1];
+if (series === undefined) throw new Error("mise.toml pins no tree-sitter series");
 
 beforeAll(() => {
   execFileSync(
-    process.execPath,
-    ["--import", "tsx", "scripts/build-wasm-bundles.ts", "--out", out],
-    { cwd: join(root, "packages/javascript") },
+    "cargo",
+    [
+      "run",
+      "-q",
+      "--manifest-path",
+      "crates/dev/Cargo.toml",
+      "--",
+      "stage-npm-bundle",
+      "--out",
+      out,
+    ],
+    { cwd: root },
   );
 });
 
@@ -37,7 +50,7 @@ describe("generated WASM bundle packages", () => {
       const dependencies = Object.fromEntries(
         ids.map((id) => {
           const parser = config.parsers[id]?.wasm_name ?? `tree-sitter-${id}`;
-          return [`@lumis-sh/wasm-${parser.replace(/^tree-sitter-/u, "")}`, expect.any(String)];
+          return [`@lumis-sh/wasm-${parser.replace(/^tree-sitter-/u, "")}`, `^${series}.0`];
         }),
       );
       const dir = join(out, `wasm-bundle-${name}`);
