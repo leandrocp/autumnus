@@ -72,9 +72,15 @@
       "fg": "#d1242f",
       "bg": "#ffeceb"
     },
+    "diff.minus.word": {
+      "bg": "#ffb1a9"
+    },
     "diff.plus": {
       "fg": "#055d20",
       "bg": "#daf7e0"
+    },
+    "diff.plus.word": {
+      "bg": "#aaddae"
     },
     "function": {
       "fg": "#512598"
