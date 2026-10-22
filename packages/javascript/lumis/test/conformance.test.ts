@@ -28,7 +28,7 @@ import {
 import type { Highlighter } from "../src/core/highlighter.js";
 import type { HighlightEvent, Language, Theme } from "../src/types.js";
 
-import { loadConformanceFixtures } from "./conformance.js";
+import { loadConformanceFixtures, type ConformanceFixture } from "./conformance.js";
 import { configureLocalWasmResolver } from "./wasm.js";
 
 const conformanceFixtures = loadConformanceFixtures();
@@ -111,6 +111,16 @@ beforeAll(async () => {
 // there as well.
 const runtime = process.env.LUMIS_TEST_RUNTIME === "wasm" ? "web-tree-sitter" : undefined;
 
+// The highlighter loaded every language up front, so the time is the render's.
+function renderWithin<T>(fixture: ConformanceFixture, render: () => T): T {
+  const started = performance.now();
+  const output = render();
+  if (fixture.returnsWithin !== undefined) {
+    expect(performance.now() - started).toBeLessThanOrEqual(fixture.returnsWithin);
+  }
+  return output;
+}
+
 describe.each(conformanceFixtures.map((f) => [f.name, f]))("%s", (_name, fixture) => {
   const options = {
     rainbowBrackets: fixture.rainbowBrackets,
@@ -118,6 +128,8 @@ describe.each(conformanceFixtures.map((f) => [f.name, f]))("%s", (_name, fixture
     budget: fixture.budget,
   };
   const skipped = runtime && fixture.skip?.[runtime];
+  const highlight: Highlighter["highlight"] = (...args) =>
+    renderWithin(fixture, () => highlighter.highlight(...args));
 
   beforeEach((context) => {
     if (skipped) context.skip(skipped);
@@ -125,7 +137,7 @@ describe.each(conformanceFixtures.map((f) => [f.name, f]))("%s", (_name, fixture
 
   it("events", () => {
     let events: HighlightEvent[] = [];
-    highlighter.highlight(
+    highlight(
       fixture.source,
       {
         language: getLanguage(fixture.language),
@@ -146,7 +158,7 @@ describe.each(conformanceFixtures.map((f) => [f.name, f]))("%s", (_name, fixture
   });
 
   it("html-inline", () => {
-    const output = highlighter.highlight(
+    const output = highlight(
       fixture.source,
       htmlInline({
         language: getLanguage(fixture.language),
@@ -159,7 +171,7 @@ describe.each(conformanceFixtures.map((f) => [f.name, f]))("%s", (_name, fixture
   });
 
   it("html-linked", () => {
-    const output = highlighter.highlight(
+    const output = highlight(
       fixture.source,
       htmlLinked({
         language: getLanguage(fixture.language),
@@ -182,7 +194,7 @@ describe.each(conformanceFixtures.map((f) => [f.name, f]))("%s", (_name, fixture
             .map(([name, theme]) => [name, getTheme(theme)]),
         )
       : { main: getTheme(fixture.theme) };
-    const output = highlighter.highlight(
+    const output = highlight(
       fixture.source,
       htmlMultiThemes({
         language: getLanguage(fixture.language),
@@ -199,7 +211,7 @@ describe.each(conformanceFixtures.map((f) => [f.name, f]))("%s", (_name, fixture
   });
 
   it("bbcodeScoped", () => {
-    const output = highlighter.highlight(
+    const output = highlight(
       fixture.source,
       bbcodeScoped({
         language: getLanguage(fixture.language),
@@ -210,7 +222,7 @@ describe.each(conformanceFixtures.map((f) => [f.name, f]))("%s", (_name, fixture
   });
 
   it("terminal", () => {
-    const output = highlighter.highlight(
+    const output = highlight(
       fixture.source,
       terminal({
         language: getLanguage(fixture.language),

@@ -11,6 +11,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { parse as parseToml } from "smol-toml";
 import { parseLanguagesToml, type LanguagesToml } from "./languages-toml.js";
+import type { LanguageInfo } from "../src/types.js";
 
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../../..");
 const OUT_DIR = path.resolve(import.meta.dirname, "../langs");
@@ -42,16 +43,6 @@ function languagePackageVersionRange(): string {
 
 function normalizeShebangCommand(command: string): string {
   return command.toLowerCase().replace(/\d+(?:\.\d+)*$/u, "");
-}
-
-interface LanguageEntry {
-  id: string;
-  name: string;
-  aliases: string[];
-  extensions: string[];
-  globs: string[];
-  emacsModes: string[];
-  shebangs: string[];
 }
 
 function writeLanguageFiles(config: LanguagesToml, plaintextAliases: string[]): void {
@@ -101,22 +92,31 @@ export default language
   console.log(`  plaintext: langs/plaintext.ts`);
 }
 
-function collectLanguageEntries(
-  config: LanguagesToml,
-  plaintextAliases: string[],
-): LanguageEntry[] {
-  const languageEntries: LanguageEntry[] = [];
+function collectLanguageEntries(config: LanguagesToml, plaintextAliases: string[]): LanguageInfo[] {
+  const languageEntries: LanguageInfo[] = [];
 
   for (const [id, entry] of Object.entries(config.parsers)) {
     const aliases = entry.aliases ?? [];
     const variant = entry.variant ?? titlecase(id);
     const name = entry.display_name ?? variant;
+    const parser = (entry.wasm_name ?? `tree-sitter-${id}`).replace(/^tree-sitter-/u, "");
+    const packageName = `@lumis-sh/wasm-${parser}`;
     const globs = entry.globs ?? [];
     const extensions = globs.filter((glob) => glob.startsWith("*."));
     const emacsModes = entry.emacs ?? [];
     const shebangs = entry.shebang ?? [];
 
-    languageEntries.push({ id, name, aliases, extensions, globs, emacsModes, shebangs });
+    languageEntries.push({
+      id,
+      name,
+      parser,
+      packageName,
+      aliases,
+      extensions,
+      globs,
+      emacsModes,
+      shebangs,
+    });
   }
 
   languageEntries.push({
@@ -132,7 +132,7 @@ function collectLanguageEntries(
   return languageEntries;
 }
 
-function writeLanguageMetadata(languageEntries: LanguageEntry[], versionRange: string): void {
+function writeLanguageMetadata(languageEntries: LanguageInfo[], versionRange: string): void {
   fs.mkdirSync(GENERATED_DIR, { recursive: true });
 
   fs.rmSync(path.join(GENERATED_DIR, "package-versions.ts"), { force: true });

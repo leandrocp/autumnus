@@ -32,6 +32,8 @@ export interface ConformanceFixture {
   structure: HtmlStructure;
   /** The limits the fixture renders under. An absent limit keeps its default. */
   budget?: Budget;
+  /** The milliseconds any one render may take once its language is loaded. */
+  returnsWithin?: number;
   /** Runtimes that cannot run the fixture yet, each with the reason. */
   skip?: Record<string, string>;
   events: SerializableHighlightEvent[];
@@ -60,6 +62,7 @@ interface FixtureMetadata {
   annotations?: FixtureAnnotation[];
   structure?: HtmlStructure;
   budget?: Budget;
+  returnsWithin?: number;
   skip?: Record<string, string>;
   events: SerializableHighlightEvent[];
 }

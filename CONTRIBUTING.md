@@ -34,6 +34,10 @@ mise run setup
 
 This installs the Rust, JS, and Elixir dependencies and checks the required tools.
 
+Setup runs independent asset builds with two mise workers. It builds Lumis before
+its integrations; pnpm builds Vite after rehype. Every setup still installs
+dependencies and regenerates the development assets.
+
 ## Testing
 
 Run the standard Rust, Elixir, and JavaScript test suites with:
@@ -86,10 +90,19 @@ The optional `budget` field (`timeLimit` in milliseconds, `matchLimit`) applies
 to the event checks and to every formatter, in every runtime. A time-limit
 fixture needs a source that takes far longer than its limit on the fastest
 runtime: `json-budget-time-limit` is 10,000 unclosed brackets, which take about
-90 ms on a release build, against a 1 ms limit. The optional `skip` field maps a
-runtime that cannot run the fixture yet to the reason. Only `web-tree-sitter`,
-which covers the JavaScript Wasm and browser suites, reads it.
-`conformance-regen` preserves both fields.
+90 ms on a release build, against a 1 ms limit.
+
+The optional `returnsWithin` field is how many milliseconds any one render may
+take once its language is loaded. Every runner times each events check and
+formatter against it, so the corpus pins when a render stops as well as what it
+returns. `elixir-budget-time-limit-operator-chain` takes about 30 s unbounded and
+has to return within 3 s under a 100 ms limit. Keep the bound wide enough for a
+loaded CI runner and far below the unbounded time, so a runtime that stops
+honouring the limit still fails.
+
+The optional `skip` field maps a runtime that cannot run the fixture yet to the
+reason. Only `web-tree-sitter`, which covers the JavaScript Wasm and browser
+suites, reads it. `conformance-regen` preserves all three fields.
 
 ### Generated HTML and CSS
 
@@ -691,6 +704,16 @@ mise run wasm-check {name}
 `wasm-publish` runs this before staging, so a parser published by hand meets the
 same bar as one the workflow publishes.
 
+A package finds its parser relative to its own module, so a page loads it only
+if the bundler ships the parser where that URL points. This stages `css`,
+`markdown` (which requires `markdown_inline`) and every member of the `web`
+bundle, installs them as tarballs into a Vite 8 project, and highlights one of
+each through the dev server and `vite build` in Chromium:
+
+```sh
+mise run wasm-check-bundler
+```
+
 The compiler is the WASI SDK that `build-wasm` downloads into `~/.cache/tree-sitter` the first time a parser compiles and hands to `tree-sitter-cli`; Emscripten is not involved. You also need `git`, to fetch each grammar at the revision `languages.toml` pins, and `npm`, for the grammars whose parser is generated from `grammar.js`.
 
 ### Running a runtime locally
@@ -870,7 +893,9 @@ The `wasm-release` workflow publishes to npm and Hex:
 1. **plan** — `mise run wasm-release-plan` works out, for every parser, the
    version it resolves to and which registries are missing it. Beside it,
    **query-check** compiles the Wasmtime half of `mise run wasm-check` once for
-   every pipeline.
+   every pipeline, and **bundler-check** runs `mise run wasm-check-bundler`, so
+   a template change Vite cannot follow stops the release. Both also run on a
+   pull request.
 2. **One pipeline per parser** that anything is missing, from
    `wasm-release-parser.yml`. **build** compiles the grammar, runs
    `mise run wasm-check` against that build, and stages both packages at the

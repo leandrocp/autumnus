@@ -94,24 +94,7 @@ echo "Installing docs site dependencies..."
 (cd docs && pnpm install)
 echo ""
 
-echo "Preprocessing shared queries..."
-mise run langs-preprocess-queries
-echo ""
-
-echo "Generating JS theme assets..."
-pnpm --filter @lumis-sh/themes run build
-echo ""
-
-echo "Generating JS language/runtime artifacts..."
-pnpm --filter @lumis-sh/lumis run build
-pnpm --dir packages/javascript run build:wasm-bundles
-echo ""
-
-echo "Building the packages whose examples import them by name..."
-pnpm --filter @lumis-sh/markdown-it-lumis run build
-pnpm --filter @lumis-sh/rehype-lumis run build
-pnpm --filter @lumis-sh/vite run build
-echo ""
+mise run --jobs 2 setup-assets
 
 echo "Fetching Elixir dependencies..."
 (cd packages/elixir/lumis && mix deps.get)
@@ -119,6 +102,32 @@ echo ""
 
 echo "Done."
 '''
+
+[tasks.'setup-assets']
+description = "Prepare shared queries and JavaScript development assets"
+depends = [
+    "langs-preprocess-queries",
+    "setup-js-themes",
+    "setup-js-integrations",
+    "setup-wasm-bundles",
+]
+
+[tasks.'setup-js-themes']
+description = "Build JavaScript theme modules, JSON and CSS"
+run = "pnpm --filter @lumis-sh/themes run build"
+
+[tasks.'setup-js-lumis']
+description = "Build JavaScript language and runtime artifacts"
+run = "pnpm --filter @lumis-sh/lumis run build"
+
+[tasks.'setup-js-integrations']
+description = "Build the packages whose examples import them by name"
+depends = ["setup-js-lumis"]
+run = "pnpm --recursive --workspace-concurrency=2 --filter @lumis-sh/markdown-it-lumis --filter @lumis-sh/rehype-lumis --filter @lumis-sh/vite run build"
+
+[tasks.'setup-wasm-bundles']
+description = "Generate JavaScript WASM bundle packages"
+run = "pnpm --dir packages/javascript run build:wasm-bundles"
 
 [tasks.'elixir-nif-lock-check']
 description = "Verify the packaged NIF crate resolves standalone with its lockfile"
@@ -133,9 +142,26 @@ tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT
 
 locked_wasmtime() {
-    awk '/^name = "wasmtime"$/ { getline; gsub(/[version ="]/, ""); print; exit }' "$1"
+    python3 - "$1" <<'PY'
+import sys
+import tomllib
+
+with open(sys.argv[1], "rb") as lockfile:
+    packages = tomllib.load(lockfile).get("package", [])
+matches = [p for p in packages if p.get("name") == "wasmtime"]
+if len(matches) != 1 or not matches[0].get("version"):
+    sys.exit(f"{sys.argv[1]}: expected exactly one versioned wasmtime package")
+print(matches[0]["version"])
+PY
 }
 workspace_version="$(locked_wasmtime Cargo.lock)"
+standalone_version="$(locked_wasmtime "$nif_dir/Cargo.lock")"
+
+if [ "${usage_fix:-false}" != "true" ] && [ "$workspace_version" != "$standalone_version" ]; then
+    echo "wasmtime differs: workspace $workspace_version, packaged NIF $standalone_version" >&2
+    echo "Run: mise run elixir-nif-lock-check --fix. Do not tighten public dependency requirements." >&2
+    exit 1
+fi
 
 mkdir "$tmp_dir/lumis_nif"
 cp "$nif_dir/Cargo.toml" "$nif_dir/Cargo.lock" "$tmp_dir/lumis_nif"
@@ -993,6 +1019,23 @@ if [ -n "${LUMIS_QUERY_CHECK:-}" ]; then
 else
     LUMIS_QUERY_LANGUAGES="$languages" cargo test -q -p lumis-wasm-runtime --test query_compile -- --ignored
 fi
+'''
+
+[tasks.'wasm-check-bundler']
+description = "Install staged parser packages and the web bundle into a Vite 8 project, and highlight with them in Chromium"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+export PATH="$(mise where tree-sitter):$PATH"
+version="$(tree-sitter --version | sed -E 's/^tree-sitter ([0-9]+\.[0-9]+).*/\1/').0"
+pnpm --dir packages/javascript run build:wasm-bundles --bundle web
+members="$(jq -r '.dependencies | keys[] | sub("^@lumis-sh/wasm-"; "")' tmp/wasm/npm/wasm-bundle-web/package.json)"
+for parser in $(printf '%s\n' css markdown markdown_inline $members | sort -u); do
+    mise run wasm-build "$parser"
+    cargo run -q --manifest-path crates/dev/Cargo.toml -- stage-wasm "$parser" --version "$version"
+done
+pnpm --filter @lumis-sh/lumis run build
+pnpm --filter @lumis-sh/lumis exec playwright test -c playwright.staged.config.ts
 '''
 
 [tasks.'wasm-publish-prepare']

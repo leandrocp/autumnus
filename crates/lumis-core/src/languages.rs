@@ -47,6 +47,7 @@ macro_rules! define_languages {
                 $a_variant:ident {
                     id: $a_id:expr,
                     name: $a_name:expr,
+                    parser: $a_parser:expr,
                     from_str: [$($a_str:expr),* $(,)?],
                     globs: [$($a_glob:expr),* $(,)?],
                     emacs: [$($a_emacs:expr),* $(,)?],
@@ -59,6 +60,7 @@ macro_rules! define_languages {
                 [$g_feat:expr] $g_variant:ident {
                     id: $g_id:expr,
                     name: $g_name:expr,
+                    parser: $g_parser:expr,
                     from_str: [$($g_str:expr),* $(,)?],
                     globs: [$($g_glob:expr),* $(,)?],
                     emacs: [$($g_emacs:expr),* $(,)?],
@@ -254,6 +256,10 @@ macro_rules! define_languages {
                 LanguageInfo {
                     id: self.id_name(),
                     name: self.name(),
+                    parser: match self {
+                        $(Language::$a_variant => $a_parser,)*
+                        $(#[cfg(feature = $g_feat)] Language::$g_variant => $g_parser,)*
+                    },
                     aliases: self.aliases(),
                     extensions: self.extensions(),
                     globs: self.globs(),
@@ -403,8 +409,6 @@ macro_rules! define_languages {
 
 /// What Lumis knows about one language.
 ///
-/// Every runtime returns this same shape.
-///
 /// # Examples
 ///
 /// ```
@@ -424,6 +428,8 @@ pub struct LanguageInfo {
     pub id: &'static str,
     /// Human-readable name, e.g. `Rust`.
     pub name: &'static str,
+    /// Parser name, e.g. `embedded-template` for EJS and ERB. `None` for plaintext.
+    pub parser: Option<&'static str>,
     /// Alternative names this language answers to.
     pub aliases: &'static [&'static str],
     /// The subset of [`globs`](Self::globs) that name a bare extension.

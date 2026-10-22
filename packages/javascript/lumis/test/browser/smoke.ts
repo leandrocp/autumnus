@@ -75,6 +75,8 @@ interface CorpusFixture {
   structure: HtmlStructure;
   /** The limits the fixture renders under. An absent limit keeps its default. */
   budget?: Budget;
+  /** The milliseconds any one render may take once its languages are loaded. */
+  returnsWithin?: number;
   source: string;
   theme: string;
   htmlMultiThemes?: {
@@ -108,6 +110,7 @@ function loadCorpus(): CorpusFixture[] {
         annotations?: FixtureAnnotation[];
         structure?: HtmlStructure;
         budget?: Budget;
+        returnsWithin?: number;
         htmlMultiThemes?: CorpusFixture["htmlMultiThemes"];
         events: { type: string; language?: string }[];
       };
@@ -126,6 +129,7 @@ function loadCorpus(): CorpusFixture[] {
         annotations: parsed.annotations,
         structure: parsed.structure ?? "block",
         budget: parsed.budget,
+        returnsWithin: parsed.returnsWithin,
         source,
         theme: parsed.theme,
         htmlMultiThemes: parsed.htmlMultiThemes,
@@ -243,6 +247,8 @@ export interface BrowserTestResult {
   /** Every conformance fixture, rendered through all five formatters. */
   fixtures: Record<string, FixtureOutput>;
   formatters: FixtureOutput;
+  /** The slowest render of each fixture that sets `returnsWithin`, in milliseconds. */
+  slowestRenders: Record<string, number>;
   languages: string[];
   requestedWasms: string[];
 }
@@ -341,8 +347,23 @@ async function run(): Promise<void> {
     await highlighter.loadLanguage(definition);
   }
 
+  const slowestRenders: Record<string, number> = {};
+  const timed = <T>(fixture: CorpusFixture, render: () => T): T => {
+    const started = performance.now();
+    const output = render();
+    if (fixture.returnsWithin !== undefined) {
+      slowestRenders[fixture.name] = Math.max(
+        slowestRenders[fixture.name] ?? 0,
+        performance.now() - started,
+      );
+    }
+    return output;
+  };
+
   const render = (fixture: CorpusFixture): FixtureOutput => {
     const { source, language, rainbowBrackets, wordDiff, structure, budget } = fixture;
+    const highlight: typeof highlighter.highlight = (...args) =>
+      timed(fixture, () => highlighter.highlight(...args));
     const theme = getTheme(fixture.theme);
     const config = fixture.htmlMultiThemes;
     // Reversed on purpose. Rust holds themes in a `HashMap` and sorts before
@@ -359,13 +380,9 @@ async function run(): Promise<void> {
     const options = { rainbowBrackets, wordDiff, budget };
 
     return {
-      htmlInline: highlighter.highlight(
-        source,
-        htmlInline({ language, structure, theme }),
-        options,
-      ),
-      htmlLinked: highlighter.highlight(source, htmlLinked({ language, structure }), options),
-      htmlMultiThemes: highlighter.highlight(
+      htmlInline: highlight(source, htmlInline({ language, structure, theme }), options),
+      htmlLinked: highlight(source, htmlLinked({ language, structure }), options),
+      htmlMultiThemes: highlight(
         source,
         htmlMultiThemes({
           language,
@@ -378,8 +395,8 @@ async function run(): Promise<void> {
         }),
         options,
       ),
-      bbcodeScoped: highlighter.highlight(source, bbcodeScoped({ language }), options),
-      terminal: highlighter.highlight(source, terminal({ language, theme }), options),
+      bbcodeScoped: highlight(source, bbcodeScoped({ language }), options),
+      terminal: highlight(source, terminal({ language, theme }), options),
     };
   };
 
@@ -392,22 +409,24 @@ async function run(): Promise<void> {
       wordDiff: fixture.wordDiff,
       budget: fixture.budget,
     };
-    highlighter.highlight(
-      fixture.source,
-      {
-        language: fixture.language,
-        render(source) {
-          fixtureEvents[fixture.name] = highlightEvents(source, this.language, {
-            ...options,
-            annotations: fixture.annotations?.map(({ range, data }) => ({
-              range: { type: "offset", ...range },
-              data,
-            })),
-          });
-          return "";
+    timed(fixture, () =>
+      highlighter.highlight(
+        fixture.source,
+        {
+          language: fixture.language,
+          render(source) {
+            fixtureEvents[fixture.name] = highlightEvents(source, this.language, {
+              ...options,
+              annotations: fixture.annotations?.map(({ range, data }) => ({
+                range: { type: "offset", ...range },
+                data,
+              })),
+            });
+            return "";
+          },
         },
-      },
-      options,
+        options,
+      ),
     );
   }
 
@@ -480,6 +499,7 @@ async function run(): Promise<void> {
     },
     fixtures,
     events: fixtureEvents,
+    slowestRenders,
     formatters,
     languages: highlighter.languages,
     requestedWasms,

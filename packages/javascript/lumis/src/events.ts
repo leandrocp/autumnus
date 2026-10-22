@@ -538,11 +538,10 @@ function snapshotCaptures(
 // Run a layer's query passes, or return null if the render runs out of time
 // during them.
 //
-// web-tree-sitter never hands the progress callback to `captures()`
-// (tree-sitter/tree-sitter#6010), so a capture pass started past the deadline
-// walks the whole document before anything can stop it, and one started in
-// time can finish past it. Like the Rust highlighter, the deadline is checked
-// after each pass, and a pass that ran out is discarded.
+// Each pass stops at the first progress callback past the deadline, but one
+// whose last callback came just before it still finishes late. Like the Rust
+// highlighter, the deadline is checked after the passes, and a layer that ran
+// out is discarded.
 function queryWithin(
   language: WasmLoadedLanguage,
   rootNode: Node,
@@ -554,7 +553,6 @@ function queryWithin(
   if (language.config.query.didExceedMatchLimit?.()) {
     budget.exceededMatchLimit = true;
   }
-  if (budget.deadline?.passed()) return null;
 
   const snapshot = snapshotCaptures(language, rootNode, queryOptions, queryMatches, maps, budget);
   if (budget.deadline?.passed()) return null;

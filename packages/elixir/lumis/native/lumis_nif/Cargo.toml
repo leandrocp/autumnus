@@ -45,9 +45,9 @@ too_many_lines = "allow"
 
 # Temporary, until lumis-core publishes with the `rustler` feature. The
 # standalone build `rustler_precompiled` runs never sees the workspace's root
-# `[patch.crates-io]`, so it takes lumis-core from the commit that added it;
+# `[patch.crates-io]`, so it takes lumis-core from a commit with the required APIs;
 # inside the workspace Cargo ignores this table. Remove it and run
 # `mise run elixir-nif-lock-check --fix` once lumis-core 4.1.0 is on crates.io.
 # `elixir-release.yml` refuses to publish while it is here.
 [patch.crates-io]
-lumis-core = { git = "https://github.com/leandrocp/lumis", rev = "757c0e6ac3c655424554e4e28b1908de20198c54" }
+lumis-core = { git = "https://github.com/leandrocp/lumis", rev = "f4e77a847bd7d36ce47b57dda192e328c9d6fa94" }

@@ -49,7 +49,7 @@ export interface Highlighter {
     onToken: HighlightCallback,
     options?: HighlightOptions,
   ): void;
-  /** Load a language by object, lazy handle, or string ID from a registered bundle. No-op if already loaded. */
+  /** Load a language by object, lazy handle, or string ID from the catalog or a registered bundle. No-op if already loaded. */
   loadLanguage(language: Language | LazyLanguage | string): Promise<void>;
   /** IDs of languages that have been loaded and are ready to highlight. */
   readonly languages: string[];
@@ -560,7 +560,7 @@ async function resolveDefinition(
   const builtin = await loadBuiltinLanguageById(input.id);
   if (builtin) return builtin;
 
-  throw new Error(`Language "${input.id}" is not registered in any bundle.`);
+  throw new Error(`Unknown language "${input.id}"`);
 }
 
 // The first bundle to claim an id or alias keeps it.
@@ -625,7 +625,7 @@ async function loadHighlighterLanguage(
 
     const builtin = await loadBuiltinLanguageById(input);
     if (!builtin) {
-      throw new Error(`Language "${input}" is not registered in any bundle.`);
+      throw new Error(`Unknown language "${input}"`);
     }
 
     await loadLanguageDefinition(runtime, builtin);

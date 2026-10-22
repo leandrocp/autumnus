@@ -1,12 +1,17 @@
 import { expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 
-const cases: { input: string; expected: string | null }[] = JSON.parse(
+const cases: {
+  input: string;
+  expected: string | null;
+  parser: string | null;
+  packageName: string | null;
+}[] = JSON.parse(
   readFileSync(new URL("../../../../../fixtures/language-lookup.json", import.meta.url), "utf8"),
 );
 
 export async function checkApi(page: Page, url: string): Promise<void> {
-  expect(cases.length).toBeGreaterThanOrEqual(24);
+  expect(cases.length).toBeGreaterThanOrEqual(27);
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.addInitScript(
@@ -22,7 +27,11 @@ export async function checkApi(page: Page, url: string): Promise<void> {
       aliases: true,
       guess: "javascript",
       language: "javascript",
-      lookup: cases.map(({ expected }) => expected),
+      lookup: cases.map(({ expected, parser, packageName }) => ({
+        id: expected,
+        parser,
+        packageName,
+      })),
       loaded: true,
       theme: "dracula",
       highlighted: true,

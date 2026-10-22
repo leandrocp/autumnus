@@ -75,6 +75,10 @@ export type AnnotationRange = OffsetAnnotationRange | PositionAnnotationRange;
 export interface LanguageInfo {
   id: string;
   name: string;
+  /** Parser name, e.g. `embedded-template` for EJS and ERB. Absent for plaintext. */
+  parser?: string;
+  /** npm parser package, e.g. `@lumis-sh/wasm-embedded-template`. Absent for plaintext. */
+  packageName?: string;
   aliases: string[];
   extensions: string[];
   globs: string[];

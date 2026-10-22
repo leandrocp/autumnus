@@ -23,6 +23,9 @@ Those files define the build pipeline, release model, generated artifacts, and h
 
 ## Operating rules
 
+Keep resolved Wasmtime versions aligned for the Lumis/mdex_native release pair targeted by CI; verify alignment in CI and build releases with `--locked`.
+Preserve compatible dependency ranges—do not add exact pins or restrict users' package combinations solely for cache reuse.
+
 ### Keep the API aligned across runtimes
 
 Lumis should present one mental model everywhere. Public APIs across languages should stay aligned in naming, argument shape, defaults, return behavior, formatter flow, and feature coverage.

@@ -104,6 +104,8 @@ defmodule Lumis.LumisTest do
     assert by_id["elixir"] == %{
              id: "elixir",
              name: "Elixir",
+             parser: "elixir",
+             package_name: "lumis_wasm_elixir",
              aliases: [],
              extensions: ["*.ex", "*.exs"],
              globs: ["*.ex", "*.exs"],
@@ -118,6 +120,8 @@ defmodule Lumis.LumisTest do
     assert by_id["plaintext"] == %{
              id: "plaintext",
              name: "Plain Text",
+             parser: nil,
+             package_name: nil,
              aliases: ["text", "txt", "plain"],
              extensions: [],
              globs: [],

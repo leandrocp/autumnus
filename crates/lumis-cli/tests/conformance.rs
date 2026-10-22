@@ -3,6 +3,7 @@ use serde::Deserialize;
 use std::collections::BTreeMap;
 use std::fs;
 use std::path::PathBuf;
+use std::time::{Duration, Instant};
 
 mod common;
 
@@ -42,6 +43,9 @@ struct FixtureMetadata {
     html_multi_themes: Option<HtmlMultiThemesFixture>,
     #[serde(default)]
     budget: FixtureBudget,
+    /// The milliseconds any one render may take once the parser is compiled.
+    #[serde(rename = "returnsWithin")]
+    returns_within: Option<u64>,
 }
 
 /// The limits a fixture renders under. An absent limit keeps its default.
@@ -122,10 +126,11 @@ fn run_highlight_source(fixture: &Fixture, formatter: &str, extra_args: &[&str])
             .arg(match_limit.to_string());
     }
 
-    let output = command
-        .write_stdin(fixture.source.as_str())
-        .output()
-        .unwrap();
+    command.write_stdin(fixture.source.as_str());
+    let output = match fixture.metadata.returns_within {
+        Some(limit) => output_within(&mut command, &fixture.metadata.language, limit),
+        None => command.output().unwrap(),
+    };
 
     assert!(
         output.status.success(),
@@ -133,6 +138,35 @@ fn run_highlight_source(fixture: &Fixture, formatter: &str, extra_args: &[&str])
         String::from_utf8_lossy(&output.stderr)
     );
     String::from_utf8(output.stdout).unwrap()
+}
+
+/// Runs a render held to the fixture's `returnsWithin`. The parser is compiled
+/// into the data directory first, since every process would otherwise compile
+/// it and loading is not part of a render.
+fn output_within(
+    command: &mut assert_cmd::Command,
+    language: &str,
+    limit: u64,
+) -> std::process::Output {
+    let warm = cmd()
+        .args(["highlight", "-l", language, "-f", "html-linked"])
+        .write_stdin("")
+        .output()
+        .unwrap();
+    assert!(
+        warm.status.success(),
+        "{}",
+        String::from_utf8_lossy(&warm.stderr)
+    );
+
+    let started = Instant::now();
+    let output = command.output().unwrap();
+    let elapsed = started.elapsed();
+    assert!(
+        elapsed <= Duration::from_millis(limit),
+        "render returned after {elapsed:?}, past its {limit} ms bound"
+    );
+    output
 }
 
 fn run_html(fixture: &Fixture, formatter: &str, extra_args: &[&str]) -> String {

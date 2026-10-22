@@ -32,16 +32,23 @@ defmodule Lumis.ApiParityTest do
       |> File.read!()
       |> Jason.decode!()
 
-    assert length(cases) >= 24
+    assert length(cases) >= 27
 
-    for %{"input" => input, "expected" => expected} <- cases do
-      actual =
-        case Lumis.Languages.get(input) do
-          nil -> nil
-          language -> language.id
-        end
+    for entry <- cases do
+      %{
+        "input" => input,
+        "expected" => expected,
+        "parser" => parser,
+        "hexPackageName" => package_name
+      } = entry
 
-      assert actual == expected, inspect(input)
+      language = Lumis.Languages.get(input)
+      listed = Enum.find(Lumis.Languages.available(), &(&1.id == expected))
+
+      assert language[:id] == expected, inspect(input)
+      assert language[:parser] == parser, inspect(input)
+      assert language[:package_name] == package_name, inspect(input)
+      assert listed == language, inspect(input)
     end
   end
 

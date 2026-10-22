@@ -41,6 +41,7 @@ struct ParserEntry {
     aliases: Option<Vec<String>>,
     variant: Option<String>,
     display_name: Option<String>,
+    wasm_name: Option<String>,
     emacs: Option<Vec<String>>,
     shebang: Option<Vec<String>>,
     feature: Option<String>,
@@ -92,11 +93,14 @@ fn format_entry(key: &str, entry: &ParserEntry) -> String {
     let globs = entry.globs.as_deref().unwrap_or(&[]);
     let emacs = entry.emacs.as_deref().unwrap_or(&[]);
     let shebang = entry.shebang.as_deref().unwrap_or(&[]);
+    let wasm_name = entry.wasm_name.as_deref().unwrap_or(key);
+    let parser = wasm_name.strip_prefix("tree-sitter-").unwrap_or(wasm_name);
 
     format!(
         r#"{variant} {{
             id: "{key}",
             name: "{display_name}",
+            parser: Some("{parser}"),
             from_str: {from_str},
             globs: {globs},
             emacs: {emacs},
@@ -136,6 +140,7 @@ fn languages() {
         r#"        PlainText {
             id: "plaintext",
             name: "Plain Text",
+            parser: None,
             from_str: ["plaintext", "text", "txt", "plain"],
             globs: [],
             emacs: ["fundamental", "text"],

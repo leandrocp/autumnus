@@ -368,6 +368,7 @@ struct FixtureMetadata {
     structure: FixtureStructure,
     html_multi_themes: Option<HtmlMultiThemesFixture>,
     budget: Option<FixtureBudget>,
+    returns_within: Option<u64>,
     skip: BTreeMap<String, String>,
 }
 
@@ -456,6 +457,10 @@ struct FixtureFile {
     annotations: Vec<FixtureAnnotation>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     budget: Option<FixtureBudget>,
+    /// The milliseconds any one render of the fixture may take, once its
+    /// language is loaded. Every runner times each render against it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    returns_within: Option<u64>,
     /// Runtimes that cannot run this fixture yet, each with the reason. Rust
     /// renders every fixture, since it generates them.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
@@ -735,6 +740,7 @@ fn fixture_outputs(source: &str, stored: &FixtureFile) -> Result<FixtureOutputs>
         structure,
         html_multi_themes,
         budget: stored.budget,
+        returns_within: stored.returns_within,
         skip: stored.skip.clone(),
     };
 
@@ -837,6 +843,7 @@ fn verify_conformance(name: &str) -> Result<()> {
                 html_multi_themes: generated.metadata.html_multi_themes.clone(),
                 annotations: generated.metadata.annotations.clone(),
                 budget: generated.metadata.budget,
+                returns_within: generated.metadata.returns_within,
                 skip: generated.metadata.skip.clone(),
                 events: generated.events.clone(),
             },
@@ -895,6 +902,7 @@ fn regen_conformance(name: &str) -> Result<()> {
                 html_multi_themes: generated.metadata.html_multi_themes,
                 annotations: generated.metadata.annotations,
                 budget: generated.metadata.budget,
+                returns_within: generated.metadata.returns_within,
                 skip: generated.metadata.skip,
                 events: generated.events,
             })? + "\n",
