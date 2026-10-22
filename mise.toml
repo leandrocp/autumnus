@@ -1317,9 +1317,6 @@ for entry in "${packages[@]}"; do
         listing="$(npm trust list "$package" --json 2>/dev/null || true)"
     fi
 
-    # The approval belongs to the command that asked for it. The retry above
-    # only gets through when npm's authentication page was told to skip
-    # two-factor for the next few minutes.
     if jq -es 'any(.[]; .error.code == "EOTP")' >/dev/null <<< "$listing"; then
         echo "npm asked for two-factor authentication again for $package." >&2
         echo "Rerun, and on npm's authentication page choose to skip two-factor for the next few minutes." >&2
@@ -1341,22 +1338,18 @@ for entry in "${packages[@]}"; do
         exit 1
     fi
 
-    # npm expires a configuration 48 hours after creating it unless a publish
-    # goes through it first, and still lists it afterwards, with no status in
-    # this output. A publish records the configuration it used in the
-    # packument, which is how a validated one is told apart from one that may
-    # have lapsed.
     configured="$(jq -rs --arg file "$workflow" '.[] | arrays[], objects | select(.file == $file) | .id' <<< "$listing")"
     if [ -n "$configured" ]; then
         validated="$(curl -fsS "https://registry.npmjs.org/${package/\//%2f}" \
             | jq -r '[.versions[]._npmUser.trustedPublisher?.oidcConfigId? // empty] | unique[]')"
+        unused="$(grep -vxFf <(printf '%s\n' "$validated") <<< "$configured" || true)"
         present=$((present + 1))
-        if grep -qxFf <(printf '%s\n' "$validated") <<< "$configured"; then
+        if [ -z "$unused" ]; then
             echo "$package already names $workflow"
         else
-            echo "$package names $workflow but has never published through it, so npm expires it 48 hours after creation"
+            echo "$package names $workflow in a configuration nothing has published through, so npm expires it 48 hours after creation"
             echo "  if https://www.npmjs.com/package/$package/access says Expired, revoke it and rerun:"
-            printf '  npm trust revoke %s --id=%s\n' $(sed "s|^|$package |" <<< "$configured")
+            printf '  npm trust revoke %s --id=%s\n' $(sed "s|^|$package |" <<< "$unused")
             unvalidated=$((unvalidated + 1))
         fi
         continue
