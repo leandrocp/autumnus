@@ -171,8 +171,8 @@ unmarked, and comparing the rest counts against the highlight
 Changed words take the theme scopes `diff.minus.word` and `diff.plus.word`, and
 every built-in formatter styles them like any other scope. HTML linked writes the
 `l-diff-minus-word` and `l-diff-plus-word` classes, which the bundled theme
-stylesheets style. BBCode writes `[diff-word-removed]` and `[diff-word-added]`
-tags.
+stylesheets style. BBCode writes the scope's tag, such as `[diff-minus-word-diff]`
+and `[diff-plus-word-diff]` in a `diff` document.
 
 Every bundled theme defines both scopes. Neovim colorschemes have no colour for
 changed words, so theme extraction derives one from the theme's `diff.minus` and
