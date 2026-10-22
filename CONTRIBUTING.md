@@ -35,8 +35,10 @@ mise run setup
 This installs the Rust, JS, and Elixir dependencies and checks the required tools.
 
 Setup runs independent asset builds with two mise workers. It builds Lumis before
-its integrations; pnpm builds Vite after rehype. Every setup still installs
-dependencies and regenerates the development assets.
+its integrations; pnpm builds Vite after rehype. The theme, Lumis and integration
+builds declare their inputs, so a rerun skips any whose inputs have not changed
+since its last build. `mise run --force setup-js-integrations` rebuilds Lumis and
+its integrations regardless.
 
 ## Testing
 
