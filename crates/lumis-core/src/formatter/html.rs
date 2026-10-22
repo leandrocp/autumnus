@@ -1477,12 +1477,7 @@ pub(crate) fn write_html_lines<T>(
             }
             LineFragment::Text(text) => write_escaped(output, text),
             LineFragment::SpanOpen(scope_index, language) => {
-                let attrs = attrs.get_or_insert(scope_index, language, span_attrs);
-                if attrs.is_empty() {
-                    output.write_all(b"<span>")
-                } else {
-                    write!(output, "<span {attrs}>")
-                }
+                output.write_all(attrs.open_tag(scope_index, language, span_attrs))
             }
             LineFragment::Close if !wrapped => Ok(()),
             LineFragment::Close | LineFragment::SpanClose => output.write_all(b"</span>"),
@@ -1524,32 +1519,37 @@ pub(crate) fn write_html_spans<T>(
     )
 }
 
-/// The rendered attributes of every scope this document has opened.
+/// The opening `<span>` of every scope this document has opened.
 ///
 /// A document reopens the same scope on every line it crosses and once per
-/// token besides, so resolving a scope's attributes is worth doing once. The
-/// key is owned because the composed events are written and dropped rather than
-/// held, and a scope carries few languages, so the language match is a scan of
-/// that short list rather than a second hash of a string this never stores
-/// twice.
+/// token besides, so each tag is rendered once and then copied. Scope indices
+/// are small and dense, so they index a vector directly, and a scope carries
+/// few languages, so the language match is a scan of that short list rather
+/// than a hash of a string this never stores twice.
 #[derive(Default)]
 struct SpanAttrCache {
-    entries: std::collections::HashMap<usize, Vec<(String, String)>>,
+    entries: Vec<Vec<(String, Vec<u8>)>>,
 }
 
 impl SpanAttrCache {
-    fn get_or_insert(
+    fn open_tag(
         &mut self,
         scope_index: usize,
         language: &str,
         span_attrs: &dyn Fn(usize, &str) -> String,
-    ) -> &str {
-        let languages = self.entries.entry(scope_index).or_default();
+    ) -> &[u8] {
+        if scope_index >= self.entries.len() {
+            self.entries.resize_with(scope_index + 1, Vec::new);
+        }
+        let languages = &mut self.entries[scope_index];
         let found = languages
             .iter()
             .position(|(known, _)| known == language)
             .unwrap_or_else(|| {
-                languages.push((language.to_string(), span_attrs(scope_index, language)));
+                languages.push((
+                    language.to_string(),
+                    open_span(&span_attrs(scope_index, language)).into_bytes(),
+                ));
                 languages.len() - 1
             });
 
