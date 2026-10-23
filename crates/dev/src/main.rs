@@ -2836,6 +2836,136 @@ fn name_list_cell(values: &[&str]) -> String {
     values.join(", ")
 }
 
+/// Languages that a language's injections query names, and whether it also takes
+/// a language from the document, such as a Markdown fence's info string.
+///
+/// Read from the processed query, where `; inherits:` is already flattened, so
+/// tsx lists what it gets from typescript and ecma. Names resolve to catalog ids
+/// and the language itself is left out. A name outside the catalog is dropped:
+/// no package could supply it.
+fn injected_languages(query: &str, own: &str) -> (Vec<&'static str>, bool) {
+    // Parsed with the query grammar rather than the target language's, which
+    // `crates/dev` does not build. Comments are syntax here, so a commented-out
+    // injection is not counted. Pattern 0 is a `#set!` naming the language,
+    // pattern 1 an `#eq?` or `#any-of?` pinning a captured one to fixed names,
+    // pattern 2 any capture that takes the language from the document.
+    static PATTERNS: std::sync::LazyLock<tree_sitter::Query> = std::sync::LazyLock::new(|| {
+        tree_sitter::Query::new(
+            &tree_sitter_tsquery::LANGUAGE.into(),
+            r#"
+            (predicate
+              name: (identifier) @_set (#eq? @_set "set")
+              type: (predicate_type) @_bang (#eq? @_bang "!")
+              parameters: (parameters
+                . (identifier) @_key (#eq? @_key "injection.language")
+                . (string (string_content) @fixed)))
+
+            (predicate
+              name: (identifier) @_test (#any-of? @_test "eq" "any-of")
+              type: (predicate_type) @_question (#eq? @_question "?")
+              parameters: (parameters
+                . (capture name: (identifier) @_key (#eq? @_key "injection.language"))
+                (string (string_content) @fixed)))
+
+            (capture
+              name: (identifier) @captured
+              (#any-of? @captured "injection.language" "injection.filename"))
+            "#,
+        )
+        .expect("valid query")
+    });
+
+    let mut parser = tree_sitter::Parser::new();
+    parser
+        .set_language(&tree_sitter_tsquery::LANGUAGE.into())
+        .expect("query grammar loads");
+    let tree = parser.parse(query, None).expect("query parses");
+    let fixed = PATTERNS.capture_index_for_name("fixed").expect("capture");
+    let captured = PATTERNS
+        .capture_index_for_name("captured")
+        .expect("capture");
+
+    let mut ids = Vec::new();
+    let mut pinned = HashSet::new();
+    let mut from_document = HashSet::new();
+    let mut cursor = tree_sitter::QueryCursor::new();
+    let mut matches = cursor.matches(&PATTERNS, tree.root_node(), query.as_bytes());
+    while let Some(found) = tree_sitter::StreamingIterator::next(&mut matches) {
+        for node in found.nodes_for_capture_index(fixed) {
+            if found.pattern_index == 1 {
+                pinned.insert(top_level_pattern(node));
+            }
+            if let Some(entry) = lumis_wasm_runtime::catalog::find(&query[node.byte_range()]) {
+                ids.push(entry.id);
+            }
+        }
+        for node in found.nodes_for_capture_index(captured) {
+            let in_predicate = node
+                .parent()
+                .and_then(|capture| capture.parent())
+                .is_some_and(|parent| parent.kind() == "parameters");
+            if !in_predicate {
+                from_document.insert(top_level_pattern(node));
+            }
+        }
+    }
+    ids.retain(|id| *id != own);
+    ids.sort_unstable();
+    ids.dedup();
+    (ids, from_document.difference(&pinned).next().is_some())
+}
+
+/// The id of the pattern `node` belongs to: the query's top-level child above it.
+fn top_level_pattern(mut node: tree_sitter::Node<'_>) -> usize {
+    while let Some(parent) = node.parent() {
+        if parent.parent().is_none() {
+            break;
+        }
+        node = parent;
+    }
+    node.id()
+}
+
+/// The table of what each language can inject, for a project choosing which
+/// parser packages to install alongside it.
+fn injections_section(toml: &LanguagesToml) -> Vec<String> {
+    let mut lines = vec![
+        String::new(),
+        "## Injections".to_string(),
+        String::new(),
+        "A language can highlight another inside it, such as CSS in an HTML `<style>`.".to_string(),
+        "Each needs its own parser installed, or that block stays plain. **Injects** lists"
+            .to_string(),
+        "the languages a query always names; **From the document** means it also takes a"
+            .to_string(),
+        "language from the source, such as a Markdown fence's info string, so any language"
+            .to_string(),
+        "can appear. Languages that inject nothing are not listed.".to_string(),
+        String::new(),
+        "| Language | Injects | From the document |".to_string(),
+        "|----------|---------|-------------------|".to_string(),
+    ];
+
+    for (lang, info) in &toml.parsers {
+        let query = fs::read_to_string(format!(
+            "queries/processed/{}/injections.scm",
+            query_source_name(lang, info)
+        ))
+        .unwrap_or_default();
+        let (ids, from_document) = injected_languages(&query, lang);
+        if ids.is_empty() && !from_document {
+            continue;
+        }
+        let from_document = if from_document { "yes" } else { "no" };
+        lines.push(format!(
+            "| {lang} | {} | {from_document} |",
+            name_list_cell(&ids)
+        ));
+    }
+
+    lines
+}
+
 /// The globs that name a bare extension, e.g. `*.rs`.
 ///
 /// `Language::extensions` in `lumis-core` selects them the same way, so the
@@ -2926,6 +3056,8 @@ fn gen_languages_md() -> Result<()> {
             "| {lang} | {aliases_col} | {extensions_col} | {parser_link} | {vendored} | {version_col} | {query_col} | {npm_col} | {hex_col} | {size_col} | {memory_col} |"
         ));
     }
+
+    table_lines.extend(injections_section(&toml));
 
     if !toml.bundles.is_empty() {
         table_lines.push(String::new());
@@ -8357,6 +8489,50 @@ mod tests {
         // reordering it: that is the order `lumis languages show` prints.
         assert_eq!(name_list_cell(&["zsh", "sh"]), "zsh, sh");
         assert_eq!(name_list_cell(&[]), "—");
+    }
+
+    #[test]
+    fn injected_languages_resolves_aliases_and_flags_names_from_the_document() {
+        let query = r#"
+((comment) @injection.content (#set! injection.language "comment"))
+((x) @injection.content (#set! injection.language "python3"))
+((y) @injection.content (#set! injection.language "python"))
+((z) @injection.content (#set! injection.language "markdown"))
+((w) @injection.content (#set! injection.language "not-a-language"))
+; (#set! injection.language "rust") is commented out
+((v) @injection.content
+  (#set!
+    injection.language
+    "json"))
+"#;
+
+        assert_eq!(
+            injected_languages(query, "markdown"),
+            (vec!["comment", "json", "python"], false)
+        );
+
+        let fenced = r"(fenced_code_block (info_string (language) @injection.language) (code_fence_content) @injection.content)";
+        assert_eq!(injected_languages(fenced, "markdown"), (vec![], true));
+
+        // Pinned by a predicate to names the query lists, so not open-ended.
+        let pinned = r#"
+((call (member) @injection.language (template) @injection.content)
+  (#eq? @injection.language "sql"))
+((macro (identifier) @injection.language (tokens) @injection.content)
+  (#any-of? @injection.language "html" "json" "pug"))
+"#;
+        assert_eq!(
+            injected_languages(pinned, "javascript"),
+            (vec!["html", "json", "sql"], false)
+        );
+
+        // `#match?` and `#not-any-of?` leave the name open.
+        let open = r#"
+((call (identifier) @injection.language (template) @injection.content)
+  (#match? @injection.language "^[a-z]+$")
+  (#not-any-of? @injection.language "svg" "css"))
+"#;
+        assert_eq!(injected_languages(open, "javascript"), (vec![], true));
     }
 
     #[test]
