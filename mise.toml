@@ -1573,6 +1573,7 @@ manifest = json.loads(path.read_text())
 implementation["version"] = f"Lumis {package['version']}"
 path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
 PYTHON
+node website/scripts/comparison-markdown.mjs --write
 '''
 
 [tasks.'release-prepare']

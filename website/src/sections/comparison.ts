@@ -25,10 +25,18 @@ interface ComparisonTheme {
   source: string;
 }
 
+interface Measurement {
+  totalNs: number;
+  sha256: string;
+  peakRssBytes: number | undefined;
+}
+
 interface Timings {
   theme: string;
-  cpu: string | undefined;
-  documents: Map<string, Map<string, { totalNs: number; sha256: string }>>;
+  documents: Map<string, Map<string, Measurement>>;
+  // How the figures were produced, as the report records it, for the
+  // methodology list. Older reports leave out what they did not record.
+  methodology: Array<[string, string]>;
 }
 
 interface Manifest {
@@ -92,9 +100,10 @@ export function renderComparison() {
             Grammars split punctuation and whitespace differently, so read it as how finely the file
             was resolved rather than as a score. The time beside it is that library highlighting that
             file: the median of the call that produced the output above, with the highlighter already
-            built and its languages loaded. The Lumis figure is its Rust runtime.
-            <span class="comparison-machine"></span>
+            built and its languages loaded. The Lumis figure is its Rust runtime. Peak RSS is what
+            a fresh process highlighting that file once held at most, runtime included.
           </p>
+          <dl class="comparison-methodology mt-4 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[auto_1fr]"></dl>
           <dl class="comparison-provenance mt-4 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[auto_1fr]"></dl>
         </div>
       </div>
@@ -109,7 +118,7 @@ export async function setupComparison(root: HTMLElement) {
   const unsupported = root.querySelector<HTMLParagraphElement>(".comparison-unsupported")!;
   const shell = root.querySelector<HTMLDivElement>(".comparison-shell")!;
   const missing = root.querySelector<HTMLParagraphElement>(".comparison-missing")!;
-  const machine = root.querySelector<HTMLSpanElement>(".comparison-machine")!;
+  const methodology = root.querySelector<HTMLDListElement>(".comparison-methodology")!;
 
   // The timings are not needed until the panel is drawn, so they load alongside
   // the manifest rather than after it.
@@ -128,8 +137,8 @@ export async function setupComparison(root: HTMLElement) {
   }
 
   const timings = await loadingTimings;
-  if (timings?.cpu) {
-    machine.textContent = `Every time was measured in one run on one machine: ${timings.cpu}.`;
+  for (const [label, value] of timings?.methodology ?? []) {
+    appendDefinition(methodology, label, value);
   }
 
   // Switching either tab reloads the frame, so the frame reports where it is and
@@ -138,13 +147,7 @@ export async function setupComparison(root: HTMLElement) {
   // same offset in a different implementation of one file is.
   const provenance = root.querySelector<HTMLDListElement>(".comparison-provenance")!;
   for (const entry of manifest.implementations) {
-    const term = document.createElement("dt");
-    term.className = "font-mono text-xs tracking-wider text-zinc-900 uppercase dark:text-white";
-    term.textContent = entry.version;
-    const detail = document.createElement("dd");
-    detail.className = "text-zinc-600 dark:text-zinc-400";
-    detail.textContent = entry.theme;
-    provenance.append(term, detail);
+    appendDefinition(provenance, entry.version, entry.theme);
   }
 
   const positions = new Map<string, number>();
@@ -185,8 +188,11 @@ export async function setupComparison(root: HTMLElement) {
 
     const tokens = currentDocument.tokens?.[currentImplementation.id];
     if (tokens !== undefined) parts.push(`${tokens.toLocaleString()} tokens`);
-    const nanoseconds = timeOf(timings, currentDocument, currentImplementation.id);
-    if (nanoseconds !== undefined) parts.push(`${formatDuration(nanoseconds)} highlight`);
+    const measured = measurementOf(timings, currentDocument, currentImplementation.id);
+    if (measured) parts.push(`${formatDuration(measured.totalNs)} highlight`);
+    if (measured?.peakRssBytes !== undefined) {
+      parts.push(`${formatBytes(measured.peakRssBytes)} peak RSS`);
+    }
 
     const link = document.createElement("a");
     link.href = currentDocument.source;
@@ -260,15 +266,25 @@ export async function setupComparison(root: HTMLElement) {
 // A time is shown only beside the output it measured. Once the comparison is
 // republished with a different output, the old time names an output the page no
 // longer has, and goes until the comparison is timed again.
-function timeOf(
+function measurementOf(
   timings: Timings | undefined,
   document: ComparisonDocument,
   implementationId: string,
-): number | undefined {
+): Measurement | undefined {
   if (!timings) return undefined;
   const timed = timings.documents.get(document.id)?.get(implementationId);
   const shown = document.outputSha256?.[implementationId]?.[timings.theme];
-  return timed && timed.sha256 === shown ? timed.totalNs : undefined;
+  return timed && timed.sha256 === shown ? timed : undefined;
+}
+
+function appendDefinition(list: HTMLDListElement, label: string, value: string) {
+  const term = document.createElement("dt");
+  term.className = "font-mono text-xs tracking-wider text-zinc-900 uppercase dark:text-white";
+  term.textContent = label;
+  const detail = document.createElement("dd");
+  detail.className = "text-zinc-600 dark:text-zinc-400";
+  detail.textContent = value;
+  list.append(term, detail);
 }
 
 // A build without the timing report still gets the gallery and the token
@@ -291,16 +307,76 @@ function readTimings(report: unknown): Timings {
   if (!isObject(report) || typeof report.theme !== "string" || !Array.isArray(report.documents)) {
     throw new Error("timing report has no theme or documents");
   }
-  const cpu =
-    isObject(report.system) && typeof report.system.cpu === "string"
-      ? report.system.cpu
-      : undefined;
-  return { theme: report.theme, cpu, documents: new Map(report.documents.map(readTimingDocument)) };
+  return {
+    theme: report.theme,
+    documents: new Map(report.documents.map(readTimingDocument)),
+    methodology: readMethodology(report),
+  };
 }
 
-function readTimingDocument(
-  entry: unknown,
-): [string, Map<string, { totalNs: number; sha256: string }>] {
+function readMethodology(report: { [key: string]: unknown }): Array<[string, string]> {
+  const system = isObject(report.system) ? report.system : {};
+  const measuredAt = stringOf(report.measuredAt);
+  const rows: Array<[string, string | undefined]> = [
+    ["Measured", measuredAt ? measuredAt.slice(0, 10) : "Date not recorded in this report"],
+    ["Hardware", hardwareOf(system)],
+    ["Operating system", stringOf(system.os) ?? joined([system.platform, system.release], " ")],
+    ["Runtimes", runtimesOf(report.runtimes)],
+    ["Metric", stringOf(report.metric) && `${stringOf(report.metric)}, one run on one machine`],
+    ["Timed", stringOf(report.timingBoundary)],
+    ...memoryRows(report.memory),
+  ];
+  return rows.filter((row): row is [string, string] => row[1] !== undefined && row[1] !== "");
+}
+
+function hardwareOf(system: { [key: string]: unknown }): string | undefined {
+  const cores = typeof system.cores === "number" ? `${system.cores} cores` : undefined;
+  const memory =
+    typeof system.memoryBytes === "number"
+      ? `${Math.round(system.memoryBytes / 2 ** 30)} GiB`
+      : undefined;
+  return joined([system.cpu, system.architecture, cores, memory], ", ");
+}
+
+function runtimesOf(runtimes: unknown): string | undefined {
+  if (!isObject(runtimes)) return undefined;
+  const node = stringOf(runtimes.node);
+  return joined([node && `Node.js ${node}`, runtimes.rust], ", ");
+}
+
+function memoryRows(memory: unknown): Array<[string, string | undefined]> {
+  if (!isObject(memory)) return [["Memory", "Not measured in this report"]];
+  const baselines = isObject(memory.baselines) ? memory.baselines : {};
+  const baseline =
+    isPositiveFinite(baselines.node) && isPositiveFinite(baselines.rust)
+      ? ` An empty Node.js process peaks at ${formatBytes(baselines.node)} and an empty Rust one at ${formatBytes(baselines.rust)}.`
+      : "";
+  const runs = typeof memory.runs === "number" ? `, over ${memory.runs} processes` : "";
+  return [
+    [
+      "Memory",
+      stringOf(memory.boundary) &&
+        `${stringOf(memory.metric) ?? "median"} ${stringOf(memory.boundary)}${runs}`,
+    ],
+    [
+      "Resident set size",
+      stringOf(memory.definition) && `${stringOf(memory.definition)}.${baseline}`,
+    ],
+  ];
+}
+
+function stringOf(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
+}
+
+function joined(values: unknown[], separator: string): string | undefined {
+  const strings = values.filter(
+    (value): value is string => typeof value === "string" && value !== "",
+  );
+  return strings.length > 0 ? strings.join(separator) : undefined;
+}
+
+function readTimingDocument(entry: unknown): [string, Map<string, Measurement>] {
   if (!isObject(entry) || typeof entry.id !== "string" || !Array.isArray(entry.results)) {
     throw new Error("timing report has a document without an id or results");
   }
@@ -308,10 +384,7 @@ function readTimingDocument(
   return [documentId, new Map(entry.results.map((result) => readTimingResult(result, documentId)))];
 }
 
-function readTimingResult(
-  result: unknown,
-  documentId: string,
-): [string, { totalNs: number; sha256: string }] {
+function readTimingResult(result: unknown, documentId: string): [string, Measurement] {
   if (!isObject(result) || typeof result.id !== "string" || typeof result.sha256 !== "string") {
     throw new Error(`${documentId} has a result without an id or output hash`);
   }
@@ -319,7 +392,9 @@ function readTimingResult(
     throw new Error(`${result.id} has no positive time for ${documentId}`);
   }
 
-  return [result.id, { totalNs: result.totalNs, sha256: result.sha256 }];
+  // A report from before memory was measured has times and no peaks.
+  const peakRssBytes = isPositiveFinite(result.peakRssBytes) ? result.peakRssBytes : undefined;
+  return [result.id, { totalNs: result.totalNs, sha256: result.sha256, peakRssBytes }];
 }
 
 function isPositiveFinite(value: unknown): value is number {
@@ -328,6 +403,10 @@ function isPositiveFinite(value: unknown): value is number {
 
 function isObject(value: unknown): value is { [key: string]: unknown } {
   return typeof value === "object" && value !== null;
+}
+
+function formatBytes(bytes: number) {
+  return `${(bytes / 2 ** 20).toFixed(1)} MiB`;
 }
 
 function formatDuration(ns: number) {

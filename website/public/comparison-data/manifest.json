@@ -35,6 +35,12 @@
       "theme": "@catppuccin/highlightjs 1.0.1 stylesheets"
     },
     {
+      "id": "pierre-highlights",
+      "label": "Highlights",
+      "version": "@pierre/highlights 0.2.0",
+      "theme": "Highlights' bundled Catppuccin themes, which match catppuccin/zed"
+    },
+    {
       "id": "prism",
       "label": "Prism",
       "version": "prismjs 1.30.0",
@@ -95,6 +101,7 @@
       "tokens": {
         "lumis": 6580,
         "highlight-js": 2019,
+        "pierre-highlights": 5468,
         "prism": 6048,
         "shiki": 5887,
         "speed-highlight": 3415,
@@ -111,6 +118,10 @@
         "highlight-js": {
           "latte": "19a74394ff8bbeda9b005c844ca6d0e59fd4098043c5ffbcc37a3e82470caf11",
           "frappe": "14ed110d5eb13f81567fdbdfe23daf4aee6e5042b2fb80afef9a57fa1a1d2087"
+        },
+        "pierre-highlights": {
+          "latte": "04282205aaca76140482ed5e1048157b27b873b1187250a1afa905f233082c7a",
+          "frappe": "6bd106d85ca189ac2250fd0a2c6ab6f8658a778f8f6960778acbc7c3eabb0567"
         },
         "prism": {
           "latte": "9a52c1d9851a707a6c839122f80e4d48dc9bbca841afee243a6c6a722d0ce89f",
@@ -157,6 +168,7 @@
       "tokens": {
         "lumis": 4521,
         "highlight-js": 1304,
+        "pierre-highlights": 3155,
         "prism": 3428,
         "shiki": 3734,
         "speed-highlight": 2421,
@@ -173,6 +185,10 @@
         "highlight-js": {
           "latte": "3cdd23c248e387a4aed0b27540971c25f340bdcf9267838dce4f8a8e0f9ac38a",
           "frappe": "da30dc6830f4983995f07f8092bc7564ceb65c1f8b85f537acbb5b7e70b165a7"
+        },
+        "pierre-highlights": {
+          "latte": "1301d6aa922f3395bf5e7024abd2e257ec3cd64c6d61ffd2a209e0384a761d84",
+          "frappe": "d07128b5742b80789d374889d2e6260b697b8f146a6d081e309c4cf90006ee1a"
         },
         "prism": {
           "latte": "828fa4f1d73e01b03539bb9c0eec4f3b77f7a32fa504a4fc9ae2cef9ed1b242a",
@@ -225,6 +241,7 @@
       "tokens": {
         "lumis": 5401,
         "highlight-js": 709,
+        "pierre-highlights": 1976,
         "prism": 1928,
         "shiki": 3668,
         "starry-night": 2519,
@@ -238,6 +255,10 @@
         "highlight-js": {
           "latte": "f6d517f08dafe107db75346800865231474faa957eeed54a31ed67f195a0c9d7",
           "frappe": "f30813ca923cf71432c6cce893d68d38fc83174f3e7ee2a0ee364b2f4043ad23"
+        },
+        "pierre-highlights": {
+          "latte": "18deb737570e80c5f889c8e49c5e21f3f76a75a5e135f6b1c3b13cacb86fbb5a",
+          "frappe": "3f6946f56cf8a498a596c08b315f8467bdeb82d6b02fe1d5716b60d0a20c0b6c"
         },
         "prism": {
           "latte": "a2110b003c4ad684ec64dba07b6fbf4b029644db6371775db8c1933fe2bcff1f",
@@ -272,6 +293,7 @@
       "tokens": {
         "lumis": 6306,
         "highlight-js": 1336,
+        "pierre-highlights": 5755,
         "prism": 4774,
         "shiki": 6189,
         "speed-highlight": 2718,
@@ -288,6 +310,10 @@
         "highlight-js": {
           "latte": "5973d6cedb835d27fa908fe4ac6593a36fa807a792c42b31e454843bc5098d1a",
           "frappe": "3d435b2bf1b6cdb0a3a00f62c0062c697b829f5223117470b9b77d127b7e8896"
+        },
+        "pierre-highlights": {
+          "latte": "e0a8c95855fa801145be793117b3516a1de2d6ef8bdaa177e8788a5b2c703833",
+          "frappe": "24d400f2ecf8b940f763c6a73729b7c634b34b4c7240874697e77993235e3b84"
         },
         "prism": {
           "latte": "96035a5ccfc9649de23ed6a9c25c17ce332f9e04f68ff2f34f79fa92eff0955b",
@@ -338,6 +364,7 @@
       "tokens": {
         "lumis": 849,
         "highlight-js": 263,
+        "pierre-highlights": 623,
         "prism": 844,
         "shiki": 571,
         "speed-highlight": 259,
@@ -354,6 +381,10 @@
         "highlight-js": {
           "latte": "89d73fe9441dcb23723eb8eea2b81d2c1f2696a9ae82c4fe1e503a31bb23e63a",
           "frappe": "cdfd2fd302ad69c9f32c751a22b3f94263c995bd87bf68ee75be2b03d95adede"
+        },
+        "pierre-highlights": {
+          "latte": "0ea14e9c943b84420b1f3e40e5829aa670c4fadcea9f255d1e6a23f21b30c431",
+          "frappe": "8b4cf9b15f63378dc6ca40fb66ad64fc3fcff329d599cbbb66bb79a299a47869"
         },
         "prism": {
           "latte": "32fb0a40213471ad0d530893a81d5757301b9c2af3b1d137a3f5db8b8cf337c4",
@@ -400,6 +431,7 @@
       "tokens": {
         "lumis": 2422,
         "highlight-js": 1259,
+        "pierre-highlights": 2177,
         "prism": 2631,
         "shiki": 2474,
         "speed-highlight": 1487,
@@ -416,6 +448,10 @@
         "highlight-js": {
           "latte": "1a991a58ed8b42afd451342013c910b7e3da7e42124100333c6b3d9b28048ef7",
           "frappe": "d73c1db1b50454013e21a9240eec8203029c93427412b6ecf18ee172723944a9"
+        },
+        "pierre-highlights": {
+          "latte": "94e78393346ef93030a69ab43398054eb009e0911383bc60c6b84ee669ab3903",
+          "frappe": "18e48b2d389d738b27812b15d995dc6d29cca89ef0c0414e2cfadfea891d64db"
         },
         "prism": {
           "latte": "948845deded5ff9c50392a9e5a31dc354c12b0790c84a0255f52faab9f409cf1",

@@ -211,15 +211,18 @@ node benchmarks/scripts/finish-showcase.mjs
 [tasks."showcase-publish"]
 description = "Copy the visual comparison into the website as static assets"
 depends = ["showcase"]
-run = "node benchmarks/scripts/publish-showcase.mjs"
+run = '''
+node benchmarks/scripts/publish-showcase.mjs
+node website/scripts/comparison-markdown.mjs --write
+'''
 
 # The time beside each output is that library highlighting that document, through
-# the call that rendered it. The Rust and JavaScript runs share their render code
-# with the showcase and keep what they timed, and the last step fails unless that
+# the call that rendered it, and the memory is the median peak RSS of five fresh
+# processes doing the same. Every pass keeps what it rendered and fails unless that
 # is byte for byte the published output, so publish the comparison before timing
 # it.
 [tasks."comparison-timings"]
-description = "Time every library on every document of the visual comparison"
+description = "Time and measure the memory of every library on every document of the visual comparison"
 depends = ["install", "prepare:showcase"]
 run = '''
 export BENCH_SHOWCASE_DIR="$MISE_CONFIG_ROOT/showcase/generated"
@@ -227,6 +230,8 @@ export BENCH_FRAGMENTS_DIR="$BENCH_RUN_DIR/comparison/fragments"
 rm -rf "$BENCH_RUN_DIR/comparison"
 CRITERION_HOME="$BENCH_RUN_DIR/comparison/criterion" cargo bench --manifest-path benchmarks/rust/Cargo.toml --bench comparison -- --noplot
 BENCH_OUTPUT="$BENCH_RUN_DIR/comparison/javascript.json" pnpm --filter @lumis-sh/benchmarks run comparison-timings
+cargo build --manifest-path benchmarks/rust/Cargo.toml --release --bin comparison-memory
+node benchmarks/scripts/comparison-memory.mjs
 node benchmarks/scripts/finish-comparison-timings.mjs
 '''
 
@@ -235,6 +240,7 @@ description = "Copy the comparison timings into the website"
 run = '''
 mkdir -p website/public/benchmark-data
 cp "$BENCH_RUN_DIR/comparison/timings.json" website/public/benchmark-data/comparison.json
+node website/scripts/comparison-markdown.mjs --write
 '''
 
 [tasks.build]

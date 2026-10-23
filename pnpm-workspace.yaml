@@ -25,3 +25,4 @@ minimumReleaseAgeExclude:
   - '@shikijs/types@4.4.2'
   - shiki@4.4.2
   - '@tanstack/highlight@1.0.0'
+  - '@pierre/highlights@0.2.0'

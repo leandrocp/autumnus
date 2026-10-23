@@ -166,6 +166,10 @@ const provenance = {
     version: `highlight.js ${await installedVersion("highlight.js")}`,
     theme: `@catppuccin/highlightjs ${await installedVersion("@catppuccin/highlightjs")} stylesheets`,
   },
+  "pierre-highlights": {
+    version: `@pierre/highlights ${await installedVersion("@pierre/highlights")}`,
+    theme: "Highlights' bundled Catppuccin themes, which match catppuccin/zed",
+  },
   "tanstack-highlight": {
     version: `@tanstack/highlight ${await installedVersion("@tanstack/highlight")}`,
     theme: `@catppuccin/highlightjs ${await installedVersion("@catppuccin/highlightjs")} colours, mapped onto its token classes by this repository`,
@@ -336,7 +340,7 @@ function run(command, args) {
 }
 
 // A token is a span the highlighter gave a colour to, whether that colour arrives
-// inline or through a token class: highlight.js's `hljs-`, TanStack Highlight's
+// inline, as Lumis, Shiki, syntect and Highlights write it, or through a token class: highlight.js's `hljs-`, TanStack Highlight's
 // `th-token`, Prism's `token`, speed-highlight's `shj-syn-` or starry-night's
 // `pl-`. Spans that carry none are structure rather than a token: Shiki wraps
 // every line in `<span class="line">`, and TanStack Highlight in
