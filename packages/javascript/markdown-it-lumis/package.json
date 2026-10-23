@@ -41,7 +41,7 @@
     "prepack": "pnpm run build"
   },
   "dependencies": {
-    "markdown-it": "^15.0.2"
+    "markdown-it": "^15.0.3"
   },
   "devDependencies": {
     "@lumis-sh/lumis": "workspace:^",
@@ -53,7 +53,7 @@
     "oxlint-tsgolint": "7.0.2004",
     "tsup": "^9.0.0",
     "typescript": "^6.0.3",
-    "vitest": "^5.0.4"
+    "vitest": "^5.0.5"
   },
   "peerDependencies": {
     "@lumis-sh/lumis": "workspace:^"

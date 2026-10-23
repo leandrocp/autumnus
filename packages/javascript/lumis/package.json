@@ -215,7 +215,7 @@
     "typedoc": "^0.28.20",
     "typescript": "^6.0.3",
     "vite": "^8.3.4",
-    "vitest": "^5.0.4",
+    "vitest": "^5.0.5",
     "web-tree-sitter": "0.27.1"
   }
 }
