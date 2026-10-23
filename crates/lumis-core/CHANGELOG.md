@@ -1,3 +1,37 @@
+## [4.1.0](https://github.com/leandrocp/lumis/compare/cargo-lumis-core/v4.0.2...cargo-lumis-core/v4.1.0) (2026-10-23)
+
+### Features
+
+- **themes:** Expose closest across Rust, JavaScript, and Elixir in [\#1750](https://github.com/leandrocp/lumis/pull/1750)
+- **api:** Align public language and theme modules in [\#1752](https://github.com/leandrocp/lumis/pull/1752)
+- **themes:** Update themes in [\#1767](https://github.com/leandrocp/lumis/pull/1767)
+- **themes:** Update themes in [\#1802](https://github.com/leandrocp/lumis/pull/1802)
+- Decode Elixir options in lumis-core for every NIF
+- Expose parser identities in language metadata in [\#1811](https://github.com/leandrocp/lumis/pull/1811)
+- Word-level diff highlighting in [\#1807](https://github.com/leandrocp/lumis/pull/1807)
+- **themes:** Style changed diff words in theme stylesheets in [\#1808](https://github.com/leandrocp/lumis/pull/1808)
+- **themes:** Extract diff word colors into theme JSON in [\#1837](https://github.com/leandrocp/lumis/pull/1837)
+- **themes:** Record each theme's source licence and ship a NOTICE in [\#1844](https://github.com/leandrocp/lumis/pull/1844)
+
+### Bug Fixes
+
+- Use theme names for multi-theme HTML classes in [\#1748](https://github.com/leandrocp/lumis/pull/1748)
+- Inherit enclosing styles in token and terminal output by @ampagent
+
+### Performance
+
+- **terminal:** Inherit enclosing styles in token and terminal output in [\#1806](https://github.com/leandrocp/lumis/pull/1806)
+- **core:** Cache opening span tags and stop cloning events per line in [\#1843](https://github.com/leandrocp/lumis/pull/1843)
+
+### Code Refactoring
+
+- Preserve Lumis wire conversion and bound raw option errors
+
+### Documentation
+
+- Clean up API documentation in [\#1763](https://github.com/leandrocp/lumis/pull/1763)
+- **languages:** List the languages each language can inject in [\#1841](https://github.com/leandrocp/lumis/pull/1841)
+
 ## [4.0.2](https://github.com/leandrocp/lumis/compare/cargo-lumis-core/v4.0.1...cargo-lumis-core/v4.0.2) (2026-10-09)
 
 ### Bug Fixes
