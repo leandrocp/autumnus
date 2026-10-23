@@ -39,12 +39,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "940b3a0ca603d1eade50a4846a2afffd5ef57a9feac2c0e2ec2e14f9ead76000"
 
 [[package]]
-name = "anyhow"
-version = "1.0.104"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "330a5ed07fa54e4702c9d6c4174f74427fc0ef6e214bbd677ae50a5099946470"
-
-[[package]]
 name = "autocfg"
 version = "1.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -549,9 +543,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.186"
+version = "0.2.190"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "68ab91017fe16c622486840e4c83c9a37afeff978bd239b5293d61ece587de66"
+checksum = "ce5d3ddc6d3fa000eb1536d85e147bfe31aacaba692ed6a876f95cb7c855be78"
 
 [[package]]
 name = "linked-hash-map"
@@ -569,24 +563,18 @@ checksum = "32a66949e030da00e8c7d4434b251670a91556f4144941d37452769c25d58a53"
 name = "lumis"
 version = "0.17.1"
 dependencies = [
- "anyhow",
  "cc",
- "derive_builder",
- "glob",
- "lumis-build",
  "lumis-core",
  "lumis-wasm-runtime",
  "prettyplease",
  "proc-macro2",
  "quote",
  "rayon",
- "regex",
  "serde",
  "serde_json",
  "smol_str",
  "streaming-iterator",
  "syn 3.0.9",
- "termcolor",
  "thiserror",
  "toml",
  "tree-sitter",
@@ -603,7 +591,6 @@ dependencies = [
  "tree-sitter-md",
  "tree-sitter-rust",
  "tree-sitter-typescript",
- "v_htmlescape",
  "xz2",
 ]
 
@@ -621,26 +608,18 @@ dependencies = [
 ]
 
 [[package]]
-name = "lumis-build"
-version = "1.1.0"
-
-[[package]]
 name = "lumis-core"
 version = "4.0.2"
 dependencies = [
  "derive_builder",
  "glob",
- "prettyplease",
- "proc-macro2",
  "quote",
  "regex",
  "serde",
  "serde_json",
  "similar",
- "syn 3.0.9",
  "toml",
  "typed-path",
- "v_htmlescape",
 ]
 
 [[package]]
@@ -1100,15 +1079,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "termcolor"
-version = "1.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "06794f8f6c5c898b3275aebefa6b8a1cb24cd2c6c79397ab15774837a0bc5755"
-dependencies = [
- "winapi-util",
-]
-
-[[package]]
 name = "thiserror"
 version = "2.0.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1374,21 +1344,6 @@ name = "unicode-ident"
 version = "1.0.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
-
-[[package]]
-name = "v_escape-base"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f1212fce830b75af194b578e55b3db9049f2c8c45f58d397fb25602fdb50fb3d"
-
-[[package]]
-name = "v_htmlescape"
-version = "0.17.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "befb3d53c9e3ec641417685896cbc8cc5bd264d6a2e190c56aaef1af24740d99"
-dependencies = [
- "v_escape-base",
-]
 
 [[package]]
 name = "walkdir"
