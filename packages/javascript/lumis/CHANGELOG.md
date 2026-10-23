@@ -1,3 +1,60 @@
+## [0.9.5](https://github.com/leandrocp/lumis/compare/npm-lumis/v0.9.4...npm-lumis/v0.9.5) (2026-10-23)
+
+### Features
+
+- **themes:** Expose closest across Rust, JavaScript, and Elixir in [\#1750](https://github.com/leandrocp/lumis/pull/1750)
+- **api:** Align public language and theme modules in [\#1752](https://github.com/leandrocp/lumis/pull/1752)
+- **themes:** Update themes in [\#1767](https://github.com/leandrocp/lumis/pull/1767)
+- Update lang php in [\#1768](https://github.com/leandrocp/lumis/pull/1768)
+- Update lang erlang in [\#1766](https://github.com/leandrocp/lumis/pull/1766)
+- Update lang graphql in [\#1765](https://github.com/leandrocp/lumis/pull/1765)
+- Update lang dart in [\#1799](https://github.com/leandrocp/lumis/pull/1799)
+- Update lang hurl in [\#1800](https://github.com/leandrocp/lumis/pull/1800)
+- **themes:** Update themes in [\#1802](https://github.com/leandrocp/lumis/pull/1802)
+- Update lang scala in [\#1801](https://github.com/leandrocp/lumis/pull/1801)
+- Update lang scheme in [\#1803](https://github.com/leandrocp/lumis/pull/1803)
+- Decode Elixir options in lumis-core for every NIF
+- Expose parser identities in language metadata in [\#1811](https://github.com/leandrocp/lumis/pull/1811)
+- Word-level diff highlighting in [\#1807](https://github.com/leandrocp/lumis/pull/1807)
+- **themes:** Style changed diff words in theme stylesheets in [\#1808](https://github.com/leandrocp/lumis/pull/1808)
+- **themes:** Extract diff word colors into theme JSON in [\#1837](https://github.com/leandrocp/lumis/pull/1837)
+- **javascript:** Instantiate browser parsers synchronously and run staged parsers in WebKit in [\#1845](https://github.com/leandrocp/lumis/pull/1845)
+- **themes:** Record each theme's source licence and ship a NOTICE in [\#1844](https://github.com/leandrocp/lumis/pull/1844)
+
+### Bug Fixes
+
+- Use theme names for multi-theme HTML classes in [\#1748](https://github.com/leandrocp/lumis/pull/1748)
+- Restore groovy and hurl in [\#1788](https://github.com/leandrocp/lumis/pull/1788)
+- Add missing queries  in [\#1786](https://github.com/leandrocp/lumis/pull/1786)
+- **sql:** Update lang sql in [\#1804](https://github.com/leandrocp/lumis/pull/1804)
+- Inherit enclosing styles in token and terminal output by @ampagent
+- **javascript:** Clarify unknown language errors in [\#1810](https://github.com/leandrocp/lumis/pull/1810)
+- **bundles:** Require the parser series mise.toml pins in [\#1828](https://github.com/leandrocp/lumis/pull/1828)
+- **javascript:** Update standalone examples for installed parsers in [\#1813](https://github.com/leandrocp/lumis/pull/1813)
+
+### Performance
+
+- **terminal:** Inherit enclosing styles in token and terminal output in [\#1806](https://github.com/leandrocp/lumis/pull/1806)
+- **core:** Cache opening span tags and stop cloning events per line in [\#1843](https://github.com/leandrocp/lumis/pull/1843)
+- **runtime:** Compile languages' queries in parallel and once per grammar in [\#1842](https://github.com/leandrocp/lumis/pull/1842)
+
+### Code Refactoring
+
+- Preserve Lumis wire conversion and bound raw option errors
+
+### Documentation
+
+- Clean up API documentation in [\#1763](https://github.com/leandrocp/lumis/pull/1763)
+- Link the crate docs to the languages reference in [\#1789](https://github.com/leandrocp/lumis/pull/1789)
+- **languages:** List the languages each language can inject in [\#1841](https://github.com/leandrocp/lumis/pull/1841)
+
+### Testing
+
+- **rust:** Keep shared fixtures outside packaged unit tests by @ampagent
+- Compare the decoy's parent as a Path
+- **javascript:** Load staged parser packages through Vite 8 in Chromium in [\#1817](https://github.com/leandrocp/lumis/pull/1817)
+- **conformance:** Pin when a render returns at its time limit in [\#1814](https://github.com/leandrocp/lumis/pull/1814)
+
 ## [0.9.4](https://github.com/leandrocp/lumis/compare/npm-lumis/v0.9.3...npm-lumis/v0.9.4) (2026-10-10)
 
 ### Features
