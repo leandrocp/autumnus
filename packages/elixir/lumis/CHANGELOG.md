@@ -1,3 +1,40 @@
+## [0.10.4](https://github.com/leandrocp/lumis/compare/hex-lumis/v0.10.3...hex-lumis/v0.10.4) (2026-10-23)
+
+### Features
+
+- **themes:** Expose closest across Rust, JavaScript, and Elixir in [\#1750](https://github.com/leandrocp/lumis/pull/1750)
+- **api:** Align public language and theme modules in [\#1752](https://github.com/leandrocp/lumis/pull/1752)
+- **themes:** Update themes in [\#1767](https://github.com/leandrocp/lumis/pull/1767)
+- **themes:** Update themes in [\#1802](https://github.com/leandrocp/lumis/pull/1802)
+- Decode Elixir options in lumis-core for every NIF
+- Expose parser identities in language metadata in [\#1811](https://github.com/leandrocp/lumis/pull/1811)
+- Word-level diff highlighting in [\#1807](https://github.com/leandrocp/lumis/pull/1807)
+- **themes:** Style changed diff words in theme stylesheets in [\#1808](https://github.com/leandrocp/lumis/pull/1808)
+- **themes:** Extract diff word colors into theme JSON in [\#1837](https://github.com/leandrocp/lumis/pull/1837)
+
+### Bug Fixes
+
+- Use theme names for multi-theme HTML classes in [\#1748](https://github.com/leandrocp/lumis/pull/1748)
+- **elixir:** Report queries that do not compile as :invalid_queries in [\#1780](https://github.com/leandrocp/lumis/pull/1780)
+- Inherit enclosing styles in token and terminal output by @ampagent
+- **elixir:** Omit BEAM registration from Rust unit tests
+
+### Performance
+
+- **runtime:** Compile languages' queries in parallel and once per grammar in [\#1842](https://github.com/leandrocp/lumis/pull/1842)
+
+### Code Refactoring
+
+- Preserve Lumis wire conversion and bound raw option errors
+
+### Documentation
+
+- Clean up API documentation in [\#1763](https://github.com/leandrocp/lumis/pull/1763)
+
+### Testing
+
+- **conformance:** Pin when a render returns at its time limit in [\#1814](https://github.com/leandrocp/lumis/pull/1814)
+
 ## [0.10.3](https://github.com/leandrocp/lumis/compare/hex-lumis/v0.10.2...hex-lumis/v0.10.3) (2026-10-11)
 
 ### Dependencies
