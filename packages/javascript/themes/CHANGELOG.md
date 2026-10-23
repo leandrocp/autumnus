@@ -1,3 +1,14 @@
+## [0.4.1](https://github.com/leandrocp/lumis/compare/npm-themes/v0.4.0...npm-themes/v0.4.1) (2026-10-23)
+
+### Features
+
+- **themes:** Expose closest across Rust, JavaScript, and Elixir in [\#1750](https://github.com/leandrocp/lumis/pull/1750)
+- **themes:** Update themes in [\#1767](https://github.com/leandrocp/lumis/pull/1767)
+- **themes:** Update themes in [\#1802](https://github.com/leandrocp/lumis/pull/1802)
+- **themes:** Style changed diff words in theme stylesheets in [\#1808](https://github.com/leandrocp/lumis/pull/1808)
+- **themes:** Extract diff word colors into theme JSON in [\#1837](https://github.com/leandrocp/lumis/pull/1837)
+- **themes:** Record each theme's source licence and ship a NOTICE in [\#1844](https://github.com/leandrocp/lumis/pull/1844)
+
 ## [0.4.0](https://github.com/leandrocp/lumis/compare/npm-themes/v0.3.2...npm-themes/v0.4.0) (2026-09-29)
 
 
