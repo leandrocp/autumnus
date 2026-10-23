@@ -34,6 +34,9 @@ export async function measureCall(call) {
     max_samples: 1_000_000,
     min_cpu_time: measurementSeconds * 1e9,
     warmup_samples: 1,
+    // mitata batches a call under 64 µs into `batch_samples / batch_unroll`
+    // calls per sample, which rounds to zero here and times an empty loop.
+    batch_threshold: 0,
     batch_samples: 1,
     gc: release,
     inner_gc: true,
