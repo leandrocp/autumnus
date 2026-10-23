@@ -222,6 +222,9 @@ fn license_link(url: &str, revision: &str, license: &SourceLicense) -> String {
 }
 
 fn copyright_cell(license: &SourceLicense) -> String {
+    if license.license == NO_LICENSE {
+        return "No license file".to_string();
+    }
     if license.copyright.is_empty() {
         return "Not stated in the license file".to_string();
     }
@@ -297,5 +300,21 @@ mod tests {
         let source = "[sources.\"https://github.com/a/a\"]\nlicense = \"MIT\"\n";
         let err = validate(&[theme("https://github.com/a/a", &[])], &licenses(source)).unwrap_err();
         assert!(err.to_string().contains("https://github.com/a/a"));
+    }
+
+    #[test]
+    fn copyright_cell_tells_a_missing_license_from_a_missing_copyright_line() {
+        let sources = licenses(
+            "[sources.\"https://github.com/a/a\"]\nlicense = \"MIT\"\nlicense_file = \"LICENSE\"\n\
+             [sources.\"https://github.com/b/b\"]\nlicense = \"NONE\"\n",
+        );
+        assert_eq!(
+            copyright_cell(&sources.sources["https://github.com/a/a"]),
+            "Not stated in the license file"
+        );
+        assert_eq!(
+            copyright_cell(&sources.sources["https://github.com/b/b"]),
+            "No license file"
+        );
     }
 }
