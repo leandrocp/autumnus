@@ -1,3 +1,14 @@
+## [0.4.1](https://github.com/leandrocp/lumis/compare/npm-react/v0.4.0...npm-react/v0.4.1) (2026-10-23)
+
+### Features
+
+- **api:** Align public language and theme modules in [\#1752](https://github.com/leandrocp/lumis/pull/1752)
+
+### Bug Fixes
+
+- **javascript:** Require Lumis as an integration peer in [\#1751](https://github.com/leandrocp/lumis/pull/1751)
+- **javascript:** Update standalone examples for installed parsers in [\#1813](https://github.com/leandrocp/lumis/pull/1813)
+
 ## [0.4.0](https://github.com/leandrocp/lumis/compare/npm-react/v0.3.1...npm-react/v0.4.0) (2026-09-29)
 
 
