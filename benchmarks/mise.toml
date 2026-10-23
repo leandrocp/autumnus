@@ -216,8 +216,8 @@ node benchmarks/scripts/publish-showcase.mjs
 node website/scripts/comparison-markdown.mjs --write
 '''
 
-# The time beside each output is that library highlighting that document, through
-# the call that rendered it, and the memory is the median peak RSS of five fresh
+# Each time is that library highlighting that document through the call that
+# rendered its gallery output, and the memory is the median peak RSS of five fresh
 # processes doing the same. Every pass keeps what it rendered and fails unless that
 # is byte for byte the published output, so publish the comparison before timing
 # it.
@@ -233,14 +233,6 @@ BENCH_OUTPUT="$BENCH_RUN_DIR/comparison/javascript.json" pnpm --filter @lumis-sh
 cargo build --manifest-path benchmarks/rust/Cargo.toml --release --bin comparison-memory
 node benchmarks/scripts/comparison-memory.mjs
 node benchmarks/scripts/finish-comparison-timings.mjs
-'''
-
-[tasks."comparison-timings-publish"]
-description = "Copy the comparison timings into the website"
-run = '''
-mkdir -p website/public/benchmark-data
-cp "$BENCH_RUN_DIR/comparison/timings.json" website/public/benchmark-data/comparison.json
-node website/scripts/comparison-markdown.mjs --write
 '''
 
 [tasks.build]
