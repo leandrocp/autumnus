@@ -153,6 +153,15 @@ describe("native runtime", () => {
     );
   });
 
+  itWithAddon("loads a batch and answers for each language in it", async () => {
+    const runtime = newRuntime();
+    const failures = await runtime.loadLanguages(["json", "regex", "markdown", "json"]);
+
+    expect(failures).toEqual([null, "@lumis-sh/wasm-regex is not installed", null, null]);
+    expect(runtime.hasLanguage("json")).toBe(true);
+    expect(runtime.hasLanguage("markdown")).toBe(true);
+  });
+
   itWithAddon("rejects direct addon reentry from a resolver callback", () => {
     const source = '```json\n{"answer": 42}\n```\n';
     const runtime = newRuntime();
@@ -461,12 +470,14 @@ describe("native adapter routing", () => {
   });
 
   it("keeps a language imported from an installed package on the installed path", async () => {
-    const loadLanguage = vi.fn<NativeRuntimeInstance["loadLanguage"]>();
+    const loadLanguages = vi.fn<NativeRuntimeInstance["loadLanguages"]>(async (ids) =>
+      ids.map(() => null),
+    );
     const loadLanguageDefinition = vi.fn<NativeRuntimeInstance["loadLanguageDefinition"]>(
       () => "json\u0001imported",
     );
     const nativeRuntime = {
-      loadLanguage,
+      loadLanguages,
       loadLanguageDefinition,
     } as unknown as NativeRuntimeInstance;
     const addon = {
@@ -498,7 +509,7 @@ describe("native adapter routing", () => {
       languagePackage: json.languagePackage,
     });
 
-    expect(loadLanguage).toHaveBeenCalledWith("json");
+    expect(loadLanguages).toHaveBeenCalledWith(["json"]);
     expect(loadLanguageDefinition).not.toHaveBeenCalled();
   });
 });

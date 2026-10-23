@@ -47,6 +47,21 @@ const PLAINTEXT_ALIASES = LANGUAGES.find(({ id }) => id === PLAINTEXT_LANG_ID)?.
 const CATALOG_LANGUAGE_IDS = new Set(LANGUAGES.map(({ id }) => normalizeLanguageName(id)));
 const encoder = new TextEncoder();
 
+interface PendingInstalledLoad {
+  readonly id: string;
+  resolve(): void;
+  reject(reason: Error): void;
+}
+
+/** `null` from the addon means the language loaded; a string is why it did not. */
+function settleInstalledLoad(load: PendingInstalledLoad, failure: string | null | undefined): void {
+  if (failure == null) {
+    load.resolve();
+  } else {
+    load.reject(new Error(failure));
+  }
+}
+
 /**
  * Rust takes the same three states JavaScript writes: a string, `true` for the
  * bare boolean form, and `false` to drop an attribute Lumis generated. `null`
@@ -300,6 +315,7 @@ export function createNativeLanguagesModule(
     private readonly languageLoads = new Map<string, Promise<LoadedLanguage>>();
     private readonly aliasMap = new Map<string, string>();
     private readonly ownDefinitions = new Map<string, string>();
+    private pendingInstalled: PendingInstalledLoad[] = [];
     private readonly resolver: RuntimeLike;
     private readonly resolverState: NativeResolverState;
     private readonly packageResolverCallback: (packageName: string) => string | undefined;
@@ -435,7 +451,7 @@ export function createNativeLanguagesModule(
       if (!(await this.isCallerResolved(opts, manifests))) {
         const packageName = opts.packageName!;
         if (manifests && !manifests[packageName]) throw notDeclared(packageName, packageName);
-        this.native.loadLanguage(opts.definition.id);
+        await this.loadInstalled(opts.definition.id);
         return { addonId: opts.definition.id, definition: opts.definition };
       }
 
@@ -474,6 +490,32 @@ export function createNativeLanguagesModule(
         ),
         definition: resolved.definition,
       };
+    }
+
+    /**
+     * Loads that start together, as `createHighlighter`'s initial languages
+     * do, reach the addon as one batch: it compiles their queries in parallel
+     * and off the JavaScript thread.
+     */
+    private loadInstalled(id: string): Promise<void> {
+      return new Promise((resolve, reject) => {
+        this.pendingInstalled.push({ id, resolve, reject });
+        if (this.pendingInstalled.length === 1) {
+          setImmediate(() => void this.flushInstalled());
+        }
+      });
+    }
+
+    private async flushInstalled(): Promise<void> {
+      const batch = this.pendingInstalled;
+      this.pendingInstalled = [];
+      try {
+        const failures = await this.native.loadLanguages(batch.map(({ id }) => id));
+        batch.forEach((load, index) => settleInstalledLoad(load, failures[index]));
+      } catch (error) {
+        const reason = error instanceof Error ? error : new Error(String(error));
+        for (const load of batch) load.reject(reason);
+      }
     }
 
     async loadLanguage(opts: LoadLanguageOptions): Promise<LoadedLanguage> {

@@ -41,11 +41,101 @@ struct LoadedLanguage {
     brackets: OnceLock<Option<Query>>,
 }
 
+/// A parser module's grammar name and the SHA-256 of its bytes.
+type ModuleKey = (String, String);
+
 struct Loader {
-    modules: HashMap<(String, String), Result<Language, String>>,
+    modules: HashMap<ModuleKey, Result<Language, String>>,
     store: WasmStore,
     #[cfg(test)]
     module_load_attempts: usize,
+}
+
+impl Loader {
+    /// Load `spec`'s parser into the store, or return the outcome memoized
+    /// under `key`.
+    fn load(&mut self, spec: &LanguageSpec, key: ModuleKey) -> Result<Language, RuntimeError> {
+        if let Some(module) = self.modules.get(&key) {
+            // Classified rather than assumed to be a bad parser: a memoized
+            // failure has to come back as the same reason it was recorded
+            // under, or a second request for a language a full store refused
+            // would be told its parser is invalid.
+            return module
+                .clone()
+                .map_err(|message| classify_load_error(&spec.id, message));
+        }
+
+        let actual_grammar = match crate::grammar_name(&spec.wasm) {
+            Ok(grammar) => grammar,
+            Err(error) => {
+                let message = error.to_string();
+                self.modules.insert(key, Err(message.clone()));
+                return Err(RuntimeError::Parser {
+                    language: spec.id.clone(),
+                    message,
+                });
+            }
+        };
+        if actual_grammar != spec.grammar_name {
+            let message = format!(
+                "invalid parser grammar: expected '{}', got '{actual_grammar}'",
+                spec.grammar_name
+            );
+            self.modules.insert(key, Err(message.clone()));
+            return Err(RuntimeError::Parser {
+                language: spec.id.clone(),
+                message,
+            });
+        }
+
+        #[cfg(test)]
+        {
+            self.module_load_attempts += 1;
+        }
+        match self.store.load_language(&spec.grammar_name, &spec.wasm) {
+            Ok(language) => {
+                self.modules.insert(key, Ok(language.clone()));
+                Ok(language)
+            }
+            Err(error) => {
+                // Memoized like any other rejection, a full store included.
+                // Tree-sitter grows the function table before it tries to grow
+                // memory and does not shrink it back when that fails, so
+                // re-attempting a parser this store has already refused leaks
+                // table capacity to no purpose. It cannot succeed later either:
+                // the store's memory offset only ever advances, so bytes that
+                // did not fit never will. The key is this parser's hash, so a
+                // new version is still asked.
+                let message = error.to_string();
+                self.modules.insert(key, Err(message.clone()));
+                Err(classify_load_error(&spec.id, message))
+            }
+        }
+    }
+}
+
+/// Compile a language's highlight configuration against its loaded parser.
+fn compile_highlight(
+    language: Language,
+    id: &str,
+    highlights: &str,
+    injections: &str,
+    locals: &str,
+) -> Result<HighlightConfiguration, RuntimeError> {
+    let mut highlight =
+        HighlightConfiguration::new(language, id.to_string(), highlights, injections, locals)
+            .map_err(|error| RuntimeError::Query {
+                language: id.to_string(),
+                message: error.to_string(),
+            })?;
+    highlight.configure(&HIGHLIGHT_NAMES);
+    Ok(highlight)
+}
+
+/// Threads to compile a batch's queries across. Query analysis is CPU-bound
+/// and allocates little, so unlike parser compilation it follows the machine.
+fn query_concurrency() -> usize {
+    std::thread::available_parallelism().map_or(1, usize::from)
 }
 
 #[derive(Default)]
@@ -172,6 +262,9 @@ pub struct Runtime {
     /// bounded by the catalog: a Markdown fence can name anything, and an
     /// owned key would let a caller grow this map without limit.
     loading: Mutex<HashMap<&'static str, Arc<Mutex<()>>>>,
+    /// Whether the engine persists compiled modules, which is what makes
+    /// compiling a batch's parsers ahead of the store worth doing.
+    compile_cache: bool,
 }
 
 /// Turn a failed `load_language` into something a caller can act on.
@@ -258,15 +351,16 @@ impl Runtime {
     ///
     /// Values below one are treated as one.
     pub fn with_worker_limit(worker_limit: usize) -> Result<Self, RuntimeError> {
-        static ENGINE: OnceLock<Engine> = OnceLock::new();
+        static ENGINE: OnceLock<(Engine, bool)> = OnceLock::new();
 
-        if let Some(engine) = ENGINE.get() {
-            return Self::with_engine(engine.clone(), worker_limit);
+        if let Some((engine, compile_cache)) = ENGINE.get() {
+            return Self::with_engine(engine.clone(), *compile_cache, worker_limit);
         }
 
-        let engine = cached_engine()?;
-        let _ = ENGINE.set(engine.clone());
-        Self::with_engine(ENGINE.get().cloned().unwrap_or(engine), worker_limit)
+        let built = cached_engine()?;
+        let _ = ENGINE.set(built.clone());
+        let (engine, compile_cache) = ENGINE.get().cloned().unwrap_or(built);
+        Self::with_engine(engine, compile_cache, worker_limit)
     }
 
     /// Construct a runtime with an independent engine whose compiled modules
@@ -283,10 +377,15 @@ impl Runtime {
         data_dir: std::path::PathBuf,
     ) -> Result<Self, RuntimeError> {
         let data_dir = crate::store::resolve_data_dir(Some(data_dir));
-        Self::with_engine(engine_with_compile_cache(data_dir)?, worker_limit)
+        let (engine, compile_cache) = engine_with_compile_cache(data_dir)?;
+        Self::with_engine(engine, compile_cache, worker_limit)
     }
 
-    fn with_engine(engine: Engine, worker_limit: usize) -> Result<Self, RuntimeError> {
+    fn with_engine(
+        engine: Engine,
+        compile_cache: bool,
+        worker_limit: usize,
+    ) -> Result<Self, RuntimeError> {
         let store =
             WasmStore::new(&engine).map_err(|error| RuntimeError::TreeSitter(error.to_string()))?;
         Ok(Self {
@@ -300,6 +399,7 @@ impl Runtime {
             workers: WorkerPool::new(engine, worker_limit),
             store: None,
             loading: Mutex::new(HashMap::new()),
+            compile_cache,
         })
     }
 
@@ -323,6 +423,69 @@ impl Runtime {
     /// parser cannot be obtained or verified.
     pub fn load_named_language(&self, name: &str) -> Result<(), RuntimeError> {
         self.load_through_store(name).map(|_| ())
+    }
+
+    /// Resolve and load several names through the store, returning one result
+    /// per name in the order given.
+    ///
+    /// Each answers as [`Runtime::load_named_language`] would, and one failure
+    /// does not stop the rest. The batch loads as [`Runtime::load_languages`]
+    /// does, so its queries compile in parallel.
+    #[must_use]
+    pub fn load_named_languages(&self, names: &[String]) -> Vec<Result<(), RuntimeError>> {
+        let Some(store) = self.store.as_ref() else {
+            return names
+                .iter()
+                .map(|name| self.load_named_language(name))
+                .collect();
+        };
+
+        let mut ids: Vec<&'static str> = names
+            .iter()
+            .filter(|name| !self.has_language(name))
+            .filter_map(|name| crate::catalog::find(name))
+            .map(|location| location.id)
+            .collect();
+        ids.sort_unstable();
+        ids.dedup();
+        // Taken in one order, so two batches naming the same languages cannot
+        // each hold a gate the other is waiting for.
+        let gates: Vec<_> = ids.iter().map(|id| self.load_gate(id)).collect();
+        let guards: Vec<_> = gates
+            .iter()
+            .map(|gate| gate.lock().expect("language load gate poisoned"))
+            .collect();
+
+        // `None` for a name to answer on its own, `Some(Ok)` for one whose
+        // spec joins the batch, `Some(Err)` for one the store could not supply.
+        let mut claimed = std::collections::HashSet::new();
+        let mut specs = Vec::new();
+        let mut slots: Vec<Option<Result<(), RuntimeError>>> = Vec::with_capacity(names.len());
+        for name in names {
+            let location = crate::catalog::find(name)
+                .filter(|location| !self.has_language(name) && claimed.insert(location.id));
+            slots.push(location.map(|location| {
+                Self::store_spec(store, name, location).map(|spec| specs.push(spec))
+            }));
+        }
+        let mut loaded = self.load_languages(specs).into_iter();
+        let results: Vec<Option<Result<(), RuntimeError>>> = slots
+            .into_iter()
+            .map(|slot| {
+                slot.map(|resolved| {
+                    resolved.and_then(|()| loaded.next().expect("one result per spec"))
+                })
+            })
+            .collect();
+        drop(guards);
+
+        // Already loaded, unknown, or a second name for a language this batch
+        // resolved: each answers exactly as it would on its own.
+        results
+            .into_iter()
+            .zip(names)
+            .map(|(result, name)| result.unwrap_or_else(|| self.load_named_language(name)))
+            .collect()
     }
 
     /// Compile and validate every cached parser and its queries in `names`, up
@@ -384,19 +547,14 @@ impl Runtime {
         let (id, definition) = package
             .language(name)
             .ok_or_else(|| RuntimeError::UnknownLanguage(name.into()))?;
-        let mut highlight = HighlightConfiguration::new(
+        compile_highlight(
             language,
-            id.to_string(),
+            id,
             &definition.highlights,
             &definition.injections,
             &definition.locals,
         )
-        .map_err(|error| RuntimeError::Query {
-            language: id.to_string(),
-            message: error.to_string(),
-        })?;
-        highlight.configure(&HIGHLIGHT_NAMES);
-        Ok(())
+        .map(drop)
     }
 
     /// Resolve, download and load `id` through the store, if one is attached.
@@ -422,17 +580,31 @@ impl Runtime {
             return Ok(loaded);
         }
 
+        let spec = Self::store_spec(store, id, location)?;
+        let resolved_id = spec.id.clone();
+        self.load_language(spec)?;
+
+        self.loaded(&resolved_id)
+            .ok_or_else(|| RuntimeError::LanguageNotLoaded(id.into()))
+    }
+
+    /// Read `name`'s package and parser from the store.
+    fn store_spec(
+        store: &LanguageStore,
+        name: &str,
+        location: &crate::catalog::LanguagePackageRef,
+    ) -> Result<LanguageSpec, RuntimeError> {
         let store_error = |error: StoreError| RuntimeError::Store {
-            language: id.to_string(),
+            language: name.to_string(),
             source: Box::new(error),
         };
         let package = store.package(location.package_name).map_err(store_error)?;
         let (resolved_id, definition) = package
-            .language(id)
-            .ok_or_else(|| RuntimeError::LanguageNotLoaded(id.into()))?;
+            .language(name)
+            .ok_or_else(|| RuntimeError::LanguageNotLoaded(name.into()))?;
         let wasm = store.parser(&package).map_err(store_error)?;
 
-        self.load_language(LanguageSpec {
+        Ok(LanguageSpec {
             id: resolved_id.to_string(),
             aliases: definition.aliases.clone(),
             grammar_name: package.parser.grammar_name.clone(),
@@ -441,10 +613,7 @@ impl Runtime {
             injections: definition.injections.clone(),
             locals: definition.locals.clone(),
             brackets: definition.brackets.clone(),
-        })?;
-
-        self.loaded(resolved_id)
-            .ok_or_else(|| RuntimeError::LanguageNotLoaded(id.into()))
+        })
     }
 
     fn loaded(&self, name_or_alias: &str) -> Option<Arc<LoadedLanguage>> {
@@ -469,104 +638,165 @@ impl Runtime {
             .len()
     }
 
+    /// Load one language. Idempotent: an id this runtime already holds is left
+    /// as it is.
+    ///
+    /// # Errors
+    /// Fails when the parser cannot be loaded into the shared store or its
+    /// queries do not compile against it.
     pub fn load_language(&self, spec: LanguageSpec) -> Result<(), RuntimeError> {
-        if self
-            .catalog
-            .read()
-            .expect("language catalog lock poisoned")
-            .languages
-            .contains_key(&spec.id)
-        {
-            return Ok(());
-        }
+        self.load_languages(vec![spec])
+            .pop()
+            .expect("one result per spec")
+    }
 
-        // Loading is rare and WasmStore is not re-entrant. Keeping one loader
-        // also makes concurrent requests for the same language idempotent.
+    /// Load several languages, returning one result per spec in the order given.
+    ///
+    /// Parser modules join the shared store one at a time, because a
+    /// [`WasmStore`] is not re-entrant. Compiling their queries is most of a
+    /// load and touches only each parser's own tables, so that part runs in
+    /// parallel, outside the store's lock. One failure does not stop the rest.
+    ///
+    /// A spec repeating an earlier one's id answers as a second
+    /// [`Runtime::load_language`] would, after the batch.
+    #[must_use]
+    pub fn load_languages(&self, specs: Vec<LanguageSpec>) -> Vec<Result<(), RuntimeError>> {
+        let count = specs.len();
+        let mut seen = std::collections::HashSet::new();
+        let (distinct, repeated): (Vec<_>, Vec<_>) = specs
+            .into_iter()
+            .enumerate()
+            .partition(|(_, spec)| seen.insert(spec.id.clone()));
+        let (indices, distinct): (Vec<usize>, Vec<LanguageSpec>) = distinct.into_iter().unzip();
+
+        let mut results: Vec<Option<Result<(), RuntimeError>>> = (0..count).map(|_| None).collect();
+        for (index, result) in indices.into_iter().zip(self.load_distinct(distinct)) {
+            results[index] = Some(result);
+        }
+        for (index, spec) in repeated {
+            results[index] = self.load_distinct(vec![spec]).pop();
+        }
+        results
+            .into_iter()
+            .map(|result| result.expect("every spec answered"))
+            .collect()
+    }
+
+    /// [`Runtime::load_languages`] for specs whose ids are all different.
+    fn load_distinct(&self, specs: Vec<LanguageSpec>) -> Vec<Result<(), RuntimeError>> {
+        let modules = self.load_modules(&specs);
+        let pending: Vec<(&LanguageSpec, &Language)> = specs
+            .iter()
+            .zip(&modules)
+            .filter_map(|(spec, module)| match module {
+                Some(Ok(language)) => Some((spec, language)),
+                _ => None,
+            })
+            .collect();
+        let mut compiled =
+            crate::parallel_map(&pending, query_concurrency(), |(spec, language)| {
+                compile_highlight(
+                    (*language).clone(),
+                    &spec.id,
+                    &spec.highlights,
+                    &spec.injections,
+                    &spec.locals,
+                )
+            })
+            .into_iter();
+        drop(pending);
+
+        specs
+            .into_iter()
+            .zip(modules)
+            .map(|(spec, module)| match module {
+                None => Ok(()),
+                Some(Err(error)) => Err(error),
+                Some(Ok(_)) => {
+                    let highlight = compiled.next().expect("one compile per loaded module")?;
+                    self.register(spec, highlight);
+                    Ok(())
+                }
+            })
+            .collect()
+    }
+
+    /// Load each spec's parser module, or `None` for an id already loaded.
+    fn load_modules(&self, specs: &[LanguageSpec]) -> Vec<Option<Result<Language, RuntimeError>>> {
+        let keys: Vec<Option<ModuleKey>> = specs
+            .iter()
+            .map(|spec| {
+                (!self.is_loaded(&spec.id))
+                    .then(|| (spec.grammar_name.clone(), crate::sha256_hex(&spec.wasm)))
+            })
+            .collect();
+        self.warm_compile_cache(specs, &keys);
+
         let mut loader = self.loader.lock().expect("language loader lock poisoned");
-        if self
-            .catalog
+        specs
+            .iter()
+            .zip(keys)
+            .map(|(spec, key)| {
+                let key = key?;
+                // Checked again under the lock: a concurrent load may have
+                // finished while this one waited for it.
+                (!self.is_loaded(&spec.id)).then(|| loader.load(spec, key))
+            })
+            .collect()
+    }
+
+    /// Compile the parsers the store has not seen yet into Wasmtime's on-disk
+    /// cache, in parallel, so loading them into the store afterwards reads the
+    /// cache instead of compiling one at a time under the store's lock.
+    ///
+    /// Tree-sitter compiles the same bytes with the same engine, so its lookup
+    /// hits what this wrote. A single module gains nothing from this and would
+    /// pay the cache lookup twice, so it is skipped. Errors are ignored here:
+    /// the load that follows reports them with the parser they belong to.
+    fn warm_compile_cache(&self, specs: &[LanguageSpec], keys: &[Option<ModuleKey>]) {
+        if !self.compile_cache {
+            return;
+        }
+        let cold: Vec<&[u8]> = {
+            let loader = self.loader.lock().expect("language loader lock poisoned");
+            let mut seen = std::collections::HashSet::new();
+            specs
+                .iter()
+                .zip(keys)
+                .filter_map(|(spec, key)| {
+                    let key = key.as_ref()?;
+                    (!loader.modules.contains_key(key) && seen.insert(key))
+                        .then_some(spec.wasm.as_slice())
+                })
+                .collect()
+        };
+        if cold.len() < 2 {
+            return;
+        }
+        let engine = self.workers.engine();
+        crate::parallel_map(&cold, crate::compile_concurrency(), |wasm| {
+            let _ = wasmtime::Module::new(engine, wasm);
+        });
+    }
+
+    fn is_loaded(&self, id: &str) -> bool {
+        self.catalog
             .read()
             .expect("language catalog lock poisoned")
             .languages
-            .contains_key(&spec.id)
-        {
-            return Ok(());
-        }
+            .contains_key(id)
+    }
 
-        let module_key = (spec.grammar_name.clone(), crate::sha256_hex(&spec.wasm));
-        let language = if let Some(module) = loader.modules.get(&module_key) {
-            // Classified rather than assumed to be a bad parser: a memoized
-            // failure has to come back as the same reason it was recorded
-            // under, or a second request for a language a full store refused
-            // would be told its parser is invalid.
-            module
-                .clone()
-                .map_err(|message| classify_load_error(&spec.id, message))?
-        } else {
-            let actual_grammar = crate::grammar_name(&spec.wasm).map_err(|error| {
-                let message = error.to_string();
-                loader
-                    .modules
-                    .insert(module_key.clone(), Err(message.clone()));
-                RuntimeError::Parser {
-                    language: spec.id.clone(),
-                    message,
-                }
-            })?;
-            if actual_grammar != spec.grammar_name {
-                let message = format!(
-                    "invalid parser grammar: expected '{}', got '{actual_grammar}'",
-                    spec.grammar_name
-                );
-                loader.modules.insert(module_key, Err(message.clone()));
-                return Err(RuntimeError::Parser {
-                    language: spec.id,
-                    message,
-                });
-            }
-
-            #[cfg(test)]
-            {
-                loader.module_load_attempts += 1;
-            }
-            match loader.store.load_language(&spec.grammar_name, &spec.wasm) {
-                Ok(language) => {
-                    loader.modules.insert(module_key, Ok(language.clone()));
-                    language
-                }
-                Err(error) => {
-                    // Memoized like any other rejection, a full store included.
-                    // Tree-sitter grows the function table before it tries to
-                    // grow memory and does not shrink it back when that fails,
-                    // so re-attempting a parser this store has already refused
-                    // leaks table capacity to no purpose. It cannot succeed
-                    // later either: the store's memory offset only ever
-                    // advances, so bytes that did not fit never will. The key
-                    // is this parser's hash, so a new version is still asked.
-                    let message = error.to_string();
-                    loader.modules.insert(module_key, Err(message.clone()));
-
-                    return Err(classify_load_error(&spec.id, message));
-                }
-            }
-        };
-        let mut highlight = HighlightConfiguration::new(
-            language.clone(),
-            spec.id.clone(),
-            &spec.highlights,
-            &spec.injections,
-            &spec.locals,
-        )
-        .map_err(|error| RuntimeError::Query {
-            language: spec.id.clone(),
-            message: error.to_string(),
-        })?;
-        highlight.configure(&HIGHLIGHT_NAMES);
-
+    /// Add a compiled language unless a concurrent load got there first, so
+    /// the first configuration registered for an id is the one that stays.
+    fn register(&self, spec: LanguageSpec, highlight: HighlightConfiguration) {
         let mut catalog = self
             .catalog
             .write()
             .expect("language catalog lock poisoned");
+        if catalog.languages.contains_key(&spec.id) {
+            return;
+        }
         for alias in &spec.aliases {
             Arc::make_mut(&mut catalog.aliases).insert(alias.clone(), spec.id.clone());
         }
@@ -579,7 +809,6 @@ impl Runtime {
                 brackets: OnceLock::new(),
             }),
         );
-        Ok(())
     }
 
     #[cfg(test)]
@@ -646,13 +875,7 @@ impl Runtime {
                 loaded.brackets_source.clone(),
             )
         };
-        let mut highlight =
-            HighlightConfiguration::new(language, id.clone(), highlights, injections, locals)
-                .map_err(|error| RuntimeError::Query {
-                    language: id.clone(),
-                    message: error.to_string(),
-                })?;
-        highlight.configure(&HIGHLIGHT_NAMES);
+        let highlight = compile_highlight(language, &id, highlights, injections, locals)?;
 
         let mut catalog = self
             .catalog
@@ -1135,7 +1358,8 @@ pub fn set_compile_cache_dir(dir: std::path::PathBuf) {
         .expect("compile cache lock poisoned") = Some(dir);
 }
 
-fn cached_engine() -> Result<Engine, wasmtime::Error> {
+/// The engine, and whether it persists compiled modules.
+fn cached_engine() -> Result<(Engine, bool), wasmtime::Error> {
     let root = crate::store::resolve_data_dir(
         COMPILE_CACHE_DIR
             .read()
@@ -1145,16 +1369,16 @@ fn cached_engine() -> Result<Engine, wasmtime::Error> {
     engine_with_compile_cache(root)
 }
 
-fn engine_with_compile_cache(root: std::path::PathBuf) -> Result<Engine, wasmtime::Error> {
+fn engine_with_compile_cache(root: std::path::PathBuf) -> Result<(Engine, bool), wasmtime::Error> {
     let mut config = Config::new();
     let mut cache_config = CacheConfig::new();
     cache_config.with_directory(root.join("compiled"));
 
-    if let Ok(cache) = Cache::new(cache_config) {
-        config.cache(Some(cache));
-    }
+    let cache = Cache::new(cache_config).ok();
+    let compile_cache = cache.is_some();
+    config.cache(cache);
 
-    Engine::new(&config)
+    Ok((Engine::new(&config)?, compile_cache))
 }
 
 /// Parse the whole document as the root language, with the render's interrupt.
@@ -1533,6 +1757,116 @@ mod tests {
             runtime.highlight_with("{}", "missing", &HighlightOptions::default()),
             Err(RuntimeError::LanguageStoreUnavailable | RuntimeError::LanguageNotLoaded(_))
         ));
+    }
+
+    #[test]
+    fn a_batch_answers_per_spec_and_loads_each_parser_once() {
+        let runtime = Runtime::with_worker_limit(1).unwrap();
+        let json = |id: &str, highlights: &str| LanguageSpec {
+            id: id.into(),
+            aliases: vec![format!("{id}-alias")],
+            grammar_name: "json".into(),
+            wasm: JSON_WASM.to_vec(),
+            highlights: highlights.into(),
+            injections: String::new(),
+            locals: String::new(),
+            brackets: String::new(),
+        };
+        let broken = LanguageSpec {
+            id: "batch-broken".into(),
+            wasm: INVALID_TREE_SITTER_WASM.to_vec(),
+            grammar_name: "broken".into(),
+            ..json("unused", "")
+        };
+
+        let results = runtime.load_languages(vec![
+            json("batch-first", "(string) @string"),
+            json("batch-bad-query", "(definitely_not_a_json_node) @string"),
+            broken,
+            json("batch-second", "(number) @number"),
+            json("batch-first", "(this_would_not_compile) @string"),
+        ]);
+
+        assert!(results[0].is_ok());
+        assert!(matches!(
+            &results[1],
+            Err(RuntimeError::Query { language, .. }) if language == "batch-bad-query"
+        ));
+        assert!(matches!(
+            &results[2],
+            Err(RuntimeError::Parser { language, .. }) if language == "batch-broken"
+        ));
+        assert!(results[3].is_ok(), "a failure must not stop later specs");
+        assert!(results[4].is_ok(), "a loaded id is left as it is");
+        assert!(runtime.has_language("batch-second-alias"));
+        assert_eq!(
+            runtime.loaded_languages(),
+            vec!["batch-first".to_string(), "batch-second".to_string()]
+        );
+        assert_eq!(
+            runtime.module_load_attempt_count(),
+            2,
+            "one store load per distinct parser"
+        );
+        let events = runtime.highlight("[1]", "batch-second", false).unwrap();
+        assert!(events
+            .iter()
+            .any(|event| matches!(event, HighlightEvent::Start { .. })));
+    }
+
+    #[test]
+    fn a_named_batch_answers_each_name_as_a_single_load_would() {
+        let dir = tempfile::tempdir().unwrap();
+        let runtime = |dir: &std::path::Path| {
+            let store = LanguageStore::new(
+                StoreConfig {
+                    cache_dir: dir.to_path_buf(),
+                    installed_dirs: None,
+                },
+                Box::new(crate::NoNetwork),
+            );
+            Arc::new(Runtime::with_worker_limit(2).unwrap().with_store(store))
+        };
+        let first = runtime(dir.path());
+        let store = first.store().unwrap();
+        cache_package(store, &json_package(JSON_WASM), JSON_WASM);
+        cache_package(
+            store,
+            &package("@lumis-sh/wasm-diff", "diff", "json", JSON_WASM),
+            JSON_WASM,
+        );
+
+        let names: Vec<String> = ["json", "not-a-language", "diff", "json", "css"]
+            .map(String::from)
+            .to_vec();
+        let results = first.load_named_languages(&names);
+        assert!(results[0].is_ok());
+        assert!(matches!(
+            &results[1],
+            Err(RuntimeError::LanguageNotLoaded(name)) if name == "not-a-language"
+        ));
+        assert!(results[2].is_ok());
+        assert!(results[3].is_ok());
+        assert!(matches!(
+            &results[4],
+            Err(RuntimeError::Store { language, .. }) if language == "css"
+        ));
+        assert_eq!(first.loaded_languages(), vec!["diff", "json"]);
+
+        // Opposite orders from two threads: a batch takes its gates sorted, so
+        // neither can hold one the other waits on.
+        for _ in 0..20 {
+            let shared = runtime(dir.path());
+            let batch = |names: [&str; 2]| {
+                let runtime = Arc::clone(&shared);
+                let names = names.map(String::from).to_vec();
+                thread::spawn(move || runtime.load_named_languages(&names))
+            };
+            let forward = batch(["json", "diff"]);
+            let backward = batch(["diff", "json"]);
+            assert!(forward.join().unwrap().iter().all(Result::is_ok));
+            assert!(backward.join().unwrap().iter().all(Result::is_ok));
+        }
     }
 
     #[test]

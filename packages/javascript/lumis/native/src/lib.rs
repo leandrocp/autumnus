@@ -394,6 +394,45 @@ fn load_installed(runtime: &Runtime, name: &str) -> Result<String> {
     if runtime.has_language(name) {
         return Ok(name.to_string());
     }
+    let spec = installed_spec(name)?;
+    let id = spec.id.clone();
+    runtime.load_language(spec).map_err(native_error)?;
+    Ok(id)
+}
+
+/// [`load_installed`] for several names at once, one result per name.
+///
+/// The queries of a batch compile in parallel, which is most of what loading
+/// a language costs.
+fn load_installed_all(runtime: &Runtime, names: &[String]) -> Vec<Result<String>> {
+    let mut specs = Vec::new();
+    let mut slots: Vec<Result<Option<String>>> = names
+        .iter()
+        .map(|name| {
+            if runtime.has_language(name) {
+                return Ok(Some(name.clone()));
+            }
+            let spec = installed_spec(name)?;
+            specs.push(spec);
+            Ok(None)
+        })
+        .collect();
+    let ids: Vec<String> = specs.iter().map(|spec| spec.id.clone()).collect();
+    let mut loaded = runtime.load_languages(specs).into_iter().zip(ids);
+    for slot in &mut slots {
+        if matches!(slot, Ok(None)) {
+            let (result, id) = loaded.next().expect("one result per spec");
+            *slot = result.map(|()| Some(id)).map_err(native_error);
+        }
+    }
+    slots
+        .into_iter()
+        .map(|slot| slot.map(|id| id.expect("every loaded name has an id")))
+        .collect()
+}
+
+/// The language `name` as its installed package defines it.
+fn installed_spec(name: &str) -> Result<lumis_wasm_runtime::LanguageSpec> {
     let location =
         catalog::find(name).ok_or_else(|| native_error(format!("unknown language {name:?}")))?;
     let manifest = INSTALLED_MANIFESTS
@@ -417,10 +456,7 @@ fn load_installed(runtime: &Runtime, name: &str) -> Result<String> {
     store::require_compatible_package_version(&package).map_err(native_error)?;
     let wasm = std::fs::read(manifest.with_file_name(format!("{}.wasm", package.parser.name)))
         .map_err(native_error)?;
-    let spec = package.language_spec(name, wasm).map_err(native_error)?;
-    let id = spec.id.clone();
-    runtime.load_language(spec).map_err(native_error)?;
-    Ok(id)
+    package.language_spec(name, wasm).map_err(native_error)
 }
 
 /// An injected language from the installed package that ships it.
@@ -797,6 +833,56 @@ impl Task for FormatTask {
     }
 }
 
+pub struct LoadLanguagesTask {
+    state: Arc<Mutex<RuntimeState>>,
+    replay: Arc<Mutex<ReplayState>>,
+    ids: Vec<String>,
+}
+
+impl Task for LoadLanguagesTask {
+    type Output = Vec<Option<String>>;
+    type JsValue = Vec<Option<String>>;
+
+    /// Loads without holding the runtime state, so this instance can still
+    /// highlight while a batch compiles. A promotion to a private runtime that
+    /// lands meanwhile has not replayed these ids, so they load there too.
+    fn compute(&mut self) -> Result<Self::Output> {
+        let runtime = NativeRuntime::runtime_from_state(
+            &mut self.state.lock().expect("native runtime lock poisoned"),
+        )?;
+        let mut results = load_installed_all(&runtime, &self.ids);
+
+        let promoted = match &*self.state.lock().expect("native runtime lock poisoned") {
+            RuntimeState::Shared(current) if Arc::ptr_eq(current, &runtime) => {
+                let mut replay = self.replay.lock().expect("runtime replay lock poisoned");
+                for (id, result) in self.ids.iter().zip(&results) {
+                    if result.is_ok() {
+                        replay.named.insert(id.clone());
+                    }
+                }
+                None
+            }
+            RuntimeState::Private(current) if !Arc::ptr_eq(current, &runtime) => {
+                Some(Arc::clone(current))
+            }
+            _ => None,
+        };
+        // A private runtime keeps no replay record, so its reload needs no lock.
+        if let Some(private) = promoted {
+            results = load_installed_all(&private, &self.ids);
+        }
+
+        Ok(results
+            .into_iter()
+            .map(|result| result.err().map(|error| error.reason))
+            .collect())
+    }
+
+    fn resolve(&mut self, _env: Env, output: Self::Output) -> Result<Self::JsValue> {
+        Ok(output)
+    }
+}
+
 /// What one highlight pass produces: the events, the injected language names it
 /// could not resolve, and which limit bound it, if one did.
 type HighlightedEvents = (
@@ -844,9 +930,9 @@ fn highlight_events(
 /// runtime when this instance accepts caller-owned language behavior.
 #[napi]
 pub struct NativeRuntime {
-    runtime: Mutex<RuntimeState>,
+    runtime: Arc<Mutex<RuntimeState>>,
     resolved_ids: Mutex<ResolvedIds>,
-    replay: Mutex<ReplayState>,
+    replay: Arc<Mutex<ReplayState>>,
 }
 
 enum RuntimeState {
@@ -1135,9 +1221,9 @@ impl NativeRuntime {
 impl Default for NativeRuntime {
     fn default() -> Self {
         Self {
-            runtime: Mutex::new(RuntimeState::Uninitialized),
+            runtime: Arc::new(Mutex::new(RuntimeState::Uninitialized)),
             resolved_ids: Mutex::new(ResolvedIds::default()),
-            replay: Mutex::new(ReplayState::default()),
+            replay: Arc::new(Mutex::new(ReplayState::default())),
         }
     }
 }
@@ -1208,6 +1294,22 @@ impl NativeRuntime {
                 .insert(id);
         }
         Ok(())
+    }
+
+    /// Load several languages from the installed packages that ship them, off
+    /// the JavaScript thread, compiling their queries in parallel.
+    ///
+    /// Resolves to one entry per id: `null` when it loaded, otherwise why not.
+    #[napi(
+        js_name = "loadLanguages",
+        ts_return_type = "Promise<Array<string | null>>"
+    )]
+    pub fn load_languages(&self, ids: Vec<String>) -> AsyncTask<LoadLanguagesTask> {
+        AsyncTask::new(LoadLanguagesTask {
+            state: Arc::clone(&self.runtime),
+            replay: Arc::clone(&self.replay),
+            ids,
+        })
     }
 
     #[napi(js_name = "hasLanguage")]
