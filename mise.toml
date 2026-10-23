@@ -1082,7 +1082,7 @@ fi
 '''
 
 [tasks.'wasm-check-bundler']
-description = "Install staged parser packages and the web bundle into a Vite 8 project, and highlight with them in Chromium"
+description = "Install staged parser packages and the web bundle into a Vite 8 project, and highlight with them in Chromium and WebKit"
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail

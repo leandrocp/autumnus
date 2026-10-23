@@ -19,8 +19,9 @@ import type {
 import type { FixtureAnnotation } from "../conformance.ts";
 
 /**
- * The browser cannot load a parser during the walk that finds an injected
- * language, so it declares the whole corpus up front. Globbed rather than
+ * The browser cannot fetch a parser during the walk that finds an injected
+ * language, and this highlighter has resolvers of its own, so it declares the
+ * whole corpus up front. Globbed rather than
  * listed, so a new fixture or a new query file is covered without editing this.
  */
 const languageModules = import.meta.glob<{ default: LanguageDefinition }>("../../langs/*.ts", {

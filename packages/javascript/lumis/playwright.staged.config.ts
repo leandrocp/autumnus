@@ -7,5 +7,10 @@ export default defineConfig({
   testMatch: "staged-packages.spec.ts",
   reporter: process.env.CI ? "github" : "list",
   use: { trace: "retain-on-failure" },
-  projects: [{ name: "chromium", use: { browserName: "chromium" } }],
+  // WebKit as well, because these are parsers the release toolchain just built,
+  // and JavaScriptCore compiles WebAssembly differently from V8.
+  projects: [
+    { name: "chromium", use: { browserName: "chromium" } },
+    { name: "webkit", use: { browserName: "webkit" } },
+  ],
 });

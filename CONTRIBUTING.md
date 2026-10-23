@@ -729,7 +729,9 @@ A package finds its parser relative to its own module, so a page loads it only
 if the bundler ships the parser where that URL points. This stages `css`,
 `markdown` (which requires `markdown_inline`) and every member of the `web`
 bundle, installs them as tarballs into a Vite 8 project, and highlights one of
-each through the dev server and `vite build` in Chromium:
+each through the dev server and `vite build` in Chromium and WebKit. WebKit is
+there because these are the parsers the release toolchain just built, and
+JavaScriptCore compiles WebAssembly with its own tiers:
 
 ```sh
 mise run wasm-check-bundler
@@ -827,9 +829,10 @@ Then open `/test.html` on the dev server.
 ```
 
 Those URLs are the layout `mise run wasm-stage` writes: the package file is named
-after the package minus its scope, and the parser is content-addressed. Loading is
-asynchronous in a browser, so an injected language has to be named in `languages:`
-rather than discovered mid-document.
+after the package minus its scope, and the parser is content-addressed. Fetching is
+asynchronous in a browser, and this highlighter has resolvers of its own, so an
+injected language has to be named in `languages:` rather than discovered
+mid-document.
 
 After a change under `crates/`, rebuild the native artifact or the runtime keeps
 the old one and fails as if your change broke it:

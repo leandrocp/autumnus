@@ -76,11 +76,15 @@ That is fine for a CLI, a script, a build step, or anything where one slow first
 render does not matter. Preload when it does.
 
 :::note
-Browsers are the exception. `web-tree-sitter` loads asynchronously, so a parser
-cannot be loaded inside a synchronous walk: in a browser, preload an injected
-language before highlighting the document that mentions it, including one from a
-registered bundle. Node does not have this limit: it highlights through a native
-addon.
+Browsers are the exception. A browser cannot download a parser in the middle of
+highlighting, so a language has to be loaded somewhere on the page before a
+document injects it, including one from a registered bundle. It does not have
+to be loaded into the highlighter doing the work: once any highlighter on the
+page has loaded a language from its package, every other highlighter without a
+resolver uses it for injected blocks too. A global resolver set with
+`languages.configureWasmResolver()` or `languages.configureLanguagePackageResolver()`
+counts as a resolver for every highlighter, so none of them borrow. Node does not
+have this limit: it highlights through a native addon.
 :::
 
 ## Preloaded

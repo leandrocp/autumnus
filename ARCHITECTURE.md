@@ -311,7 +311,7 @@ than shipped half-designed.
 
 Parser modules are retained before query compilation. Rust keys both successful
 and failed store loads by the declared grammar and the SHA-256 of the actual
-bytes; `web-tree-sitter` retains the corresponding `Language.load` promise by
+bytes; `web-tree-sitter` retains the instantiated language, or the failure, by
 byte digest within its JavaScript realm. An invalid query can therefore be
 corrected without loading the parser again, while repeating the same parser-load
 failure cannot grow Tree-sitter's store. Fetch, resolver and integrity failures
@@ -341,10 +341,26 @@ In Elixir it is cheaper still, because loading is global to the VM. One
 `Runtime` lives in the NIF, so the first process to need a language pays, and
 every process after it does not.
 
-Browsers are the exception. `web-tree-sitter` loads asynchronously, so a parser
-cannot be fetched inside a synchronous walk; an injected language has to be
-loaded before the document mentioning it. Node runs the native addon
-specifically so it does not inherit that limit, and falls back to
+Browsers are the exception, and only half of loading is the problem. Resolving
+a package and fetching a parser are asynchronous, so a walk cannot do them.
+Instantiating a parser whose bytes are already in memory is synchronous: a
+`WebAssembly.Module` handed to `Language.loadSync` is ready in a few
+milliseconds. So loading a `web-tree-sitter` language is split in two. The
+asynchronous half resolves the package, reads the parser and instantiates it;
+the synchronous half compiles the queries and creates a parser for one runtime.
+A language whose first half some runtime on the page already finished, from its
+catalog package's own parser and with no caller resolver involved, is
+registered for the whole realm, and a walk in any other runtime without a
+resolver of its own runs the second half when an injection names it. As in
+Rust, that time is given back to the render's budget. A runtime with a
+resolver never borrows, because its caller said where parsers come from.
+
+That leaves one real limit: a language nothing on the page has loaded still has
+to be loaded before the document mentioning it. And Chromium refuses a
+synchronous compile or instantiation over 8 MiB on the main thread (Firefox and
+WebKit do not, but there is no way to ask), so a parser above that size, such as
+F#, Nim or SystemVerilog, always takes `Language.load`. Node runs the native
+addon specifically so it inherits none of this, and falls back to
 `web-tree-sitter` only where no addon is built.
 
 The npm build bundles the browser entry separately from the Node entry.
