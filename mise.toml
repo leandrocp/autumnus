@@ -651,6 +651,9 @@ mise run check-cli-versions
 echo ""
 echo "Checking crate dependency requirements..."
 mise run check-crate-deps
+echo ""
+echo "Checking theme licenses and notices..."
+mise run themes-check-notices
 '''
 
 [tasks.'check-cli-versions']
@@ -888,11 +891,19 @@ mise run docs-gen-languages-md
 '''
 
 [tasks.'docs-gen-themes-md']
-description = "Generate THEMES.md from themes definition"
+description = "Generate THEMES.md and themes/NOTICE.md from themes definition and licenses"
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
 cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- gen-themes-md
+'''
+
+[tasks.'themes-check-notices']
+description = "Verify every theme source has a license entry and THEMES.md and themes/NOTICE.md are current"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+cargo run --quiet --manifest-path crates/dev/Cargo.toml --no-default-features -- gen-themes-md --check
 '''
 
 [tasks.'langs-extract-scopes']
@@ -1208,6 +1219,7 @@ else
 fi
 cargo run --manifest-path crates/dev/Cargo.toml -- filter-theme-updates "${usage_theme_name:-}"
 cargo run --manifest-path crates/dev/Cargo.toml -- sync-themes
+cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- gen-themes-md
 pnpm --filter @lumis-sh/themes run build:themes
 pnpm --filter @lumis-sh/themes run build:assets
 '''
