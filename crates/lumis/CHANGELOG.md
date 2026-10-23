@@ -1,3 +1,42 @@
+## [0.17.2](https://github.com/leandrocp/lumis/compare/cargo-lumis/v0.17.1...cargo-lumis/v0.17.2) (2026-10-23)
+
+### Features
+
+- **themes:** Expose closest across Rust, JavaScript, and Elixir in [\#1750](https://github.com/leandrocp/lumis/pull/1750)
+- **api:** Align public language and theme modules in [\#1752](https://github.com/leandrocp/lumis/pull/1752)
+- **themes:** Update themes in [\#1767](https://github.com/leandrocp/lumis/pull/1767)
+- Update lang php in [\#1768](https://github.com/leandrocp/lumis/pull/1768)
+- Update lang erlang in [\#1766](https://github.com/leandrocp/lumis/pull/1766)
+- Update lang graphql in [\#1765](https://github.com/leandrocp/lumis/pull/1765)
+- Update lang dart in [\#1799](https://github.com/leandrocp/lumis/pull/1799)
+- Update lang hurl in [\#1800](https://github.com/leandrocp/lumis/pull/1800)
+- **themes:** Update themes in [\#1802](https://github.com/leandrocp/lumis/pull/1802)
+- Update lang scala in [\#1801](https://github.com/leandrocp/lumis/pull/1801)
+- Update lang scheme in [\#1803](https://github.com/leandrocp/lumis/pull/1803)
+- Expose parser identities in language metadata in [\#1811](https://github.com/leandrocp/lumis/pull/1811)
+- Word-level diff highlighting in [\#1807](https://github.com/leandrocp/lumis/pull/1807)
+- **themes:** Style changed diff words in theme stylesheets in [\#1808](https://github.com/leandrocp/lumis/pull/1808)
+- **themes:** Extract diff word colors into theme JSON in [\#1837](https://github.com/leandrocp/lumis/pull/1837)
+
+### Bug Fixes
+
+- Use theme names for multi-theme HTML classes in [\#1748](https://github.com/leandrocp/lumis/pull/1748)
+- Restore groovy and hurl in [\#1788](https://github.com/leandrocp/lumis/pull/1788)
+- Add missing queries  in [\#1786](https://github.com/leandrocp/lumis/pull/1786)
+- **sql:** Update lang sql in [\#1804](https://github.com/leandrocp/lumis/pull/1804)
+- Inherit enclosing styles in token and terminal output by @ampagent
+
+### Documentation
+
+- Clean up API documentation in [\#1763](https://github.com/leandrocp/lumis/pull/1763)
+- Link the crate docs to the languages reference in [\#1789](https://github.com/leandrocp/lumis/pull/1789)
+- **languages:** List the languages each language can inject in [\#1841](https://github.com/leandrocp/lumis/pull/1841)
+
+### Testing
+
+- **rust:** Keep shared fixtures outside packaged unit tests by @ampagent
+- **conformance:** Pin when a render returns at its time limit in [\#1814](https://github.com/leandrocp/lumis/pull/1814)
+
 ## [0.17.1](https://github.com/leandrocp/lumis/compare/cargo-lumis/v0.17.0...cargo-lumis/v0.17.1) (2026-10-10)
 
 ### Dependencies
