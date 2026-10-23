@@ -852,8 +852,7 @@ impl Task for LoadLanguagesTask {
         )?;
         let mut results = load_installed_all(&runtime, &self.ids);
 
-        let state = self.state.lock().expect("native runtime lock poisoned");
-        match &*state {
+        let promoted = match &*self.state.lock().expect("native runtime lock poisoned") {
             RuntimeState::Shared(current) if Arc::ptr_eq(current, &runtime) => {
                 let mut replay = self.replay.lock().expect("runtime replay lock poisoned");
                 for (id, result) in self.ids.iter().zip(&results) {
@@ -861,13 +860,17 @@ impl Task for LoadLanguagesTask {
                         replay.named.insert(id.clone());
                     }
                 }
+                None
             }
             RuntimeState::Private(current) if !Arc::ptr_eq(current, &runtime) => {
-                results = load_installed_all(current, &self.ids);
+                Some(Arc::clone(current))
             }
-            _ => {}
+            _ => None,
+        };
+        // A private runtime keeps no replay record, so its reload needs no lock.
+        if let Some(private) = promoted {
+            results = load_installed_all(&private, &self.ids);
         }
-        drop(state);
 
         Ok(results
             .into_iter()
