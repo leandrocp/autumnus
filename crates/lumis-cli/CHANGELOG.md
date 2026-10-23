@@ -1,3 +1,30 @@
+## [0.8.2](https://github.com/leandrocp/lumis/compare/cargo-lumis-cli/v0.8.1...cargo-lumis-cli/v0.8.2) (2026-10-23)
+
+### Features
+
+- **themes:** Expose closest across Rust, JavaScript, and Elixir in [\#1750](https://github.com/leandrocp/lumis/pull/1750)
+- Word-level diff highlighting in [\#1807](https://github.com/leandrocp/lumis/pull/1807)
+- **themes:** Extract diff word colors into theme JSON in [\#1837](https://github.com/leandrocp/lumis/pull/1837)
+- **themes:** Record each theme's source licence and ship a NOTICE in [\#1844](https://github.com/leandrocp/lumis/pull/1844)
+
+### Bug Fixes
+
+- Restore groovy and hurl in [\#1788](https://github.com/leandrocp/lumis/pull/1788)
+- **javascript:** Update standalone examples for installed parsers in [\#1813](https://github.com/leandrocp/lumis/pull/1813)
+
+### Performance
+
+- **runtime:** Compile languages' queries in parallel and once per grammar in [\#1842](https://github.com/leandrocp/lumis/pull/1842)
+
+### Documentation
+
+- **languages:** List the languages each language can inject in [\#1841](https://github.com/leandrocp/lumis/pull/1841)
+
+### Testing
+
+- Compare the decoy's parent as a Path
+- **conformance:** Pin when a render returns at its time limit in [\#1814](https://github.com/leandrocp/lumis/pull/1814)
+
 ## [0.8.1](https://github.com/leandrocp/lumis/compare/cargo-lumis-cli/v0.8.0...cargo-lumis-cli/v0.8.1) (2026-10-10)
 
 ### Features
