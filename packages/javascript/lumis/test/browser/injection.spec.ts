@@ -9,6 +9,8 @@ test("a walk descends into a language another highlighter already loaded", async
   expect(outcome?.error).toBeUndefined();
   // Rust was loaded elsewhere; python never was, so its block stays plain.
   expect(outcome?.injected).toEqual(["rust"]);
+  // The Rust package claimed `python`, but the catalog gives that name to Python.
+  expect(outcome?.injectedClaimedAlias).toEqual([]);
   // A caller's resolver says where its parsers come from, so nothing is borrowed.
   expect(outcome?.injectedWithResolver).toEqual([]);
 });

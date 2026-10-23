@@ -259,6 +259,13 @@ async function fetchFromCdns(primary: string, isDefault: boolean): Promise<Respo
 const HIGHLIGHT_NAMES_SET = new Set(HIGHLIGHT_NAMES);
 const PLAINTEXT_ALIASES = LANGUAGES.find(({ id }) => id === PLAINTEXT_LANG_ID)?.aliases ?? [];
 
+/** The language each catalog id and alias names. */
+const CATALOG_LANGUAGE_IDS = new Map(
+  LANGUAGES.flatMap(({ id, aliases }) =>
+    [id, ...aliases].map((name) => [normalizeLanguageName(name), id] as const),
+  ),
+);
+
 const encoder = new TextEncoder();
 const decoder = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true });
 
@@ -1074,9 +1081,17 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
   // never reads or writes this, because its caller said where parsers come from.
   const injectable = new Map<string, PreparedLanguage>();
 
+  // A package's manifest can claim any alias, so a borrower sees only the names
+  // the catalog gives this language; otherwise a Markdown package claiming
+  // `rust` would parse every other highlighter's Rust fences as Markdown.
   function shareInjectable(prepared: PreparedLanguage): void {
-    for (const name of [prepared.definition.id, ...prepared.definition.aliases]) {
-      injectable.set(normalizeLanguageName(name), prepared);
+    const { id } = prepared.definition;
+    const aliases = prepared.definition.aliases.filter(
+      (alias) => CATALOG_LANGUAGE_IDS.get(normalizeLanguageName(alias)) === id,
+    );
+    const shared = { ...prepared, definition: { ...prepared.definition, aliases } };
+    for (const name of [id, ...aliases]) {
+      injectable.set(normalizeLanguageName(name), shared);
     }
   }
 

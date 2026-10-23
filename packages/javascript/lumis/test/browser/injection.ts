@@ -10,6 +10,8 @@ import { createHighlighter } from "../../src/index.browser.ts";
 export interface InjectionOutcome {
   /** Fenced languages the markdown-only highlighter highlighted. */
   injected?: string[];
+  /** A Python-only document, after a Rust package claimed the alias `python`. */
+  injectedClaimedAlias?: string[];
   /** The same, from a highlighter with a resolver of its own. */
   injectedWithResolver?: string[];
   error?: string;
@@ -39,7 +41,11 @@ function query(language: string, kind: string): string | undefined {
 }
 
 /** What an imported `@lumis-sh/wasm-*` package exports, built from the committed fixtures. */
-async function importedLanguage(id: string, requires?: Language[]): Promise<Language> {
+async function importedLanguage(
+  id: string,
+  requires?: Language[],
+  aliases: string[] = [],
+): Promise<Language> {
   const entry = Object.entries(parsers).find(([path]) => path.endsWith(`/tree-sitter-${id}.wasm`));
   if (!entry) throw new Error(`no committed parser fixture for ${id}`);
   const wasm = new URL(entry[1], location.href);
@@ -59,7 +65,7 @@ async function importedLanguage(id: string, requires?: Language[]): Promise<Lang
       parser: { name: `tree-sitter-${id}`, grammarName: id, sha256 },
       languages: {
         [id]: {
-          aliases: [],
+          aliases,
           highlights: query(id, "highlights") ?? "",
           injections: query(id, "injections"),
           locals: query(id, "locals"),
@@ -84,11 +90,12 @@ function injectedLanguages(language: Language): Formatter {
   };
 }
 
+const pythonDocument = ["```python", "x = 1", "```", ""].join("\n");
 const document = ["```rust", "fn main() {}", "```", "", "```python", "x = 1", "```", ""].join("\n");
 
 try {
   const markdown = await importedLanguage("markdown", [await importedLanguage("markdown_inline")]);
-  await createHighlighter({ languages: [await importedLanguage("rust")] });
+  await createHighlighter({ languages: [await importedLanguage("rust", undefined, ["python"])] });
 
   const plain = await createHighlighter({ languages: [markdown] });
   const resolved = await createHighlighter({
@@ -99,6 +106,10 @@ try {
   });
   window.lumisInjection = {
     injected: plain.highlight(document, injectedLanguages(markdown)).split(","),
+    injectedClaimedAlias: plain
+      .highlight(pythonDocument, injectedLanguages(markdown))
+      .split(",")
+      .filter(Boolean),
     injectedWithResolver: resolved
       .highlight(document, injectedLanguages(markdown))
       .split(",")

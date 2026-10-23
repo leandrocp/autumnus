@@ -81,8 +81,10 @@ highlighting, so a language has to be loaded somewhere on the page before a
 document injects it, including one from a registered bundle. It does not have
 to be loaded into the highlighter doing the work: once any highlighter on the
 page has loaded a language from its package, every other highlighter without a
-resolver of its own uses it for injected blocks too. Node does not have this
-limit: it highlights through a native addon.
+resolver uses it for injected blocks too. A global resolver set with
+`languages.configureWasmResolver()` or `languages.configureLanguagePackageResolver()`
+counts as a resolver for every highlighter, so none of them borrow. Node does not
+have this limit: it highlights through a native addon.
 :::
 
 ## Preloaded
