@@ -27,7 +27,7 @@ part of a formatter that does not carry across tabs.
 
 | Runtime | Output | To report a failure |
 | --- | --- | --- |
-| Rust | writes to the `&mut dyn Write` it is given | return `Err(io::Error)`; `highlight` returns it |
+| Rust | writes to the `&mut dyn Write` it is given | return `Err(io::Error)`; `write_highlight` returns it |
 | JavaScript / TypeScript | returns a string | throw; the error reaches the caller of `highlight()` unchanged |
 | Elixir | returns iodata | raise `Lumis.FormatterError`; `Lumis.highlight/2` returns `{:error, %Lumis.RenderError{reason: :render}}` and `Lumis.highlight!/2` raises |
 
