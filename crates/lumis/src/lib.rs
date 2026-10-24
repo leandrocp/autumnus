@@ -501,6 +501,36 @@ mod tests {
         .unwrap()
     }
 
+    struct FailingFormatter;
+
+    impl Formatter for FailingFormatter {
+        fn language(&self) -> Language {
+            Language::JavaScript
+        }
+
+        fn render(
+            &self,
+            _source: &str,
+            _events: &[crate::events::HighlightEvent<'_>],
+            _output: &mut dyn Write,
+        ) -> io::Result<()> {
+            Err(io::Error::new(
+                io::ErrorKind::BrokenPipe,
+                "formatter failed",
+            ))
+        }
+    }
+
+    #[test]
+    fn test_write_highlight_returns_formatter_error() {
+        let mut buffer = Vec::new();
+
+        let error = write_highlight(&mut buffer, "const = 1", FailingFormatter).unwrap_err();
+
+        assert_eq!(error.kind(), io::ErrorKind::BrokenPipe);
+        assert_eq!(error.to_string(), "formatter failed");
+    }
+
     #[test]
     fn test_write_highlight() {
         let code = r"const = 1";

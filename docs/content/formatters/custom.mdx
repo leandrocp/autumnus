@@ -20,6 +20,22 @@ Write your own formatter when the built-in ones don't produce the output you nee
 - add data attributes or extra classes
 - feed Lumis tokens into an existing rendering pipeline
 
+## Output and failure
+
+`render` hands back its output differently in each runtime, and this is the one
+part of a formatter that does not carry across tabs.
+
+| Runtime | Output | To report a failure |
+| --- | --- | --- |
+| Rust | writes to the `&mut dyn Write` it is given | return `Err(io::Error)`; `highlight` returns it |
+| JavaScript / TypeScript | returns a string | throw; the error reaches the caller of `highlight()` unchanged |
+| Elixir | returns iodata | raise `Lumis.FormatterError`; `Lumis.highlight/2` returns `{:error, %Lumis.RenderError{reason: :render}}` and `Lumis.highlight!/2` raises |
+
+In JavaScript, `render` must return a string. Any other value, including
+`undefined`, throws a `TypeError`; an empty string is valid output. In Elixir, any
+exception other than `Lumis.FormatterError` is a bug in the formatter and
+propagates unchanged.
+
 ## Rust
 
 Implement the [`Formatter`](https://docs.rs/lumis/latest/lumis/formatters/trait.Formatter.html) trait.

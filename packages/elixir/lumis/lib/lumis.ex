@@ -1318,11 +1318,12 @@ defmodule Lumis do
         # handed the language highlighting actually used.
         formatter_options = Keyword.put(formatter_options, :language, language)
 
-        output =
-          formatter.render(source, events, formatter_options)
-          |> IO.iodata_to_binary()
-
-        {:ok, output}
+        try do
+          {:ok, formatter.render(source, events, formatter_options) |> IO.iodata_to_binary()}
+        rescue
+          error in Lumis.FormatterError ->
+            {:error, %Lumis.RenderError{reason: :render, detail: error.message}}
+        end
     end
   end
 

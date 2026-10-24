@@ -668,6 +668,9 @@ export interface Formatter<T = unknown> {
    * `budget` names the limit that bound the render, when one did. The built-in
    * HTML formatters mark the `<pre>` with it; a formatter with nowhere to put
    * the fact ignores it, which is what the argument being optional is for.
+   *
+   * Throw to report a failure; the error reaches the caller of `highlight()`
+   * unchanged. Returning anything but a string throws a `TypeError`.
    */
   render(source: string, events: readonly HighlightEvent<T>[], budget?: BudgetExhausted): string;
 }

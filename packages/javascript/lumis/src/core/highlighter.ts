@@ -391,11 +391,19 @@ function runFormatter<T>(
   currentRuntime = runtime;
   fmt.language = detectedRef;
   try {
-    return fmt.render(source, events, report.budget);
+    const output: unknown = fmt.render(source, events, report.budget);
+    if (typeof output !== "string") {
+      throw new TypeError(`Formatter.render() must return a string, got ${describeValue(output)}.`);
+    }
+    return output;
   } finally {
     fmt.language = prevLanguage;
     currentRuntime = prevRuntime;
   }
+}
+
+function describeValue(value: unknown): string {
+  return value === null ? "null" : Array.isArray(value) ? "an array" : typeof value;
 }
 
 async function runFormatterAsync<T>(
