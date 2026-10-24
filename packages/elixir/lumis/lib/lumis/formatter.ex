@@ -38,7 +38,13 @@ defmodule Lumis.Formatter do
           | {:decoration_start, Lumis.Decoration.DiffWord.t()}
           | :decoration_end
 
-  @doc "Renders a unified event stream for `source`."
+  @doc """
+  Renders a unified event stream for `source`.
+
+  To report that the formatter cannot render, raise `Lumis.FormatterError`.
+  `Lumis.highlight/2` returns it as an error, and any other exception
+  propagates.
+  """
   @callback render(
               source :: String.t(),
               events :: [event(term())],

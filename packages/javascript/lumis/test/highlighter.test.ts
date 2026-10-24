@@ -10,7 +10,14 @@ import {
   terminal,
 } from "../src/formatters.js";
 import * as formatterApi from "../src/formatters.js";
-import type { Highlighter, Language, LanguageBundle, LanguageInput, Theme } from "../src/index.js";
+import type {
+  Formatter,
+  Highlighter,
+  Language,
+  LanguageBundle,
+  LanguageInput,
+  Theme,
+} from "../src/index.js";
 import json from "../langs/json.ts";
 import htmlLanguage from "../langs/html.ts";
 import plaintext from "../langs/plaintext.ts";
@@ -377,6 +384,11 @@ describe("createHighlighter", () => {
   });
 });
 
+const returning = (value: unknown): Formatter => ({
+  language: json,
+  render: () => value as string,
+});
+
 describe("hl.highlight", () => {
   it("produces inline-styled HTML with theme", () => {
     const html = hl.highlight('{"a": 1}', htmlInline({ language: json, theme }));
@@ -584,6 +596,41 @@ class User:
     for (const formatter of formatters) {
       expect(render(formatter)).toThrow('structure must be "block" or "inline", got "sentence"');
     }
+  });
+
+  describe("custom formatter failures", () => {
+    const failure = new RangeError("formatter failed");
+    const throwing: Formatter = {
+      language: json,
+      render() {
+        throw failure;
+      },
+    };
+    const working: Formatter = {
+      language: json,
+      render: (source) => `<${source}>`,
+    };
+
+    it("rethrows the formatter's own error and stays usable", () => {
+      let caught: unknown;
+      try {
+        hl.highlight("{}", throwing);
+      } catch (error) {
+        caught = error;
+      }
+
+      expect(caught).toBe(failure);
+      expect(throwing.language).toBe(json);
+      expect(hl.highlight("{}", working)).toBe("<{}>");
+    });
+
+    it("rejects a render that does not return a string", () => {
+      expect(() => hl.highlight("{}", returning(undefined))).toThrow(
+        new TypeError("Formatter.render() must return a string, got undefined."),
+      );
+      expect(() => hl.highlight("{}", returning(["<"]))).toThrow(/got an array/u);
+      expect(hl.highlight("{}", returning(""))).toBe("");
+    });
   });
 
   it("accepts italic option", () => {

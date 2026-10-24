@@ -44,7 +44,9 @@ dependency still returns `{:ok, html}`, rendered as plain text with a warning in
 the log. Don't write a `Lumis.ParserError` clause around `highlight/2` — it will
 never match. Use `Lumis.Languages.load/1` at boot to make a missing parser fatal.
 
-An error means the formatter itself failed. Match on `:reason`, never on the
+An error means highlighting failed for a reason other than a missing parser, such
+as an invalid theme or annotation. A custom formatter reports its own failure by
+raising `Lumis.FormatterError`, which `highlight/2` returns as `reason: :render`. Match on `:reason`, never on the
 message — the reasons are the API, the messages are not.
 
 ```elixir

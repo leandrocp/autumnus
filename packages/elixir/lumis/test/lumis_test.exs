@@ -1937,6 +1937,35 @@ defmodule Lumis.LumisTest do
       end
     end
 
+    defmodule FailingFormatter do
+      @behaviour Lumis.Formatter
+
+      @impl true
+      def render(_source, _events, options) do
+        case Keyword.fetch!(options, :failure) do
+          :formatter_error -> raise Lumis.FormatterError, "cannot render this"
+          :bug -> raise "formatter bug"
+        end
+      end
+    end
+
+    test "a formatter raising Lumis.FormatterError is an error, not a crash" do
+      options = [formatter: {FailingFormatter, language: "elixir", failure: :formatter_error}]
+
+      assert {:error, %Lumis.RenderError{reason: :render, detail: "cannot render this"}} =
+               Lumis.highlight("x = 1", options)
+
+      assert_raise Lumis.HighlightError, ~r/cannot render this/, fn ->
+        Lumis.highlight!("x = 1", options)
+      end
+    end
+
+    test "any other exception from a formatter propagates" do
+      assert_raise RuntimeError, "formatter bug", fn ->
+        Lumis.highlight("x = 1", formatter: {FailingFormatter, language: "elixir", failure: :bug})
+      end
+    end
+
     test "highlight/2 returns {:error, _} rather than raising" do
       assert {:error, %Lumis.RenderError{reason: :formatter} = error} =
                Lumis.highlight("x = 1", formatter: @bad_default)

@@ -177,6 +177,23 @@ defmodule Lumis.RenderError do
   def message(%__MODULE__{detail: detail}), do: detail
 end
 
+defmodule Lumis.FormatterError do
+  @moduledoc """
+  Raised by a custom `Lumis.Formatter` to report that it cannot render.
+
+  `Lumis.highlight/2` returns it as `{:error, %Lumis.RenderError{reason: :render}}`
+  with the message as `:detail`, and `Lumis.highlight!/2` raises
+  `Lumis.HighlightError`. Any other exception a formatter raises is a bug in the
+  formatter and propagates unchanged.
+
+      raise Lumis.FormatterError, "no theme given"
+  """
+
+  defexception [:message]
+
+  @type t() :: %__MODULE__{message: String.t()}
+end
+
 defmodule Lumis.HighlightError do
   defexception [:error]
 
