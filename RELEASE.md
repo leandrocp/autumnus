@@ -58,6 +58,9 @@ the next release pull request picks the bundle up.
   and `mise run lint` fails on drift. `npm-cli` need not match `cargo-lumis-cli`.
 - `npm-lumis` also updates the comparison manifest's version label. This changes
   metadata only; highlighting changes must regenerate the comparison before release.
+- `cargo-lumis-core` and `npm-themes` include upstream theme license texts alongside
+  their notices. Run `mise run themes-check-notices` before packaging; the npm build
+  copies `themes/licenses/` into `dist/licenses/`.
 - `hex-lumis` goes last — see [Elixir package](#elixir-package).
 - `@lumis-sh/wasm-*` parser packages are outside this flow: `wasm-release.yml` publishes
   them on any push to `main` that touches parsers, queries or the package templates.

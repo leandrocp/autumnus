@@ -1036,6 +1036,10 @@ underscored application name, since an Elixir application name is an atom —
 
 Themes are extracted from Neovim colorscheme plugins. Each theme is a JSON file in `themes/`. Theme definitions live in [`themes/themes.lua`](themes/themes.lua), which follows the `vim.pack` convention so Neovim can install them automatically.
 
+`mise run poc-theme-packs` runs the isolated [optional theme-pack experiment](poc/theme-packs/README.md)
+against Lumis, MDEx and mdex_native. It builds patched snapshots under `tmp/`;
+it does not change the production catalog or package layout.
+
 ### Adding a new theme
 
 1. Add the theme definition to `themes/themes.lua`:
@@ -1103,8 +1107,25 @@ identical theme data, so revision-only changes do not create update PRs.
 
 `mise run docs-gen-themes-md` writes `THEMES.md`, the docs reference page and
 `themes/NOTICE.md`, which lists each theme's source, pinned commit, license and
-copyright. `crates/lumis-core` and `@lumis-sh/themes` ship a copy of the notice.
+copyright. `crates/lumis-core` and `@lumis-sh/themes` ship the notice and the full
+upstream license texts, including their copyright notices.
+
+After adding a source or changing a theme revision, fetch the license texts:
+
+```sh
+mise run themes-fetch-licenses
+```
+
+This reads each licensed theme's recorded commit and downloads its license into
+`themes/licenses/<owner>/<repo>/<commit>/`, then regenerates the notices and
+copies the texts into `crates/lumis-core/themes/licenses/`. Extraction dependencies
+have no recorded theme commit; their `license_revision` in `themes/licenses.toml`
+pins the bundled license text, not the plugin used during extraction. Sources
+marked `NONE` have no license text to fetch; that does not grant permission to
+redistribute them.
+
 `mise run themes-check-notices` fails when a theme or dependency URL has no entry
 in `themes/licenses.toml`, when an entry is no longer used, or when a generated
-file is stale. A revision bump does not re-read the license, so check the
-license file again when an update PR moves a theme to a new commit.
+file is stale. It also rejects missing or empty license texts and missing or stale
+crate copies, without network access. Check the license metadata again when an
+update PR moves a theme to a new commit.

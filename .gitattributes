@@ -29,6 +29,9 @@ packages/javascript/wasm-bundle-*/package.json linguist-generated
 parser-sizes.json linguist-generated
 queries/processed/** linguist-generated
 
+# Unified-diff context lines retain their leading space, including empty lines.
+poc/theme-packs/*.patch linguist-generated -whitespace
+
 # Generated themes and formatter output.
 crates/lumis-core/themes/*.json linguist-generated
 crates/lumis-core/themes/NOTICE.md linguist-generated
@@ -37,6 +40,10 @@ css/*.css linguist-generated
 packages/elixir/lumis/priv/static/css/*.css linguist-generated
 themes/*.json linguist-generated
 themes/NOTICE.md linguist-generated
+
+# Preserve upstream license bytes, including line endings and trailing blank lines.
+themes/licenses/** linguist-vendored -text -whitespace
+crates/lumis-core/themes/licenses/** linguist-vendored -text -whitespace
 
 # Generated test and website artifacts.
 packages/javascript/*/examples/**/output.html linguist-generated

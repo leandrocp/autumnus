@@ -117,6 +117,8 @@ description = "Build JavaScript theme modules, JSON and CSS"
 sources = [
     "pnpm-lock.yaml",
     "themes/*.json",
+    "themes/NOTICE.md",
+    "themes/licenses/**",
     "css/*.css",
     "packages/javascript/themes/{package.json,tsconfig.json,tsup.config.ts}",
     "packages/javascript/themes/{src,scripts}/**",
@@ -899,12 +901,20 @@ cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- gen-the
 '''
 
 [tasks.'themes-check-notices']
-description = "Verify every theme source has a license entry and THEMES.md and themes/NOTICE.md are current"
+description = "Verify theme license texts, packaged copies, listings and notices"
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
 cargo run --quiet --manifest-path crates/dev/Cargo.toml --no-default-features -- gen-themes-md --check
 '''
+
+[tasks.'themes-fetch-licenses']
+description = "Fetch theme license texts at recorded commits and regenerate notices"
+run = "cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- gen-themes-md --fetch-licenses"
+
+[tasks.'poc-theme-packs']
+description = "Demonstrate optional theme packs with Lumis, MDEx and mdex_native"
+run = "bash poc/theme-packs/run.sh"
 
 [tasks.'langs-extract-scopes']
 description = "Extract highlight scopes from query files"
@@ -1219,7 +1229,7 @@ else
 fi
 cargo run --manifest-path crates/dev/Cargo.toml -- filter-theme-updates "${usage_theme_name:-}"
 cargo run --manifest-path crates/dev/Cargo.toml -- sync-themes
-cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- gen-themes-md
+mise run themes-fetch-licenses
 pnpm --filter @lumis-sh/themes run build:themes
 pnpm --filter @lumis-sh/themes run build:assets
 '''
@@ -1243,7 +1253,7 @@ cargo-lumis-build|crates/lumis-build
 cargo-lumis-wasm-runtime|crates/lumis-wasm-runtime
 cargo-lumis|crates/lumis
 cargo-lumis-cli|crates/lumis-cli|crates/lumis-wasm-runtime|.gitattributes
-npm-themes|packages/javascript/themes
+npm-themes|packages/javascript/themes|themes/licenses|themes/NOTICE.md
 npm-lumis|packages/javascript/lumis|crates/lumis|crates/lumis-core|crates/lumis-wasm-runtime
 npm-markdown-it-lumis|packages/javascript/markdown-it-lumis
 npm-rehype-lumis|packages/javascript/rehype-lumis
