@@ -18,6 +18,18 @@
     "expected": "bash"
   },
   {
+    "name": "Slim fence label",
+    "hint": "slim",
+    "source": "h1 Latest articles\n",
+    "expected": "slim"
+  },
+  {
+    "name": "Django fence label selects its own grammar",
+    "hint": "django",
+    "source": "{% load static %}\n{{ title }}\n",
+    "expected": "htmldjango"
+  },
+  {
     "name": "bare extension",
     "hint": "rs",
     "source": "",

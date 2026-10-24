@@ -521,6 +521,10 @@ feature = "lang-ocaml"            # optional -- override feature name (default: 
 
 `git`, `rev`, and `version` are always required. Every parser is identified by its git repo and pinned commit.
 
+WASM builds regenerate parser sources when `grammar.js` or `grammar.json` is present.
+Set `generate = false` to compile the upstream's shipped sources instead, or
+`generate = true` to require regeneration even without those files.
+
 `git` + `rev` and `crate` are not alternatives:
 
 - `git` + `rev`: always required for WASM builds, vendored parser fetches, and the source-of-truth version pin

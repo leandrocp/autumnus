@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+  {# Show only published articles. #}
+  <main class="articles">
+    <h1>{{ page_title|default:"Latest articles" }}</h1>
+    {% for article in articles %}
+      {% if article.published %}
+        <article>
+          <a href="{% url 'article-detail' article.slug %}">{{ article.title }}</a>
+          <p>{{ article.summary|truncatewords:20 }}</p>
+        </article>
+      {% endif %}
+    {% empty %}
+      <p>No articles yet.</p>
+    {% endfor %}
+  </main>
+{% endblock %}

@@ -149,6 +149,8 @@ describe("processed queries compile against their pinned grammar", () => {
       instance.setLanguage(grammar);
       const tree = instance.parse(readFileSync(sample!, "utf8"));
       expect(tree, `${id} sample did not parse`).not.toBeNull();
+      // oxlint-disable-next-line vitest/no-conditional-expect -- Only Slim's sample guards against regeneration breaking indentation.
+      if (id === "slim") expect(tree!.rootNode.hasError).toBe(false);
       for (const query of compiled.values()) query.captures(tree!.rootNode);
 
       for (const query of compiled.values()) query.delete();

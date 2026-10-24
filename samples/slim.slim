@@ -1,0 +1,16 @@
+doctype html
+html
+  head
+    title = page_title
+  body
+    / A list of published articles
+    main#content.articles
+      h1 Latest articles
+      - if articles.any?
+        ul
+          - articles.each do |article|
+            li.article
+              a href=article.url = article.title
+              p = article.summary
+      - else
+        p No articles yet.

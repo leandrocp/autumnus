@@ -118,6 +118,8 @@ unsafe extern "C" {
     fn tree_sitter_haskell() -> *const ();
     #[cfg(feature = "lang-html")]
     fn tree_sitter_html() -> *const ();
+    #[cfg(feature = "lang-htmldjango")]
+    fn tree_sitter_htmldjango() -> *const ();
     #[cfg(feature = "lang-http")]
     fn tree_sitter_http() -> *const ();
     #[cfg(feature = "lang-hurl")]
@@ -160,6 +162,8 @@ unsafe extern "C" {
     fn tree_sitter_ruby() -> *const ();
     #[cfg(feature = "lang-scss")]
     fn tree_sitter_scss() -> *const ();
+    #[cfg(feature = "lang-slim")]
+    fn tree_sitter_slim() -> *const ();
     #[cfg(feature = "lang-surface")]
     fn tree_sitter_surface() -> *const ();
     #[cfg(feature = "lang-svelte")]
@@ -281,6 +285,8 @@ impl LanguageConfig for Language {
             Language::HEEx => &HEEX_CONFIG,
             #[cfg(feature = "lang-html")]
             Language::HTML => &HTML_CONFIG,
+            #[cfg(feature = "lang-htmldjango")]
+            Language::HTMLDjango => &HTMLDJANGO_CONFIG,
             #[cfg(feature = "lang-http")]
             Language::HTTP => &HTTP_CONFIG,
             #[cfg(feature = "lang-hurl")]
@@ -385,6 +391,8 @@ impl LanguageConfig for Language {
             Language::SCSS => &SCSS_CONFIG,
             #[cfg(feature = "lang-scheme")]
             Language::Scheme => &SCHEME_CONFIG,
+            #[cfg(feature = "lang-slim")]
+            Language::Slim => &SLIM_CONFIG,
             #[cfg(feature = "lang-sql")]
             Language::SQL => &SQL_CONFIG,
             #[cfg(feature = "lang-solidity")]
@@ -1059,6 +1067,21 @@ static HTML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         HTML_LOCALS,
     )
     .expect("failed to create html highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+#[cfg(feature = "lang-htmldjango")]
+static HTMLDJANGO_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_htmldjango) };
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "htmldjango",
+        HTMLDJANGO_HIGHLIGHTS,
+        HTMLDJANGO_INJECTIONS,
+        HTMLDJANGO_LOCALS,
+    )
+    .expect("failed to create htmldjango highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
@@ -1843,6 +1866,21 @@ static SCHEME_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     config
 });
 
+#[cfg(feature = "lang-slim")]
+static SLIM_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_slim) };
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "slim",
+        SLIM_HIGHLIGHTS,
+        SLIM_INJECTIONS,
+        SLIM_LOCALS,
+    )
+    .expect("failed to create slim highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
 #[cfg(feature = "lang-sql")]
 static SQL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
@@ -2465,6 +2503,8 @@ mod tests {
         test_heex_config_loads => (Language::HEEx, "HEEx", "heex.heex");
         #[cfg(feature = "lang-html")]
         test_html_config_loads => (Language::HTML, "HTML", "html.html");
+        #[cfg(feature = "lang-htmldjango")]
+        test_htmldjango_config_loads => (Language::HTMLDjango, "Django HTML", "htmldjango.djhtml");
         #[cfg(feature = "lang-http")]
         test_http_config_loads => (Language::HTTP, "HTTP", "http.http");
         #[cfg(feature = "lang-hurl")]
@@ -2568,6 +2608,8 @@ mod tests {
         test_scss_config_loads => (Language::SCSS, "SCSS", "scss.scss");
         #[cfg(feature = "lang-scheme")]
         test_scheme_config_loads => (Language::Scheme, "Scheme", "scheme.scm");
+        #[cfg(feature = "lang-slim")]
+        test_slim_config_loads => (Language::Slim, "Slim", "slim.slim");
         #[cfg(feature = "lang-sql")]
         test_sql_config_loads => (Language::SQL, "SQL", "sql.sql");
         #[cfg(feature = "lang-solidity")]
