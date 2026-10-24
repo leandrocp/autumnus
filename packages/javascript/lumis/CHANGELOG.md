@@ -1,3 +1,9 @@
+## [0.9.6](https://github.com/leandrocp/lumis/compare/npm-lumis/v0.9.5...npm-lumis/v0.9.6) (2026-10-24)
+
+### Features
+
+- **languages:** Add Slim and Django templates in [\#1860](https://github.com/leandrocp/lumis/pull/1860)
+
 ## [0.9.5](https://github.com/leandrocp/lumis/compare/npm-lumis/v0.9.4...npm-lumis/v0.9.5) (2026-10-23)
 
 ### Features
