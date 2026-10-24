@@ -3372,7 +3372,7 @@ fn build_parser_wasm(
         git,
         rev,
         info.location.as_deref(),
-        info.generate.unwrap_or(false),
+        info.generate,
         context.toolchain,
     );
 
@@ -3418,7 +3418,7 @@ fn build_parser_wasm(
         println!("* writing tree-sitter.json metadata");
         write_tree_sitter_json(parser_name, &repo_dir, &metadata_dir, info)?;
     }
-    if has_grammar_source || info.generate.unwrap_or(false) {
+    if info.generate.unwrap_or(has_grammar_source) {
         if has_package_json {
             install_npm_dependencies(&repo_dir, &metadata_dir, has_package_lock);
         }
@@ -3522,11 +3522,11 @@ fn wasm_build_id(
     git: &str,
     rev: &str,
     location: Option<&str>,
-    generate: bool,
+    generate: Option<bool>,
     toolchain: &str,
 ) -> String {
     format!(
-        "{git}\n{rev}\n{}\n{generate}\n{toolchain}\n",
+        "{git}\n{rev}\n{}\n{generate:?}\n{toolchain}\n",
         location.unwrap_or("")
     )
 }
@@ -4201,6 +4201,11 @@ fn language_definition_hash(
         hash_definition_field(&mut digest, language.injections.as_bytes());
         hash_definition_field(&mut digest, language.locals.as_bytes());
         hash_definition_field(&mut digest, language.brackets.as_bytes());
+
+        // Preserve published hashes for parsers that still use generation.
+        if toml.parsers.get(id).and_then(|info| info.generate) == Some(false) {
+            hash_definition_field(&mut digest, b"generate=false");
+        }
 
         // A required grammar is a dependency of the package, by the package
         // that ships it, so changing either is a new package. Only hashed when
@@ -7857,28 +7862,32 @@ mod tests {
 
     #[test]
     fn every_build_input_changes_the_build_id() {
-        let baseline = wasm_build_id("git://g", "rev1", Some("sub"), false, "ts\nem");
+        let baseline = wasm_build_id("git://g", "rev1", Some("sub"), None, "ts\nem");
 
         for (label, other) in [
             (
                 "git",
-                wasm_build_id("git://other", "rev1", Some("sub"), false, "ts\nem"),
+                wasm_build_id("git://other", "rev1", Some("sub"), None, "ts\nem"),
             ),
             (
                 "rev",
-                wasm_build_id("git://g", "rev2", Some("sub"), false, "ts\nem"),
+                wasm_build_id("git://g", "rev2", Some("sub"), None, "ts\nem"),
             ),
             (
                 "location",
-                wasm_build_id("git://g", "rev1", None, false, "ts\nem"),
+                wasm_build_id("git://g", "rev1", None, None, "ts\nem"),
             ),
             (
                 "generate",
-                wasm_build_id("git://g", "rev1", Some("sub"), true, "ts\nem"),
+                wasm_build_id("git://g", "rev1", Some("sub"), Some(true), "ts\nem"),
+            ),
+            (
+                "do not generate",
+                wasm_build_id("git://g", "rev1", Some("sub"), Some(false), "ts\nem"),
             ),
             (
                 "toolchain",
-                wasm_build_id("git://g", "rev1", Some("sub"), false, "ts\nem2"),
+                wasm_build_id("git://g", "rev1", Some("sub"), None, "ts\nem2"),
             ),
         ] {
             assert_ne!(baseline, other, "{label} must invalidate a cached parser");
@@ -7886,7 +7895,7 @@ mod tests {
 
         assert_eq!(
             baseline,
-            wasm_build_id("git://g", "rev1", Some("sub"), false, "ts\nem"),
+            wasm_build_id("git://g", "rev1", Some("sub"), None, "ts\nem"),
             "the same inputs must reuse a cached parser"
         );
     }
@@ -8134,7 +8143,7 @@ mod tests {
         fs::write(dir.join("tree-sitter-x.wasm"), b"\0asm").unwrap();
         fs::write(
             dir.join("tree-sitter-x.build-id"),
-            wasm_build_id(SDK_TEST_GIT, "abc", None, false, "toolchain"),
+            wasm_build_id(SDK_TEST_GIT, "abc", None, None, "toolchain"),
         )
         .unwrap();
         let fetches = std::cell::Cell::new(0);
@@ -8705,6 +8714,24 @@ mod tests {
 
         assert_ne!(hash(&toml, "tree-sitter-markdown"), markdown);
         assert_eq!(hash(&toml, "tree-sitter-css"), css);
+    }
+
+    #[test]
+    fn preserving_a_shipped_parser_changes_its_definition() {
+        let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../languages.toml");
+        let text = fs::read_to_string(&path).expect("languages.toml should be readable");
+        let mut toml: LanguagesToml = toml::from_str(&text).expect("languages.toml should parse");
+        let hash = |toml: &LanguagesToml| {
+            let languages = packaged_languages(toml, "tree-sitter-slim").expect("languages load");
+            language_definition_hash(toml, "tree-sitter-slim", &languages).expect("hash")
+        };
+
+        let shipped = hash(&toml);
+        toml.parsers.get_mut("slim").unwrap().generate = None;
+        let default = hash(&toml);
+        assert_ne!(default, shipped);
+        toml.parsers.get_mut("slim").unwrap().generate = Some(true);
+        assert_eq!(hash(&toml), default);
     }
 
     /// The dependency is the package, so the same grammar moving to another

@@ -340,6 +340,16 @@ variant = "HTML"
 globs = ["*.html", "*.htm", "*.xhtml"]
 emacs = ["html"]
 
+[parsers.htmldjango]
+git = "https://github.com/interdependence/tree-sitter-htmldjango.git"
+rev = "a10318892603d9a0b925df7cc7771a840304b997"
+version = "1.0.0"
+aliases = ["django"]
+variant = "HTMLDjango"
+display_name = "Django HTML"
+globs = ["*.djhtml", "*.html.django"]
+emacs = ["django"]
+
 [parsers.http]
 git = "https://github.com/rest-nvim/tree-sitter-http.git"
 rev = "db8b4398de90b6d0b6c780aba96aaa2cd8e9202c"
@@ -631,6 +641,15 @@ version = "1.0.0"
 variant = "SCSS"
 globs = ["*.scss"]
 emacs = ["scss"]
+
+[parsers.slim]
+git = "https://github.com/theoo/tree-sitter-slim.git"
+rev = "d4ff7e388eb271c04662f2176c08548c9c51078f"
+version = "0.0.1"
+# Regenerating with Tree-sitter 0.26 breaks indentation; use the shipped parser.
+generate = false
+globs = ["*.slim"]
+emacs = ["slim"]
 
 [parsers.sql]
 git = "https://github.com/derekstride/tree-sitter-sql.git"
@@ -1093,12 +1112,14 @@ parsers = [
   "glimmer",
   "graphql",
   "heex",
+  "htmldjango",
   "markdown",
   "markdown_inline",
   "mdx",
   "php",
   "prisma",
   "scss",
+  "slim",
   "surface",
   "svelte",
   "vue",

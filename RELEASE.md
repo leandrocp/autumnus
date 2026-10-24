@@ -69,7 +69,8 @@ the next release pull request picks the bundle up.
   `npm-lumis`. Bumping `NPM_BUNDLE_FORMAT` in `crates/dev` puts every
   npm bundle in the next release pull requests instead.
 - Each registry is checked on its own. Hex gets a parser release only when its newest
-  release ships another definition (a new parser, queries or required grammar), read
+  release ships another definition (a new parser, queries, required grammar or
+  `generate = false` setting), read
   from that release's `lumis.json`. A format change that
   touches only the npm entry leaves Hex on the version it has, so Hex and npm versions
   can differ. When a format change does reach what Hex ships (`priv/parsers`,
