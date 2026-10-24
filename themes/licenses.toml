@@ -5,6 +5,7 @@
 # license       SPDX expression read from the license file at the pinned commit,
 #               or "NONE" when the repository has no license.
 # license_file  Path of that file in the repository.
+# license_revision  Commit for an extraction dependency's bundled license text.
 # copyright     Copyright lines as the license file states them.
 
 [sources."https://github.com/0xstepit/flow.nvim"]
@@ -328,6 +329,7 @@ copyright = [
 [sources."https://github.com/rktjmp/lush.nvim"]
 license = "MIT"
 license_file = "LICENSE"
+license_revision = "9c60ec2279d62487d942ce095e49006af28eed6e"
 copyright = ["Copyright (c) 2020 Oliver Marriott"]
 
 [sources."https://github.com/rmehri01/onenord.nvim"]
@@ -440,6 +442,7 @@ license_file = "LICENSE"
 [sources."https://github.com/tjdevries/colorbuddy.nvim"]
 license = "MIT"
 license_file = "LICENSE"
+license_revision = "8b968581e5c19d22a861d5f3fe5dbd83394fa681"
 copyright = ["Copyright (c) 2017 TJ DeVries"]
 
 [sources."https://github.com/Tsuzat/NeoSolarized.nvim"]

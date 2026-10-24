@@ -65,6 +65,17 @@
                                                  +---------------------------+
 ```
 
+## Theme license assets
+
+`themes/licenses.toml` records each theme source's license file and copyright.
+`mise run themes-fetch-licenses` downloads the full texts at the commits recorded
+in theme JSON; extraction dependencies use explicit `license_revision` values.
+The checked-in texts live under `themes/licenses/<owner>/<repo>/<commit>/`.
+Notice generation copies them beside the crate's theme data, and the JavaScript
+theme build copies them into `dist/licenses/`. Both packages ship notices with
+relative links to those texts. `mise run themes-check-notices` checks the required
+texts and crate copies offline.
+
 ## JavaScript integrations
 
 `@lumis-sh/rehype-lumis`, `@lumis-sh/markdown-it-lumis`, `@lumis-sh/react`, and

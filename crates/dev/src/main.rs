@@ -42,6 +42,9 @@ enum Commands {
         /// Fail if a generated listing or notice is stale instead of writing it.
         #[arg(long)]
         check: bool,
+        /// Download upstream license texts at the recorded commits.
+        #[arg(long, conflicts_with = "check")]
+        fetch_licenses: bool,
     },
     LangsList,
     UpgradeParsers {
@@ -227,7 +230,10 @@ fn main() -> Result<()> {
         Commands::SyncThemes => sync_themes(),
         Commands::SyncCss => sync_css(),
         Commands::ListThemes => list_themes(),
-        Commands::GenThemesMd { check } => gen_themes_md(check),
+        Commands::GenThemesMd {
+            check,
+            fetch_licenses,
+        } => gen_themes_md(check, fetch_licenses),
         Commands::LangsList => langs_list(),
         Commands::UpgradeParsers { name } => upgrade_parsers(&name),
         Commands::FetchParsers { name } => fetch_parsers(&name),
@@ -1180,12 +1186,13 @@ fn list_themes() -> Result<()> {
     Ok(())
 }
 
-fn gen_themes_md(check: bool) -> Result<()> {
+fn gen_themes_md(check: bool, fetch_licenses: bool) -> Result<()> {
     let mut entries = parse_themes_lua()?;
     entries.sort_by(|a, b| a.name.cmp(&b.name));
 
     let licenses = theme_licenses::read("themes/licenses.toml")?;
     let themes = theme_licenses::resolve(&entries, &licenses, Path::new("themes"))?;
+    theme_licenses::sync_license_texts(&themes, &entries, &licenses, check, fetch_licenses)?;
 
     let mut table_lines = vec![
         "| Theme | Repository | License |".to_string(),
