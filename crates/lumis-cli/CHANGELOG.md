@@ -1,3 +1,9 @@
+## [0.8.3](https://github.com/leandrocp/lumis/compare/cargo-lumis-cli/v0.8.2...cargo-lumis-cli/v0.8.3) (2026-10-24)
+
+### Features
+
+- **languages:** Add Slim and Django templates in [\#1860](https://github.com/leandrocp/lumis/pull/1860)
+
 ## [0.8.2](https://github.com/leandrocp/lumis/compare/cargo-lumis-cli/v0.8.1...cargo-lumis-cli/v0.8.2) (2026-10-23)
 
 ### Features
