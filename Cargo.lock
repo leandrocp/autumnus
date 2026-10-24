@@ -1415,7 +1415,7 @@ dependencies = [
 
 [[package]]
 name = "lumis"
-version = "0.17.2"
+version = "0.17.3"
 dependencies = [
  "ansi-to-tui",
  "cc",

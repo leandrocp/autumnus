@@ -1,3 +1,9 @@
+## [0.17.3](https://github.com/leandrocp/lumis/compare/cargo-lumis/v0.17.2...cargo-lumis/v0.17.3) (2026-10-24)
+
+### Features
+
+- **languages:** Add Slim and Django templates in [\#1860](https://github.com/leandrocp/lumis/pull/1860)
+
 ## [0.17.2](https://github.com/leandrocp/lumis/compare/cargo-lumis/v0.17.1...cargo-lumis/v0.17.2) (2026-10-23)
 
 ### Features
